@@ -1,0 +1,25 @@
+package me.tomassetti.kolasu.parsing
+
+import me.tomassetti.kolasu.validation.Error
+import me.tomassetti.kolasu.model.Node
+import java.io.ByteArrayInputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
+import java.nio.charset.Charset
+
+data class ParsingResult<RootNode : Node>(val root : RootNode?, val errors: List<Error>) {
+    fun isCorrect() = errors.isEmpty() && root != null
+}
+
+fun String.toStream(charset: Charset = Charsets.UTF_8) = ByteArrayInputStream(toByteArray(charset))
+
+interface Parser<RootNode : Node> {
+    fun parse(code: String) : ParsingResult<RootNode>
+
+    fun parse(code: String, withValidation : Boolean = true) = parse(code.toStream(), withValidation)
+
+    fun parse(file: File, withValidation : Boolean = true) = parse(FileInputStream(file), withValidation)
+
+    fun parse(inputStream: InputStream, withValidation : Boolean = true)
+}
