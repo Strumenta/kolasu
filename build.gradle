@@ -41,5 +41,5 @@ dependencies {
 
   compile 'com.fifesoft:rsyntaxtextarea:2.5.8'
   compile 'com.fifesoft:autocomplete:2.5.8'
-  compile 'me.tomassetti.kanvas:kanvas-core:0.1.0'
+
 }

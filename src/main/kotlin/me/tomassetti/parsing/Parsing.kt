@@ -8,18 +8,16 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.nio.charset.Charset
 
-data class ParsingResult<RootNode : Node>(val root : RootNode?, val errors: List<Error>) {
+data class ParsingResult<RootNode : Node>(val root : RootNode?, val errors: List<Error>, val code: String) {
     fun isCorrect() = errors.isEmpty() && root != null
 }
 
 fun String.toStream(charset: Charset = Charsets.UTF_8) = ByteArrayInputStream(toByteArray(charset))
 
 interface Parser<RootNode : Node> {
-    fun parse(code: String) : ParsingResult<RootNode>
+    fun parse(code: String, withValidation : Boolean = true) : ParsingResult<RootNode> = parse(code.toStream(), withValidation)
 
-    fun parse(code: String, withValidation : Boolean = true) = parse(code.toStream(), withValidation)
+    fun parse(file: File, withValidation : Boolean = true) : ParsingResult<RootNode> = parse(FileInputStream(file), withValidation)
 
-    fun parse(file: File, withValidation : Boolean = true) = parse(FileInputStream(file), withValidation)
-
-    fun parse(inputStream: InputStream, withValidation : Boolean = true)
+    fun parse(inputStream: InputStream, withValidation : Boolean = true) : ParsingResult<RootNode>
 }
