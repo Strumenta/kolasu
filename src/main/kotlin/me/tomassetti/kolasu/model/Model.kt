@@ -1,8 +1,5 @@
 package me.tomassetti.kolasu.model
 
-import java.util.*
-
-
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
@@ -16,18 +13,16 @@ interface Node {
  */
 annotation class Derived
 
-///
-/// Named
-///
-
+/**
+ * An entity which has a name.
+ */
 interface Named {
     val name: String
 }
 
-///
-/// References
-///
-
+/**
+ * A reference associated by using a name.
+ */
 data class ReferenceByName<N>(val name: String, var referred: N? = null) where N : Named {
     override fun toString(): String {
         if (referred == null) {

@@ -4,9 +4,10 @@ import java.lang.reflect.ParameterizedType
 import kotlin.reflect.jvm.javaType
 import kotlin.reflect.memberProperties
 
-const val indentBlock = "  "
+private const val indentBlock = "  "
 
-fun Node.relevantMemberProperties() = this.javaClass.kotlin.memberProperties.filter { !it.name.startsWith("component") && !it.name.equals("position") }
+fun Node.relevantMemberProperties() = this.javaClass.kotlin.memberProperties
+        .filter { !it.name.startsWith("component") && !it.name.equals("position") }
 
 fun Node.multilineString(indent: String = "") : String {
     val sb = StringBuffer()
@@ -19,18 +20,20 @@ fun Node.multilineString(indent: String = "") : String {
             if (mt is ParameterizedType && mt.rawType.equals(List::class.java)) {
                 val paramType = mt.actualTypeArguments[0]
                 if (paramType is Class<*> && Node::class.java.isAssignableFrom(paramType)) {
-                    sb.append("$indent${indentBlock}${it.name} = [\n")
-                    (it.get(this) as List<out Node>).forEach { sb.append(it.multilineString(indent + indentBlock + indentBlock)) }
-                    sb.append("$indent${indentBlock}]\n")
+                    sb.append("$indent$indentBlock${it.name} = [\n")
+                    (it.get(this) as List<out Node>).forEach {
+                        sb.append(it.multilineString(indent + indentBlock + indentBlock))
+                    }
+                    sb.append("$indent$indentBlock]\n")
                 }
             } else {
                 val value = it.get(this)
                 if (value is Node) {
-                    sb.append("$indent${indentBlock}${it.name} = [\n")
+                    sb.append("$indent$indentBlock${it.name} = [\n")
                     sb.append(value.multilineString(indent + indentBlock + indentBlock))
-                    sb.append("$indent${indentBlock}]\n")
+                    sb.append("$indent$indentBlock]\n")
                 } else {
-                    sb.append("$indent${indentBlock}${it.name} = ${it.get(this)}\n")
+                    sb.append("$indent$indentBlock${it.name} = ${it.get(this)}\n")
                 }
             }
         }
@@ -38,4 +41,3 @@ fun Node.multilineString(indent: String = "") : String {
     }
     return sb.toString()
 }
-
