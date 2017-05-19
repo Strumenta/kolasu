@@ -25,3 +25,4 @@ hs_err_pid*
 *.iws
 *build
 out
+.DS_Store

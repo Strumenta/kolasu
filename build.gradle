@@ -27,8 +27,10 @@ repositories {
     jcenter()
 }
 
+def kolasuVersion = "0.1.0"
+
 project.group   = "me.tomassetti"
-project.version = "0.1"
+project.version = kolasuVersion
 
 dependencies {
   antlr "org.antlr:antlr4:4.5.1"
@@ -43,3 +45,83 @@ dependencies {
   compile 'com.fifesoft:autocomplete:2.5.8'
 
 }
+
+task version {
+  doLast {
+    print "Version ${kolasuVersion}"
+  }
+}
+
+task javadocJar(type: Jar) {
+  classifier = 'javadoc'
+  from javadoc
+}
+
+task sourcesJar(type: Jar) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+if (JavaVersion.current().isJava8Compatible()) {
+  allprojects {
+    tasks.withType(Javadoc) {
+      options.addStringOption('Xdoclint:none', '-quiet')
+    }
+  }
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+  }
+
+task generatePom {
+  doLast {
+    def generatedPom = pom {
+      project {
+        name project.name
+        description "Framework to support building languages with Kotlin"
+        version kolasuVersion
+        packaging 'jar'
+        url 'https://github.com/ftomassetti/kolasu'
+
+        scm {
+          connection 'scm:git:https://github.com/javaparser/kolasu.git'
+          developerConnection 'scm:git:git@github.com:javaparser/kolasu.git'
+          url 'https://github.com/ftomassetti/kolasu.git'
+        }
+
+        licenses {
+          license {
+            name 'Apache Licenve V2.0'
+            url 'https://www.apache.org/licenses/LICENSE-2.0'
+            distribution 'repo'
+          }
+        }
+
+        developers {
+          developer {
+            id = 'ftomassetti'
+            name = 'Federico Tomassetti'
+            email = 'federico@tomassetti.me'
+          }
+        }
+      }
+    }
+    generatedPom.writeTo("$buildDir/pom.xml")
+  }
+}
+
+task sign(type:Exec) {
+  doLast {
+    String home = System.getProperty("user.home")
+    String passphrase = new File(home + '/.gnupg/passphrase.txt').text
+    commandLine 'gpg2', '--passphrase', passphrase, '--batch', '--yes', '--no-tty', '-ab', 'build/pom.xml'
+  }
+}
+
+test {
+  testLogging {
+    exceptionFormat = 'full'
+  }
+}
+
