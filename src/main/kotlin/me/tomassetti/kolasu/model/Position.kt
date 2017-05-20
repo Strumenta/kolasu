@@ -32,6 +32,10 @@ data class Position(val start: Point, val end: Point) {
     }
 
     fun length(code: String) = end.offset(code) - start.offset(code)
+
+    fun contains(point: Point) : Boolean {
+        return ((point == start || start.isBefore(point)) && (point == end || point.isBefore(end)))
+    }
 }
 
 /**

@@ -17,7 +17,7 @@ annotation class Derived
  * An entity which has a name.
  */
 interface Named {
-    val name: String
+    val name: String?
 }
 
 /**
