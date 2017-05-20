@@ -1,6 +1,14 @@
 package me.tomassetti.kolasu.model
 
+/**
+ * The line should be in 1..n, the column in 0..n
+ */
 data class Point(val line: Int, val column: Int) {
+    init {
+        require(line >= 1) { "Line should be equal or greater than 1, was $line" }
+        require(column >= 0) { "Column should be equal or greater than 0, was $column" }
+    }
+
     override fun toString() = "Line $line, Column $column"
 
     /**
@@ -8,6 +16,10 @@ data class Point(val line: Int, val column: Int) {
      */
     fun offset(code: String) : Int {
         val lines = code.split("\n")
+        require(lines.size >= line) {
+            "The point does not exist in the given text. It indicates line $line but there are only ${lines.size} lines" }
+        require(lines[line - 1].length >= column) {
+            "The column does not exist in the given text. Line $line has ${lines[line - 1].length} columns, the point indicates column $column" }
         val newLines = this.line - 1
         return lines.subList(0, this.line - 1).foldRight(0, { it, acc -> it.length + acc }) + newLines + column
     }
@@ -16,12 +28,12 @@ data class Point(val line: Int, val column: Int) {
 
 }
 
+val START_POINT = Point(1, 0)
+
 data class Position(val start: Point, val end: Point) {
 
     init {
-        if (end.isBefore(start)) {
-            throw IllegalArgumentException("End should follows start")
-        }
+        require(end.isBefore(start)) { "End should follows start" }
     }
 
     /**
