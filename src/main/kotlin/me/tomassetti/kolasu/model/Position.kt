@@ -30,10 +30,14 @@ data class Point(val line: Int, val column: Int) {
 
 val START_POINT = Point(1, 0)
 
+/**
+ * Both the start point and the end point are included
+ */
 data class Position(val start: Point, val end: Point) {
 
     init {
-        require(end.isBefore(start)) { "End should follows start" }
+        require(start.isBefore(end) || start == end) {
+            "End should follows start or be the same as start (start: $start, end: $end)" }
     }
 
     /**
@@ -53,6 +57,6 @@ data class Position(val start: Point, val end: Point) {
 /**
  * Utility function to create a Position
  */
-fun pos(startLine:Int, startCol:Int, endLine:Int, endCol:Int) = Position(Point(startLine,startCol),Point(endLine,endCol))
+fun pos(startLine:Int, startCol:Int, endLine:Int, endCol:Int) = Position(Point(startLine,startCol), Point(endLine,endCol))
 
 fun Node.isBefore(other: Node) : Boolean = position!!.start.isBefore(other.position!!.start)

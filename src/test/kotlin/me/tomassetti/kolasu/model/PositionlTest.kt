@@ -45,4 +45,16 @@ class PositionTest {
         assertEquals(false, p3.isBefore(p3))
     }
 
+    @test fun text() {
+        val code = """this is some code
+                     |second line
+                     |third line""".trimMargin("|")
+        assertEquals("", Position(START_POINT, START_POINT).text(code))
+        assertEquals("t", Position(START_POINT, Point(1, 1)).text(code))
+        assertEquals("this is some cod", Position(START_POINT, Point(1, 16)).text(code))
+        assertEquals("this is some code", Position(START_POINT, Point(1, 17)).text(code))
+        assertEquals("this is some code\n", Position(START_POINT, Point(2, 0)).text(code))
+        assertEquals("this is some code\ns", Position(START_POINT, Point(2, 1)).text(code))
+    }
+
 }
