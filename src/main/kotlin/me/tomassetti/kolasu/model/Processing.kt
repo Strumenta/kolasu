@@ -3,22 +3,26 @@ package me.tomassetti.kolasu.model
 import java.util.*
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.memberProperties
+import kotlin.reflect.full.memberProperties
 import kotlin.reflect.primaryConstructor
 
 fun Node.process(operation: (Node) -> Unit) {
     operation(this)
-    this.javaClass.kotlin.memberProperties.filter { it.findAnnotation<Derived>() == null }.forEach { p ->
+    this.javaClass.kotlin.memberProperties
+            .filter { it.findAnnotation<Derived>() == null }
+            .forEach { p ->
         val v = p.get(this)
         when (v) {
             is Node -> v.process(operation)
-            is Collection<*> -> v.forEach { if (it is Node) it.process(operation) }
+            is Collection<*> -> v.forEach { (it as? Node)?.process(operation) }
         }
     }
 }
 
 fun <T: Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit) {
-    process { if (klass.isInstance(it)) { operation(it as T) } }
+    process { if (klass.isInstance(it)) {
+        operation(it as T) }
+    }
 }
 
 fun <T: Node> Node.collectByType(klass: Class<T>) : List<T> {
@@ -33,7 +37,7 @@ fun Node.processConsideringParent(operation: (Node, Node?) -> Unit, parent: Node
         val v = p.get(this)
         when (v) {
             is Node -> v.processConsideringParent(operation, this)
-            is Collection<*> -> v.forEach { if (it is Node) it.processConsideringParent(operation, this) }
+            is Collection<*> -> v.forEach { (it as? Node)?.processConsideringParent(operation, this) }
         }
     }
 }
