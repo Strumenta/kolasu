@@ -42,17 +42,18 @@ fun Node.processConsideringParent(operation: (Node, Node?) -> Unit, parent: Node
     }
 }
 
-fun Node.children() : List<Node> {
-    val children = LinkedList<Node>()
-    this.javaClass.kotlin.memberProperties.filter { it.findAnnotation<Derived>() == null }.forEach { p ->
-        val v = p.get(this)
-        when (v) {
-            is Node -> children.add(v)
-            is Collection<*> -> v.forEach { if (it is Node) children.add(it) }
+val Node.children : List<Node>
+    get() {
+        val children = LinkedList<Node>()
+        this.javaClass.kotlin.memberProperties.filter { it.findAnnotation<Derived>() == null }.forEach { p ->
+            val v = p.get(this)
+            when (v) {
+                is Node -> children.add(v)
+                is Collection<*> -> v.forEach { if (it is Node) children.add(it) }
+            }
         }
+        return children.toList()
     }
-    return children.toList()
-}
 
 fun Node.transform(operation: (Node) -> Node) : Node {
     operation(this)
