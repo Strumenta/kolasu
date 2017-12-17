@@ -38,7 +38,7 @@ class ParseTreeNode(val name: String) : ParseTreeElement() {
 
 fun toParseTree(node: ParserRuleContext, vocabulary: Vocabulary) : ParseTreeNode {
     val res = ParseTreeNode(node.javaClass.simpleName.removeSuffix("Context"))
-    node.children.forEach { c ->
+    node.children?.forEach { c ->
         when (c) {
             is ParserRuleContext -> res.child(toParseTree(c, vocabulary))
             is TerminalNode -> res.child(ParseTreeLeaf(vocabulary.getSymbolicName(c.symbol.type), c.text))
