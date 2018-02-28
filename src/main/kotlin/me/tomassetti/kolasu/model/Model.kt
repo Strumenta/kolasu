@@ -1,13 +1,13 @@
 package me.tomassetti.kolasu.model
 
+import org.antlr.v4.runtime.RuleContext
+
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
-open class Node(val position: Position? = null ) {
-    var directlyNotTerminated: Boolean = false
+open class Node(open val position: Position? = null) {
+    var parseTreeNode : RuleContext? = null
     var parent : Node? = null
-    val notTerminated : Boolean
-        get() = directlyNotTerminated || (parent?.notTerminated ?: false)
 }
 
 /**
@@ -28,10 +28,10 @@ interface Named {
  */
 data class ReferenceByName<N>(val name: String, var referred: N? = null) where N : Named {
     override fun toString(): String {
-        if (referred == null) {
-            return "Ref($name)[Unsolved]"
+        return if (referred == null) {
+            "Ref($name)[Unsolved]"
         } else {
-            return "Ref($name)[Solved]"
+            "Ref($name)[Solved]"
         }
     }
 
@@ -50,11 +50,11 @@ fun <N> ReferenceByName<N>.tryToResolve(candidates: List<N>) : Boolean where N :
 }
 
 fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?) : Boolean where N : Named {
-    if (possibleValue == null) {
-        return false
+    return if (possibleValue == null) {
+        false
     } else {
         this.referred = possibleValue
-        return true
+        true
     }
 }
 
