@@ -2,21 +2,49 @@ package me.tomassetti.kolasu.model
 
 import java.util.*
 import kotlin.reflect.KParameter
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.primaryConstructor
 
+private val <T: Node> T.relevantProperties : Collection<KProperty1<T, *>>
+    get() = this.javaClass.kotlin.memberProperties
+            .filter { it.findAnnotation<Derived>() == null }
+            .filter { it.name != "parent" }
+
 fun Node.process(operation: (Node) -> Unit) {
     operation(this)
-    this.javaClass.kotlin.memberProperties
-            .filter { it.findAnnotation<Derived>() == null }
-            .forEach { p ->
+    relevantProperties.forEach { p ->
         val v = p.get(this)
         when (v) {
             is Node -> v.process(operation)
             is Collection<*> -> v.forEach { (it as? Node)?.process(operation) }
         }
     }
+}
+
+fun Node.find(predicate: (Node) -> Boolean) : Node? {
+    if (predicate(this)) {
+        return this
+    }
+    relevantProperties.forEach { p ->
+        val v = p.get(this)
+        when (v) {
+            is Node -> {
+                val res = v.find(predicate)
+                if (res != null) {
+                    return res
+                }
+            }
+            is Collection<*> -> v.forEach { (it as? Node)?.let {
+                val res = it.find(predicate)
+                if (res != null) {
+                    return res
+                }
+            } }
+        }
+    }
+    return null
 }
 
 fun <T: Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit) {
@@ -33,7 +61,7 @@ fun <T: Node> Node.collectByType(klass: Class<T>) : List<T> {
 
 fun Node.processConsideringParent(operation: (Node, Node?) -> Unit, parent: Node? = null) {
     operation(this, parent)
-    this.javaClass.kotlin.memberProperties.forEach { p ->
+    this.relevantProperties.forEach { p ->
         val v = p.get(this)
         when (v) {
             is Node -> v.processConsideringParent(operation, this)
@@ -45,7 +73,7 @@ fun Node.processConsideringParent(operation: (Node, Node?) -> Unit, parent: Node
 val Node.children : List<Node>
     get() {
         val children = LinkedList<Node>()
-        this.javaClass.kotlin.memberProperties.filter { it.findAnnotation<Derived>() == null }.forEach { p ->
+        relevantProperties.forEach { p ->
             val v = p.get(this)
             when (v) {
                 is Node -> children.add(v)
@@ -58,7 +86,7 @@ val Node.children : List<Node>
 fun Node.transform(operation: (Node) -> Node) : Node {
     operation(this)
     val changes = HashMap<String, Any>()
-    this.javaClass.kotlin.memberProperties.forEach { p ->
+    relevantMemberProperties().forEach { p ->
         val v = p.get(this)
         when (v) {
             is Node -> {

@@ -8,7 +8,7 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.nio.charset.Charset
 
-data class ParsingResult<RootNode : Node>(val root : RootNode?, val errors: List<Error>, val code: String) {
+data class ParsingResult<RootNode : Node>(val root : RootNode?, val errors: List<Error>, val code: String, val incompleteNode: Node? = null) {
     fun isCorrect() = errors.isEmpty() && root != null
 }
 
