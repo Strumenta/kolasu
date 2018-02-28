@@ -3,8 +3,11 @@ package me.tomassetti.kolasu.model
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
-interface Node {
-    val position: Position?
+open class Node(val position: Position? = null ) {
+    var directlyNotTerminated: Boolean = false
+    var parent : Node? = null
+    val notTerminated : Boolean
+        get() = directlyNotTerminated || (parent?.notTerminated ?: false)
 }
 
 /**

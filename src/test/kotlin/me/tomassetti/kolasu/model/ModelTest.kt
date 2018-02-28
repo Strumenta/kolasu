@@ -3,7 +3,7 @@ package me.tomassetti.kolasu.model
 import kotlin.test.assertEquals
 import org.junit.Test as test
 
-class MyNode(override val name: String, override val position: Position? = null) : Node, Named
+class MyNode(override val name: String) : Node(), Named
 
 class ModelTest {
 
