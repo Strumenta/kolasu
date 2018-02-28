@@ -25,6 +25,7 @@ data class Point(val line: Int, val column: Int) {
     }
 
     fun isBefore(other: Point) : Boolean = line < other.line || (line == other.line && column < other.column)
+    fun isSameOrBefore(other: Point) : Boolean = line < other.line || (line == other.line && column <= other.column)
 
 }
 
