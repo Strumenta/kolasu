@@ -14,7 +14,7 @@ fun Token.startPoint() = Point(line, charPositionInLine)
 
 fun Token.endPoint() = Point(line, charPositionInLine + text.length)
 
-fun ParserRuleContext.toPosition(considerPosition: Boolean) : Position? {
+fun ParserRuleContext.toPosition(considerPosition: Boolean = true) : Position? {
     return if (considerPosition && start!=null && stop!=null) {
         Position(start.startPoint(), stop.endPoint())
     } else null
