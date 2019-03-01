@@ -1,8 +1,8 @@
 package me.tomassetti.kolasu.model
 
 import java.lang.reflect.ParameterizedType
+import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaType
-import kotlin.reflect.memberProperties
 
 private const val indentBlock = "  "
 

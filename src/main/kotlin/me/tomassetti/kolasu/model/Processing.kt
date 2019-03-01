@@ -5,7 +5,7 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
-import kotlin.reflect.primaryConstructor
+import kotlin.reflect.full.primaryConstructor
 
 private val <T: Node> T.relevantProperties : Collection<KProperty1<T, *>>
     get() = this.javaClass.kotlin.memberProperties

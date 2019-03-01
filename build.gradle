@@ -124,7 +124,3 @@ test {
     exceptionFormat = 'full'
   }
 }
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '5.2'
-}
