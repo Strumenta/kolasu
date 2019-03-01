@@ -1,5 +1,6 @@
 buildscript {
     ext.kotlin_version = '1.3.20'
+    ext.antlr_version = '4.7.2'
 
     repositories {
         mavenCentral()
@@ -33,8 +34,8 @@ project.group   = "me.tomassetti"
 project.version = kolasuVersion
 
 dependencies {
-  antlr "org.antlr:antlr4:4.5.1"
-  compile "org.antlr:antlr4-runtime:4.5.1"
+  antlr "org.antlr:antlr4:$antlr_version"
+  compile "org.antlr:antlr4-runtime:$antlr_version"
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
   testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
