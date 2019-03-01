@@ -27,6 +27,14 @@ data class Point(val line: Int, val column: Int) {
     fun isBefore(other: Point) : Boolean = line < other.line || (line == other.line && column < other.column)
     fun isSameOrBefore(other: Point) : Boolean = line < other.line || (line == other.line && column <= other.column)
 
+    operator fun plus(text: String) : Point {
+        return when {
+            text.isEmpty() -> this
+            text.startsWith("\r\n") -> Point(line + 1, 0) + text.substring(2)
+            text.startsWith("\n") || text.startsWith("\r") -> Point(line + 1, 0) + text.substring(1)
+            else -> Point(line, column + 1) + text.substring(1)
+        }
+    }
 }
 
 val START_POINT = Point(1, 0)
