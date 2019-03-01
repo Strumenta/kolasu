@@ -30,7 +30,7 @@ repositories {
 
 def kolasuVersion = "0.2.0"
 
-project.group   = "com.strumenta"
+project.group   = "me.tomassetti"
 project.version = kolasuVersion
 
 dependencies {
