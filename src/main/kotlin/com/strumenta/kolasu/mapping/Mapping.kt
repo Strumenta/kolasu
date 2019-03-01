@@ -1,8 +1,8 @@
-package me.tomassetti.kolasu.mapping
+package com.strumenta.kolasu.mapping
 
-import me.tomassetti.kolasu.model.Node
-import me.tomassetti.kolasu.model.Point
-import me.tomassetti.kolasu.model.Position
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Token
 

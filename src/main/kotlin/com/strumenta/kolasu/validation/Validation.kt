@@ -1,6 +1,6 @@
-package me.tomassetti.kolasu.validation
+package com.strumenta.kolasu.validation
 
-import me.tomassetti.kolasu.model.Position
+import com.strumenta.kolasu.model.Position
 
 enum class ErrorType {
     LEXICAL,

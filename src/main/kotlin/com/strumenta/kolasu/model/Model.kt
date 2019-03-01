@@ -1,4 +1,4 @@
-package me.tomassetti.kolasu.model
+package com.strumenta.kolasu.model
 
 import org.antlr.v4.runtime.RuleContext
 

@@ -1,4 +1,4 @@
-package me.tomassetti.kolasu.model
+package com.strumenta.kolasu.model
 
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.full.memberProperties

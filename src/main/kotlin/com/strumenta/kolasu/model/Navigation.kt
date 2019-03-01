@@ -1,4 +1,4 @@
-package me.tomassetti.kolasu.model
+package com.strumenta.kolasu.model
 
 fun <T: Node> Node.ancestor(klass: Class<T>) : T?{
     if (this.parent != null) {

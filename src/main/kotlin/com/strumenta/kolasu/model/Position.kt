@@ -1,4 +1,4 @@
-package me.tomassetti.kolasu.model
+package com.strumenta.kolasu.model
 
 /**
  * The line should be in 1..n, the column in 0..n
@@ -66,6 +66,6 @@ data class Position(val start: Point, val end: Point) {
 /**
  * Utility function to create a Position
  */
-fun pos(startLine:Int, startCol:Int, endLine:Int, endCol:Int) = Position(Point(startLine,startCol), Point(endLine,endCol))
+fun pos(startLine:Int, startCol:Int, endLine:Int, endCol:Int) = Position(Point(startLine, startCol), Point(endLine, endCol))
 
 fun Node.isBefore(other: Node) : Boolean = position!!.start.isBefore(other.position!!.start)

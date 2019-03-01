@@ -1,7 +1,7 @@
-package me.tomassetti.kolasu.parsing
+package com.strumenta.kolasu.parsing
 
-import me.tomassetti.kolasu.validation.Error
-import me.tomassetti.kolasu.model.Node
+import com.strumenta.kolasu.validation.Error
+import com.strumenta.kolasu.model.Node
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream

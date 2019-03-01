@@ -1,4 +1,4 @@
-package me.tomassetti.kolasu.parsing
+package com.strumenta.kolasu.parsing
 
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Vocabulary
