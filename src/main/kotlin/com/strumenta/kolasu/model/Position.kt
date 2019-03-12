@@ -42,6 +42,8 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
             else -> Point(line, column + 1) + text.substring(1)
         }
     }
+
+    fun asPosition() = Position(this, this)
 }
 
 val START_POINT = Point(1, 0)
