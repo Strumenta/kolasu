@@ -18,6 +18,43 @@ class PositionTest {
         assertFails { Point(4, 0).offset(code) }
     }
 
+    @test fun pointCompare() {
+        val p0 = START_POINT
+        val p1 = Point(1, 1)
+        val p2 = Point(1, 100)
+        val p3 = Point(2, 90)
+
+        assertEquals(false, p0 < p0)
+        assertEquals(true, p0 <= p0)
+        assertEquals(true, p0 >= p0)
+        assertEquals(false, p0 > p0)
+
+        assertEquals(true, p0 < p1)
+        assertEquals(true, p0 <= p1)
+        assertEquals(false, p0 >= p1)
+        assertEquals(false, p0 > p1)
+
+        assertEquals(true, p0 < p2)
+        assertEquals(true, p0 <= p2)
+        assertEquals(false, p0 >= p2)
+        assertEquals(false, p0 > p2)
+
+        assertEquals(true, p0 < p3)
+        assertEquals(true, p0 <= p3)
+        assertEquals(false, p0 >= p3)
+        assertEquals(false, p0 > p3)
+
+        assertEquals(true, p1 < p2)
+        assertEquals(true, p1 <= p2)
+        assertEquals(false, p1 >= p2)
+        assertEquals(false, p1 > p2)
+
+        assertEquals(true, p1 < p3)
+        assertEquals(true, p1 <= p3)
+        assertEquals(false, p1 >= p3)
+        assertEquals(false, p1 > p3)
+    }
+
     @test fun isBefore() {
         val p0 = START_POINT
         val p1 = Point(1, 1)

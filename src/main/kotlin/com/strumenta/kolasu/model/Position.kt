@@ -3,7 +3,14 @@ package com.strumenta.kolasu.model
 /**
  * The line should be in 1..n, the column in 0..n
  */
-data class Point(val line: Int, val column: Int) {
+data class Point(val line: Int, val column: Int) : Comparable<Point> {
+    override fun compareTo(other: Point): Int {
+        if (line == other.line) {
+            return this.column - other.column
+        }
+        return this.line - other.line
+    }
+
     init {
         require(line >= 1) { "Line should be equal or greater than 1, was $line" }
         require(column >= 0) { "Column should be equal or greater than 0, was $column" }
@@ -24,8 +31,8 @@ data class Point(val line: Int, val column: Int) {
         return lines.subList(0, this.line - 1).foldRight(0, { it, acc -> it.length + acc }) + newLines + column
     }
 
-    fun isBefore(other: Point) : Boolean = line < other.line || (line == other.line && column < other.column)
-    fun isSameOrBefore(other: Point) : Boolean = line < other.line || (line == other.line && column <= other.column)
+    fun isBefore(other: Point) = this < other
+    fun isSameOrBefore(other: Point) = this <= other
 
     operator fun plus(text: String) : Point {
         return when {
