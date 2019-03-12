@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.model
 
+import org.antlr.v4.runtime.Token
+
 /**
  * The line should be in 1..n, the column in 0..n
  */
@@ -43,7 +45,8 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
         }
     }
 
-    fun asPosition() = Position(this, this)
+    val asPosition: Position
+        get() = Position(this, this)
 }
 
 val START_POINT = Point(1, 0)
@@ -78,3 +81,10 @@ data class Position(val start: Point, val end: Point) {
 fun pos(startLine:Int, startCol:Int, endLine:Int, endCol:Int) = Position(Point(startLine, startCol), Point(endLine, endCol))
 
 fun Node.isBefore(other: Node) : Boolean = position!!.start.isBefore(other.position!!.start)
+
+
+val Token.startPoint: Point
+    get() = Point(this.line, this.charPositionInLine)
+
+val Token.endPoint: Point
+    get() = startPoint + this.text
