@@ -54,7 +54,16 @@ val START_POINT = Point(1, 0)
 /**
  * Both the start point and the end point are included
  */
-data class Position(val start: Point, val end: Point) {
+data class Position(val start: Point, val end: Point) : Comparable<Position> {
+
+    override fun compareTo(other: Position): Int {
+        val cmp = this.start.compareTo(other.start)
+        return if (cmp == 0) {
+            this.end.compareTo(other.end)
+        } else {
+            cmp
+        }
+    }
 
     init {
         require(start.isBefore(end) || start == end) {
