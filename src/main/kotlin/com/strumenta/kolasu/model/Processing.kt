@@ -153,3 +153,10 @@ fun Node.transformDirect(operation: (Node) -> Node) : Node {
     }
     return operation(instanceToTransform)
 }
+
+fun Node.replace(other: Node) {
+    if (this.parent == null) {
+        throw IllegalStateException("Parent not set")
+    }
+    this.parent!!.transformDirect { if (it == this) other else it }
+}
