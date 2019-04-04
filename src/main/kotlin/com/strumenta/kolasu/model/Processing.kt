@@ -1,7 +1,9 @@
 package com.strumenta.kolasu.model
 
 import java.util.*
+import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
+import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
@@ -90,7 +92,9 @@ val Node.children : List<Node>
         return children.toList()
     }
 
-fun Node.transform(operation: (Node) -> Node) : Node {
+// TODO reimplement using transformChildren
+fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false) : Node {
+    if (inPlace) TODO()
     operation(this)
     val changes = HashMap<String, Any>()
     relevantMemberProperties().forEach { p ->
@@ -122,19 +126,52 @@ fun Node.transform(operation: (Node) -> Node) : Node {
     return operation(instanceToTransform)
 }
 
-fun Node.transformDirect(operation: (Node) -> Node) : Node {
-    operation(this)
+class ImmutablePropertyException(property: KProperty<*>) : RuntimeException("Cannot mutate property ${property.name}")
+
+fun Node.transformChildren(operation: (Node) -> Node, inPlace: Boolean = false) : Node {
     val changes = HashMap<String, Any>()
     relevantMemberProperties().forEach { p ->
         val v = p.get(this)
         when (v) {
             is Node -> {
                 val newValue = operation(v)
-                if (newValue != v) changes[p.name] = newValue
+                if (newValue != v) {
+                    if (inPlace) {
+                        if (p is KMutableProperty<*>) {
+                            p.setter.call(this, newValue)
+                        } else {
+                            throw ImmutablePropertyException(p)
+                        }
+                    } else {
+                        changes[p.name] = newValue
+                    }
+                }
             }
             is Collection<*> -> {
-                val newValue = v.map { if (it is Node) operation(it) else it }
-                if (newValue != v) changes[p.name] = newValue
+                if (inPlace) {
+                    if (v is List<*>) {
+                        for (i in 0 until v.size) {
+                            val element = v[i]
+                            if (element is Node) {
+                                val newValue = operation(element)
+                                if (newValue != element) {
+                                    if (v is MutableList<*>) {
+                                        (v as MutableList<Node>)[i] = newValue
+                                    } else {
+                                        throw ImmutablePropertyException(p)
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        TODO()
+                    }
+                } else {
+                    val newValue = v.map { if (it is Node) operation(it) else it }
+                    if (newValue != v) {
+                        changes[p.name] = newValue
+                    }
+                }
             }
         }
     }
@@ -151,12 +188,12 @@ fun Node.transformDirect(operation: (Node) -> Node) : Node {
         }
         instanceToTransform = constructor.callBy(params)
     }
-    return operation(instanceToTransform)
+    return instanceToTransform
 }
 
 fun Node.replace(other: Node) {
     if (this.parent == null) {
         throw IllegalStateException("Parent not set")
     }
-    this.parent!!.transformDirect { if (it == this) other else it }
+    this.parent!!.transformChildren(inPlace = true, operation = { if (it == this) other else it } )
 }
