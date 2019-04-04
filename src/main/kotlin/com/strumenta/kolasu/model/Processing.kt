@@ -12,6 +12,13 @@ private val <T: Node> T.relevantProperties : Collection<KProperty1<T, *>>
             .filter { it.findAnnotation<Derived>() == null }
             .filter { it.name != "parent" }
 
+fun Node.assignParents() {
+    this.children.forEach {
+        it.parent = this
+        it.assignParents()
+    }
+}
+
 fun Node.process(operation: (Node) -> Unit) {
     operation(this)
     relevantProperties.forEach { p ->
@@ -95,6 +102,38 @@ fun Node.transform(operation: (Node) -> Node) : Node {
             }
             is Collection<*> -> {
                 val newValue = v.map { if (it is Node) it.transform(operation) else it }
+                if (newValue != v) changes[p.name] = newValue
+            }
+        }
+    }
+    var instanceToTransform = this
+    if (!changes.isEmpty()) {
+        val constructor = this.javaClass.kotlin.primaryConstructor!!
+        val params = HashMap<KParameter, Any?>()
+        constructor.parameters.forEach { param ->
+            if (changes.containsKey(param.name)) {
+                params[param] = changes[param.name]
+            } else {
+                params[param] = this.javaClass.kotlin.memberProperties.find { param.name == it.name }!!.get(this)
+            }
+        }
+        instanceToTransform = constructor.callBy(params)
+    }
+    return operation(instanceToTransform)
+}
+
+fun Node.transformDirect(operation: (Node) -> Node) : Node {
+    operation(this)
+    val changes = HashMap<String, Any>()
+    relevantMemberProperties().forEach { p ->
+        val v = p.get(this)
+        when (v) {
+            is Node -> {
+                val newValue = operation(v)
+                if (newValue != v) changes[p.name] = newValue
+            }
+            is Collection<*> -> {
+                val newValue = v.map { if (it is Node) operation(it) else it }
                 if (newValue != v) changes[p.name] = newValue
             }
         }
