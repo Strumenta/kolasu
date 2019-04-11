@@ -1,16 +1,14 @@
 package com.strumenta.kolasu.model
 
 import java.util.*
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KParameter
-import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty1
+import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
 private val <T: Node> T.relevantProperties : Collection<KProperty1<T, *>>
     get() = this.javaClass.kotlin.memberProperties
+            .filter { it.visibility == KVisibility.PUBLIC }
             .filter { it.findAnnotation<Derived>() == null }
             .filter { it.name != "parent" }
 
