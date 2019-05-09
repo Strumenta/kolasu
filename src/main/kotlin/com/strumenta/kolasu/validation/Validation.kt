@@ -8,4 +8,4 @@ enum class ErrorType {
     SEMANTIC
 }
 
-data class Error(val type: ErrorType, val message: String, val position: Position?)
+data class Error(val type: ErrorType, val message: String, val position: Position? = null)
