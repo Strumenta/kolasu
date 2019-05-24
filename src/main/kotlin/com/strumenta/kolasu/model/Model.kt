@@ -43,8 +43,8 @@ data class ReferenceByName<N>(val name: String, var referred: N? = null) where N
         get() = referred != null
 }
 
-fun <N> ReferenceByName<N>.tryToResolve(candidates: List<N>) : Boolean where N : Named {
-    val res = candidates.find { it.name == this.name }
+fun <N> ReferenceByName<N>.tryToResolve(candidates: List<N>, caseInsensitive : Boolean = false) : Boolean where N : Named {
+    val res = candidates.find { if (it.name == null) false else it.name.equals(this.name, caseInsensitive) }
     this.referred = res
     return res != null
 }
