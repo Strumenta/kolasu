@@ -57,6 +57,3 @@ fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?) : Boolean where N : N
         true
     }
 }
-
-
-
