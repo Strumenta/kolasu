@@ -2,15 +2,13 @@ package com.strumenta.kolasu.model
 
 import java.util.*
 import kotlin.test.assertEquals
-import kotlin.test.assertFails
 import org.junit.Test as test
 
 data class A(val s: String) : Node()
-data class B(val a: A, val manyAs : List<A>) : Node()
+data class B(val a: A, val manyAs: List<A>) : Node()
 
 data class AW(var s: String) : Node()
-data class BW(var a: AW, val manyAs : MutableList<AW>) : Node()
-
+data class BW(var a: AW, val manyAs: MutableList<AW>) : Node()
 
 class ProcessingTest {
 
@@ -42,5 +40,4 @@ class ProcessingTest {
         a2.replace(a4)
         assertEquals("4", b.manyAs[0].s)
     }
-
 }

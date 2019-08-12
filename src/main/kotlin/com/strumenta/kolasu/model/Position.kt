@@ -23,7 +23,7 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
     /**
      * Translate the Point to an offset in the original code stream.
      */
-    fun offset(code: String) : Int {
+    fun offset(code: String): Int {
         val lines = code.split("\n")
         require(lines.size >= line) {
             "The point does not exist in the given text. It indicates line $line but there are only ${lines.size} lines" }
@@ -36,7 +36,7 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
     fun isBefore(other: Point) = this < other
     fun isSameOrBefore(other: Point) = this <= other
 
-    operator fun plus(text: String) : Point {
+    operator fun plus(text: String): Point {
         return when {
             text.isEmpty() -> this
             text.startsWith("\r\n") -> Point(line + 1, 0) + text.substring(2)
@@ -79,7 +79,7 @@ data class Position(val start: Point, val end: Point) : Comparable<Position> {
 
     fun length(code: String) = end.offset(code) - start.offset(code)
 
-    fun contains(point: Point) : Boolean {
+    fun contains(point: Point): Boolean {
         return ((point == start || start.isBefore(point)) && (point == end || point.isBefore(end)))
     }
 }
@@ -87,10 +87,9 @@ data class Position(val start: Point, val end: Point) : Comparable<Position> {
 /**
  * Utility function to create a Position
  */
-fun pos(startLine:Int, startCol:Int, endLine:Int, endCol:Int) = Position(Point(startLine, startCol), Point(endLine, endCol))
+fun pos(startLine: Int, startCol: Int, endLine: Int, endCol: Int) = Position(Point(startLine, startCol), Point(endLine, endCol))
 
-fun Node.isBefore(other: Node) : Boolean = position!!.start.isBefore(other.position!!.start)
-
+fun Node.isBefore(other: Node): Boolean = position!!.start.isBefore(other.position!!.start)
 
 val Token.startPoint: Point
     get() = Point(this.line, this.charPositionInLine)

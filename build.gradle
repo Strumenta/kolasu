@@ -16,6 +16,10 @@ buildscript {
     }
 }
 
+plugins {
+    id "org.jlleitschuh.gradle.ktlint" version "8.2.0"
+}
+
 apply plugin: 'kotlin'
 apply plugin: 'java'
 apply plugin: 'antlr'

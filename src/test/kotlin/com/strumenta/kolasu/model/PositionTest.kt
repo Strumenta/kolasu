@@ -93,5 +93,4 @@ class PositionTest {
         assertEquals("this is some code\n", Position(START_POINT, Point(2, 0)).text(code))
         assertEquals("this is some code\ns", Position(START_POINT, Point(2, 1)).text(code))
     }
-
 }

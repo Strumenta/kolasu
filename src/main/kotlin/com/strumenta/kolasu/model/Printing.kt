@@ -9,7 +9,7 @@ private const val indentBlock = "  "
 fun Node.relevantMemberProperties() = this.javaClass.kotlin.memberProperties
         .filter { !it.name.startsWith("component") && it.name != "position" && it.name != "parent" }
 
-fun Node.multilineString(indent: String = "") : String {
+fun Node.multilineString(indent: String = ""): String {
     val sb = StringBuffer()
     if (this.relevantMemberProperties().isEmpty()) {
         sb.append("$indent${this.javaClass.simpleName}\n")
