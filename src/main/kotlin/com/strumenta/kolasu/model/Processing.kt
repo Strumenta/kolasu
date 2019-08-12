@@ -124,7 +124,8 @@ fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false) : Node {
     return operation(instanceToTransform)
 }
 
-class ImmutablePropertyException(property: KProperty<*>) : RuntimeException("Cannot mutate property ${property.name}")
+class ImmutablePropertyException(property: KProperty<*>, node: Node)
+    : RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
 fun Node.transformChildren(operation: (Node) -> Node, inPlace: Boolean = false) : Node {
     val changes = HashMap<String, Any>()
@@ -138,7 +139,7 @@ fun Node.transformChildren(operation: (Node) -> Node, inPlace: Boolean = false) 
                         if (p is KMutableProperty<*>) {
                             p.setter.call(this, newValue)
                         } else {
-                            throw ImmutablePropertyException(p)
+                            throw ImmutablePropertyException(p, v)
                         }
                     } else {
                         changes[p.name] = newValue
