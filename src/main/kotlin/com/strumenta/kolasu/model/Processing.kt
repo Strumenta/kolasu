@@ -157,7 +157,7 @@ fun Node.transformChildren(operation: (Node) -> Node, inPlace: Boolean = false) 
                                     if (v is MutableList<*>) {
                                         (v as MutableList<Node>)[i] = newValue
                                     } else {
-                                        throw ImmutablePropertyException(p)
+                                        throw ImmutablePropertyException(p, element)
                                     }
                                 }
                             }
