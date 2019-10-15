@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.parsing
 
-import com.strumenta.kolasu.validation.Error
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.validation.Error
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream

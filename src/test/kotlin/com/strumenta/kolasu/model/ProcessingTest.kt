@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.model
 
-import java.util.*
+import java.util.LinkedList
 import kotlin.test.assertEquals
 import org.junit.Test as test
 
