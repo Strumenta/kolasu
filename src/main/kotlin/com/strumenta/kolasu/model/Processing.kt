@@ -42,7 +42,7 @@ private fun provideNodes(kTypeProjection: KTypeProjection): Boolean {
     }
 }
 
-fun provideNodes(classifier: KClassifier?): Boolean {
+private fun provideNodes(classifier: KClassifier?): Boolean {
     if (classifier is KClass<*>) {
         return provideNodes(classifier as? KClass<*>)
     } else {
