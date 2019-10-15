@@ -49,6 +49,7 @@ dependencies {
   compile 'com.fifesoft:rsyntaxtextarea:2.5.8'
   compile 'com.fifesoft:autocomplete:2.5.8'
   compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
+  compile 'org.redundent:kotlin-xml-builder:1.5.3'
 }
 
 task version {
@@ -132,12 +133,8 @@ test {
 
 ktlint {
     version = "0.35.0"
-    //debug = true
     verbose = true
-    //android = false
     outputToConsole = true
-    //ignoreFailures = true
     enableExperimentalRules = true
-    //additionalEditorconfigFile = file("/some/additional/.editorconfig")
     disabledRules = ["no-wildcard-imports"]
 }
