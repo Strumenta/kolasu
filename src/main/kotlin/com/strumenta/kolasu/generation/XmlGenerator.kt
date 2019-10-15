@@ -130,8 +130,12 @@ private fun Element.addAttribute(role: String, value: Any, document: Document) {
     this.setAttribute(role, value.toString())
 }
 
-private fun Element.addAttributesList(role: String, values: Collection<*>, document: Document) {
-    TODO()
+private fun Element.addAttributesList(listName: String, values: Collection<*>, document: Document) {
+    values.forEach {
+        val childElement = document.createElement(listName)
+        childElement.setAttribute("value", it.toString())
+        this.appendChild(childElement)
+    }
 }
 
 private fun Any?.toXML(): Element {
