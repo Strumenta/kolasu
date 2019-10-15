@@ -2,12 +2,9 @@ package com.strumenta.kolasu.model
 
 import java.util.LinkedList
 import kotlin.collections.HashMap
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KParameter
-import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty1
-import kotlin.reflect.KVisibility
+import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
@@ -25,13 +22,66 @@ fun Node.assignParents() {
     }
 }
 
-fun Node.process(operation: (Node) -> Unit) {
+fun Node.processNodes(operation: (Node) -> Unit) {
     operation(this)
     containmentProperties.forEach { p ->
         val v = p.get(this)
         when (v) {
-            is Node -> v.process(operation)
-            is Collection<*> -> v.forEach { (it as? Node)?.process(operation) }
+            is Node -> v.processNodes(operation)
+            is Collection<*> -> v.forEach { (it as? Node)?.processNodes(operation) }
+        }
+    }
+}
+
+private fun provideNodes(kTypeProjection: KTypeProjection): Boolean {
+    val ktype = kTypeProjection.type
+    return when (ktype) {
+        is KClass<*> -> provideNodes(ktype as? KClass<*>)
+        is KType -> provideNodes((ktype as? KType)?.classifier)
+        else -> TODO()
+    }
+}
+
+fun provideNodes(classifier: KClassifier?): Boolean {
+    if (classifier is KClass<*>) {
+        return provideNodes(classifier as? KClass<*>)
+    } else {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+}
+
+private fun provideNodes(kclass: KClass<*>?): Boolean {
+    return kclass?.isSubclassOf(Node::class) ?: false
+}
+
+data class PropertyDescription(val name: String, val provideNodes: Boolean, val multiple: Boolean, val value: Any?) {
+    companion object {
+        fun buildFor(property: KProperty1<in Node, *>, node: Node) : PropertyDescription {
+            val propertyType = property.returnType
+            val classifier = propertyType.classifier as? KClass<*>
+            val multiple = (classifier?.isSubclassOf(Collection::class) == true)
+            val provideNodes = if (multiple) {
+                provideNodes(propertyType.arguments[0])
+            } else {
+                provideNodes(classifier)
+            }
+            return PropertyDescription(
+                    name = property.name,
+                    provideNodes = provideNodes,
+                    multiple = multiple,
+                    value = property.get(node)
+            )
+        }
+
+    }
+}
+
+fun Node.processProperties(
+        propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position"),
+        propertyOperation: (PropertyDescription) -> Unit) {
+    containmentProperties.forEach { p ->
+        if (!propertiesToIgnore.contains(p.name)) {
+            propertyOperation(PropertyDescription.buildFor(p, this))
         }
     }
 }
@@ -61,7 +111,7 @@ fun Node.find(predicate: (Node) -> Boolean): Node? {
 }
 
 fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit) {
-    process { if (klass.isInstance(it)) {
+    processNodes { if (klass.isInstance(it)) {
         operation(it as T) }
     }
 }
