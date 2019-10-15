@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.generation
 
-import com.strumenta.kolasu.model.Node
 import kotlin.test.assertEquals
 import org.junit.Test
 
@@ -9,18 +8,21 @@ class XmlGenerationTest {
     @Test
     fun generateXMBasic() {
         val myRoot = MyRoot(
-                mainSection = Section(
-                        "Section1",
-                        emptyList()
-                ),
-                otherSections = listOf()
+            mainSection = Section(
+                "Section1",
+                emptyList()
+            ),
+            otherSections = listOf()
         )
         val xml = XMLGenerator().generateString(myRoot)
-        assertEquals("""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        assertEquals(
+            """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <root type="MyRoot">
     <mainSection name="Section1" type="Section"/>
 </root>
-""", xml)
+""",
+            xml
+        )
     }
 
     @Test
@@ -53,7 +55,7 @@ class XmlGenerationTest {
     </mainSection>
 </root>
 """,
-                xml
+            xml
         )
     }
 }

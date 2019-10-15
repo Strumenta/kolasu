@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.generation
 
-import com.strumenta.kolasu.model.Node
 import kotlin.test.assertEquals
 import org.junit.Test
 

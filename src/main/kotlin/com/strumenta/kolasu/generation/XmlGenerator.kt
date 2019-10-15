@@ -1,13 +1,10 @@
 package com.strumenta.kolasu.generation
 
-import com.google.gson.GsonBuilder
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.validation.Error
-import org.w3c.dom.Document
-import org.w3c.dom.Element
 import java.io.File
 import java.io.StringWriter
 import javax.xml.parsers.DocumentBuilderFactory
@@ -15,11 +12,8 @@ import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
-import com.sun.xml.internal.ws.addressing.EndpointReferenceUtil.transform
-import javax.xml.transform.Transformer
-import com.sun.org.apache.xerces.internal.impl.xs.opti.SchemaDOM.indent
-
-
+import org.w3c.dom.Document
+import org.w3c.dom.Element
 
 class XMLGenerator {
 
@@ -47,8 +41,8 @@ class XMLGenerator {
         return document.toXmlString()
     }
 
-    private fun Document.toXmlString() : String {
-        val  tf = TransformerFactory.newInstance()
+    private fun Document.toXmlString(): String {
+        val tf = TransformerFactory.newInstance()
         tf.setAttribute("indent-number", 4)
         val transformer = tf.newTransformer()
         transformer.setOutputProperty(OutputKeys.INDENT, "yes")
@@ -57,7 +51,7 @@ class XMLGenerator {
 
         transformer.transform(DOMSource(this), StreamResult(writer))
 
-        val xmlString = writer.buffer.toString();
+        val xmlString = writer.buffer.toString()
         return xmlString
     }
 
@@ -101,12 +95,12 @@ private fun Element.addChild(child: Element) {
     this.appendChild(child)
 }
 
-private fun Element.addNullChild(role: String, document : Document) {
+private fun Element.addNullChild(role: String, document: Document) {
     val element = document.createElement(role)
     this.appendChild(element)
 }
 
-private fun Node.toXML(role: String, document : Document): Element {
+private fun Node.toXML(role: String, document: Document): Element {
     val element = document.createElement(role)
     element.setAttribute("type", this.javaClass.simpleName)
     this.position?.let {
