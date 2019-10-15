@@ -11,10 +11,15 @@ open class Node(open val position: Position? = null) {
 }
 
 /**
- * This will be used to mark all the properties that returns a Node or a list of Node which are not
- * contained by the Node having the properties.
+ * This should be used for all relations which are secondary, i.e., they are calculated from other relations
  */
 annotation class Derived
+
+/**
+ * This will be used to mark all the properties that returns a Node or a list of Node which are not
+ * contained by the Node having the properties, they are just references
+ */
+annotation class Link
 
 /**
  * An entity which has a name.

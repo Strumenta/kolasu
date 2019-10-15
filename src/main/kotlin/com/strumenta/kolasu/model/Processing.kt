@@ -6,10 +6,11 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
-private val <T : Node> T.relevantProperties: Collection<KProperty1<T, *>>
+private val <T : Node> T.containmentProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.kotlin.memberProperties
             .filter { it.visibility == KVisibility.PUBLIC }
             .filter { it.findAnnotation<Derived>() == null }
+            .filter { it.findAnnotation<Link>() == null }
             .filter { it.name != "parent" }
 
 fun Node.assignParents() {
@@ -21,7 +22,7 @@ fun Node.assignParents() {
 
 fun Node.process(operation: (Node) -> Unit) {
     operation(this)
-    relevantProperties.forEach { p ->
+    containmentProperties.forEach { p ->
         val v = p.get(this)
         when (v) {
             is Node -> v.process(operation)
@@ -34,7 +35,7 @@ fun Node.find(predicate: (Node) -> Boolean): Node? {
     if (predicate(this)) {
         return this
     }
-    relevantProperties.forEach { p ->
+    containmentProperties.forEach { p ->
         val v = p.get(this)
         when (v) {
             is Node -> {
@@ -68,7 +69,7 @@ fun <T : Node> Node.collectByType(klass: Class<T>): List<T> {
 
 fun Node.processConsideringParent(operation: (Node, Node?) -> Unit, parent: Node? = null) {
     operation(this, parent)
-    this.relevantProperties.forEach { p ->
+    this.containmentProperties.forEach { p ->
         val v = p.get(this)
         when (v) {
             is Node -> v.processConsideringParent(operation, this)
@@ -80,7 +81,7 @@ fun Node.processConsideringParent(operation: (Node, Node?) -> Unit, parent: Node
 val Node.children: List<Node>
     get() {
         val children = LinkedList<Node>()
-        relevantProperties.forEach { p ->
+        containmentProperties.forEach { p ->
             val v = p.get(this)
             when (v) {
                 is Node -> children.add(v)
