@@ -129,3 +129,15 @@ test {
     exceptionFormat = 'full'
   }
 }
+
+ktlint {
+    version = "0.35.0"
+    //debug = true
+    verbose = true
+    //android = false
+    outputToConsole = true
+    //ignoreFailures = true
+    enableExperimentalRules = true
+    //additionalEditorconfigFile = file("/some/additional/.editorconfig")
+    disabledRules = ["no-wildcard-imports"]
+}

@@ -15,23 +15,23 @@ import java.io.File
 
 class JsonGenerator {
 
-    fun generateJSON(root: Node) : JsonElement {
+    fun generateJSON(root: Node): JsonElement {
         return root.toJson()
     }
 
-    fun generateJSON(result: com.strumenta.kolasu.Result<out Node>) : JsonElement {
+    fun generateJSON(result: com.strumenta.kolasu.Result<out Node>): JsonElement {
         return jsonObject(
-                "errors" to result.errors.map { it.toJson() },
-                "root" to result.root?.toJson()
+            "errors" to result.errors.map { it.toJson() },
+            "root" to result.root?.toJson()
         )
     }
 
-    fun generateString(root: Node) : String {
+    fun generateString(root: Node): String {
         val gson = GsonBuilder().setPrettyPrinting().create()
         return gson.toJson(generateJSON(root))
     }
 
-    fun generateString(result: com.strumenta.kolasu.Result<out Node>) : String {
+    fun generateString(result: com.strumenta.kolasu.Result<out Node>): String {
         val gson = GsonBuilder().setPrettyPrinting().create()
         return gson.toJson(generateJSON(result))
     }
@@ -47,8 +47,8 @@ class JsonGenerator {
 
 private fun Node.toJson(): JsonElement {
     val jsonObject = jsonObject(
-            "type" to this.javaClass.simpleName,
-            "position" to this.position?.toJson()
+        "type" to this.javaClass.simpleName,
+        "position" to this.position?.toJson()
     )
     this.processProperties {
         if (it.value == null) {
@@ -71,7 +71,7 @@ private fun Node.toJson(): JsonElement {
 }
 
 private fun Any?.toJson(): JsonElement? {
-    return when (this){
+    return when (this) {
         null -> JsonNull.INSTANCE
         is String -> JsonPrimitive(this)
         is Number -> JsonPrimitive(this)
@@ -82,23 +82,23 @@ private fun Any?.toJson(): JsonElement? {
 
 private fun Error.toJson(): JsonElement {
     return jsonObject(
-            "type" to this.type.name,
-            "message" to this.message,
-            "position" to this.position?.toJson()
+        "type" to this.type.name,
+        "message" to this.message,
+        "position" to this.position?.toJson()
     )
 }
 
 private fun Position.toJson(): JsonElement {
     return jsonObject(
-            "description" to this.toString(),
-            "start" to this.start.toJson(),
-            "end" to this.end.toJson()
+        "description" to this.toString(),
+        "start" to this.start.toJson(),
+        "end" to this.end.toJson()
     )
 }
 
 private fun Point.toJson(): JsonElement {
     return jsonObject(
-            "line" to this.line,
-            "column" to this.column
+        "line" to this.line,
+        "column" to this.column
     )
 }

@@ -7,7 +7,8 @@ import org.junit.Test as test
 class PositionTest {
 
     @test fun offset() {
-        val code = """this is some code
+        val code =
+            """this is some code
                      |second line
                      |third line""".trimMargin("|")
         assertEquals(0, START_POINT.offset(code))
@@ -83,7 +84,8 @@ class PositionTest {
     }
 
     @test fun text() {
-        val code = """this is some code
+        val code =
+            """this is some code
                      |second line
                      |third line""".trimMargin("|")
         assertEquals("", Position(START_POINT, START_POINT).text(code))

@@ -26,9 +26,11 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
     fun offset(code: String): Int {
         val lines = code.split("\n")
         require(lines.size >= line) {
-            "The point does not exist in the given text. It indicates line $line but there are only ${lines.size} lines" }
+            "The point does not exist in the given text. It indicates line $line but there are only ${lines.size} lines"
+        }
         require(lines[line - 1].length >= column) {
-            "The column does not exist in the given text. Line $line has ${lines[line - 1].length} columns, the point indicates column $column" }
+            "The column does not exist in the given text. Line $line has ${lines[line - 1].length} columns, the point indicates column $column"
+        }
         val newLines = this.line - 1
         return lines.subList(0, this.line - 1).foldRight(0, { it, acc -> it.length + acc }) + newLines + column
     }
@@ -67,7 +69,8 @@ data class Position(val start: Point, val end: Point) : Comparable<Position> {
 
     init {
         require(start.isBefore(end) || start == end) {
-            "End should follows start or be the same as start (start: $start, end: $end)" }
+            "End should follows start or be the same as start (start: $start, end: $end)"
+        }
     }
 
     /**

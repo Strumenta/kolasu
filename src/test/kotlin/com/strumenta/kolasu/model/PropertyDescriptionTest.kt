@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.model
 
-import org.junit.Test
 import java.util.*
 import kotlin.test.assertEquals
+import org.junit.Test
 
 data class Foo1(val name: String) : Node()
 data class Foo2(val names: List<String>) : Node()
@@ -76,5 +76,4 @@ class PropertyDescriptionTest {
         assertEquals(1, list.size)
         assertEquals(PropertyDescription("foos", true, true, null), list[0])
     }
-
 }

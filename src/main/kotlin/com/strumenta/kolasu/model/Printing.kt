@@ -7,7 +7,7 @@ import kotlin.reflect.jvm.javaType
 private const val indentBlock = "  "
 
 fun Node.relevantMemberProperties() = this.javaClass.kotlin.memberProperties
-        .filter { !it.name.startsWith("component") && it.name != "position" && it.name != "parent" }
+    .filter { !it.name.startsWith("component") && it.name != "position" && it.name != "parent" }
 
 fun Node.multilineString(indent: String = ""): String {
     val sb = StringBuffer()

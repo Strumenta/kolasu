@@ -10,10 +10,10 @@ import kotlin.reflect.full.primaryConstructor
 
 private val <T : Node> T.containmentProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.kotlin.memberProperties
-            .filter { it.visibility == KVisibility.PUBLIC }
-            .filter { it.findAnnotation<Derived>() == null }
-            .filter { it.findAnnotation<Link>() == null }
-            .filter { it.name != "parent" }
+        .filter { it.visibility == KVisibility.PUBLIC }
+        .filter { it.findAnnotation<Derived>() == null }
+        .filter { it.findAnnotation<Link>() == null }
+        .filter { it.name != "parent" }
 
 fun Node.assignParents() {
     this.children.forEach {
@@ -46,7 +46,7 @@ private fun provideNodes(classifier: KClassifier?): Boolean {
     if (classifier is KClass<*>) {
         return provideNodes(classifier as? KClass<*>)
     } else {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 }
 
@@ -56,7 +56,7 @@ private fun provideNodes(kclass: KClass<*>?): Boolean {
 
 data class PropertyDescription(val name: String, val provideNodes: Boolean, val multiple: Boolean, val value: Any?) {
     companion object {
-        fun buildFor(property: KProperty1<in Node, *>, node: Node) : PropertyDescription {
+        fun buildFor(property: KProperty1<in Node, *>, node: Node): PropertyDescription {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             val multiple = (classifier?.isSubclassOf(Collection::class) == true)
@@ -66,19 +66,19 @@ data class PropertyDescription(val name: String, val provideNodes: Boolean, val 
                 provideNodes(classifier)
             }
             return PropertyDescription(
-                    name = property.name,
-                    provideNodes = provideNodes,
-                    multiple = multiple,
-                    value = property.get(node)
+                name = property.name,
+                provideNodes = provideNodes,
+                multiple = multiple,
+                value = property.get(node)
             )
         }
-
     }
 }
 
 fun Node.processProperties(
-        propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position"),
-        propertyOperation: (PropertyDescription) -> Unit) {
+    propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position"),
+    propertyOperation: (PropertyDescription) -> Unit
+) {
     containmentProperties.forEach { p ->
         if (!propertiesToIgnore.contains(p.name)) {
             propertyOperation(PropertyDescription.buildFor(p, this))
@@ -99,20 +99,24 @@ fun Node.find(predicate: (Node) -> Boolean): Node? {
                     return res
                 }
             }
-            is Collection<*> -> v.forEach { (it as? Node)?.let {
-                val res = it.find(predicate)
-                if (res != null) {
-                    return res
+            is Collection<*> -> v.forEach {
+                (it as? Node)?.let {
+                    val res = it.find(predicate)
+                    if (res != null) {
+                        return res
+                    }
                 }
-            } }
+            }
         }
     }
     return null
 }
 
 fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit) {
-    processNodes { if (klass.isInstance(it)) {
-        operation(it as T) }
+    processNodes {
+        if (klass.isInstance(it)) {
+            operation(it as T)
+        }
     }
 }
 
