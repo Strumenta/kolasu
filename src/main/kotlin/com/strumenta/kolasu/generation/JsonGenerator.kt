@@ -21,7 +21,7 @@ class JsonGenerator {
 
     fun generateJSON(result: com.strumenta.kolasu.Result<out Node>): JsonElement {
         return jsonObject(
-            "errors" to result.errors.map { it.toJson() },
+            "errors" to result.errors.map { it.toJson() }.toJsonArray(),
             "root" to result.root?.toJson()
         )
     }
