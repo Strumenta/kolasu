@@ -8,17 +8,18 @@ import org.junit.Test
 
 class JsonGenerationTest {
 
-
     @Test
     fun generateJsonOfResultWithErrors() {
-        val result : com.strumenta.kolasu.Result<Node> = com.strumenta.kolasu.Result(
-                listOf(com.strumenta.kolasu.validation.Error(ErrorType.SYNTACTIC, "An error"),
-                        com.strumenta.kolasu.validation.Error(ErrorType.SYNTACTIC, "Another error")),
-                null
+        val result: com.strumenta.kolasu.Result<Node> = com.strumenta.kolasu.Result(
+            listOf(
+                com.strumenta.kolasu.validation.Error(ErrorType.SYNTACTIC, "An error"),
+                com.strumenta.kolasu.validation.Error(ErrorType.SYNTACTIC, "Another error")
+            ),
+            null
         )
         val json = JsonGenerator().generateString(result)
         assertEquals(
-                """{
+            """{
   "errors": [
     {
       "type": "SYNTACTIC",
@@ -29,7 +30,9 @@ class JsonGenerationTest {
       "message": "Another error"
     }
   ]
-}""", json)
+}""",
+            json
+        )
     }
 
     @Test

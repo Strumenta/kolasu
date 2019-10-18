@@ -62,19 +62,19 @@ class XmlGenerationTest {
     @Test
     fun generateXMLWithListOfValues() {
         val myRoot = MyRoot(
-                mainSection = Section(
-                        "Section1",
-                        listOf(
-                                Content(1, null),
-                                OtherContent(listOf(1,2,3,100,-122)),
-                                Content(2, Content(3, Content(4, null)))
-                        )
-                ),
-                otherSections = listOf()
+            mainSection = Section(
+                "Section1",
+                listOf(
+                    Content(1, null),
+                    OtherContent(listOf(1, 2, 3, 100, -122)),
+                    Content(2, Content(3, Content(4, null)))
+                )
+            ),
+            otherSections = listOf()
         )
         val xml = XMLGenerator().generateString(myRoot)
         assertEquals(
-                """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+            """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <root type="MyRoot">
     <mainSection name="Section1" type="Section">
         <contents id="1" type="Content">
@@ -97,7 +97,7 @@ class XmlGenerationTest {
     </mainSection>
 </root>
 """,
-                xml
+            xml
         )
     }
 }
