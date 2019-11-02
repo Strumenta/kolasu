@@ -12,11 +12,11 @@ class JsonGenerationTest {
     @Test
     fun generateJsonOfResultWithErrors() {
         val result: Result<Node> = Result(
-                listOf(
-                        Error(ErrorType.SYNTACTIC, "An error"),
-                        Error(ErrorType.SYNTACTIC, "Another error")
-                ),
-                null
+            listOf(
+                Error(ErrorType.SYNTACTIC, "An error"),
+                Error(ErrorType.SYNTACTIC, "Another error")
+            ),
+            null
         )
         val json = JsonGenerator().generateString(result)
         assertEquals(

@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.model
 
-import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.ParseTree
@@ -111,5 +110,3 @@ val RuleContext.firstChild: ParseTree?
 
 val RuleContext.lastChild: ParseTree?
     get() = if (hasChildren) this.getChild(this.childCount - 1) else null
-
-

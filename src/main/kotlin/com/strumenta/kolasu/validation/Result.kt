@@ -9,11 +9,11 @@ data class Result<C>(val errors: List<Error>, val root: C?) {
     companion object {
         fun <C> exception(errorType: ErrorType, e: Throwable): Result<C> {
             val errors = listOf(
-                    Error(
-                            type = errorType,
-                            message = e.message ?: e.javaClass.simpleName,
-                            position = null
-                    )
+                Error(
+                    type = errorType,
+                    message = e.message ?: e.javaClass.simpleName,
+                    position = null
+                )
             )
             return Result(errors, null)
         }

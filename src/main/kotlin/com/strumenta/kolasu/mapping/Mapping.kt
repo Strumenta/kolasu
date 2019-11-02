@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.mapping
 
-import com.strumenta.kolasu.mapping.endPoint
 import com.strumenta.kolasu.model.*
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Token
