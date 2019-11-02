@@ -18,6 +18,7 @@ buildscript {
 
 plugins {
     id "org.jlleitschuh.gradle.ktlint" version "9.0.0"
+    id("maven-publish")
 }
 
 apply plugin: 'kotlin'
@@ -34,7 +35,7 @@ repositories {
 
 def kolasuVersion = "0.2.3-SNAPSHOT"
 
-project.group   = "me.tomassetti"
+project.group   = "com.strumenta"
 project.version = kolasuVersion
 
 dependencies {
@@ -137,4 +138,22 @@ ktlint {
     outputToConsole = true
     enableExperimentalRules = true
     disabledRules = ["no-wildcard-imports"]
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Strumenta/kolasu")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
+                password = project.findProperty("gpr.key") ?: System.getenv("GPR_API_KEY")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
+        }
+    }
 }
