@@ -100,12 +100,13 @@ class PositionTest {
         assertEquals("this is some code\ns", Position(START_POINT, Point(2, 1)).text(code))
     }
 
-    @test fun parserRuleContextPositon() {
-        val code = "SET foo = 123"
+    @test fun parserRuleContextPosition() {
+        val code = "set foo = 123"
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
         val cu = parser.compilationUnit()
-        val setStmt = cu.statement() as SimpleLangParser.SetStmtContext
+        val setStmt = cu.statement(0) as SimpleLangParser.SetStmtContext
         val pos = setStmt.position
+        assertEquals(Position(Point(1, 0), Point(1, 13)), pos)
     }
 }
