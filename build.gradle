@@ -33,7 +33,7 @@ repositories {
     jcenter()
 }
 
-def kolasuVersion = "0.2.3-SNAPSHOT"
+def kolasuVersion = "0.3.0-SNAPSHOT"
 
 project.group   = "com.strumenta"
 project.version = kolasuVersion
