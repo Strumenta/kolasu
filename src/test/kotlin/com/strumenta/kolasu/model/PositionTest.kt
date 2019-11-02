@@ -2,10 +2,10 @@ package com.strumenta.kolasu.model
 
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
 import org.junit.Test as test
 
 data class MySetStatement(override val specifiedPosition: Position? = null) : Node(specifiedPosition)

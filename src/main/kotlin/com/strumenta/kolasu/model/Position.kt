@@ -103,13 +103,13 @@ val Token.startPoint: Point
 val Token.endPoint: Point
     get() = startPoint + this.text
 
-val RuleContext.hasChildren : Boolean
+val RuleContext.hasChildren: Boolean
     get() = this.childCount > 0
 
-val RuleContext.firstChild : ParseTree?
+val RuleContext.firstChild: ParseTree?
     get() = if (hasChildren) this.getChild(0) else null
 
-val RuleContext.lastChild : ParseTree?
+val RuleContext.lastChild: ParseTree?
     get() = if (hasChildren) this.getChild(this.childCount - 1) else null
 
 val ParserRuleContext.position: Position

@@ -9,7 +9,7 @@ open class Node(open val specifiedPosition: Position? = null) {
     var parseTreeNode: ParserRuleContext? = null
     var parent: Node? = null
 
-    val position : Position?
+    val position: Position?
         get() = specifiedPosition ?: parseTreeNode?.position
 }
 
