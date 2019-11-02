@@ -1,6 +1,9 @@
 package com.strumenta.kolasu.model
 
+import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token
+import org.antlr.v4.runtime.tree.ParseTree
 
 /**
  * The line should be in 1..n, the column in 0..n
@@ -99,3 +102,15 @@ val Token.startPoint: Point
 
 val Token.endPoint: Point
     get() = startPoint + this.text
+
+val RuleContext.hasChildren : Boolean
+    get() = this.childCount > 0
+
+val RuleContext.firstChild : ParseTree?
+    get() = if (hasChildren) this.getChild(0) else null
+
+val RuleContext.lastChild : ParseTree?
+    get() = if (hasChildren) this.getChild(this.childCount - 1) else null
+
+val ParserRuleContext.position: Position
+    get() = Position(this.start.startPoint, this.stop.endPoint)
