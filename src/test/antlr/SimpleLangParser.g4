@@ -6,9 +6,9 @@ compilationUnit:
     statement+;
 
 statement:
-      DISPLAY expression
-    | SET ID EQUAL expression
-    | INPUT ID IS type
+      DISPLAY expression #displayStmt
+    | SET ID EQUAL expression #setStmt
+    | INPUT ID IS type #inputDeclStmt
     ;
 
 expression:

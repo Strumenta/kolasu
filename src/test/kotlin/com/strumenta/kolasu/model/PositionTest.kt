@@ -1,5 +1,9 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.simplelang.SimpleLangLexer
+import com.strumenta.simplelang.SimpleLangParser
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import org.junit.Test as test
@@ -98,7 +102,10 @@ class PositionTest {
 
     @test fun parserRuleContextPositon() {
         val code = "SET foo = 123"
-        val lexer = SimpleLangLexer()
-        val parser = SimpleLangParser()
+        val lexer = SimpleLangLexer(CharStreams.fromString(code))
+        val parser = SimpleLangParser(CommonTokenStream(lexer))
+        val cu = parser.compilationUnit()
+        val setStmt = cu.statement() as SimpleLangParser.SetStmtContext
+        val pos = setStmt.position
     }
 }
