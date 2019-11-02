@@ -76,7 +76,7 @@ data class PropertyDescription(val name: String, val provideNodes: Boolean, val 
 }
 
 fun Node.processProperties(
-    propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position"),
+    propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
     propertyOperation: (PropertyDescription) -> Unit
 ) {
     containmentProperties.forEach { p ->
