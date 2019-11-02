@@ -151,11 +151,12 @@ clean{
     delete "generated-src"
 }
 
-idea.dependsOn generateTestGrammarSource
+//idea.dependsOn generateTestGrammarSource
 
 idea {
     module {
-        sourceDirs += file("generated-test-src/antlr/main")
+        testSourceDirs += file("generated-test-src/antlr/main")
+        generatedSourceDirs += file("generated-test-src/antlr/main")
     }
 }
 
