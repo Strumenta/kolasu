@@ -86,7 +86,7 @@ task generatePom {
     def generatedPom = pom {
       project {
         name project.name
-        description "Framework to work with AST and building languages"
+        description "Framework to work with AST and building languages. Integrated with ANTLR."
         version kolasuVersion
         packaging 'jar'
         url 'https://github.com/Strumenta/kolasu'
