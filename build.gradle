@@ -151,7 +151,7 @@ clean{
     delete "generated-src"
 }
 
-//idea.dependsOn generateTestGrammarSource
+ideaProject.dependsOn generateTestGrammarSource
 
 idea {
     module {
