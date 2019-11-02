@@ -152,6 +152,7 @@ clean{
 }
 
 ideaProject.dependsOn generateTestGrammarSource
+compileTestKotlin.dependsOn generateTestGrammarSource
 
 idea {
     module {
