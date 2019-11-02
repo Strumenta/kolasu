@@ -140,19 +140,22 @@ generateTestGrammarSource {
 compileKotlin.dependsOn generateGrammarSource
 compileJava.dependsOn generateGrammarSource
 sourceSets {
-    generated {
+    generatedTest {
         java.srcDir 'generated-test-src/antlr/main/'
     }
 }
-compileJava.source sourceSets.generated.java, sourceSets.main.java
-compileKotlin.source sourceSets.generated.java, sourceSets.main.java, sourceSets.main.kotlin
+
+compileKotlin.source sourceSets.main.java, sourceSets.main.kotlin
+compileJava.source sourceSets.generatedTest.java
+compileTestKotlin.source sourceSets.test.kotlin
 
 clean{
     delete "generated-src"
 }
 
 ideaProject.dependsOn generateTestGrammarSource
-compileTestKotlin.dependsOn generateTestGrammarSource
+compileJava.dependsOn generateTestGrammarSource
+//compileTestKotlin.dependsOn compileTestJava
 
 idea {
     module {
