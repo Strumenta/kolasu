@@ -112,5 +112,4 @@ val RuleContext.firstChild: ParseTree?
 val RuleContext.lastChild: ParseTree?
     get() = if (hasChildren) this.getChild(this.childCount - 1) else null
 
-val ParserRuleContext.position: Position
-    get() = Position(this.start.startPoint, this.stop.endPoint)
+

@@ -5,6 +5,7 @@ import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.validation.Error
+import com.strumenta.kolasu.validation.Result
 import java.io.File
 import java.io.StringWriter
 import javax.xml.parsers.DocumentBuilderFactory
@@ -25,7 +26,7 @@ class XMLGenerator {
         return document
     }
 
-    fun generateXML(result: com.strumenta.kolasu.Result<out Node>): Document {
+    fun generateXML(result: Result<out Node>): Document {
         val documentFactory = DocumentBuilderFactory.newInstance()
         val documentBuilder = documentFactory.newDocumentBuilder()
         val document = documentBuilder.newDocument()
@@ -55,7 +56,7 @@ class XMLGenerator {
         return xmlString
     }
 
-    fun generateString(result: com.strumenta.kolasu.Result<out Node>): String {
+    fun generateString(result: Result<out Node>): String {
         val document = generateXML(result)
         return document.toXmlString()
     }
@@ -64,7 +65,7 @@ class XMLGenerator {
         File(file.toURI()).writeText(generateString(root))
     }
 
-    fun generateFile(result: com.strumenta.kolasu.Result<out Node>, file: File) {
+    fun generateFile(result: Result<out Node>, file: File) {
         File(file.toURI()).writeText(generateString(result))
     }
 }

@@ -11,6 +11,7 @@ import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.validation.Error
+import com.strumenta.kolasu.validation.Result
 import java.io.File
 
 class JsonGenerator {
@@ -19,7 +20,7 @@ class JsonGenerator {
         return root.toJson()
     }
 
-    fun generateJSON(result: com.strumenta.kolasu.Result<out Node>): JsonElement {
+    fun generateJSON(result: Result<out Node>): JsonElement {
         return jsonObject(
             "errors" to result.errors.map { it.toJson() }.toJsonArray(),
             "root" to result.root?.toJson()
@@ -31,7 +32,7 @@ class JsonGenerator {
         return gson.toJson(generateJSON(root))
     }
 
-    fun generateString(result: com.strumenta.kolasu.Result<out Node>): String {
+    fun generateString(result: Result<out Node>): String {
         val gson = GsonBuilder().setPrettyPrinting().create()
         return gson.toJson(generateJSON(result))
     }
@@ -40,7 +41,7 @@ class JsonGenerator {
         File(file.toURI()).writeText(generateString(root))
     }
 
-    fun generateFile(result: com.strumenta.kolasu.Result<out Node>, file: File) {
+    fun generateFile(result: Result<out Node>, file: File) {
         File(file.toURI()).writeText(generateString(result))
     }
 }

@@ -3,6 +3,7 @@ package com.strumenta.kolasu.generation
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.validation.Error
 import com.strumenta.kolasu.validation.ErrorType
+import com.strumenta.kolasu.validation.Result
 import kotlin.test.assertEquals
 import org.junit.Test
 
@@ -10,12 +11,12 @@ class JsonGenerationTest {
 
     @Test
     fun generateJsonOfResultWithErrors() {
-        val result: com.strumenta.kolasu.Result<Node> = com.strumenta.kolasu.Result(
-            listOf(
-                com.strumenta.kolasu.validation.Error(ErrorType.SYNTACTIC, "An error"),
-                com.strumenta.kolasu.validation.Error(ErrorType.SYNTACTIC, "Another error")
-            ),
-            null
+        val result: Result<Node> = Result(
+                listOf(
+                        Error(ErrorType.SYNTACTIC, "An error"),
+                        Error(ErrorType.SYNTACTIC, "Another error")
+                ),
+                null
         )
         val json = JsonGenerator().generateString(result)
         assertEquals(

@@ -4,6 +4,15 @@
 
 Kolasu is a library that can be used for writing Abstract Syntax Trees and AST processing. It is particularly suited for working with ANTLR.
 
+## Features
+
+* AST model hierarchy: AST classes can be defined to extend `Node` to get some nice features
+* References support: references to named things can be implemented
+* Navigation of AST: utility methods to traverse the AST
+* Printing AST
+* Printing parse-tree
+* JSON and XML serialization of the AST
+
 ## Origin
 
 It stands for Kotlin Language Support. 

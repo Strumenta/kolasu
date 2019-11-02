@@ -1,8 +1,7 @@
 package com.strumenta.kolasu.mapping
 
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.mapping.endPoint
+import com.strumenta.kolasu.model.*
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Token
 
@@ -14,8 +13,11 @@ fun Token.startPoint() = Point(line, charPositionInLine)
 
 fun Token.endPoint() = Point(line, charPositionInLine + text.length)
 
+val ParserRuleContext.position: Position
+    get() = Position(start.startPoint, stop.endPoint)
+
 fun ParserRuleContext.toPosition(considerPosition: Boolean = true): Position? {
     return if (considerPosition && start != null && stop != null) {
-        Position(start.startPoint(), stop.endPoint())
+        position
     } else null
 }
