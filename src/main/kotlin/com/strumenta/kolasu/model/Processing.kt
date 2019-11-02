@@ -91,8 +91,7 @@ fun Node.find(predicate: (Node) -> Boolean): Node? {
         return this
     }
     containmentProperties.forEach { p ->
-        val v = p.get(this)
-        when (v) {
+        when (val v = p.get(this)) {
             is Node -> {
                 val res = v.find(predicate)
                 if (res != null) {

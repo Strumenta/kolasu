@@ -8,6 +8,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import org.junit.Test as test
 
+data class MySetStatement(override val specifiedPosition: Position? = null) : Node(specifiedPosition)
+
 class PositionTest {
 
     @test fun offset() {
@@ -108,5 +110,16 @@ class PositionTest {
         val setStmt = cu.statement(0) as SimpleLangParser.SetStmtContext
         val pos = setStmt.position
         assertEquals(Position(Point(1, 0), Point(1, 13)), pos)
+    }
+
+    @test fun positionDerivedFromParseTreeNode() {
+        val code = "set foo = 123"
+        val lexer = SimpleLangLexer(CharStreams.fromString(code))
+        val parser = SimpleLangParser(CommonTokenStream(lexer))
+        val cu = parser.compilationUnit()
+        val setStmt = cu.statement(0) as SimpleLangParser.SetStmtContext
+        val mySetStatement = MySetStatement()
+        mySetStatement.parseTreeNode = setStmt
+        assertEquals(Position(Point(1, 0), Point(1, 13)), mySetStatement.position)
     }
 }
