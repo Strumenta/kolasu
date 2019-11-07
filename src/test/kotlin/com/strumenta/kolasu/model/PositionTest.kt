@@ -3,11 +3,11 @@ package com.strumenta.kolasu.model
 import com.strumenta.kolasu.mapping.position
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
+import java.lang.Exception
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
-import java.lang.Exception
 import org.junit.Test as test
 
 data class MySetStatement(override val specifiedPosition: Position? = null) : Node(specifiedPosition)
@@ -129,7 +129,8 @@ class PositionTest {
         val p = Position(Point(10, 1), Point(5, 2), validate = false)
     }
 
-    @test(expected = Exception::class) fun illegalPositionNotAccepted() {
+    @test(expected = Exception::class)
+    fun illegalPositionNotAccepted() {
         val p = Position(Point(10, 1), Point(5, 2), validate = true)
     }
 
