@@ -1,17 +1,15 @@
 package com.strumenta.kolasu.parsing
 
-import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.endPoint
 import com.strumenta.kolasu.model.startPoint
 import com.strumenta.kolasu.validation.Error
 import com.strumenta.kolasu.validation.ErrorType
+import java.util.LinkedList
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.Parser
-import java.util.LinkedList
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.TerminalNode
-import java.io.InputStream
 
 abstract class ParseTreeElement {
     abstract fun multiLineString(indentation: String = ""): String
@@ -56,9 +54,9 @@ fun toParseTree(node: ParserRuleContext, vocabulary: Vocabulary): ParseTreeNode 
 }
 
 fun ParserRuleContext.processDescendantsAndErrors(
-        operationOnParserRuleContext: (ParserRuleContext) -> Unit,
-        operationOnError: (ErrorNode) -> Unit,
-        includingMe: Boolean = true
+    operationOnParserRuleContext: (ParserRuleContext) -> Unit,
+    operationOnError: (ErrorNode) -> Unit,
+    includingMe: Boolean = true
 ) {
     if (includingMe) {
         operationOnParserRuleContext(this)
@@ -80,13 +78,16 @@ fun verifyParseTree(parser: Parser, errors: MutableList<Error>, root: ParserRule
         errors.add(Error(ErrorType.SYNTACTIC, "Not whole input consumed", lastToken!!.endPoint.asPosition))
     }
 
-    root.processDescendantsAndErrors({
-        if (it.exception != null) {
-            errors.add(Error(ErrorType.SYNTACTIC, "Recognition exception: ${it.exception.message}", it.start.startPoint.asPosition))
+    root.processDescendantsAndErrors(
+        {
+            if (it.exception != null) {
+                errors.add(Error(ErrorType.SYNTACTIC, "Recognition exception: ${it.exception.message}", it.start.startPoint.asPosition))
+            }
+        },
+        {
+            errors.add(Error(ErrorType.SYNTACTIC, "Error node found", it.toPosition(true)))
         }
-    }, {
-        errors.add(Error(ErrorType.SYNTACTIC, "Error node found", it.toPosition(true)))
-    })
+    )
 }
 
 fun TerminalNode.toPosition(considerPosition: Boolean = true): Position? {
