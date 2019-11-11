@@ -1,7 +1,11 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.validation.Error
+import com.strumenta.kolasu.validation.ErrorType
+import org.antlr.v4.runtime.*
+import org.antlr.v4.runtime.Parser
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -20,4 +24,24 @@ interface Parser<RootNode : Node> {
     fun parse(file: File, withValidation: Boolean = true): ParsingResult<RootNode> = parse(FileInputStream(file), withValidation)
 
     fun parse(inputStream: InputStream, withValidation: Boolean = true): ParsingResult<RootNode>
+}
+
+fun injectErrorCollectorInLexer(lexer: Lexer, errors: MutableList<Error>) {
+    lexer.removeErrorListeners()
+    lexer.addErrorListener(object : BaseErrorListener() {
+        override fun syntaxError(p0: Recognizer<*, *>?, p1: Any?, line: Int, charPositionInLine: Int, errorMessage: String?, p5: RecognitionException?) {
+            errors.add(Error(ErrorType.LEXICAL, errorMessage
+                    ?: "unspecified", position = Point(line, charPositionInLine).asPosition))
+        }
+    })
+}
+
+fun injectErrorCollectorInParser(parser: Parser, errors: MutableList<Error>) {
+    parser.removeErrorListeners()
+    parser.addErrorListener(object : BaseErrorListener() {
+        override fun syntaxError(p0: Recognizer<*, *>?, p1: Any?, line: Int, charPositionInLine: Int, errorMessage: String?, p5: RecognitionException?) {
+            errors.add(Error(ErrorType.SYNTACTIC, errorMessage
+                    ?: "unspecified", position = Point(line, charPositionInLine).asPosition))
+        }
+    })
 }
