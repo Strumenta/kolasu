@@ -24,3 +24,5 @@ annotation class Derived
  * contained by the Node having the properties, they are just references
  */
 annotation class Link
+
+annotation class NodeType
