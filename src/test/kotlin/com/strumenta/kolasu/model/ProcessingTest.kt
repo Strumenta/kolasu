@@ -10,7 +10,21 @@ data class B(val a: A, val manyAs: List<A>) : Node()
 data class AW(var s: String) : Node()
 data class BW(var a: AW, val manyAs: MutableList<AW>) : Node()
 
+@NodeType
+interface FooNodeType
+
+interface BarNotNodeType
+
 class ProcessingTest {
+
+    @test
+    fun recognizeNodeType() {
+        assertEquals(true, FooNodeType::class.isMarkedAsNodeType())
+        assertEquals(false, BarNotNodeType::class.isMarkedAsNodeType())
+
+        assertEquals(true, FooNodeType::class.representsNode())
+        assertEquals(false, BarNotNodeType::class.representsNode())
+    }
 
     @test(expected = ImmutablePropertyException::class)
     fun replaceSingleOnReadOnly() {

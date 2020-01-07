@@ -69,9 +69,11 @@ data class Position(val start: Point, val end: Point) : Comparable<Position> {
         }
     }
 
-    init {
-        require(start.isBefore(end) || start == end) {
-            "End should follows start or be the same as start (start: $start, end: $end)"
+    constructor(start: Point, end: Point, validate: Boolean = true) : this(start, end) {
+        if (validate) {
+            require(start.isBefore(end) || start == end) {
+                "End should follows start or be the same as start (start: $start, end: $end)"
+            }
         }
     }
 

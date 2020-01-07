@@ -26,9 +26,9 @@ fun Node.processNodes(operation: (Node) -> Unit) {
     operation(this)
     containmentProperties.forEach { p ->
         val v = p.get(this)
-        when (v) {
-            is Node -> v.processNodes(operation)
-            is Collection<*> -> v.forEach { (it as? Node)?.processNodes(operation) }
+        when {
+            v is Node -> v.processNodes(operation)
+            v is Collection<*> -> v.forEach { (it as? Node)?.processNodes(operation) }
         }
     }
 }
@@ -51,7 +51,15 @@ private fun provideNodes(classifier: KClassifier?): Boolean {
 }
 
 private fun provideNodes(kclass: KClass<*>?): Boolean {
-    return kclass?.isSubclassOf(Node::class) ?: false
+    return kclass?.representsNode() ?: false
+}
+
+fun KClass<*>.representsNode(): Boolean {
+    return this.isSubclassOf(Node::class) || this.isMarkedAsNodeType()
+}
+
+fun KClass<*>.isMarkedAsNodeType(): Boolean {
+    return this.annotations.any { it.annotationClass == NodeType::class }
 }
 
 data class PropertyDescription(val name: String, val provideNodes: Boolean, val multiple: Boolean, val value: Any?) {

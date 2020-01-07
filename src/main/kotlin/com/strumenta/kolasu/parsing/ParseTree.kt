@@ -1,8 +1,14 @@
 package com.strumenta.kolasu.parsing
 
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.endPoint
+import com.strumenta.kolasu.model.startPoint
+import com.strumenta.kolasu.validation.Error
+import com.strumenta.kolasu.validation.ErrorType
 import java.util.LinkedList
-import org.antlr.v4.runtime.ParserRuleContext
-import org.antlr.v4.runtime.Vocabulary
+import org.antlr.v4.runtime.*
+import org.antlr.v4.runtime.Parser
+import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.TerminalNode
 
 abstract class ParseTreeElement {
@@ -45,4 +51,49 @@ fun toParseTree(node: ParserRuleContext, vocabulary: Vocabulary): ParseTreeNode 
         }
     }
     return res
+}
+
+fun ParserRuleContext.processDescendantsAndErrors(
+    operationOnParserRuleContext: (ParserRuleContext) -> Unit,
+    operationOnError: (ErrorNode) -> Unit,
+    includingMe: Boolean = true
+) {
+    if (includingMe) {
+        operationOnParserRuleContext(this)
+    }
+    if (this.children != null) {
+        this.children.filterIsInstance(ParserRuleContext::class.java).forEach {
+            it.processDescendantsAndErrors(operationOnParserRuleContext, operationOnError, includingMe = true)
+        }
+        this.children.filterIsInstance(ErrorNode::class.java).forEach {
+            operationOnError(it)
+        }
+    }
+}
+
+fun verifyParseTree(parser: Parser, errors: MutableList<Error>, root: ParserRuleContext) {
+    val commonTokenStream = parser.tokenStream as CommonTokenStream
+    val lastToken = commonTokenStream.get(commonTokenStream.index())
+    if (lastToken.type != Token.EOF) {
+        errors.add(Error(ErrorType.SYNTACTIC, "Not whole input consumed", lastToken!!.endPoint.asPosition))
+    }
+
+    root.processDescendantsAndErrors(
+        {
+            if (it.exception != null) {
+                errors.add(Error(ErrorType.SYNTACTIC, "Recognition exception: ${it.exception.message}", it.start.startPoint.asPosition))
+            }
+        },
+        {
+            errors.add(Error(ErrorType.SYNTACTIC, "Error node found", it.toPosition(true)))
+        }
+    )
+}
+
+fun TerminalNode.toPosition(considerPosition: Boolean = true): Position? {
+    return if (considerPosition) {
+        Position(this.symbol.startPoint, this.symbol.endPoint)
+    } else {
+        null
+    }
 }
