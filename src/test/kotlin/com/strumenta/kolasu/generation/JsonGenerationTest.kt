@@ -13,8 +13,8 @@ class JsonGenerationTest {
     fun generateJsonOfResultWithErrors() {
         val result: Result<Node> = Result(
             listOf(
-                Error(ErrorType.SYNTACTIC, "An error"),
-                Error(ErrorType.SYNTACTIC, "Another error")
+                Issue(IssueType.SYNTACTIC, "An error"),
+                Issue(IssueType.SYNTACTIC, "Another error")
             ),
             null
         )

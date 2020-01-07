@@ -1,5 +1,10 @@
 package com.strumenta.kolasu.generation
 
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.Result
 import kotlin.test.assertEquals
 import org.junit.Test
 
@@ -99,5 +104,26 @@ class XmlGenerationTest {
 """,
             xml
         )
+    }
+
+    @Test
+    fun generateXMLWithErrors() {
+        val issues : List<Issue> = listOf<Issue>(Issue.lexical("lexical problem"),
+                Issue.semantic("semantic problem", Position(Point(10, 1), Point(12, 3))))
+        val result = Result<Node>(issues, null)
+        val serialized = XMLGenerator().generateString(result)
+        assertEquals("""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<result>
+    <errors>
+        <Issue message="lexical problem" type="LEXICAL"/>
+        <Issue message="semantic problem" type="SEMANTIC">
+            <position description="Position(start=Line 10, Column 1, end=Line 12, Column 3)">
+                <start column="1" line="10"/>
+                <end column="3" line="12"/>
+            </position>
+        </Issue>
+    </errors>
+    <root/>
+</result>""", serialized.trim())
     }
 }

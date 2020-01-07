@@ -31,7 +31,7 @@ class XMLGenerator {
         val documentBuilder = documentFactory.newDocumentBuilder()
         val document = documentBuilder.newDocument()
         val root = document.createElement("result")
-        root.addListOfElements("errors", result.errors.map { it.toXML() }, document)
+        root.addListOfElements("errors", result.errors.map { it.toXML(document) }, document)
         root.addChildPossiblyEmpty("root", result.root, document)
         document.appendChild(root)
         return document
@@ -139,7 +139,7 @@ private fun Element.addAttributesList(listName: String, values: Collection<*>, d
     }
 }
 
-private fun Any?.toXML(): Element {
+private fun Any?.toXML(document: Document): Element {
 //    return when (this) {
 //        null -> JsonNull.INSTANCE
 //        is String -> JsonPrimitive(this)
