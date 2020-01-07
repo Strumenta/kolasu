@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.generation
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.validation.Error
-import com.strumenta.kolasu.validation.ErrorType
+import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
 import kotlin.test.assertEquals
 import org.junit.Test

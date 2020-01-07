@@ -1,14 +1,14 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.validation.Error
+import com.strumenta.kolasu.validation.Issue
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.nio.charset.Charset
 
-data class ParsingResult<RootNode : Node>(val root: RootNode?, val errors: List<Error>, val code: String, val incompleteNode: Node? = null) {
+data class ParsingResult<RootNode : Node>(val root: RootNode?, val errors: List<Issue>, val code: String, val incompleteNode: Node? = null) {
     fun isCorrect() = errors.isEmpty() && root != null
 }
 

@@ -4,7 +4,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.processProperties
-import com.strumenta.kolasu.validation.Error
+import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import java.io.File
 import java.io.StringWriter
@@ -150,13 +150,14 @@ private fun Any?.toXML(): Element {
     TODO()
 }
 
-private fun Error.toXML(): Element {
-//    return jsonObject(
-//        "type" to this.type.name,
-//        "message" to this.message,
-//        "position" to this.position?.toJson()
-//    )
-    TODO()
+private fun Issue.toXML(document: Document): Element {
+    val element = document.createElement("Issue")
+    element.setAttribute("type", this.type.name)
+    element.setAttribute("message", this.message)
+    this.position?.let {
+        element.addChild(it.toXML(document = document))
+    }
+    return element
 }
 
 private fun Position.toXML(role: String = "position", document: Document): Element {

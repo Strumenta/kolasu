@@ -10,7 +10,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.processProperties
-import com.strumenta.kolasu.validation.Error
+import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import java.io.File
 
@@ -81,7 +81,7 @@ private fun Any?.toJson(): JsonElement? {
     }
 }
 
-private fun Error.toJson(): JsonElement {
+private fun Issue.toJson(): JsonElement {
     return jsonObject(
         "type" to this.type.name,
         "message" to this.message,
