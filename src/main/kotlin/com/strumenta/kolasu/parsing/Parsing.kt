@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -47,8 +47,8 @@ fun injectErrorCollectorInParser(parser: Parser, errors: MutableList<Issue>) {
     parser.addErrorListener(object : BaseErrorListener() {
         override fun syntaxError(p0: Recognizer<*, *>?, p1: Any?, line: Int, charPositionInLine: Int, errorMessage: String?, p5: RecognitionException?) {
             errors.add(
-                    Issue(
-                        IssueType.SYNTACTIC,
+                Issue(
+                    IssueType.SYNTACTIC,
                     errorMessage
                         ?: "unspecified",
                     position = Point(line, charPositionInLine).asPosition

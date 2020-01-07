@@ -3,8 +3,8 @@ package com.strumenta.kolasu.parsing
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.endPoint
 import com.strumenta.kolasu.model.startPoint
-import com.strumenta.kolasu.validation.Error
-import com.strumenta.kolasu.validation.ErrorType
+import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueType
 import java.util.LinkedList
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.Parser
@@ -71,21 +71,21 @@ fun ParserRuleContext.processDescendantsAndErrors(
     }
 }
 
-fun verifyParseTree(parser: Parser, errors: MutableList<Error>, root: ParserRuleContext) {
+fun verifyParseTree(parser: Parser, errors: MutableList<Issue>, root: ParserRuleContext) {
     val commonTokenStream = parser.tokenStream as CommonTokenStream
     val lastToken = commonTokenStream.get(commonTokenStream.index())
     if (lastToken.type != Token.EOF) {
-        errors.add(Error(ErrorType.SYNTACTIC, "Not whole input consumed", lastToken!!.endPoint.asPosition))
+        errors.add(Issue(IssueType.SYNTACTIC, "Not whole input consumed", lastToken!!.endPoint.asPosition))
     }
 
     root.processDescendantsAndErrors(
         {
             if (it.exception != null) {
-                errors.add(Error(ErrorType.SYNTACTIC, "Recognition exception: ${it.exception.message}", it.start.startPoint.asPosition))
+                errors.add(Issue(IssueType.SYNTACTIC, "Recognition exception: ${it.exception.message}", it.start.startPoint.asPosition))
             }
         },
         {
-            errors.add(Error(ErrorType.SYNTACTIC, "Error node found", it.toPosition(true)))
+            errors.add(Issue(IssueType.SYNTACTIC, "Error node found", it.toPosition(true)))
         }
     )
 }

@@ -108,11 +108,14 @@ class XmlGenerationTest {
 
     @Test
     fun generateXMLWithErrors() {
-        val issues : List<Issue> = listOf<Issue>(Issue.lexical("lexical problem"),
-                Issue.semantic("semantic problem", Position(Point(10, 1), Point(12, 3))))
+        val issues: List<Issue> = listOf<Issue>(
+            Issue.lexical("lexical problem"),
+            Issue.semantic("semantic problem", Position(Point(10, 1), Point(12, 3)))
+        )
         val result = Result<Node>(issues, null)
         val serialized = XMLGenerator().generateString(result)
-        assertEquals("""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        assertEquals(
+            """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <result>
     <errors>
         <Issue message="lexical problem" type="LEXICAL"/>
@@ -124,6 +127,8 @@ class XmlGenerationTest {
         </Issue>
     </errors>
     <root/>
-</result>""", serialized.trim())
+</result>""",
+            serialized.trim()
+        )
     }
 }
