@@ -10,10 +10,10 @@ import kotlin.reflect.full.primaryConstructor
 
 private val <T : Node> T.containmentProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.kotlin.memberProperties
-        .filter { it.visibility == KVisibility.PUBLIC }
-        .filter { it.findAnnotation<Derived>() == null }
-        .filter { it.findAnnotation<Link>() == null }
-        .filter { it.name != "parent" }
+            .filter { it.visibility == KVisibility.PUBLIC }
+            .filter { it.findAnnotation<Derived>() == null }
+            .filter { it.findAnnotation<Link>() == null }
+            .filter { it.name != "parent" }
 
 fun Node.assignParents() {
     this.children.forEach {
@@ -74,18 +74,18 @@ data class PropertyDescription(val name: String, val provideNodes: Boolean, val 
                 provideNodes(classifier)
             }
             return PropertyDescription(
-                name = property.name,
-                provideNodes = provideNodes,
-                multiple = multiple,
-                value = property.get(node)
+                    name = property.name,
+                    provideNodes = provideNodes,
+                    multiple = multiple,
+                    value = property.get(node)
             )
         }
     }
 }
 
 fun Node.processProperties(
-    propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
-    propertyOperation: (PropertyDescription) -> Unit
+        propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
+        propertyOperation: (PropertyDescription) -> Unit
 ) {
     containmentProperties.forEach { p ->
         if (!propertiesToIgnore.contains(p.name)) {
@@ -157,42 +157,17 @@ val Node.children: List<Node>
         return children.toList()
     }
 
-// TODO reimplement using transformChildren
+/**
+ * @param inPlace when false, all nodes will be newly instantiated, otherwise all changes will be "set" on the existing nodes.
+ * @return the node and its children transformed with "operation".
+ */
 fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
-    if (inPlace) TODO()
-    operation(this)
-    val changes = HashMap<String, Any>()
-    relevantMemberProperties().forEach { p ->
-        val v = p.get(this)
-        when (v) {
-            is Node -> {
-                val newValue = v.transform(operation)
-                if (newValue != v) changes[p.name] = newValue
-            }
-            is Collection<*> -> {
-                val newValue = v.map { if (it is Node) it.transform(operation) else it }
-                if (newValue != v) changes[p.name] = newValue
-            }
-        }
-    }
-    var instanceToTransform = this
-    if (!changes.isEmpty()) {
-        val constructor = this.javaClass.kotlin.primaryConstructor!!
-        val params = HashMap<KParameter, Any?>()
-        constructor.parameters.forEach { param ->
-            if (changes.containsKey(param.name)) {
-                params[param] = changes[param.name]
-            } else {
-                params[param] = this.javaClass.kotlin.memberProperties.find { param.name == it.name }!!.get(this)
-            }
-        }
-        instanceToTransform = constructor.callBy(params)
-    }
-    return operation(instanceToTransform)
+    val transformedNode = operation(this)
+    return transformedNode.transformChildren(operation, inPlace)
 }
 
 class ImmutablePropertyException(property: KProperty<*>, node: Node) :
-    RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
+        RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
 fun Node.transformChildren(operation: (Node) -> Node, inPlace: Boolean = false): Node {
     val changes = HashMap<String, Any>()
