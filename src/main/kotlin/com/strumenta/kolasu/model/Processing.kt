@@ -26,9 +26,9 @@ fun Node.processNodes(operation: (Node) -> Unit) {
     operation(this)
     containmentProperties.forEach { p ->
         val v = p.get(this)
-        when {
-            v is Node -> v.processNodes(operation)
-            v is Collection<*> -> v.forEach { (it as? Node)?.processNodes(operation) }
+        when (v) {
+            is Node -> v.processNodes(operation)
+            is Collection<*> -> v.forEach { (it as? Node)?.processNodes(operation) }
         }
     }
 }
@@ -98,8 +98,8 @@ fun Node.find(predicate: (Node) -> Boolean): Node? {
     if (predicate(this)) {
         return this
     }
-    containmentProperties.forEach { p ->
-        when (val v = p.get(this)) {
+    containmentProperties.forEach { property ->
+        when (val v = property.get(this)) {
             is Node -> {
                 val res = v.find(predicate)
                 if (res != null) {
@@ -119,6 +119,7 @@ fun Node.find(predicate: (Node) -> Boolean): Node? {
     return null
 }
 
+@Suppress("UNCHECKED_CAST")
 fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit) {
     processNodes {
         if (klass.isInstance(it)) {
@@ -129,7 +130,7 @@ fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit) {
 
 fun <T : Node> Node.collectByType(klass: Class<T>): List<T> {
     val res = LinkedList<T>()
-    this.specificProcess(klass, { res.add(it) })
+    this.specificProcess(klass) { res.add(it) }
     return res
 }
 
@@ -176,7 +177,7 @@ fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
         }
     }
     var instanceToTransform = this
-    if (!changes.isEmpty()) {
+    if (changes.isNotEmpty()) {
         val constructor = this.javaClass.kotlin.primaryConstructor!!
         val params = HashMap<KParameter, Any?>()
         constructor.parameters.forEach { param ->
@@ -194,37 +195,38 @@ fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
 class ImmutablePropertyException(property: KProperty<*>, node: Node) :
     RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
+@Suppress("UNCHECKED_CAST")
 fun Node.transformChildren(operation: (Node) -> Node, inPlace: Boolean = false): Node {
     val changes = HashMap<String, Any>()
-    relevantMemberProperties().forEach { p ->
-        val v = p.get(this)
-        when (v) {
+    relevantMemberProperties().forEach { property ->
+        val value = property.get(this)
+        when (value) {
             is Node -> {
-                val newValue = operation(v)
-                if (newValue != v) {
+                val newValue = operation(value)
+                if (newValue != value) {
                     if (inPlace) {
-                        if (p is KMutableProperty<*>) {
-                            p.setter.call(this, newValue)
+                        if (property is KMutableProperty<*>) {
+                            property.setter.call(this, newValue)
                         } else {
-                            throw ImmutablePropertyException(p, v)
+                            throw ImmutablePropertyException(property, value)
                         }
                     } else {
-                        changes[p.name] = newValue
+                        changes[property.name] = newValue
                     }
                 }
             }
             is Collection<*> -> {
                 if (inPlace) {
-                    if (v is List<*>) {
-                        for (i in 0 until v.size) {
-                            val element = v[i]
+                    if (value is List<*>) {
+                        for (i in 0 until value.size) {
+                            val element = value[i]
                             if (element is Node) {
                                 val newValue = operation(element)
                                 if (newValue != element) {
-                                    if (v is MutableList<*>) {
-                                        (v as MutableList<Node>)[i] = newValue
+                                    if (value is MutableList<*>) {
+                                        (value as MutableList<Node>)[i] = newValue
                                     } else {
-                                        throw ImmutablePropertyException(p, element)
+                                        throw ImmutablePropertyException(property, element)
                                     }
                                 }
                             }
@@ -233,16 +235,16 @@ fun Node.transformChildren(operation: (Node) -> Node, inPlace: Boolean = false):
                         TODO()
                     }
                 } else {
-                    val newValue = v.map { if (it is Node) operation(it) else it }
-                    if (newValue != v) {
-                        changes[p.name] = newValue
+                    val newValue = value.map { if (it is Node) operation(it) else it }
+                    if (newValue != value) {
+                        changes[property.name] = newValue
                     }
                 }
             }
         }
     }
     var instanceToTransform = this
-    if (!changes.isEmpty()) {
+    if (changes.isNotEmpty()) {
         val constructor = this.javaClass.kotlin.primaryConstructor!!
         val params = HashMap<KParameter, Any?>()
         constructor.parameters.forEach { param ->

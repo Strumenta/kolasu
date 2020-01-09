@@ -120,14 +120,14 @@ private fun Node.toXML(role: String, document: Document): Element {
             if (it.provideNodes) {
                 element.addChild((it.value as Node).toXML(it.name, document))
             } else {
-                element.addAttribute(it.name, it.value, document)
+                element.addAttribute(it.name, it.value)
             }
         }
     }
     return element
 }
 
-private fun Element.addAttribute(role: String, value: Any, document: Document) {
+private fun Element.addAttribute(role: String, value: Any) {
     this.setAttribute(role, value.toString())
 }
 
