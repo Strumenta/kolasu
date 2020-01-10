@@ -1,6 +1,7 @@
 # Kolasu
 
 [![Build Status](https://travis-ci.org/Strumenta/kolasu.svg?branch=master)](https://travis-ci.org/Strumenta/kolasu)
+[![Gitter](https://badges.gitter.im/lang-eng/community.svg)](https://gitter.im/lang-eng/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 Kolasu is a library that can be used for writing Abstract Syntax Trees and AST processing. It is particularly suited for working with ANTLR.
 
