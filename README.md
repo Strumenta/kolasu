@@ -46,6 +46,14 @@ dependencies {
 }
 ```
 
+## How to format code
+
+Run:
+
+```
+./gradlew ktlintFormat
+```
+
 ## Publishing
 
 To publish releases you need to set the environment variables GPR_USER and GPR_API_KEY.
