@@ -8,6 +8,9 @@ import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
+/**
+ * @return all properties of this node that are considered AST properties.
+ */
 private val <T : Node> T.containmentProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.kotlin.memberProperties
         .filter { it.visibility == KVisibility.PUBLIC }
@@ -15,6 +18,11 @@ private val <T : Node> T.containmentProperties: Collection<KProperty1<T, *>>
         .filter { it.findAnnotation<Link>() == null }
         .filter { it.name != "parent" }
 
+/**
+ * Sets or corrects the parent of all AST nodes.
+ * Kolasu does not see set/add/delete operations on the AST nodes,
+ * so this function should be called manually after modifying the AST.
+ */
 fun Node.assignParents() {
     this.children.forEach {
         it.parent = this
@@ -22,6 +30,9 @@ fun Node.assignParents() {
     }
 }
 
+/**
+ * Recursively execute "operation" on this node, and all nodes below this node.
+ */
 fun Node.processNodes(operation: (Node) -> Unit) {
     operation(this)
     containmentProperties.forEach { p ->
@@ -38,15 +49,18 @@ private fun provideNodes(kTypeProjection: KTypeProjection): Boolean {
     return when (ktype) {
         is KClass<*> -> provideNodes(ktype as? KClass<*>)
         is KType -> provideNodes((ktype as? KType)?.classifier)
-        else -> TODO()
+        else -> throw UnsupportedOperationException("We are not able to determine if the type $ktype provides AST Nodes or not")
     }
 }
 
 private fun provideNodes(classifier: KClassifier?): Boolean {
+    if (classifier == null) {
+        return false
+    }
     if (classifier is KClass<*>) {
         return provideNodes(classifier as? KClass<*>)
     } else {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        throw UnsupportedOperationException("We are not able to determine if the classifier $classifier provides AST Nodes or not")
     }
 }
 
@@ -54,10 +68,16 @@ private fun provideNodes(kclass: KClass<*>?): Boolean {
     return kclass?.representsNode() ?: false
 }
 
+/**
+ * @return can this class be considered an AST node?
+ */
 fun KClass<*>.representsNode(): Boolean {
     return this.isSubclassOf(Node::class) || this.isMarkedAsNodeType()
 }
 
+/**
+ * @return is this class annotated with NodeType?
+ */
 fun KClass<*>.isMarkedAsNodeType(): Boolean {
     return this.annotations.any { it.annotationClass == NodeType::class }
 }
@@ -94,6 +114,9 @@ fun Node.processProperties(
     }
 }
 
+/**
+ * @return the first node in the AST for which the predicate is true. Null if none are found.
+ */
 fun Node.find(predicate: (Node) -> Boolean): Node? {
     if (predicate(this)) {
         return this
@@ -119,6 +142,9 @@ fun Node.find(predicate: (Node) -> Boolean): Node? {
     return null
 }
 
+/**
+ * Recursively execute "operation" on this node, and all nodes below this node that extend klass.
+ */
 @Suppress("UNCHECKED_CAST")
 fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit) {
     processNodes {
@@ -128,12 +154,19 @@ fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit) {
     }
 }
 
+/**
+ * @return all nodes in this AST (sub)tree that extend klass.
+ */
 fun <T : Node> Node.collectByType(klass: Class<T>): List<T> {
     val res = LinkedList<T>()
     this.specificProcess(klass) { res.add(it) }
     return res
 }
 
+/**
+ * Recursively execute "operation" on this node, and all nodes below this node.
+ * Every node is informed about its parent node. (But not about the parent's parent!)
+ */
 fun Node.processConsideringParent(operation: (Node, Node?) -> Unit, parent: Node? = null) {
     operation(this, parent)
     this.containmentProperties.forEach { p ->
@@ -145,6 +178,9 @@ fun Node.processConsideringParent(operation: (Node, Node?) -> Unit, parent: Node
     }
 }
 
+/**
+ * @return all descendants of this node, meaning all the children, the children of those children, etc.
+ */
 val Node.children: List<Node>
     get() {
         val children = LinkedList<Node>()
