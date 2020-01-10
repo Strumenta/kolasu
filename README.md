@@ -1,21 +1,25 @@
 # Kolasu
 
 [![Build Status](https://travis-ci.org/Strumenta/kolasu.svg?branch=master)](https://travis-ci.org/Strumenta/kolasu)
+[![Gitter](https://badges.gitter.im/lang-eng/community.svg)](https://gitter.im/lang-eng/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Kolasu is a library that can be used for writing Abstract Syntax Trees and AST processing. It is particularly suited for working with ANTLR.
+Kolasu supplies the infrastructure to build a custom, possibly mutable, Abstract Syntax Tree (AST) using ANTLR4 and Kotlin.
 
 ## Features
 
-* AST model hierarchy: AST classes can be defined to extend `Node` to get some nice features
-* References support: references to named things can be implemented
-* Navigation of AST: utility methods to traverse the AST
-* Printing AST
-* Printing parse-tree
-* JSON and XML serialization of the AST
+Extend your AST classes from `Node` to get these features:
+* Navigation: utility methods to traverse, search, and modify the AST
+* Printing: print the AST as XML, as JSON, as a parse tree 
+
+Classes can have a *name*, and classes can *reference* a name.
+Utilities for resolving these references are supplied.
+
+Kolasu tries to be non-invasive and implements this functionality by introspecting the AST.
+All properties, and therefore the whole tree structure, will be detected automatically. 
 
 ## Origin
 
-It stands for Kotlin Language Support. 
+Kolasu stands for Kotlin Language Support. 
 
 It was born as a small framework to support building languages using ANTLR and Kotlin. 
 
@@ -44,6 +48,20 @@ dependencies {
     compile "com.github.strumenta:kolasu:v0.2.2"
 }
 ```
+
+## How to format code
+
+Run:
+
+```
+./gradlew ktlintFormat
+```
+
+## Projects using Kolasu
+
+Kolasu is used in several internal and commercial projects developed at [Strumenta](https://strumenta.com).
+
+It is also used in an open-source project named [Jariko](https://github.com/smeup/jariko). Jariko is an interpreter for RPG running on the JVM.
 
 ## Publishing
 
