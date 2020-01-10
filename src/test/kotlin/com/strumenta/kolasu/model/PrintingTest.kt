@@ -43,6 +43,8 @@ class PrintingTest {
   parseTreeNode = null
   specifiedPosition = null
 } // Add
-""", ast.multilineString())
+""",
+            ast.multilineString()
+        )
     }
 }
