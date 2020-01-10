@@ -49,15 +49,18 @@ private fun provideNodes(kTypeProjection: KTypeProjection): Boolean {
     return when (ktype) {
         is KClass<*> -> provideNodes(ktype as? KClass<*>)
         is KType -> provideNodes((ktype as? KType)?.classifier)
-        else -> TODO()
+        else -> throw UnsupportedOperationException("We are not able to determine if the type $ktype provides AST Nodes or not")
     }
 }
 
 private fun provideNodes(classifier: KClassifier?): Boolean {
+    if (classifier == null) {
+        return false
+    }
     if (classifier is KClass<*>) {
         return provideNodes(classifier as? KClass<*>)
     } else {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        throw UnsupportedOperationException("We are not able to determine if the classifier $classifier provides AST Nodes or not")
     }
 }
 
