@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.ParseTree
 
 /**
+ * A location in a source code file.
  * The line should be in 1..n, the column in 0..n
  */
 data class Point(val line: Int, val column: Int) : Comparable<Point> {
@@ -56,6 +57,7 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
 val START_POINT = Point(1, 0)
 
 /**
+ * An area in a source file, from start to end.
  * Both the start point and the end point are included
  */
 data class Position(val start: Point, val end: Point) : Comparable<Position> {

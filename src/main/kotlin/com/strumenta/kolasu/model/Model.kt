@@ -15,14 +15,19 @@ open class Node(open val specifiedPosition: Position? = null) {
 }
 
 /**
- * This should be used for all relations which are secondary, i.e., they are calculated from other relations
+ * Use this to mark all relations which are secondary, i.e., they are calculated from other relations,
+ * so that they will not be considered branches of the AST.
  */
 annotation class Derived
 
 /**
- * This will be used to mark all the properties that returns a Node or a list of Node which are not
- * contained by the Node having the properties, they are just references
+ * Use this to mark all the properties that return a Node or a list of Nodes which are not
+ * contained by the Node having the properties. In other words: they are just references.
+ * This will prevent them from being considered branches of the AST.
  */
 annotation class Link
 
+/**
+ * Use this to mark something that does not inherit from Node as a node, so it will be included in the AST.
+ */
 annotation class NodeType

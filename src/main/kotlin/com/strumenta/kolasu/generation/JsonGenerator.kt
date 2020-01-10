@@ -14,6 +14,9 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import java.io.File
 
+/**
+ * Converts an AST to JSON format.
+ */
 class JsonGenerator {
 
     fun generateJSON(root: Node): JsonElement {

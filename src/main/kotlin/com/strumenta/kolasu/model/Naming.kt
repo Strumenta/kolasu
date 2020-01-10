@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.model
 
 /**
- * An entity that could have a name
+ * An entity that can have a name
  */
 interface PossiblyNamed {
     val name: String?
