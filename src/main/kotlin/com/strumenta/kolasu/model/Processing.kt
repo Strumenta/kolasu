@@ -13,10 +13,10 @@ import kotlin.reflect.full.primaryConstructor
  */
 private val <T : Node> T.containmentProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.kotlin.memberProperties
-            .filter { it.visibility == KVisibility.PUBLIC }
-            .filter { it.findAnnotation<Derived>() == null }
-            .filter { it.findAnnotation<Link>() == null }
-            .filter { it.name != "parent" }
+        .filter { it.visibility == KVisibility.PUBLIC }
+        .filter { it.findAnnotation<Derived>() == null }
+        .filter { it.findAnnotation<Link>() == null }
+        .filter { it.name != "parent" }
 
 /**
  * Sets or corrects the parent of all AST nodes.
@@ -94,18 +94,18 @@ data class PropertyDescription(val name: String, val provideNodes: Boolean, val 
                 provideNodes(classifier)
             }
             return PropertyDescription(
-                    name = property.name,
-                    provideNodes = provideNodes,
-                    multiple = multiple,
-                    value = property.get(node)
+                name = property.name,
+                provideNodes = provideNodes,
+                multiple = multiple,
+                value = property.get(node)
             )
         }
     }
 }
 
 fun Node.processProperties(
-        propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
-        propertyOperation: (PropertyDescription) -> Unit
+    propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
+    propertyOperation: (PropertyDescription) -> Unit
 ) {
     containmentProperties.forEach { p ->
         if (!propertiesToIgnore.contains(p.name)) {
@@ -203,7 +203,7 @@ fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
 }
 
 class ImmutablePropertyException(property: KProperty<*>, node: Node) :
-        RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
+    RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
 fun Node.transformChildren(operation: (Node) -> Node, inPlace: Boolean = false): Node {
     val changes = HashMap<String, Any>()
