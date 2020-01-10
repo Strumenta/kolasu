@@ -57,6 +57,12 @@ Run:
 ./gradlew ktlintFormat
 ```
 
+## Projects using Kolasu
+
+Kolasu is used in several internal and commercial projects developed at [Strumenta](https://strumenta.com).
+
+It is also used in an open-source project named [Jariko](https://github.com/smeup/jariko). Jariko is an interpreter for RPG running on the JVM.
+
 ## Publishing
 
 To publish releases you need to set the environment variables GPR_USER and GPR_API_KEY.
