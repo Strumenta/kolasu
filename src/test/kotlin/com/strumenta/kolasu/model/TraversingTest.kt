@@ -50,6 +50,12 @@ internal class TraversingTest {
     }
 
     @Test
+    fun walkLeavesFirst() {
+        val result: String = printSequence(testCase.walkLeavesFirst())
+        assertEquals("1, first, 2, 3, 4, 5, small, big, 6, root", result)
+    }
+
+    @Test
     fun walkDescendants() {
         val result: String = printSequence(testCase.walkDescendants())
         assertEquals("first, 1, 2, big, small, 3, 4, 5, 6", result)

@@ -3,20 +3,83 @@ package com.strumenta.kolasu.model
 import java.util.*
 import kotlin.reflect.KFunction1
 
+fun <T> mutableStackOf(): Deque<T> = ArrayDeque()
+fun <T> Deque<T>.pushAll(elements: Collection<T>) {
+    elements.reversed().forEach(this::push)
+}
+
+fun <T> mutableStackOf(vararg elements: T): Deque<T> {
+    val stack = mutableStackOf<T>()
+    stack.pushAll(elements.asList())
+    return stack
+}
+
 /**
  * @return walks the whole AST starting from this node, depth-first.
  */
 fun Node.walk(): Sequence<Node> {
-    val stack: Deque<Node> = ArrayDeque()
-    stack.push(this)
+    val stack: Deque<Node> = mutableStackOf(this)
     return generateSequence {
         if (stack.peek() == null) {
             null
         } else {
             val next: Node = stack.pop()
-            val children: List<Node> = next.children
-            children.reversed().forEach { child -> stack.push(child) }
+            stack.pushAll(next.children)
             next
+        }
+    }
+}
+
+/**
+ * Performs a post-order (or leaves-first) node traversal starting with a given node.
+ */
+fun Node.walkLeavesFirst(): Sequence<Node> {
+    val nodesStack: Deque<List<Node>> = mutableStackOf()
+    val cursorStack: Deque<Int> = ArrayDeque()
+    var done = false
+
+    fun nextFromLevel(): Node {
+        val nodes: List<Node> = nodesStack.peek()
+        val cursor = cursorStack.pop()
+        cursorStack.push(cursor + 1)
+        return nodes[cursor]
+    }
+
+    fun fillStackToLeaf(node: Node) {
+        var currentNode: Node = node
+        while (true) {
+            val childNodes: List<Node> = currentNode.children
+            if (childNodes.isEmpty()) {
+                break
+            }
+            nodesStack.push(childNodes)
+            cursorStack.push(0)
+            currentNode = childNodes[0]
+        }
+    }
+    fillStackToLeaf(this)
+    return generateSequence {
+        if (done) {
+            null
+        } else {
+            val nodes: List<Node> = nodesStack.peek()
+            val cursor = cursorStack.peek()
+            val levelHasNext = cursor < nodes.size
+            if (levelHasNext) {
+                val node: Node = nodes[cursor]
+                fillStackToLeaf(node)
+                nextFromLevel()
+            } else {
+                nodesStack.pop()
+                cursorStack.pop()
+                val hasNext = !nodesStack.isEmpty()
+                if (hasNext) {
+                    nextFromLevel()
+                } else {
+                    done = true
+                    this
+                }
+            }
         }
     }
 }
