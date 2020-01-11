@@ -34,14 +34,7 @@ fun Node.assignParents() {
  * Recursively execute "operation" on this node, and all nodes below this node.
  */
 fun Node.processNodes(operation: (Node) -> Unit) {
-    operation(this)
-    containmentProperties.forEach { p ->
-        val v = p.get(this)
-        when (v) {
-            is Node -> v.processNodes(operation)
-            is Collection<*> -> v.forEach { (it as? Node)?.processNodes(operation) }
-        }
-    }
+    walk().forEach(operation)
 }
 
 private fun provideNodes(kTypeProjection: KTypeProjection): Boolean {
@@ -118,48 +111,21 @@ fun Node.processProperties(
  * @return the first node in the AST for which the predicate is true. Null if none are found.
  */
 fun Node.find(predicate: (Node) -> Boolean): Node? {
-    if (predicate(this)) {
-        return this
-    }
-    containmentProperties.forEach { p ->
-        when (val v = p.get(this)) {
-            is Node -> {
-                val res = v.find(predicate)
-                if (res != null) {
-                    return res
-                }
-            }
-            is Collection<*> -> v.forEach {
-                (it as? Node)?.let {
-                    val res = it.find(predicate)
-                    if (res != null) {
-                        return res
-                    }
-                }
-            }
-        }
-    }
-    return null
+    return walk().find(predicate)
 }
 
 /**
  * Recursively execute "operation" on this node, and all nodes below this node that extend klass.
  */
 fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit) {
-    processNodes {
-        if (klass.isInstance(it)) {
-            operation(it as T)
-        }
-    }
+    walk().filterIsInstance(klass).forEach(operation)
 }
 
 /**
  * @return all nodes in this AST (sub)tree that extend klass.
  */
 fun <T : Node> Node.collectByType(klass: Class<T>): List<T> {
-    val res = LinkedList<T>()
-    this.specificProcess(klass, { res.add(it) })
-    return res
+    return walk().filterIsInstance(klass).toList()
 }
 
 /**
