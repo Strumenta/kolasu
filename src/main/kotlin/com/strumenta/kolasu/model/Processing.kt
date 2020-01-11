@@ -33,8 +33,8 @@ fun Node.assignParents() {
 /**
  * Recursively execute "operation" on this node, and all nodes below this node.
  */
-fun Node.processNodes(operation: (Node) -> Unit) {
-    walk().forEach(operation)
+fun Node.processNodes(operation: (Node) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
+    walker.invoke(this).forEach(operation)
 }
 
 private fun provideNodes(kTypeProjection: KTypeProjection): Boolean {
@@ -110,22 +110,22 @@ fun Node.processProperties(
 /**
  * @return the first node in the AST for which the predicate is true. Null if none are found.
  */
-fun Node.find(predicate: (Node) -> Boolean): Node? {
-    return walk().find(predicate)
+fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<Node>> = Node::walk): Node? {
+    return walker.invoke(this).find(predicate)
 }
 
 /**
  * Recursively execute "operation" on this node, and all nodes below this node that extend klass.
  */
-fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit) {
-    walk().filterIsInstance(klass).forEach(operation)
+fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
+    walker.invoke(this).filterIsInstance(klass).forEach(operation)
 }
 
 /**
  * @return all nodes in this AST (sub)tree that extend klass.
  */
-fun <T : Node> Node.collectByType(klass: Class<T>): List<T> {
-    return walk().filterIsInstance(klass).toList()
+fun <T : Node> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<Node>> = Node::walk): List<T> {
+    return walker.invoke(this).filterIsInstance(klass).toList()
 }
 
 /**
