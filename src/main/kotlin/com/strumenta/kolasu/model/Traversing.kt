@@ -3,7 +3,11 @@ package com.strumenta.kolasu.model
 import java.util.*
 import kotlin.reflect.KFunction1
 
+/**
+ * Some Kotlinization of Deques used as a stack.
+ */
 typealias Stack<T> = Deque<T>
+
 fun <T> mutableStackOf(): Stack<T> = ArrayDeque()
 fun <T> Stack<T>.pushAll(elements: Collection<T>) {
     elements.reversed().forEach(this::push)
@@ -98,7 +102,7 @@ fun Node.walkAncestors(): Sequence<Node> {
 }
 
 /**
- * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method.
+ * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method. For post-order traversal, take "walkLeavesFirst"
  * @return walks the whole AST starting from the childnodes of this node.
  */
 fun Node.walkDescendants(walker: KFunction1<Node, Sequence<Node>> = Node::walk): Sequence<Node> {
