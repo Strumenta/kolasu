@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.model
 
-import java.util.LinkedList
+import java.util.*
 import kotlin.collections.HashMap
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
@@ -11,12 +11,12 @@ import kotlin.reflect.full.primaryConstructor
 /**
  * @return all properties of this node that are considered AST properties.
  */
-private val <T : Node> T.containmentProperties: Collection<KProperty1<T, *>>
+internal val <T : Node> T.containmentProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.kotlin.memberProperties
-        .filter { it.visibility == KVisibility.PUBLIC }
-        .filter { it.findAnnotation<Derived>() == null }
-        .filter { it.findAnnotation<Link>() == null }
-        .filter { it.name != "parent" }
+            .filter { it.visibility == KVisibility.PUBLIC }
+            .filter { it.findAnnotation<Derived>() == null }
+            .filter { it.findAnnotation<Link>() == null }
+            .filter { it.name != "parent" }
 
 /**
  * Sets or corrects the parent of all AST nodes.
@@ -24,7 +24,7 @@ private val <T : Node> T.containmentProperties: Collection<KProperty1<T, *>>
  * so this function should be called manually after modifying the AST.
  */
 fun Node.assignParents() {
-    this.children.forEach {
+    this.walkChildren().forEach {
         it.parent = this
         it.assignParents()
     }
@@ -87,18 +87,18 @@ data class PropertyDescription(val name: String, val provideNodes: Boolean, val 
                 provideNodes(classifier)
             }
             return PropertyDescription(
-                name = property.name,
-                provideNodes = provideNodes,
-                multiple = multiple,
-                value = property.get(node)
+                    name = property.name,
+                    provideNodes = provideNodes,
+                    multiple = multiple,
+                    value = property.get(node)
             )
         }
     }
 }
 
 fun Node.processProperties(
-    propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
-    propertyOperation: (PropertyDescription) -> Unit
+        propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
+        propertyOperation: (PropertyDescription) -> Unit
 ) {
     containmentProperties.forEach { p ->
         if (!propertiesToIgnore.contains(p.name)) {
@@ -144,7 +144,7 @@ fun Node.processConsideringParent(operation: (Node, Node?) -> Unit, parent: Node
 }
 
 /**
- * @return all descendants of this node, meaning all the children, the children of those children, etc.
+ * @return all direct children of this node.
  */
 val Node.children: List<Node>
     get() {
@@ -156,7 +156,7 @@ val Node.children: List<Node>
                 is Collection<*> -> v.forEach { if (it is Node) children.add(it) }
             }
         }
-        return children.toList()
+        return children
     }
 
 // TODO reimplement using transformChildren
@@ -194,7 +194,7 @@ fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
 }
 
 class ImmutablePropertyException(property: KProperty<*>, node: Node) :
-    RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
+        RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
 fun Node.transformChildren(operation: (Node) -> Node, inPlace: Boolean = false): Node {
     val changes = HashMap<String, Any>()

@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.model
 
 import java.util.*
-import kotlin.reflect.KFunction1
 
 /**
  * Some Kotlinization of Deques used as a stack.
@@ -102,9 +101,24 @@ fun Node.walkAncestors(): Sequence<Node> {
 }
 
 /**
+ * @return all direct children of this node.
+ */
+fun Node.walkChildren(): Sequence<Node> {
+    return sequence {
+        containmentProperties.forEach { property ->
+            when (val value = property.get(this@walkChildren)) {
+                is Node -> yield(value as Node)
+                is Collection<*> -> value.forEach { if (it is Node) yield(it as Node) }
+            }
+        }
+    }
+}
+
+
+/**
  * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method. For post-order traversal, take "walkLeavesFirst"
  * @return walks the whole AST starting from the childnodes of this node.
  */
-fun Node.walkDescendants(walker: KFunction1<Node, Sequence<Node>> = Node::walk): Sequence<Node> {
+fun Node.walkDescendants(walker: (Node) -> Sequence<Node> = Node::walk): Sequence<Node> {
     return walker.invoke(this).filter { node -> node != this }
 }
