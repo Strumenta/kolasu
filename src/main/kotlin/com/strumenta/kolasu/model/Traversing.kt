@@ -3,12 +3,13 @@ package com.strumenta.kolasu.model
 import java.util.*
 import kotlin.reflect.KFunction1
 
-fun <T> mutableStackOf(): Deque<T> = ArrayDeque()
-fun <T> Deque<T>.pushAll(elements: Collection<T>) {
+typealias Stack<T> = Deque<T>
+fun <T> mutableStackOf(): Stack<T> = ArrayDeque()
+fun <T> Stack<T>.pushAll(elements: Collection<T>) {
     elements.reversed().forEach(this::push)
 }
 
-fun <T> mutableStackOf(vararg elements: T): Deque<T> {
+fun <T> mutableStackOf(vararg elements: T): Stack<T> {
     val stack = mutableStackOf<T>()
     stack.pushAll(elements.asList())
     return stack
@@ -18,7 +19,7 @@ fun <T> mutableStackOf(vararg elements: T): Deque<T> {
  * @return walks the whole AST starting from this node, depth-first.
  */
 fun Node.walk(): Sequence<Node> {
-    val stack: Deque<Node> = mutableStackOf(this)
+    val stack: Stack<Node> = mutableStackOf(this)
     return generateSequence {
         if (stack.peek() == null) {
             null
@@ -34,8 +35,8 @@ fun Node.walk(): Sequence<Node> {
  * Performs a post-order (or leaves-first) node traversal starting with a given node.
  */
 fun Node.walkLeavesFirst(): Sequence<Node> {
-    val nodesStack: Deque<List<Node>> = mutableStackOf()
-    val cursorStack: Deque<Int> = ArrayDeque()
+    val nodesStack: Stack<List<Node>> = mutableStackOf()
+    val cursorStack: Stack<Int> = ArrayDeque()
     var done = false
 
     fun nextFromLevel(): Node {
