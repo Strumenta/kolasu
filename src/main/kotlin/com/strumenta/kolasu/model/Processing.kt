@@ -1,7 +1,5 @@
 package com.strumenta.kolasu.model
 
-import java.util.LinkedList
-import kotlin.collections.HashMap
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
@@ -158,7 +156,7 @@ fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit) {
  * @return all nodes in this AST (sub)tree that extend klass.
  */
 fun <T : Node> Node.collectByType(klass: Class<T>): List<T> {
-    val res = LinkedList<T>()
+    val res = mutableListOf<T>()
     this.specificProcess(klass) { res.add(it) }
     return res
 }
@@ -183,7 +181,7 @@ fun Node.processConsideringParent(operation: (Node, Node?) -> Unit, parent: Node
  */
 val Node.children: List<Node>
     get() {
-        val children = LinkedList<Node>()
+        val children = mutableListOf<Node>()
         containmentProperties.forEach { p ->
             val v = p.get(this)
             when (v) {
@@ -198,7 +196,7 @@ val Node.children: List<Node>
 fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
     if (inPlace) TODO()
     operation(this)
-    val changes = HashMap<String, Any>()
+    val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { p ->
         val v = p.get(this)
         when (v) {
@@ -215,7 +213,7 @@ fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
     var instanceToTransform = this
     if (changes.isNotEmpty()) {
         val constructor = this.javaClass.kotlin.primaryConstructor!!
-        val params = HashMap<KParameter, Any?>()
+        val params = mutableMapOf<KParameter, Any?>()
         constructor.parameters.forEach { param ->
             if (changes.containsKey(param.name)) {
                 params[param] = changes[param.name]
@@ -233,7 +231,7 @@ class ImmutablePropertyException(property: KProperty<*>, node: Node) :
 
 @Suppress("UNCHECKED_CAST")
 fun Node.transformChildren(operation: (Node) -> Node, inPlace: Boolean = false): Node {
-    val changes = HashMap<String, Any>()
+    val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { property ->
         val value = property.get(this)
         when (value) {
@@ -282,7 +280,7 @@ fun Node.transformChildren(operation: (Node) -> Node, inPlace: Boolean = false):
     var instanceToTransform = this
     if (changes.isNotEmpty()) {
         val constructor = this.javaClass.kotlin.primaryConstructor!!
-        val params = HashMap<KParameter, Any?>()
+        val params = mutableMapOf<KParameter, Any?>()
         constructor.parameters.forEach { param ->
             if (changes.containsKey(param.name)) {
                 params[param] = changes[param.name]

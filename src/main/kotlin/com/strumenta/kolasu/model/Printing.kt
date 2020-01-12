@@ -9,7 +9,7 @@ private const val indentBlock = "  "
 fun Node.relevantMemberProperties() = this.javaClass.kotlin.memberProperties
     .filter { !it.name.startsWith("component") && it.name != "position" && it.name != "parent" }
 
-@Suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST") // some fancy reflection tests make sure the cast always succeeds
 fun Node.multilineString(indent: String = ""): String {
     val sb = StringBuffer()
     if (this.relevantMemberProperties().isEmpty()) {
