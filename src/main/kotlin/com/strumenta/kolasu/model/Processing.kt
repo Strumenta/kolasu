@@ -1,7 +1,5 @@
 package com.strumenta.kolasu.model
 
-import java.util.LinkedList
-import kotlin.collections.HashMap
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
@@ -11,7 +9,7 @@ import kotlin.reflect.full.primaryConstructor
 /**
  * @return all properties of this node that are considered AST properties.
  */
-private val <T : Node> T.containmentProperties: Collection<KProperty1<T, *>>
+internal val <T : Node> T.containmentProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.kotlin.memberProperties
         .filter { it.visibility == KVisibility.PUBLIC }
         .filter { it.findAnnotation<Derived>() == null }
@@ -24,7 +22,7 @@ private val <T : Node> T.containmentProperties: Collection<KProperty1<T, *>>
  * so this function should be called manually after modifying the AST.
  */
 fun Node.assignParents() {
-    this.children.forEach {
+    this.walkChildren().forEach {
         it.parent = this
         it.assignParents()
     }
@@ -32,16 +30,10 @@ fun Node.assignParents() {
 
 /**
  * Recursively execute "operation" on this node, and all nodes below this node.
+ * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
-fun Node.processNodes(operation: (Node) -> Unit) {
-    operation(this)
-    containmentProperties.forEach { p ->
-        val v = p.get(this)
-        when (v) {
-            is Node -> v.processNodes(operation)
-            is Collection<*> -> v.forEach { (it as? Node)?.processNodes(operation) }
-        }
-    }
+fun Node.processNodes(operation: (Node) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
+    walker.invoke(this).forEach(operation)
 }
 
 private fun provideNodes(kTypeProjection: KTypeProjection): Boolean {
@@ -115,51 +107,27 @@ fun Node.processProperties(
 }
 
 /**
+ * @param walker the function that generates the nodes to operate on in the desired sequence.
  * @return the first node in the AST for which the predicate is true. Null if none are found.
  */
-fun Node.find(predicate: (Node) -> Boolean): Node? {
-    if (predicate(this)) {
-        return this
-    }
-    containmentProperties.forEach { p ->
-        when (val v = p.get(this)) {
-            is Node -> {
-                val res = v.find(predicate)
-                if (res != null) {
-                    return res
-                }
-            }
-            is Collection<*> -> v.forEach {
-                (it as? Node)?.let {
-                    val res = it.find(predicate)
-                    if (res != null) {
-                        return res
-                    }
-                }
-            }
-        }
-    }
-    return null
+fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<Node>> = Node::walk): Node? {
+    return walker.invoke(this).find(predicate)
 }
 
 /**
  * Recursively execute "operation" on this node, and all nodes below this node that extend klass.
+ * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
-fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit) {
-    processNodes {
-        if (klass.isInstance(it)) {
-            operation(it as T)
-        }
-    }
+fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
+    walker.invoke(this).filterIsInstance(klass).forEach(operation)
 }
 
 /**
- * @return all nodes in this AST (sub)tree that extend klass.
+ * @param walker the function that generates the nodes to operate on in the desired sequence.
+ * @return all nodes in this AST (sub)tree that are instances of, or extend klass.
  */
-fun <T : Node> Node.collectByType(klass: Class<T>): List<T> {
-    val res = LinkedList<T>()
-    this.specificProcess(klass, { res.add(it) })
-    return res
+fun <T : Node> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<Node>> = Node::walk): List<T> {
+    return walker.invoke(this).filterIsInstance(klass).toList()
 }
 
 /**
@@ -178,11 +146,11 @@ fun Node.processConsideringParent(operation: (Node, Node?) -> Unit, parent: Node
 }
 
 /**
- * @return all descendants of this node, meaning all the children, the children of those children, etc.
+ * @return all direct children of this node.
  */
 val Node.children: List<Node>
     get() {
-        val children = LinkedList<Node>()
+        val children = mutableListOf<Node>()
         containmentProperties.forEach { p ->
             val v = p.get(this)
             when (v) {
@@ -190,14 +158,14 @@ val Node.children: List<Node>
                 is Collection<*> -> v.forEach { if (it is Node) children.add(it) }
             }
         }
-        return children.toList()
+        return children
     }
 
 // TODO reimplement using transformChildren
 fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
     if (inPlace) TODO()
     operation(this)
-    val changes = HashMap<String, Any>()
+    val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { p ->
         val v = p.get(this)
         when (v) {
@@ -214,7 +182,7 @@ fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
     var instanceToTransform = this
     if (!changes.isEmpty()) {
         val constructor = this.javaClass.kotlin.primaryConstructor!!
-        val params = HashMap<KParameter, Any?>()
+        val params = mutableMapOf<KParameter, Any?>()
         constructor.parameters.forEach { param ->
             if (changes.containsKey(param.name)) {
                 params[param] = changes[param.name]
@@ -268,7 +236,7 @@ fun Node.transformChildrenInPlace(operation: (Node) -> Node) {
 }
 
 fun Node.transformChildren(operation: (Node) -> Node): Node {
-    val changes = HashMap<String, Any>()
+    val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { property ->
         val value = property.get(this)
         when (value) {
@@ -289,7 +257,7 @@ fun Node.transformChildren(operation: (Node) -> Node): Node {
     var instanceToTransform = this
     if (!changes.isEmpty()) {
         val constructor = this.javaClass.kotlin.primaryConstructor!!
-        val params = HashMap<KParameter, Any?>()
+        val params = mutableMapOf<KParameter, Any?>()
         constructor.parameters.forEach { param ->
             if (changes.containsKey(param.name)) {
                 params[param] = changes[param.name]
