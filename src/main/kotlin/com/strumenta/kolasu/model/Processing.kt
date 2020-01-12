@@ -180,7 +180,7 @@ fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
         }
     }
     var instanceToTransform = this
-    if (!changes.isEmpty()) {
+    if (changes.isNotEmpty()) {
         val constructor = this.javaClass.kotlin.primaryConstructor!!
         val params = mutableMapOf<KParameter, Any?>()
         constructor.parameters.forEach { param ->
@@ -198,6 +198,7 @@ fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
 class ImmutablePropertyException(property: KProperty<*>, node: Node) :
     RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
+@Suppress("UNCHECKED_CAST") // assumption: every MutableList in the AST contains Nodes.
 fun Node.transformChildrenInPlace(operation: (Node) -> Node) {
     relevantMemberProperties().forEach { property ->
         val value = property.get(this)
@@ -255,7 +256,7 @@ fun Node.transformChildren(operation: (Node) -> Node): Node {
         }
     }
     var instanceToTransform = this
-    if (!changes.isEmpty()) {
+    if (changes.isNotEmpty()) {
         val constructor = this.javaClass.kotlin.primaryConstructor!!
         val params = mutableMapOf<KParameter, Any?>()
         constructor.parameters.forEach { param ->
