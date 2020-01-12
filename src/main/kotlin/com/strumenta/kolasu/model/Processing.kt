@@ -199,7 +199,44 @@ class ImmutablePropertyException(property: KProperty<*>, node: Node) :
     RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
 @Suppress("UNCHECKED_CAST") // assumption: every MutableList in the AST contains Nodes.
-fun Node.transformChildren(operation: (Node) -> Node, inPlace: Boolean = false): Node {
+fun Node.transformChildrenInPlace(operation: (Node) -> Node) {
+    relevantMemberProperties().forEach { property ->
+        val value = property.get(this)
+        when (value) {
+            is Node -> {
+                val newValue = operation(value)
+                if (newValue != value) {
+                    if (property is KMutableProperty<*>) {
+                        property.setter.call(this, newValue)
+                    } else {
+                        throw ImmutablePropertyException(property, value)
+                    }
+                }
+            }
+            is Collection<*> -> {
+                if (value is List<*>) {
+                    for (i in 0 until value.size) {
+                        val element = value[i]
+                        if (element is Node) {
+                            val newValue = operation(element)
+                            if (newValue != element) {
+                                if (value is MutableList<*>) {
+                                    (value as MutableList<Node>)[i] = newValue
+                                } else {
+                                    throw ImmutablePropertyException(property, element)
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    TODO()
+                }
+            }
+        }
+    }
+}
+
+fun Node.transformChildren(operation: (Node) -> Node): Node {
     val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { property ->
         val value = property.get(this)
@@ -207,41 +244,13 @@ fun Node.transformChildren(operation: (Node) -> Node, inPlace: Boolean = false):
             is Node -> {
                 val newValue = operation(value)
                 if (newValue != value) {
-                    if (inPlace) {
-                        if (property is KMutableProperty<*>) {
-                            property.setter.call(this, newValue)
-                        } else {
-                            throw ImmutablePropertyException(property, value)
-                        }
-                    } else {
-                        changes[property.name] = newValue
-                    }
+                    changes[property.name] = newValue
                 }
             }
             is Collection<*> -> {
-                if (inPlace) {
-                    if (value is List<*>) {
-                        for (i in 0 until value.size) {
-                            val element = value[i]
-                            if (element is Node) {
-                                val newValue = operation(element)
-                                if (newValue != element) {
-                                    if (value is MutableList<*>) {
-                                        (value as MutableList<Node>)[i] = newValue
-                                    } else {
-                                        throw ImmutablePropertyException(property, element)
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        TODO()
-                    }
-                } else {
-                    val newValue = value.map { if (it is Node) operation(it) else it }
-                    if (newValue != value) {
-                        changes[property.name] = newValue
-                    }
+                val newValue = value.map { if (it is Node) operation(it) else it }
+                if (newValue != value) {
+                    changes[property.name] = newValue
                 }
             }
         }
@@ -266,5 +275,5 @@ fun Node.replace(other: Node) {
     if (this.parent == null) {
         throw IllegalStateException("Parent not set")
     }
-    this.parent!!.transformChildren(inPlace = true, operation = { if (it == this) other else it })
+    this.parent!!.transformChildrenInPlace { if (it == this) other else it }
 }
