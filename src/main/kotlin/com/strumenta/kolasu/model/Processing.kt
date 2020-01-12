@@ -228,7 +228,7 @@ fun Node.transformChildrenInPlace(operation: (Node) -> Node) {
                         }
                     }
                 } else {
-                    TODO()
+                    throw UnsupportedOperationException("Only modifications in a List and MutableList are supported, not " + value::class.toString())
                 }
             }
         }

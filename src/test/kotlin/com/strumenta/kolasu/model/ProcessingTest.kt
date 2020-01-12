@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import java.lang.UnsupportedOperationException
 import java.util.LinkedList
 import kotlin.test.assertEquals
 import org.junit.Test as test
@@ -9,6 +10,7 @@ data class B(val a: A, val manyAs: List<A>) : Node()
 
 data class AW(var s: String) : Node()
 data class BW(var a: AW, val manyAs: MutableList<AW>) : Node()
+data class CW(var a: AW, val manyAs: MutableSet<AW>) : Node()
 
 @NodeType
 interface FooNodeType
@@ -44,14 +46,25 @@ class ProcessingTest {
         assertEquals("2", b.a.s)
     }
 
-    @test fun replaceList() {
+    @test fun replaceInList() {
         val a1 = AW("1")
         val a2 = AW("2")
         val a3 = AW("3")
         val a4 = AW("4")
-        val b = BW(a1, listOf(a2, a3).toMutableList())
+        val b = BW(a1, mutableListOf(a2, a3))
         b.assignParents()
         a2.replace(a4)
         assertEquals("4", b.manyAs[0].s)
+    }
+
+    @test(expected = UnsupportedOperationException::class)
+    fun replaceInSet() {
+        val a1 = AW("1")
+        val a2 = AW("2")
+        val a3 = AW("3")
+        val a4 = AW("4")
+        val b = CW(a1, mutableSetOf(a2, a3))
+        b.assignParents()
+        a2.replace(a4)
     }
 }
