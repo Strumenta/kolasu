@@ -2,12 +2,13 @@ package com.strumenta.kolasu.model
 
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaType
 
 private const val indentBlock = "  "
 
 fun Node.relevantMemberProperties() = this.javaClass.kotlin.memberProperties
-    .filter { !it.name.startsWith("component") && it.name != "position" && it.name != "parent" }
+        .filter { !it.name.startsWith("component") && it.name != "position" && it.name != "parent" }
 
 fun Node.multilineString(indent: String = ""): String {
     val sb = StringBuffer()
@@ -27,6 +28,7 @@ fun Node.multilineString(indent: String = ""): String {
                     sb.append("$indent$indentBlock]\n")
                 }
             } else {
+                it.isAccessible = true
                 val value = it.get(this)
                 if (value is Node) {
                     sb.append("$indent$indentBlock${it.name} = [\n")
