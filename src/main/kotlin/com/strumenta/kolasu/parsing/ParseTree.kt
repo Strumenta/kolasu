@@ -5,7 +5,6 @@ import com.strumenta.kolasu.model.endPoint
 import com.strumenta.kolasu.model.startPoint
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
-import java.util.LinkedList
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.Parser
 import org.antlr.v4.runtime.tree.ErrorNode
@@ -24,7 +23,7 @@ class ParseTreeLeaf(val type: String, val text: String) : ParseTreeElement() {
 }
 
 class ParseTreeNode(val name: String) : ParseTreeElement() {
-    val children = LinkedList<ParseTreeElement>()
+    val children = mutableListOf<ParseTreeElement>()
     fun child(c: ParseTreeElement): ParseTreeNode {
         children.add(c)
         return this
