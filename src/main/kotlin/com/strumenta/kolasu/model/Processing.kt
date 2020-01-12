@@ -30,6 +30,7 @@ fun Node.assignParents() {
 
 /**
  * Recursively execute "operation" on this node, and all nodes below this node.
+ * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
 fun Node.processNodes(operation: (Node) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
     walker.invoke(this).forEach(operation)
@@ -106,6 +107,7 @@ fun Node.processProperties(
 }
 
 /**
+ * @param walker the function that generates the nodes to operate on in the desired sequence.
  * @return the first node in the AST for which the predicate is true. Null if none are found.
  */
 fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<Node>> = Node::walk): Node? {
@@ -114,13 +116,15 @@ fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<No
 
 /**
  * Recursively execute "operation" on this node, and all nodes below this node that extend klass.
+ * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
 fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
     walker.invoke(this).filterIsInstance(klass).forEach(operation)
 }
 
 /**
- * @return all nodes in this AST (sub)tree that extend klass.
+ * @param walker the function that generates the nodes to operate on in the desired sequence.
+ * @return all nodes in this AST (sub)tree that are instances of, or extend klass.
  */
 fun <T : Node> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<Node>> = Node::walk): List<T> {
     return walker.invoke(this).filterIsInstance(klass).toList()
