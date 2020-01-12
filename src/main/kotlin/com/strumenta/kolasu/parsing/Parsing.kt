@@ -33,8 +33,7 @@ fun injectErrorCollectorInLexer(lexer: Lexer, errors: MutableList<Issue>) {
             errors.add(
                 Issue(
                     IssueType.LEXICAL,
-                    errorMessage
-                        ?: "unspecified",
+                    errorMessage ?: "unspecified",
                     position = Point(line, charPositionInLine).asPosition
                 )
             )
@@ -49,8 +48,7 @@ fun injectErrorCollectorInParser(parser: Parser, errors: MutableList<Issue>) {
             errors.add(
                 Issue(
                     IssueType.SYNTACTIC,
-                    errorMessage
-                        ?: "unspecified",
+                    errorMessage ?: "unspecified",
                     position = Point(line, charPositionInLine).asPosition
                 )
             )
