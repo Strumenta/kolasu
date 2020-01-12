@@ -8,6 +8,7 @@ import java.util.*
 typealias Stack<T> = Deque<T>
 
 fun <T> mutableStackOf(): Stack<T> = ArrayDeque()
+
 fun <T> Stack<T>.pushAll(elements: Collection<T>) {
     elements.reversed().forEach(this::push)
 }
@@ -113,7 +114,6 @@ fun Node.walkChildren(): Sequence<Node> {
         }
     }
 }
-
 
 /**
  * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method. For post-order traversal, take "walkLeavesFirst"
