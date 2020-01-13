@@ -56,20 +56,6 @@ class PrintingTest {
 """Add {
   left = [
     Sub {
-      left = [
-        Number {
-          value = 3
-          parseTreeNode = null
-          specifiedPosition = null
-        } // Number
-      ]
-      right = [
-        Number {
-          value = 9
-          parseTreeNode = null
-          specifiedPosition = null
-        } // Number
-      ]
       parseTreeNode = null
       specifiedPosition = null
     } // Sub

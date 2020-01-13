@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.model
 
 import java.lang.reflect.ParameterizedType
+import kotlin.reflect.KVisibility.PUBLIC
 import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaType
 
 private const val indentBlock = "  "
@@ -29,14 +29,15 @@ fun Node.multilineString(indent: String = ""): String {
                     sb.append("$indent$indentBlock]\n")
                 }
             } else {
-                property.isAccessible = true
-                val value = property.get(this)
-                if (value is Node) {
-                    sb.append("$indent$indentBlock${property.name} = [\n")
-                    sb.append(value.multilineString(indent + indentBlock + indentBlock))
-                    sb.append("$indent$indentBlock]\n")
-                } else {
-                    sb.append("$indent$indentBlock${property.name} = ${property.get(this)}\n")
+                if (property.visibility == PUBLIC) {
+                    val value = property.get(this)
+                    if (value is Node) {
+                        sb.append("$indent$indentBlock${property.name} = [\n")
+                        sb.append(value.multilineString(indent + indentBlock + indentBlock))
+                        sb.append("$indent$indentBlock]\n")
+                    } else {
+                        sb.append("$indent$indentBlock${property.name} = ${property.get(this)}\n")
+                    }
                 }
             }
         }
