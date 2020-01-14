@@ -9,12 +9,12 @@ import kotlin.reflect.full.primaryConstructor
 /**
  * @return all properties of this node that are considered AST properties.
  */
-internal val <T : Node> T.containmentProperties: Collection<KProperty1<T, *>>
+internal val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.kotlin.memberProperties
-        .filter { it.visibility == KVisibility.PUBLIC }
-        .filter { it.findAnnotation<Derived>() == null }
-        .filter { it.findAnnotation<Link>() == null }
-        .filter { it.name != "parent" }
+            .filter { it.visibility == KVisibility.PUBLIC }
+            .filter { it.findAnnotation<Derived>() == null }
+            .filter { it.findAnnotation<Link>() == null }
+            .filter { it.name != "parent" }
 
 /**
  * Sets or corrects the parent of all AST nodes.
@@ -36,34 +36,34 @@ fun Node.processNodes(operation: (Node) -> Unit, walker: KFunction1<Node, Sequen
     walker.invoke(this).forEach(operation)
 }
 
-private fun provideNodes(kTypeProjection: KTypeProjection): Boolean {
+private fun providesNodes(kTypeProjection: KTypeProjection): Boolean {
     val ktype = kTypeProjection.type
     return when (ktype) {
-        is KClass<*> -> provideNodes(ktype as? KClass<*>)
-        is KType -> provideNodes((ktype as? KType)?.classifier)
+        is KClass<*> -> providesNodes(ktype as? KClass<*>)
+        is KType -> providesNodes((ktype as? KType)?.classifier)
         else -> throw UnsupportedOperationException("We are not able to determine if the type $ktype provides AST Nodes or not")
     }
 }
 
-private fun provideNodes(classifier: KClassifier?): Boolean {
+private fun providesNodes(classifier: KClassifier?): Boolean {
     if (classifier == null) {
         return false
     }
     if (classifier is KClass<*>) {
-        return provideNodes(classifier as? KClass<*>)
+        return providesNodes(classifier as? KClass<*>)
     } else {
         throw UnsupportedOperationException("We are not able to determine if the classifier $classifier provides AST Nodes or not")
     }
 }
 
-private fun provideNodes(kclass: KClass<*>?): Boolean {
-    return kclass?.representsNode() ?: false
+private fun providesNodes(kclass: KClass<*>?): Boolean {
+    return kclass?.isANode() ?: false
 }
 
 /**
  * @return can this class be considered an AST node?
  */
-fun KClass<*>.representsNode(): Boolean {
+fun KClass<*>.isANode(): Boolean {
     return this.isSubclassOf(Node::class) || this.isMarkedAsNodeType()
 }
 
@@ -81,25 +81,25 @@ data class PropertyDescription(val name: String, val provideNodes: Boolean, val 
             val classifier = propertyType.classifier as? KClass<*>
             val multiple = (classifier?.isSubclassOf(Collection::class) == true)
             val provideNodes = if (multiple) {
-                provideNodes(propertyType.arguments[0])
+                providesNodes(propertyType.arguments[0])
             } else {
-                provideNodes(classifier)
+                providesNodes(classifier)
             }
             return PropertyDescription(
-                name = property.name,
-                provideNodes = provideNodes,
-                multiple = multiple,
-                value = property.get(node)
+                    name = property.name,
+                    provideNodes = provideNodes,
+                    multiple = multiple,
+                    value = property.get(node)
             )
         }
     }
 }
 
 fun Node.processProperties(
-    propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
-    propertyOperation: (PropertyDescription) -> Unit
+        propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
+        propertyOperation: (PropertyDescription) -> Unit
 ) {
-    containmentProperties.forEach { p ->
+    nodeProperties.forEach { p ->
         if (!propertiesToIgnore.contains(p.name)) {
             propertyOperation(PropertyDescription.buildFor(p, this))
         }
@@ -118,7 +118,7 @@ fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<No
  * Recursively execute "operation" on this node, and all nodes below this node that extend klass.
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
-fun <T : Node> Node.specificProcess(klass: Class<T>, operation: (T) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
+fun <T : Node> Node.processNodesOfType(klass: Class<T>, operation: (T) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
     walker.invoke(this).filterIsInstance(klass).forEach(operation)
 }
 
@@ -134,13 +134,13 @@ fun <T : Node> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequ
  * Recursively execute "operation" on this node, and all nodes below this node.
  * Every node is informed about its parent node. (But not about the parent's parent!)
  */
-fun Node.processConsideringParent(operation: (Node, Node?) -> Unit, parent: Node? = null) {
+fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent: Node? = null) {
     operation(this, parent)
-    this.containmentProperties.forEach { p ->
+    this.nodeProperties.forEach { p ->
         val v = p.get(this)
         when (v) {
-            is Node -> v.processConsideringParent(operation, this)
-            is Collection<*> -> v.forEach { (it as? Node)?.processConsideringParent(operation, this) }
+            is Node -> v.processConsideringDirectParent(operation, this)
+            is Collection<*> -> v.forEach { (it as? Node)?.processConsideringDirectParent(operation, this) }
         }
     }
 }
@@ -151,7 +151,7 @@ fun Node.processConsideringParent(operation: (Node, Node?) -> Unit, parent: Node
 val Node.children: List<Node>
     get() {
         val children = mutableListOf<Node>()
-        containmentProperties.forEach { p ->
+        nodeProperties.forEach { p ->
             val v = p.get(this)
             when (v) {
                 is Node -> children.add(v)
@@ -196,9 +196,9 @@ fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
 }
 
 class ImmutablePropertyException(property: KProperty<*>, node: Node) :
-    RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
+        RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
-fun Node.transformChildrenInPlace(operation: (Node) -> Node) {
+fun Node.transformTree(operation: (Node) -> Node) {
     relevantMemberProperties().forEach { property ->
         val value = property.get(this)
         when (value) {
@@ -235,7 +235,7 @@ fun Node.transformChildrenInPlace(operation: (Node) -> Node) {
     }
 }
 
-fun Node.transformChildren(operation: (Node) -> Node): Node {
+fun Node.mapTree(operation: (Node) -> Node): Node {
     val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { property ->
         val value = property.get(this)
@@ -270,9 +270,13 @@ fun Node.transformChildren(operation: (Node) -> Node): Node {
     return instanceToTransform
 }
 
-fun Node.replace(other: Node) {
+/**
+ * Replace this node with "other" (by modifying the children of the parent node.)
+ * For this to work, assignParents() must have been called.
+ */
+fun Node.replaceWith(other: Node) {
     if (this.parent == null) {
         throw IllegalStateException("Parent not set")
     }
-    this.parent!!.transformChildrenInPlace { if (it == this) other else it }
+    this.parent!!.transformTree { if (it == this) other else it }
 }

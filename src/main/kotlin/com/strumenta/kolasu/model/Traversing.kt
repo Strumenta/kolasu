@@ -106,7 +106,7 @@ fun Node.walkAncestors(): Sequence<Node> {
  */
 fun Node.walkChildren(): Sequence<Node> {
     return sequence {
-        containmentProperties.forEach { property ->
+        nodeProperties.forEach { property ->
             when (val value = property.get(this@walkChildren)) {
                 is Node -> yield(value as Node)
                 is Collection<*> -> value.forEach { if (it is Node) yield(it as Node) }

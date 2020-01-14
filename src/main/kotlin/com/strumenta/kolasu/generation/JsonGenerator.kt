@@ -14,15 +14,18 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import java.io.File
 
-/**
- * Converts an AST to JSON format.
- */
 class JsonGenerator {
 
+    /**
+     * Converts an AST to JSON format.
+     */
     fun generateJSON(root: Node): JsonElement {
         return root.toJson()
     }
 
+    /**
+     * Converts "results" to JSON format.
+     */
     fun generateJSON(result: Result<out Node>): JsonElement {
         return jsonObject(
             "errors" to result.errors.map { it.toJson() }.toJsonArray(),
