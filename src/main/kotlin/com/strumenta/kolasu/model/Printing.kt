@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.model
 
 import java.lang.reflect.ParameterizedType
+import kotlin.reflect.KVisibility.PUBLIC
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaType
 
@@ -28,13 +29,15 @@ fun Node.debugPrint(indent: String = ""): String {
                     sb.append("$indent$indentBlock]\n")
                 }
             } else {
-                val value = property.get(this)
-                if (value is Node) {
-                    sb.append("$indent$indentBlock${property.name} = [\n")
-                    sb.append(value.debugPrint(indent + indentBlock + indentBlock))
-                    sb.append("$indent$indentBlock]\n")
-                } else {
-                    sb.append("$indent$indentBlock${property.name} = ${property.get(this)}\n")
+                if (property.visibility == PUBLIC) {
+                    val value = property.get(this)
+                    if (value is Node) {
+                        sb.append("$indent$indentBlock${property.name} = [\n")
+                        sb.append(value.debugPrint(indent + indentBlock + indentBlock))
+                        sb.append("$indent$indentBlock]\n")
+                    } else {
+                        sb.append("$indent$indentBlock${property.name} = ${property.get(this)}\n")
+                    }
                 }
             }
         }
