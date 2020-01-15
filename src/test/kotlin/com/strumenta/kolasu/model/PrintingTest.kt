@@ -71,7 +71,7 @@ class PrintingTest {
   specifiedPosition = null
 } // Add
 """,
-            ast.multilineString()
+            ast.debugPrint()
         )
     }
 }
