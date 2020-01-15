@@ -24,8 +24,8 @@ class ProcessingTest {
         assertEquals(true, FooNodeType::class.isMarkedAsNodeType())
         assertEquals(false, BarNotNodeType::class.isMarkedAsNodeType())
 
-        assertEquals(true, FooNodeType::class.representsNode())
-        assertEquals(false, BarNotNodeType::class.representsNode())
+        assertEquals(true, FooNodeType::class.isANode())
+        assertEquals(false, BarNotNodeType::class.isANode())
     }
 
     @test(expected = ImmutablePropertyException::class)
@@ -34,7 +34,7 @@ class ProcessingTest {
         val a2 = A("2")
         val b = B(a1, emptyList())
         b.assignParents()
-        a1.replace(a2)
+        a1.replaceWith(a2)
     }
 
     @test fun replaceSingle() {
@@ -42,7 +42,7 @@ class ProcessingTest {
         val a2 = AW("2")
         val b = BW(a1, LinkedList())
         b.assignParents()
-        a1.replace(a2)
+        a1.replaceWith(a2)
         assertEquals("2", b.a.s)
     }
 
@@ -53,7 +53,7 @@ class ProcessingTest {
         val a4 = AW("4")
         val b = BW(a1, mutableListOf(a2, a3))
         b.assignParents()
-        a2.replace(a4)
+        a2.replaceWith(a4)
         assertEquals("4", b.manyAs[0].s)
     }
 
@@ -65,6 +65,6 @@ class ProcessingTest {
         val a4 = AW("4")
         val b = CW(a1, mutableSetOf(a2, a3))
         b.assignParents()
-        a2.replace(a4)
+        a2.replaceWith(a4)
     }
 }

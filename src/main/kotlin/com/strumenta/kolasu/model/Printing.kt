@@ -10,7 +10,7 @@ fun Node.relevantMemberProperties() = this.javaClass.kotlin.memberProperties
     .filter { !it.name.startsWith("component") && it.name != "position" && it.name != "parent" }
 
 @Suppress("UNCHECKED_CAST") // some fancy reflection tests make sure the cast always succeeds
-fun Node.multilineString(indent: String = ""): String {
+fun Node.debugPrint(indent: String = ""): String {
     val sb = StringBuffer()
     if (this.relevantMemberProperties().isEmpty()) {
         sb.append("$indent${this.javaClass.simpleName}\n")
@@ -23,7 +23,7 @@ fun Node.multilineString(indent: String = ""): String {
                 if (paramType is Class<*> && Node::class.java.isAssignableFrom(paramType)) {
                     sb.append("$indent$indentBlock${property.name} = [\n")
                     (property.get(this) as List<Node>).forEach {
-                        sb.append(it.multilineString(indent + indentBlock + indentBlock))
+                        sb.append(it.debugPrint(indent + indentBlock + indentBlock))
                     }
                     sb.append("$indent$indentBlock]\n")
                 }
@@ -31,7 +31,7 @@ fun Node.multilineString(indent: String = ""): String {
                 val value = property.get(this)
                 if (value is Node) {
                     sb.append("$indent$indentBlock${property.name} = [\n")
-                    sb.append(value.multilineString(indent + indentBlock + indentBlock))
+                    sb.append(value.debugPrint(indent + indentBlock + indentBlock))
                     sb.append("$indent$indentBlock]\n")
                 } else {
                     sb.append("$indent$indentBlock${property.name} = ${property.get(this)}\n")
