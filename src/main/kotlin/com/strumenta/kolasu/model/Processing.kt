@@ -303,6 +303,7 @@ fun Node.replaceWithSeveral(oldNode: Node, newNodes: List<Node>) {
             }
         }
     }
+    throw IllegalStateException("Did not find $oldNode in any MutableList in $this. Replace failed.")
 }
 
 /**

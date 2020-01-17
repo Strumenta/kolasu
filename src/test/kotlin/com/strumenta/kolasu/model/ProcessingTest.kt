@@ -84,6 +84,18 @@ class ProcessingTest {
         assertEquals("3", b.manyAs[2].s)
     }
 
+    @test(expected = IllegalStateException::class)
+    fun replaceSeveralInListInParentButTheNodeToReplaceIsMissing() {
+        val a1 = AW("1")
+        val a2 = AW("2")
+        val a3 = AW("3")
+        val a4 = AW("4")
+        val a5 = AW("5")
+        val b = BW(a1, mutableListOf(a2, a3))
+        b.assignParents()
+        a1.replaceWithSeveral(listOf(a4, a5))
+    }
+
     @test(expected = UnsupportedOperationException::class)
     fun replaceInSet() {
         val a1 = AW("1")
