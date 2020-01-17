@@ -313,5 +313,5 @@ fun Node.replaceWithSeveral(oldNode: Node, newNodes: List<Node>) {
  * For this to work, [Node.assignParents] must have been called.
  */
 fun Node.replaceWithSeveral(newNodes: List<Node>) {
-    (parent ?: throw IllegalStateException("Parent not set")).replaceWithSeveral(this, newNodes)
+    parent?.replaceWithSeveral(this, newNodes) ?: throw IllegalStateException("Parent not set")
 }
