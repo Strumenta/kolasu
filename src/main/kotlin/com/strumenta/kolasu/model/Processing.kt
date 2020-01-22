@@ -29,7 +29,7 @@ fun Node.assignParents() {
 }
 
 /**
- * Recursively execute "operation" on this node, and all nodes below this node.
+ * Recursively execute [operation] on [this] node, and all nodes below this node.
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
 fun Node.processNodes(operation: (Node) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
@@ -61,14 +61,14 @@ private fun providesNodes(kclass: KClass<*>?): Boolean {
 }
 
 /**
- * @return can this class be considered an AST node?
+ * @return can [this] class be considered an AST node?
  */
 fun KClass<*>.isANode(): Boolean {
     return this.isSubclassOf(Node::class) || this.isMarkedAsNodeType()
 }
 
 /**
- * @return is this class annotated with NodeType?
+ * @return is [this] class annotated with NodeType?
  */
 fun KClass<*>.isMarkedAsNodeType(): Boolean {
     return this.annotations.any { it.annotationClass == NodeType::class }
@@ -108,14 +108,14 @@ fun Node.processProperties(
 
 /**
  * @param walker the function that generates the nodes to operate on in the desired sequence.
- * @return the first node in the AST for which the predicate is true. Null if none are found.
+ * @return the first node in the AST for which the [predicate] is true. Null if none are found.
  */
 fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<Node>> = Node::walk): Node? {
     return walker.invoke(this).find(predicate)
 }
 
 /**
- * Recursively execute "operation" on this node, and all nodes below this node that extend klass.
+ * Recursively execute [operation] on this node, and all nodes below this node that extend [klass].
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
 fun <T : Node> Node.processNodesOfType(klass: Class<T>, operation: (T) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
@@ -124,15 +124,15 @@ fun <T : Node> Node.processNodesOfType(klass: Class<T>, operation: (T) -> Unit, 
 
 /**
  * @param walker the function that generates the nodes to operate on in the desired sequence.
- * @return all nodes in this AST (sub)tree that are instances of, or extend klass.
+ * @return all nodes in this AST (sub)tree that are instances of, or extend [klass].
  */
 fun <T : Node> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<Node>> = Node::walk): List<T> {
     return walker.invoke(this).filterIsInstance(klass).toList()
 }
 
 /**
- * Recursively execute "operation" on this node, and all nodes below this node.
- * Every node is informed about its parent node. (But not about the parent's parent!)
+ * Recursively execute [operation] on this node, and all nodes below this node.
+ * Every node is informed about its [parent] node. (But not about the parent's parent!)
  */
 fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent: Node? = null) {
     operation(this, parent)
@@ -146,7 +146,7 @@ fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent
 }
 
 /**
- * @return all direct children of this node.
+ * @return all direct children of [this] node.
  */
 val Node.children: List<Node>
     get() {
@@ -272,12 +272,46 @@ fun Node.mapTree(operation: (Node) -> Node): Node {
 }
 
 /**
- * Replace this node with "other" (by modifying the children of the parent node.)
- * For this to work, assignParents() must have been called.
+ * Replace [this] node with [other] (by modifying the children of the parent node.)
+ * For this to work, [Node.assignParents] must have been called.
  */
 fun Node.replaceWith(other: Node) {
     if (this.parent == null) {
         throw IllegalStateException("Parent not set")
     }
     this.parent!!.transformTree { if (it == this) other else it }
+}
+
+/**
+ * Looks for [oldNode] in the lists of nodes in this node.
+ * When found, it is removed, and in its place the [newNodes] are inserted.
+ */
+@Suppress("UNCHECKED_CAST") // assumption: a MutableList with a Node in it is a MutableList<Node>
+fun Node.replaceWithSeveral(oldNode: Node, newNodes: List<Node>) {
+    relevantMemberProperties().forEach { property ->
+        when (val value = property.get(this)) {
+            is MutableList<*> -> {
+                for (i in 0 until value.size) {
+                    if (value[i] == oldNode) {
+                        val nodeList = value as MutableList<Node>
+                        nodeList.removeAt(i)
+                        nodeList.addAll(i, newNodes)
+                        newNodes.forEach { node -> node.parent = this@replaceWithSeveral }
+                        return
+                    }
+                }
+            }
+        }
+    }
+    throw IllegalStateException("Did not find $oldNode in any MutableList in $this. Replace failed.")
+}
+
+/**
+ * Replaces this node with any amount of other nodes.
+ * <p/>Looks for [this] in the lists of nodes in the parent node.
+ * When found, [this] is removed, and in its place [newNodes] are inserted.
+ * For this to work, [Node.assignParents] must have been called.
+ */
+fun Node.replaceWithSeveral(newNodes: List<Node>) {
+    parent?.replaceWithSeveral(this, newNodes) ?: throw IllegalStateException("Parent not set")
 }
