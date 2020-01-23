@@ -155,7 +155,7 @@ class ProcessingTest {
         val existing2 = AW("e2")
         val parentNode = BW(notInList, mutableListOf(existing1, existing2))
         parentNode.assignParents()
-        existing2.remove()
+        existing2.removeFromList()
 
         assertSame(existing1, parentNode.manyAs[0])
         assertEquals(1, parentNode.manyAs.size)

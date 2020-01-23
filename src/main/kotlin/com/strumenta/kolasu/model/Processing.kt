@@ -285,6 +285,7 @@ fun Node.replaceWith(other: Node) {
 /**
  * Looks for [oldNode] in the lists of nodes in this node.
  * When found, it is removed, and in its place the [newNodes] are inserted.
+ * When not found, an [IllegalStateException] is thrown.
  */
 fun Node.replaceWithSeveral(oldNode: Node, newNodes: List<Node>) {
     findMutableListContainingChild(oldNode) { nodeList, index ->
@@ -297,8 +298,9 @@ fun Node.replaceWithSeveral(oldNode: Node, newNodes: List<Node>) {
 /**
  * Looks for [targetNode] in the lists of nodes in this node.
  * When found, it is removed.
+ * When not found, an [IllegalStateException] is thrown.
  */
-fun Node.remove(targetNode: Node) {
+fun Node.removeFromList(targetNode: Node) {
     findMutableListContainingChild(targetNode) { nodeList, index ->
         nodeList.removeAt(index)
         targetNode.parent = null
@@ -308,6 +310,7 @@ fun Node.remove(targetNode: Node) {
 /**
  * Looks for [targetNode] in the lists of nodes in this node.
  * When found, [newNodes] are inserted before it.
+ * When not found, an [IllegalStateException] is thrown.
  */
 fun Node.addSeveralBefore(targetNode: Node, newNodes: List<Node>) {
     findMutableListContainingChild(targetNode) { nodeList, index ->
@@ -319,6 +322,7 @@ fun Node.addSeveralBefore(targetNode: Node, newNodes: List<Node>) {
 /**
  * Looks for [targetNode] in the lists of nodes in this node.
  * When found, [newNodes] are inserted after it.
+ * When not found, an [IllegalStateException] is thrown.
  */
 fun Node.addSeveralAfter(targetNode: Node, newNodes: List<Node>) {
     findMutableListContainingChild(targetNode) { nodeList, index ->
@@ -377,8 +381,8 @@ fun Node.addSeveralAfter(newNodes: List<Node>) {
  * Removes [this] node from the parent if it is in a [MutableList].
  * For this to work, [Node.assignParents] must have been called.
  */
-fun Node.remove() {
-    parent?.remove(this) ?: throw IllegalStateException("Parent not set")
+fun Node.removeFromList() {
+    parent?.removeFromList(this) ?: throw IllegalStateException("Parent not set")
 }
 
 /**
