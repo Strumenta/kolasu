@@ -3,6 +3,7 @@ package com.strumenta.kolasu.model
 import java.lang.UnsupportedOperationException
 import java.util.LinkedList
 import kotlin.test.assertEquals
+import kotlin.test.assertSame
 import org.junit.Test as test
 
 data class A(val s: String) : Node()
@@ -37,7 +38,8 @@ class ProcessingTest {
         a1.replaceWith(a2)
     }
 
-    @test fun replaceSingle() {
+    @test
+    fun replaceSingle() {
         val a1 = AW("1")
         val a2 = AW("2")
         val b = BW(a1, LinkedList())
@@ -46,7 +48,8 @@ class ProcessingTest {
         assertEquals("2", b.a.s)
     }
 
-    @test fun replaceInList() {
+    @test
+    fun replaceInList() {
         val a1 = AW("1")
         val a2 = AW("2")
         val a3 = AW("3")
@@ -57,7 +60,8 @@ class ProcessingTest {
         assertEquals("4", b.manyAs[0].s)
     }
 
-    @test fun replaceSeveralInList() {
+    @test
+    fun replaceSeveralInList() {
         val a1 = AW("1")
         val a2 = AW("2")
         val a3 = AW("3")
@@ -70,7 +74,8 @@ class ProcessingTest {
         assertEquals("3", b.manyAs[2].s)
     }
 
-    @test fun replaceSeveralInListInParent() {
+    @test
+    fun replaceSeveralInListInParent() {
         val a1 = AW("1")
         val a2 = AW("2")
         val a3 = AW("3")
@@ -105,5 +110,54 @@ class ProcessingTest {
         val b = CW(a1, mutableSetOf(a2, a3))
         b.assignParents()
         a2.replaceWith(a4)
+    }
+
+    @test
+    fun addSeveralBeforeInListInParent() {
+        val notInList = AW("x")
+        val existing1 = AW("e1")
+        val existing2 = AW("e2")
+        val before1 = AW("b1")
+        val before2 = AW("b2")
+        val parentNode = BW(notInList, mutableListOf(existing1, existing2))
+        parentNode.assignParents()
+        existing1.addSeveralBefore(listOf(before1))
+        existing2.addSeveralBefore(listOf(before2))
+
+        assertSame(before1, parentNode.manyAs[0])
+        assertSame(existing1, parentNode.manyAs[1])
+        assertSame(before2, parentNode.manyAs[2])
+        assertSame(existing2, parentNode.manyAs[3])
+    }
+
+    @test
+    fun addSeveralAfterInListInParent() {
+        val notInList = AW("x")
+        val existing1 = AW("e1")
+        val existing2 = AW("e2")
+        val after1 = AW("a1")
+        val after2 = AW("a2")
+        val parentNode = BW(notInList, mutableListOf(existing1, existing2))
+        parentNode.assignParents()
+        existing1.addSeveralAfter(listOf(after1))
+        existing2.addSeveralAfter(listOf(after2))
+
+        assertSame(existing1, parentNode.manyAs[0])
+        assertSame(after1, parentNode.manyAs[1])
+        assertSame(existing2, parentNode.manyAs[2])
+        assertSame(after2, parentNode.manyAs[3])
+    }
+
+    @test
+    fun removeInListInParent() {
+        val notInList = AW("x")
+        val existing1 = AW("e1")
+        val existing2 = AW("e2")
+        val parentNode = BW(notInList, mutableListOf(existing1, existing2))
+        parentNode.assignParents()
+        existing2.removeFromList()
+
+        assertSame(existing1, parentNode.manyAs[0])
+        assertEquals(1, parentNode.manyAs.size)
     }
 }

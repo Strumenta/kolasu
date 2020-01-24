@@ -146,7 +146,7 @@ fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent
 }
 
 /**
- * @return all direct children of [this] node.
+ * @return all direct children of this node.
  */
 val Node.children: List<Node>
     get() {
@@ -285,33 +285,124 @@ fun Node.replaceWith(other: Node) {
 /**
  * Looks for [oldNode] in the lists of nodes in this node.
  * When found, it is removed, and in its place the [newNodes] are inserted.
+ * When not found, an [IllegalStateException] is thrown.
+ */
+fun Node.replaceWithSeveral(oldNode: Node, newNodes: List<Node>) {
+    findMutableListContainingChild(oldNode) { nodeList, index ->
+        nodeList.replaceWithSeveral(index, newNodes)
+        oldNode.parent = null
+        newNodes.forEach { node -> node.parent = this }
+    }
+}
+
+/**
+ * Looks for [targetNode] in the lists of nodes in this node.
+ * When found, it is removed.
+ * When not found, an [IllegalStateException] is thrown.
+ */
+fun Node.removeFromList(targetNode: Node) {
+    findMutableListContainingChild(targetNode) { nodeList, index ->
+        nodeList.removeAt(index)
+        targetNode.parent = null
+    }
+}
+
+/**
+ * Looks for [targetNode] in the lists of nodes in this node.
+ * When found, [newNodes] are inserted before it.
+ * When not found, an [IllegalStateException] is thrown.
+ */
+fun Node.addSeveralBefore(targetNode: Node, newNodes: List<Node>) {
+    findMutableListContainingChild(targetNode) { nodeList, index ->
+        nodeList.addSeveralBefore(index, newNodes)
+        newNodes.forEach { node -> node.parent = this }
+    }
+}
+
+/**
+ * Looks for [targetNode] in the lists of nodes in this node.
+ * When found, [newNodes] are inserted after it.
+ * When not found, an [IllegalStateException] is thrown.
+ */
+fun Node.addSeveralAfter(targetNode: Node, newNodes: List<Node>) {
+    findMutableListContainingChild(targetNode) { nodeList, index ->
+        nodeList.addSeveralAfter(index, newNodes)
+        newNodes.forEach { node -> node.parent = this }
+    }
+}
+
+/**
+ * Supports functions that manipulate a list of child nodes by finding [targetNode] in the [MutableList]s of nodes contained in [this] node.
  */
 @Suppress("UNCHECKED_CAST") // assumption: a MutableList with a Node in it is a MutableList<Node>
-fun Node.replaceWithSeveral(oldNode: Node, newNodes: List<Node>) {
+private fun Node.findMutableListContainingChild(targetNode: Node, whenFoundDo: (nodeList: MutableList<Node>, index: Int) -> Unit) {
     relevantMemberProperties().forEach { property ->
         when (val value = property.get(this)) {
             is MutableList<*> -> {
                 for (i in 0 until value.size) {
-                    if (value[i] == oldNode) {
-                        val nodeList = value as MutableList<Node>
-                        nodeList.removeAt(i)
-                        nodeList.addAll(i, newNodes)
-                        newNodes.forEach { node -> node.parent = this@replaceWithSeveral }
+                    if (value[i] == targetNode) {
+                        whenFoundDo(value as MutableList<Node>, i)
                         return
                     }
                 }
             }
         }
     }
-    throw IllegalStateException("Did not find $oldNode in any MutableList in $this. Replace failed.")
+    throw IllegalStateException("Did not find $targetNode in any MutableList in $this.")
 }
 
 /**
- * Replaces this node with any amount of other nodes.
+ * Replaces [this] node with any amount of other nodes if it is in a [MutableList].
  * <p/>Looks for [this] in the lists of nodes in the parent node.
  * When found, [this] is removed, and in its place [newNodes] are inserted.
  * For this to work, [Node.assignParents] must have been called.
  */
 fun Node.replaceWithSeveral(newNodes: List<Node>) {
     parent?.replaceWithSeveral(this, newNodes) ?: throw IllegalStateException("Parent not set")
+}
+
+/**
+ * Inserts the [newNodes] before [this] node if it is in a [MutableList].
+ * For this to work, [Node.assignParents] must have been called.
+ */
+fun Node.addSeveralBefore(newNodes: List<Node>) {
+    parent?.addSeveralBefore(this, newNodes) ?: throw IllegalStateException("Parent not set")
+}
+
+/**
+ * Inserts the [newNodes] after [this] node if it is in a [MutableList].
+ * For this to work, [Node.assignParents] must have been called.
+ */
+fun Node.addSeveralAfter(newNodes: List<Node>) {
+    parent?.addSeveralAfter(this, newNodes) ?: throw IllegalStateException("Parent not set")
+}
+
+/**
+ * Removes [this] node from the parent if it is in a [MutableList].
+ * For this to work, [Node.assignParents] must have been called.
+ */
+fun Node.removeFromList() {
+    parent?.removeFromList(this) ?: throw IllegalStateException("Parent not set")
+}
+
+/**
+ * Replaces the element at [index] with [replacements].
+ */
+fun <T> MutableList<T>.replaceWithSeveral(index: Int, replacements: List<T>) {
+    removeAt(index)
+    addAll(index, replacements)
+}
+
+/**
+ * Replaces the element at [index] with [additions].
+ */
+fun <T> MutableList<T>.addSeveralBefore(index: Int, additions: List<T>) {
+    addAll(index, additions)
+}
+
+/**
+ * Replaces the element at [index] with [additions].
+ */
+fun <T> MutableList<T>.addSeveralAfter(index: Int, additions: List<T>) {
+    addAll(index + 1, additions)
 }
