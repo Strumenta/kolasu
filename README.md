@@ -3,7 +3,8 @@
 [![Build Status](https://travis-ci.org/Strumenta/kolasu.svg?branch=master)](https://travis-ci.org/Strumenta/kolasu)
 [![Gitter](https://badges.gitter.im/lang-eng/community.svg)](https://gitter.im/lang-eng/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Kolasu supplies the infrastructure to build a custom, possibly mutable, Abstract Syntax Tree (AST) using ANTLR4 and Kotlin.
+Kolasu supplies the infrastructure to build a custom, possibly mutable, Abstract Syntax Tree (AST) using Kotlin.
+In particular it can be integrated easily with ANTLR, but it can also be used without.
 
 ## Features
 
