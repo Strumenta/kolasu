@@ -6,6 +6,8 @@
 Kolasu supplies the infrastructure to build a custom, possibly mutable, Abstract Syntax Tree (AST) using Kotlin.
 In particular it can be integrated easily with ANTLR, but it can also be used without.
 
+It stands for _**Ko**tlin_ _**La**nguage_ _**Su**pport_.
+
 ## Features
 
 Extend your AST classes from `Node` to get these features:
