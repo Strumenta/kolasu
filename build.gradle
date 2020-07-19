@@ -33,7 +33,7 @@ repositories {
     jcenter()
 }
 
-def kolasuVersion = "0.3.0"
+def kolasuVersion = "1.0.0-SNAPSHOT"
 
 project.group   = "com.strumenta"
 project.version = kolasuVersion
@@ -109,7 +109,7 @@ task generatePom {
           developer {
             id = 'ftomassetti'
             name = 'Federico Tomassetti'
-            email = 'federico@tomassetti.me'
+            email = 'federico@strumenta.com'
           }
         }
       }

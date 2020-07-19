@@ -48,7 +48,7 @@ repositories {
 }
 
 dependencies {
-    compile "com.github.strumenta:kolasu:v0.2.2"
+    compile "com.github.strumenta:kolasu:v0.3.0"
 }
 ```
 
