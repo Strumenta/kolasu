@@ -40,7 +40,7 @@ dependencies {
 }
 ```
 
-Releases are published on GitHub registry. 
+Releases are published on Bintray: 
 
 ```
 repositories {

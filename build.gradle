@@ -19,6 +19,7 @@ buildscript {
 plugins {
     id "org.jlleitschuh.gradle.ktlint" version "9.0.0"
     id("maven-publish")
+    id "com.jfrog.bintray" version "1.8.5"
 }
 
 apply plugin: 'kotlin'
@@ -186,4 +187,27 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+}
+
+bintray {
+    user = rootProject.findProperty('bintray_user')
+    key = rootProject.findProperty('bintray_api_key')
+    pkg {
+        repo = 'strumenta-oss-maven'
+        name = 'kolasu'
+        userOrg = 'strumenta'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/Strumenta/kolasu.git'
+        version {
+            name = 'v' + project.version
+            desc = 'Version ' + project.version
+            released = new Date()
+            vcsTag = 'v'+project.version
+        }
+    }
+
+    publications = ['gpr']
+    dryRun = false
+    publish = true
+    override = true
 }
