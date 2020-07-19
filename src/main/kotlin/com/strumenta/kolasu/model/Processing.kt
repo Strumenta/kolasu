@@ -208,6 +208,7 @@ fun Node.transformTree(operation: (Node) -> Node) {
                 if (newValue != value) {
                     if (property is KMutableProperty<*>) {
                         property.setter.call(this, newValue)
+                        newValue.parent = this
                     } else {
                         throw ImmutablePropertyException(property, value)
                     }
@@ -222,6 +223,7 @@ fun Node.transformTree(operation: (Node) -> Node) {
                             if (newValue != element) {
                                 if (value is MutableList<*>) {
                                     (value as MutableList<Node>)[i] = newValue
+                                    newValue.parent = this
                                 } else {
                                     throw ImmutablePropertyException(property, element)
                                 }
