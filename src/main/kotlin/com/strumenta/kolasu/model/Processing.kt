@@ -162,7 +162,7 @@ val Node.children: List<Node>
     }
 
 // TODO reimplement using transformChildren
-fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
+fun Node.transformTree(operation: (Node) -> Node, inPlace: Boolean = false): Node {
     if (inPlace) TODO()
     operation(this)
     val changes = mutableMapOf<String, Any>()
@@ -170,11 +170,11 @@ fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
         val v = p.get(this)
         when (v) {
             is Node -> {
-                val newValue = v.transform(operation)
+                val newValue = v.transformTree(operation)
                 if (newValue != v) changes[p.name] = newValue
             }
             is Collection<*> -> {
-                val newValue = v.map { if (it is Node) it.transform(operation) else it }
+                val newValue = v.map { if (it is Node) it.transformTree(operation) else it }
                 if (newValue != v) changes[p.name] = newValue
             }
         }
@@ -199,7 +199,7 @@ class ImmutablePropertyException(property: KProperty<*>, node: Node) :
     RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
 @Suppress("UNCHECKED_CAST") // assumption: every MutableList in the AST contains Nodes.
-fun Node.transformTree(operation: (Node) -> Node) {
+fun Node.transformChildren(operation: (Node) -> Node) {
     relevantMemberProperties().forEach { property ->
         val value = property.get(this)
         when (value) {
@@ -236,7 +236,7 @@ fun Node.transformTree(operation: (Node) -> Node) {
     }
 }
 
-fun Node.mapTree(operation: (Node) -> Node): Node {
+fun Node.mapChildren(operation: (Node) -> Node): Node {
     val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { property ->
         val value = property.get(this)
@@ -279,7 +279,7 @@ fun Node.replaceWith(other: Node) {
     if (this.parent == null) {
         throw IllegalStateException("Parent not set")
     }
-    this.parent!!.transformTree { if (it == this) other else it }
+    this.parent!!.transformChildren { if (it == this) other else it }
 }
 
 /**
