@@ -44,7 +44,7 @@ Releases are published on Bintray:
 
 ```
 repositories {
-    maven { url 'https://maven.pkg.github.com/Strumenta/kolasu' }
+    maven { url 'https://maven.pkg.github.com/strumenta/strumenta-oss-maven' }
 }
 
 dependencies {
