@@ -10,7 +10,10 @@ interface ParseTreeToAstMapper<in PTN : ParserRuleContext, out ASTN : Node> {
 
 fun Token.startPoint() = Point(line, charPositionInLine)
 
-fun Token.endPoint() = Point(line, charPositionInLine + text.length)
+val Token.length
+    get() = if (this.type == Token.EOF) 0 else text.length
+
+fun Token.endPoint() = Point(line, charPositionInLine + this.length)
 
 val ParserRuleContext.position: Position
     get() = Position(start.startPoint, stop.endPoint)
