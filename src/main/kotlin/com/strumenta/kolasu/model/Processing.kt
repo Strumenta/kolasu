@@ -116,17 +116,22 @@ fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<No
 
 /**
  * Recursively execute [operation] on this node, and all nodes below this node that extend [klass].
+ *
+ * T is not forced to be a subtype of Node to support using interfaces.
+ *
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
-fun <T : Node> Node.processNodesOfType(klass: Class<T>, operation: (T) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
+fun <T> Node.processNodesOfType(klass: Class<T>, operation: (T) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
     walker.invoke(this).filterIsInstance(klass).forEach(operation)
 }
 
 /**
+ * T is not forced to be a subtype of Node to support using interfaces.
+ *
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  * @return all nodes in this AST (sub)tree that are instances of, or extend [klass].
  */
-fun <T : Node> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<Node>> = Node::walk): List<T> {
+fun <T> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<Node>> = Node::walk): List<T> {
     return walker.invoke(this).filterIsInstance(klass).toList()
 }
 
