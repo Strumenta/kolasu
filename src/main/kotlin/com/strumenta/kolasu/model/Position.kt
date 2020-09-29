@@ -100,11 +100,14 @@ fun pos(startLine: Int, startCol: Int, endLine: Int, endCol: Int) = Position(Poi
 
 fun Node.isBefore(other: Node): Boolean = position!!.start.isBefore(other.position!!.start)
 
+val Token.length
+    get() = if (this.type == Token.EOF) 0 else text.length
+
 val Token.startPoint: Point
     get() = Point(this.line, this.charPositionInLine)
 
 val Token.endPoint: Point
-    get() = startPoint + this.text
+    get() = if (this.type == Token.EOF) startPoint else startPoint + this.text
 
 val RuleContext.hasChildren: Boolean
     get() = this.childCount > 0
