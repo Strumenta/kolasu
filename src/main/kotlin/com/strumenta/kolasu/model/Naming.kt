@@ -40,7 +40,7 @@ fun <N> ReferenceByName<N>.tryToResolve(candidates: List<N>, caseInsensitive: Bo
     return res != null
 }
 
-fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : Named {
+fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : PossiblyNamed {
     return if (possibleValue == null) {
         false
     } else {
