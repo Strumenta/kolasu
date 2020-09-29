@@ -12,8 +12,8 @@ import java.nio.charset.Charset
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.Parser
 
-data class ParsingResult<RootNode : Node>(val root: RootNode?, val errors: List<Issue>, val code: String, val incompleteNode: Node? = null) {
-    fun isCorrect() = errors.isEmpty() && root != null
+data class ParsingResult<RootNode : Node>(val root: RootNode?, val issues: List<Issue>, val code: String, val incompleteNode: Node? = null) {
+    fun isCorrect() = issues.isEmpty() && root != null
 }
 
 fun String.toStream(charset: Charset = Charsets.UTF_8) = ByteArrayInputStream(toByteArray(charset))
