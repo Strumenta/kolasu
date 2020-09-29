@@ -1,11 +1,13 @@
 package com.strumenta.kolasu.generation
 
+import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
 import kotlin.test.assertEquals
 import org.junit.Test
+import java.io.StringWriter
 
 class JsonGenerationTest {
 
@@ -77,6 +79,27 @@ class JsonGenerationTest {
   "otherSections": []
 }""",
             json
+        )
+    }
+
+    @Test
+    fun generateJsonWithStreaming() {
+        val myRoot = MyRoot(
+                mainSection = Section(
+                        "Section1",
+                        listOf(
+                                Content(1, null),
+                                Content(2, Content(3, Content(4, null)))
+                        )
+                ),
+                otherSections = listOf()
+        )
+        val writer = StringWriter()
+        JsonGenerator().generateJSONWithStreaming(myRoot, JsonWriter(writer))
+        val json = writer.toString()
+        assertEquals(
+                """{"type":"MyRoot","mainSection":{"type":"Section","contents":[{"type":"Content","annidatedContent":null,"id":1},{"type":"Content","annidatedContent":{"type":"Content","annidatedContent":{"type":"Content","annidatedContent":null,"id":4},"id":3},"id":2}],"name":"Section1"},"otherSections":[]}""",
+                json
         )
     }
 }
