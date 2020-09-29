@@ -22,23 +22,9 @@ All properties, and therefore the whole tree structure, will be detected automat
 
 ## Origin
 
-Kolasu stands for Kotlin Language Support. 
-
-It was born as a small framework to support building languages using ANTLR and Kotlin. 
+Kolasu was born as a small framework to support building languages using ANTLR and Kotlin. 
 
 ## Using Kolasu in your project
-
-Snapshots are published on JitPack.
-
-```
-repositories {
-    maven { url 'https://jitpack.io' }
-}
-
-dependencies {
-    compile "com.github.strumenta:kolasu:20fb9cd239"
-}
-```
 
 Releases are published on Bintray: 
 
@@ -48,7 +34,19 @@ repositories {
 }
 
 dependencies {
-    compile "com.strumenta:kolasu:v0.3.0"
+    compile "com.strumenta:kolasu:1.0.5"
+}
+```
+
+Snapshots are published on JitPack.
+
+```
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compile "com.github.strumenta:kolasu:master"
 }
 ```
 
@@ -64,7 +62,8 @@ Run:
 
 Kolasu is used in several internal and commercial projects developed at [Strumenta](https://strumenta.com).
 
-It is also used in an open-source project named [Jariko](https://github.com/smeup/jariko). Jariko is an interpreter for RPG running on the JVM.
+It is also used in an open-source project named [Jariko](https://github.com/smeup/jariko). 
+Jariko is an interpreter for RPG running on the JVM.
 
 ## Publishing
 
