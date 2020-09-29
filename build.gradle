@@ -34,7 +34,7 @@ repositories {
     jcenter()
 }
 
-def kolasuVersion = "1.0.6-SNAPSHOT"
+def kolasuVersion = "1.0.6"
 
 project.group   = "com.strumenta"
 project.version = kolasuVersion
@@ -179,6 +179,8 @@ publishing {
     publications {
         gpr(MavenPublication) {
             from(components.java)
+            artifact sourcesJar
+            artifact javadocJar
         }
     }
 }
