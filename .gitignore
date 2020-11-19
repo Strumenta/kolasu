@@ -27,3 +27,6 @@ hs_err_pid*
 out
 .DS_Store
 .gradle
+
+.idea/
+generated-test-src/
