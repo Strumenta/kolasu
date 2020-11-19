@@ -1,10 +1,12 @@
 package com.strumenta.kolasu.model
 
+import kotlinx.serialization.Serializable
 import org.antlr.v4.runtime.Token
 
 /**
  * The line should be in 1..n, the column in 0..n
  */
+@Serializable
 data class Point(val line: Int, val column: Int) : Comparable<Point> {
     override fun compareTo(other: Point): Int {
         if (line == other.line) {
@@ -54,6 +56,7 @@ val START_POINT = Point(1, 0)
 /**
  * Both the start point and the end point are included
  */
+@Serializable
 data class Position(val start: Point, val end: Point) : Comparable<Position> {
 
     override fun compareTo(other: Position): Int {

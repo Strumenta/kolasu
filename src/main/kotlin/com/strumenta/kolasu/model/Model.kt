@@ -1,12 +1,13 @@
 package com.strumenta.kolasu.model
 
-import org.antlr.v4.runtime.RuleContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
-open class Node(open val position: Position? = null) {
-    var parseTreeNode: RuleContext? = null
+@Serializable
+open class Node(@Transient open val position: Position? = null) {
     var parent: Node? = null
 }
 
@@ -31,6 +32,7 @@ interface Named {
 /**
  * A reference associated by using a name.
  */
+@Serializable
 data class ReferenceByName<N>(val name: String, var referred: N? = null) where N : Named {
     override fun toString(): String {
         return if (referred == null) {
