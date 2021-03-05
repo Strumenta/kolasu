@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.4.0'
+    ext.kotlin_version = '1.4.31'
     ext.antlr_version = '4.8-1'
 
     repositories {
@@ -52,6 +52,9 @@ dependencies {
   compile 'com.fifesoft:autocomplete:2.5.8'
   compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
   compile 'org.redundent:kotlin-xml-builder:1.5.3'
+  compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.common', version: '2.21.0'
+  compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore', version: '2.23.0'
+  compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore.xmi', version: '2.16.0'
 }
 
 task version {
