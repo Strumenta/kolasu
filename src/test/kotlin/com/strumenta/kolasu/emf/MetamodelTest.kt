@@ -20,6 +20,7 @@ class MetamodelTest {
         metamodelBuilder.addClass(CompilationUnit::class)
         var ePackage = metamodelBuilder.generate()
         ePackage.saveEcore(File("simplemm.ecore"))
+        ePackage.saveAsJson(File("simplemm.json"))
         assertEquals("SimpleMM", ePackage.name)
         assertEquals(6, ePackage.eClassifiers.size)
 

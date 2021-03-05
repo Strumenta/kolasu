@@ -20,5 +20,6 @@ class ModelTest {
 
         val eo = cu.toEObject(ePackage)
         eo.saveXMI(File("simplemodel.xmi"))
+        eo.saveAsJson(File("simplem.json"))
     }
 }

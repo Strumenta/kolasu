@@ -10,6 +10,7 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
+import org.emfjson.jackson.resource.JsonResourceFactory
 import java.io.File
 
 fun EPackage.getEClass(javaClass: Class<*>) : EClass {
@@ -46,6 +47,15 @@ fun EObject.saveXMI(xmiFile: File) {
     val resourceSet = ResourceSetImpl()
     resourceSet.resourceFactoryRegistry.extensionToFactoryMap["xmi"] = XMIResourceFactoryImpl()
     val uri: URI = URI.createFileURI(xmiFile.absolutePath)
+    val resource: Resource = resourceSet.createResource(uri)
+    resource.contents.add(this)
+    resource.save(null)
+}
+
+fun EObject.saveAsJson(jsonFile: File) {
+    val resourceSet = ResourceSetImpl()
+    resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
+    val uri: URI = URI.createFileURI(jsonFile.absolutePath)
     val resource: Resource = resourceSet.createResource(uri)
     resource.contents.add(this)
     resource.save(null)
