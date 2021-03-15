@@ -14,7 +14,7 @@ class ModelTest {
                 VarDeclaration("a", StringLiteral("foo")),
                 VarDeclaration("b", StringLiteral("bar"))
         ))
-        val metamodelBuilder = MetamodelBuilder("SimpleMM")
+        val metamodelBuilder = MetamodelBuilder("SimpleMM", "https://strumenta.com/simplemm")
         metamodelBuilder.addClass(CompilationUnit::class)
         var ePackage = metamodelBuilder.generate()
 

@@ -16,7 +16,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.jvmErasure
 
-class MetamodelBuilder(packageName: String) {
+class MetamodelBuilder(packageName: String, nsURI: String) {
 
     private val ePackage : EPackage
     private val eClasses = HashMap<KClass<*>, EClass>()
@@ -25,6 +25,7 @@ class MetamodelBuilder(packageName: String) {
     init {
         ePackage = EcoreFactory.eINSTANCE.createEPackage()
         ePackage.name = packageName
+        ePackage.nsURI = nsURI
     }
 
     private fun toEDataType(ktype: KType) : EDataType {
