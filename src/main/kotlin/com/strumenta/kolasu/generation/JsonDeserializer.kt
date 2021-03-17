@@ -40,6 +40,7 @@ class JsonDeserializer {
                     }
                     return list
                 }
+                // TODO handle enum classes
                 rawClass == String::class.java -> {
                     return json.asString
                 }
@@ -47,7 +48,7 @@ class JsonDeserializer {
                     return json.asInt
                 }
                 else -> {
-                    TODO()
+                    TODO("RawClass $rawClass")
                 }
             }
         }
