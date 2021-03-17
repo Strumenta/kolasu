@@ -2,6 +2,12 @@ package com.strumenta.kolasu.generation
 
 import com.google.gson.*
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueType
+import com.strumenta.kolasu.validation.Result
+import jdk.nashorn.internal.parser.JSONParser
 import java.lang.IllegalStateException
 import java.lang.UnsupportedOperationException
 import java.util.*
@@ -74,4 +80,33 @@ class JsonDeserializer {
 
         return instance ?: throw UnsupportedOperationException()
     }
+
+    fun <T: Node> deserializeResult(rootClass: Class<T>, json: String): Result<T> {
+        val jo = JsonParser().parse(json).asJsonObject
+        val errors = jo["errors"].asJsonArray.map { it.asJsonObject }.map {
+            val type = IssueType.valueOf(it["type"].asString)
+            val message = it["message"].asString
+            val position = it["position"]?.asJsonObject?.decodeAsPosition()
+            Issue(type, message, position)
+        }
+        val root = if (jo.has("root")) {
+            deserialize(rootClass, jo["root"].asJsonObject)
+        } else {
+            null
+        }
+
+        return Result(errors, root as T?)
+    }
+}
+
+private fun JsonObject.decodeAsPosition(): Position {
+    val start = this["start"]!!.asJsonObject.decodeAsPoint()
+    val end = this["end"]!!.asJsonObject.decodeAsPoint()
+    return Position(start, end)
+}
+
+private fun JsonObject.decodeAsPoint(): Point {
+    val line = this["line"]!!.asInt
+    val column = this["column"]!!.asInt
+    return Point(line, column)
 }
