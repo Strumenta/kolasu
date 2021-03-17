@@ -1,16 +1,7 @@
 package com.strumenta.kolasu.generation
 
-import com.github.salomonbrys.kotson.jsonObject
-import com.github.salomonbrys.kotson.toJsonArray
 import com.google.gson.*
-import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.model.processProperties
-import com.strumenta.kolasu.validation.Issue
-import com.strumenta.kolasu.validation.Result
-import java.io.File
 import java.lang.IllegalStateException
 import java.lang.UnsupportedOperationException
 import java.util.*
@@ -27,7 +18,7 @@ class JsonDeserializer {
             return null
         }
         if (type.classifier is KClass<*>) {
-            val rawClass : Class<*> = (type.classifier as KClass<*>).java
+            val rawClass: Class<*> = (type.classifier as KClass<*>).java
             when {
                 Node::class.java.isAssignableFrom(rawClass) -> {
                     val className = json.asJsonObject["type"].asString
@@ -57,13 +48,13 @@ class JsonDeserializer {
         }
         TODO()
     }
-    fun <T:Node> deserialize(clazz: Class<T>, json: String): T {
+    fun <T : Node> deserialize(clazz: Class<T>, json: String): T {
         val jo = JsonParser().parse(json).asJsonObject
         return deserialize(clazz, jo)
     }
 
-    fun <T:Node> deserialize(clazz: Class<T>, jo: JsonObject): T {
-        var instance : T? = null
+    fun <T : Node> deserialize(clazz: Class<T>, jo: JsonObject): T {
+        var instance: T? = null
         val primaryConstructor = clazz.kotlin.primaryConstructor
         if (primaryConstructor != null) {
             var args = HashMap<KParameter, Any?>()
