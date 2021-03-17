@@ -7,7 +7,6 @@ import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
-import jdk.nashorn.internal.parser.JSONParser
 import java.lang.IllegalStateException
 import java.lang.UnsupportedOperationException
 import java.util.*
