@@ -77,7 +77,7 @@ class JsonGenerator {
 
 private fun Node.toJson(): JsonElement {
     val jsonObject = jsonObject(
-        "type" to this.javaClass.simpleName,
+        "type" to this.javaClass.canonicalName,
         "position" to this.position?.toJson()
     )
     this.processProperties {

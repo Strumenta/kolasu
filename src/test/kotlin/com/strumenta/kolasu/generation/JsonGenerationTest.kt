@@ -53,20 +53,20 @@ class JsonGenerationTest {
         val json = JsonGenerator().generateString(myRoot)
         assertEquals(
             """{
-  "type": "MyRoot",
+  "type": "com.strumenta.kolasu.generation.MyRoot",
   "mainSection": {
-    "type": "Section",
+    "type": "com.strumenta.kolasu.generation.Section",
     "contents": [
       {
-        "type": "Content",
+        "type": "com.strumenta.kolasu.generation.Content",
         "id": 1
       },
       {
-        "type": "Content",
+        "type": "com.strumenta.kolasu.generation.Content",
         "annidatedContent": {
-          "type": "Content",
+          "type": "com.strumenta.kolasu.generation.Content",
           "annidatedContent": {
-            "type": "Content",
+            "type": "com.strumenta.kolasu.generation.Content",
             "id": 4
           },
           "id": 3
