@@ -3,20 +3,19 @@ package com.strumenta.kolasu.emf
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.processProperties
 import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.*
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EDataType
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
-import org.emfjson.jackson.resource.JsonResourceFactory
 import java.io.File
-import java.util.*
-import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.superclasses
-import kotlin.reflect.jvm.jvmErasure
 
-class MetamodelBuilder(packageName: String, nsURI: String) {
+class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String? = null) {
 
     private val ePackage : EPackage
     private val eClasses = HashMap<KClass<*>, EClass>()
@@ -26,6 +25,7 @@ class MetamodelBuilder(packageName: String, nsURI: String) {
         ePackage = EcoreFactory.eINSTANCE.createEPackage()
         ePackage.name = packageName
         ePackage.nsURI = nsURI
+        ePackage.nsPrefix = nsPrefix
     }
 
     private fun toEDataType(ktype: KType) : EDataType {
