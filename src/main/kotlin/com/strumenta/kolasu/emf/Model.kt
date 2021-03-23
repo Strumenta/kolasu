@@ -8,13 +8,13 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.emfjson.jackson.resource.JsonResourceFactory
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 fun EPackage.getEClass(javaClass: Class<*>) : EClass {
-    return this.eClassifiers.find { it.name == javaClass.simpleName } as EClass
+    return (this.eClassifiers.find { it.name == javaClass.simpleName } ?: throw IllegalArgumentException("Class not found: $javaClass")) as EClass
 }
 
 fun Node.toEObject(ePackage: EPackage) : EObject {
@@ -60,3 +60,13 @@ fun EObject.saveAsJson(jsonFile: File) {
     resource.contents.add(this)
     resource.save(null)
 }
+
+fun EObject.saveAsJson() : String {
+    val uri: URI = URI.createURI("dummy-URI")
+    val resource: Resource = JsonResourceFactory().createResource(uri)
+    resource.contents.add(this)
+    val output = ByteArrayOutputStream()
+    resource.save(output, null)
+    return output.toString(Charsets.UTF_8)
+}
+
