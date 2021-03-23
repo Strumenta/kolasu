@@ -20,7 +20,7 @@ class ResultTest {
                 VarDeclaration(Visibility.PUBLIC, "a", StringLiteral("foo")),
                 VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar"))
         ))
-        val metamodelBuilder = MetamodelBuilder("SimpleMM", "https://strumenta.com/simplemm")
+        val metamodelBuilder = MetamodelBuilder("SimpleMM", "https://strumenta.com/simplemm", "simplemm")
         metamodelBuilder.addClass(CompilationUnit::class)
         var ePackage = metamodelBuilder.generate()
 

@@ -108,7 +108,7 @@ fun createKolasuMetamodel(): EPackage {
     return ePackage
 }
 
-class MetamodelBuilder(packageName: String, nsURI: String) {
+class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
 
     private val ePackage : EPackage
     private val eClasses = HashMap<KClass<*>, EClass>()
@@ -118,6 +118,7 @@ class MetamodelBuilder(packageName: String, nsURI: String) {
         ePackage = EcoreFactory.eINSTANCE.createEPackage()
         ePackage.name = packageName
         ePackage.nsURI = nsURI
+        ePackage.nsPrefix = nsPrefix
     }
 
     private fun createEEnum(kClass: KClass<out Enum<*>>) : EEnum {
