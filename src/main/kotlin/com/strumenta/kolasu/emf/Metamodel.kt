@@ -56,10 +56,17 @@ fun EClass.addAttribute(name: String, type: EDataType, min: Int, max: Int) : EAt
 
 val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
 
+fun EPackage.setResourceURI(uri: String) {
+    val resource = EcoreResourceFactoryImpl().createResource(URI.createURI(uri))
+    resource.contents.add(this)
+}
+
 fun createKolasuMetamodel(): EPackage {
     val ePackage = EcoreFactory.eINSTANCE.createEPackage()
+    val nsUri = "https://strumenta.com/kolasu"
+    ePackage.setResourceURI(nsUri)
     ePackage.name = "StrumentaParser"
-    ePackage.nsURI = "https://strumenta.com/kolasu"
+    ePackage.nsURI = nsUri
 
     val intDT = EcoreFactory.eINSTANCE.createEDataType()
     intDT.name = "int"
@@ -119,6 +126,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
         ePackage.name = packageName
         ePackage.nsURI = nsURI
         ePackage.nsPrefix = nsPrefix
+        ePackage.setResourceURI(nsURI)
     }
 
     private fun createEEnum(kClass: KClass<out Enum<*>>) : EEnum {
