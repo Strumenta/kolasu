@@ -55,8 +55,7 @@ dependencies {
   compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.common', version: '2.21.0'
   compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore', version: '2.23.0'
   compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore.xmi', version: '2.16.0'
-    compile group: 'org.emfjson', name: 'emfjson-jackson', version: '1.2.0'
-
+  compile group: 'org.emfjson', name: 'emfjson-jackson', version: '1.2.0'
 }
 
 task version {

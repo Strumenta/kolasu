@@ -13,7 +13,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 
-class MetamodelBuilder(packageName: String, uri: String) {
+class MetamodelBuilder(packageName: String, nsURI: String) {
 
     private val ePackage : EPackage
     private val eClasses = HashMap<KClass<*>, EClass>()
@@ -22,7 +22,7 @@ class MetamodelBuilder(packageName: String, uri: String) {
     init {
         ePackage = EcoreFactory.eINSTANCE.createEPackage()
         ePackage.name = packageName
-        ePackage.nsURI = uri
+        ePackage.nsURI = nsURI
     }
 
     private fun createEEnum(kClass: KClass<out Enum<*>>) : EEnum {
