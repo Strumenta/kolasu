@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.processProperties
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
@@ -15,6 +16,10 @@ import java.io.File
 
 fun EPackage.getEClass(javaClass: Class<*>) : EClass {
     return (this.eClassifiers.find { it.name == javaClass.simpleName } ?: throw IllegalArgumentException("Class not found: $javaClass")) as EClass
+}
+
+fun EPackage.getEEnum(javaClass: Class<*>) : EEnum {
+    return (this.eClassifiers.find { it.name == javaClass.simpleName } ?: throw IllegalArgumentException("Class not found: $javaClass")) as EEnum
 }
 
 fun Node.toEObject(ePackage: EPackage) : EObject {
@@ -36,7 +41,13 @@ fun Node.toEObject(ePackage: EPackage) : EObject {
             if (pd.multiple) {
                 TODO()
             } else {
-                eo.eSet(esf, pd.value)
+                if (pd.value is Enum<*>) {
+                    val ee = ePackage.getEEnum(pd.value.javaClass)
+                    val eev = ee.getEEnumLiteral(pd.value.name)
+                    eo.eSet(esf, eev)
+                } else {
+                    eo.eSet(esf, pd.value)
+                }
             }
         }
     }

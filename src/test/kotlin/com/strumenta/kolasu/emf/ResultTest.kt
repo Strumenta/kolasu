@@ -17,8 +17,8 @@ class ResultTest {
     @Test
     fun generateSimpleModelResult() {
         val cu = CompilationUnit(listOf(
-                VarDeclaration("a", StringLiteral("foo")),
-                VarDeclaration("b", StringLiteral("bar"))
+                VarDeclaration(Visibility.PUBLIC, "a", StringLiteral("foo")),
+                VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar"))
         ))
         val metamodelBuilder = MetamodelBuilder("SimpleMM", "https://strumenta.com/simplemm")
         metamodelBuilder.addClass(CompilationUnit::class)
