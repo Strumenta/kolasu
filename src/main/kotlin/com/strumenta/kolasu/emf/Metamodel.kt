@@ -7,16 +7,13 @@ import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
-import org.emfjson.jackson.resource.JsonResourceFactory
 import java.io.File
-import java.util.*
-import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
-import kotlin.reflect.jvm.jvmErasure
 
-class MetamodelBuilder(packageName: String) {
+class MetamodelBuilder(packageName: String, uri: String) {
 
     private val ePackage : EPackage
     private val eClasses = HashMap<KClass<*>, EClass>()
@@ -25,16 +22,35 @@ class MetamodelBuilder(packageName: String) {
     init {
         ePackage = EcoreFactory.eINSTANCE.createEPackage()
         ePackage.name = packageName
+        ePackage.nsURI = uri
+    }
+
+    private fun createEEnum(kClass: KClass<out Enum<*>>) : EEnum {
+        val eEnum = EcoreFactory.eINSTANCE.createEEnum()
+        eEnum.name = kClass.simpleName
+        kClass.java.enumConstants.forEach {
+            var eLiteral = EcoreFactory.eINSTANCE.createEEnumLiteral()
+            eLiteral.name = it.name
+            eLiteral.value = it.ordinal
+            eEnum.eLiterals.add(eLiteral)
+        }
+        return eEnum
     }
 
     private fun toEDataType(ktype: KType) : EDataType {
         if (!dataTypes.containsKey(ktype)) {
-            val eDataType = EcoreFactory.eINSTANCE.createEDataType()
-            if (ktype.classifier == String::class) {
-                eDataType.name = "String"
-                eDataType.instanceClass = String::class.java
-            } else {
-                TODO(ktype.toString())
+            var eDataType = EcoreFactory.eINSTANCE.createEDataType()
+            when {
+                ktype.classifier == String::class -> {
+                    eDataType.name = "String"
+                    eDataType.instanceClass = String::class.java
+                }
+                (ktype.classifier as? KClass<*>)?.isSubclassOf(Enum::class) == true -> {
+                    eDataType = createEEnum(ktype.classifier as KClass<out Enum<*>>)
+                }
+                else -> {
+                    TODO(ktype.toString())
+                }
             }
             ePackage.eClassifiers.add(eDataType)
             dataTypes[ktype] = eDataType
