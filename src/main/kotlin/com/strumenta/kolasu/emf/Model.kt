@@ -2,6 +2,8 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.processProperties
+import java.io.ByteArrayOutputStream
+import java.io.File
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EEnum
@@ -11,18 +13,16 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.emfjson.jackson.resource.JsonResourceFactory
-import java.io.ByteArrayOutputStream
-import java.io.File
 
-fun EPackage.getEClass(javaClass: Class<*>) : EClass {
+fun EPackage.getEClass(javaClass: Class<*>): EClass {
     return (this.eClassifiers.find { it.name == javaClass.simpleName } ?: throw IllegalArgumentException("Class not found: $javaClass")) as EClass
 }
 
-fun EPackage.getEEnum(javaClass: Class<*>) : EEnum {
+fun EPackage.getEEnum(javaClass: Class<*>): EEnum {
     return (this.eClassifiers.find { it.name == javaClass.simpleName } ?: throw IllegalArgumentException("Class not found: $javaClass")) as EEnum
 }
 
-fun Node.toEObject(ePackage: EPackage) : EObject {
+fun Node.toEObject(ePackage: EPackage): EObject {
     val ec = ePackage.getEClass(this.javaClass)
     val eo = ePackage.eFactoryInstance.create(ec)
     this.processProperties { pd ->
@@ -72,7 +72,7 @@ fun EObject.saveAsJson(jsonFile: File) {
     resource.save(null)
 }
 
-fun EObject.saveAsJson() : String {
+fun EObject.saveAsJson(): String {
     val uri: URI = URI.createURI("dummy-URI")
     val resource: Resource = JsonResourceFactory().createResource(uri)
     resource.contents.add(this)
@@ -82,4 +82,3 @@ fun EObject.saveAsJson() : String {
     resource.save(output, null)
     return output.toString(Charsets.UTF_8)
 }
-

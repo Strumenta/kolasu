@@ -1,10 +1,10 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.Node
-import org.eclipse.emf.ecore.EClass
-import org.junit.Test
 import java.io.File
 import kotlin.test.assertEquals
+import org.eclipse.emf.ecore.EClass
+import org.junit.Test
 
 sealed class Statement : Node()
 sealed class Expression : Node()
@@ -47,5 +47,4 @@ class MetamodelTest {
         val vd: EClass = ePackage.eClassifiers.find { it.name == "VarDeclaration" } as EClass
         assertEquals(2, vd.eAllAttributes.size)
     }
-
 }

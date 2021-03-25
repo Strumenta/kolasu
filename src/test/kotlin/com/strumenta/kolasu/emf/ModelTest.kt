@@ -1,5 +1,9 @@
 package com.strumenta.kolasu.emf
 
+import java.io.File
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
@@ -8,19 +12,17 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.emfjson.jackson.resource.JsonResourceFactory
 import org.junit.Test
-import java.io.File
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class ModelTest {
 
     @Test
     fun generateSimpleModel() {
-        val cu = CompilationUnit(listOf(
+        val cu = CompilationUnit(
+            listOf(
                 VarDeclaration(Visibility.PUBLIC, "a", StringLiteral("foo")),
                 VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar"))
-        ))
+            )
+        )
         val nsURI = "https://strumenta.com/simplemm"
         val metamodelBuilder = MetamodelBuilder("SimpleMM", nsURI, "simplemm")
         metamodelBuilder.addClass(CompilationUnit::class)
@@ -34,8 +36,8 @@ class ModelTest {
 
         val resourceSet = ResourceSetImpl()
         resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
-        //TODO this is to correctly resolve the metamodel, however what would happen if there were
-        //other references to https://... resources?
+        // TODO this is to correctly resolve the metamodel, however what would happen if there were
+        // other references to https://... resources?
         resourceSet.resourceFactoryRegistry.protocolToFactoryMap["https"] = JsonResourceFactory()
         val metaURI = URI.createURI(nsURI)
         val metaRes = resourceSet.createResource(metaURI)

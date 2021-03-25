@@ -3,21 +3,20 @@ package com.strumenta.kolasu.emf
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.validation.IssueType
-import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.*
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
+import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.*
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
+import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 
 fun EEnum.addLiteral(enumEntry: Enum<*>) {
     this.addLiteral(enumEntry.name)
 }
-
 
 fun EEnum.addLiteral(name: String) {
     val newLiteral = EcoreFactory.eINSTANCE.createEEnumLiteral()
@@ -26,14 +25,14 @@ fun EEnum.addLiteral(name: String) {
     this.eLiterals.add(newLiteral)
 }
 
-fun EPackage.createEClass(name: String) : EClass {
+fun EPackage.createEClass(name: String): EClass {
     val eClass = EcoreFactory.eINSTANCE.createEClass()
     eClass.name = name
     this.eClassifiers.add(eClass)
     return eClass
 }
 
-fun EClass.addContainment(name: String, type: EClass, min: Int, max: Int) : EReference {
+fun EClass.addContainment(name: String, type: EClass, min: Int, max: Int): EReference {
     val eReference = EcoreFactory.eINSTANCE.createEReference()
     eReference.isContainment = true
     eReference.name = name
@@ -44,7 +43,7 @@ fun EClass.addContainment(name: String, type: EClass, min: Int, max: Int) : ERef
     return eReference
 }
 
-fun EClass.addAttribute(name: String, type: EDataType, min: Int, max: Int) : EAttribute {
+fun EClass.addAttribute(name: String, type: EDataType, min: Int, max: Int): EAttribute {
     val eAttribute = EcoreFactory.eINSTANCE.createEAttribute()
     eAttribute.name = name
     eAttribute.eType = type
@@ -117,7 +116,7 @@ fun createKolasuMetamodel(): EPackage {
 
 class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
 
-    private val ePackage : EPackage
+    private val ePackage: EPackage
     private val eClasses = HashMap<KClass<*>, EClass>()
     private val dataTypes = HashMap<KType, EDataType>()
 
@@ -129,7 +128,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
         ePackage.setResourceURI(nsURI)
     }
 
-    private fun createEEnum(kClass: KClass<out Enum<*>>) : EEnum {
+    private fun createEEnum(kClass: KClass<out Enum<*>>): EEnum {
         val eEnum = EcoreFactory.eINSTANCE.createEEnum()
         eEnum.name = kClass.simpleName
         kClass.java.enumConstants.forEach {
@@ -141,7 +140,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
         return eEnum
     }
 
-    private fun toEDataType(ktype: KType) : EDataType {
+    private fun toEDataType(ktype: KType): EDataType {
         if (!dataTypes.containsKey(ktype)) {
             var eDataType = EcoreFactory.eINSTANCE.createEDataType()
             when {
@@ -162,7 +161,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
         return dataTypes[ktype]!!
     }
 
-    private fun toEClass(kClass: KClass<*>) : EClass {
+    private fun toEClass(kClass: KClass<*>): EClass {
         val eClass = EcoreFactory.eINSTANCE.createEClass()
         kClass.superclasses.forEach {
             if (it != Any::class && it != Node::class) {
@@ -202,7 +201,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
         return eClass
     }
 
-    fun addClass(kClass: KClass<*>) : EClass {
+    fun addClass(kClass: KClass<*>): EClass {
         if (!eClasses.containsKey(kClass)) {
             val eClass = toEClass(kClass)
             ePackage.eClassifiers.add(eClass)
@@ -214,7 +213,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
         return eClasses[kClass]!!
     }
 
-    fun generate() : EPackage {
+    fun generate(): EPackage {
         return ePackage
     }
 }

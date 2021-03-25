@@ -8,10 +8,10 @@ import kotlin.reflect.full.primaryConstructor
 
 internal val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.kotlin.memberProperties
-            .filter { it.visibility == KVisibility.PUBLIC }
-            .filter { it.findAnnotation<Derived>() == null }
-            .filter { it.findAnnotation<Link>() == null }
-            .filter { it.name != "parent" }
+        .filter { it.visibility == KVisibility.PUBLIC }
+        .filter { it.findAnnotation<Derived>() == null }
+        .filter { it.findAnnotation<Link>() == null }
+        .filter { it.name != "parent" }
 
 /**
  * @return all properties of this node that are considered AST properties.
@@ -83,7 +83,7 @@ data class PropertyTypeDescription(val name: String, val provideNodes: Boolean, 
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             val multiple = (classifier?.isSubclassOf(Collection::class) == true)
-            var valueType : KType
+            var valueType: KType
             val provideNodes = if (multiple) {
                 valueType = propertyType.arguments[0].type!!
                 providesNodes(propertyType.arguments[0])
@@ -92,10 +92,10 @@ data class PropertyTypeDescription(val name: String, val provideNodes: Boolean, 
                 providesNodes(classifier)
             }
             return PropertyTypeDescription(
-                    name = property.name,
-                    provideNodes = provideNodes,
-                    multiple = multiple,
-                    valueType = valueType
+                name = property.name,
+                provideNodes = provideNodes,
+                multiple = multiple,
+                valueType = valueType
             )
         }
     }
@@ -133,9 +133,9 @@ fun Node.processProperties(
     }
 }
 
-fun <T: Any> Class<T>.processProperties(
-        propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
-        propertyTypeOperation: (PropertyTypeDescription) -> Unit
+fun <T : Any> Class<T>.processProperties(
+    propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
+    propertyTypeOperation: (PropertyTypeDescription) -> Unit
 ) {
     nodeProperties.forEach { p ->
         if (!propertiesToIgnore.contains(p.name)) {

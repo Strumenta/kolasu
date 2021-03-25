@@ -17,9 +17,9 @@ import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
+import java.io.File
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
-import java.io.File
 
 class JsonGenerator {
 
@@ -72,7 +72,7 @@ class JsonGenerator {
         return gson.toJson(generateJSON(result))
     }
 
-    private fun pointAsEObject(point: Point) : EObject {
+    private fun pointAsEObject(point: Point): EObject {
         val ec = KOLASU_METAMODEL.getEClass(Point::class.java)
         val eo = KOLASU_METAMODEL.eFactoryInstance.create(ec)
         val lineSF = ec.eAllStructuralFeatures.find { it.name == "line" }!!
@@ -82,7 +82,7 @@ class JsonGenerator {
         return eo
     }
 
-    private fun positionAsEObject(position: Position) : EObject {
+    private fun positionAsEObject(position: Position): EObject {
         val ec = KOLASU_METAMODEL.getEClass(Position::class.java)
         val eo = KOLASU_METAMODEL.eFactoryInstance.create(ec)
         val startSF = ec.eAllStructuralFeatures.find { it.name == "start" }!!
@@ -92,7 +92,7 @@ class JsonGenerator {
         return eo
     }
 
-    private fun issueAsEObject(issue: Issue) : EObject {
+    private fun issueAsEObject(issue: Issue): EObject {
         val ec = KOLASU_METAMODEL.getEClass(Issue::class.java)
         val eo = KOLASU_METAMODEL.eFactoryInstance.create(ec)
         val typeSF = ec.eAllStructuralFeatures.find { it.name == "type" }!!
