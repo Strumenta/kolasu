@@ -80,5 +80,5 @@ fun EObject.saveAsJson(): String {
     println(uf)
     val output = ByteArrayOutputStream()
     resource.save(output, null)
-    return output.toString(Charsets.UTF_8)
+    return output.toString(Charsets.UTF_8.name())
 }
