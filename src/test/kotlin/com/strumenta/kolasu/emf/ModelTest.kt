@@ -14,11 +14,11 @@ class ModelTest {
     @Test
     fun generateSimpleModel() {
         val cu = CompilationUnit(listOf(
-                VarDeclaration("a", StringLiteral("foo")),
-                VarDeclaration("b", StringLiteral("bar"))
+                VarDeclaration(Visibility.PUBLIC, "a", StringLiteral("foo")),
+                VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar"))
         ))
         val nsURI = "https://strumenta.com/simplemm"
-        val metamodelBuilder = MetamodelBuilder("SimpleMM", nsURI)
+        val metamodelBuilder = MetamodelBuilder("SimpleMM", nsURI, "simplemm")
         metamodelBuilder.addClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
 
