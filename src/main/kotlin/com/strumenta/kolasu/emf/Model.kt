@@ -15,7 +15,11 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.emfjson.jackson.resource.JsonResourceFactory
 
 fun EPackage.getEClass(javaClass: Class<*>): EClass {
-    return (this.eClassifiers.find { it.name == javaClass.simpleName } ?: throw IllegalArgumentException("Class not found: $javaClass")) as EClass
+    return this.getEClass(javaClass.simpleName)
+}
+
+fun EPackage.getEClass(name: String): EClass {
+    return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("Class not found: $javaClass")) as EClass
 }
 
 fun EPackage.getEEnum(javaClass: Class<*>): EEnum {

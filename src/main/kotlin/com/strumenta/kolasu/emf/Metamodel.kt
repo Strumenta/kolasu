@@ -181,6 +181,9 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
                 eClass.eSuperTypes.add(addClass(it))
             }
         }
+        if (eClass.eSuperTypes.isEmpty()) {
+            eClass.eSuperTypes.add(KOLASU_METAMODEL.getEClass("ASTNode"))
+        }
         eClass.name = kClass.simpleName
         eClass.isAbstract = kClass.isAbstract || kClass.isSealed
         kClass.java.processProperties {
