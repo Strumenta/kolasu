@@ -113,8 +113,9 @@ fun createKolasuMetamodel(): EPackage {
         this.eTypeParameters.add(typeParameter)
         val rootContainment = EcoreFactory.eINSTANCE.createEReference()
         rootContainment.name = "root"
-        rootContainment.eType = EcoreFactory.eINSTANCE.createe
-        rootContainment.eType = EcorePackage.eINSTANCE.eObject
+        rootContainment.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
+            this.eTypeParameter = typeParameter
+        }
         rootContainment.isContainment = true
         rootContainment.lowerBound = 0
         rootContainment.upperBound = 1
