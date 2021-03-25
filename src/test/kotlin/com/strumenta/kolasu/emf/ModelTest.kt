@@ -1,13 +1,17 @@
 package com.strumenta.kolasu.emf
 
+import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.emfjson.jackson.resource.JsonResourceFactory
 import org.junit.Test
 import java.io.File
-import java.io.FileInputStream
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class ModelTest {
 
@@ -30,11 +34,22 @@ class ModelTest {
 
         val resourceSet = ResourceSetImpl()
         resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
+        //TODO this is to correctly resolve the metamodel, however what would happen if there were
+        //other references to https://... resources?
+        resourceSet.resourceFactoryRegistry.protocolToFactoryMap["https"] = JsonResourceFactory()
+        val metaURI = URI.createURI(nsURI)
+        val metaRes = resourceSet.createResource(metaURI)
+        metaRes.contents.add(ePackage)
         val uri: URI = URI.createFileURI(jsonFile.absolutePath)
         val resource: Resource = resourceSet.createResource(uri)
-        resource.contents.add(ePackage)
-        //TODO this fails
-        //resource.load(null)
-        //assertEquals(1, resource.contents.size)
+        assertFalse(resource.isLoaded)
+        resource.load(null)
+        assertEquals(1, resource.contents.size)
+        assertTrue(resource.contents[0] is EObject)
+        val eObject = resource.contents[0] as EObject
+        val cuClass = ePackage.eClassifiers.find { c -> c.name.equals("CompilationUnit") } as EClass
+        assertEquals(cuClass, eObject.eClass())
+        val stmts = eObject.eGet(cuClass.getEStructuralFeature("statements")) as EList<*>
+        assertEquals(2, stmts.size)
     }
 }

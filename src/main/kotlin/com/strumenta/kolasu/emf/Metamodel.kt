@@ -184,7 +184,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
                 }
                 ec.isContainment = true
                 ec.eType = addClass(it.valueType.classifier as KClass<*>)
-                eClass.eReferences.add(ec)
+                eClass.eStructuralFeatures.add(ec)
             } else {
                 val ea = EcoreFactory.eINSTANCE.createEAttribute()
                 ea.name = it.name
@@ -196,7 +196,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
                     ea.upperBound = 1
                 }
                 ea.eType = toEDataType(it.valueType)
-                eClass.eAttributes.add(ea)
+                eClass.eStructuralFeatures.add(ea)
             }
         }
         return eClass
