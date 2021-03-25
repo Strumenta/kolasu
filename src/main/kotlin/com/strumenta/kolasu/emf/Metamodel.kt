@@ -85,6 +85,9 @@ fun createKolasuMetamodel(): EPackage {
         addContainment("start", point, 1, 1)
         addContainment("end", point, 1, 1)
     }
+    val astNode = ePackage.createEClass("ASTNode").apply {
+        addContainment("position", position,0, 1)
+    }
 
     val issueType = EcoreFactory.eINSTANCE.createEEnum()
     issueType.name = "IssueType"
@@ -100,8 +103,19 @@ fun createKolasuMetamodel(): EPackage {
     }
 
     val result = ePackage.createEClass("Result").apply {
+        val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
+            this.name = "CU"
+            this.eBounds.add(EcoreFactory.eINSTANCE.createEGenericType().apply {
+                this.eClassifier = astNode
+            })
+        }
+        this.eTypeParameters.add(typeParameter)
         val rootContainment = EcoreFactory.eINSTANCE.createEReference()
         rootContainment.name = "root"
+        rootContainment.et
+        rootContainment.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
+            this.eTypeParameter = typeParameter
+        }
         rootContainment.eType = EcorePackage.eINSTANCE.eObject
         rootContainment.isContainment = true
         rootContainment.lowerBound = 0
@@ -230,4 +244,8 @@ fun EPackage.saveEcore(ecoreFile: File) {
     val resource: Resource = resourceSet.createResource(uri)
     resource.contents.add(this)
     resource.save(null)
+}
+
+fun main(args: Array<String>) {
+    KOLASU_METAMODEL.saveEcore(File("kolasu.ecore"))
 }
