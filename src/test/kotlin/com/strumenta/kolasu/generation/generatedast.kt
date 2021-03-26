@@ -4,6 +4,16 @@ import com.strumenta.kolasu.model.Position
 import java.lang.IllegalStateException
 import java.util.*
 
+class ASTProperty
+class ASTContainment
+class ASTRelation
+
+class ASTNodeType(val name: String) {
+    val properties: List<ASTProperty> = mutableListOf()
+    val containment: List<ASTContainment> = mutableListOf()
+    val relations: List<ASTRelation> = mutableListOf()
+}
+
 class Containment(val parent: ASTNode, val containmentName: String, val remover: (element: ASTNode)->Unit) {
     fun remove(element: ASTNode) {
         remover(element)
@@ -18,6 +28,11 @@ abstract class ASTNode(val position: Position? = null) {
     val parent: ASTNode?
         get() = containment?.parent
     var containment: Containment? = null
+    abstract val type: ASTNodeType
+}
+
+interface Named {
+    val name: String
 }
 
 sealed class Rule(val name: String) : ASTNode()
@@ -118,15 +133,17 @@ class ContainmentList<E: ASTNode>(val containment: Containment) : MutableList<E>
 
 }
 
-class Grammar(var name: String, var type: Type) : ASTNode() {
+class Grammar(override var name: String, var type: Type) : ASTNode(), Named {
     enum class Type {
         LEXER,
         PARSER,
         MIXED
     }
+
     val rules : MutableList<Rule> = ContainmentList(Containment(this, "rules") {
         removeRule(it as Rule)
     })
+
     private fun removeRule(element: Rule) {
         this.rules.remove(element)
     }
