@@ -13,6 +13,7 @@ import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
+import java.lang.RuntimeException
 
 fun EEnum.addLiteral(enumEntry: Enum<*>) {
     this.addLiteral(enumEntry.name)
@@ -187,36 +188,40 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
         eClass.name = kClass.simpleName
         eClass.isAbstract = kClass.isAbstract || kClass.isSealed
         kClass.java.processProperties {
-            if (eClass.eAllStructuralFeatures.any { sf -> sf.name == it.name}) {
-                // skip
-            } else {
-                // do not process inherited properties
-                if (it.provideNodes) {
-                    val ec = EcoreFactory.eINSTANCE.createEReference()
-                    ec.name = it.name
-                    if (it.multiple) {
-                        ec.lowerBound = 0
-                        ec.upperBound = -1
-                    } else {
-                        ec.lowerBound = 0
-                        ec.upperBound = 1
-                    }
-                    ec.isContainment = true
-                    ec.eType = addClass(it.valueType.classifier as KClass<*>)
-                    eClass.eStructuralFeatures.add(ec)
+            try {
+                if (eClass.eAllStructuralFeatures.any { sf -> sf.name == it.name }) {
+                    // skip
                 } else {
-                    val ea = EcoreFactory.eINSTANCE.createEAttribute()
-                    ea.name = it.name
-                    if (it.multiple) {
-                        ea.lowerBound = 0
-                        ea.upperBound = -1
+                    // do not process inherited properties
+                    if (it.provideNodes) {
+                        val ec = EcoreFactory.eINSTANCE.createEReference()
+                        ec.name = it.name
+                        if (it.multiple) {
+                            ec.lowerBound = 0
+                            ec.upperBound = -1
+                        } else {
+                            ec.lowerBound = 0
+                            ec.upperBound = 1
+                        }
+                        ec.isContainment = true
+                        ec.eType = addClass(it.valueType.classifier as KClass<*>)
+                        eClass.eStructuralFeatures.add(ec)
                     } else {
-                        ea.lowerBound = 0
-                        ea.upperBound = 1
+                        val ea = EcoreFactory.eINSTANCE.createEAttribute()
+                        ea.name = it.name
+                        if (it.multiple) {
+                            ea.lowerBound = 0
+                            ea.upperBound = -1
+                        } else {
+                            ea.lowerBound = 0
+                            ea.upperBound = 1
+                        }
+                        ea.eType = toEDataType(it.valueType)
+                        eClass.eStructuralFeatures.add(ea)
                     }
-                    ea.eType = toEDataType(it.valueType)
-                    eClass.eStructuralFeatures.add(ea)
                 }
+            } catch (e: Exception) {
+                throw RuntimeException("Issue processing property $it in class $kClass", e)
             }
         }
         return eClass
