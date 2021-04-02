@@ -14,6 +14,8 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 import java.lang.RuntimeException
+import java.util.*
+import kotlin.collections.HashMap
 
 fun EEnum.addLiteral(enumEntry: Enum<*>) {
     this.addLiteral(enumEntry.name)
@@ -128,11 +130,32 @@ fun createKolasuMetamodel(): EPackage {
     return ePackage
 }
 
+interface EDataTypeHandler {
+    fun canHandle(ktype: KType) : Boolean
+    fun toDataType(ktype: KType): EDataType
+}
+
+object BasicKClassDataTypeHandler : EDataTypeHandler {
+    override fun canHandle(ktype: KType): Boolean {
+        return ktype.classifier is KClass<*>
+    }
+
+    override fun toDataType(ktype: KType): EDataType {
+        val kclass = ktype.classifier as KClass<*>
+        val eDataType = EcoreFactory.eINSTANCE.createEDataType()
+        eDataType.name = kclass.simpleName!!
+        eDataType.instanceClass = kclass.java
+        return eDataType
+    }
+
+}
+
 class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
 
     private val ePackage: EPackage
     private val eClasses = HashMap<KClass<*>, EClass>()
     private val dataTypes = HashMap<KType, EDataType>()
+    private val dataTypeHandlers = LinkedList<EDataTypeHandler>()
 
     init {
         ePackage = EcoreFactory.eINSTANCE.createEPackage()
@@ -140,6 +163,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
         ePackage.nsURI = nsURI
         ePackage.nsPrefix = nsPrefix
         ePackage.setResourceURI(nsURI)
+    }
+
+    fun addDataTypeHandler(eDataTypeHandler: EDataTypeHandler) {
+        dataTypeHandlers.add(eDataTypeHandler)
     }
 
     private fun createEEnum(kClass: KClass<out Enum<*>>): EEnum {
@@ -166,7 +193,12 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
                     eDataType = createEEnum(ktype.classifier as KClass<out Enum<*>>)
                 }
                 else -> {
-                    TODO(ktype.toString())
+                    val handler = dataTypeHandlers.find { it.canHandle(ktype) }
+                    if (handler == null) {
+                        throw RuntimeException("Unable to handle data type $ktype, with classifier ${ktype.classifier}")
+                    } else {
+                        eDataType = handler.toDataType(ktype)
+                    }
                 }
             }
             ePackage.eClassifiers.add(eDataType)

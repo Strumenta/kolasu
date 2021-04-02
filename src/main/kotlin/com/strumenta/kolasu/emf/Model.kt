@@ -39,7 +39,11 @@ fun Node.toEObject(ePackage: EPackage): EObject {
                     elist.add(childEO)
                 }
             } else {
-                eo.eSet(esf, (pd.value as Node).toEObject(ePackage))
+                if (pd.value == null) {
+                    eo.eSet(esf, null)
+                } else {
+                    eo.eSet(esf, (pd.value as Node).toEObject(ePackage))
+                }
             }
         } else {
             if (pd.multiple) {
