@@ -13,6 +13,7 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.emfjson.jackson.resource.JsonResourceFactory
+import java.lang.RuntimeException
 
 fun EPackage.getEClass(javaClass: Class<*>): EClass {
     return this.getEClass(javaClass.simpleName)
@@ -24,6 +25,12 @@ fun EPackage.getEClass(name: String): EClass {
 
 fun EPackage.getEEnum(javaClass: Class<*>): EEnum {
     return (this.eClassifiers.find { it.name == javaClass.simpleName } ?: throw IllegalArgumentException("Class not found: $javaClass")) as EEnum
+}
+
+fun Any.dataToEObject(ePackage: EPackage): EObject {
+    val ec = ePackage.getEClass(this.javaClass)
+    val eo = ePackage.eFactoryInstance.create(ec)
+    return eo
 }
 
 fun Node.toEObject(ePackage: EPackage): EObject {
@@ -54,7 +61,22 @@ fun Node.toEObject(ePackage: EPackage): EObject {
                     val eev = ee.getEEnumLiteral(pd.value.name)
                     eo.eSet(esf, eev)
                 } else {
-                    eo.eSet(esf, pd.value)
+                    // this could be not a primitive value but a value that we mapped to an EClass
+                    if (pd.value != null){
+                        val eClass = ePackage.eClassifiers.filterIsInstance<EClass>().find { it.name == pd.value.javaClass.simpleName }
+                        if (eClass != null) {
+                            val eoValue = pd.value.dataToEObject(ePackage)
+                            try {
+                                eo.eSet(esf, eoValue)
+                            } catch (t: Throwable) {
+                                throw RuntimeException("Issue setting $esf in $eo to $eoValue", t)
+                            }
+                        } else {
+                            eo.eSet(esf, pd.value)
+                        }
+                    } else {
+                        eo.eSet(esf, pd.value)
+                    }
                 }
             }
         }
