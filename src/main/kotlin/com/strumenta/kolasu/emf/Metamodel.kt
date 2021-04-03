@@ -170,14 +170,23 @@ interface EClassTypeHandler {
         }
     }
     fun canHandle(kclass: KClass<*>) : Boolean
-    fun toEClass(kclass: KClass<*>, eClassProvider: EClassProvider): EClass
+    fun toEClass(kclass: KClass<*>, eClassProvider: ClassifiersProvider): EClass
 }
 
-interface EClassProvider {
+interface ClassifiersProvider {
+    fun isDataType(ktype: KType) : Boolean {
+        try {
+            provideDataType(ktype)
+            return true
+        } catch (e: Exception) {
+            return false
+        }
+    }
     fun provideClass(kClass: KClass<*>): EClass
+    fun provideDataType(ktype: KType): EDataType
 }
 
-class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : EClassProvider {
+class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : ClassifiersProvider {
 
     private val ePackage: EPackage
     private val eClasses = HashMap<KClass<*>, EClass>()
@@ -213,7 +222,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : E
         return eEnum
     }
 
-    private fun toEDataType(ktype: KType): EDataType {
+    override fun provideDataType(ktype: KType): EDataType {
         if (!dataTypes.containsKey(ktype)) {
             var eDataType = EcoreFactory.eINSTANCE.createEDataType()
             when {
@@ -224,6 +233,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : E
                 ktype.classifier == Boolean::class -> {
                     eDataType.name = "Boolean"
                     eDataType.instanceClass = Boolean::class.java
+                }
+                ktype.classifier == Int::class -> {
+                    eDataType.name = "Int"
+                    eDataType.instanceClass = Int::class.java
                 }
                 (ktype.classifier as? KClass<*>)?.isSubclassOf(Enum::class) == true -> {
                     eDataType = createEEnum(ktype.classifier as KClass<out Enum<*>>)
@@ -300,7 +313,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : E
                                 ea.lowerBound = 0
                                 ea.upperBound = 1
                             }
-                            ea.eType = toEDataType(prop.valueType)
+                            ea.eType = provideDataType(prop.valueType)
                             eClass.eStructuralFeatures.add(ea)
                         }
                     }
