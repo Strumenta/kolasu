@@ -106,6 +106,17 @@ fun createKolasuMetamodel(): EPackage {
         addContainment("position", position, 0, 1)
     }
 
+    val possiblyNamed = ePackage.createEClass("PossiblyNamed").apply {
+        isInterface = true
+
+        addAttribute("name", stringDT, 0, 1)
+    }
+    val named = ePackage.createEClass("Named").apply {
+        isInterface = true
+        eSuperTypes.add(possiblyNamed)
+        addAttribute("name", stringDT, 1, 1)
+    }
+
     val result = ePackage.createEClass("Result").apply {
         val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
             this.name = "CU"
@@ -150,11 +161,24 @@ object BasicKClassDataTypeHandler : EDataTypeHandler {
 
 }
 
+interface EClassTypeHandler {
+    fun canHandle(ktype: KType) : Boolean {
+        return if (ktype.classifier is KClass<*>) {
+            canHandle(ktype.classifier as KClass<*>)
+        } else {
+            false
+        }
+    }
+    fun canHandle(kclass: KClass<*>) : Boolean
+    fun toEClass(kclass: KClass<*>): EClass
+}
+
 class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
 
     private val ePackage: EPackage
     private val eClasses = HashMap<KClass<*>, EClass>()
     private val dataTypes = HashMap<KType, EDataType>()
+    private val eclassTypeHandlers = LinkedList<EClassTypeHandler>()
     private val dataTypeHandlers = LinkedList<EDataTypeHandler>()
 
     init {
@@ -167,6 +191,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
 
     fun addDataTypeHandler(eDataTypeHandler: EDataTypeHandler) {
         dataTypeHandlers.add(eDataTypeHandler)
+    }
+
+    fun addEClassTypeHandler(eClassTypeHandler: EClassTypeHandler) {
+        eclassTypeHandlers.add(eClassTypeHandler)
     }
 
     private fun createEEnum(kClass: KClass<out Enum<*>>): EEnum {
@@ -189,6 +217,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
                     eDataType.name = "String"
                     eDataType.instanceClass = String::class.java
                 }
+                ktype.classifier == Boolean::class -> {
+                    eDataType.name = "Boolean"
+                    eDataType.instanceClass = Boolean::class.java
+                }
                 (ktype.classifier as? KClass<*>)?.isSubclassOf(Enum::class) == true -> {
                     eDataType = createEEnum(ktype.classifier as KClass<out Enum<*>>)
                 }
@@ -207,7 +239,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
         return dataTypes[ktype]!!
     }
 
-    private fun toEClass(kClass: KClass<*>): EClass {
+    private fun nodeClassToEClass(kClass: KClass<*>): EClass {
         val eClass = EcoreFactory.eINSTANCE.createEClass()
         kClass.superclasses.forEach {
             if (it != Any::class && it != Node::class) {
@@ -219,16 +251,16 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
         }
         eClass.name = kClass.simpleName
         eClass.isAbstract = kClass.isAbstract || kClass.isSealed
-        kClass.java.processProperties {
+        kClass.java.processProperties { prop ->
             try {
-                if (eClass.eAllStructuralFeatures.any { sf -> sf.name == it.name }) {
+                if (eClass.eAllStructuralFeatures.any { sf -> sf.name == prop.name }) {
                     // skip
                 } else {
                     // do not process inherited properties
-                    if (it.provideNodes) {
+                    if (prop.provideNodes) {
                         val ec = EcoreFactory.eINSTANCE.createEReference()
-                        ec.name = it.name
-                        if (it.multiple) {
+                        ec.name = prop.name
+                        if (prop.multiple) {
                             ec.lowerBound = 0
                             ec.upperBound = -1
                         } else {
@@ -236,24 +268,41 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
                             ec.upperBound = 1
                         }
                         ec.isContainment = true
-                        ec.eType = addClass(it.valueType.classifier as KClass<*>)
+                        ec.eType = addClass(prop.valueType.classifier as KClass<*>)
                         eClass.eStructuralFeatures.add(ec)
                     } else {
-                        val ea = EcoreFactory.eINSTANCE.createEAttribute()
-                        ea.name = it.name
-                        if (it.multiple) {
-                            ea.lowerBound = 0
-                            ea.upperBound = -1
+                        val ch = eclassTypeHandlers.find { it.canHandle(prop.valueType) }
+                        if (ch != null) {
+                            // We can treat it like a class
+                            val eContainment = EcoreFactory.eINSTANCE.createEReference()
+                            eContainment.name = prop.name
+                            if (prop.multiple) {
+                                eContainment.lowerBound = 0
+                                eContainment.upperBound = -1
+                            } else {
+                                eContainment.lowerBound = 0
+                                eContainment.upperBound = 1
+                            }
+                            eContainment.isContainment = true
+                            eContainment.eType = addClass(prop.valueType.classifier as KClass<*>)
+                            eClass.eStructuralFeatures.add(eContainment)
                         } else {
-                            ea.lowerBound = 0
-                            ea.upperBound = 1
+                            val ea = EcoreFactory.eINSTANCE.createEAttribute()
+                            ea.name = prop.name
+                            if (prop.multiple) {
+                                ea.lowerBound = 0
+                                ea.upperBound = -1
+                            } else {
+                                ea.lowerBound = 0
+                                ea.upperBound = 1
+                            }
+                            ea.eType = toEDataType(prop.valueType)
+                            eClass.eStructuralFeatures.add(ea)
                         }
-                        ea.eType = toEDataType(it.valueType)
-                        eClass.eStructuralFeatures.add(ea)
                     }
                 }
             } catch (e: Exception) {
-                throw RuntimeException("Issue processing property $it in class $kClass", e)
+                throw RuntimeException("Issue processing property $prop in class $kClass", e)
             }
         }
         return eClass
@@ -261,7 +310,11 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
 
     fun addClass(kClass: KClass<*>): EClass {
         if (!eClasses.containsKey(kClass)) {
-            val eClass = toEClass(kClass)
+            val eClass = if (kClass.isSubclassOf(Node::class)) {
+                nodeClassToEClass(kClass)
+            } else {
+                eclassTypeHandlers.find { it.canHandle(kClass) }!!.toEClass(kClass)
+            }
             ePackage.eClassifiers.add(eClass)
             eClasses[kClass] = eClass
             if (kClass.isSealed) {
