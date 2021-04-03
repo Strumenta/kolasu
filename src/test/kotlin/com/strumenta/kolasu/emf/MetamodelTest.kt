@@ -3,7 +3,6 @@ package com.strumenta.kolasu.emf
 import com.strumenta.kolasu.model.Node
 import java.io.File
 import kotlin.test.assertEquals
-import org.eclipse.emf.ecore.EClass
 import org.junit.Test
 
 sealed class Statement : Node()
@@ -20,7 +19,7 @@ class MetamodelTest {
     @Test
     fun generateSimpleMetamodel() {
         val metamodelBuilder = MetamodelBuilder("SimpleMM", "https://strumenta.com/simplemm", "simplemm")
-        metamodelBuilder.addClass(CompilationUnit::class)
+        metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
         ePackage.saveEcore(File("simplemm.ecore"))
         ePackage.saveAsJson(File("simplemm.json"))

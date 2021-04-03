@@ -19,7 +19,7 @@ class ResultTest {
             )
         )
         val metamodelBuilder = MetamodelBuilder("SimpleMM", "https://strumenta.com/simplemm", "simplemm")
-        metamodelBuilder.addClass(CompilationUnit::class)
+        metamodelBuilder.provideClass(CompilationUnit::class)
         var ePackage = metamodelBuilder.generate()
 
         val eo = cu.toEObject(ePackage)

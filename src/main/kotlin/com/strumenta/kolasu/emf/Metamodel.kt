@@ -170,10 +170,14 @@ interface EClassTypeHandler {
         }
     }
     fun canHandle(kclass: KClass<*>) : Boolean
-    fun toEClass(kclass: KClass<*>): EClass
+    fun toEClass(kclass: KClass<*>, eClassProvider: EClassProvider): EClass
 }
 
-class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
+interface EClassProvider {
+    fun provideClass(kClass: KClass<*>): EClass
+}
+
+class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : EClassProvider {
 
     private val ePackage: EPackage
     private val eClasses = HashMap<KClass<*>, EClass>()
@@ -243,7 +247,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
         val eClass = EcoreFactory.eINSTANCE.createEClass()
         kClass.superclasses.forEach {
             if (it != Any::class && it != Node::class) {
-                eClass.eSuperTypes.add(addClass(it))
+                eClass.eSuperTypes.add(provideClass(it))
             }
         }
         if (eClass.eSuperTypes.isEmpty()) {
@@ -268,7 +272,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
                             ec.upperBound = 1
                         }
                         ec.isContainment = true
-                        ec.eType = addClass(prop.valueType.classifier as KClass<*>)
+                        ec.eType = provideClass(prop.valueType.classifier as KClass<*>)
                         eClass.eStructuralFeatures.add(ec)
                     } else {
                         val ch = eclassTypeHandlers.find { it.canHandle(prop.valueType) }
@@ -284,7 +288,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
                                 eContainment.upperBound = 1
                             }
                             eContainment.isContainment = true
-                            eContainment.eType = addClass(prop.valueType.classifier as KClass<*>)
+                            eContainment.eType = provideClass(prop.valueType.classifier as KClass<*>)
                             eClass.eStructuralFeatures.add(eContainment)
                         } else {
                             val ea = EcoreFactory.eINSTANCE.createEAttribute()
@@ -308,17 +312,17 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) {
         return eClass
     }
 
-    fun addClass(kClass: KClass<*>): EClass {
+    override fun provideClass(kClass: KClass<*>): EClass {
         if (!eClasses.containsKey(kClass)) {
             val eClass = if (kClass.isSubclassOf(Node::class)) {
                 nodeClassToEClass(kClass)
             } else {
-                eclassTypeHandlers.find { it.canHandle(kClass) }!!.toEClass(kClass)
+                eclassTypeHandlers.find { it.canHandle(kClass) }!!.toEClass(kClass, this)
             }
             ePackage.eClassifiers.add(eClass)
             eClasses[kClass] = eClass
             if (kClass.isSealed) {
-                kClass.sealedSubclasses.forEach { addClass(it) }
+                kClass.sealedSubclasses.forEach { provideClass(it) }
             }
         }
         return eClasses[kClass]!!

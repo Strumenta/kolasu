@@ -25,7 +25,7 @@ class ModelTest {
         )
         val nsURI = "https://strumenta.com/simplemm"
         val metamodelBuilder = MetamodelBuilder("SimpleMM", nsURI, "simplemm")
-        metamodelBuilder.addClass(CompilationUnit::class)
+        metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
 
         val eo = cu.toEObject(ePackage)
