@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.validation.IssueType
 import java.io.File
@@ -115,6 +116,27 @@ fun createKolasuMetamodel(): EPackage {
         isInterface = true
         eSuperTypes.add(possiblyNamed)
         addAttribute("name", stringDT, 1, 1)
+    }
+
+    val referenceByName = ePackage.createEClass("ReferenceByName").apply {
+        val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
+            this.name = "N"
+            this.eBounds.add(EcoreFactory.eINSTANCE.createEGenericType().apply {
+                this.eClassifier = astNode
+            })
+        }
+        this.eTypeParameters.add(typeParameter)
+        val rootContainment = EcoreFactory.eINSTANCE.createEReference()
+        rootContainment.name = "referenced"
+        rootContainment.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
+            this.eTypeParameter = typeParameter
+        }
+        rootContainment.isContainment = true
+        rootContainment.lowerBound = 0
+        rootContainment.upperBound = 1
+
+        addAttribute("name", stringDT, 1, 1)
+        this.eStructuralFeatures.add(rootContainment)
     }
 
     val result = ePackage.createEClass("Result").apply {
@@ -287,6 +309,18 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
                         ec.isContainment = true
                         ec.eType = provideClass(prop.valueType.classifier as KClass<*>)
                         eClass.eStructuralFeatures.add(ec)
+                    } else if (prop.valueType.classifier == ReferenceByName::class) {
+                        val ec = EcoreFactory.eINSTANCE.createEReference()
+                        ec.name = prop.name
+                        ec.isContainment = true
+                        ec.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
+                            this.eClassifier = KOLASU_METAMODEL.getEClass(ReferenceByName::class.java)
+                            val eClassForReferenced : EClass = provideClass(prop.valueType.arguments[0].type!!.classifier!! as KClass<*>)
+                            this.eTypeArguments.add(EcoreFactory.eINSTANCE.createEGenericType().apply {
+                                this.eClassifier = eClassForReferenced
+                            })
+                        }
+                        eClass.eStructuralFeatures.add(ec)
                     } else {
                         val ch = eclassTypeHandlers.find { it.canHandle(prop.valueType) }
                         if (ch != null) {
@@ -330,7 +364,8 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
             val eClass = if (kClass.isSubclassOf(Node::class)) {
                 nodeClassToEClass(kClass)
             } else {
-                eclassTypeHandlers.find { it.canHandle(kClass) }!!.toEClass(kClass, this)
+                val eth = eclassTypeHandlers.find { it.canHandle(kClass) } ?: throw RuntimeException("Unable to handle class $kClass")
+                eth.toEClass(kClass, this)
             }
             ePackage.eClassifiers.add(eClass)
             eClasses[kClass] = eClass
