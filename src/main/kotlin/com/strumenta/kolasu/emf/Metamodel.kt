@@ -281,13 +281,17 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
     private fun nodeClassToEClass(kClass: KClass<*>): EClass {
         val eClass = EcoreFactory.eINSTANCE.createEClass()
         kClass.superclasses.forEach {
-            if (it != Any::class && it != Node::class) {
-                eClass.eSuperTypes.add(provideClass(it))
+            if (it != Any::class) {
+                if (it == Node::class) {
+                    eClass.eSuperTypes.add(KOLASU_METAMODEL.getEClass("ASTNode"))
+                } else {
+                    eClass.eSuperTypes.add(provideClass(it))
+                }
             }
         }
-        if (eClass.eSuperTypes.isEmpty()) {
-            eClass.eSuperTypes.add(KOLASU_METAMODEL.getEClass("ASTNode"))
-        }
+//        if (eClass.eSuperTypes.isEmpty()) {
+//            eClass.eSuperTypes.add(KOLASU_METAMODEL.getEClass("ASTNode"))
+//        }
         eClass.name = kClass.simpleName
         eClass.isAbstract = kClass.isAbstract || kClass.isSealed
         kClass.java.processProperties { prop ->
