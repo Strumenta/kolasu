@@ -1,14 +1,10 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.processProperties
+import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.IssueType
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
-import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.superclasses
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
@@ -17,6 +13,8 @@ import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 import java.lang.RuntimeException
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.reflect.KTypeProjection
+import kotlin.reflect.full.*
 
 fun EEnum.addLiteral(enumEntry: Enum<*>) {
     this.addLiteral(enumEntry.name)
@@ -208,6 +206,79 @@ interface ClassifiersProvider {
     fun provideDataType(ktype: KType): EDataType
 }
 
+object StandardEClassHandler : EClassTypeHandler {
+        override fun canHandle(kclass: KClass<*>): Boolean {
+            if (kclass == Named::class) {
+                return true
+            } else if (kclass == String::class) {
+                return false
+            } else if (kclass == Boolean::class) {
+                return false
+            } else if (kclass == Int::class) {
+                return false
+            } else if (kclass == ReferenceByName::class) {
+                return false
+            } else {
+                //TODO("Not yet implemented")
+                return true
+            }
+        }
+
+        override fun toEClass(kclass: KClass<*>, classifiersProvider: ClassifiersProvider): EClass {
+            if (kclass == Named::class) {
+                return KOLASU_METAMODEL.getEClass(Named::class.java)
+            } else {
+                val ec = EcoreFactory.eINSTANCE.createEClass()
+                ec.isAbstract = kclass.isSealed || kclass.isAbstract
+                ec.isInterface = kclass.java.isInterface
+                ec.name = kclass.simpleName
+                kclass.supertypes.forEach {
+                    if (it == Any::class.createType()) {
+                        // ignore
+                    } else {
+                        val parent = classifiersProvider.provideClass(it.classifier as KClass<*>)
+                        ec.eSuperTypes.add(parent)
+                    }
+                }
+                kclass.memberProperties.forEach {
+                    val isDerived = it.annotations.any { it is Derived }
+
+                    if (!isDerived) {
+                        val isMany = it.returnType.isSubtypeOf(Collection::class.createType(listOf(KTypeProjection.STAR)))
+                        val baseType = if (isMany) it.returnType.arguments[0].type!! else it.returnType
+                        if (baseType.classifier == ReferenceByName::class){
+                            TODO()
+                        }
+                        val isAttr = classifiersProvider.isDataType(baseType)
+                        if (isAttr) {
+                            val ea = EcoreFactory.eINSTANCE.createEAttribute()
+                            ea.name = it.name
+                            if (isMany) {
+                                ea.upperBound = -1
+                                ea.lowerBound = 0
+                            }
+                            ea.eType = classifiersProvider.provideDataType(baseType)
+                            ec.eStructuralFeatures.add(ea)
+                        } else {
+                            val er = EcoreFactory.eINSTANCE.createEReference()
+                            er.name = it.name
+                            if (isMany) {
+                                er.upperBound = -1
+                                er.lowerBound = 0
+                            }
+                            er.isContainment = true
+                            er.eType = classifiersProvider.provideClass(baseType.classifier as KClass<*>)
+                            ec.eStructuralFeatures.add(er)
+                        }
+                    }
+                }
+                return ec
+                //TODO("Not yet implemented")
+            }
+        }
+
+    }
+
 class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : ClassifiersProvider {
 
     private val ePackage: EPackage
@@ -222,6 +293,8 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         ePackage.nsURI = nsURI
         ePackage.nsPrefix = nsPrefix
         ePackage.setResourceURI(nsURI)
+
+        eclassTypeHandlers.add(StandardEClassHandler)
     }
 
     fun addDataTypeHandler(eDataTypeHandler: EDataTypeHandler) {
@@ -289,9 +362,6 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
                 }
             }
         }
-//        if (eClass.eSuperTypes.isEmpty()) {
-//            eClass.eSuperTypes.add(KOLASU_METAMODEL.getEClass("ASTNode"))
-//        }
         eClass.name = kClass.simpleName
         eClass.isAbstract = kClass.isAbstract || kClass.isSealed
         kClass.java.processProperties { prop ->
@@ -364,6 +434,12 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
     }
 
     override fun provideClass(kClass: KClass<*>): EClass {
+        if (kClass == Node::class) {
+            return KOLASU_METAMODEL.getEClass("ASTNode")
+        }
+        if (kClass == Named::class) {
+            return KOLASU_METAMODEL.getEClass("Named")
+        }
         if (!eClasses.containsKey(kClass)) {
             val eClass = if (kClass.isSubclassOf(Node::class)) {
                 nodeClassToEClass(kClass)
