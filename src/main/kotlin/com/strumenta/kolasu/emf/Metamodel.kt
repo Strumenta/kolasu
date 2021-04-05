@@ -381,13 +381,17 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
     }
 }
 
-fun EPackage.saveEcore(ecoreFile: File) {
+fun EPackage.saveEcore(ecoreFile: File, restoringURI:Boolean=true) {
+    val startURI = this.eResource().uri
     val resourceSet = ResourceSetImpl()
     resourceSet.resourceFactoryRegistry.extensionToFactoryMap["ecore"] = EcoreResourceFactoryImpl()
     val uri: URI = URI.createFileURI(ecoreFile.absolutePath)
     val resource: Resource = resourceSet.createResource(uri)
     resource.contents.add(this)
     resource.save(null)
+    if (restoringURI) {
+        this.setResourceURI(startURI.toString())
+    }
 }
 
 fun main(args: Array<String>) {

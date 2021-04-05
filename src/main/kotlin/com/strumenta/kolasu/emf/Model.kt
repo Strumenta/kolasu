@@ -93,6 +93,15 @@ fun EObject.saveXMI(xmiFile: File) {
     resource.save(null)
 }
 
+fun EPackage.saveAsJson(jsonFile: File, restoringURI:Boolean=true) {
+    val startURI = this.eResource().uri
+    (this as EObject).saveAsJson(jsonFile)
+    if (restoringURI) {
+        this.setResourceURI(startURI.toString())
+    }
+}
+
+
 fun EObject.saveAsJson(jsonFile: File) {
     val resourceSet = ResourceSetImpl()
     resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
