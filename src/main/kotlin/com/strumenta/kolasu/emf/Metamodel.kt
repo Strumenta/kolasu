@@ -235,6 +235,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         }
         eClass.name = kClass.simpleName
         eClass.isAbstract = kClass.isAbstract || kClass.isSealed
+
+        // This is necessary because some classes refer to themselves
+        eClasses[kClass] = eClass
+
         kClass.java.processProperties { prop ->
             try {
                 if (eClass.eAllStructuralFeatures.any { sf -> sf.name == prop.name }) {

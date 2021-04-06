@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.processProperties
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -34,54 +35,67 @@ fun Any.dataToEObject(ePackage: EPackage): EObject {
 }
 
 fun Node.toEObject(ePackage: EPackage): EObject {
-    val ec = ePackage.getEClass(this.javaClass)
-    val eo = ePackage.eFactoryInstance.create(ec)
-    this.processProperties { pd ->
-        val esf = ec.eAllStructuralFeatures.find { it.name == pd.name }!!
-        if (pd.provideNodes) {
-            if (pd.multiple) {
-                val elist = eo.eGet(esf) as MutableList<EObject>
-                (pd.value as List<*>).forEach {
-                    val childEO = (it as Node).toEObject(ePackage)
-                    elist.add(childEO)
+    try {
+        val ec = ePackage.getEClass(this.javaClass)
+        val eo = ePackage.eFactoryInstance.create(ec)
+        this.processProperties { pd ->
+            val esf = ec.eAllStructuralFeatures.find { it.name == pd.name }!!
+            if (pd.provideNodes) {
+                if (pd.multiple) {
+                    val elist = eo.eGet(esf) as MutableList<EObject>
+                    (pd.value as List<*>).forEach {
+                        try {
+                            val childEO = (it as Node).toEObject(ePackage)
+                            elist.add(childEO)
+                        } catch (e: Exception) {
+                            throw RuntimeException("Unable to map to EObject child $it in property $pd of $this", e)
+                        }
+                    }
+                } else {
+                    if (pd.value == null) {
+                        eo.eSet(esf, null)
+                    } else {
+                        eo.eSet(esf, (pd.value as Node).toEObject(ePackage))
+                    }
                 }
             } else {
-                if (pd.value == null) {
-                    eo.eSet(esf, null)
+                if (pd.multiple) {
+                    TODO()
                 } else {
-                    eo.eSet(esf, (pd.value as Node).toEObject(ePackage))
-                }
-            }
-        } else {
-            if (pd.multiple) {
-                TODO()
-            } else {
-                if (pd.value is Enum<*>) {
-                    val ee = ePackage.getEEnum(pd.value.javaClass)
-                    val eev = ee.getEEnumLiteral(pd.value.name)
-                    eo.eSet(esf, eev)
-                } else {
-                    // this could be not a primitive value but a value that we mapped to an EClass
-                    if (pd.value != null){
-                        val eClass = ePackage.eClassifiers.filterIsInstance<EClass>().find { it.name == pd.value.javaClass.simpleName }
-                        if (eClass != null) {
-                            val eoValue = pd.value.dataToEObject(ePackage)
-                            try {
-                                eo.eSet(esf, eoValue)
-                            } catch (t: Throwable) {
-                                throw RuntimeException("Issue setting $esf in $eo to $eoValue", t)
+                    if (pd.value is Enum<*>) {
+                        val ee = ePackage.getEEnum(pd.value.javaClass)
+                        val eev = ee.getEEnumLiteral(pd.value.name)
+                        eo.eSet(esf, eev)
+                    } else {
+                        // this could be not a primitive value but a value that we mapped to an EClass
+                        if (pd.value != null) {
+                            val eClass = ePackage.eClassifiers.filterIsInstance<EClass>().find { it.name == pd.value.javaClass.simpleName }
+                            if (eClass != null) {
+                                val eoValue = pd.value.dataToEObject(ePackage)
+                                try {
+                                    eo.eSet(esf, eoValue)
+                                } catch (t: Throwable) {
+                                    throw RuntimeException("Issue setting $esf in $eo to $eoValue", t)
+                                }
+                            } else if (pd.value is ReferenceByName<*>) {
+                                val refEC = KOLASU_METAMODEL.getEClass("ReferenceByName")
+                                val refEO = KOLASU_METAMODEL.eFactoryInstance.create(refEC)
+                                // TODO complete
+                                eo.eSet(esf, refEO)
+                            } else {
+                                eo.eSet(esf, pd.value)
                             }
                         } else {
                             eo.eSet(esf, pd.value)
                         }
-                    } else {
-                        eo.eSet(esf, pd.value)
                     }
                 }
             }
         }
+        return eo
+    } catch (e: Exception) {
+        throw RuntimeException("Unable to map to EObject $this", e)
     }
-    return eo
 }
 
 fun EObject.saveXMI(xmiFile: File) {
