@@ -1,0 +1,108 @@
+package com.strumenta.kolasu.emf
+
+import com.strumenta.kolasu.validation.IssueType
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EcoreFactory
+
+val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
+
+
+
+fun createKolasuMetamodel(): EPackage {
+    val ePackage = EcoreFactory.eINSTANCE.createEPackage()
+    val nsUri = "https://strumenta.com/kolasu"
+    ePackage.setResourceURI(nsUri)
+    ePackage.name = "StrumentaParser"
+    ePackage.nsURI = nsUri
+
+    val intDT = EcoreFactory.eINSTANCE.createEDataType()
+    intDT.name = "int"
+    intDT.instanceClass = Int::class.java
+    ePackage.eClassifiers.add(intDT)
+
+    val stringDT = EcoreFactory.eINSTANCE.createEDataType()
+    stringDT.name = "string"
+    stringDT.instanceClass = String::class.java
+    ePackage.eClassifiers.add(stringDT)
+
+    val point = ePackage.createEClass("Point").apply {
+        addAttribute("line", intDT, 1, 1)
+        addAttribute("column", intDT, 1, 1)
+    }
+    val position = ePackage.createEClass("Position").apply {
+        addContainment("start", point, 1, 1)
+        addContainment("end", point, 1, 1)
+    }
+    val astNode = ePackage.createEClass("ASTNode").apply {
+        this.isAbstract = true
+        addContainment("position", position,0, 1)
+    }
+
+    val issueType = EcoreFactory.eINSTANCE.createEEnum()
+    issueType.name = "IssueType"
+    issueType.addLiteral(IssueType.LEXICAL)
+    issueType.addLiteral(IssueType.SYNTACTIC)
+    issueType.addLiteral(IssueType.SEMANTIC)
+    ePackage.eClassifiers.add(issueType)
+
+    val issue = ePackage.createEClass("Issue").apply {
+        addAttribute("type", issueType, 1, 1)
+        addAttribute("message", stringDT, 1, 1)
+        addContainment("position", position, 0, 1)
+    }
+
+    val possiblyNamed = ePackage.createEClass("PossiblyNamed").apply {
+        isInterface = true
+
+        addAttribute("name", stringDT, 0, 1)
+    }
+    val named = ePackage.createEClass("Named").apply {
+        isInterface = true
+        eSuperTypes.add(possiblyNamed)
+        addAttribute("name", stringDT, 1, 1)
+    }
+
+    val referenceByName = ePackage.createEClass("ReferenceByName").apply {
+        val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
+            this.name = "N"
+            this.eBounds.add(EcoreFactory.eINSTANCE.createEGenericType().apply {
+                this.eClassifier = astNode
+            })
+        }
+        this.eTypeParameters.add(typeParameter)
+        val rootContainment = EcoreFactory.eINSTANCE.createEReference()
+        rootContainment.name = "referenced"
+        rootContainment.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
+            this.eTypeParameter = typeParameter
+        }
+        rootContainment.isContainment = true
+        rootContainment.lowerBound = 0
+        rootContainment.upperBound = 1
+
+        addAttribute("name", stringDT, 1, 1)
+        this.eStructuralFeatures.add(rootContainment)
+    }
+
+    val result = ePackage.createEClass("Result").apply {
+        val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
+            this.name = "CU"
+            this.eBounds.add(EcoreFactory.eINSTANCE.createEGenericType().apply {
+                this.eClassifier = astNode
+            })
+        }
+        this.eTypeParameters.add(typeParameter)
+        val rootContainment = EcoreFactory.eINSTANCE.createEReference()
+        rootContainment.name = "root"
+        rootContainment.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
+            this.eTypeParameter = typeParameter
+        }
+        rootContainment.isContainment = true
+        rootContainment.lowerBound = 0
+        rootContainment.upperBound = 1
+        this.eStructuralFeatures.add(rootContainment)
+
+        addContainment("issues", issue, 0, -1)
+    }
+
+    return ePackage
+}
