@@ -25,6 +25,11 @@ fun createKolasuMetamodel(): EPackage {
     stringDT.instanceClass = String::class.java
     ePackage.eClassifiers.add(stringDT)
 
+    val booleanDT = EcoreFactory.eINSTANCE.createEDataType()
+    booleanDT.name = "boolean"
+    booleanDT.instanceClass = Boolean::class.java
+    ePackage.eClassifiers.add(booleanDT)
+
     val point = ePackage.createEClass("Point").apply {
         addAttribute("line", intDT, 1, 1)
         addAttribute("column", intDT, 1, 1)

@@ -14,22 +14,9 @@ import kotlin.reflect.full.*
 interface EDataTypeHandler {
     fun canHandle(ktype: KType) : Boolean
     fun toDataType(ktype: KType): EDataType
+    fun external() : Boolean
 }
 
-object BasicKClassDataTypeHandler : EDataTypeHandler {
-    override fun canHandle(ktype: KType): Boolean {
-        return ktype.classifier is KClass<*>
-    }
-
-    override fun toDataType(ktype: KType): EDataType {
-        val kclass = ktype.classifier as KClass<*>
-        val eDataType = EcoreFactory.eINSTANCE.createEDataType()
-        eDataType.name = kclass.simpleName!!
-        eDataType.instanceClass = kclass.java
-        return eDataType
-    }
-
-}
 
 interface EClassTypeHandler {
     fun canHandle(ktype: KType) : Boolean {
@@ -140,9 +127,25 @@ class KolasuClassHandler(val kolasuKClass: KClass<*>, val kolasuEClass: EClass) 
     override fun external(): Boolean = true
 }
 
+class KolasuDataTypeHandler(val kolasuKClass: KClass<*>, val kolasuDataType: EDataType) : EDataTypeHandler {
+    override fun canHandle(ktype: KType): Boolean {
+        return ktype == kolasuKClass.createType()
+    }
+
+    override fun toDataType(ktype: KType): EDataType {
+        return kolasuDataType
+    }
+
+    override fun external(): Boolean = true
+}
+
 val NodeHandler = KolasuClassHandler(Node::class, KOLASU_METAMODEL.getEClass("ASTNode"))
 val NamedHandler = KolasuClassHandler(Named::class, KOLASU_METAMODEL.getEClass("Named"))
 val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, KOLASU_METAMODEL.getEClass("ReferenceByName"))
+
+val StringHandler = KolasuDataTypeHandler(String::class, KOLASU_METAMODEL.getEClassifier("string") as EDataType)
+val BooleanHandler = KolasuDataTypeHandler(String::class, KOLASU_METAMODEL.getEClassifier("boolean") as EDataType)
+val IntHandler = KolasuDataTypeHandler(String::class, KOLASU_METAMODEL.getEClassifier("int") as EDataType)
 
 class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : ClassifiersProvider {
 
@@ -162,6 +165,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         eclassTypeHandlers.add(NodeHandler)
         eclassTypeHandlers.add(NamedHandler)
         eclassTypeHandlers.add(ReferenceByNameHandler)
+
+        dataTypeHandlers.add(StringHandler)
+        dataTypeHandlers.add(BooleanHandler)
+        dataTypeHandlers.add(IntHandler)
     }
 
     /**
@@ -195,19 +202,8 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
     override fun provideDataType(ktype: KType): EDataType? {
         if (!dataTypes.containsKey(ktype)) {
             var eDataType = EcoreFactory.eINSTANCE.createEDataType()
+            var external = false
             when {
-                ktype.classifier == String::class -> {
-                    eDataType.name = "String"
-                    eDataType.instanceClass = String::class.java
-                }
-                ktype.classifier == Boolean::class -> {
-                    eDataType.name = "Boolean"
-                    eDataType.instanceClass = Boolean::class.java
-                }
-                ktype.classifier == Int::class -> {
-                    eDataType.name = "Int"
-                    eDataType.instanceClass = Int::class.java
-                }
                 (ktype.classifier as? KClass<*>)?.isSubclassOf(Enum::class) == true -> {
                     eDataType = createEEnum(ktype.classifier as KClass<out Enum<*>>)
                 }
@@ -217,11 +213,14 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
                         //throw RuntimeException("Unable to handle data type $ktype, with classifier ${ktype.classifier}")\
                         return null
                     } else {
+                        external = handler.external()
                         eDataType = handler.toDataType(ktype)
                     }
                 }
             }
-            ePackage.eClassifiers.add(eDataType)
+            if (!external) {
+                ePackage.eClassifiers.add(eDataType)
+            }
             dataTypes[ktype] = eDataType
         }
         return dataTypes[ktype]!!
