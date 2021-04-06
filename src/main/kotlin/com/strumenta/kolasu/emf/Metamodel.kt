@@ -144,8 +144,8 @@ val NamedHandler = KolasuClassHandler(Named::class, KOLASU_METAMODEL.getEClass("
 val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, KOLASU_METAMODEL.getEClass("ReferenceByName"))
 
 val StringHandler = KolasuDataTypeHandler(String::class, KOLASU_METAMODEL.getEClassifier("string") as EDataType)
-val BooleanHandler = KolasuDataTypeHandler(String::class, KOLASU_METAMODEL.getEClassifier("boolean") as EDataType)
-val IntHandler = KolasuDataTypeHandler(String::class, KOLASU_METAMODEL.getEClassifier("int") as EDataType)
+val BooleanHandler = KolasuDataTypeHandler(Boolean::class, KOLASU_METAMODEL.getEClassifier("boolean") as EDataType)
+val IntHandler = KolasuDataTypeHandler(Int::class, KOLASU_METAMODEL.getEClassifier("int") as EDataType)
 
 class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : ClassifiersProvider {
 
@@ -267,7 +267,8 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
 //                        }
 //                        eClass.eStructuralFeatures.add(ec)
                     } else {
-                        val dataType = provideDataType(prop.valueType)
+                        val nullable = prop.valueType.isMarkedNullable
+                        val dataType = provideDataType(prop.valueType.withNullability(false))
                         if (dataType == null) {
 
                             // We can treat it like a class
