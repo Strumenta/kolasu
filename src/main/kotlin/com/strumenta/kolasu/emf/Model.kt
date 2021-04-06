@@ -83,10 +83,18 @@ fun Node.toEObject(ePackage: EPackage): EObject {
                                 // TODO complete
                                 eo.eSet(esf, refEO)
                             } else {
-                                eo.eSet(esf, pd.value)
+                                try{
+                                    eo.eSet(esf, pd.value)
+                                } catch (e: Exception) {
+                                    throw RuntimeException("Unable to set property $pd of $this. Structural feature: $esf", e)
+                                }
                             }
                         } else {
-                            eo.eSet(esf, pd.value)
+                            try{
+                                eo.eSet(esf, pd.value)
+                            } catch (e: Exception) {
+                                throw RuntimeException("Unable to set property $pd of $this. Structural feature: $esf", e)
+                            }
                         }
                     }
                 }

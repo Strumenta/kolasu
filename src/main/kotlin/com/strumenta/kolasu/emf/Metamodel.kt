@@ -295,10 +295,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
                                 ea.lowerBound = 0
                                 ea.upperBound = -1
                             } else {
-                                ea.lowerBound = 0
+                                ea.lowerBound = if (nullable) 0 else 1
                                 ea.upperBound = 1
                             }
-                            ea.eType = provideDataType(prop.valueType)
+                            ea.eType = dataType
                             eClass.eStructuralFeatures.add(ea)
                         }
                     }
@@ -330,6 +330,3 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
     }
 }
 
-fun main(args: Array<String>) {
-    KOLASU_METAMODEL.saveEcore(File("kolasu.ecore"))
-}

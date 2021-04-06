@@ -3,6 +3,7 @@ package com.strumenta.kolasu.emf
 import com.strumenta.kolasu.validation.IssueType
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
+import java.io.File
 
 val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
 
@@ -110,4 +111,8 @@ fun createKolasuMetamodel(): EPackage {
     }
 
     return ePackage
+}
+
+fun main(args: Array<String>) {
+    KOLASU_METAMODEL.saveEcore(File("kolasu.ecore"))
 }
