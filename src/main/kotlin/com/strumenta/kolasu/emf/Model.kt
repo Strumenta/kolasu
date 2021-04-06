@@ -1,8 +1,6 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.processProperties
+import com.strumenta.kolasu.model.*
 import java.io.ByteArrayOutputStream
 import java.io.File
 import org.eclipse.emf.common.util.URI
@@ -34,10 +32,30 @@ fun Any.dataToEObject(ePackage: EPackage): EObject {
     return eo
 }
 
+fun Point.toEObject() : EObject {
+    val ec = KOLASU_METAMODEL.getEClass("Point")
+    val eo = KOLASU_METAMODEL.eFactoryInstance.create(ec)
+    eo.eSet(ec.getEStructuralFeature("line"), this.line)
+    eo.eSet(ec.getEStructuralFeature("column"), this.column)
+    return eo
+}
+
+fun Position.toEObject() : EObject {
+    val ec = KOLASU_METAMODEL.getEClass("Position")
+    val eo = KOLASU_METAMODEL.eFactoryInstance.create(ec)
+    eo.eSet(ec.getEStructuralFeature("start"), this.start.toEObject())
+    eo.eSet(ec.getEStructuralFeature("end"), this.end.toEObject())
+    return eo
+}
+
 fun Node.toEObject(ePackage: EPackage): EObject {
     try {
         val ec = ePackage.getEClass(this.javaClass)
         val eo = ePackage.eFactoryInstance.create(ec)
+        val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
+        val position = astNode.getEStructuralFeature("position")
+        val positionValue = this.position?.toEObject()
+        eo.eSet(position, positionValue)
         this.processProperties { pd ->
             val esf = ec.eAllStructuralFeatures.find { it.name == pd.name }!!
             if (pd.provideNodes) {
