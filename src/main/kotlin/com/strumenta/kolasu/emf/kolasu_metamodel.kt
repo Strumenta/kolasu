@@ -4,6 +4,8 @@ import com.strumenta.kolasu.validation.IssueType
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
 import java.io.File
+import java.math.BigDecimal
+import java.math.BigInteger
 
 val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
 
@@ -20,6 +22,16 @@ fun createKolasuMetamodel(): EPackage {
     intDT.name = "int"
     intDT.instanceClass = Int::class.java
     ePackage.eClassifiers.add(intDT)
+
+    val bigDecimalDT = EcoreFactory.eINSTANCE.createEDataType()
+    intDT.name = "BigDecimal"
+    intDT.instanceClass = BigDecimal::class.java
+    ePackage.eClassifiers.add(bigDecimalDT)
+
+    val bigIntegerDT = EcoreFactory.eINSTANCE.createEDataType()
+    intDT.name = "BigInteger"
+    intDT.instanceClass = BigInteger::class.java
+    ePackage.eClassifiers.add(bigIntegerDT)
 
     val stringDT = EcoreFactory.eINSTANCE.createEDataType()
     stringDT.name = "string"
@@ -115,4 +127,5 @@ fun createKolasuMetamodel(): EPackage {
 
 fun main(args: Array<String>) {
     KOLASU_METAMODEL.saveEcore(File("kolasu.ecore"))
+    KOLASU_METAMODEL.saveAsJson(File("kolasu.json"))
 }

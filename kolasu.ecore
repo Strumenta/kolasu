@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="StrumentaParser" nsURI="https://strumenta.com/kolasu">
+  <eClassifiers xsi:type="ecore:EDataType" name="BigInteger" instanceClassName="java.math.BigInteger"/>
+  <eClassifiers xsi:type="ecore:EDataType"/>
+  <eClassifiers xsi:type="ecore:EDataType"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="string" instanceClassName="java.lang.String"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="boolean" instanceClassName="boolean"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Point">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="line" lowerBound="1" eType="#//BigInteger"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="column" lowerBound="1"
+        eType="#//BigInteger"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Position">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="start" lowerBound="1" eType="#//Point"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="end" lowerBound="1" eType="#//Point"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ASTNode" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="position" eType="#//Position"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="IssueType">
+    <eLiterals name="LEXICAL"/>
+    <eLiterals name="SYNTACTIC" value="1"/>
+    <eLiterals name="SEMANTIC" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Issue">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" lowerBound="1" eType="#//IssueType"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="message" lowerBound="1"
+        eType="#//string"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="position" eType="#//Position"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PossiblyNamed" interface="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="#//string"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Named" interface="true" eSuperTypes="#//PossiblyNamed">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="#//string"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ReferenceByName">
+    <eTypeParameters name="N">
+      <eBounds eClassifier="#//ASTNode"/>
+    </eTypeParameters>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="#//string"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="referenced" containment="true">
+      <eGenericType eTypeParameter="#//ReferenceByName/N"/>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Result">
+    <eTypeParameters name="CU">
+      <eBounds eClassifier="#//ASTNode"/>
+    </eTypeParameters>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="root" containment="true">
+      <eGenericType eTypeParameter="#//Result/CU"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="issues" upperBound="-1"
+        eType="#//Issue" containment="true"/>
+  </eClassifiers>
+</ecore:EPackage>
