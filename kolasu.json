@@ -4,12 +4,20 @@
   "nsURI" : "https://strumenta.com/kolasu",
   "eClassifiers" : [ {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
+    "name" : "int",
+    "instanceClassName" : "int"
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
+    "name" : "long",
+    "instanceClassName" : "long"
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
+    "name" : "BigDecimal",
+    "instanceClassName" : "java.math.BigDecimal"
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
     "name" : "BigInteger",
     "instanceClassName" : "java.math.BigInteger"
-  }, {
-    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType"
-  }, {
-    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType"
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
     "name" : "string",
@@ -27,7 +35,7 @@
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "$ref" : "//BigInteger"
+        "$ref" : "//int"
       }
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
@@ -35,7 +43,7 @@
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "$ref" : "//BigInteger"
+        "$ref" : "//int"
       }
     } ]
   }, {

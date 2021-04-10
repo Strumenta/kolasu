@@ -23,14 +23,19 @@ fun createKolasuMetamodel(): EPackage {
     intDT.instanceClass = Int::class.java
     ePackage.eClassifiers.add(intDT)
 
+    val longDT = EcoreFactory.eINSTANCE.createEDataType()
+    longDT.name = "long"
+    longDT.instanceClass = Long::class.java
+    ePackage.eClassifiers.add(longDT)
+
     val bigDecimalDT = EcoreFactory.eINSTANCE.createEDataType()
-    intDT.name = "BigDecimal"
-    intDT.instanceClass = BigDecimal::class.java
+    bigDecimalDT.name = "BigDecimal"
+    bigDecimalDT.instanceClass = BigDecimal::class.java
     ePackage.eClassifiers.add(bigDecimalDT)
 
     val bigIntegerDT = EcoreFactory.eINSTANCE.createEDataType()
-    intDT.name = "BigInteger"
-    intDT.instanceClass = BigInteger::class.java
+    bigIntegerDT.name = "BigInteger"
+    bigIntegerDT.instanceClass = BigInteger::class.java
     ePackage.eClassifiers.add(bigIntegerDT)
 
     val stringDT = EcoreFactory.eINSTANCE.createEDataType()

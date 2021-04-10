@@ -3,6 +3,8 @@ package com.strumenta.kolasu.emf
 import com.strumenta.kolasu.model.*
 import org.eclipse.emf.ecore.*
 import java.io.File
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
@@ -146,8 +148,9 @@ val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, KOLASU_M
 val StringHandler = KolasuDataTypeHandler(String::class, KOLASU_METAMODEL.getEClassifier("string") as EDataType)
 val BooleanHandler = KolasuDataTypeHandler(Boolean::class, KOLASU_METAMODEL.getEClassifier("boolean") as EDataType)
 val IntHandler = KolasuDataTypeHandler(Int::class, KOLASU_METAMODEL.getEClassifier("int") as EDataType)
-val BigIntegerHandler = KolasuDataTypeHandler(Int::class, KOLASU_METAMODEL.getEClassifier("BigInteger") as EDataType)
-val BigDecimalHandler = KolasuDataTypeHandler(Int::class, KOLASU_METAMODEL.getEClassifier("BigDecimal") as EDataType)
+val BigIntegerHandler = KolasuDataTypeHandler(BigInteger::class, KOLASU_METAMODEL.getEClassifier("BigInteger") as EDataType)
+val BigDecimalHandler = KolasuDataTypeHandler(BigDecimal::class, KOLASU_METAMODEL.getEClassifier("BigDecimal") as EDataType)
+val LongHandler = KolasuDataTypeHandler(Long::class, KOLASU_METAMODEL.getEClassifier("long") as EDataType)
 
 class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : ClassifiersProvider {
 
@@ -164,15 +167,16 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         ePackage.nsPrefix = nsPrefix
         ePackage.setResourceURI(nsURI)
 
-        eclassTypeHandlers.add(NodeHandler)
-        eclassTypeHandlers.add(NamedHandler)
-        eclassTypeHandlers.add(ReferenceByNameHandler)
-
         dataTypeHandlers.add(StringHandler)
         dataTypeHandlers.add(BooleanHandler)
         dataTypeHandlers.add(IntHandler)
+        dataTypeHandlers.add(LongHandler)
         dataTypeHandlers.add(BigIntegerHandler)
         dataTypeHandlers.add(BigDecimalHandler)
+
+        eclassTypeHandlers.add(NodeHandler)
+        eclassTypeHandlers.add(NamedHandler)
+        eclassTypeHandlers.add(ReferenceByNameHandler)
     }
 
     /**

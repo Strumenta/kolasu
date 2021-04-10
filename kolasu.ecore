@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="StrumentaParser" nsURI="https://strumenta.com/kolasu">
+  <eClassifiers xsi:type="ecore:EDataType" name="int" instanceClassName="int"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="long" instanceClassName="long"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="BigDecimal" instanceClassName="java.math.BigDecimal"/>
   <eClassifiers xsi:type="ecore:EDataType" name="BigInteger" instanceClassName="java.math.BigInteger"/>
-  <eClassifiers xsi:type="ecore:EDataType"/>
-  <eClassifiers xsi:type="ecore:EDataType"/>
   <eClassifiers xsi:type="ecore:EDataType" name="string" instanceClassName="java.lang.String"/>
   <eClassifiers xsi:type="ecore:EDataType" name="boolean" instanceClassName="boolean"/>
   <eClassifiers xsi:type="ecore:EClass" name="Point">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="line" lowerBound="1" eType="#//BigInteger"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="line" lowerBound="1" eType="#//int"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="column" lowerBound="1"
-        eType="#//BigInteger"/>
+        eType="#//int"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Position">
     <eStructuralFeatures xsi:type="ecore:EReference" name="start" lowerBound="1" eType="#//Point"
