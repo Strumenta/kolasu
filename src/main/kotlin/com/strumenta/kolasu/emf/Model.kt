@@ -13,6 +13,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.emfjson.jackson.resource.JsonResourceFactory
 import java.lang.RuntimeException
+import kotlin.reflect.full.memberProperties
 
 fun EPackage.getEClass(javaClass: Class<*>): EClass {
     return this.getEClass(javaClass.simpleName)
@@ -29,6 +30,15 @@ fun EPackage.getEEnum(javaClass: Class<*>): EEnum {
 fun Any.dataToEObject(ePackage: EPackage): EObject {
     val ec = ePackage.getEClass(this.javaClass)
     val eo = ePackage.eFactoryInstance.create(ec)
+    ec.eAllAttributes.forEach { attr ->
+        val prop = this.javaClass.kotlin.memberProperties.find { it.name == attr.name }
+        if (prop != null) {
+            val value = prop.getValue(this, prop)
+            eo.eSet(attr, value)
+        } else {
+            throw RuntimeException("Unable to set attribute $attr in $this")
+        }
+    }
     return eo
 }
 
