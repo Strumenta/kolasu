@@ -108,6 +108,7 @@ fun Node.toEObject(ePackage: EPackage): EObject {
                             } else if (pd.value is ReferenceByName<*>) {
                                 val refEC = KOLASU_METAMODEL.getEClass("ReferenceByName")
                                 val refEO = KOLASU_METAMODEL.eFactoryInstance.create(refEC)
+                                refEO.eSet(refEC.getEStructuralFeature("name")!!, pd.value.name)
                                 // TODO complete
                                 eo.eSet(esf, refEO)
                             } else {
