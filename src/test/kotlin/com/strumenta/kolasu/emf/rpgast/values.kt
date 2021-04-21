@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.emf.rpgast
 
 import com.smeup.rpgparser.parsing.ast.CompilationUnit
-import com.sun.javafx.fxml.BeanAdapter.coerce
 import java.math.BigDecimal
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat

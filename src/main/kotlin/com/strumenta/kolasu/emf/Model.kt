@@ -20,7 +20,7 @@ fun EPackage.getEClass(javaClass: Class<*>): EClass {
 }
 
 fun EPackage.getEClass(name: String): EClass {
-    return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("Class not found: $javaClass")) as EClass
+    return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("Class not found: $name")) as EClass
 }
 
 fun EPackage.getEEnum(javaClass: Class<*>): EEnum {
