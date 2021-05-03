@@ -6,15 +6,18 @@ import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
-/**
- * @return all properties of this node that are considered AST properties.
- */
-internal val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
-    get() = this.javaClass.kotlin.memberProperties
+internal val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
+    get() = this.kotlin.memberProperties
         .filter { it.visibility == KVisibility.PUBLIC }
         .filter { it.findAnnotation<Derived>() == null }
         .filter { it.findAnnotation<Link>() == null }
         .filter { it.name != "parent" }
+
+/**
+ * @return all properties of this node that are considered AST properties.
+ */
+internal val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
+    get() = this.javaClass.nodeProperties
 
 /**
  * Sets or corrects the parent of all AST nodes.
@@ -74,12 +77,53 @@ fun KClass<*>.isMarkedAsNodeType(): Boolean {
     return this.annotations.any { it.annotationClass == NodeType::class }
 }
 
-data class PropertyDescription(val name: String, val provideNodes: Boolean, val multiple: Boolean, val value: Any?) {
+data class PropertyTypeDescription(val name: String, val provideNodes: Boolean, val multiple: Boolean, val valueType: KType) {
+    companion object {
+        fun buildFor(property: KProperty1<*, *>): PropertyTypeDescription {
+            val propertyType = property.returnType
+            val classifier = propertyType.classifier as? KClass<*>
+            val multiple = (classifier?.isSubclassOf(Collection::class) == true)
+            var valueType: KType
+            val provideNodes = if (multiple) {
+                valueType = propertyType.arguments[0].type!!
+                providesNodes(propertyType.arguments[0])
+            } else {
+                valueType = propertyType
+                providesNodes(classifier)
+            }
+            return PropertyTypeDescription(
+                name = property.name,
+                provideNodes = provideNodes,
+                multiple = multiple,
+                valueType = valueType
+            )
+        }
+    }
+}
+
+enum class Multeplicity {
+    OPTIONAL,
+    SINGULAR,
+    MANY
+}
+
+data class PropertyDescription(val name: String, val provideNodes: Boolean,
+                               val multeplicity: Multeplicity, val value: Any?) {
+
+    val multiple: Boolean
+        get() = multeplicity == Multeplicity.MANY
+
     companion object {
         fun buildFor(property: KProperty1<in Node, *>, node: Node): PropertyDescription {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             val multiple = (classifier?.isSubclassOf(Collection::class) == true)
+            val optional = !multiple && propertyType.isMarkedNullable
+            val multeplicity = when {
+                multiple -> Multeplicity.MANY
+                optional -> Multeplicity.OPTIONAL
+                else -> Multeplicity.SINGULAR
+            }
             val provideNodes = if (multiple) {
                 providesNodes(propertyType.arguments[0])
             } else {
@@ -88,7 +132,7 @@ data class PropertyDescription(val name: String, val provideNodes: Boolean, val 
             return PropertyDescription(
                 name = property.name,
                 provideNodes = provideNodes,
-                multiple = multiple,
+                    multeplicity = multeplicity,
                 value = property.get(node)
             )
         }
@@ -102,6 +146,17 @@ fun Node.processProperties(
     nodeProperties.forEach { p ->
         if (!propertiesToIgnore.contains(p.name)) {
             propertyOperation(PropertyDescription.buildFor(p, this))
+        }
+    }
+}
+
+fun <T : Any> Class<T>.processProperties(
+    propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
+    propertyTypeOperation: (PropertyTypeDescription) -> Unit
+) {
+    nodeProperties.forEach { p ->
+        if (!propertiesToIgnore.contains(p.name)) {
+            propertyTypeOperation(PropertyTypeDescription.buildFor(p))
         }
     }
 }

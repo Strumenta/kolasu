@@ -19,7 +19,7 @@ class PropertyDescriptionTest {
             list.add(it)
         }
         assertEquals(1, list.size)
-        assertEquals(PropertyDescription("name", false, false, "gino"), list[0])
+        assertEquals(PropertyDescription("name", false, Multeplicity.SINGULAR, "gino"), list[0])
     }
 
     @Test
@@ -30,7 +30,7 @@ class PropertyDescriptionTest {
             list.add(it)
         }
         assertEquals(1, list.size)
-        assertEquals(PropertyDescription("names", false, true, listOf("gino", "pino")), list[0])
+        assertEquals(PropertyDescription("names", false, Multeplicity.MANY, listOf("gino", "pino")), list[0])
     }
 
     @Test
@@ -41,7 +41,7 @@ class PropertyDescriptionTest {
             list.add(it)
         }
         assertEquals(1, list.size)
-        assertEquals(PropertyDescription("foo", true, false, Foo1("gino")), list[0])
+        assertEquals(PropertyDescription("foo", true, Multeplicity.SINGULAR, Foo1("gino")), list[0])
     }
 
     @Test
@@ -52,7 +52,7 @@ class PropertyDescriptionTest {
             list.add(it)
         }
         assertEquals(1, list.size)
-        assertEquals(PropertyDescription("foos", true, true, listOf(Foo1("gino"))), list[0])
+        assertEquals(PropertyDescription("foos", true, Multeplicity.MANY, listOf(Foo1("gino"))), list[0])
     }
 
     @Test
@@ -63,7 +63,7 @@ class PropertyDescriptionTest {
             list.add(it)
         }
         assertEquals(1, list.size)
-        assertEquals(PropertyDescription("foos", true, true, emptyList<Foo1>()), list[0])
+        assertEquals(PropertyDescription("foos", true, Multeplicity.MANY, emptyList<Foo1>()), list[0])
     }
 
     @Test
@@ -74,6 +74,6 @@ class PropertyDescriptionTest {
             list.add(it)
         }
         assertEquals(1, list.size)
-        assertEquals(PropertyDescription("foos", true, true, null), list[0])
+        assertEquals(PropertyDescription("foos", true, Multeplicity.MANY, null), list[0])
     }
 }
