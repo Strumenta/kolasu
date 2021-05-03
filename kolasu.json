@@ -1,7 +1,7 @@
 {
   "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
   "name" : "StrumentaParser",
-  "nsURI" : "https://strumenta.com/kolasu",
+  "nsURI" : "https://strumenta.com/kolasu/v1",
   "eClassifiers" : [ {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
     "name" : "int",
