@@ -1,6 +1,6 @@
 # Kolasu
 
-[![Build Status](https://travis-ci.org/Strumenta/kolasu.svg?branch=master)](https://travis-ci.org/Strumenta/kolasu)
+[![Build Status](https://github.com/Strumenta/kolasu/workflows/BuildAndTest/badge.svg)](https://github.com/Strumenta/kolasu/actions)
 [![Gitter](https://badges.gitter.im/lang-eng/community.svg)](https://gitter.im/lang-eng/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 Kolasu supplies the infrastructure to build a custom, possibly mutable, Abstract Syntax Tree (AST) using Kotlin.
@@ -22,11 +22,21 @@ All properties, and therefore the whole tree structure, will be detected automat
 
 ## Origin
 
-Kolasu stands for Kotlin Language Support. 
-
-It was born as a small framework to support building languages using ANTLR and Kotlin. 
+Kolasu was born as a small framework to support building languages using ANTLR and Kotlin. 
 
 ## Using Kolasu in your project
+
+Releases are published on Bintray: 
+
+```
+repositories {
+    maven { url 'https://maven.pkg.github.com/strumenta/strumenta-oss-maven' }
+}
+
+dependencies {
+    compile "com.strumenta:kolasu:1.0.5"
+}
+```
 
 Snapshots are published on JitPack.
 
@@ -36,19 +46,7 @@ repositories {
 }
 
 dependencies {
-    compile "com.github.strumenta:kolasu:20fb9cd239"
-}
-```
-
-Releases are published on Bintray: 
-
-```
-repositories {
-    maven { url 'https://maven.pkg.github.com/Strumenta/kolasu' }
-}
-
-dependencies {
-    compile "com.strumenta:kolasu:v0.3.0"
+    compile "com.github.strumenta:kolasu:master"
 }
 ```
 
@@ -64,7 +62,8 @@ Run:
 
 Kolasu is used in several internal and commercial projects developed at [Strumenta](https://strumenta.com).
 
-It is also used in an open-source project named [Jariko](https://github.com/smeup/jariko). Jariko is an interpreter for RPG running on the JVM.
+It is also used in an open-source project named [Jariko](https://github.com/smeup/jariko). 
+Jariko is an interpreter for RPG running on the JVM.
 
 ## Publishing
 

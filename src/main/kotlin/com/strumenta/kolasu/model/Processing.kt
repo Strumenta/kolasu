@@ -116,17 +116,22 @@ fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<No
 
 /**
  * Recursively execute [operation] on this node, and all nodes below this node that extend [klass].
+ *
+ * T is not forced to be a subtype of Node to support using interfaces.
+ *
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
-fun <T : Node> Node.processNodesOfType(klass: Class<T>, operation: (T) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
+fun <T> Node.processNodesOfType(klass: Class<T>, operation: (T) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
     walker.invoke(this).filterIsInstance(klass).forEach(operation)
 }
 
 /**
+ * T is not forced to be a subtype of Node to support using interfaces.
+ *
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  * @return all nodes in this AST (sub)tree that are instances of, or extend [klass].
  */
-fun <T : Node> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<Node>> = Node::walk): List<T> {
+fun <T> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<Node>> = Node::walk): List<T> {
     return walker.invoke(this).filterIsInstance(klass).toList()
 }
 
@@ -162,7 +167,7 @@ val Node.children: List<Node>
     }
 
 // TODO reimplement using transformChildren
-fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
+fun Node.transformTree(operation: (Node) -> Node, inPlace: Boolean = false): Node {
     if (inPlace) TODO()
     operation(this)
     val changes = mutableMapOf<String, Any>()
@@ -170,11 +175,11 @@ fun Node.transform(operation: (Node) -> Node, inPlace: Boolean = false): Node {
         val v = p.get(this)
         when (v) {
             is Node -> {
-                val newValue = v.transform(operation)
+                val newValue = v.transformTree(operation)
                 if (newValue != v) changes[p.name] = newValue
             }
             is Collection<*> -> {
-                val newValue = v.map { if (it is Node) it.transform(operation) else it }
+                val newValue = v.map { if (it is Node) it.transformTree(operation) else it }
                 if (newValue != v) changes[p.name] = newValue
             }
         }
@@ -199,7 +204,7 @@ class ImmutablePropertyException(property: KProperty<*>, node: Node) :
     RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
 @Suppress("UNCHECKED_CAST") // assumption: every MutableList in the AST contains Nodes.
-fun Node.transformTree(operation: (Node) -> Node) {
+fun Node.transformChildren(operation: (Node) -> Node) {
     relevantMemberProperties().forEach { property ->
         val value = property.get(this)
         when (value) {
@@ -238,7 +243,7 @@ fun Node.transformTree(operation: (Node) -> Node) {
     }
 }
 
-fun Node.mapTree(operation: (Node) -> Node): Node {
+fun Node.mapChildren(operation: (Node) -> Node): Node {
     val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { property ->
         val value = property.get(this)
@@ -281,7 +286,7 @@ fun Node.replaceWith(other: Node) {
     if (this.parent == null) {
         throw IllegalStateException("Parent not set")
     }
-    this.parent!!.transformTree { if (it == this) other else it }
+    this.parent!!.transformChildren { if (it == this) other else it }
 }
 
 /**

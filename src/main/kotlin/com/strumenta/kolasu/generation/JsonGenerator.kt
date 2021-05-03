@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonNull
 import com.google.gson.JsonPrimitive
+import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
@@ -33,6 +34,28 @@ class JsonGenerator {
         )
     }
 
+    /**
+     * Converts "results" to JSON format.
+     */
+    fun generateJSONWithStreaming(result: Result<out Node>, writer: JsonWriter) {
+        writer.beginObject()
+        writer.name("errors")
+        writer.beginArray()
+        result.errors.forEach { it.toJsonStreaming(writer) }
+        writer.endArray()
+        writer.name("root")
+        if (result.root == null) {
+            writer.nullValue()
+        } else {
+            result.root.toJsonStreaming(writer)
+        }
+        writer.endObject()
+    }
+
+    fun generateJSONWithStreaming(root: Node, writer: JsonWriter) {
+        root.toJsonStreaming(writer)
+    }
+
     fun generateString(root: Node): String {
         val gson = GsonBuilder().setPrettyPrinting().create()
         return gson.toJson(generateJSON(root))
@@ -54,7 +77,7 @@ class JsonGenerator {
 
 private fun Node.toJson(): JsonElement {
     val jsonObject = jsonObject(
-        "type" to this.javaClass.simpleName,
+        "type" to this.javaClass.canonicalName,
         "position" to this.position?.toJson()
     )
     this.processProperties {
@@ -77,6 +100,41 @@ private fun Node.toJson(): JsonElement {
     return jsonObject
 }
 
+private fun Node.toJsonStreaming(writer: JsonWriter) {
+    writer.beginObject()
+    writer.name("type")
+    writer.value(this.javaClass.simpleName)
+    if (this.position != null) {
+        writer.name("position")
+        this.position!!.toJsonStreaming(writer)
+    }
+    this.processProperties {
+        writer.name(it.name)
+        if (it.value == null) {
+            writer.nullValue()
+        } else if (it.multiple) {
+            writer.beginArray()
+            if (it.provideNodes) {
+                (it.value as Collection<*>).forEach {
+                    (it as Node).toJsonStreaming(writer)
+                }
+            } else {
+                (it.value as Collection<*>).forEach {
+                    it.toJsonStreaming(writer)
+                }
+            }
+            writer.endArray()
+        } else {
+            if (it.provideNodes) {
+                (it.value as Node).toJsonStreaming(writer)
+            } else {
+                it.value.toJsonStreaming(writer)
+            }
+        }
+    }
+    writer.endObject()
+}
+
 private fun Any?.toJson(): JsonElement? {
     return when (this) {
         null -> JsonNull.INSTANCE
@@ -84,6 +142,16 @@ private fun Any?.toJson(): JsonElement? {
         is Number -> JsonPrimitive(this)
         is Boolean -> JsonPrimitive(this)
         else -> JsonPrimitive(this.toString())
+    }
+}
+
+private fun Any?.toJsonStreaming(writer: JsonWriter) {
+    when (this) {
+        null -> writer.nullValue()
+        is String -> writer.value(this)
+        is Number -> writer.value(this)
+        is Boolean -> writer.value(this)
+        else -> writer.value(this.toString())
     }
 }
 
@@ -95,6 +163,21 @@ private fun Issue.toJson(): JsonElement {
     )
 }
 
+private fun Issue.toJsonStreaming(writer: JsonWriter) {
+    writer.beginObject()
+    writer.name("type")
+    writer.value(this.type.name)
+    writer.name("message")
+    writer.value(this.message)
+    writer.name("position")
+    if (this.position == null) {
+        writer.nullValue()
+    } else {
+        this.position!!.toJsonStreaming(writer)
+    }
+    writer.endObject()
+}
+
 private fun Position.toJson(): JsonElement {
     return jsonObject(
         "description" to this.toString(),
@@ -103,9 +186,29 @@ private fun Position.toJson(): JsonElement {
     )
 }
 
+private fun Position.toJsonStreaming(writer: JsonWriter) {
+    writer.beginObject()
+    writer.name("description")
+    writer.value(this.toString())
+    writer.name("start")
+    start.toJsonStreaming(writer)
+    writer.name("end")
+    end.toJsonStreaming(writer)
+    writer.endObject()
+}
+
 private fun Point.toJson(): JsonElement {
     return jsonObject(
         "line" to this.line,
         "column" to this.column
     )
+}
+
+private fun Point.toJsonStreaming(writer: JsonWriter) {
+    writer.beginObject()
+    writer.name("line")
+    writer.value(this.line)
+    writer.name("column")
+    writer.value(this.column)
+    writer.endObject()
 }
