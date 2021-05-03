@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.emf
 
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.strumenta.kolasu.model.*
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -171,4 +173,8 @@ fun EObject.saveAsJson(): String {
     val output = ByteArrayOutputStream()
     resource.save(output, null)
     return output.toString(Charsets.UTF_8.name())
+}
+
+fun EObject.saveAsJsonObject(): JsonObject {
+    return JsonParser().parse(this.saveAsJson()).asJsonObject
 }
