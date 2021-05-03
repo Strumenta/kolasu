@@ -27,6 +27,8 @@ apply plugin: 'java'
 apply plugin: 'antlr'
 apply plugin: 'maven'
 apply plugin: 'idea'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 repositories {
     mavenLocal()
@@ -86,43 +88,43 @@ if (JavaVersion.current().isJava8Compatible()) {
 artifacts {
     archives javadocJar, sourcesJar
   }
-
-task generatePom {
-  doLast {
-    def generatedPom = pom {
-      project {
-        name project.name
-        description "Framework to work with AST and building languages. Integrated with ANTLR."
-        version kolasuVersion
-        packaging 'jar'
-        url 'https://github.com/Strumenta/kolasu'
-
-        scm {
-          connection 'scm:git:https://github.com/Strumenta/kolasu.git'
-          developerConnection 'scm:git:git@github.com:Strumenta/kolasu.git'
-          url 'https://github.com/Strumenta/kolasu.git'
-        }
-
-        licenses {
-          license {
-            name 'Apache Licenve V2.0'
-            url 'https://www.apache.org/licenses/LICENSE-2.0'
-            distribution 'repo'
-          }
-        }
-
-        developers {
-          developer {
-            id = 'ftomassetti'
-            name = 'Federico Tomassetti'
-            email = 'federico@strumenta.com'
-          }
-        }
-      }
-    }
-    generatedPom.writeTo("$buildDir/pom.xml")
-  }
-}
+//
+//task generatePom {
+//  doLast {
+//    def generatedPom = pom {
+//      project {
+//        name project.name
+//        description "Framework to work with AST and building languages. Integrated with ANTLR."
+//        version kolasuVersion
+//        packaging 'jar'
+//        url 'https://github.com/Strumenta/kolasu'
+//
+//        scm {
+//          connection 'scm:git:https://github.com/Strumenta/kolasu.git'
+//          developerConnection 'scm:git:git@github.com:Strumenta/kolasu.git'
+//          url 'https://github.com/Strumenta/kolasu.git'
+//        }
+//
+//        licenses {
+//          license {
+//            name 'Apache Licenve V2.0'
+//            url 'https://www.apache.org/licenses/LICENSE-2.0'
+//            distribution 'repo'
+//          }
+//        }
+//
+//        developers {
+//          developer {
+//            id = 'ftomassetti'
+//            name = 'Federico Tomassetti'
+//            email = 'federico@strumenta.com'
+//          }
+//        }
+//      }
+//    }
+//    generatedPom.writeTo("$buildDir/pom.xml")
+//  }
+//}
 
 test {
   testLogging {
@@ -161,7 +163,6 @@ clean{
 
 ideaProject.dependsOn generateTestGrammarSource
 compileJava.dependsOn generateTestGrammarSource
-//compileTestKotlin.dependsOn compileTestJava
 
 idea {
     module {
@@ -170,22 +171,62 @@ idea {
     }
 }
 
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
 publishing {
+
     repositories {
         maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/Strumenta/kolasu")
+            def releaseRepo = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotRepo = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url = isReleaseVersion ? releaseRepo : snapshotRepo
             credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
-                password = project.findProperty("gpr.key") ?: System.getenv("GPR_API_KEY")
+                username = project.hasProperty('ossrhUsername') ? ossrhUsername : "Unknown user"
+                password = project.hasProperty('ossrhPassword') ? ossrhPassword : "Unknown password"
             }
         }
     }
+
     publications {
-        gpr(MavenPublication) {
+        kolasu(MavenPublication) {
             from(components.java)
             artifact sourcesJar
             artifact javadocJar
+            pom {
+                name = project.name
+                description = "Framework to work with AST and building languages. Integrated with ANTLR."
+                version = kolasuVersion
+                packaging = 'jar'
+                url = 'https://github.com/Strumenta/kolasu'
+
+                scm {
+                    connection = 'scm:git:https://github.com/Strumenta/kolasu.git'
+                    developerConnection = 'scm:git:git@github.com:Strumenta/kolasu.git'
+                    url = 'https://github.com/Strumenta/kolasu.git'
+                }
+
+                licenses {
+                    license {
+                        name = 'Apache Licenve V2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                        distribution = 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'ftomassetti'
+                        name = 'Federico Tomassetti'
+                        email = 'federico@strumenta.com'
+                    }
+                    developer {
+                        id = 'alessiostalla'
+                        name = 'Alessio Stalla'
+                        email = 'alessio.stalla@strumenta.com'
+                    }
+                }
+
+            }
         }
     }
 }
@@ -196,25 +237,11 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     }
 }
 
-bintray {
-    user = rootProject.findProperty('bintray_user')
-    key = rootProject.findProperty('bintray_api_key')
-    pkg {
-        repo = 'strumenta-oss-maven'
-        name = 'kolasu'
-        userOrg = 'strumenta'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/Strumenta/kolasu.git'
-        version {
-            name = 'v' + project.version
-            desc = 'Version ' + project.version
-            released = new Date()
-            vcsTag = 'v'+project.version
-        }
-    }
 
-    publications = ['gpr']
-    dryRun = false
-    publish = true
-    override = true
+signing {
+    sign publishing.publications.kolasu
+}
+
+tasks.withType(Sign) {
+    onlyIf { isReleaseVersion }
 }
