@@ -13,25 +13,26 @@ import com.strumenta.kolasu.model.Position
 // to its main components
 
 data class CompilationUnit(
-        val fileDefinitions: List<FileDefinition>,
-        val dataDefinitions: List<DataDefinition>,
-        val main: MainBody,
-        val subroutines: List<Subroutine>,
-        val compileTimeArrays: List<CompileTimeArray>,
-        val directives: List<Directive>,
-        override val specifiedPosition: Position??
+    val fileDefinitions: List<FileDefinition>,
+    val dataDefinitions: List<DataDefinition>,
+    val main: MainBody,
+    val subroutines: List<Subroutine>,
+    val compileTimeArrays: List<CompileTimeArray>,
+    val directives: List<Directive>,
+    override val specifiedPosition: Position??
 ) : Node(specifiedPosition) {
-    
-    
+
     companion object {
-        fun empty() = CompilationUnit(emptyList(), emptyList(), MainBody(emptyList(), null), emptyList(), emptyList(),
-                emptyList(),
-                null)
+        fun empty() = CompilationUnit(
+            emptyList(), emptyList(), MainBody(emptyList(), null), emptyList(), emptyList(),
+            emptyList(),
+            null
+        )
     }
 
     val entryPlist: PlistStmt?
         get() = main.stmts.plist()
-                ?: subroutines.mapNotNull { it.stmts.plist() }.firstOrNull()
+            ?: subroutines.mapNotNull { it.stmts.plist() }.firstOrNull()
 
     private val inStatementsDataDefinitions = mutableListOf<InStatementDataDefinition>()
 
@@ -73,11 +74,11 @@ data class CompilationUnit(
     fun hasDataDefinition(name: String) = dataDefinitions.any { it.name.equals(name, ignoreCase = true) }
 
     fun getDataDefinition(name: String) = dataDefinitions.firstOrNull() { it.name.equals(name, ignoreCase = true) }
-            ?: throw IllegalArgumentException("Data definition $name was not found")
+        ?: throw IllegalArgumentException("Data definition $name was not found")
 
     fun getDataOrFieldDefinition(name: String) = dataDefinitions.firstOrNull() { it.name.equals(name, ignoreCase = true) }
-            ?: dataDefinitions.mapNotNull { it.fields.find { it.name.equals(name, ignoreCase = true) } }.firstOrNull()
-            ?: throw IllegalArgumentException("Data or field definition $name was not found")
+        ?: dataDefinitions.mapNotNull { it.fields.find { it.name.equals(name, ignoreCase = true) } }.firstOrNull()
+        ?: throw IllegalArgumentException("Data or field definition $name was not found")
 
     fun hasAnyDataDefinition(name: String) = allDataDefinitions.any { it.name.equals(name, ignoreCase = true) }
 
@@ -97,15 +98,11 @@ data class CompilationUnit(
     fun getFileDefinition(name: String) = fileDefinitions.first { it.name.equals(name, ignoreCase = true) }
 }
 
-
 data class MainBody(val stmts: List<Statement>, override val specifiedPosition: Position?? = null) : Node(specifiedPosition)
-
 
 data class Subroutine(override val name: String, val stmts: List<Statement>, val tag: String? = null, override val specifiedPosition: Position?? = null) : Named, Node(specifiedPosition)
 
-
 data class Function(override val name: String, override val specifiedPosition: Position?? = null) : Named, Node(specifiedPosition)
-
 
 data class CompileTimeArray(override val name: String, val lines: List<String>, override val specifiedPosition: Position?? = null) : Named, Node(specifiedPosition)
 

@@ -5,6 +5,8 @@ import com.google.gson.JsonParser
 import com.strumenta.kolasu.model.*
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.lang.RuntimeException
+import kotlin.reflect.full.memberProperties
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EEnum
@@ -14,8 +16,6 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.emfjson.jackson.resource.JsonResourceFactory
-import java.lang.RuntimeException
-import kotlin.reflect.full.memberProperties
 
 fun EPackage.getEClass(javaClass: Class<*>): EClass {
     return this.getEClass(javaClass.simpleName)
@@ -44,7 +44,7 @@ fun Any.dataToEObject(ePackage: EPackage): EObject {
     return eo
 }
 
-fun Point.toEObject() : EObject {
+fun Point.toEObject(): EObject {
     val ec = KOLASU_METAMODEL.getEClass("Point")
     val eo = KOLASU_METAMODEL.eFactoryInstance.create(ec)
     eo.eSet(ec.getEStructuralFeature("line"), this.line)
@@ -52,7 +52,7 @@ fun Point.toEObject() : EObject {
     return eo
 }
 
-fun Position.toEObject() : EObject {
+fun Position.toEObject(): EObject {
     val ec = KOLASU_METAMODEL.getEClass("Position")
     val eo = KOLASU_METAMODEL.eFactoryInstance.create(ec)
     eo.eSet(ec.getEStructuralFeature("start"), this.start.toEObject())
@@ -114,14 +114,14 @@ fun Node.toEObject(ePackage: EPackage): EObject {
                                 // TODO complete
                                 eo.eSet(esf, refEO)
                             } else {
-                                try{
+                                try {
                                     eo.eSet(esf, pd.value)
                                 } catch (e: Exception) {
                                     throw RuntimeException("Unable to set property $pd of $this. Structural feature: $esf", e)
                                 }
                             }
                         } else {
-                            try{
+                            try {
                                 eo.eSet(esf, pd.value)
                             } catch (e: Exception) {
                                 throw RuntimeException("Unable to set property $pd of $this. Structural feature: $esf", e)
@@ -146,14 +146,13 @@ fun EObject.saveXMI(xmiFile: File) {
     resource.save(null)
 }
 
-fun EPackage.saveAsJson(jsonFile: File, restoringURI:Boolean=true) {
+fun EPackage.saveAsJson(jsonFile: File, restoringURI: Boolean = true) {
     val startURI = this.eResource().uri
     (this as EObject).saveAsJson(jsonFile)
     if (restoringURI) {
         this.setResourceURI(startURI.toString())
     }
 }
-
 
 fun EObject.saveAsJson(jsonFile: File) {
     val resourceSet = ResourceSetImpl()

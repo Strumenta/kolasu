@@ -9,20 +9,18 @@ data class IndicatorExpr(val index: IndicatorKey, override val specifiedPosition
     AssignableExpression(specifiedPosition) {
 
     constructor(dataWrapUpChoice: DataWrapUpChoice, specifiedPosition: Position? = null) :
-            this(index = dataWrapUpChoice.name.toIndicatorKey(), specifiedPosition = specifiedPosition)
+    this(index = dataWrapUpChoice.name.toIndicatorKey(), specifiedPosition = specifiedPosition)
 
     override fun size(): Int = 1
-    
 }
 
 // *IN
 
 data class GlobalIndicatorExpr(override val specifiedPosition: Position? = null) :
-        AssignableExpression(specifiedPosition) {
+    AssignableExpression(specifiedPosition) {
     override fun size(): Int {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
-    
 }
 
 typealias IndicatorKey = Int
@@ -67,7 +65,6 @@ fun String.toIndicatorKey(): IndicatorKey {
         else -> IndicatorType.valueOf(this).range.first
     }
 }
-
 
 data class IndicatorCondition(val key: IndicatorKey, val negate: Boolean)
 

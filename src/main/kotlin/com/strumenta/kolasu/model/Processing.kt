@@ -107,8 +107,12 @@ enum class Multeplicity {
     MANY
 }
 
-data class PropertyDescription(val name: String, val provideNodes: Boolean,
-                               val multeplicity: Multeplicity, val value: Any?) {
+data class PropertyDescription(
+    val name: String,
+    val provideNodes: Boolean,
+    val multeplicity: Multeplicity,
+    val value: Any?
+) {
 
     val multiple: Boolean
         get() = multeplicity == Multeplicity.MANY
@@ -132,7 +136,7 @@ data class PropertyDescription(val name: String, val provideNodes: Boolean,
             return PropertyDescription(
                 name = property.name,
                 provideNodes = provideNodes,
-                    multeplicity = multeplicity,
+                multeplicity = multeplicity,
                 value = property.get(node)
             )
         }

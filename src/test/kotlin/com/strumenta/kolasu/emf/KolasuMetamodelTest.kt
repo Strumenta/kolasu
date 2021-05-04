@@ -1,10 +1,8 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.Node
 import java.io.File
 import kotlin.test.assertEquals
 import org.junit.Test
-
 
 class KolasuMetamodelTest {
 

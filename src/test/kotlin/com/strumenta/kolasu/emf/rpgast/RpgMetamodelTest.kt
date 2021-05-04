@@ -4,11 +4,9 @@ import com.smeup.rpgparser.parsing.ast.CompilationUnit
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.emf.saveAsJson
 import com.strumenta.kolasu.emf.saveEcore
-import com.strumenta.kolasu.model.Node
 import java.io.File
 import kotlin.test.assertEquals
 import org.junit.Test
-
 
 class RpgMetamodelTest {
 
@@ -23,7 +21,7 @@ class RpgMetamodelTest {
 
         assertEquals(null, ePackage.eClassifiers.find { it.name == "Int" })
 
-        //assertEquals(34, ePackage.eClassifiers.size)
+        // assertEquals(34, ePackage.eClassifiers.size)
 
 //        val cu: EClass = ePackage.eClassifiers.find { it.name == "CompilationUnit" } as EClass
 //        assertEquals(1, cu.eAllSuperTypes.size)

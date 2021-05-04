@@ -30,14 +30,14 @@ class JsonDeserializerTest {
     @Test
     fun deserializePositiveResultFromJson() {
         val myRoot = MyRoot(
-                mainSection = Section(
-                        "Section1",
-                        listOf(
-                                Content(1, null),
-                                Content(2, Content(3, Content(4, null)))
-                        )
-                ),
-                otherSections = listOf()
+            mainSection = Section(
+                "Section1",
+                listOf(
+                    Content(1, null),
+                    Content(2, Content(3, Content(4, null)))
+                )
+            ),
+            otherSections = listOf()
         )
         val originalResult = Result(emptyList(), myRoot)
         val json = JsonGenerator().generateString(originalResult)

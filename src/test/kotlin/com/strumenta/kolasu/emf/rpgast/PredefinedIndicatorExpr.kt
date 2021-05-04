@@ -13,13 +13,13 @@ data class PredefinedIndicatorExpr(val index: Int, override val specifiedPositio
 
 // *IN
 data class PredefinedGlobalIndicatorExpr(override val specifiedPosition: Position? = null) :
-        AssignableExpression(specifiedPosition) {
+    AssignableExpression(specifiedPosition) {
     override fun size(): Int {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 }
 
 data class DataWrapUpIndicatorExpr(val dataWrapUpChoice: DataWrapUpChoice, override val specifiedPosition: Position? = null) :
-        AssignableExpression(specifiedPosition) {
+    AssignableExpression(specifiedPosition) {
     override fun size(): Int = 1
 }

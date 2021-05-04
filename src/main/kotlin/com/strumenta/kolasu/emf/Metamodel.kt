@@ -1,40 +1,36 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
-import org.eclipse.emf.ecore.*
-import java.io.File
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
-import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.*
-
+import org.eclipse.emf.ecore.*
 
 interface EDataTypeHandler {
-    fun canHandle(ktype: KType) : Boolean
+    fun canHandle(ktype: KType): Boolean
     fun toDataType(ktype: KType): EDataType
-    fun external() : Boolean
+    fun external(): Boolean
 }
 
-
 interface EClassTypeHandler {
-    fun canHandle(ktype: KType) : Boolean {
+    fun canHandle(ktype: KType): Boolean {
         return if (ktype.classifier is KClass<*>) {
             canHandle(ktype.classifier as KClass<*>)
         } else {
             false
         }
     }
-    fun canHandle(kclass: KClass<*>) : Boolean
+    fun canHandle(kclass: KClass<*>): Boolean
     fun toEClass(kclass: KClass<*>, eClassProvider: ClassifiersProvider): EClass
-    fun external() : Boolean
+    fun external(): Boolean
 }
 
 interface ClassifiersProvider {
-    fun isDataType(ktype: KType) : Boolean {
+    fun isDataType(ktype: KType): Boolean {
         try {
             provideDataType(ktype)
             return true
@@ -46,7 +42,7 @@ interface ClassifiersProvider {
     fun provideDataType(ktype: KType): EDataType?
 }
 
-//object StandardEClassHandler : EClassTypeHandler {
+// object StandardEClassHandler : EClassTypeHandler {
 //        override fun canHandle(kclass: KClass<*>): Boolean {
 //            if (kclass == Named::class) {
 //                return true
@@ -218,7 +214,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
                 else -> {
                     val handler = dataTypeHandlers.find { it.canHandle(ktype) }
                     if (handler == null) {
-                        //throw RuntimeException("Unable to handle data type $ktype, with classifier ${ktype.classifier}")\
+                        // throw RuntimeException("Unable to handle data type $ktype, with classifier ${ktype.classifier}")\
                         return null
                     } else {
                         external = handler.external()
@@ -282,7 +278,6 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
                         val nullable = prop.valueType.isMarkedNullable
                         val dataType = provideDataType(prop.valueType.withNullability(false))
                         if (dataType == null) {
-
                             // We can treat it like a class
                             val eContainment = EcoreFactory.eINSTANCE.createEReference()
                             eContainment.name = prop.name
@@ -337,4 +332,3 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         return ePackage
     }
 }
-

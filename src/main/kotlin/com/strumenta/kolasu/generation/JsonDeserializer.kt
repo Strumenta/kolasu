@@ -81,7 +81,7 @@ class JsonDeserializer {
         return instance ?: throw UnsupportedOperationException()
     }
 
-    fun <T: Node> deserializeResult(rootClass: Class<T>, json: String): Result<T> {
+    fun <T : Node> deserializeResult(rootClass: Class<T>, json: String): Result<T> {
         val jo = JsonParser().parse(json).asJsonObject
         val errors = jo["errors"].asJsonArray.map { it.asJsonObject }.map {
             val type = IssueType.valueOf(it["type"].asString)

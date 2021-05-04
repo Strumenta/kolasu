@@ -3,12 +3,8 @@ package com.strumenta.kolasu.emf.simple
 import com.strumenta.kolasu.emf.KOLASU_METAMODEL
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.emf.getEClass
-import com.strumenta.kolasu.emf.saveEcore
-import com.strumenta.kolasu.model.Node
-import java.io.File
 import kotlin.test.assertEquals
 import org.junit.Test
-
 
 class MetamodelTest {
 

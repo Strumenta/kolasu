@@ -3,14 +3,11 @@ package com.strumenta.kolasu.emf.rpgast
 import com.smeup.rpgparser.parsing.*
 import com.smeup.rpgparser.parsing.ast.*
 import com.smeup.rpgparser.parsing.ast.AssignmentOperator.*
-import com.strumenta.kolasu.mapping.toPosition
 import com.strumenta.kolasu.model.*
-import org.antlr.v4.runtime.ParserRuleContext
-import org.antlr.v4.runtime.Token
 import java.util.*
 
 data class ToAstConfiguration(
-    val considerPosition: Boolean = true,
+    val considerPosition: Boolean = true
 )
 
 fun List<Node>.position(): Position? {
@@ -36,10 +33,4 @@ private data class DataDefinitionCalculator(val calculator: () -> DataDefinition
     override fun toDataDefinition() = calculator()
 }
 
-
-
-
-
 internal fun String.isInt() = this.toIntOrNull() != null
-
-

@@ -26,8 +26,8 @@ fun String.asLong(): Long = this.trim().toLong()
 fun String.asInt(): Int = this.trim().toInt()
 fun String?.isEmptyTrim() = this == null || this.trim().isEmpty()
 fun String?.asIntOrNull(): Int? =
-        try {
-            this?.trim()?.toInt()
-        } catch (e: Exception) {
-            null
-        }
+    try {
+        this?.trim()?.toInt()
+    } catch (e: Exception) {
+        null
+    }

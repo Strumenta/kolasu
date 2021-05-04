@@ -8,7 +8,6 @@ import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.ReferenceByName
 import java.math.BigDecimal
 
-
 abstract class Expression(@Transient override val specifiedPosition: Position? = null) : Node(specifiedPosition) {
     open fun render(): String = this.javaClass.simpleName
 }
@@ -17,9 +16,7 @@ abstract class Expression(@Transient override val specifiedPosition: Position? =
 // / Literals
 // /
 
-
 abstract class NumberLiteral(@Transient override val specifiedPosition: Position? = null) : Expression(specifiedPosition)
-
 
 data class IntLiteral(val value: Long, override val specifiedPosition: Position? = null) : NumberLiteral(specifiedPosition) {
     override fun render() = value.toString()
@@ -39,8 +36,7 @@ data class StringLiteral(val value: String, override val specifiedPosition: Posi
 
 abstract class FigurativeConstantRef(@Transient override val specifiedPosition: Position? = null) : Expression(specifiedPosition)
 
-data class BlanksRefExpr(override val specifiedPosition: Position? = null) : FigurativeConstantRef(specifiedPosition) {
-}
+data class BlanksRefExpr(override val specifiedPosition: Position? = null) : FigurativeConstantRef(specifiedPosition)
 
 data class OnRefExpr(override val specifiedPosition: Position? = null) : FigurativeConstantRef(specifiedPosition)
 
@@ -71,105 +67,80 @@ data class AssignmentExpr(var target: AssignableExpression, var value: Expressio
 data class GreaterThanExpr(var left: Expression, var right: Expression, override val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render() = "${left.render()} > ${right.render()}"
-    
 }
-
 
 data class GreaterEqualThanExpr(var left: Expression, var right: Expression, override val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render() = "${left.render()} >= ${right.render()}"
 }
 
-
 data class LessThanExpr(var left: Expression, var right: Expression, override val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render() = "${left.render()} < ${right.render()}"
-    
 }
-
 
 data class LessEqualThanExpr(var left: Expression, var right: Expression, override val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render() = "${left.render()} <= ${right.render()}"
-    
 }
-
 
 data class DifferentThanExpr(var left: Expression, var right: Expression, override val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render() = "${left.render()} <> ${right.render()}"
-    
 }
 
 // /
 // / Logical operations
 // /
 
-data class NotExpr(val base: Expression, override val specifiedPosition: Position? = null) : Expression(specifiedPosition) {
-    
-}
-
+data class NotExpr(val base: Expression, override val specifiedPosition: Position? = null) : Expression(specifiedPosition)
 
 data class LogicalOrExpr(var left: Expression, var right: Expression, override val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render() = "${left.render()} || ${right.render()}"
-    
 }
 
 data class LogicalAndExpr(var left: Expression, var right: Expression, override val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render() = "${left.render()} && ${right.render()}"
-    
 }
 
 // /
 // / Arithmetic operations
 // /
 
-
 data class PlusExpr(var left: Expression, var right: Expression, override val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render() = "${left.render()} + ${right.render()}"
-    
 }
-
 
 data class MinusExpr(var left: Expression, var right: Expression, override val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render() = "${left.render()} - ${right.render()}"
-    
 }
-
 
 data class MultExpr(var left: Expression, var right: Expression, override val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render() = "${left.render()} * ${right.render()}"
-    
 }
-
 
 data class DivExpr(var left: Expression, var right: Expression, override val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render() = "${left.render()} / ${right.render()}"
-    
 }
-
 
 data class ExpExpr(var left: Expression, var right: Expression, override val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render() = "${left.render()} ** ${right.render()}"
-    
 }
 
 // /
 // / Misc
 // /
 
-
 abstract class AssignableExpression(@Transient override val specifiedPosition: Position? = null) : Expression(specifiedPosition) {
     abstract fun size(): Int
 }
-
 
 data class DataRefExpr(val variable: ReferenceByName<AbstractDataDefinition>, override val specifiedPosition: Position? = null) :
     AssignableExpression(specifiedPosition) {
@@ -195,12 +166,10 @@ data class DataRefExpr(val variable: ReferenceByName<AbstractDataDefinition>, ov
     }
 
     override fun render() = variable.name
-    
 }
 
-
 data class QualifiedAccessExpr(val container: Expression, val field: ReferenceByName<FieldDefinition>, override val specifiedPosition: Position? = null) :
-        AssignableExpression(specifiedPosition) {
+    AssignableExpression(specifiedPosition) {
 
     init {
         require(field.name.isNotBlank()) { "The field name should not blank" }
@@ -214,9 +183,7 @@ data class QualifiedAccessExpr(val container: Expression, val field: ReferenceBy
     }
 
     override fun render() = "${container.render()}.${field.name}"
-    
 }
-
 
 data class ArrayAccessExpr(val array: Expression, val index: Expression, override val specifiedPosition: Position? = null) :
     AssignableExpression(specifiedPosition) {
@@ -226,7 +193,6 @@ data class ArrayAccessExpr(val array: Expression, val index: Expression, overrid
     override fun size(): Int {
         TODO("size")
     }
-    
 }
 
 // A Function call is not distinguishable from an array access
@@ -236,16 +202,12 @@ data class FunctionCall(
     val function: ReferenceByName<Function>,
     val args: List<Expression>,
     override val specifiedPosition: Position? = null
-) : Expression(specifiedPosition) {
-    
-}
+) : Expression(specifiedPosition)
 
 fun dataRefTo(dataDefinition: AbstractDataDefinition) =
-        DataRefExpr(ReferenceByName(dataDefinition.name, dataDefinition))
-
+    DataRefExpr(ReferenceByName(dataDefinition.name, dataDefinition))
 
 data class NumberOfElementsExpr(val value: Expression, override val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render() = "%ELEM(${value.render()})"
-    
 }

@@ -11,7 +11,7 @@ const val PAD_STRING = PAD_CHAR.toString()
 
 val DEFAULT_CHARSET = Charset.forName("Cp037")
 
-fun coerce(value: Value, type: Type) : Value {
+fun coerce(value: Value, type: Type): Value {
     return value
 }
 
@@ -47,7 +47,6 @@ abstract class NumberValue : Value {
 
     abstract val bigDecimal: BigDecimal
 }
-
 
 data class StringValue(var value: String, val varying: Boolean = false) : Value {
 
@@ -152,8 +151,9 @@ data class StringValue(var value: String, val varying: Boolean = false) : Value 
 
     fun length(varying: Boolean = this.varying): Int {
         if (varying) {
-            if (value.isBlank())
+            if (value.isBlank()) {
                 return 0
+            }
         }
         return value.length
     }
@@ -190,7 +190,6 @@ data class StringValue(var value: String, val varying: Boolean = false) : Value 
  * See: https://www.ibm.com/support/knowledgecenter/SSLTBW_2.1.0/com.ibm.zos.v2r1.idad400/ccsids.htm
  */
 fun sortA(value: Value, charset: Charset) {
-
     when (value) {
         is ConcreteArrayValue -> {
             // TODO pass the correct charset to the default sorting algorithm
@@ -226,7 +225,6 @@ fun sortA(value: Value, charset: Charset) {
         }
     }
 }
-
 
 data class IntValue(val value: Long) : NumberValue() {
     override val bigDecimal: BigDecimal by lazy { BigDecimal(value) }
@@ -320,7 +318,6 @@ data class IntValue(val value: Long) : NumberValue() {
     operator fun times(other: IntValue) = IntValue(this.bigDecimal.times(other.bigDecimal).longValueExact())
 }
 
-
 data class DecimalValue(val value: BigDecimal) : NumberValue() {
 
     override val bigDecimal: BigDecimal
@@ -379,7 +376,6 @@ data class DecimalValue(val value: BigDecimal) : NumberValue() {
     }
 }
 
-
 data class BooleanValue private constructor(val value: Boolean) : Value {
     override fun assignableTo(expectedType: Type): Boolean {
         return expectedType is BooleanType
@@ -405,7 +401,6 @@ data class BooleanValue private constructor(val value: Boolean) : Value {
             else -> super.compareTo(other)
         }
 }
-
 
 data class CharacterValue(val value: Array<Char>) : Value {
     override fun assignableTo(expectedType: Type): Boolean {
@@ -433,7 +428,6 @@ data class CharacterValue(val value: Array<Char>) : Value {
         return StringValue(value.toString())
     }
 }
-
 
 data class TimeStampValue(val value: Date) : Value {
     override fun assignableTo(expectedType: Type): Boolean {
@@ -526,7 +520,6 @@ abstract class ArrayValue : Value {
         return result
     }
 }
-
 
 data class ConcreteArrayValue(val elements: MutableList<Value>, override val elementType: Type) : ArrayValue() {
     init {
@@ -925,10 +918,11 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
     fun asStringValue(): String {
         val builder = StringBuilder()
         value.forEach {
-            if (it.toInt() < 32 || it.toInt() > 128 || it in '0'..'9')
+            if (it.toInt() < 32 || it.toInt() > 128 || it in '0'..'9') {
                 builder.append(' ')
-            else
+            } else {
                 builder.append(it)
+            }
         }
         return builder.toString()
     }

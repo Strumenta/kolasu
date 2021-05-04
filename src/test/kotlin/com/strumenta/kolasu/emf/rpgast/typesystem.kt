@@ -1,11 +1,11 @@
 package com.strumenta.kolasu.emf.rpgast
 
+import com.smeup.rpgparser.parsing.ast.*
 import com.smeup.rpgparser.parsing.ast.DataRefExpr
 import com.smeup.rpgparser.parsing.ast.Expression
 import java.lang.IllegalStateException
-import kotlin.math.ceil
-import com.smeup.rpgparser.parsing.ast.*
 import java.math.BigDecimal
+import kotlin.math.ceil
 import kotlin.math.max
 
 // Supported data types:
@@ -19,7 +19,6 @@ import kotlin.math.max
 // * Basing Pointer Data Type
 // * Procedure Pointer Data Type
 
-
 sealed class Type {
     open fun numberOfElements(): Int {
         return 1
@@ -27,7 +26,6 @@ sealed class Type {
     open fun elementSize(): Int {
         return size
     }
-
 
     open fun canBeAssigned(type: Type): Boolean {
         return this == type
@@ -43,26 +41,20 @@ sealed class Type {
     open fun hasVariableSize() = false
 }
 
-
 object FigurativeType : Type() {
     override val size: Int
         get() = 0
-
 }
-
 
 object KListType : Type() {
     override val size: Int
         get() = 0
-
 }
-
 
 data class DataStructureType(val fields: List<FieldType>, val elementSize: Int) : Type() {
     override val size: Int
         get() = elementSize
 }
-
 
 data class StringType(val length: Int, val varying: Boolean = false) : Type() {
     override val size: Int
@@ -76,7 +68,6 @@ object BooleanType : Type() {
     override fun toString() = this.javaClass.simpleName
 }
 
-
 object HiValType : Type() {
     override val size: Int
         get() = throw IllegalStateException("Has variable size")
@@ -84,14 +75,12 @@ object HiValType : Type() {
     override fun hasVariableSize() = true
 }
 
-
 object LowValType : Type() {
     override val size: Int
         get() = throw IllegalStateException("Has variable size")
 
     override fun hasVariableSize() = true
 }
-
 
 object TimeStampType : Type() {
     override val size: Int
@@ -120,7 +109,6 @@ infix fun Int.pow(exponent: Int): Long {
 infix fun Long.log(base: Int): Double {
     return (Math.log(this.toDouble()) / Math.log(base.toDouble()))
 }
-
 
 data class NumberType(val entireDigits: Int, val decimalDigits: Int, val rpgType: String? = "") : Type() {
 
@@ -173,7 +161,6 @@ data class NumberType(val entireDigits: Int, val decimalDigits: Int, val rpgType
     }
 }
 
-
 data class ArrayType(val element: Type, val nElements: Int, val compileTimeRecordsPerLine: Int? = null) : Type() {
     var ascend: Boolean? = null
 
@@ -194,7 +181,6 @@ data class ArrayType(val element: Type, val nElements: Int, val compileTimeRecor
 
     fun compileTimeArray(): Boolean = compileTimeRecordsPerLine != null
 }
-
 
 data class FieldType(val name: String, val type: Type)
 
@@ -323,9 +309,7 @@ fun Type.toDataStructureValue(value: Value): StringValue {
             return StringValue(sb.toString())
         }
         is BooleanType -> {
-            if ((value as BooleanValue).value)
-                return StringValue("1")
-            return StringValue("0")
+            return StringValue(if ((value as BooleanValue).value) "1" else "0")
         }
         else -> TODO("Conversion to data struct value not implemented for $this")
     }

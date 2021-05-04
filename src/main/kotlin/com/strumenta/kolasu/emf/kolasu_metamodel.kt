@@ -1,15 +1,13 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.validation.IssueType
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.EcoreFactory
 import java.io.File
 import java.math.BigDecimal
 import java.math.BigInteger
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EcoreFactory
 
 val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
-
-
 
 fun createKolasuMetamodel(): EPackage {
     val ePackage = EcoreFactory.eINSTANCE.createEPackage()
@@ -58,7 +56,7 @@ fun createKolasuMetamodel(): EPackage {
     }
     val astNode = ePackage.createEClass("ASTNode").apply {
         this.isAbstract = true
-        addContainment("position", position,0, 1)
+        addContainment("position", position, 0, 1)
     }
 
     val issueType = EcoreFactory.eINSTANCE.createEEnum()
@@ -88,9 +86,11 @@ fun createKolasuMetamodel(): EPackage {
     val referenceByName = ePackage.createEClass("ReferenceByName").apply {
         val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
             this.name = "N"
-            this.eBounds.add(EcoreFactory.eINSTANCE.createEGenericType().apply {
-                this.eClassifier = astNode
-            })
+            this.eBounds.add(
+                EcoreFactory.eINSTANCE.createEGenericType().apply {
+                    this.eClassifier = astNode
+                }
+            )
         }
         this.eTypeParameters.add(typeParameter)
         val rootContainment = EcoreFactory.eINSTANCE.createEReference()
@@ -109,9 +109,11 @@ fun createKolasuMetamodel(): EPackage {
     val result = ePackage.createEClass("Result").apply {
         val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
             this.name = "CU"
-            this.eBounds.add(EcoreFactory.eINSTANCE.createEGenericType().apply {
-                this.eClassifier = astNode
-            })
+            this.eBounds.add(
+                EcoreFactory.eINSTANCE.createEGenericType().apply {
+                    this.eClassifier = astNode
+                }
+            )
         }
         this.eTypeParameters.add(typeParameter)
         val rootContainment = EcoreFactory.eINSTANCE.createEReference()

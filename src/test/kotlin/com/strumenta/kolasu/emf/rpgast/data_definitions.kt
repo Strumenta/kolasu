@@ -8,18 +8,14 @@ abstract class AbstractDataDefinition(
     override val name: String,
     open val type: Type,
     override val specifiedPosition: Position? = null,
-    private val hashCode: Int = name.hashCode(),
-
+    private val hashCode: Int = name.hashCode()
 ) : Node(specifiedPosition), Named {
     fun numberOfElements() = type.numberOfElements()
     open fun elementSize() = type.elementSize()
 
-
-
     open fun isArray(): Boolean {
         return type is ArrayType
     }
-
 
     override fun hashCode() = hashCode
 
@@ -48,7 +44,7 @@ data class DataDefinition(
     val inz: Boolean = false,
     override val specifiedPosition: Position? = null
 ) :
-            AbstractDataDefinition(name, type, specifiedPosition) {
+    AbstractDataDefinition(name, type, specifiedPosition) {
 
     override fun isArray() = type is ArrayType
     fun isCompileTimeArray() = type is ArrayType && type.compileTimeArray()
@@ -76,7 +72,6 @@ data class DataDefinition(
     }
 }
 
-
 data class FieldDefinition(
     override val name: String,
     override val type: Type,
@@ -84,8 +79,8 @@ data class FieldDefinition(
     val explicitEndOffset: Int? = null,
     val calculatedStartOffset: Int? = null,
     val calculatedEndOffset: Int? = null,
-        // In case of using LIKEDS we reuse a FieldDefinition, but specifying a different
-        // container. We basically duplicate it
+    // In case of using LIKEDS we reuse a FieldDefinition, but specifying a different
+    // container. We basically duplicate it
     @property:Link
     var overriddenContainer: DataDefinition? = null,
     val initializationValue: Expression? = null,
@@ -95,7 +90,7 @@ data class FieldDefinition(
     // true when the FieldDefinition contains a DIM keyword on its line
     val declaredArrayInLineOnThisField: Int? = null
 ) :
-            AbstractDataDefinition(name, type, specifiedPosition) {
+    AbstractDataDefinition(name, type, specifiedPosition) {
 
     init {
         require((explicitStartOffset != null) != (calculatedStartOffset != null)) {
@@ -149,8 +144,8 @@ data class FieldDefinition(
     @Derived
     val container
         get() = overriddenContainer
-                ?: this.parent as? DataDefinition
-                ?: throw IllegalStateException("Parent of field ${this.name} was expected to be a DataDefinition, instead it is ${this.parent} (${this.parent?.javaClass})")
+            ?: this.parent as? DataDefinition
+            ?: throw IllegalStateException("Parent of field ${this.name} was expected to be a DataDefinition, instead it is ${this.parent} (${this.parent?.javaClass})")
 
     /**
      * The start offset is zero based, while in RPG code you could find explicit one-based offsets.
@@ -228,21 +223,18 @@ fun encodeBinary(inValue: BigDecimal, size: Int): String {
     val lsb = inValue.toInt()
 
     if (size == 1) {
-
         buffer[0] = (lsb and 0x0000FFFF).toByte()
 
         return buffer[0].toChar().toString()
     }
 
     if (size == 2) {
-
         buffer[0] = ((lsb shr 8) and 0x000000FF).toByte()
         buffer[1] = (lsb and 0x000000FF).toByte()
 
         return buffer[1].toChar().toString() + buffer[0].toChar().toString()
     }
     if (size == 4) {
-
         buffer[0] = ((lsb shr 24) and 0x0000FFFF).toByte()
         buffer[1] = ((lsb shr 16) and 0x0000FFFF).toByte()
         buffer[2] = ((lsb shr 8) and 0x0000FFFF).toByte()
@@ -262,7 +254,7 @@ fun encodeBinary(inValue: BigDecimal, size: Int): String {
         buffer[7] = (llsb and 0x0000FFFF).toByte()
 
         return buffer[7].toChar().toString() + buffer[6].toChar().toString() + buffer[5].toChar().toString() + buffer[4].toChar().toString() +
-        buffer[3].toChar().toString() + buffer[2].toChar().toString() + buffer[1].toChar().toString() + buffer[0].toChar().toString()
+            buffer[3].toChar().toString() + buffer[2].toChar().toString() + buffer[1].toChar().toString() + buffer[0].toChar().toString()
     }
     TODO("encode binary for $size not implemented")
 }
@@ -296,21 +288,21 @@ fun decodeBinary(value: String, size: Int): BigDecimal {
 
     if (size == 4) {
         val number = (value[0].toLong() and 0x00FF) +
-                ((value[1].toLong() and 0x00FF) shl 8) +
-                ((value[2].toLong() and 0x00FF) shl 16) +
-                ((value[3].toLong() and 0x00FF) shl 24)
+            ((value[1].toLong() and 0x00FF) shl 8) +
+            ((value[2].toLong() and 0x00FF) shl 16) +
+            ((value[3].toLong() and 0x00FF) shl 24)
 
         return BigDecimal(number.toInt().toString())
     }
     if (size == 8) {
         val number = (value[0].toLong() and 0x00FF) +
-                ((value[1].toLong() and 0x00FF) shl 8) +
-                ((value[2].toLong() and 0x00FF) shl 16) +
-                ((value[3].toLong() and 0x00FF) shl 24) +
-                ((value[4].toLong() and 0x00FF) shl 32) +
-                ((value[5].toLong() and 0x00FF) shl 40) +
-                ((value[6].toLong() and 0x00FF) shl 48) +
-                ((value[7].toLong() and 0x00FF) shl 56)
+            ((value[1].toLong() and 0x00FF) shl 8) +
+            ((value[2].toLong() and 0x00FF) shl 16) +
+            ((value[3].toLong() and 0x00FF) shl 24) +
+            ((value[4].toLong() and 0x00FF) shl 32) +
+            ((value[5].toLong() and 0x00FF) shl 40) +
+            ((value[6].toLong() and 0x00FF) shl 48) +
+            ((value[7].toLong() and 0x00FF) shl 56)
 
         return BigDecimal(number.toInt().toString())
     }
@@ -334,21 +326,21 @@ fun decodeInteger(value: String, size: Int): BigDecimal {
     }
     if (size == 4) {
         val number = (value[0].toLong() and 0x00FF) +
-                ((value[1].toLong() and 0x00FF) shl 8) +
-                ((value[2].toLong() and 0x00FF) shl 16) +
-                ((value[3].toLong() and 0x00FF) shl 24)
+            ((value[1].toLong() and 0x00FF) shl 8) +
+            ((value[2].toLong() and 0x00FF) shl 16) +
+            ((value[3].toLong() and 0x00FF) shl 24)
 
         return BigDecimal(number.toInt().toString())
     }
     if (size == 8) {
         val number = (value[0].toLong() and 0x00FF) +
-                ((value[1].toLong() and 0x00FF) shl 8) +
-                ((value[2].toLong() and 0x00FF) shl 16) +
-                ((value[3].toLong() and 0x00FF) shl 24) +
-                ((value[4].toLong() and 0x00FF) shl 32) +
-                ((value[5].toLong() and 0x00FF) shl 40) +
-                ((value[6].toLong() and 0x00FF) shl 48) +
-                ((value[7].toLong() and 0x00FF) shl 56)
+            ((value[1].toLong() and 0x00FF) shl 8) +
+            ((value[2].toLong() and 0x00FF) shl 16) +
+            ((value[3].toLong() and 0x00FF) shl 24) +
+            ((value[4].toLong() and 0x00FF) shl 32) +
+            ((value[5].toLong() and 0x00FF) shl 40) +
+            ((value[6].toLong() and 0x00FF) shl 48) +
+            ((value[7].toLong() and 0x00FF) shl 56)
 
         return BigDecimal(number.toString())
     }
@@ -356,7 +348,6 @@ fun decodeInteger(value: String, size: Int): BigDecimal {
 }
 
 fun decodeUnsigned(value: String, size: Int): BigDecimal {
-
     if (size == 1) {
         var number: Long = 0x0000000
         if (value[0].toInt() and 0x0010 != 0) {
@@ -378,21 +369,21 @@ fun decodeUnsigned(value: String, size: Int): BigDecimal {
     }
     if (size == 4) {
         val number = (value[0].toLong() and 0x00FF) +
-                ((value[1].toLong() and 0x00FF) shl 8) +
-                ((value[2].toLong() and 0x00FF) shl 16) +
-                ((value[3].toLong() and 0x00FF) shl 24)
+            ((value[1].toLong() and 0x00FF) shl 8) +
+            ((value[2].toLong() and 0x00FF) shl 16) +
+            ((value[3].toLong() and 0x00FF) shl 24)
 
         return BigDecimal(number.toString())
     }
     if (size == 8) {
         val number = (value[0].toLong() and 0x00FF) +
-                ((value[1].toLong() and 0x00FF) shl 8) +
-                ((value[2].toLong() and 0x00FF) shl 16) +
-                ((value[3].toLong() and 0x00FF) shl 24) +
-                ((value[4].toLong() and 0x00FF) shl 32) +
-                ((value[5].toLong() and 0x00FF) shl 40) +
-                ((value[6].toLong() and 0x00FF) shl 48) +
-                ((value[7].toLong() and 0x00FF) shl 56)
+            ((value[1].toLong() and 0x00FF) shl 8) +
+            ((value[2].toLong() and 0x00FF) shl 16) +
+            ((value[3].toLong() and 0x00FF) shl 24) +
+            ((value[4].toLong() and 0x00FF) shl 32) +
+            ((value[5].toLong() and 0x00FF) shl 40) +
+            ((value[6].toLong() and 0x00FF) shl 48) +
+            ((value[7].toLong() and 0x00FF) shl 56)
 
         return BigDecimal(number.toInt().toString())
     }
@@ -536,7 +527,6 @@ fun decodeFromDS(value: String, digits: Int, scale: Int): BigDecimal {
         number.toBigDecimal()
     }
 }
-
 
 enum class RpgType(val rpgType: String) {
     PACKED("P"),
