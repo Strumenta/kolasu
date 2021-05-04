@@ -150,6 +150,14 @@ val BigIntegerHandler = KolasuDataTypeHandler(BigInteger::class, KOLASU_METAMODE
 val BigDecimalHandler = KolasuDataTypeHandler(BigDecimal::class, KOLASU_METAMODEL.getEClassifier("BigDecimal") as EDataType)
 val LongHandler = KolasuDataTypeHandler(Long::class, KOLASU_METAMODEL.getEClassifier("long") as EDataType)
 
+val KClass<*>.eClassifierName
+    get() = if (this.isInner) {
+        val parts = this.qualifiedName!!.split(".")
+        parts.takeLast(2).joinToString { "" }
+    } else {
+        this.simpleName
+    }
+
 class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : ClassifiersProvider {
 
     private val ePackage: EPackage
@@ -195,7 +203,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
 
     private fun createEEnum(kClass: KClass<out Enum<*>>): EEnum {
         val eEnum = EcoreFactory.eINSTANCE.createEEnum()
-        eEnum.name = kClass.simpleName
+        eEnum.name = kClass.eClassifierName
         kClass.java.enumConstants.forEach {
             var eLiteral = EcoreFactory.eINSTANCE.createEEnumLiteral()
             eLiteral.name = it.name
@@ -243,7 +251,8 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
                 eClass.eSuperTypes.add(provideClass(it))
             }
         }
-        eClass.name = kClass.simpleName
+        eClass.name = kClass.eClassifierName
+
         eClass.isAbstract = kClass.isAbstract || kClass.isSealed
 
         kClass.java.processProperties { prop ->
