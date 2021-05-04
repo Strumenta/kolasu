@@ -235,6 +235,9 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
 
     private fun classToEClass(kClass: KClass<*>): EClass {
         val eClass = EcoreFactory.eINSTANCE.createEClass()
+        // This is necessary because some classes refer to themselves
+        registerKClassForEClass(kClass, eClass)
+
         kClass.superclasses.forEach {
             if (it != Any::class) {
                 eClass.eSuperTypes.add(provideClass(it))
@@ -242,9 +245,6 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         }
         eClass.name = kClass.simpleName
         eClass.isAbstract = kClass.isAbstract || kClass.isSealed
-
-        // This is necessary because some classes refer to themselves
-        eClasses[kClass] = eClass
 
         kClass.java.processProperties { prop ->
             try {
@@ -322,6 +322,14 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         }
     }
 
+    private fun registerKClassForEClass(kClass: KClass<*>, eClass: EClass) {
+        if (eClasses.containsKey(kClass)) {
+            require(eClasses[kClass] == eClass)
+        } else {
+            eClasses[kClass] = eClass
+        }
+    }
+
     override fun provideClass(kClass: KClass<*>): EClass {
         if (!eClasses.containsKey(kClass)) {
             val ch = eclassTypeHandlers.find { it.canHandle(kClass) }
@@ -330,13 +338,21 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
                 ensureClassifierNameIsNotUsed(eClass)
                 ePackage.eClassifiers.add(eClass)
             }
-            eClasses[kClass] = eClass
+            registerKClassForEClass(kClass, eClass)
             if (kClass.isSealed) {
-                kClass.sealedSubclasses.forEach { provideClass(it) }
+                kClass.sealedSubclasses.forEach {
+                    //provideClass(it)
+                    queue.add(it)
+                }
             }
+        }
+        while (queue.isNotEmpty()) {
+            provideClass(queue.removeFirst())
         }
         return eClasses[kClass]!!
     }
+
+    private val queue = LinkedList<KClass<*>>()
 
     fun generate(): EPackage {
         return ePackage
