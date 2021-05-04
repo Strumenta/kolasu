@@ -4,10 +4,6 @@ buildscript {
 
     repositories {
         mavenCentral()
-        maven {
-            name 'JFrog OSS snapshot repo'
-            url  'https://oss.jfrog.org/oss-snapshot-local/'
-        }
         jcenter()
     }
 
@@ -19,7 +15,6 @@ buildscript {
 plugins {
     id "org.jlleitschuh.gradle.ktlint" version "9.0.0"
     id("maven-publish")
-    id "com.jfrog.bintray" version "1.8.5"
 }
 
 apply plugin: 'kotlin'
@@ -36,7 +31,7 @@ repositories {
     jcenter()
 }
 
-def kolasuVersion = "1.1.0"
+def kolasuVersion = "1.1.1"
 
 project.group   = "com.strumenta"
 project.version = kolasuVersion
@@ -54,7 +49,7 @@ dependencies {
   compile 'com.fifesoft:rsyntaxtextarea:2.5.8'
   compile 'com.fifesoft:autocomplete:2.5.8'
   compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
-  compile 'org.redundent:kotlin-xml-builder:1.5.3'
+  compile 'org.redundent:kotlin-xml-builder:1.7.2'
   compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.common', version: '2.21.0'
   compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore', version: '2.23.0'
   compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore.xmi', version: '2.16.0'
