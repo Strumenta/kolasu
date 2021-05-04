@@ -9,6 +9,8 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.*
 import org.eclipse.emf.ecore.*
+import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean
@@ -223,6 +225,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
                 }
             }
             if (!external) {
+                ensureClassifierNameIsNotUsed(eDataType)
                 ePackage.eClassifiers.add(eDataType)
             }
             dataTypes[ktype] = eDataType
@@ -313,11 +316,18 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         return eClass
     }
 
+    private fun ensureClassifierNameIsNotUsed(classifier: EClassifier) {
+        if (ePackage.hasClassifierNamed(classifier.name)) {
+            throw IllegalStateException("There is already a Classifier named ${classifier.name}: ${ePackage.classifierByName(classifier.name)}")
+        }
+    }
+
     override fun provideClass(kClass: KClass<*>): EClass {
         if (!eClasses.containsKey(kClass)) {
             val ch = eclassTypeHandlers.find { it.canHandle(kClass) }
             val eClass = ch?.toEClass(kClass, this) ?: classToEClass(kClass)
             if (ch == null || !ch?.external()) {
+                ensureClassifierNameIsNotUsed(eClass)
                 ePackage.eClassifiers.add(eClass)
             }
             eClasses[kClass] = eClass
@@ -331,4 +341,13 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
     fun generate(): EPackage {
         return ePackage
     }
+}
+
+
+private fun EPackage.hasClassifierNamed(name: String): Boolean {
+    return this.eClassifiers.any { it.name == name }
+}
+
+private fun EPackage.classifierByName(name: String): EClassifier {
+    return this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("No classifier named $name was found")
 }
