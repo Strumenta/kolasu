@@ -151,8 +151,11 @@ val BigDecimalHandler = KolasuDataTypeHandler(BigDecimal::class, KOLASU_METAMODE
 val LongHandler = KolasuDataTypeHandler(Long::class, KOLASU_METAMODEL.getEClassifier("long") as EDataType)
 
 val KClass<*>.eClassifierName
-    get() = if (this.java.enclosingClass != null) {
-        "${this.java.enclosingClass.name}.${this.simpleName}"
+    get() = this.java.eClassifierName
+
+val Class<*>.eClassifierName
+    get() = if (this.enclosingClass != null) {
+        "${this.enclosingClass.simpleName}${this.simpleName}"
     } else {
         this.simpleName
     }
