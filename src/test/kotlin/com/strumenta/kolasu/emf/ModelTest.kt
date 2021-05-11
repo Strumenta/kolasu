@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.emf
 
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -21,7 +23,8 @@ class ModelTest {
             listOf(
                 VarDeclaration(Visibility.PUBLIC, "a", StringLiteral("foo")),
                 VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar"))
-            )
+            ),
+            Position(Point(1, 0), Point(1, 1))
         )
         val nsURI = "https://strumenta.com/simplemm"
         val metamodelBuilder = MetamodelBuilder("SimpleMM", nsURI, "simplemm")
