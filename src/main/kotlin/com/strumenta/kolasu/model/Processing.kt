@@ -147,11 +147,7 @@ fun Node.processProperties(
     propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
     propertyOperation: (PropertyDescription) -> Unit
 ) {
-    nodeProperties.forEach { p ->
-        if (!propertiesToIgnore.contains(p.name)) {
-            propertyOperation(PropertyDescription.buildFor(p, this))
-        }
-    }
+    this.properties.filter { it.name !in propertiesToIgnore }.forEach { propertyOperation(it)  }
 }
 
 fun <T : Any> Class<T>.processProperties(

@@ -7,6 +7,10 @@ import org.antlr.v4.runtime.ParserRuleContext
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
 open class Node(open val specifiedPosition: Position? = null) {
+    @Derived
+    open val properties : List<PropertyDescription>
+       get() = nodeProperties.map { PropertyDescription.buildFor(it, this) }
+
     var parseTreeNode: ParserRuleContext? = null
     var parent: Node? = null
 
