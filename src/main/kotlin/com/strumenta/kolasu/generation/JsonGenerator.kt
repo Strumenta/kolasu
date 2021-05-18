@@ -26,11 +26,13 @@ const val JSON_POSITION_KEY = "#position"
 
 class JsonGenerator {
 
+    var shortClassNames = false
+
     /**
      * Converts an AST to JSON format.
      */
     fun generateJSON(root: Node): JsonElement {
-        return root.toJson()
+        return root.toJson(shortClassNames)
     }
 
     /**
@@ -39,14 +41,14 @@ class JsonGenerator {
     fun generateJSON(result: Result<out Node>): JsonElement {
         return jsonObject(
             "errors" to result.errors.map { it.toJson() }.toJsonArray(),
-            "root" to result.root?.toJson()
+            "root" to result.root?.toJson(shortClassNames)
         )
     }
 
     /**
      * Converts "results" to JSON format.
      */
-    fun generateJSONWithStreaming(result: Result<out Node>, writer: JsonWriter) {
+    fun generateJSONWithStreaming(result: Result<out Node>, writer: JsonWriter, shortClassNames: Boolean = false) {
         writer.beginObject()
         writer.name("errors")
         writer.beginArray()
@@ -56,13 +58,13 @@ class JsonGenerator {
         if (result.root == null) {
             writer.nullValue()
         } else {
-            result.root.toJsonStreaming(writer)
+            result.root.toJsonStreaming(writer, shortClassNames)
         }
         writer.endObject()
     }
 
-    fun generateJSONWithStreaming(root: Node, writer: JsonWriter) {
-        root.toJsonStreaming(writer)
+    fun generateJSONWithStreaming(root: Node, writer: JsonWriter, shortClassNames: Boolean = false) {
+        root.toJsonStreaming(writer, shortClassNames)
     }
 
     fun generateString(root: Node): String {
@@ -135,9 +137,9 @@ class JsonGenerator {
     }
 }
 
-private fun Node.toJson(): JsonElement {
+private fun Node.toJson(shortClassNames: Boolean = false): JsonElement {
     val jsonObject = jsonObject(
-        JSON_TYPE_KEY to this.javaClass.canonicalName,
+        JSON_TYPE_KEY to if (shortClassNames) this.javaClass.simpleName else this.javaClass.canonicalName,
         JSON_POSITION_KEY to this.position?.toJson()
     )
     this.processProperties {
@@ -145,13 +147,13 @@ private fun Node.toJson(): JsonElement {
             jsonObject.add(it.name, JsonNull.INSTANCE)
         } else if (it.multiple) {
             if (it.provideNodes) {
-                jsonObject.add(it.name, (it.value as Collection<*>).map { (it as Node).toJson() }.toJsonArray())
+                jsonObject.add(it.name, (it.value as Collection<*>).map { (it as Node).toJson(shortClassNames) }.toJsonArray())
             } else {
                 jsonObject.add(it.name, (it.value as Collection<*>).toJsonArray())
             }
         } else {
             if (it.provideNodes) {
-                jsonObject.add(it.name, (it.value as Node).toJson())
+                jsonObject.add(it.name, (it.value as Node).toJson(shortClassNames))
             } else {
                 jsonObject.add(it.name, it.value.toJson())
             }
@@ -160,10 +162,10 @@ private fun Node.toJson(): JsonElement {
     return jsonObject
 }
 
-private fun Node.toJsonStreaming(writer: JsonWriter) {
+private fun Node.toJsonStreaming(writer: JsonWriter, shortClassNames: Boolean = false) {
     writer.beginObject()
     writer.name(JSON_TYPE_KEY)
-    writer.value(this.javaClass.simpleName)
+    writer.value(if (shortClassNames) this.javaClass.simpleName else this.javaClass.canonicalName)
     if (this.position != null) {
         writer.name(JSON_POSITION_KEY)
         this.position!!.toJsonStreaming(writer)
@@ -176,7 +178,7 @@ private fun Node.toJsonStreaming(writer: JsonWriter) {
             writer.beginArray()
             if (it.provideNodes) {
                 (it.value as Collection<*>).forEach {
-                    (it as Node).toJsonStreaming(writer)
+                    (it as Node).toJsonStreaming(writer, shortClassNames)
                 }
             } else {
                 (it.value as Collection<*>).forEach {
@@ -186,7 +188,7 @@ private fun Node.toJsonStreaming(writer: JsonWriter) {
             writer.endArray()
         } else {
             if (it.provideNodes) {
-                (it.value as Node).toJsonStreaming(writer)
+                (it.value as Node).toJsonStreaming(writer, shortClassNames)
             } else {
                 it.value.toJsonStreaming(writer)
             }
