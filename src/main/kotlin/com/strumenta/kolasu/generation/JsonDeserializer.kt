@@ -26,7 +26,7 @@ class JsonDeserializer {
             val rawClass: Class<*> = (type.classifier as KClass<*>).java
             when {
                 Node::class.java.isAssignableFrom(rawClass) -> {
-                    val className = json.asJsonObject["type"].asString
+                    val className = json.asJsonObject[JSON_TYPE_KEY].asString
                     val actualClass = Class.forName(className)
                     return deserialize(actualClass as Class<out Node>, json.asJsonObject)
                 }

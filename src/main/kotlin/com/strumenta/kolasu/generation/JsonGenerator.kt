@@ -21,6 +21,9 @@ import java.io.File
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 
+const val JSON_TYPE_KEY = "#type"
+const val JSON_POSITION_KEY = "#position"
+
 class JsonGenerator {
 
     /**
@@ -134,8 +137,8 @@ class JsonGenerator {
 
 private fun Node.toJson(): JsonElement {
     val jsonObject = jsonObject(
-        "type" to this.javaClass.canonicalName,
-        "position" to this.position?.toJson()
+        JSON_TYPE_KEY to this.javaClass.canonicalName,
+        JSON_POSITION_KEY to this.position?.toJson()
     )
     this.processProperties {
         if (it.value == null) {
@@ -159,10 +162,10 @@ private fun Node.toJson(): JsonElement {
 
 private fun Node.toJsonStreaming(writer: JsonWriter) {
     writer.beginObject()
-    writer.name("type")
+    writer.name(JSON_TYPE_KEY)
     writer.value(this.javaClass.simpleName)
     if (this.position != null) {
-        writer.name("position")
+        writer.name(JSON_POSITION_KEY)
         this.position!!.toJsonStreaming(writer)
     }
     this.processProperties {
