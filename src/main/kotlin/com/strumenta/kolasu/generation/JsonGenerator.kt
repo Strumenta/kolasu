@@ -20,6 +20,7 @@ import com.strumenta.kolasu.validation.Result
 import java.io.File
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
+import java.util.function.Function
 
 const val JSON_TYPE_KEY = "#type"
 const val JSON_POSITION_KEY = "#position"
@@ -27,6 +28,7 @@ const val JSON_POSITION_KEY = "#position"
 class JsonGenerator {
 
     var shortClassNames = false
+    var jsonSerializer : JsonSerializer = AsStringJsonSerializer
 
     /**
      * Converts an AST to JSON format.
@@ -41,7 +43,7 @@ class JsonGenerator {
     fun generateJSON(result: Result<out Node>): JsonElement {
         return jsonObject(
             "errors" to result.errors.map { it.toJson() }.toJsonArray(),
-            "root" to result.root?.toJson(shortClassNames)
+            "root" to result.root?.toJson(shortClassNames, jsonSerializer)
         )
     }
 
@@ -137,7 +139,7 @@ class JsonGenerator {
     }
 }
 
-private fun Node.toJson(shortClassNames: Boolean = false): JsonElement {
+private fun Node.toJson(shortClassNames: Boolean = false, jsonSerializer: JsonSerializer = AsStringJsonSerializer): JsonElement {
     val jsonObject = jsonObject(
         JSON_TYPE_KEY to if (shortClassNames) this.javaClass.simpleName else this.javaClass.canonicalName,
         JSON_POSITION_KEY to this.position?.toJson()
@@ -147,7 +149,7 @@ private fun Node.toJson(shortClassNames: Boolean = false): JsonElement {
             jsonObject.add(it.name, JsonNull.INSTANCE)
         } else if (it.multiple) {
             if (it.provideNodes) {
-                jsonObject.add(it.name, (it.value as Collection<*>).map { (it as Node).toJson(shortClassNames) }.toJsonArray())
+                jsonObject.add(it.name, (it.value as Collection<*>).map { el -> (el as Node).toJson(shortClassNames, jsonSerializer) }.toJsonArray())
             } else {
                 jsonObject.add(it.name, (it.value as Collection<*>).toJsonArray())
             }
@@ -155,7 +157,7 @@ private fun Node.toJson(shortClassNames: Boolean = false): JsonElement {
             if (it.provideNodes) {
                 jsonObject.add(it.name, (it.value as Node).toJson(shortClassNames))
             } else {
-                jsonObject.add(it.name, it.value.toJson())
+                jsonObject.add(it.name, it.value.toJson(jsonSerializer))
             }
         }
     }
@@ -197,13 +199,16 @@ private fun Node.toJsonStreaming(writer: JsonWriter, shortClassNames: Boolean = 
     writer.endObject()
 }
 
-private fun Any?.toJson(): JsonElement? {
+typealias JsonSerializer = Function<Any, JsonElement>
+private val AsStringJsonSerializer = JsonSerializer { JsonPrimitive(it.toString()) }
+
+private fun Any?.toJson(jsonSerializer: JsonSerializer = AsStringJsonSerializer): JsonElement {
     return when (this) {
         null -> JsonNull.INSTANCE
         is String -> JsonPrimitive(this)
         is Number -> JsonPrimitive(this)
         is Boolean -> JsonPrimitive(this)
-        else -> JsonPrimitive(this.toString())
+        else -> jsonSerializer.apply(this)
     }
 }
 
