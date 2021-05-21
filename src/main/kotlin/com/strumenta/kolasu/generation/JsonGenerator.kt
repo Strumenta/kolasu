@@ -155,7 +155,7 @@ private fun Node.toJson(shortClassNames: Boolean = false, jsonSerializer: JsonSe
             }
         } else {
             if (it.provideNodes) {
-                jsonObject.add(it.name, (it.value as Node).toJson(shortClassNames))
+                jsonObject.add(it.name, (it.value as Node).toJson(shortClassNames, jsonSerializer))
             } else {
                 jsonObject.add(it.name, it.value.toJson(jsonSerializer))
             }
