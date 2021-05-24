@@ -180,8 +180,6 @@ fun EObject.saveAsJson(): String {
     val uri: URI = URI.createURI("dummy-URI")
     val resource: Resource = JsonResourceFactory().createResource(uri)
     resource.contents.add(this)
-    val uf = resource.getURIFragment(this)
-    println(uf)
     val output = ByteArrayOutputStream()
     resource.save(output, null)
     return output.toString(Charsets.UTF_8.name())
