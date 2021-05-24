@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
+import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -9,8 +11,6 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.*
 import org.eclipse.emf.ecore.*
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean

@@ -13,7 +13,7 @@ import org.antlr.v4.runtime.tree.TerminalNode
 
 data class PathElement(val symbol: Int, val rule: Boolean) {
     fun toString(parser: Parser): String {
-        return if(rule) {
+        return if (rule) {
             parser.ruleNames[symbol]
         } else {
             parser.vocabulary.getSymbolicName(symbol)
@@ -63,7 +63,7 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
     }
 
     protected fun addUncoveredPaths(state: Int = parser!!.state) {
-        if(!states.contains(state)) {
+        if (!states.contains(state)) {
             states.push(state)
             parser!!.atn.states[state].transitions.forEach {
                 when (it) {
@@ -75,7 +75,7 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
                     }
                     is SetTransition -> {
                         it.set.intervals.forEach { interval ->
-                            for(i in interval.a .. interval.b) {
+                            for (i in interval.a..interval.b) {
                                 addUncoveredPath(path.followWith(PathElement(i, false)))
                             }
                         }

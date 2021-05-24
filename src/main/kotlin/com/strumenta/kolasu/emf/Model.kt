@@ -57,7 +57,7 @@ fun Position.toEObject(): EObject {
     return eo
 }
 
-private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, esf: EStructuralFeature) : Any? {
+private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, esf: EStructuralFeature): Any? {
     val pdValue: Any? = value
     if (pdValue is Enum<*>) {
         val ee = ePackage.getEEnum(pdValue.javaClass)
