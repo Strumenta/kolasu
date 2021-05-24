@@ -244,7 +244,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
     }
 
     private fun classToEClass(kClass: KClass<*>): EClass {
-        if(kClass == Any::class) {
+        if (kClass == Any::class) {
             return EcoreFactory.eINSTANCE.ecorePackage.eObject
         }
 
@@ -356,7 +356,6 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
             registerKClassForEClass(kClass, eClass)
             if (kClass.isSealed) {
                 kClass.sealedSubclasses.forEach {
-                    //provideClass(it)
                     queue.add(it)
                 }
             }
@@ -373,7 +372,6 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         return ePackage
     }
 }
-
 
 private fun EPackage.hasClassifierNamed(name: String): Boolean {
     return this.eClassifiers.any { it.name == name }
