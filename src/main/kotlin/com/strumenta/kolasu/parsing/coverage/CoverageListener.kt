@@ -45,16 +45,21 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
         addUncoveredPaths()
         path = path.followWith(PathElement(node.symbol.type, false))
         paths[path] = true
+        val elements = path.elements
+        val rulePath = Path(elements.subList(elements.indexOf(elements.findLast { it.rule }), elements.size))
+        paths[rulePath] = true
     }
 
     override fun visitErrorNode(node: ErrorNode?) {}
 
     override fun enterEveryRule(ctx: ParserRuleContext) {
-        path = path.followWith(PathElement(ctx.ruleIndex, true))
+        val el = PathElement(ctx.ruleIndex, true)
+        val newPath = path.followWith(el)
+        path = Path(mutableListOf(el))
         addUncoveredPaths()
-        if(paths.containsKey(path)) {
-            paths[path] = true
-        }
+        paths[path] = true
+        path = newPath
+        paths[path] = true
     }
 
     protected fun addUncoveredPaths(state: Int = parser!!.state) {

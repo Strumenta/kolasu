@@ -29,7 +29,7 @@ class CoverageTest {
         assertTrue { coverage.uncoveredPathStrings().containsAll(listOf(
             "type > DEC", "type > STRING", "type > BOOLEAN"))
         }
-        assertCoverage(coverage, 3, 4)
+        assertCoverage(coverage, 3, 5)
     }
 
     private fun assertCoverage(coverage: CoverageListener, expectedUncovered: Int, expectedPaths: Int) {
@@ -47,15 +47,15 @@ class CoverageTest {
         coverage.listenTo(parser)
         parser.compilationUnit()
         assertTrue { coverage.uncoveredPathStrings().containsAll(listOf(
-            "compilationUnit > statement > DISPLAY",
-            "compilationUnit > statement > INPUT",
-            "compilationUnit > statement > SET > ID > EQUAL > expression > DEC_LIT",
-            "compilationUnit > statement > SET > ID > EQUAL > expression > STRING_LIT",
-            "compilationUnit > statement > SET > ID > EQUAL > expression > BOOLEAN_LIT",
+            "statement > DISPLAY",
+            "statement > INPUT",
+            "expression > DEC_LIT",
+            "expression > STRING_LIT",
+            "expression > BOOLEAN_LIT",
             "compilationUnit > statement > SET > ID > EQUAL > expression > statement",
             "compilationUnit > statement > statement"))
         }
-        assertCoverage(coverage, 7, 12)
+        assertCoverage(coverage, 7, 20)
     }
 
 }
