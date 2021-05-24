@@ -2,12 +2,12 @@ package com.strumenta.kolasu.parsing.coverage
 
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
-import org.junit.Test
 import kotlin.math.abs
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
+import org.junit.Test
 
 class CoverageTest {
 
@@ -26,8 +26,8 @@ class CoverageTest {
         val coverage = CoverageListener()
         coverage.listenTo(parser)
         parser.type()
-        assertTrue { coverage.uncoveredPathStrings().containsAll(listOf(
-            "type > DEC", "type > STRING", "type > BOOLEAN"))
+        assertTrue {
+            coverage.uncoveredPathStrings().containsAll(listOf("type > DEC", "type > STRING", "type > BOOLEAN"))
         }
         assertCoverage(coverage, 3, 5)
     }
@@ -46,16 +46,19 @@ class CoverageTest {
         val coverage = CoverageListener()
         coverage.listenTo(parser)
         parser.compilationUnit()
-        assertTrue { coverage.uncoveredPathStrings().containsAll(listOf(
-            "statement > DISPLAY",
-            "statement > INPUT",
-            "expression > DEC_LIT",
-            "expression > STRING_LIT",
-            "expression > BOOLEAN_LIT",
-            "compilationUnit > statement > SET > ID > EQUAL > expression > statement",
-            "compilationUnit > statement > statement"))
+        assertTrue {
+            coverage.uncoveredPathStrings().containsAll(
+                listOf(
+                    "statement > DISPLAY",
+                    "statement > INPUT",
+                    "expression > DEC_LIT",
+                    "expression > STRING_LIT",
+                    "expression > BOOLEAN_LIT",
+                    "compilationUnit > statement > SET > ID > EQUAL > expression > statement",
+                    "compilationUnit > statement > statement"
+                )
+            )
         }
         assertCoverage(coverage, 7, 20)
     }
-
 }
