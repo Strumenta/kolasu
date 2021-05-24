@@ -84,9 +84,9 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
         }
     }
 
-    private fun addUncoveredPath(transPath: Path) {
-        if (!paths.containsKey(transPath)) {
-            paths[transPath] = false
+    private fun addUncoveredPath(path: Path) {
+        if (!paths.containsKey(path)) {
+            paths[path] = false
         }
     }
 
@@ -97,6 +97,7 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
             last = path.elements.last()
         }
         addUncoveredPaths()
+        path = path.parent()
     }
 
     fun pathStrings(): List<String> {
@@ -117,7 +118,5 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
         parser.addParseListener(this)
     }
 
-    fun percentage(): Double {
-        return 1.0 - (this.uncoveredPaths().size.toDouble() / this.paths.size.toDouble())
-    }
+    fun percentage() = (1.0 - (this.uncoveredPaths().size.toDouble() / this.paths.size.toDouble())) * 100.0
 }
