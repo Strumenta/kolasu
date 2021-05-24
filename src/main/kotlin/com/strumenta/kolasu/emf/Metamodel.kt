@@ -207,7 +207,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         val eEnum = EcoreFactory.eINSTANCE.createEEnum()
         eEnum.name = kClass.eClassifierName
         kClass.java.enumConstants.forEach {
-            var eLiteral = EcoreFactory.eINSTANCE.createEEnumLiteral()
+            val eLiteral = EcoreFactory.eINSTANCE.createEEnumLiteral()
             eLiteral.name = it.name
             eLiteral.value = it.ordinal
             eEnum.eLiterals.add(eLiteral)
@@ -244,6 +244,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
     }
 
     private fun classToEClass(kClass: KClass<*>): EClass {
+        if(kClass == Any::class) {
+            return EcoreFactory.eINSTANCE.ecorePackage.eObject
+        }
+
         val eClass = EcoreFactory.eINSTANCE.createEClass()
         // This is necessary because some classes refer to themselves
         registerKClassForEClass(kClass, eClass)
