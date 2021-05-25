@@ -3,10 +3,7 @@ package com.strumenta.kolasu.parsing.coverage
 import com.strumenta.kolasu.model.mutableStackOf
 import org.antlr.v4.runtime.Parser
 import org.antlr.v4.runtime.ParserRuleContext
-import org.antlr.v4.runtime.atn.AtomTransition
-import org.antlr.v4.runtime.atn.EpsilonTransition
-import org.antlr.v4.runtime.atn.RuleTransition
-import org.antlr.v4.runtime.atn.SetTransition
+import org.antlr.v4.runtime.atn.*
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.antlr.v4.runtime.tree.TerminalNode
@@ -21,9 +18,9 @@ data class PathElement(val symbol: Int, val rule: Boolean) {
     }
 }
 
-data class Path(val elements: List<PathElement> = mutableListOf()) {
+data class Path(val elements: List<PathElement> = listOf(), val states: MutableSet<Int> = mutableSetOf()) {
     fun followWith(el: PathElement): Path {
-        return Path(elements + el)
+        return Path(elements + el, states = this.states.toMutableSet())
     }
 
     fun parent(): Path {
@@ -31,48 +28,48 @@ data class Path(val elements: List<PathElement> = mutableListOf()) {
     }
 
     fun toString(parser: Parser): String {
-        return elements.map { it.toString(parser) }.joinToString(" > ")
+        return elements.joinToString(" > ") { it.toString(parser) }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is Path && elements == other.elements
+    }
+
+    override fun hashCode(): Int {
+        return elements.hashCode()
     }
 }
 
 open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
 
     val paths = mutableMapOf<Path, Boolean>()
-    protected var path: Path = Path()
-    protected val states = mutableStackOf<Int>()
+    val pathStack = mutableStackOf<Path>()
+    val statesToProcess = mutableSetOf<Int>()
 
     override fun visitTerminal(node: TerminalNode) {
         addUncoveredPaths()
+        var path = pathStack.pop()
         path = path.followWith(PathElement(node.symbol.type, false))
         paths[path] = true
-        var remainder = Path()
-        for(i in (0 until path.elements.size).reversed()) {
-            remainder = Path(listOf(path.elements[i]) + remainder.elements)
-            if(path.elements[i].rule) {
-                paths[remainder] = true
-            }
-        }
-        while(remainder.elements.size > 1) {
-            remainder = Path(remainder.elements.subList(0, remainder.elements.size - 1))
-            paths[remainder] = true
-        }
+        pathStack.push(path)
     }
 
     override fun visitErrorNode(node: ErrorNode?) {}
 
     override fun enterEveryRule(ctx: ParserRuleContext) {
         val el = PathElement(ctx.ruleIndex, true)
-        val newPath = path.followWith(el)
-        path = Path(mutableListOf(el))
+        val prev = pathStack.peek() ?: Path()
+        paths[prev.followWith(el)] = true
+        val path = Path().followWith(el)
+        pathStack.push(path)
         addUncoveredPaths()
-        paths[path] = true
-        path = newPath
         paths[path] = true
     }
 
     protected fun addUncoveredPaths(state: Int = parser!!.state) {
-        if (!states.contains(state)) {
-            states.push(state)
+        val path = pathStack.peek()
+        if (!path.states.contains(state)) {
+            path.states.add(state)
             parser!!.atn.states[state].transitions.forEach {
                 when (it) {
                     is RuleTransition -> {
@@ -88,12 +85,11 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
                             }
                         }
                     }
-                    is EpsilonTransition -> {
+                    else -> {
                         addUncoveredPaths(it.target.stateNumber)
                     }
                 }
             }
-            states.pop()
         }
     }
 
@@ -104,27 +100,7 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
     }
 
     override fun exitEveryRule(ctx: ParserRuleContext) {
-        var last = path.elements.last()
-        var remainder = Path(mutableListOf(last))
-        if(last.rule) {
-            paths[remainder] = true
-        }
-        while (!last.rule || last.symbol != ctx.ruleIndex) {
-            path = path.parent()
-            paths[path] = true
-            last = path.elements.last()
-
-            remainder = Path(listOf(last) + remainder.elements)
-            if(last.rule) {
-                paths[remainder] = true
-            }
-        }
-        while(remainder.elements.size > 1) {
-            remainder = Path(remainder.elements.subList(0, remainder.elements.size - 1))
-            paths[remainder] = true
-        }
-        addUncoveredPaths()
-        path = path.parent()
+        pathStack.pop()
     }
 
     fun pathStrings(): List<String> {

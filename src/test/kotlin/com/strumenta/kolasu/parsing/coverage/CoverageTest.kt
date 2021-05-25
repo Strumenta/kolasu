@@ -53,12 +53,10 @@ class CoverageTest {
                     "statement > INPUT",
                     "expression > DEC_LIT",
                     "expression > STRING_LIT",
-                    "expression > BOOLEAN_LIT",
-                    "compilationUnit > statement > SET > ID > EQUAL > expression > statement",
-                    "compilationUnit > statement > statement"
+                    "expression > BOOLEAN_LIT"
                 )
             )
         }
-        assertCoverage(coverage, 7, 21)
+        assertCoverage(coverage, 5, 14)
     }
 }
