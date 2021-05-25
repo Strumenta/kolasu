@@ -52,6 +52,10 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
                 paths[remainder] = true
             }
         }
+        while(remainder.elements.size > 1) {
+            remainder = Path(remainder.elements.subList(0, remainder.elements.size - 1))
+            paths[remainder] = true
+        }
     }
 
     override fun visitErrorNode(node: ErrorNode?) {}
@@ -115,6 +119,10 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
                 paths[remainder] = true
             }
         }
+        while(remainder.elements.size > 1) {
+            remainder = Path(remainder.elements.subList(0, remainder.elements.size - 1))
+            paths[remainder] = true
+        }
         addUncoveredPaths()
         path = path.parent()
     }
@@ -123,12 +131,12 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
         return paths.keys.map { it.toString(parser!!) }
     }
 
-    fun uncoveredPaths(): Set<Path> {
-        return paths.filterValues { !it }.keys
+    fun uncoveredPaths(maxLength: Int = Int.MAX_VALUE): Collection<Path> {
+        return paths.filterValues { !it }.keys.filter { it.elements.size <= maxLength }
     }
 
-    fun uncoveredPathStrings(): List<String> {
-        return uncoveredPaths().map { it.toString(parser!!) }
+    fun uncoveredPathStrings(maxLength: Int = Int.MAX_VALUE): Collection<String> {
+        return uncoveredPaths(maxLength).map { it.toString(parser!!) }
     }
 
     fun listenTo(parser: Parser) {
