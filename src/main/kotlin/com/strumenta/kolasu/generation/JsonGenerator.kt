@@ -108,7 +108,6 @@ class JsonGenerator {
 
     fun generateEMFString(result: Result<out Node>, astPackage: EPackage): String {
         val resultEC = KOLASU_METAMODEL.getEClass(Result::class.java)
-        val issueEC = KOLASU_METAMODEL.getEClass(Issue::class.java)
         val resultEO = KOLASU_METAMODEL.eFactoryInstance.create(resultEC)
         val issuesSF = resultEC.eAllStructuralFeatures.find { it.name == "issues" }!!
         val issues = resultEO.eGet(issuesSF) as MutableList<EObject>
@@ -117,7 +116,7 @@ class JsonGenerator {
         }
         val rootSF = resultEC.eAllStructuralFeatures.find { it.name == "root" }!!
         if (result.root != null) {
-            resultEO.eSet(rootSF, result.root!!.toEObject(astPackage))
+            resultEO.eSet(rootSF, result.root.toEObject(astPackage))
         }
 
         return resultEO.saveAsJson()
@@ -230,7 +229,7 @@ private fun Issue.toJsonStreaming(writer: JsonWriter) {
     if (this.position == null) {
         writer.nullValue()
     } else {
-        this.position!!.toJsonStreaming(writer)
+        this.position.toJsonStreaming(writer)
     }
     writer.endObject()
 }

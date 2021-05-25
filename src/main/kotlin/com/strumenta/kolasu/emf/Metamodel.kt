@@ -217,7 +217,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
 
     override fun provideDataType(ktype: KType): EDataType? {
         if (!dataTypes.containsKey(ktype)) {
-            var eDataType = EcoreFactory.eINSTANCE.createEDataType()
+            val eDataType: EDataType
             var external = false
             when {
                 (ktype.classifier as? KClass<*>)?.isSubclassOf(Enum::class) == true -> {

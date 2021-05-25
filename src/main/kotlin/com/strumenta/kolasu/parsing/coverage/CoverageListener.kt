@@ -45,9 +45,13 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
         addUncoveredPaths()
         path = path.followWith(PathElement(node.symbol.type, false))
         paths[path] = true
-        val elements = path.elements
-        val rulePath = Path(elements.subList(elements.indexOf(elements.findLast { it.rule }), elements.size))
-        paths[rulePath] = true
+        var remainder = Path()
+        for(i in (0 until path.elements.size).reversed()) {
+            remainder = Path(listOf(path.elements[i]) + remainder.elements)
+            if(path.elements[i].rule) {
+                paths[remainder] = true
+            }
+        }
     }
 
     override fun visitErrorNode(node: ErrorNode?) {}
@@ -97,9 +101,19 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
 
     override fun exitEveryRule(ctx: ParserRuleContext) {
         var last = path.elements.last()
+        var remainder = Path(mutableListOf(last))
+        if(last.rule) {
+            paths[remainder] = true
+        }
         while (!last.rule || last.symbol != ctx.ruleIndex) {
             path = path.parent()
+            paths[path] = true
             last = path.elements.last()
+
+            remainder = Path(listOf(last) + remainder.elements)
+            if(last.rule) {
+                paths[remainder] = true
+            }
         }
         addUncoveredPaths()
         path = path.parent()

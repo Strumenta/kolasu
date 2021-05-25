@@ -59,6 +59,6 @@ class CoverageTest {
                 )
             )
         }
-        assertCoverage(coverage, 7, 20)
+        assertCoverage(coverage, 7, 21)
     }
 }

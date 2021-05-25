@@ -65,7 +65,7 @@ private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, es
     } else {
         // this could be not a primitive value but a value that we mapped to an EClass
         if (pdValue != null) {
-            val eClass = ePackage.eClassifiers.filterIsInstance<EClass>().find { it.name == pdValue!!.javaClass.simpleName }
+            val eClass = ePackage.eClassifiers.filterIsInstance<EClass>().find { it.name == pdValue.javaClass.simpleName }
             when {
                 eClass != null -> {
                     val eoValue = pdValue.dataToEObject(ePackage)
