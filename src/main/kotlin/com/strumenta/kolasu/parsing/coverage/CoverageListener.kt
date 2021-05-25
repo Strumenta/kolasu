@@ -100,7 +100,10 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
     }
 
     override fun exitEveryRule(ctx: ParserRuleContext) {
-        pathStack.pop()
+        val path = pathStack.pop()
+        if(!pathStack.isEmpty()) {
+            pathStack.push(pathStack.pop().followWith(path.elements.first()))
+        }
     }
 
     fun pathStrings(): List<String> {
