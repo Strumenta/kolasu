@@ -16,7 +16,7 @@ internal val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
 /**
  * @return all properties of this node that are considered AST properties.
  */
-internal val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
+val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.nodeProperties
 
 /**
@@ -118,21 +118,39 @@ data class PropertyDescription(
         get() = multeplicity == Multeplicity.MANY
 
     companion object {
-        fun buildFor(property: KProperty1<in Node, *>, node: Node): PropertyDescription {
+
+        fun multiple(property: KProperty1<in Node, *>): Boolean {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
-            val multiple = (classifier?.isSubclassOf(Collection::class) == true)
-            val optional = !multiple && propertyType.isMarkedNullable
-            val multeplicity = when {
-                multiple -> Multeplicity.MANY
-                optional -> Multeplicity.OPTIONAL
+            return (classifier?.isSubclassOf(Collection::class) == true)
+        }
+
+        fun optional(property: KProperty1<in Node, *>) : Boolean {
+            val propertyType = property.returnType
+            return !multiple(property) && propertyType.isMarkedNullable
+        }
+
+        fun multeplicity(property: KProperty1<in Node, *>) : Multeplicity {
+            return when {
+                multiple(property) -> Multeplicity.MANY
+                optional(property) -> Multeplicity.OPTIONAL
                 else -> Multeplicity.SINGULAR
             }
-            val provideNodes = if (multiple) {
+        }
+
+        fun provideNodes(property: KProperty1<in Node, *>) : Boolean {
+            val propertyType = property.returnType
+            val classifier = propertyType.classifier as? KClass<*>
+            return if (multiple(property)) {
                 providesNodes(propertyType.arguments[0])
             } else {
                 providesNodes(classifier)
             }
+        }
+
+        fun buildFor(property: KProperty1<in Node, *>, node: Node): PropertyDescription {
+            val multeplicity = multeplicity(property)
+            val provideNodes = provideNodes(property)
             return PropertyDescription(
                 name = property.name,
                 provideNodes = provideNodes,

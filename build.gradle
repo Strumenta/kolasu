@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.4.32'
+    ext.kotlin_version = '1.5.10'
     ext.antlr_version = '4.9.2'
 
     repositories {
@@ -31,7 +31,7 @@ repositories {
     jcenter()
 }
 
-def kolasuVersion = "1.1.2-SNAPSHOT"
+def kolasuVersion = "1.2.0-SNAPSHOT"
 
 project.group   = "com.strumenta"
 project.version = kolasuVersion
