@@ -27,7 +27,7 @@ class ModelTest {
             Position(Point(1, 0), Point(1, 1))
         )
         val nsURI = "https://strumenta.com/simplemm"
-        val metamodelBuilder = MetamodelBuilder("SimpleMM", nsURI, "simplemm")
+        val metamodelBuilder = MetamodelBuilder(packageName(CompilationUnit::class), nsURI, "simplemm")
         metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
 

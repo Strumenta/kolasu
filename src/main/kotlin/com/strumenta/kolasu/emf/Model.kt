@@ -7,11 +7,12 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.lang.RuntimeException
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.KClass
 import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.*
-import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
+import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
+import org.eclipse.emf.ecore.*
 import org.emfjson.jackson.resource.JsonResourceFactory
 
 fun EPackage.getEClass(javaClass: Class<*>): EClass {
@@ -100,10 +101,32 @@ private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, es
     }
 }
 
+fun packageName(klass: KClass<*>): String =
+    klass.qualifiedName!!.substring(0, klass.qualifiedName!!.lastIndexOf("."))
+
+fun EPackage.findEClass(klass: KClass<*>): EClass? {
+    return this.findEClass(klass.eClassifierName)
+}
+
+fun EPackage.findEClass(name: String): EClass? {
+    return this.eClassifiers.find { it is EClass && it.name == name } as EClass?
+}
+
+fun Resource.findEClass(klass: KClass<*>): EClass? {
+    val ePackage = this.contents.find { it is EPackage && it.name == packageName(klass) } as EPackage?
+    return ePackage?.findEClass(klass)
+}
+
+fun Resource.getEClass(klass: KClass<*>): EClass = this.findEClass(klass) ?: throw ClassNotFoundException(klass.qualifiedName)
+
 fun Node.toEObject(ePackage: EPackage): EObject {
+    return this.toEObject(ePackage.eResource())
+}
+
+fun Node.toEObject(eResource: Resource): EObject {
     try {
-        val ec = ePackage.getEClass(this.javaClass)
-        val eo = ePackage.eFactoryInstance.create(ec)
+        val ec = eResource.getEClass(this::class)
+        val eo = ec.ePackage.eFactoryInstance.create(ec)
         val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
         val position = astNode.getEStructuralFeature("position")
         val positionValue = this.position?.toEObject()
@@ -115,7 +138,7 @@ fun Node.toEObject(ePackage: EPackage): EObject {
                     val elist = eo.eGet(esf) as MutableList<EObject>
                     (pd.value as List<*>).forEach {
                         try {
-                            val childEO = (it as Node).toEObject(ePackage)
+                            val childEO = (it as Node).toEObject(eResource)
                             elist.add(childEO)
                         } catch (e: Exception) {
                             throw RuntimeException("Unable to map to EObject child $it in property $pd of $this", e)
@@ -125,7 +148,7 @@ fun Node.toEObject(ePackage: EPackage): EObject {
                     if (pd.value == null) {
                         eo.eSet(esf, null)
                     } else {
-                        eo.eSet(esf, (pd.value as Node).toEObject(ePackage))
+                        eo.eSet(esf, (pd.value as Node).toEObject(eResource))
                     }
                 }
             } else {
@@ -133,14 +156,14 @@ fun Node.toEObject(ePackage: EPackage): EObject {
                     val elist = eo.eGet(esf) as MutableList<Any>
                     (pd.value as List<*>).forEach {
                         try {
-                            val childValue = toValue(ePackage, it, pd, esf)
+                            val childValue = toValue(ec.ePackage, it, pd, esf)
                             elist.add(childValue!!)
                         } catch (e: Exception) {
                             throw RuntimeException("Unable to map to EObject child $it in property $pd of $this", e)
                         }
                     }
                 } else {
-                    eo.eSet(esf, toValue(ePackage, pd.value, pd, esf))
+                    eo.eSet(esf, toValue(ec.ePackage, pd.value, pd, esf))
                 }
             }
         }

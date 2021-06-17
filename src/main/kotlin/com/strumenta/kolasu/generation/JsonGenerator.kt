@@ -95,13 +95,13 @@ class JsonGenerator {
     private fun issueAsEObject(issue: Issue): EObject {
         val ec = KOLASU_METAMODEL.getEClass(Issue::class.java)
         val eo = KOLASU_METAMODEL.eFactoryInstance.create(ec)
-        val typeSF = ec.eAllStructuralFeatures.find { it.name == "type" }!!
-        // TODO eo.eSet(typeSF, issue.type.ordinal)
+        // TODO val typeSF = ec.eAllStructuralFeatures.find { it.name == "type" }!!
+        // eo.eSet(typeSF, issue.type.ordinal)
         val messageSF = ec.eAllStructuralFeatures.find { it.name == "message" }!!
         eo.eSet(messageSF, issue.message)
         val positionSF = ec.eAllStructuralFeatures.find { it.name == "position" }!!
         if (issue.position != null) {
-            eo.eSet(positionSF, positionAsEObject(issue.position!!))
+            eo.eSet(positionSF, positionAsEObject(issue.position))
         }
         return eo
     }

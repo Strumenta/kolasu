@@ -72,7 +72,7 @@ class JsonDeserializer {
         } else {
             val emptyConstructor = clazz.constructors.find { it.parameters.isEmpty() }
             if (emptyConstructor != null) {
-                instance = clazz.newInstance()
+                instance = clazz.getConstructor().newInstance()
             } else {
                 throw IllegalStateException("Class ${clazz.canonicalName} has no primary or default constructor")
             }
