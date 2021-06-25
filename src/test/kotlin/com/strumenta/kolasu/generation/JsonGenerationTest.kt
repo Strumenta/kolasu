@@ -104,7 +104,7 @@ class JsonGenerationTest {
                 |{"#type":"com.strumenta.kolasu.generation.Content","annidatedContent":
                 |{"#type":"com.strumenta.kolasu.generation.Content","annidatedContent":
                 |{"#type":"com.strumenta.kolasu.generation.Content","annidatedContent":null,"id":4},"id":3},"id":2}],
-                |"name":"Section1"},"otherSections":[]}""".trimMargin(),
+                |"name":"Section1"},"otherSections":[]}""".trimMargin().replace("\n", ""),
             json
         )
     }
