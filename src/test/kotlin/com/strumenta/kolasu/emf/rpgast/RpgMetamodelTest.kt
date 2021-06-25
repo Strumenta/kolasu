@@ -4,9 +4,9 @@ import com.smeup.rpgparser.parsing.ast.CompilationUnit
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.emf.saveAsJson
 import com.strumenta.kolasu.emf.saveEcore
+import org.junit.Test
 import java.io.File
 import kotlin.test.assertEquals
-import org.junit.Test
 
 class RpgMetamodelTest {
 

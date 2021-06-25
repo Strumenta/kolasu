@@ -8,12 +8,12 @@ import org.antlr.v4.runtime.ParserRuleContext
  */
 open class Node(open val specifiedPosition: Position? = null) {
     @Derived
-    open val properties : List<PropertyDescription>
-       get() = try {
-           nodeProperties.map { PropertyDescription.buildFor(it, this) }
-       } catch (e: Throwable) {
-           throw RuntimeException("Issue while getting properties of $this (${this.javaClass})")
-       }
+    open val properties: List<PropertyDescription>
+        get() = try {
+            nodeProperties.map { PropertyDescription.buildFor(it, this) }
+        } catch (e: Throwable) {
+            throw RuntimeException("Issue while getting properties of $this (${this.javaClass})")
+        }
 
     var parseTreeNode: ParserRuleContext? = null
     var parent: Node? = null

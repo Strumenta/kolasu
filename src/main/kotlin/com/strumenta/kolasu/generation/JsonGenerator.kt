@@ -17,9 +17,9 @@ import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
-import java.io.File
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
+import java.io.File
 import java.util.function.Function
 
 const val JSON_TYPE_KEY = "#type"
@@ -28,7 +28,7 @@ const val JSON_POSITION_KEY = "#position"
 class JsonGenerator {
 
     var shortClassNames = false
-    var jsonSerializer : JsonSerializer = AsStringJsonSerializer
+    var jsonSerializer: JsonSerializer = AsStringJsonSerializer
 
     /**
      * Converts an AST to JSON format.
@@ -139,7 +139,8 @@ class JsonGenerator {
     }
 }
 
-private fun Node.toJson(shortClassNames: Boolean = false, jsonSerializer: JsonSerializer = AsStringJsonSerializer): JsonElement {
+private fun Node.toJson(shortClassNames: Boolean = false, jsonSerializer: JsonSerializer = AsStringJsonSerializer):
+    JsonElement {
     val jsonObject = jsonObject(
         JSON_TYPE_KEY to if (shortClassNames) this.javaClass.simpleName else this.javaClass.canonicalName,
         JSON_POSITION_KEY to this.position?.toJson()
@@ -149,7 +150,11 @@ private fun Node.toJson(shortClassNames: Boolean = false, jsonSerializer: JsonSe
             jsonObject.add(it.name, JsonNull.INSTANCE)
         } else if (it.multiple) {
             if (it.provideNodes) {
-                jsonObject.add(it.name, (it.value as Collection<*>).map { el -> (el as Node).toJson(shortClassNames, jsonSerializer) }.toJsonArray())
+                jsonObject.add(
+                    it.name,
+                    (it.value as Collection<*>).map { el -> (el as Node).toJson(shortClassNames, jsonSerializer) }
+                        .toJsonArray()
+                )
             } else {
                 jsonObject.add(it.name, (it.value as Collection<*>).toJsonArray())
             }

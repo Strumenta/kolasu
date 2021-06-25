@@ -17,10 +17,14 @@ fun coerce(value: Value, type: Type): Value {
 
 interface Value : Comparable<Value> {
     fun asInt(): IntValue = throw UnsupportedOperationException("${this.javaClass.simpleName} cannot be seen as an Int")
-    fun asDecimal(): DecimalValue = throw UnsupportedOperationException("${this.javaClass.simpleName} cannot be seen as an Decimal")
+    fun asDecimal(): DecimalValue = throw UnsupportedOperationException(
+        "${this.javaClass.simpleName} cannot be seen as an Decimal"
+    )
     fun asString(): StringValue
     fun asBoolean(): BooleanValue = throw UnsupportedOperationException()
-    fun asTimeStamp(): TimeStampValue = throw UnsupportedOperationException("${this.javaClass.simpleName} cannot be seen as an TimeStamp - $this")
+    fun asTimeStamp(): TimeStampValue = throw UnsupportedOperationException(
+        "${this.javaClass.simpleName} cannot be seen as an TimeStamp - $this"
+    )
     fun assignableTo(expectedType: Type): Boolean
     fun takeLast(n: Int): Value = TODO("takeLast not yet implemented for ${this.javaClass.simpleName}")
     fun takeFirst(n: Int): Value = TODO("takeFirst not yet implemented for ${this.javaClass.simpleName}")
@@ -115,7 +119,9 @@ data class StringValue(var value: String, val varying: Boolean = false) : Value 
         require(startOffset >= 0)
         require(startOffset <= value.length)
         require(endOffset >= startOffset)
-        require(endOffset <= value.length) { "Asked startOffset=$startOffset, endOffset=$endOffset on string of length ${value.length}" }
+        require(endOffset <= value.length) {
+            "Asked startOffset=$startOffset, endOffset=$endOffset on string of length ${value.length}"
+        }
         substringValue.pad(endOffset - startOffset)
         value = value.substring(0, startOffset) + substringValue.value + value.substring(endOffset)
     }
@@ -124,7 +130,9 @@ data class StringValue(var value: String, val varying: Boolean = false) : Value 
         require(startOffset >= 0)
         require(startOffset <= value.length)
         require(endOffset >= startOffset)
-        require(endOffset <= value.length) { "Asked startOffset=$startOffset, endOffset=$endOffset on string of length ${value.length}" }
+        require(endOffset <= value.length) {
+            "Asked startOffset=$startOffset, endOffset=$endOffset on string of length ${value.length}"
+        }
         val s = value.substring(startOffset, endOffset)
         return StringValue(s)
     }
@@ -206,7 +214,11 @@ fun sortA(value: Value, charset: Charset) {
                 for (j in 1..(n - i - 1)) {
                     val compared =
                         if (strings) {
-                            value.getElement(j).asString().compare(value.getElement(j + 1).asString(), charset, value.field.descend)
+                            value.getElement(j).asString().compare(
+                                value.getElement(j + 1).asString(),
+                                charset,
+                                value.field.descend
+                            )
                         } else {
                             value.getElement(j).compareTo(value.getElement(j + 1)) * multiplier
                         }
@@ -243,6 +255,7 @@ data class IntValue(val value: Long) : NumberValue() {
     }
 
     override fun asInt() = this
+
     // TODO Verify conversion
     override fun asDecimal(): DecimalValue = DecimalValue(bigDecimal)
 
@@ -703,7 +716,9 @@ class ProjectedArrayValue(
     override fun setElement(index: Int, value: Value) {
         require(index >= 1)
         require(index <= arrayLength())
-        require(value.assignableTo((field.type as ArrayType).element)) { "Assigning to field $field incompatible value $value" }
+        require(value.assignableTo((field.type as ArrayType).element)) {
+            "Assigning to field $field incompatible value $value"
+        }
         val startIndex = (this.startOffset + this.step * (index - 1)).toInt()
         val endIndex = (startIndex + this.field.elementSize()).toInt()
         container.setSubstring(startIndex, endIndex, coerce(value, StringType(this.field.elementSize())) as StringValue)
@@ -736,7 +751,10 @@ class ProjectedArrayValue(
     }
 }
 
-fun createArrayValue(elementType: Type, n: Int, creator: (Int) -> Value) = ConcreteArrayValue(Array(n, creator).toMutableList(), elementType)
+fun createArrayValue(elementType: Type, n: Int, creator: (Int) -> Value) = ConcreteArrayValue(
+    Array(n, creator).toMutableList(),
+    elementType
+)
 
 fun List<Value>.asConcreteArrayValue(elementType: Type) = createArrayValue(elementType, size) {
     this[it + 1]
@@ -771,7 +789,8 @@ fun createBlankFor(dataDefinition: DataDefinition): Value {
 private fun NumberType.toRPGValue(iniz: Boolean): Value =
     when (rpgType) {
         RpgType.ZONED.rpgType, RpgType.PACKED.rpgType -> if (iniz) DecimalValue.ZERO else DecimalValue.ONE
-        RpgType.BINARY.rpgType, RpgType.INTEGER.rpgType, RpgType.UNSIGNED.rpgType -> if (iniz) IntValue.ZERO else IntValue.ONE
+        RpgType.BINARY.rpgType, RpgType.INTEGER.rpgType, RpgType.UNSIGNED.rpgType ->
+            if (iniz) IntValue.ZERO else IntValue.ONE
         else -> TODO("Please handle RpgType $rpgType")
     }
 
@@ -827,7 +846,11 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
             try {
                 this.setSubstring(startIndex, endIndex, v)
             } catch (e: Exception) {
-                throw RuntimeException("Issue arose while setting field ${field.name}. Indexes: $startIndex to $endIndex. Field size: ${field.size}. Value: $value", e)
+                throw RuntimeException(
+                    "Issue arose while setting field ${field.name}. Indexes: $startIndex to $endIndex. " +
+                        "Field size: ${field.size}. Value: $value",
+                    e
+                )
             }
         } catch (e: Throwable) {
             throw RuntimeException("Issue arose while setting field ${field.name}. Value: $value", e)
@@ -841,7 +864,11 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
         try {
             this.setSubstring(startIndex, endIndex, v)
         } catch (e: Exception) {
-            throw RuntimeException("Issue arose while setting field ${field.name}. Indexes: $startIndex to $endIndex. Field size: ${field.size}. Value: $value", e)
+            throw RuntimeException(
+                "Issue arose while setting field ${field.name}. Indexes: $startIndex to $endIndex. " +
+                    "Field size: ${field.size}. Value: $value",
+                e
+            )
         }
     }
 
@@ -869,10 +896,17 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
         }
         require(startOffset <= value.length)
         require(endOffset >= startOffset)
-        require(endOffset <= value.length) { "Asked startOffset=$startOffset, endOffset=$endOffset on string of length ${value.length}" }
-        // require(endOffset - startOffset == substringValue.value.length) { "Setting value $substringValue, with length ${substringValue.value.length}, into field of length ${endOffset - startOffset}" }
+        require(endOffset <= value.length) {
+            "Asked startOffset=$startOffset, endOffset=$endOffset on string of length ${value.length}"
+        }
+        // require(endOffset - startOffset == substringValue.value.length) {
+        // "Setting value $substringValue, with length ${substringValue.value.length}, into field of length
+        // ${endOffset - startOffset}" }
         // changed to >= a small value fits in a bigger one
-        require(endOffset - startOffset >= substringValue.value.length) { "Setting value $substringValue, with length ${substringValue.value.length}, into field of length ${endOffset - startOffset}" }
+        require(endOffset - startOffset >= substringValue.value.length) {
+            "Setting value $substringValue, with length ${substringValue.value.length}, " +
+                "into field of length ${endOffset - startOffset}"
+        }
         substringValue.pad(endOffset - startOffset)
         value = value.substring(0, startOffset) + substringValue.value + value.substring(endOffset)
     }
@@ -881,7 +915,10 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
         require(startOffset >= 0)
         require(startOffset <= value.length)
         require(endOffset >= startOffset)
-        require(endOffset <= value.length) { "Asked startOffset=$startOffset, endOffset=$endOffset on string of length ${value.length}" }
+        require(endOffset <= value.length) {
+            "Asked startOffset=$startOffset, " +
+                "endOffset=$endOffset on string of length ${value.length}"
+        }
         val s = value.substring(startOffset, endOffset)
         return StringValue(s)
     }
@@ -895,7 +932,8 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
          * @param dataStructName Name
          * @param values Initialization values
          * */
-        fun createInstance(compilationUnit: CompilationUnit, dataStructName: String, values: Map<String, Value>): DataStructValue {
+        fun createInstance(compilationUnit: CompilationUnit, dataStructName: String, values: Map<String, Value>):
+            DataStructValue {
             val dataStructureDefinition = compilationUnit.getDataDefinition(dataStructName)
             val newInstance = blank(dataStructureDefinition.type.size)
             values.forEach {

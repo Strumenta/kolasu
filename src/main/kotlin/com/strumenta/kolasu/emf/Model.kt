@@ -3,27 +3,32 @@ package com.strumenta.kolasu.emf
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.strumenta.kolasu.model.*
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.lang.RuntimeException
-import kotlin.reflect.full.memberProperties
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.emfjson.jackson.resource.JsonResourceFactory
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.lang.RuntimeException
+import kotlin.reflect.full.memberProperties
 
 fun EPackage.getEClass(javaClass: Class<*>): EClass {
     return this.getEClass(javaClass.eClassifierName)
 }
 
 fun EPackage.getEClass(name: String): EClass {
-    return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("Class not found: $name")) as EClass
+    return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("Class not found: $name"))
+        as EClass
 }
 
 fun EPackage.getEEnum(javaClass: Class<*>): EEnum {
-    return (this.eClassifiers.find { it.name == javaClass.eClassifierName } ?: throw IllegalArgumentException("Class not found: $javaClass")) as EEnum
+    return (
+        this.eClassifiers.find { it.name == javaClass.eClassifierName } ?: throw IllegalArgumentException(
+            "Class not found: $javaClass"
+        )
+        ) as EEnum
 }
 
 fun Any.dataToEObject(ePackage: EPackage): EObject {
@@ -57,7 +62,7 @@ fun Position.toEObject(): EObject {
     return eo
 }
 
-private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, esf: EStructuralFeature) : Any? {
+private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, esf: EStructuralFeature): Any? {
     val pdValue: Any? = value
     if (pdValue is Enum<*>) {
         val ee = ePackage.getEEnum(pdValue.javaClass)
@@ -65,7 +70,9 @@ private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, es
     } else {
         // this could be not a primitive value but a value that we mapped to an EClass
         if (pdValue != null) {
-            val eClass = ePackage.eClassifiers.filterIsInstance<EClass>().find { it.name == pdValue!!.javaClass.simpleName }
+            val eClass = ePackage.eClassifiers.filterIsInstance<EClass>().find {
+                it.name == pdValue!!.javaClass.simpleName
+            }
             when {
                 eClass != null -> {
                     val eoValue = pdValue.dataToEObject(ePackage)

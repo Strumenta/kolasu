@@ -6,9 +6,9 @@ import com.strumenta.kolasu.emf.saveAsJson
 import com.strumenta.kolasu.emf.saveAsJsonObject
 import com.strumenta.kolasu.emf.toEObject
 import com.strumenta.kolasu.parsing.Parser
+import org.eclipse.emf.ecore.EPackage
 import java.io.File
 import java.io.FileWriter
-import org.eclipse.emf.ecore.EPackage
 
 class ParserBenchExampleGenerator(val parser: Parser<*>, val ePackage: EPackage, val directory: File) {
 

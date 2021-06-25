@@ -80,7 +80,13 @@ fun verifyParseTree(parser: Parser, errors: MutableList<Issue>, root: ParserRule
     root.processDescendantsAndErrors(
         {
             if (it.exception != null) {
-                errors.add(Issue(IssueType.SYNTACTIC, "Recognition exception: ${it.exception.message}", it.start.startPoint.asPosition))
+                errors.add(
+                    Issue(
+                        IssueType.SYNTACTIC,
+                        "Recognition exception: ${it.exception.message}",
+                        it.start.startPoint.asPosition
+                    )
+                )
             }
         },
         {

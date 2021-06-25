@@ -6,6 +6,8 @@ import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
+import org.w3c.dom.Document
+import org.w3c.dom.Element
 import java.io.File
 import java.io.StringWriter
 import javax.xml.parsers.DocumentBuilderFactory
@@ -13,8 +15,6 @@ import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
-import org.w3c.dom.Document
-import org.w3c.dom.Element
 
 /**
  * Converts an AST to XML

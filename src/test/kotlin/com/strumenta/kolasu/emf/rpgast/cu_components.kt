@@ -24,7 +24,11 @@ data class CompilationUnit(
 
     companion object {
         fun empty() = CompilationUnit(
-            emptyList(), emptyList(), MainBody(emptyList(), null), emptyList(), emptyList(),
+            emptyList(),
+            emptyList(),
+            MainBody(emptyList(), null),
+            emptyList(),
+            emptyList(),
             emptyList(),
             null
         )
@@ -55,7 +59,8 @@ data class CompilationUnit(
             return _allDataDefinitions
         }
 
-    private fun checkDuplicatedDataDefinition(dataDefinitions: List<AbstractDataDefinition>): List<AbstractDataDefinition> {
+    private fun checkDuplicatedDataDefinition(dataDefinitions: List<AbstractDataDefinition>):
+        List<AbstractDataDefinition> {
         val dataDefinitionMap = mutableMapOf<String, AbstractDataDefinition>()
         return dataDefinitions.filter {
             val dataDefinition = dataDefinitionMap[it.name]
@@ -76,7 +81,9 @@ data class CompilationUnit(
     fun getDataDefinition(name: String) = dataDefinitions.firstOrNull() { it.name.equals(name, ignoreCase = true) }
         ?: throw IllegalArgumentException("Data definition $name was not found")
 
-    fun getDataOrFieldDefinition(name: String) = dataDefinitions.firstOrNull() { it.name.equals(name, ignoreCase = true) }
+    fun getDataOrFieldDefinition(name: String) = dataDefinitions.firstOrNull() {
+        it.name.equals(name, ignoreCase = true)
+    }
         ?: dataDefinitions.mapNotNull { it.fields.find { it.name.equals(name, ignoreCase = true) } }.firstOrNull()
         ?: throw IllegalArgumentException("Data or field definition $name was not found")
 
@@ -98,13 +105,26 @@ data class CompilationUnit(
     fun getFileDefinition(name: String) = fileDefinitions.first { it.name.equals(name, ignoreCase = true) }
 }
 
-data class MainBody(val stmts: List<Statement>, override val specifiedPosition: Position?? = null) : Node(specifiedPosition)
+data class MainBody(val stmts: List<Statement>, override val specifiedPosition: Position?? = null) : Node(
+    specifiedPosition
+)
 
-data class Subroutine(override val name: String, val stmts: List<Statement>, val tag: String? = null, override val specifiedPosition: Position?? = null) : Named, Node(specifiedPosition)
+data class Subroutine(
+    override val name: String,
+    val stmts: List<Statement>,
+    val tag: String? = null,
+    override val specifiedPosition: Position?? = null
+) : Named, Node(specifiedPosition)
 
-data class Function(override val name: String, override val specifiedPosition: Position?? = null) : Named, Node(specifiedPosition)
+data class Function(override val name: String, override val specifiedPosition: Position?? = null) : Named, Node(
+    specifiedPosition
+)
 
-data class CompileTimeArray(override val name: String, val lines: List<String>, override val specifiedPosition: Position?? = null) : Named, Node(specifiedPosition)
+data class CompileTimeArray(
+    override val name: String,
+    val lines: List<String>,
+    override val specifiedPosition: Position?? = null
+) : Named, Node(specifiedPosition)
 
 enum class DataWrapUpChoice {
     LR,

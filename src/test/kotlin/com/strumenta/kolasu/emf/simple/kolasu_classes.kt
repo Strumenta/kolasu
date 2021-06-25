@@ -13,15 +13,21 @@ abstract class Expression(@Transient override val specifiedPosition: Position? =
 
 sealed class NumberLiteral(@Transient override val specifiedPosition: Position? = null) : Expression(specifiedPosition)
 
-data class IntLiteral(val value: Long, override val specifiedPosition: Position? = null) : NumberLiteral(specifiedPosition) {
+data class IntLiteral(val value: Long, override val specifiedPosition: Position? = null) : NumberLiteral(
+    specifiedPosition
+) {
     override fun render() = value.toString()
 }
 
-data class RealLiteral(val value: BigDecimal, override val specifiedPosition: Position? = null) : NumberLiteral(specifiedPosition) {
+data class RealLiteral(val value: BigDecimal, override val specifiedPosition: Position? = null) : NumberLiteral(
+    specifiedPosition
+) {
     override fun render() = value.toString()
 }
 
-data class StringLiteral(val value: String, override val specifiedPosition: Position? = null) : Expression(specifiedPosition) {
+data class StringLiteral(val value: String, override val specifiedPosition: Position? = null) : Expression(
+    specifiedPosition
+) {
     override fun render() = "\"$value\""
 }
 

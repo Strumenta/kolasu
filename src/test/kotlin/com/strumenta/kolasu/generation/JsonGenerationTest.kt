@@ -5,9 +5,9 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
+import org.junit.Test
 import java.io.StringWriter
 import kotlin.test.assertEquals
-import org.junit.Test
 
 class JsonGenerationTest {
 
@@ -98,7 +98,13 @@ class JsonGenerationTest {
         JsonGenerator().generateJSONWithStreaming(myRoot, JsonWriter(writer))
         val json = writer.toString()
         assertEquals(
-            """{"#type":"com.strumenta.kolasu.generation.MyRoot","mainSection":{"#type":"com.strumenta.kolasu.generation.Section","contents":[{"#type":"com.strumenta.kolasu.generation.Content","annidatedContent":null,"id":1},{"#type":"com.strumenta.kolasu.generation.Content","annidatedContent":{"#type":"com.strumenta.kolasu.generation.Content","annidatedContent":{"#type":"com.strumenta.kolasu.generation.Content","annidatedContent":null,"id":4},"id":3},"id":2}],"name":"Section1"},"otherSections":[]}""",
+            """{"#type":"com.strumenta.kolasu.generation.MyRoot",
+                |"mainSection":{"#type":"com.strumenta.kolasu.generation.Section","contents":
+                |[{"#type":"com.strumenta.kolasu.generation.Content","annidatedContent":null,"id":1},
+                |{"#type":"com.strumenta.kolasu.generation.Content","annidatedContent":
+                |{"#type":"com.strumenta.kolasu.generation.Content","annidatedContent":
+                |{"#type":"com.strumenta.kolasu.generation.Content","annidatedContent":null,"id":4},"id":3},"id":2}],
+                |"name":"Section1"},"otherSections":[]}""".trimMargin(),
             json
         )
     }

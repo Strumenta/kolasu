@@ -45,7 +45,10 @@ fun List<Statement>.explode(): List<Statement> {
     return result
 }
 
-data class ExecuteSubroutine(var subroutine: ReferenceByName<Subroutine>, override val specifiedPosition: Position? = null) : Statement(specifiedPosition)
+data class ExecuteSubroutine(
+    var subroutine: ReferenceByName<Subroutine>,
+    override val specifiedPosition: Position? = null
+) : Statement(specifiedPosition)
 
 data class SelectStmt(
     var cases: List<SelectCase>,
@@ -64,9 +67,17 @@ data class SelectStmt(
         }
 }
 
-data class SelectOtherClause(override val body: List<Statement>, override val specifiedPosition: Position? = null) : Node(specifiedPosition), CompositeStatement
+data class SelectOtherClause(override val body: List<Statement>, override val specifiedPosition: Position? = null) :
+    Node(
+        specifiedPosition
+    ),
+    CompositeStatement
 
-data class SelectCase(val condition: Expression, override val body: List<Statement>, override val specifiedPosition: Position? = null) : Node(specifiedPosition), CompositeStatement
+data class SelectCase(
+    val condition: Expression,
+    override val body: List<Statement>,
+    override val specifiedPosition: Position? = null
+) : Node(specifiedPosition), CompositeStatement
 
 data class EvalFlags(
     val halfAdjust: Boolean = false,
@@ -176,7 +187,10 @@ data class ReadEqualStmt(
     override val searchArg: Expression?,
     override val name: String,
     override val specifiedPosition: Position? = null
-) : AbstractReadEqualStmt(searchArg = searchArg, name = name, specifiedPosition = specifiedPosition, logPref = "READE") {
+) : AbstractReadEqualStmt(
+    searchArg = searchArg, name = name, specifiedPosition = specifiedPosition,
+    logPref = "READE"
+) {
 
     override fun read(dbFile: DBFile, kList: List<String>?): Result = Result()
 }
@@ -185,28 +199,51 @@ data class ReadPreviousEqualStmt(
     override val searchArg: Expression?,
     override val name: String,
     override val specifiedPosition: Position? = null
-) : AbstractReadEqualStmt(searchArg = searchArg, name = name, specifiedPosition = specifiedPosition, logPref = "READPE") {
+) : AbstractReadEqualStmt(
+    searchArg = searchArg, name = name, specifiedPosition = specifiedPosition,
+    logPref = "READPE"
+) {
 
     override fun read(dbFile: DBFile, kList: List<String>?): Result = Result()
 }
 
-data class ReadStmt(override val name: String, override val specifiedPosition: Position?) : AbstractReadStmt(name, specifiedPosition, "READ") {
+data class ReadStmt(override val name: String, override val specifiedPosition: Position?) : AbstractReadStmt(
+    name,
+    specifiedPosition,
+    "READ"
+) {
     override fun readOp(dbFile: DBFile) = Result()
 }
 
-data class ReadPreviousStmt(override val name: String, override val specifiedPosition: Position?) : AbstractReadStmt(name, specifiedPosition, "READP") {
+data class ReadPreviousStmt(override val name: String, override val specifiedPosition: Position?) : AbstractReadStmt(
+    name,
+    specifiedPosition,
+    "READP"
+) {
     override fun readOp(dbFile: DBFile) = Result()
 }
 
-data class WriteStmt(override val name: String, override val specifiedPosition: Position?) : AbstractStoreStmt(name = name, specifiedPosition = specifiedPosition, logPref = "WRITE") {
+data class WriteStmt(override val name: String, override val specifiedPosition: Position?) : AbstractStoreStmt(
+    name = name,
+    specifiedPosition = specifiedPosition,
+    logPref = "WRITE"
+) {
     override fun store(dbFile: DBFile, record: Record) = Result()
 }
 
-data class UpdateStmt(override val name: String, override val specifiedPosition: Position?) : AbstractStoreStmt(name = name, specifiedPosition = specifiedPosition, logPref = "UPDATE") {
+data class UpdateStmt(override val name: String, override val specifiedPosition: Position?) : AbstractStoreStmt(
+    name = name,
+    specifiedPosition = specifiedPosition,
+    logPref = "UPDATE"
+) {
     override fun store(dbFile: DBFile, record: Record) = Result()
 }
 
-data class DeleteStmt(override val name: String, override val specifiedPosition: Position?) : AbstractStoreStmt(name = name, specifiedPosition = specifiedPosition, logPref = "DELETE") {
+data class DeleteStmt(override val name: String, override val specifiedPosition: Position?) : AbstractStoreStmt(
+    name = name,
+    specifiedPosition = specifiedPosition,
+    logPref = "DELETE"
+) {
     override fun store(dbFile: DBFile, record: Record) = Result()
 }
 
@@ -254,7 +291,11 @@ data class CallStmt(
 }
 
 data class KListStmt
-private constructor(val name: String, val fields: List<String>, override val specifiedPosition: Position?) : Statement(specifiedPosition), StatementThatCanDefineData {
+private constructor(val name: String, val fields: List<String>, override val specifiedPosition: Position?) :
+    Statement(
+        specifiedPosition
+    ),
+    StatementThatCanDefineData {
     companion object {
         operator fun invoke(name: String, fields: List<String>, specifiedPosition: Position? = null): KListStmt {
             return KListStmt(name.toUpperCase(), fields, specifiedPosition)
@@ -272,18 +313,32 @@ data class IfStmt(
     override val specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), CompositeStatement
 
-data class ElseClause(override val body: List<Statement>, override val specifiedPosition: Position? = null) : Node(specifiedPosition), CompositeStatement
+data class ElseClause(override val body: List<Statement>, override val specifiedPosition: Position? = null) :
+    Node(
+        specifiedPosition
+    ),
+    CompositeStatement
 
-data class ElseIfClause(val condition: Expression, override val body: List<Statement>, override val specifiedPosition: Position? = null) : Node(specifiedPosition), CompositeStatement
+data class ElseIfClause(
+    val condition: Expression,
+    override val body: List<Statement>,
+    override val specifiedPosition: Position? = null
+) : Node(specifiedPosition), CompositeStatement
 
-data class SetStmt(val valueSet: ValueSet, val indicators: List<AssignableExpression>, override val specifiedPosition: Position? = null) : Statement(specifiedPosition) {
+data class SetStmt(
+    val valueSet: ValueSet,
+    val indicators: List<AssignableExpression>,
+    override val specifiedPosition: Position? = null
+) : Statement(specifiedPosition) {
     enum class ValueSet {
         ON,
         OFF
     }
 }
 
-data class ReturnStmt(val expression: Expression?, override val specifiedPosition: Position? = null) : Statement(specifiedPosition)
+data class ReturnStmt(val expression: Expression?, override val specifiedPosition: Position? = null) : Statement(
+    specifiedPosition
+)
 
 // A Plist is a list of parameters
 
@@ -470,7 +525,11 @@ data class TimeStmt(
     override val specifiedPosition: Position? = null
 ) : Statement(specifiedPosition)
 
-data class DisplayStmt(val factor1: Expression?, val response: Expression?, override val specifiedPosition: Position? = null) : Statement(specifiedPosition)
+data class DisplayStmt(
+    val factor1: Expression?,
+    val response: Expression?,
+    override val specifiedPosition: Position? = null
+) : Statement(specifiedPosition)
 
 data class DoStmt(
     val endLimit: Expression,
@@ -500,7 +559,9 @@ data class IterStmt(override val specifiedPosition: Position? = null) : Statemen
 
 data class OtherStmt(override val specifiedPosition: Position? = null) : Statement(specifiedPosition)
 
-data class TagStmt constructor(val tag: String, override val specifiedPosition: Position? = null) : Statement(specifiedPosition)
+data class TagStmt constructor(val tag: String, override val specifiedPosition: Position? = null) : Statement(
+    specifiedPosition
+)
 
 data class GotoStmt(val tag: String, override val specifiedPosition: Position? = null) : Statement(specifiedPosition)
 
@@ -539,9 +600,17 @@ data class ForStmt(
 * of the array to be sorted followed by the subfield to be used as a key for the sort.
 */
 
-data class SortAStmt(val target: Expression, override val specifiedPosition: Position? = null) : Statement(specifiedPosition)
+data class SortAStmt(val target: Expression, override val specifiedPosition: Position? = null) : Statement(
+    specifiedPosition
+)
 
-data class CatStmt(val left: Expression?, val right: Expression, val target: AssignableExpression, val blanksInBetween: Int, override val specifiedPosition: Position? = null) : Statement(specifiedPosition)
+data class CatStmt(
+    val left: Expression?,
+    val right: Expression,
+    val target: AssignableExpression,
+    val blanksInBetween: Int,
+    override val specifiedPosition: Position? = null
+) : Statement(specifiedPosition)
 
 data class LookupStmt(
     val left: Expression,

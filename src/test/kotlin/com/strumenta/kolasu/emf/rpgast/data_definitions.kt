@@ -24,7 +24,11 @@ abstract class AbstractDataDefinition(
         if (other is AbstractDataDefinition) name == other.name else false
 }
 
-data class FileDefinition private constructor(override val name: String, override val specifiedPosition: Position?) : Node(specifiedPosition), Named {
+data class FileDefinition private constructor(override val name: String, override val specifiedPosition: Position?) :
+    Node(
+        specifiedPosition
+    ),
+    Named {
     companion object {
         operator fun invoke(name: String, specifiedPosition: Position? = null): FileDefinition {
             return FileDefinition(name.toUpperCase(), specifiedPosition)
@@ -69,7 +73,9 @@ data class DataDefinition(
     }
 
     fun getFieldByName(fieldName: String): FieldDefinition {
-        return this.fields.find { it.name == fieldName } ?: throw java.lang.IllegalArgumentException("Field not found $fieldName")
+        return this.fields.find { it.name == fieldName } ?: throw java.lang.IllegalArgumentException(
+            "Field not found $fieldName"
+        )
     }
 }
 
@@ -95,12 +101,15 @@ data class FieldDefinition(
 
     init {
         require((explicitStartOffset != null) != (calculatedStartOffset != null)) {
-            "Field $name should have either an explicit start offset ($explicitStartOffset) or a calculated one ($calculatedStartOffset)"
+            "Field $name should have either an explicit start offset ($explicitStartOffset) " +
+                "or a calculated one ($calculatedStartOffset)"
         }
         require((explicitEndOffset != null) != (calculatedEndOffset != null)) {
-            "Field $name should have either an explicit end offset ($explicitEndOffset) or a calculated one ($calculatedEndOffset)"
+            "Field $name should have either an explicit end offset ($explicitEndOffset) " +
+                "or a calculated one ($calculatedEndOffset)"
         }
     }
+
     // true when the FieldDefinition contains a DIM keyword on its line
     // or when the field is overlaying on an a field which has the DIM keyword
     val declaredArrayInLine: Int?
@@ -146,7 +155,10 @@ data class FieldDefinition(
     val container
         get() = overriddenContainer
             ?: this.parent as? DataDefinition
-            ?: throw IllegalStateException("Parent of field ${this.name} was expected to be a DataDefinition, instead it is ${this.parent} (${this.parent?.javaClass})")
+            ?: throw IllegalStateException(
+                "Parent of field ${this.name} was expected to be a DataDefinition, instead it is ${this.parent} " +
+                    "(${this.parent?.javaClass})"
+            )
 
     /**
      * The start offset is zero based, while in RPG code you could find explicit one-based offsets.
@@ -241,7 +253,8 @@ fun encodeBinary(inValue: BigDecimal, size: Int): String {
         buffer[2] = ((lsb shr 8) and 0x0000FFFF).toByte()
         buffer[3] = (lsb and 0x0000FFFF).toByte()
 
-        return buffer[3].toChar().toString() + buffer[2].toChar().toString() + buffer[1].toChar().toString() + buffer[0].toChar().toString()
+        return buffer[3].toChar().toString() + buffer[2].toChar().toString() + buffer[1].toChar().toString()
+        +buffer[0].toChar().toString()
     }
     if (size == 8) {
         val llsb = inValue.toLong()
@@ -254,8 +267,10 @@ fun encodeBinary(inValue: BigDecimal, size: Int): String {
         buffer[6] = ((llsb shr 8) and 0x0000FFFF).toByte()
         buffer[7] = (llsb and 0x0000FFFF).toByte()
 
-        return buffer[7].toChar().toString() + buffer[6].toChar().toString() + buffer[5].toChar().toString() + buffer[4].toChar().toString() +
-            buffer[3].toChar().toString() + buffer[2].toChar().toString() + buffer[1].toChar().toString() + buffer[0].toChar().toString()
+        return buffer[7].toChar().toString() + buffer[6].toChar().toString() + buffer[5].toChar().toString() +
+            buffer[4].toChar().toString() +
+            buffer[3].toChar().toString() + buffer[2].toChar().toString() + buffer[1].toChar().toString() +
+            buffer[0].toChar().toString()
     }
     TODO("encode binary for $size not implemented")
 }

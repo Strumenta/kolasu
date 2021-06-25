@@ -1,6 +1,9 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
+import org.eclipse.emf.ecore.*
+import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -8,9 +11,6 @@ import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.*
-import org.eclipse.emf.ecore.*
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean
@@ -146,8 +146,14 @@ val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, KOLASU_M
 val StringHandler = KolasuDataTypeHandler(String::class, KOLASU_METAMODEL.getEClassifier("string") as EDataType)
 val BooleanHandler = KolasuDataTypeHandler(Boolean::class, KOLASU_METAMODEL.getEClassifier("boolean") as EDataType)
 val IntHandler = KolasuDataTypeHandler(Int::class, KOLASU_METAMODEL.getEClassifier("int") as EDataType)
-val BigIntegerHandler = KolasuDataTypeHandler(BigInteger::class, KOLASU_METAMODEL.getEClassifier("BigInteger") as EDataType)
-val BigDecimalHandler = KolasuDataTypeHandler(BigDecimal::class, KOLASU_METAMODEL.getEClassifier("BigDecimal") as EDataType)
+val BigIntegerHandler = KolasuDataTypeHandler(
+    BigInteger::class,
+    KOLASU_METAMODEL.getEClassifier("BigInteger") as EDataType
+)
+val BigDecimalHandler = KolasuDataTypeHandler(
+    BigDecimal::class,
+    KOLASU_METAMODEL.getEClassifier("BigDecimal") as EDataType
+)
 val LongHandler = KolasuDataTypeHandler(Long::class, KOLASU_METAMODEL.getEClassifier("long") as EDataType)
 
 val KClass<*>.eClassifierName
@@ -329,7 +335,9 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
 
     private fun ensureClassifierNameIsNotUsed(classifier: EClassifier) {
         if (ePackage.hasClassifierNamed(classifier.name)) {
-            throw IllegalStateException("There is already a Classifier named ${classifier.name}: ${ePackage.classifierByName(classifier.name)}")
+            throw IllegalStateException(
+                "There is already a Classifier named ${classifier.name}: ${ePackage.classifierByName(classifier.name)}"
+            )
         }
     }
 
@@ -352,7 +360,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
             registerKClassForEClass(kClass, eClass)
             if (kClass.isSealed) {
                 kClass.sealedSubclasses.forEach {
-                    //provideClass(it)
+                    // provideClass(it)
                     queue.add(it)
                 }
             }
@@ -370,11 +378,12 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
     }
 }
 
-
 private fun EPackage.hasClassifierNamed(name: String): Boolean {
     return this.eClassifiers.any { it.name == name }
 }
 
 private fun EPackage.classifierByName(name: String): EClassifier {
-    return this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("No classifier named $name was found")
+    return this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException(
+        "No classifier named $name was found"
+    )
 }

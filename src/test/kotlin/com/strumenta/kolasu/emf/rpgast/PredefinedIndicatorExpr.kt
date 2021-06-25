@@ -19,7 +19,10 @@ data class PredefinedGlobalIndicatorExpr(override val specifiedPosition: Positio
     }
 }
 
-data class DataWrapUpIndicatorExpr(val dataWrapUpChoice: DataWrapUpChoice, override val specifiedPosition: Position? = null) :
+data class DataWrapUpIndicatorExpr(
+    val dataWrapUpChoice: DataWrapUpChoice,
+    override val specifiedPosition: Position? = null
+) :
     AssignableExpression(specifiedPosition) {
     override fun size(): Int = 1
 }

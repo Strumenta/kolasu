@@ -13,7 +13,7 @@ class PrintingTest {
     fun basicTest() {
         val ast = Add(Add(Number(3), Number(9)), Number(1))
         assertEquals(
-"""Add {
+            """Add {
   left = [
     Add {
       left = [
@@ -53,7 +53,7 @@ class PrintingTest {
     fun privateFieldsGetPrintedToo() {
         val ast = Add(Sub(Number(3), Number(9)), Number(1))
         assertEquals(
-"""Add {
+            """Add {
   left = [
     Sub {
       parseTreeNode = null

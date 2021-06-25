@@ -10,7 +10,8 @@ private const val indentBlock = "  "
 fun Node.relevantMemberProperties() = this.javaClass.kotlin.memberProperties
     .filter { !it.name.startsWith("component") && it.name != "position" && it.name != "parent" }
 
-@Suppress("UNCHECKED_CAST") // some fancy reflection tests make sure the cast always succeeds
+// some fancy reflection tests make sure the cast always succeeds
+@Suppress("UNCHECKED_CAST")
 fun Node.debugPrint(indent: String = ""): String {
     val sb = StringBuffer()
     if (this.relevantMemberProperties().isEmpty()) {

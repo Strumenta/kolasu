@@ -1,11 +1,11 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.validation.IssueType
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EcoreFactory
 import java.io.File
 import java.math.BigDecimal
 import java.math.BigInteger
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.EcoreFactory
 
 val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
 

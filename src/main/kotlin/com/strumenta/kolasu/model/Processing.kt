@@ -44,7 +44,9 @@ private fun providesNodes(kTypeProjection: KTypeProjection): Boolean {
     return when (ktype) {
         is KClass<*> -> providesNodes(ktype as? KClass<*>)
         is KType -> providesNodes((ktype as? KType)?.classifier)
-        else -> throw UnsupportedOperationException("We are not able to determine if the type $ktype provides AST Nodes or not")
+        else -> throw UnsupportedOperationException(
+            "We are not able to determine if the type $ktype provides AST Nodes or not"
+        )
     }
 }
 
@@ -55,7 +57,9 @@ private fun providesNodes(classifier: KClassifier?): Boolean {
     if (classifier is KClass<*>) {
         return providesNodes(classifier as? KClass<*>)
     } else {
-        throw UnsupportedOperationException("We are not able to determine if the classifier $classifier provides AST Nodes or not")
+        throw UnsupportedOperationException(
+            "We are not able to determine if the classifier $classifier provides AST Nodes or not"
+        )
     }
 }
 
@@ -77,7 +81,12 @@ fun KClass<*>.isMarkedAsNodeType(): Boolean {
     return this.annotations.any { it.annotationClass == NodeType::class }
 }
 
-data class PropertyTypeDescription(val name: String, val provideNodes: Boolean, val multiple: Boolean, val valueType: KType) {
+data class PropertyTypeDescription(
+    val name: String,
+    val provideNodes: Boolean,
+    val multiple: Boolean,
+    val valueType: KType
+) {
     companion object {
         fun buildFor(property: KProperty1<*, *>): PropertyTypeDescription {
             val propertyType = property.returnType
@@ -125,12 +134,12 @@ data class PropertyDescription(
             return (classifier?.isSubclassOf(Collection::class) == true)
         }
 
-        fun optional(property: KProperty1<in Node, *>) : Boolean {
+        fun optional(property: KProperty1<in Node, *>): Boolean {
             val propertyType = property.returnType
             return !multiple(property) && propertyType.isMarkedNullable
         }
 
-        fun multeplicity(property: KProperty1<in Node, *>) : Multeplicity {
+        fun multeplicity(property: KProperty1<in Node, *>): Multeplicity {
             return when {
                 multiple(property) -> Multeplicity.MANY
                 optional(property) -> Multeplicity.OPTIONAL
@@ -138,7 +147,7 @@ data class PropertyDescription(
             }
         }
 
-        fun provideNodes(property: KProperty1<in Node, *>) : Boolean {
+        fun provideNodes(property: KProperty1<in Node, *>): Boolean {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             return if (multiple(property)) {
@@ -166,11 +175,11 @@ fun Node.processProperties(
     propertyOperation: (PropertyDescription) -> Unit
 ) {
     this.properties.filter { it.name !in propertiesToIgnore }.forEach {
-    try {
-        propertyOperation(it)
-    } catch (t: Throwable) {
-        throw java.lang.RuntimeException("Issue processing property $it in $this", t)
-    }
+        try {
+            propertyOperation(it)
+        } catch (t: Throwable) {
+            throw java.lang.RuntimeException("Issue processing property $it in $this", t)
+        }
     }
 }
 
@@ -200,7 +209,11 @@ fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<No
  *
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
-fun <T> Node.processNodesOfType(klass: Class<T>, operation: (T) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
+fun <T> Node.processNodesOfType(
+    klass: Class<T>,
+    operation: (T) -> Unit,
+    walker: KFunction1<Node, Sequence<Node>> = Node::walk
+) {
     walker.invoke(this).filterIsInstance(klass).forEach(operation)
 }
 
@@ -282,7 +295,8 @@ fun Node.transformTree(operation: (Node) -> Node, inPlace: Boolean = false): Nod
 class ImmutablePropertyException(property: KProperty<*>, node: Node) :
     RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
-@Suppress("UNCHECKED_CAST") // assumption: every MutableList in the AST contains Nodes.
+// assumption: every MutableList in the AST contains Nodes.
+@Suppress("UNCHECKED_CAST")
 fun Node.transformChildren(operation: (Node) -> Node) {
     relevantMemberProperties().forEach { property ->
         val value = property.get(this)
@@ -315,7 +329,9 @@ fun Node.transformChildren(operation: (Node) -> Node) {
                         }
                     }
                 } else {
-                    throw UnsupportedOperationException("Only modifications in a List and MutableList are supported, not ${value::class}")
+                    throw UnsupportedOperationException(
+                        "Only modifications in a List and MutableList are supported, not ${value::class}"
+                    )
                 }
             }
         }
@@ -421,7 +437,10 @@ fun Node.addSeveralAfter(targetNode: Node, newNodes: List<Node>) {
  * Supports functions that manipulate a list of child nodes by finding [targetNode] in the [MutableList]s of nodes contained in [this] node.
  */
 @Suppress("UNCHECKED_CAST") // assumption: a MutableList with a Node in it is a MutableList<Node>
-private fun Node.findMutableListContainingChild(targetNode: Node, whenFoundDo: (nodeList: MutableList<Node>, index: Int) -> Unit) {
+private fun Node.findMutableListContainingChild(
+    targetNode: Node,
+    whenFoundDo: (nodeList: MutableList<Node>, index: Int) -> Unit
+) {
     relevantMemberProperties().forEach { property ->
         when (val value = property.get(this)) {
             is MutableList<*> -> {

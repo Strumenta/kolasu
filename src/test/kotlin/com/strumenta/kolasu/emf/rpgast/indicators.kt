@@ -9,7 +9,7 @@ data class IndicatorExpr(val index: IndicatorKey, override val specifiedPosition
     AssignableExpression(specifiedPosition) {
 
     constructor(dataWrapUpChoice: DataWrapUpChoice, specifiedPosition: Position? = null) :
-    this(index = dataWrapUpChoice.name.toIndicatorKey(), specifiedPosition = specifiedPosition)
+        this(index = dataWrapUpChoice.name.toIndicatorKey(), specifiedPosition = specifiedPosition)
 
     override fun size(): Int = 1
 }

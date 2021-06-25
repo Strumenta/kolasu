@@ -1,9 +1,9 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.Node
+import org.junit.Test
 import java.io.File
 import kotlin.test.assertEquals
-import org.junit.Test
 
 sealed class Statement : Node()
 sealed class Expression : Node()

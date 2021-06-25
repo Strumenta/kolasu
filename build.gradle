@@ -183,3 +183,7 @@ signing {
 tasks.withType(Sign) {
     onlyIf { isReleaseVersion }
 }
+
+ktlint {
+    disabledRules = ["no-wildcard-imports", "experimental:argument-list-wrapping"]
+}

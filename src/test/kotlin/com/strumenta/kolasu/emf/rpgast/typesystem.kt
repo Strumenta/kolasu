@@ -112,11 +112,17 @@ infix fun Long.log(base: Int): Double {
 
 data class NumberType(val entireDigits: Int, val decimalDigits: Int, val rpgType: String? = "") : Type() {
 
-    constructor(entireDigits: Int, decimalDigits: Int, rpgType: RpgType) : this(entireDigits, decimalDigits, rpgType.rpgType)
+    constructor(entireDigits: Int, decimalDigits: Int, rpgType: RpgType) : this(
+        entireDigits,
+        decimalDigits,
+        rpgType.rpgType
+    )
 
     init {
         if (rpgType == RpgType.INTEGER.rpgType || rpgType == RpgType.UNSIGNED.rpgType) {
-            require(entireDigits <= 20) { "Integer or Unsigned integer can have only length up to 20. Value specified: $this" }
+            require(entireDigits <= 20) {
+                "Integer or Unsigned integer can have only length up to 20. Value specified: $this"
+            }
             require(decimalDigits == 0)
         }
     }
@@ -131,7 +137,9 @@ data class NumberType(val entireDigits: Int, val decimalDigits: Int, val rpgType
                         in 4..5 -> 2
                         in 6..10 -> 4
                         in 11..20 -> 8
-                        else -> throw IllegalStateException("Only predefined length allowed for integer, signed or unsigned")
+                        else -> throw IllegalStateException(
+                            "Only predefined length allowed for integer, signed or unsigned"
+                        )
                     }
                 }
                 RpgType.BINARY.rpgType -> {
@@ -228,7 +236,10 @@ fun Expression.type(): Type {
             val leftType = this.left.type()
             val rightType = this.right.type()
             if (leftType is NumberType && rightType is NumberType) {
-                return NumberType(max(leftType.entireDigits, rightType.entireDigits), max(leftType.decimalDigits, rightType.decimalDigits))
+                return NumberType(
+                    max(leftType.entireDigits, rightType.entireDigits),
+                    max(leftType.decimalDigits, rightType.decimalDigits)
+                )
             } else {
                 TODO("We do not know the type of a sum of types $leftType and $rightType")
             }
