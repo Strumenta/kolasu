@@ -253,8 +253,8 @@ fun encodeBinary(inValue: BigDecimal, size: Int): String {
         buffer[2] = ((lsb shr 8) and 0x0000FFFF).toByte()
         buffer[3] = (lsb and 0x0000FFFF).toByte()
 
-        return buffer[3].toChar().toString() + buffer[2].toChar().toString() + buffer[1].toChar().toString()
-        +buffer[0].toChar().toString()
+        return buffer[3].toChar().toString() + buffer[2].toChar().toString() + buffer[1].toChar().toString() +
+                buffer[0].toChar().toString()
     }
     if (size == 8) {
         val llsb = inValue.toLong()
