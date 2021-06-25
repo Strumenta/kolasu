@@ -1,34 +1,15 @@
-buildscript {
-    ext.kotlin_version = '1.5.10'
-    ext.antlr_version = '4.9.2'
-
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
-
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-
 plugins {
-    id "org.jlleitschuh.gradle.ktlint" version "9.0.0"
+    id 'org.jetbrains.kotlin.jvm' version "${kotlin_version}"
+    id "org.jlleitschuh.gradle.ktlint" version "10.1.0"
     id("maven-publish")
+    id("antlr")
+    id("idea")
+    id("signing")
 }
-
-apply plugin: 'kotlin'
-apply plugin: 'java'
-apply plugin: 'antlr'
-apply plugin: 'maven'
-apply plugin: 'idea'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
 
 repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()
 }
 
 def kolasuVersion = "1.2.0-SNAPSHOT"
@@ -83,43 +64,6 @@ if (JavaVersion.current().isJava8Compatible()) {
 artifacts {
     archives javadocJar, sourcesJar
   }
-//
-//task generatePom {
-//  doLast {
-//    def generatedPom = pom {
-//      project {
-//        name project.name
-//        description "Framework to work with AST and building languages. Integrated with ANTLR."
-//        version kolasuVersion
-//        packaging 'jar'
-//        url 'https://github.com/Strumenta/kolasu'
-//
-//        scm {
-//          connection 'scm:git:https://github.com/Strumenta/kolasu.git'
-//          developerConnection 'scm:git:git@github.com:Strumenta/kolasu.git'
-//          url 'https://github.com/Strumenta/kolasu.git'
-//        }
-//
-//        licenses {
-//          license {
-//            name 'Apache Licenve V2.0'
-//            url 'https://www.apache.org/licenses/LICENSE-2.0'
-//            distribution 'repo'
-//          }
-//        }
-//
-//        developers {
-//          developer {
-//            id = 'ftomassetti'
-//            name = 'Federico Tomassetti'
-//            email = 'federico@strumenta.com'
-//          }
-//        }
-//      }
-//    }
-//    generatedPom.writeTo("$buildDir/pom.xml")
-//  }
-//}
 
 test {
   testLogging {
@@ -128,7 +72,7 @@ test {
 }
 
 ktlint {
-    version = "0.35.0"
+    version = "0.41.0"
     verbose = true
     outputToConsole = true
     enableExperimentalRules = true
@@ -228,10 +172,9 @@ publishing {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
-
 
 signing {
     sign publishing.publications.kolasu
