@@ -174,7 +174,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         ePackage.name = packageName
         ePackage.nsURI = nsURI
         ePackage.nsPrefix = nsPrefix
-        if(resource == null) {
+        if (resource == null) {
             ePackage.setResourceURI(nsURI)
         } else {
             resource.contents.add(ePackage)

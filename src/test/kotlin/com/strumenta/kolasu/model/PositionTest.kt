@@ -126,12 +126,12 @@ class PositionTest {
     }
 
     @test fun illegalPositionAccepted() {
-        val p = Position(Point(10, 1), Point(5, 2), validate = false)
+        Position(Point(10, 1), Point(5, 2), validate = false)
     }
 
     @test(expected = Exception::class)
     fun illegalPositionNotAccepted() {
-        val p = Position(Point(10, 1), Point(5, 2), validate = true)
+        Position(Point(10, 1), Point(5, 2), validate = true)
     }
 
 //    @test(expected = Exception::class) fun illegalPositionNotAcceptedByDefault() {

@@ -2,10 +2,9 @@ package com.strumenta.kolasu.emf.multipkg
 
 import com.strumenta.kolasu.emf.CompilationUnit
 import com.strumenta.kolasu.emf.MetamodelBuilder
+import kotlin.test.assertEquals
 import org.eclipse.emf.common.util.URI
 import org.emfjson.jackson.resource.JsonResourceFactory
-import java.io.File
-import kotlin.test.assertEquals
 import org.junit.Test
 
 data class MultiCU(val cus: List<CompilationUnit>)

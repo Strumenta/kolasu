@@ -132,7 +132,7 @@ ktlint {
     verbose = true
     outputToConsole = true
     enableExperimentalRules = true
-    disabledRules = ["no-wildcard-imports"]
+    disabledRules = ["import-ordering", "no-wildcard-imports"]
 }
 
 generateTestGrammarSource {

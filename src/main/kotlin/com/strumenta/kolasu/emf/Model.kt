@@ -9,10 +9,10 @@ import java.lang.RuntimeException
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.KClass
 import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
-import org.eclipse.emf.ecore.*
 import org.emfjson.jackson.resource.JsonResourceFactory
 
 fun EPackage.getEClass(javaClass: Class<*>): EClass {
