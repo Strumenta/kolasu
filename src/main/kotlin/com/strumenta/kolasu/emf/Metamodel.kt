@@ -11,6 +11,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.*
 import org.eclipse.emf.ecore.*
+import org.eclipse.emf.ecore.resource.Resource
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean
@@ -160,7 +161,7 @@ val Class<*>.eClassifierName
         this.simpleName
     }
 
-class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : ClassifiersProvider {
+class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, resource: Resource? = null) : ClassifiersProvider {
 
     private val ePackage: EPackage
     private val eClasses = HashMap<KClass<*>, EClass>()
@@ -173,7 +174,12 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         ePackage.name = packageName
         ePackage.nsURI = nsURI
         ePackage.nsPrefix = nsPrefix
-        ePackage.setResourceURI(nsURI)
+        if(resource == null) {
+            ePackage.setResourceURI(nsURI)
+        } else {
+            resource.contents.add(ePackage)
+            eclassTypeHandlers.add(ResourceClassTypeHandler(resource, ePackage))
+        }
 
         dataTypeHandlers.add(StringHandler)
         dataTypeHandlers.add(BooleanHandler)
@@ -371,6 +377,21 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
     fun generate(): EPackage {
         return ePackage
     }
+}
+
+class ResourceClassTypeHandler(val resource: Resource, val ownPackage: EPackage) : EClassTypeHandler {
+    override fun canHandle(ktype: KClass<*>): Boolean = getPackage(packageName(ktype)) != null
+
+    private fun getPackage(packageName: String): EPackage? =
+        resource.contents.find { it is EPackage && it != ownPackage && it.name == packageName } as EPackage?
+
+    override fun toEClass(kclass: KClass<*>, eClassProvider: ClassifiersProvider): EClass {
+        return getPackage(packageName(kclass))!!.eClassifiers.find {
+            it is EClass && it.name == kclass.simpleName
+        } as EClass? ?: throw NoClassDefFoundError(kclass.qualifiedName)
+    }
+
+    override fun external(): Boolean = true
 }
 
 private fun EPackage.hasClassifierNamed(name: String): Boolean {
