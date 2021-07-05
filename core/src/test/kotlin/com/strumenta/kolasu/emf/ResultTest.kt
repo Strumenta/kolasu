@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.serialization.JsonGenerator
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.serialization.JsonGenerator
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
