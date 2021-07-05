@@ -1,18 +1,12 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version "${kotlin_version}"
-    id "org.jlleitschuh.gradle.ktlint" version "10.1.0"
+    id 'org.jetbrains.kotlin.jvm'
+    id "org.jlleitschuh.gradle.ktlint"
     id("maven-publish")
     id("antlr")
     id("idea")
     id("signing")
-    id("org.jetbrains.dokka") version "1.4.32"
+    id("org.jetbrains.dokka")
 }
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
 
 dependencies {
   antlr "org.antlr:antlr4:$antlr_version"
@@ -28,48 +22,6 @@ dependencies {
   compile 'com.fifesoft:autocomplete:2.5.8'
   compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
   compile 'org.redundent:kotlin-xml-builder:1.7.2'
-}
-
-task version {
-  doLast {
-    print "Version ${kolasuVersion}"
-  }
-}
-
-task javadocJar(type: Jar) {
-  classifier = 'javadoc'
-  from javadoc
-}
-
-task sourcesJar(type: Jar) {
-  classifier = 'sources'
-  from sourceSets.main.allSource
-}
-
-if (JavaVersion.current().isJava8Compatible()) {
-  allprojects {
-    tasks.withType(Javadoc) {
-      options.addStringOption('Xdoclint:none', '-quiet')
-    }
-  }
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-  }
-
-test {
-  testLogging {
-    exceptionFormat = 'full'
-  }
-}
-
-ktlint {
-    version = "0.41.0"
-    verbose = true
-    outputToConsole = true
-    enableExperimentalRules = true
-    disabledRules = ["no-wildcard-imports"]
 }
 
 generateTestGrammarSource {
@@ -93,7 +45,6 @@ clean{
     delete "generated-src"
 }
 
-//ideaProject.dependsOn generateTestGrammarSource
 compileJava.dependsOn generateTestGrammarSource
 
 idea {
@@ -102,8 +53,6 @@ idea {
         generatedSourceDirs += file("generated-test-src/antlr/main")
     }
 }
-
-ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 publishing {
 
@@ -120,7 +69,7 @@ publishing {
     }
 
     publications {
-        kolasu(MavenPublication) {
+        kolasu_core(MavenPublication) {
             from(components.java)
             artifact sourcesJar
             artifact javadocJar
@@ -163,20 +112,6 @@ publishing {
     }
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-}
-
 signing {
-    sign publishing.publications.kolasu
-}
-
-tasks.withType(Sign) {
-    onlyIf { isReleaseVersion }
-}
-
-ktlint {
-    disabledRules = ["no-wildcard-imports", "experimental:argument-list-wrapping"]
+    sign publishing.publications.kolasu_core
 }
