@@ -31,6 +31,7 @@ generateTestGrammarSource {
 }
 compileKotlin.dependsOn generateGrammarSource
 compileJava.dependsOn generateGrammarSource
+compileTestKotlin.dependsOn generateTestGrammarSource
 sourceSets {
     generatedTest {
         java.srcDir 'generated-test-src/antlr/main/'

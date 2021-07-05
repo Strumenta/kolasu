@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ASCII"?>
+<simplemm:CompilationUnit xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:simplemm="https://strumenta.com/simplemm">
+  <statements xsi:type="simplemm:VarDeclaration" name="a">
+    <initialValue xsi:type="simplemm:StringLiteral" value="foo"/>
+  </statements>
+  <statements xsi:type="simplemm:VarDeclaration" name="b" visibility="PRIVATE">
+    <initialValue xsi:type="simplemm:StringLiteral" value="bar"/>
+  </statements>
+</simplemm:CompilationUnit>

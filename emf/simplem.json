@@ -1,0 +1,19 @@
+{
+  "eClass" : "https://strumenta.com/simplemm#//CompilationUnit",
+  "statements" : [ {
+    "eClass" : "https://strumenta.com/simplemm#//VarDeclaration",
+    "initialValue" : {
+      "eClass" : "https://strumenta.com/simplemm#//StringLiteral",
+      "value" : "foo"
+    },
+    "name" : "a"
+  }, {
+    "eClass" : "https://strumenta.com/simplemm#//VarDeclaration",
+    "initialValue" : {
+      "eClass" : "https://strumenta.com/simplemm#//StringLiteral",
+      "value" : "bar"
+    },
+    "name" : "b",
+    "visibility" : "PRIVATE"
+  } ]
+}
