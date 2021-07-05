@@ -1,3 +1,6 @@
 plugins {
 //    id("idea")
 }
+
+project.group   = "com.strumenta"
+project.version = kolasu_version

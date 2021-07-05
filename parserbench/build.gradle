@@ -1,0 +1,25 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version "${kotlin_version}"
+    id "org.jlleitschuh.gradle.ktlint" version "10.1.0"
+    id("maven-publish")
+    id("antlr")
+    id("idea")
+    id("signing")
+    id("org.jetbrains.dokka") version "1.4.32"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile project(":core")
+    compile project(":emf")
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: "$kotlin_version"
+    testCompile 'junit:junit:4.12'
+}

@@ -13,10 +13,6 @@ repositories {
     mavenCentral()
 }
 
-def kolasuVersion = "1.2.0-SNAPSHOT"
-
-project.group   = "com.strumenta"
-project.version = kolasuVersion
 
 dependencies {
   antlr "org.antlr:antlr4:$antlr_version"
@@ -32,10 +28,6 @@ dependencies {
   compile 'com.fifesoft:autocomplete:2.5.8'
   compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
   compile 'org.redundent:kotlin-xml-builder:1.7.2'
-  compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.common', version: '2.21.0'
-  compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore', version: '2.23.0'
-  compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore.xmi', version: '2.16.0'
-  compile group: 'org.emfjson', name: 'emfjson-jackson', version: '1.2.0'
 }
 
 task version {
@@ -101,7 +93,7 @@ clean{
     delete "generated-src"
 }
 
-ideaProject.dependsOn generateTestGrammarSource
+//ideaProject.dependsOn generateTestGrammarSource
 compileJava.dependsOn generateTestGrammarSource
 
 idea {
@@ -135,7 +127,7 @@ publishing {
             pom {
                 name = project.name
                 description = "Framework to work with AST and building languages. Integrated with ANTLR."
-                version = kolasuVersion
+                version = kolasu_version
                 packaging = 'jar'
                 url = 'https://github.com/Strumenta/kolasu'
 

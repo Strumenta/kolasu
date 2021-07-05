@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.generation
+package com.strumenta.kolasu.serialization
 
 import com.strumenta.kolasu.model.Node
 
