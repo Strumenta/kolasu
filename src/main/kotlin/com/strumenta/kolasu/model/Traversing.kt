@@ -116,7 +116,8 @@ fun Node.walkChildren(): Sequence<Node> {
 }
 
 /**
- * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method. For post-order traversal, take "walkLeavesFirst"
+ * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method.
+ * For post-order traversal, take "walkLeavesFirst"
  * @return walks the whole AST starting from the childnodes of this node.
  */
 fun Node.walkDescendants(walker: (Node) -> Sequence<Node> = Node::walk): Sequence<Node> {

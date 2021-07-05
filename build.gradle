@@ -5,6 +5,7 @@ plugins {
     id("antlr")
     id("idea")
     id("signing")
+    id("org.jetbrains.dokka") version "1.4.32"
 }
 
 repositories {

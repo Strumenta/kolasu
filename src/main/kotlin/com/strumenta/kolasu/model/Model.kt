@@ -15,6 +15,9 @@ open class Node(open val specifiedPosition: Position? = null) {
             throw RuntimeException("Issue while getting properties of $this (${this.javaClass})")
         }
 
+    /**
+     * The parse-tree node from which this AST Node has been generated, if any.
+     */
     var parseTreeNode: ParserRuleContext? = null
     var parent: Node? = null
 

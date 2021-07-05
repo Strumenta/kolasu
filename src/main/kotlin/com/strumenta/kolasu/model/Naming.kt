@@ -34,6 +34,10 @@ data class ReferenceByName<N>(val name: String, var referred: N? = null) where N
         get() = referred != null
 }
 
+/**
+ * Try to resolve the reference by finding a named element with a matching name.
+ * The name match is performed in a case sensitive or insensitive way depending on the value of @param[caseInsensitive].
+ */
 fun <N> ReferenceByName<N>.tryToResolve(candidates: List<N>, caseInsensitive: Boolean = false):
     Boolean where N : PossiblyNamed {
     val res = candidates.find { if (it.name == null) false else it.name.equals(this.name, caseInsensitive) }
@@ -41,6 +45,12 @@ fun <N> ReferenceByName<N>.tryToResolve(candidates: List<N>, caseInsensitive: Bo
     return res != null
 }
 
+/**
+ * Try to resolve the reference by assigining @param[possibleValue]. The assignment is not performed if
+ * @param[possibleValue] is null.
+ *
+ * @return true if the assignment has been performed
+ */
 fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : PossiblyNamed {
     return if (possibleValue == null) {
         false
