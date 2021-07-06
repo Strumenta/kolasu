@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.parsing.coverage
 
+import com.strumenta.kolasu.model.mutableStackOf
 import org.antlr.v4.runtime.Parser
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.atn.AtomTransition
@@ -44,10 +45,11 @@ data class Path(val elements: List<PathElement> = listOf(), val states: MutableS
 open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
 
     val paths = mutableMapOf<Path, Boolean>()
-    var path: Path = Path()
+    val pathStack = mutableStackOf<Path>()
 
     override fun visitTerminal(node: TerminalNode) {
-        path = path.followWith(PathElement(node.symbol.type, false))
+        val path = pathStack.pop().followWith(PathElement(node.symbol.type, false))
+        pathStack.push(path)
         paths[path] = true
     }
 
@@ -55,31 +57,36 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
 
     override fun enterEveryRule(ctx: ParserRuleContext) {
         addUncoveredPaths(ctx.invokingState)
-        if (!isLeftRecursive(ctx.ruleIndex)) {
+        val prevPath = pathStack.peek() ?: Path()
+        if (!isLeftRecursive(prevPath, ctx.ruleIndex)) {
             val el = PathElement(ctx.ruleIndex, true)
-            path = path.followWith(el)
+            paths[prevPath.followWith(el)] = true
+            val path = Path(states = prevPath.states).followWith(el)
+            pathStack.push(path)
+            addUncoveredPaths()
             paths[path] = true
+        } else {
+            addUncoveredPaths()
         }
-        addUncoveredPaths()
     }
 
-    private fun isLeftRecursive(ruleIndex: Int): Boolean {
-        val leftRec = if (path.elements.isNotEmpty()) {
+    private fun isLeftRecursive(path: Path, ruleIndex: Int): Boolean {
+        return if (path.elements.isNotEmpty()) {
             val last = path.elements.last()
             last.rule && last.symbol == ruleIndex
         } else false
-        return leftRec
     }
 
     protected fun addUncoveredPaths(state: Int = parser!!.state) {
-        if (path.states.contains(state) || state < 0) {
+        val path = pathStack.peek()
+        if (path == null || path.states.contains(state) || state < 0) {
             return
         }
         path.states.add(state)
         parser!!.atn.states[state].transitions.forEach {
             when (it) {
                 is RuleTransition -> {
-                    if (!isLeftRecursive(it.ruleIndex)) {
+                    if (!isLeftRecursive(path, it.ruleIndex)) {
                         addUncoveredPath(path.followWith(PathElement(it.ruleIndex, true)))
                     }
                 }
@@ -107,9 +114,7 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
     }
 
     override fun exitEveryRule(ctx: ParserRuleContext) {
-        while (path.elements.isNotEmpty() && (!path.elements.last().rule || path.elements.last().symbol != ctx.ruleIndex)) {
-            path = Path(path.elements.subList(0, path.elements.size - 1), path.states)
-        }
+        pathStack.pop()
     }
 
     fun pathStrings(): List<String> {

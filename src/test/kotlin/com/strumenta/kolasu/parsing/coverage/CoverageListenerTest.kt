@@ -49,20 +49,20 @@ class CoverageListenerTest {
         assertTrue {
             coverage.uncoveredPathStrings().containsAll(
                 listOf(
-                    "compilationUnit > statement > DISPLAY",
-                    "compilationUnit > statement > INPUT",
-                    "compilationUnit > statement > SET > ID > EQUAL > expression > DEC_LIT",
-                    "compilationUnit > statement > SET > ID > EQUAL > expression > STRING_LIT",
-                    "compilationUnit > statement > SET > ID > EQUAL > expression > BOOLEAN_LIT"
+                    "statement > DISPLAY",
+                    "statement > INPUT",
+                    "expression > DEC_LIT",
+                    "expression > STRING_LIT",
+                    "expression > BOOLEAN_LIT"
                 )
             )
         }
-        assertCoverage(coverage, 5, 12)
+        assertCoverage(coverage, 5, 14)
     }
 
     @Test
     fun coverageOfPlusBlock2() {
-        val code = "set foo = 123 set bar = 1.23 display foo"
+        val code = "set foo = 123 set bar = 1.23 display 12.3"
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
         val coverage = CoverageListener()
@@ -71,17 +71,17 @@ class CoverageListenerTest {
         assertTrue {
             coverage.uncoveredPathStrings().containsAll(
                 listOf(
-                    "compilationUnit > statement > INPUT",
-                    "compilationUnit > statement > SET > ID > EQUAL > expression > STRING_LIT",
-                    "compilationUnit > statement > SET > ID > EQUAL > expression > BOOLEAN_LIT"
+                    "statement > INPUT",
+                    "expression > STRING_LIT",
+                    "expression > BOOLEAN_LIT"
                 )
             )
         }
-        assertCoverage(coverage, 5, 12)
+        assertCoverage(coverage, 3, 15)
     }
 
     @Test
-    fun coverageOfLeftRecursion() {
+    fun coverageOfLeftRecursion1() {
         val code = "set foo = 123 + 124 + 125"
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
@@ -91,17 +91,40 @@ class CoverageListenerTest {
         assertTrue {
             coverage.uncoveredPathStrings().containsAll(
                 listOf(
-                    "compilationUnit > statement > DISPLAY",
-                    "compilationUnit > statement > INPUT",
-                    "compilationUnit > statement > SET > ID > EQUAL > expression > DEC_LIT",
-                    "compilationUnit > statement > SET > ID > EQUAL > expression > STRING_LIT",
-                    "compilationUnit > statement > SET > ID > EQUAL > expression > BOOLEAN_LIT",
-                    "compilationUnit > statement > SET > ID > EQUAL > expression > MINUS",
-                    "compilationUnit > statement > SET > ID > EQUAL > expression > MULT",
-                    "compilationUnit > statement > SET > ID > EQUAL > expression > DIV"
+                    "statement > DISPLAY",
+                    "statement > INPUT",
+                    "expression > DEC_LIT",
+                    "expression > STRING_LIT",
+                    "expression > BOOLEAN_LIT",
+                    "expression > MINUS",
+                    "expression > MULT",
+                    "expression > DIV"
                 )
             )
         }
-        assertCoverage(coverage, 8, 21)
+        assertCoverage(coverage, 8, 19)
+    }
+
+    @Test
+    fun coverageOfLeftRecursion2() {
+        val code = "set foo = 123 + 124 + 125 set bar = 123 + 12.4 - 1.25"
+        val lexer = SimpleLangLexer(CharStreams.fromString(code))
+        val parser = SimpleLangParser(CommonTokenStream(lexer))
+        val coverage = CoverageListener()
+        coverage.listenTo(parser)
+        parser.compilationUnit()
+        assertTrue {
+            coverage.uncoveredPathStrings().containsAll(
+                listOf(
+                    "statement > DISPLAY",
+                    "statement > INPUT",
+                    "expression > STRING_LIT",
+                    "expression > BOOLEAN_LIT",
+                    "expression > MULT",
+                    "expression > DIV"
+                )
+            )
+        }
+        assertCoverage(coverage, 6, 20)
     }
 }
