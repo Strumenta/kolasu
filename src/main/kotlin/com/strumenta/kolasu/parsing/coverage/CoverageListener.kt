@@ -114,7 +114,9 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
     }
 
     override fun exitEveryRule(ctx: ParserRuleContext) {
-        pathStack.pop()
+        if (pathStack.peek()?.elements?.last { it.rule }?.symbol == ctx.ruleIndex) {
+            pathStack.pop()
+        }
     }
 
     fun pathStrings(): List<String> {
