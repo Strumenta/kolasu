@@ -356,7 +356,7 @@ data class DefineStmt(
                     .flatten()
                     .find { it.name == originalName } ?: return emptyList()
 
-            return listOf(InStatementDataDefinition(newVarName, inStatementDataDefinition!!.type, specifiedPosition))
+            return listOf(InStatementDataDefinition(newVarName, inStatementDataDefinition.type, specifiedPosition))
         }
     }
 }

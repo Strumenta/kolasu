@@ -1,9 +1,10 @@
 package com.strumenta.kolasu.parsing.coverage
 
-import com.strumenta.kolasu.model.mutableStackOf
 import org.antlr.v4.runtime.Parser
 import org.antlr.v4.runtime.ParserRuleContext
-import org.antlr.v4.runtime.atn.*
+import org.antlr.v4.runtime.atn.AtomTransition
+import org.antlr.v4.runtime.atn.RuleTransition
+import org.antlr.v4.runtime.atn.SetTransition
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.antlr.v4.runtime.tree.TerminalNode
@@ -43,51 +44,57 @@ data class Path(val elements: List<PathElement> = listOf(), val states: MutableS
 open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
 
     val paths = mutableMapOf<Path, Boolean>()
-    val pathStack = mutableStackOf<Path>()
-    val statesToProcess = mutableSetOf<Int>()
+    var path: Path = Path()
 
     override fun visitTerminal(node: TerminalNode) {
-        addUncoveredPaths()
-        var path = pathStack.pop()
         path = path.followWith(PathElement(node.symbol.type, false))
         paths[path] = true
-        pathStack.push(path)
     }
 
     override fun visitErrorNode(node: ErrorNode?) {}
 
     override fun enterEveryRule(ctx: ParserRuleContext) {
-        val el = PathElement(ctx.ruleIndex, true)
-        val prev = pathStack.peek() ?: Path()
-        paths[prev.followWith(el)] = true
-        val path = Path().followWith(el)
-        pathStack.push(path)
+        addUncoveredPaths(ctx.invokingState)
+        if (!isLeftRecursive(ctx.ruleIndex)) {
+            val el = PathElement(ctx.ruleIndex, true)
+            path = path.followWith(el)
+            paths[path] = true
+        }
         addUncoveredPaths()
-        paths[path] = true
+    }
+
+    private fun isLeftRecursive(ruleIndex: Int): Boolean {
+        val leftRec = if (path.elements.isNotEmpty()) {
+            val last = path.elements.last()
+            last.rule && last.symbol == ruleIndex
+        } else false
+        return leftRec
     }
 
     protected fun addUncoveredPaths(state: Int = parser!!.state) {
-        val path = pathStack.peek()
-        if (!path.states.contains(state)) {
-            path.states.add(state)
-            parser!!.atn.states[state].transitions.forEach {
-                when (it) {
-                    is RuleTransition -> {
+        if (path.states.contains(state) || state < 0) {
+            return
+        }
+        path.states.add(state)
+        parser!!.atn.states[state].transitions.forEach {
+            when (it) {
+                is RuleTransition -> {
+                    if (!isLeftRecursive(it.ruleIndex)) {
                         addUncoveredPath(path.followWith(PathElement(it.ruleIndex, true)))
                     }
-                    is AtomTransition -> {
-                        addUncoveredPath(path.followWith(PathElement(it.label, false)))
-                    }
-                    is SetTransition -> {
-                        it.set.intervals.forEach { interval ->
-                            for (i in interval.a..interval.b) {
-                                addUncoveredPath(path.followWith(PathElement(i, false)))
-                            }
+                }
+                is AtomTransition -> {
+                    addUncoveredPath(path.followWith(PathElement(it.label, false)))
+                }
+                is SetTransition -> {
+                    it.set.intervals.forEach { interval ->
+                        for (i in interval.a..interval.b) {
+                            addUncoveredPath(path.followWith(PathElement(i, false)))
                         }
                     }
-                    else -> {
-                        addUncoveredPaths(it.target.stateNumber)
-                    }
+                }
+                else -> {
+                    addUncoveredPaths(it.target.stateNumber)
                 }
             }
         }
@@ -100,9 +107,8 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
     }
 
     override fun exitEveryRule(ctx: ParserRuleContext) {
-        pathStack.pop()
-        if (pathStack.isNotEmpty()) {
-            pathStack.push(pathStack.pop().followWith(PathElement(ctx.ruleIndex, true)))
+        while (path.elements.isNotEmpty() && (!path.elements.last().rule || path.elements.last().symbol != ctx.ruleIndex)) {
+            path = Path(path.elements.subList(0, path.elements.size - 1), path.states)
         }
     }
 
