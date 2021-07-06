@@ -5,12 +5,12 @@ import com.google.gson.JsonPrimitive
 import com.strumenta.kolasu.emf.saveAsJson
 import com.strumenta.kolasu.emf.saveAsJsonObject
 import com.strumenta.kolasu.emf.toEObject
-import com.strumenta.kolasu.parsing.Parser
+import com.strumenta.kolasu.parsing.KolasuParser
 import org.eclipse.emf.ecore.EPackage
 import java.io.File
 import java.io.FileWriter
 
-class ParserBenchExampleGenerator(val parser: Parser<*>, val ePackage: EPackage, val directory: File) {
+class ParserBenchExampleGenerator(val parser: KolasuParser<*, *, *>, val ePackage: EPackage, val directory: File) {
 
     fun generateMetamodel() {
         ePackage.saveAsJson(File(directory, "metamodel.json"))
@@ -30,7 +30,7 @@ class ParserBenchExampleGenerator(val parser: Parser<*>, val ePackage: EPackage,
         jo.add("code", JsonPrimitive(code))
 
         val parsingResult = parser.parse(code)
-        if (!parsingResult.isCorrect()) {
+        if (!parsingResult.correct) {
             throw IllegalStateException("Cannot generate examples from code with errors")
         }
         val astEMF = parsingResult.root!!.toEObject(ePackage)
