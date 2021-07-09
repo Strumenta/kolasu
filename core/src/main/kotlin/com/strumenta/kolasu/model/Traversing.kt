@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.model
 
 import java.util.*
+import kotlin.reflect.KClass
 
 /**
  * Some Kotlinization of Deques used as a stack.
@@ -122,4 +123,8 @@ fun Node.walkChildren(): Sequence<Node> {
  */
 fun Node.walkDescendants(walker: (Node) -> Sequence<Node> = Node::walk): Sequence<Node> {
     return walker.invoke(this).filter { node -> node != this }
+}
+
+fun <N: Any> Node.walkDescendants(type: KClass<N>, walker: (Node) -> Sequence<Node> = Node::walk): Sequence<N> {
+    return walkDescendants(walker).filterIsInstance(type.java)
 }
