@@ -104,6 +104,12 @@ fun pos(startLine: Int, startCol: Int, endLine: Int, endCol: Int) = Position(
 
 fun Node.isBefore(other: Node): Boolean = position!!.start.isBefore(other.position!!.start)
 
+val Node.startLine : Int?
+    get() = this.position?.start?.line
+
+val Node.endLine : Int?
+    get() = this.position?.end?.line
+
 val Token.length
     get() = if (this.type == Token.EOF) 0 else text.length
 

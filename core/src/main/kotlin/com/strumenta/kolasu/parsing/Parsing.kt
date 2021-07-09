@@ -167,10 +167,10 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
 
 abstract class KolasuParser<R: Node, P: Parser, C: ParserRuleContext> {
 
-    abstract fun createANTLRLexer(inputStream: InputStream) : Lexer
-    abstract fun createANTLRParser(tokenStream: TokenStream) : P
-    abstract fun invokeRootRule(parser: P): C?
-    abstract fun parseTreeToAst(parseTreeRoot: C) : R?
+    protected abstract fun createANTLRLexer(inputStream: InputStream) : Lexer
+    protected abstract fun createANTLRParser(tokenStream: TokenStream) : P
+    protected abstract fun invokeRootRule(parser: P): C?
+    protected abstract fun parseTreeToAst(parseTreeRoot: C, considerPosition: Boolean = true) : R?
 
     fun lex(inputStream: InputStream): LexingResult {
         val issues = LinkedList<Issue>()
@@ -224,11 +224,11 @@ abstract class KolasuParser<R: Node, P: Parser, C: ParserRuleContext> {
         )
     }
 
-    fun getParseTree(code: String): FirstStageParsingResult<C> {
-        return getParseTree(code.byteInputStream())
+    fun parseFirstStage(code: String): FirstStageParsingResult<C> {
+        return parseFirstStage(code.byteInputStream())
     }
 
-    private fun getParseTree(inputStream: InputStream): FirstStageParsingResult<C> {
+    fun parseFirstStage(inputStream: InputStream): FirstStageParsingResult<C> {
         val issues = LinkedList<Issue>()
         val parser = createParser(inputStream, issues)
         val root: C? = invokeRootRule(parser)
@@ -238,22 +238,27 @@ abstract class KolasuParser<R: Node, P: Parser, C: ParserRuleContext> {
         return FirstStageParsingResult(issues, root)
     }
 
-    private fun getAst(inputStream: InputStream): R? {
-        val result = getParseTree(inputStream)
-        return parseTreeToAst(result.root!!)
+    fun parseFirstStage(file: File): FirstStageParsingResult<C> = parseFirstStage(FileInputStream(file))
+
+    private fun getAst(inputStream: InputStream, considerPosition: Boolean = true): R? {
+        val result = parseFirstStage(inputStream)
+        return parseTreeToAst(result.root!!, considerPosition)
     }
 
-    fun parse(inputStream: InputStream): ParsingResult<R> {
-        val result = getParseTree(inputStream)
-        val ast = parseTreeToAst(result.root!!)
-        return ParsingResult(result.issues, ast, inputStreamToString(inputStream), null)
-    }
-
-    fun parse(code: String): ParsingResult<R> {
-        val result = getParseTree(code)
-        val ast = parseTreeToAst(result.root!!)
+    fun parse(inputStream: InputStream, considerPosition: Boolean = true): ParsingResult<R> {
+        val code = inputStreamToString(inputStream)
+        val result = parseFirstStage(code)
+        val ast = parseTreeToAst(result.root!!, considerPosition)
         return ParsingResult(result.issues, ast, code, null)
     }
+
+    fun parse(code: String, considerPosition: Boolean = true): ParsingResult<R> {
+        val result = parseFirstStage(code)
+        val ast = parseTreeToAst(result.root!!, considerPosition)
+        return ParsingResult(result.issues, ast, code, null)
+    }
+
+    fun parse(file: File, considerPosition: Boolean = true): ParsingResult<R> = parse(FileInputStream(file), considerPosition)
 }
 
 private fun inputStreamToString(inputStream: InputStream): String =
