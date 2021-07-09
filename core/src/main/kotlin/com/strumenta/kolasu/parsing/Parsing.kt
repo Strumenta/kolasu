@@ -1,9 +1,6 @@
 package com.strumenta.kolasu.parsing
 
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.endPoint
-import com.strumenta.kolasu.model.startPoint
+import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import org.antlr.v4.runtime.*
@@ -242,19 +239,23 @@ abstract class KolasuParser<R: Node, P: Parser, C: ParserRuleContext> {
 
     private fun getAst(inputStream: InputStream, considerPosition: Boolean = true): R? {
         val result = parseFirstStage(inputStream)
-        return parseTreeToAst(result.root!!, considerPosition)
+        val ast = parseTreeToAst(result.root!!, considerPosition)
+        ast?.assignParents()
+        return ast
     }
 
     fun parse(inputStream: InputStream, considerPosition: Boolean = true): ParsingResult<R> {
         val code = inputStreamToString(inputStream)
         val result = parseFirstStage(code)
         val ast = parseTreeToAst(result.root!!, considerPosition)
+        ast?.assignParents()
         return ParsingResult(result.issues, ast, code, null)
     }
 
     fun parse(code: String, considerPosition: Boolean = true): ParsingResult<R> {
         val result = parseFirstStage(code)
         val ast = parseTreeToAst(result.root!!, considerPosition)
+        ast?.assignParents()
         return ParsingResult(result.issues, ast, code, null)
     }
 
