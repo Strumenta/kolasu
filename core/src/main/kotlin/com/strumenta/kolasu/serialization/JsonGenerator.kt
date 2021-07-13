@@ -188,7 +188,7 @@ private fun Issue.toJsonStreaming(writer: JsonWriter) {
     if (this.position == null) {
         writer.nullValue()
     } else {
-        this.position!!.toJsonStreaming(writer)
+        this.position.toJsonStreaming(writer)
     }
     writer.endObject()
 }

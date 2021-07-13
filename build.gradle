@@ -40,7 +40,7 @@ subprojects {
         verbose = true
         outputToConsole = true
         enableExperimentalRules = true
-        disabledRules = ["no-wildcard-imports"]
+        disabledRules = ["no-wildcard-imports", "no-wildcard-imports"]
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

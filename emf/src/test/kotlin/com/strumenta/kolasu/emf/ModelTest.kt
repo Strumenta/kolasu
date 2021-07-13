@@ -1,5 +1,11 @@
 package com.strumenta.kolasu.emf
 
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
+import java.io.File
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
@@ -21,10 +27,11 @@ class ModelTest {
             listOf(
                 VarDeclaration(Visibility.PUBLIC, "a", StringLiteral("foo")),
                 VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar"))
-            )
+            ),
+            Position(Point(1, 0), Point(1, 1))
         )
         val nsURI = "https://strumenta.com/simplemm"
-        val metamodelBuilder = MetamodelBuilder("SimpleMM", nsURI, "simplemm")
+        val metamodelBuilder = MetamodelBuilder(packageName(CompilationUnit::class), nsURI, "simplemm")
         metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
 

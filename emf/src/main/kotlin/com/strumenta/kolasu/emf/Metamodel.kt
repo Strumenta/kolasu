@@ -4,6 +4,8 @@ import com.strumenta.kolasu.model.*
 import org.eclipse.emf.ecore.*
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
+import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -11,6 +13,8 @@ import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.*
+import org.eclipse.emf.ecore.*
+import org.eclipse.emf.ecore.resource.Resource
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean
@@ -166,7 +170,7 @@ val Class<*>.eClassifierName
         this.simpleName
     }
 
-class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : ClassifiersProvider {
+class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, resource: Resource? = null) : ClassifiersProvider {
 
     private val ePackage: EPackage
     private val eClasses = HashMap<KClass<*>, EClass>()
@@ -179,7 +183,12 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         ePackage.name = packageName
         ePackage.nsURI = nsURI
         ePackage.nsPrefix = nsPrefix
-        ePackage.setResourceURI(nsURI)
+        if (resource == null) {
+            ePackage.setResourceURI(nsURI)
+        } else {
+            resource.contents.add(ePackage)
+            eclassTypeHandlers.add(ResourceClassTypeHandler(resource, ePackage))
+        }
 
         dataTypeHandlers.add(StringHandler)
         dataTypeHandlers.add(BooleanHandler)
@@ -213,7 +222,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         val eEnum = EcoreFactory.eINSTANCE.createEEnum()
         eEnum.name = kClass.eClassifierName
         kClass.java.enumConstants.forEach {
-            var eLiteral = EcoreFactory.eINSTANCE.createEEnumLiteral()
+            val eLiteral = EcoreFactory.eINSTANCE.createEEnumLiteral()
             eLiteral.name = it.name
             eLiteral.value = it.ordinal
             eEnum.eLiterals.add(eLiteral)
@@ -223,7 +232,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
 
     override fun provideDataType(ktype: KType): EDataType? {
         if (!dataTypes.containsKey(ktype)) {
-            var eDataType = EcoreFactory.eINSTANCE.createEDataType()
+            val eDataType: EDataType
             var external = false
             when {
                 (ktype.classifier as? KClass<*>)?.isSubclassOf(Enum::class) == true -> {
@@ -250,6 +259,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
     }
 
     private fun classToEClass(kClass: KClass<*>): EClass {
+        if (kClass == Any::class) {
+            return EcoreFactory.eINSTANCE.ecorePackage.eObject
+        }
+
         val eClass = EcoreFactory.eINSTANCE.createEClass()
         // This is necessary because some classes refer to themselves
         registerKClassForEClass(kClass, eClass)
@@ -353,14 +366,13 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
         if (!eClasses.containsKey(kClass)) {
             val ch = eclassTypeHandlers.find { it.canHandle(kClass) }
             val eClass = ch?.toEClass(kClass, this) ?: classToEClass(kClass)
-            if (ch == null || !ch?.external()) {
+            if (ch == null || !ch.external()) {
                 ensureClassifierNameIsNotUsed(eClass)
                 ePackage.eClassifiers.add(eClass)
             }
             registerKClassForEClass(kClass, eClass)
             if (kClass.isSealed) {
                 kClass.sealedSubclasses.forEach {
-                    // provideClass(it)
                     queue.add(it)
                 }
             }
@@ -376,6 +388,21 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String) : C
     fun generate(): EPackage {
         return ePackage
     }
+}
+
+class ResourceClassTypeHandler(val resource: Resource, val ownPackage: EPackage) : EClassTypeHandler {
+    override fun canHandle(ktype: KClass<*>): Boolean = getPackage(packageName(ktype)) != null
+
+    private fun getPackage(packageName: String): EPackage? =
+        resource.contents.find { it is EPackage && it != ownPackage && it.name == packageName } as EPackage?
+
+    override fun toEClass(kclass: KClass<*>, eClassProvider: ClassifiersProvider): EClass {
+        return getPackage(packageName(kclass))!!.eClassifiers.find {
+            it is EClass && it.name == kclass.simpleName
+        } as EClass? ?: throw NoClassDefFoundError(kclass.qualifiedName)
+    }
+
+    override fun external(): Boolean = true
 }
 
 private fun EPackage.hasClassifierNamed(name: String): Boolean {
