@@ -2,12 +2,12 @@ package com.strumenta.kolasu.parsing.coverage
 
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
-import kotlin.math.abs
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.junit.Test
+import kotlin.math.abs
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class CoverageListenerTest {
 
@@ -35,7 +35,12 @@ class CoverageListenerTest {
     private fun assertCoverage(coverage: CoverageListener, expectedUncovered: Int, expectedPaths: Int) {
         assertEquals(expectedUncovered, coverage.uncoveredPaths().size)
         assertEquals(expectedPaths, coverage.paths.size)
-        assertTrue { abs((expectedPaths.toDouble() - expectedUncovered.toDouble()) / expectedPaths.toDouble() - coverage.percentage() / 100.0) < .00001 }
+        assertTrue {
+            abs(
+                (expectedPaths.toDouble() - expectedUncovered.toDouble()) /
+                    expectedPaths.toDouble() - coverage.percentage() / 100.0
+            ) < .00001
+        }
     }
 
     @Test

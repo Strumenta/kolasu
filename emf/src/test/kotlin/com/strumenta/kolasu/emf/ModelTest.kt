@@ -2,10 +2,6 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
-import java.io.File
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass

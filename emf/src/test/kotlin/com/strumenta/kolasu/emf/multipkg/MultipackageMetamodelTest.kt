@@ -2,10 +2,10 @@ package com.strumenta.kolasu.emf.multipkg
 
 import com.strumenta.kolasu.emf.CompilationUnit
 import com.strumenta.kolasu.emf.MetamodelBuilder
-import kotlin.test.assertEquals
 import org.eclipse.emf.common.util.URI
 import org.emfjson.jackson.resource.JsonResourceFactory
 import org.junit.Test
+import kotlin.test.assertEquals
 
 data class MultiCU(val cus: List<CompilationUnit>)
 
@@ -15,11 +15,17 @@ class MultipackageMetamodelTest {
     fun generateSimpleMetamodel() {
         val resource = JsonResourceFactory().createResource(URI.createFileURI("multipkg.json"))
 
-        val mb1 = MetamodelBuilder("com.strumenta.kolasu.emf", "https://strumenta.com/simplemm", "simplemm", resource)
+        val mb1 = MetamodelBuilder(
+            "com.strumenta.kolasu.emf", "https://strumenta.com/simplemm",
+            "simplemm", resource
+        )
         mb1.provideClass(CompilationUnit::class)
         assertEquals(6, mb1.generate().eClassifiers.size)
 
-        val mb2 = MetamodelBuilder("com.strumenta.kolasu.emf.multipkg", "https://strumenta.com/simplemm2", "simplemm2", resource)
+        val mb2 = MetamodelBuilder(
+            "com.strumenta.kolasu.emf.multipkg",
+            "https://strumenta.com/simplemm2", "simplemm2", resource
+        )
         mb2.provideClass(MultiCU::class)
         assertEquals(1, mb2.generate().eClassifiers.size)
 

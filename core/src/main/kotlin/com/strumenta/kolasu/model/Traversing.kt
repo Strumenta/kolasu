@@ -125,6 +125,6 @@ fun Node.walkDescendants(walker: (Node) -> Sequence<Node> = Node::walk): Sequenc
     return walker.invoke(this).filter { node -> node != this }
 }
 
-fun <N: Any> Node.walkDescendants(type: KClass<N>, walker: (Node) -> Sequence<Node> = Node::walk): Sequence<N> {
+fun <N : Any> Node.walkDescendants(type: KClass<N>, walker: (Node) -> Sequence<Node> = Node::walk): Sequence<N> {
     return walkDescendants(walker).filterIsInstance(type.java)
 }

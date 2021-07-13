@@ -8,9 +8,11 @@ import java.io.*
 import java.nio.charset.Charset
 import java.util.*
 
-open class CodeProcessingResult<D>(val issues: List<Issue>,
-                                   val data: D?,
-                                   val code: String? = null) {
+open class CodeProcessingResult<D>(
+    val issues: List<Issue>,
+    val data: D?,
+    val code: String? = null
+) {
     val correct: Boolean
         get() = issues.isEmpty()
 
@@ -31,7 +33,6 @@ open class CodeProcessingResult<D>(val issues: List<Issue>,
         result = 31 * result + (code?.hashCode() ?: 0)
         return result
     }
-
 }
 
 class LexingResult(
@@ -162,12 +163,12 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
     })
 }
 
-abstract class KolasuParser<R: Node, P: Parser, C: ParserRuleContext> {
+abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
 
-    protected abstract fun createANTLRLexer(inputStream: InputStream) : Lexer
-    protected abstract fun createANTLRParser(tokenStream: TokenStream) : P
+    protected abstract fun createANTLRLexer(inputStream: InputStream): Lexer
+    protected abstract fun createANTLRParser(tokenStream: TokenStream): P
     protected abstract fun invokeRootRule(parser: P): C?
-    protected abstract fun parseTreeToAst(parseTreeRoot: C, considerPosition: Boolean = true) : R?
+    protected abstract fun parseTreeToAst(parseTreeRoot: C, considerPosition: Boolean = true): R?
 
     fun lex(inputStream: InputStream): LexingResult {
         val issues = LinkedList<Issue>()
@@ -191,7 +192,6 @@ abstract class KolasuParser<R: Node, P: Parser, C: ParserRuleContext> {
         return LexingResult(issues, tokens)
     }
 
-
     fun createParser(inputStream: InputStream, issues: MutableList<Issue>): P {
         val lexer = createANTLRLexer(inputStream)
         lexer.removeErrorListeners()
@@ -212,7 +212,12 @@ abstract class KolasuParser<R: Node, P: Parser, C: ParserRuleContext> {
         root.processDescendantsAndErrors(
             {
                 if (it.exception != null) {
-                    errors.add(Issue(IssueType.SYNTACTIC, "Recognition exception: ${it.exception.message}", it.start.startPoint.asPosition))
+                    errors.add(
+                        Issue(
+                            IssueType.SYNTACTIC, "Recognition exception: ${it.exception.message}",
+                            it.start.startPoint.asPosition
+                        )
+                    )
                 }
             },
             {
@@ -259,7 +264,10 @@ abstract class KolasuParser<R: Node, P: Parser, C: ParserRuleContext> {
         return ParsingResult(result.issues, ast, code, null)
     }
 
-    fun parse(file: File, considerPosition: Boolean = true): ParsingResult<R> = parse(FileInputStream(file), considerPosition)
+    fun parse(file: File, considerPosition: Boolean = true): ParsingResult<R> = parse(
+        FileInputStream(file),
+        considerPosition
+    )
 }
 
 private fun inputStreamToString(inputStream: InputStream): String =

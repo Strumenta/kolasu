@@ -2,8 +2,7 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
 import org.eclipse.emf.ecore.*
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
+import org.eclipse.emf.ecore.resource.Resource
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import java.math.BigDecimal
@@ -13,8 +12,6 @@ import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.*
-import org.eclipse.emf.ecore.*
-import org.eclipse.emf.ecore.resource.Resource
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean
@@ -170,7 +167,8 @@ val Class<*>.eClassifierName
         this.simpleName
     }
 
-class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, resource: Resource? = null) : ClassifiersProvider {
+class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, resource: Resource? = null) :
+    ClassifiersProvider {
 
     private val ePackage: EPackage
     private val eClasses = HashMap<KClass<*>, EClass>()

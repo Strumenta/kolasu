@@ -3,20 +3,16 @@ package com.strumenta.kolasu.emf
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.strumenta.kolasu.model.*
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.lang.RuntimeException
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.KClass
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.*
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.emfjson.jackson.resource.JsonResourceFactory
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.lang.RuntimeException
+import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
 
 fun EPackage.getEClass(javaClass: Class<*>): EClass {
@@ -128,7 +124,8 @@ fun Resource.findEClass(klass: KClass<*>): EClass? {
     return ePackage?.findEClass(klass)
 }
 
-fun Resource.getEClass(klass: KClass<*>): EClass = this.findEClass(klass) ?: throw ClassNotFoundException(klass.qualifiedName)
+fun Resource.getEClass(klass: KClass<*>): EClass = this.findEClass(klass)
+    ?: throw ClassNotFoundException(klass.qualifiedName)
 
 fun Node.toEObject(ePackage: EPackage): EObject {
     return this.toEObject(ePackage.eResource())
