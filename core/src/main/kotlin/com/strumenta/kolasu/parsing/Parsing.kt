@@ -170,6 +170,10 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
     protected abstract fun invokeRootRule(parser: P): C?
     protected abstract fun parseTreeToAst(parseTreeRoot: C, considerPosition: Boolean = true): R?
 
+    fun lex(code: String): LexingResult {
+        return lex(code.byteInputStream(Charsets.UTF_8))
+    }
+
     fun lex(inputStream: InputStream): LexingResult {
         val issues = LinkedList<Issue>()
         val lexer = createANTLRLexer(inputStream)
