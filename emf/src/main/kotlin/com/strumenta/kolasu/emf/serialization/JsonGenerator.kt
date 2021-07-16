@@ -53,7 +53,7 @@ class JsonGenerator {
         val resultEO = KOLASU_METAMODEL.eFactoryInstance.create(resultEC)
         val issuesSF = resultEC.eAllStructuralFeatures.find { it.name == "issues" }!!
         val issues = resultEO.eGet(issuesSF) as MutableList<EObject>
-        result.errors.forEach {
+        result.issues.forEach {
             issues.add(issueAsEObject(it))
         }
         val rootSF = resultEC.eAllStructuralFeatures.find { it.name == "root" }!!

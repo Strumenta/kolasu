@@ -60,15 +60,15 @@ class JsonDeserializer {
     }
 
     fun <T : Node> deserialize(clazz: Class<T>, jo: JsonObject): T {
-        var instance: T? = null
+        val instance: T?
         val primaryConstructor = clazz.kotlin.primaryConstructor
         if (primaryConstructor != null) {
-            var args = HashMap<KParameter, Any?>()
+            val args = HashMap<KParameter, Any?>()
             for (p in primaryConstructor.parameters) {
                 val value = deserializeType(p.type, jo.get(p.name))
                 args[p] = value
             }
-            instance = primaryConstructor!!.callBy(args)
+            instance = primaryConstructor.callBy(args)
         } else {
             val emptyConstructor = clazz.constructors.find { it.parameters.isEmpty() }
             if (emptyConstructor != null) {
@@ -95,7 +95,7 @@ class JsonDeserializer {
             null
         }
 
-        return Result(errors, root as T?)
+        return Result(errors, root)
     }
 }
 

@@ -36,7 +36,7 @@ class JsonGenerator {
      */
     fun generateJSON(result: Result<out Node>): JsonElement {
         return jsonObject(
-            "errors" to result.errors.map { it.toJson() }.toJsonArray(),
+            "errors" to result.issues.map { it.toJson() }.toJsonArray(),
             "root" to result.root?.toJson(shortClassNames, jsonSerializer)
         )
     }
@@ -48,7 +48,7 @@ class JsonGenerator {
         writer.beginObject()
         writer.name("errors")
         writer.beginArray()
-        result.errors.forEach { it.toJsonStreaming(writer) }
+        result.issues.forEach { it.toJsonStreaming(writer) }
         writer.endArray()
         writer.name("root")
         if (result.root == null) {
