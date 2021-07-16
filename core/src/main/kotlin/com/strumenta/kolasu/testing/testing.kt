@@ -11,5 +11,5 @@ fun assertParseTreeStr(expectedMultiLineStr: String, root: ParserRuleContext, vo
     if (printParseTree) {
         println("parse tree:\n\n${actualParseTree}\n")
     }
-    assertEquals(expectedMultiLineStr, actualParseTree)
+    assertEquals(expectedMultiLineStr.trim(), actualParseTree.trim())
 }
