@@ -170,11 +170,11 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
     protected abstract fun invokeRootRule(parser: P): C?
     protected abstract fun parseTreeToAst(parseTreeRoot: C, considerPosition: Boolean = true): R?
 
-    fun lex(code: String): LexingResult {
-        return lex(code.byteInputStream(Charsets.UTF_8))
+    fun lex(code: String, onlyFromDefaultChannel: Boolean = true): LexingResult {
+        return lex(code.byteInputStream(Charsets.UTF_8), onlyFromDefaultChannel)
     }
 
-    fun lex(inputStream: InputStream): LexingResult {
+    fun lex(inputStream: InputStream, onlyFromDefaultChannel: Boolean = true): LexingResult {
         val issues = LinkedList<Issue>()
         val lexer = createANTLRLexer(inputStream)
         lexer.removeErrorListeners()
@@ -185,7 +185,9 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
             if (t == null) {
                 break
             } else {
-                tokens.add(t)
+                if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
+                    tokens.add(t)
+                }
             }
         } while (t.type != Token.EOF)
 
