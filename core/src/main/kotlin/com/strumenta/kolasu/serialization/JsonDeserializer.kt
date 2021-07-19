@@ -28,7 +28,7 @@ class JsonDeserializer {
                 Node::class.java.isAssignableFrom(rawClass) -> {
                     val className = json.asJsonObject[JSON_TYPE_KEY].asString
                     val actualClass = Class.forName(className)
-                    return deserialize(actualClass as Class<out Node>, json.asJsonObject)
+                    return deserialize(actualClass.asSubclass(Node::class.java), json.asJsonObject)
                 }
                 Collection::class.java.isAssignableFrom(rawClass) -> {
                     require(type.arguments.size == 1)
