@@ -3,7 +3,7 @@ package com.strumenta.kolasu.testing
 import com.strumenta.kolasu.parsing.toParseTree
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Vocabulary
-import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.test.assertEquals
 
 fun assertParseTreeStr(
     expectedMultiLineStr: String,
