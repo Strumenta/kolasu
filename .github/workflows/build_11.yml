@@ -1,4 +1,4 @@
-name: BuildAndTest
+name: BuildAndTest_JDK11
 
 on: [push]
 
