@@ -65,6 +65,9 @@ class IgnoreChildren<N : Node> : List<N> {
     }
 }
 
+class ASTDifferenceException(val context: String, val expected: Any, val actual: Any)
+    : Exception("$context: expecting $expected, actual $actual")
+
 fun assertASTsAreEqual(
     expected: Node,
     actual: Node,
@@ -85,23 +88,23 @@ fun assertASTsAreEqual(
                             "$context.${expectedProperty.name}, expected ${expectedPropValueCollection.size} elements, actual ${actualPropValueCollection.size}")
                         val expectedIt = expectedPropValueCollection.iterator()
                         val actualIt = actualPropValueCollection.iterator()
-                        for (i in 0..expectedPropValueCollection.size) {
+                        for (i in expectedPropValueCollection.indices) {
                             assertASTsAreEqual(expectedIt.next(), actualIt.next(), "${context}[$i]")
                         }
                     }
                 } else {
                     if (expectedPropValue == null && actualPropValue != null) {
-                        TODO()
+                        assertEquals<Any?>(expectedPropValue, actualPropValue, "$context.${expectedProperty.name}")
                     } else if (expectedPropValue != null && actualPropValue == null) {
-                        TODO()
+                        assertEquals<Any?>(expectedPropValue, actualPropValue, "$context.${expectedProperty.name}")
                     } else if (expectedPropValue == null && actualPropValue == null) {
-                        TODO()
+                        // that is ok
                     } else {
                         assertASTsAreEqual(expectedPropValue as Node, actualPropValue as Node, context = "$context.${expectedProperty.name}")
                     }
                 }
             } else {
-                assertEquals(expectedPropValue, actualPropValue, "$context, comparing property ${expectedProperty.name}, expected value $expectedPropValue, actual value $actualPropValue")
+                assertEquals(expectedPropValue, actualPropValue, "$context, comparing property ${expectedProperty.name}")
             }
         }
     } else {
