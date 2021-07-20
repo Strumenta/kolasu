@@ -7,6 +7,9 @@ plugins {
     id("org.jetbrains.dokka")
 }
 
+java.sourceCompatibility = "$jvm_version"
+java.targetCompatibility = "$jvm_version"
+
 dependencies {
     implementation project(":core")
     implementation project(":emf")

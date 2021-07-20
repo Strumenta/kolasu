@@ -8,6 +8,9 @@ plugins {
     id "org.jetbrains.dokka"
 }
 
+java.sourceCompatibility = "$jvm_version"
+java.targetCompatibility = "$jvm_version"
+
 dependencies {
     antlr "org.antlr:antlr4:$antlr_version"
     implementation "org.antlr:antlr4-runtime:$antlr_version"
