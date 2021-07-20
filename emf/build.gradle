@@ -8,18 +8,19 @@ plugins {
 }
 
 dependencies {
-    compile project(":core")
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
-    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    implementation project(":core")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: "$kotlin_version"
-    testCompile 'junit:junit:4.12'
+    implementation group: 'org.eclipse.emf', name: 'org.eclipse.emf.common', version: '2.21.0'
+    implementation group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore', version: '2.23.0'
+    implementation group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore.xmi', version: '2.16.0'
+    implementation group: 'org.emfjson', name: 'emfjson-jackson', version: '1.2.0'
+    implementation 'com.google.code.gson:gson:2.8.7'
 
-    compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.common', version: '2.21.0'
-    compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore', version: '2.23.0'
-    compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore.xmi', version: '2.16.0'
-    compile group: 'org.emfjson', name: 'emfjson-jackson', version: '1.2.0'
+    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    testImplementation 'junit:junit:4.12'
 }
 
 publishing {

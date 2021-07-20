@@ -1,28 +1,27 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm'
     id "org.jlleitschuh.gradle.ktlint"
-    id("maven-publish")
-    id("antlr")
-    id("idea")
-    id("signing")
-    id("org.jetbrains.dokka")
+    id "maven-publish"
+    id "antlr"
+    id "idea"
+    id "signing"
+    id "org.jetbrains.dokka"
 }
 
 dependencies {
-  antlr "org.antlr:antlr4:$antlr_version"
-  compile "org.antlr:antlr4-runtime:$antlr_version"
-  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-  compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-  testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
-  implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: "$kotlin_version"
-  // we define some testing utilities
-  compile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
-  testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    antlr "org.antlr:antlr4:$antlr_version"
+    implementation "org.antlr:antlr4-runtime:$antlr_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: "$kotlin_version"
+    // we define some testing utilities
+    implementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    implementation 'com.fifesoft:rsyntaxtextarea:2.5.8'
+    implementation 'com.fifesoft:autocomplete:2.5.8'
+    implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
+    implementation 'org.redundent:kotlin-xml-builder:1.7.2'
 
-  compile 'com.fifesoft:rsyntaxtextarea:2.5.8'
-  compile 'com.fifesoft:autocomplete:2.5.8'
-  compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
-  compile 'org.redundent:kotlin-xml-builder:1.7.2'
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 }
 
 generateTestGrammarSource {
