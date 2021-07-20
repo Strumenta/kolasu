@@ -5,7 +5,11 @@ import com.strumenta.kolasu.model.Node
 import org.junit.ComparisonFailure
 import org.junit.Test
 
-data class MyBigNode(override val name: String, val foo: MySmallNode? = null, val bars: List<MyOtherNode> = emptyList()) : Node(), Named
+data class MyBigNode(
+    override val name: String,
+    val foo: MySmallNode? = null,
+    val bars: List<MyOtherNode> = emptyList()
+) : Node(), Named
 
 data class MySmallNode(val value: Long) : Node()
 
@@ -45,51 +49,102 @@ class AssertionsTest {
 
     @Test
     fun comparingTwoSimpleNodesWhichAreEqualWithMultipleContainmentC() {
-        assertASTsAreEqual(MyBigNode("a", bars = listOf(
-                MyOtherNode(false, "z1"),
-                MyOtherNode(true, "z2"),
-                MyOtherNode(false, "z3"))),
-            MyBigNode("a", bars = listOf(MyOtherNode(false, "z1"),
-                MyOtherNode(true, "z2"),
-                MyOtherNode(false, "z3"))))
+        assertASTsAreEqual(
+            MyBigNode(
+                "a",
+                bars = listOf(
+                    MyOtherNode(false, "z1"),
+                    MyOtherNode(true, "z2"),
+                    MyOtherNode(false, "z3")
+                )
+            ),
+            MyBigNode(
+                "a",
+                bars = listOf(
+                    MyOtherNode(false, "z1"),
+                    MyOtherNode(true, "z2"),
+                    MyOtherNode(false, "z3")
+                )
+            )
+        )
     }
 
     @Test(expected = AssertionError::class)
     fun comparingTwoSimpleNodesWhichAreNotEqualBecauseOfMultipleContainmentA() {
-        assertASTsAreEqual(MyBigNode("a", bars = listOf(
-            MyOtherNode(false, "z1"),
-            MyOtherNode(true, "z2"),
-            MyOtherNode(false, "z3"))),
-            MyBigNode("a", bars = listOf(MyOtherNode(false, "z1"),
-                MyOtherNode(false, "z2"),
-                MyOtherNode(false, "z3"))))
+        assertASTsAreEqual(
+            MyBigNode(
+                "a",
+                bars = listOf(
+                    MyOtherNode(false, "z1"),
+                    MyOtherNode(true, "z2"),
+                    MyOtherNode(false, "z3")
+                )
+            ),
+            MyBigNode(
+                "a",
+                bars = listOf(
+                    MyOtherNode(false, "z1"),
+                    MyOtherNode(false, "z2"),
+                    MyOtherNode(false, "z3")
+                )
+            )
+        )
     }
 
     @Test(expected = AssertionError::class)
     fun comparingTwoSimpleNodesWhichAreNotEqualBecauseOfMultipleContainmentB() {
-        assertASTsAreEqual(MyBigNode("a", bars = listOf(
-            MyOtherNode(false, "z1"),
-            MyOtherNode(true, "z2"),
-            MyOtherNode(false, "z3"))),
-            MyBigNode("a", bars = listOf(MyOtherNode(false, "z1"),
-                MyOtherNode(false, "z3"))))
+        assertASTsAreEqual(
+            MyBigNode(
+                "a",
+                bars = listOf(
+                    MyOtherNode(false, "z1"),
+                    MyOtherNode(true, "z2"),
+                    MyOtherNode(false, "z3")
+                )
+            ),
+            MyBigNode(
+                "a",
+                bars = listOf(
+                    MyOtherNode(false, "z1"),
+                    MyOtherNode(false, "z3")
+                )
+            )
+        )
     }
 
     @Test(expected = AssertionError::class)
     fun comparingTwoSimpleNodesWhichAreNotEqualBecauseOfMultipleContainmentC() {
-        assertASTsAreEqual(MyBigNode("a", bars = listOf(
-            MyOtherNode(false, "z1"),
-            MyOtherNode(true, "z2"))),
-            MyBigNode("a", bars = listOf(MyOtherNode(false, "z1"),
-                MyOtherNode(true, "z2"),
-                MyOtherNode(false, "z3"))))
+        assertASTsAreEqual(
+            MyBigNode(
+                "a",
+                bars = listOf(
+                    MyOtherNode(false, "z1"),
+                    MyOtherNode(true, "z2")
+                )
+            ),
+            MyBigNode(
+                "a",
+                bars = listOf(
+                    MyOtherNode(false, "z1"),
+                    MyOtherNode(true, "z2"),
+                    MyOtherNode(false, "z3")
+                )
+            )
+        )
     }
 
     @Test
     fun comparingTwoSimpleNodesWhichAreNotEqualButUsingIgnoreChildren() {
-        assertASTsAreEqual(MyBigNode("a", bars = IgnoreChildren()),
-            MyBigNode("a", bars = listOf(MyOtherNode(false, "z1"),
-                MyOtherNode(true, "z2"),
-                MyOtherNode(false, "z3"))))
+        assertASTsAreEqual(
+            MyBigNode("a", bars = IgnoreChildren()),
+            MyBigNode(
+                "a",
+                bars = listOf(
+                    MyOtherNode(false, "z1"),
+                    MyOtherNode(true, "z2"),
+                    MyOtherNode(false, "z3")
+                )
+            )
+        )
     }
 }
