@@ -6,7 +6,15 @@ import org.antlr.v4.runtime.ParserRuleContext
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
-open class Node(open val specifiedPosition: Position? = null) {
+open class Node(
+    /**
+     * Explicitly set position.
+     * @see Node.position
+     */
+    open val specifiedPosition: Position? = null) {
+    /**
+     * The properties of this AST nodes, including attributes, children, and references.
+     */
     @Derived
     open val properties: List<PropertyDescription>
         get() = try {
@@ -19,8 +27,16 @@ open class Node(open val specifiedPosition: Position? = null) {
      * The parse-tree node from which this AST Node has been generated, if any.
      */
     var parseTreeNode: ParserRuleContext? = null
+    /**
+     * The parent node, if any.
+     */
     var parent: Node? = null
 
+    /**
+     * The position of this node in the source text.
+     * If a position has been provided when creating this node, it is returned.
+     * Otherwise, the value of this property is the position of the original parse tree node, if any.
+     */
     val position: Position?
         get() = specifiedPosition ?: parseTreeNode?.position
 }
