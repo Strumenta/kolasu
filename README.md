@@ -1,10 +1,11 @@
 # Kolasu
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.strumenta.kolasu/kolasu-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.strumenta.kolasu/kolasu-core)
 [![Build Status](https://github.com/Strumenta/kolasu/workflows/BuildAndTest/badge.svg)](https://github.com/Strumenta/kolasu/actions)
 [![Gitter](https://badges.gitter.im/lang-eng/community.svg)](https://gitter.im/lang-eng/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 Kolasu supplies the infrastructure to build a custom, possibly mutable, Abstract Syntax Tree (AST) using Kotlin.
-In particular it can be integrated easily with ANTLR, but it can also be used without.
+In particular it can be integrated easily with ANTLR, but it can also be used on its own.
 
 It stands for _**Ko**tlin_ _**La**nguage_ _**Su**pport_.
 
@@ -26,15 +27,11 @@ Kolasu was born as a small framework to support building languages using ANTLR a
 
 ## Using Kolasu in your project
 
-Releases are published on Bintray: 
+Releases are published on Maven Central: 
 
 ```
-repositories {
-    maven { url 'https://maven.pkg.github.com/strumenta/strumenta-oss-maven' }
-}
-
 dependencies {
-    compile "com.strumenta:kolasu:1.0.5"
+    compile "com.strumenta:kolasu:1.3.4"
 }
 ```
 
