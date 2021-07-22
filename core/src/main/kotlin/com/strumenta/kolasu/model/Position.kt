@@ -39,7 +39,15 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
         return lines.subList(0, this.line - 1).foldRight(0, { it, acc -> it.length + acc }) + newLines + column
     }
 
+    /**
+     * Computes whether this point comes strictly before another point.
+     * @param other the other point
+     */
     fun isBefore(other: Point) = this < other
+    /**
+     * Computes whether this point is the same as, or comes before, another point.
+     * @param other the other point
+     */
     fun isSameOrBefore(other: Point) = this <= other
 
     operator fun plus(text: String): Point {
@@ -87,8 +95,16 @@ data class Position(val start: Point, val end: Point) : Comparable<Position> {
         return wholeText.substring(start.offset(wholeText), end.offset(wholeText))
     }
 
+    /**
+     * The length in characters of the text under this position in the provided source.
+     * @param code the source text.
+     */
     fun length(code: String) = end.offset(code) - start.offset(code)
 
+    /**
+     * Tests whether the given point is contained in the interval represented by this object.
+     * @param point the point.
+     */
     fun contains(point: Point): Boolean {
         return ((point == start || start.isBefore(point)) && (point == end || point.isBefore(end)))
     }

@@ -170,8 +170,15 @@ data class PropertyDescription(
     }
 }
 
+val DEFAULT_IGNORED_PROPERTIES = setOf("parseTreeNode", "position", "specifiedPosition")
+
+/**
+ * Executes an operation on the properties of a node.
+ * @param propertiesToIgnore which properties to ignore. @see DEFAULT_IGNORED_PROPERTIES
+ * @param propertyOperation the operation to perform on each property.
+ */
 fun Node.processProperties(
-    propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
+    propertiesToIgnore: Set<String> = DEFAULT_IGNORED_PROPERTIES,
     propertyOperation: (PropertyDescription) -> Unit
 ) {
     this.properties.filter { it.name !in propertiesToIgnore }.forEach {
@@ -183,8 +190,13 @@ fun Node.processProperties(
     }
 }
 
+/**
+ * Executes an operation on the properties definitions of a node class.
+ * @param propertiesToIgnore which properties to ignore. @see DEFAULT_IGNORED_PROPERTIES
+ * @param propertyTypeOperation the operation to perform on each property.
+ */
 fun <T : Any> Class<T>.processProperties(
-    propertiesToIgnore: Set<String> = setOf("parseTreeNode", "position", "specifiedPosition"),
+    propertiesToIgnore: Set<String> = DEFAULT_IGNORED_PROPERTIES,
     propertyTypeOperation: (PropertyTypeDescription) -> Unit
 ) {
     nodeProperties.forEach { p ->
