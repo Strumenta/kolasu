@@ -177,6 +177,7 @@ val DEFAULT_IGNORED_PROPERTIES = setOf("parseTreeNode", "position", "specifiedPo
  * @param propertiesToIgnore which properties to ignore. @see DEFAULT_IGNORED_PROPERTIES
  * @param propertyOperation the operation to perform on each property.
  */
+@JvmOverloads
 fun Node.processProperties(
     propertiesToIgnore: Set<String> = DEFAULT_IGNORED_PROPERTIES,
     propertyOperation: (PropertyDescription) -> Unit
