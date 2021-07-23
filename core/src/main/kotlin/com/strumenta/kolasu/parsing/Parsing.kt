@@ -248,13 +248,6 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
 
     fun parseFirstStage(file: File): FirstStageParsingResult<C> = parseFirstStage(FileInputStream(file))
 
-    private fun getAst(inputStream: InputStream, considerPosition: Boolean = true): R? {
-        val result = parseFirstStage(inputStream)
-        val ast = parseTreeToAst(result.root!!, considerPosition)
-        ast?.assignParents()
-        return ast
-    }
-
     fun parse(inputStream: InputStream, considerPosition: Boolean = true): ParsingResult<R> {
         val code = inputStreamToString(inputStream)
         val result = parseFirstStage(code)
