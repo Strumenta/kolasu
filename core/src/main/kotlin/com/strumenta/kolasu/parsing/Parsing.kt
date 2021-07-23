@@ -257,8 +257,9 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
         val result = parseFirstStage(code)
         var ast = parseTreeToAst(result.root!!, considerPosition)
         ast?.assignParents()
-        ast = if (ast == null) null else postProcessAst(ast, result.issues)
-        return ParsingResult(result.issues, ast, code, null)
+        val myIssues = result.issues.toMutableList()
+        ast = if (ast == null) null else postProcessAst(ast, myIssues)
+        return ParsingResult(myIssues, ast, code, null)
     }
 
     fun parse(code: String, considerPosition: Boolean = true): ParsingResult<R> {
