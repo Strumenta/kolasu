@@ -11,7 +11,8 @@ open class Node(
      * Explicitly set position.
      * @see Node.position
      */
-    open val specifiedPosition: Position? = null) {
+    open val specifiedPosition: Position? = null
+) {
     /**
      * The properties of this AST nodes, including attributes, children, and references.
      */
