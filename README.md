@@ -6,6 +6,7 @@
 
 Kolasu supplies the infrastructure to build a custom, possibly mutable, Abstract Syntax Tree (AST) using Kotlin.
 In particular it can be integrated easily with ANTLR, but it can also be used on its own.
+The library aims to support well also using it from **Java**.
 
 It stands for _**Ko**tlin_ _**La**nguage_ _**Su**pport_.
 
@@ -23,7 +24,7 @@ All properties, and therefore the whole tree structure, will be detected automat
 
 ## Origin
 
-Kolasu was born as a small framework to support building languages using ANTLR and Kotlin. 
+Kolasu was born as a small framework to support building languages using ANTLR and Kotlin. It evolved over the time as it was used at Strumenta as part of open-source and commercial projects for building transpilers, interpreters, compilers, and more.
 
 ## Using Kolasu in your project
 
@@ -31,19 +32,7 @@ Releases are published on Maven Central:
 
 ```
 dependencies {
-    compile "com.strumenta:kolasu:1.3.4"
-}
-```
-
-Snapshots are published on JitPack.
-
-```
-repositories {
-    maven { url 'https://jitpack.io' }
-}
-
-dependencies {
-    compile "com.github.strumenta:kolasu:master"
+    compile "com.strumenta.kolasu:kolasu-core:1.3.4"
 }
 ```
 
