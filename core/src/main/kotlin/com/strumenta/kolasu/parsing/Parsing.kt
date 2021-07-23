@@ -248,7 +248,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
 
     fun parseFirstStage(file: File): FirstStageParsingResult<C> = parseFirstStage(FileInputStream(file))
 
-    protected fun postProcessAst(ast: R) : R {
+    protected fun postProcessAst(ast: R, issues: MutableList<Issue>) : R {
         return ast
     }
 
@@ -257,7 +257,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
         val result = parseFirstStage(code)
         var ast = parseTreeToAst(result.root!!, considerPosition)
         ast?.assignParents()
-        ast = if (ast == null) null else postProcessAst(ast)
+        ast = if (ast == null) null else postProcessAst(ast, result.issues)
         return ParsingResult(result.issues, ast, code, null)
     }
 
