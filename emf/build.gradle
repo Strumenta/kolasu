@@ -7,8 +7,13 @@ plugins {
     id("org.jetbrains.dokka")
 }
 
-java.sourceCompatibility = "$jvm_version"
-java.targetCompatibility = "$jvm_version"
+java {
+    sourceCompatibility = "$jvm_version"
+    targetCompatibility = "$jvm_version"
+    registerFeature('cli') {
+        usingSourceSet(sourceSets.main)
+    }
+}
 
 dependencies {
     implementation project(":core")
@@ -21,7 +26,8 @@ dependencies {
     implementation group: 'org.emfjson', name: 'emfjson-jackson', version: '1.2.0'
     implementation 'com.google.code.gson:gson:2.8.7'
 
-    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    cliImplementation 'com.github.ajalt.clikt:clikt:3.2.0'
+
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testImplementation 'junit:junit:4.12'
 }
