@@ -25,10 +25,6 @@ data class Path(val elements: List<PathElement> = listOf(), val states: MutableS
         return Path(elements + el, states = this.states.toMutableSet())
     }
 
-    fun parent(): Path {
-        return Path(elements.subList(0, elements.size - 1))
-    }
-
     fun toString(parser: Parser): String {
         return elements.joinToString(" > ") { it.toString(parser) }
     }
@@ -42,7 +38,7 @@ data class Path(val elements: List<PathElement> = listOf(), val states: MutableS
     }
 }
 
-open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
+open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths: Boolean = true) : ParseTreeListener {
 
     val paths = mutableMapOf<Path, Boolean>()
     val pathStack = mutableStackOf<Path>()
@@ -77,7 +73,7 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
         } else false
     }
 
-    protected fun addUncoveredPaths(state: Int = parser!!.state) {
+    private fun addUncoveredPaths(state: Int = parser!!.state) {
         val path = pathStack.peek()
         if (path == null || path.states.contains(state) || state < 0) {
             return
@@ -87,16 +83,16 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
             when (it) {
                 is RuleTransition -> {
                     if (!isLeftRecursive(path, it.ruleIndex)) {
-                        addUncoveredPath(path.followWith(PathElement(it.ruleIndex, true)))
+                        addUncoveredPath(PathElement(it.ruleIndex, true), it.target.stateNumber)
                     }
                 }
                 is AtomTransition -> {
-                    addUncoveredPath(path.followWith(PathElement(it.label, false)))
+                    addUncoveredPath(PathElement(it.label, false), it.target.stateNumber)
                 }
                 is SetTransition -> {
                     it.set.intervals.forEach { interval ->
                         for (i in interval.a..interval.b) {
-                            addUncoveredPath(path.followWith(PathElement(i, false)))
+                            addUncoveredPath(PathElement(i, false), it.target.stateNumber)
                         }
                     }
                 }
@@ -107,10 +103,25 @@ open class CoverageListener(var parser: Parser? = null) : ParseTreeListener {
         }
     }
 
-    private fun addUncoveredPath(path: Path) {
-        if (!paths.containsKey(path)) {
+    private fun addUncoveredPath(element: PathElement, nextState: Int): Boolean {
+        val path = pathStack.peek().followWith(element)
+        return if (!paths.containsKey(path)) {
             paths[path] = false
-        }
+            if(expandUncoveredPaths) {
+                val newPath = if (element.rule) {
+                    Path(listOf(element), path.states)
+                } else {
+                    path
+                }
+                pathStack.push(newPath)
+                try {
+                    addUncoveredPaths(nextState)
+                } finally {
+                    pathStack.pop()
+                }
+            }
+            true
+        } else false
     }
 
     override fun exitEveryRule(ctx: ParserRuleContext) {

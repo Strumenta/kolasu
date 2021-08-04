@@ -248,7 +248,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
 
     fun parseFirstStage(file: File): FirstStageParsingResult<C> = parseFirstStage(FileInputStream(file))
 
-    protected open fun postProcessAst(ast: R, issues: MutableList<Issue>) : R {
+    protected open fun postProcessAst(ast: R, issues: MutableList<Issue>): R {
         return ast
     }
 
