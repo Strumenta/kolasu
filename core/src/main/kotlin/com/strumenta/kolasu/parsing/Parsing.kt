@@ -173,6 +173,14 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
 
     protected abstract fun createANTLRLexer(inputStream: InputStream): Lexer
     protected abstract fun createANTLRParser(tokenStream: TokenStream): P
+
+    /**
+     * Invokes the parser's root rule, i.e., the method which is responsible of parsing the entire input.
+     * Usually this is the topmost rule, the one with index 0 (as also assumed by other libraries such as antlr4-c3),
+     * so this method invokes that rule. If your grammar/parser is structured differently, or if you're using this to
+     * parse only a portion of the input or a subset of the language, you have to override this method to invoke the
+     * correct entry point.
+     */
     protected open fun invokeRootRule(parser: P): C? {
         val entryPoint = parser::class.memberFunctions.find { it.name == parser.ruleNames[0] }
         return entryPoint!!.call(parser) as C
@@ -291,6 +299,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
 
     // For convenient use from Java
     fun walk(node: Node) = node.walk()
+
     @JvmOverloads
     fun processProperties(
         node: Node,
