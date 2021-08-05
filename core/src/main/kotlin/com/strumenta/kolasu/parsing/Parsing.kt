@@ -7,6 +7,8 @@ import org.antlr.v4.runtime.*
 import java.io.*
 import java.nio.charset.Charset
 import java.util.*
+import kotlin.reflect.full.memberFunctions
+import kotlin.system.measureTimeMillis
 
 open class CodeProcessingResult<D>(
     val issues: List<Issue>,
@@ -39,6 +41,7 @@ class LexingResult(
     issues: List<Issue>,
     val tokens: List<Token>,
     code: String? = null,
+    val time: Long? = null
 ) : CodeProcessingResult<List<Token>>(issues, tokens, code) {
 
     override fun equals(other: Any?): Boolean {
@@ -63,6 +66,7 @@ class FirstStageParsingResult<C : ParserRuleContext>(
     val root: C?,
     code: String? = null,
     val incompleteNode: Node? = null,
+    val time: Long? = null
 ) : CodeProcessingResult<C>(issues, root, code) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -88,6 +92,8 @@ class ParsingResult<RootNode : Node>(
     val root: RootNode?,
     code: String? = null,
     val incompleteNode: Node? = null,
+    val firstStage: FirstStageParsingResult<*>? = null,
+    val time: Long? = null
 ) : CodeProcessingResult<RootNode>(issues, root, code) {
 
     override fun equals(other: Any?): Boolean {
@@ -167,7 +173,18 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
 
     protected abstract fun createANTLRLexer(inputStream: InputStream): Lexer
     protected abstract fun createANTLRParser(tokenStream: TokenStream): P
-    protected abstract fun invokeRootRule(parser: P): C?
+
+    /**
+     * Invokes the parser's root rule, i.e., the method which is responsible of parsing the entire input.
+     * Usually this is the topmost rule, the one with index 0 (as also assumed by other libraries such as antlr4-c3),
+     * so this method invokes that rule. If your grammar/parser is structured differently, or if you're using this to
+     * parse only a portion of the input or a subset of the language, you have to override this method to invoke the
+     * correct entry point.
+     */
+    protected open fun invokeRootRule(parser: P): C? {
+        val entryPoint = parser::class.memberFunctions.find { it.name == parser.ruleNames[0] }
+        return entryPoint!!.call(parser) as C
+    }
     protected abstract fun parseTreeToAst(parseTreeRoot: C, considerPosition: Boolean = true): R?
 
     fun lex(code: String, onlyFromDefaultChannel: Boolean = true): LexingResult {
@@ -176,26 +193,28 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
 
     fun lex(inputStream: InputStream, onlyFromDefaultChannel: Boolean = true): LexingResult {
         val issues = LinkedList<Issue>()
-        val lexer = createANTLRLexer(inputStream)
-        lexer.removeErrorListeners()
-        lexer.injectErrorCollectorInLexer(issues)
         val tokens = LinkedList<Token>()
-        do {
-            val t = lexer.nextToken()
-            if (t == null) {
-                break
-            } else {
-                if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
-                    tokens.add(t)
+        val time = measureTimeMillis {
+            val lexer = createANTLRLexer(inputStream)
+            lexer.removeErrorListeners()
+            lexer.injectErrorCollectorInLexer(issues)
+            do {
+                val t = lexer.nextToken()
+                if (t == null) {
+                    break
+                } else {
+                    if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
+                        tokens.add(t)
+                    }
                 }
-            }
-        } while (t.type != Token.EOF)
+            } while (t.type != Token.EOF)
 
-        if (tokens.last.type != Token.EOF) {
-            issues.add(Issue(IssueType.SYNTACTIC, "Not whole input consumed", tokens.last!!.endPoint.asPosition))
+            if (tokens.last.type != Token.EOF) {
+                issues.add(Issue(IssueType.SYNTACTIC, "Not whole input consumed", tokens.last!!.endPoint.asPosition))
+            }
         }
 
-        return LexingResult(issues, tokens)
+        return LexingResult(issues, tokens, null, time)
     }
 
     fun createParser(inputStream: InputStream, issues: MutableList<Issue>): P {
@@ -209,8 +228,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
     }
 
     private fun verifyParseTree(parser: Parser, errors: MutableList<Issue>, root: ParserRuleContext) {
-        val commonTokenStream = parser.tokenStream as CommonTokenStream
-        val lastToken = commonTokenStream.get(commonTokenStream.index())
+        val lastToken = parser.tokenStream.get(parser.tokenStream.index())
         if (lastToken.type != Token.EOF) {
             errors.add(Issue(IssueType.SYNTACTIC, "Not whole input consumed", lastToken!!.endPoint.asPosition))
         }
@@ -238,12 +256,15 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
 
     fun parseFirstStage(inputStream: InputStream): FirstStageParsingResult<C> {
         val issues = LinkedList<Issue>()
-        val parser = createParser(inputStream, issues)
-        val root: C? = invokeRootRule(parser)
-        if (root != null) {
-            verifyParseTree(parser, issues, root)
+        var root: C?
+        val time = measureTimeMillis {
+            val parser = createParser(inputStream, issues)
+            root = invokeRootRule(parser)
+            if (root != null) {
+                verifyParseTree(parser, issues, root!!)
+            }
         }
-        return FirstStageParsingResult(issues, root)
+        return FirstStageParsingResult(issues, root, null, null, time)
     }
 
     fun parseFirstStage(file: File): FirstStageParsingResult<C> = parseFirstStage(FileInputStream(file))
@@ -253,26 +274,38 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
     }
 
     fun parse(inputStream: InputStream, considerPosition: Boolean = true): ParsingResult<R> {
+        val time = System.currentTimeMillis()
         val code = inputStreamToString(inputStream)
         val result = parseFirstStage(code)
         var ast = parseTreeToAst(result.root!!, considerPosition)
         ast?.assignParents()
         val myIssues = result.issues.toMutableList()
         ast = if (ast == null) null else postProcessAst(ast, myIssues)
-        return ParsingResult(myIssues, ast, code, null)
+        return ParsingResult(myIssues, ast, code, null, result, System.currentTimeMillis() - time)
     }
 
     fun parse(code: String, considerPosition: Boolean = true): ParsingResult<R> {
+        val time = System.currentTimeMillis()
         val result = parseFirstStage(code)
         val ast = parseTreeToAst(result.root!!, considerPosition)
         ast?.assignParents()
-        return ParsingResult(result.issues, ast, code, null)
+        return ParsingResult(result.issues, ast, code, null, result, System.currentTimeMillis() - time)
     }
 
     fun parse(file: File, considerPosition: Boolean = true): ParsingResult<R> = parse(
         FileInputStream(file),
         considerPosition
     )
+
+    // For convenient use from Java
+    fun walk(node: Node) = node.walk()
+
+    @JvmOverloads
+    fun processProperties(
+        node: Node,
+        propertyOperation: (PropertyDescription) -> Unit,
+        propertiesToIgnore: Set<String> = DEFAULT_IGNORED_PROPERTIES
+    ) = node.processProperties(propertiesToIgnore, propertyOperation)
 }
 
 private fun inputStreamToString(inputStream: InputStream): String =

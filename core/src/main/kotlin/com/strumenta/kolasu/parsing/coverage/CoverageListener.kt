@@ -107,7 +107,7 @@ open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths
         val path = pathStack.peek().followWith(element)
         return if (!paths.containsKey(path)) {
             paths[path] = false
-            if(expandUncoveredPaths) {
+            if (expandUncoveredPaths) {
                 val newPath = if (element.rule) {
                     Path(listOf(element), path.states)
                 } else {

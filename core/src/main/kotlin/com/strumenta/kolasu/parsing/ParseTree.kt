@@ -70,6 +70,7 @@ fun ParserRuleContext.processDescendantsAndErrors(
     }
 }
 
+@Deprecated("Use KolasuParser")
 fun verifyParseTree(parser: Parser, errors: MutableList<Issue>, root: ParserRuleContext) {
     val commonTokenStream = parser.tokenStream as CommonTokenStream
     val lastToken = commonTokenStream.get(commonTokenStream.index())

@@ -8,8 +8,13 @@ plugins {
     id "org.jetbrains.dokka"
 }
 
-java.sourceCompatibility = "$jvm_version"
-java.targetCompatibility = "$jvm_version"
+java {
+    sourceCompatibility = "$jvm_version"
+    targetCompatibility = "$jvm_version"
+    registerFeature('cli') {
+        usingSourceSet(sourceSets.main)
+    }
+}
 
 dependencies {
     antlr "org.antlr:antlr4:$antlr_version"
@@ -23,6 +28,8 @@ dependencies {
     implementation 'com.fifesoft:autocomplete:2.5.8'
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
     implementation 'org.redundent:kotlin-xml-builder:1.7.2'
+
+    cliImplementation 'com.github.ajalt.clikt:clikt:3.2.0'
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 }
