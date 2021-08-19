@@ -186,7 +186,6 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
         return entryPoint!!.call(parser) as C
     }
 
-    @JvmOverloads
     protected abstract fun parseTreeToAst(parseTreeRoot: C, considerPosition: Boolean = true): R?
 
     @JvmOverloads

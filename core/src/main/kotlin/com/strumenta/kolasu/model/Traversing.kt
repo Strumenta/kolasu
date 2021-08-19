@@ -121,10 +121,23 @@ fun Node.walkChildren(): Sequence<Node> {
  * For post-order traversal, take "walkLeavesFirst"
  * @return walks the whole AST starting from the childnodes of this node.
  */
+@JvmOverloads
 fun Node.walkDescendants(walker: (Node) -> Sequence<Node> = Node::walk): Sequence<Node> {
     return walker.invoke(this).filter { node -> node != this }
 }
 
+@JvmOverloads
 fun <N : Any> Node.walkDescendants(type: KClass<N>, walker: (Node) -> Sequence<Node> = Node::walk): Sequence<N> {
     return walkDescendants(walker).filterIsInstance(type.java)
+}
+
+/**
+ * Note that type T is not strictly forced to be a Node. This is intended to support
+ * interfaces like `Statement` or `Expression`. However, being an ancestor the returned
+ * value is guaranteed to be a Node, as only Node instances can be part of the hierarchy.
+ *
+ * @return the nearest ancestor of this node that is an instance of klass.
+ */
+fun <T> Node.findAncestorOfType(klass: Class<T>): T? {
+    return walkAncestors().filterIsInstance(klass).firstOrNull()
 }
