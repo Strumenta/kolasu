@@ -185,12 +185,16 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
         val entryPoint = parser::class.memberFunctions.find { it.name == parser.ruleNames[0] }
         return entryPoint!!.call(parser) as C
     }
+
+    @JvmOverloads
     protected abstract fun parseTreeToAst(parseTreeRoot: C, considerPosition: Boolean = true): R?
 
+    @JvmOverloads
     fun lex(code: String, onlyFromDefaultChannel: Boolean = true): LexingResult {
         return lex(code.byteInputStream(Charsets.UTF_8), onlyFromDefaultChannel)
     }
 
+    @JvmOverloads
     fun lex(inputStream: InputStream, onlyFromDefaultChannel: Boolean = true): LexingResult {
         val issues = LinkedList<Issue>()
         val tokens = LinkedList<Token>()
@@ -273,6 +277,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
         return ast
     }
 
+    @JvmOverloads
     fun parse(inputStream: InputStream, considerPosition: Boolean = true): ParsingResult<R> {
         val time = System.currentTimeMillis()
         val code = inputStreamToString(inputStream)
@@ -284,6 +289,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
         return ParsingResult(myIssues, ast, code, null, result, System.currentTimeMillis() - time)
     }
 
+    @JvmOverloads
     fun parse(code: String, considerPosition: Boolean = true): ParsingResult<R> {
         val time = System.currentTimeMillis()
         val result = parseFirstStage(code)
@@ -292,6 +298,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
         return ParsingResult(result.issues, ast, code, null, result, System.currentTimeMillis() - time)
     }
 
+    @JvmOverloads
     fun parse(file: File, considerPosition: Boolean = true): ParsingResult<R> = parse(
         FileInputStream(file),
         considerPosition
