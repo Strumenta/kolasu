@@ -1,3 +1,4 @@
+@file:JvmName("Processing")
 package com.strumenta.kolasu.model
 
 import kotlin.reflect.*
@@ -261,8 +262,8 @@ fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent
 val Node.children: List<Node>
     get() {
         val children = mutableListOf<Node>()
-        nodeProperties.forEach { p ->
-            val v = p.get(this)
+        this.properties.forEach { p ->
+            val v = p.value
             when (v) {
                 is Node -> children.add(v)
                 is Collection<*> -> v.forEach { if (it is Node) children.add(it) }
