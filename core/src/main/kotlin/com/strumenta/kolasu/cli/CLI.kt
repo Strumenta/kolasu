@@ -32,7 +32,8 @@ open class ParsingCommand<R : Node>(
     autoCompleteEnvvar: String? = "",
     allowMultipleSubcommands: Boolean = false,
     treatUnknownOptionsAsArgs: Boolean = false,
-    val exitOnFail: Boolean = true
+    val exitOnFail: Boolean = true,
+    val printASTSummary: Boolean = true
 ) : CliktCommand(
     help, epilog, name, invokeWithoutSubcommand, printHelpOnEmptyArgs, helpTags, autoCompleteEnvvar,
     allowMultipleSubcommands, treatUnknownOptionsAsArgs
@@ -67,9 +68,11 @@ open class ParsingCommand<R : Node>(
         println(
             "The file has $lines lines and ${result!!.code?.length ?: "unknown"} characters. " +
                 "The parse tree has ${countParseTreeNodes(parseTree)} nodes " +
-                "(${parseTree.start.inputStream.size()} tokens)." +
-                " The AST has ${countASTNodes(node)} nodes."
+                "(${parseTree.start.inputStream.size()} tokens)."
         )
+        if (printASTSummary) {
+            println("The AST has ${countASTNodes(node)} nodes.")
+        }
     }
 
     fun countASTNodes(node: Node): Int = 1 + (node.children.map { countASTNodes(it) }.reduceOrNull(Int::plus) ?: 0)

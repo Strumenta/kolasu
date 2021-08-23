@@ -28,10 +28,11 @@ open class ParserCLIEMF<R : Node>(
     autoCompleteEnvvar: String? = "",
     allowMultipleSubcommands: Boolean = false,
     treatUnknownOptionsAsArgs: Boolean = false,
-    exitOnFail: Boolean = true
+    exitOnFail: Boolean = true,
+    printASTSummary: Boolean = true
 ) : ParsingCommand<R>(
     help, epilog, name, invokeWithoutSubcommand, printHelpOnEmptyArgs, helpTags, autoCompleteEnvvar,
-    allowMultipleSubcommands, treatUnknownOptionsAsArgs, exitOnFail
+    allowMultipleSubcommands, treatUnknownOptionsAsArgs, exitOnFail, printASTSummary
 ) {
     val output by argument()
     val metamodel by option("--metamodel")

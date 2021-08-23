@@ -282,7 +282,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
         val code = inputStreamToString(inputStream)
         val result = parseFirstStage(code)
         var ast = parseTreeToAst(result.root!!, considerPosition)
-        ast?.assignParents()
+        assignParents(ast)
         val myIssues = result.issues.toMutableList()
         ast = if (ast == null) null else postProcessAst(ast, myIssues)
         return ParsingResult(myIssues, ast, code, null, result, System.currentTimeMillis() - time)
@@ -293,8 +293,18 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
         val time = System.currentTimeMillis()
         val result = parseFirstStage(code)
         val ast = parseTreeToAst(result.root!!, considerPosition)
-        ast?.assignParents()
+        assignParents(ast)
         return ParsingResult(result.issues, ast, code, null, result, System.currentTimeMillis() - time)
+    }
+
+    /**
+     * Traverses the AST to ensure that parent nodes are correctly assigned.
+     *
+     * If you assign the parents correctly when you build the AST, or you're not interested in tracking child-parent
+     * relationships, you can override this method to do nothing to improve performance.
+     */
+    protected open fun assignParents(ast: R?) {
+        ast?.assignParents()
     }
 
     @JvmOverloads

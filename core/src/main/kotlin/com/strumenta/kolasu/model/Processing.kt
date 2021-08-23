@@ -8,7 +8,10 @@ import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
 val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
-    get() = this.kotlin.memberProperties
+    get() = this.kotlin.nodeProperties
+
+val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
+    get() = memberProperties
         .filter { it.visibility == KVisibility.PUBLIC }
         .filter { it.findAnnotation<Derived>() == null }
         .filter { it.findAnnotation<Link>() == null }
@@ -198,6 +201,16 @@ fun Node.processProperties(
  * @param propertyTypeOperation the operation to perform on each property.
  */
 fun <T : Any> Class<T>.processProperties(
+    propertiesToIgnore: Set<String> = DEFAULT_IGNORED_PROPERTIES,
+    propertyTypeOperation: (PropertyTypeDescription) -> Unit
+) = kotlin.processProperties(propertiesToIgnore, propertyTypeOperation)
+
+/**
+ * Executes an operation on the properties definitions of a node class.
+ * @param propertiesToIgnore which properties to ignore. @see DEFAULT_IGNORED_PROPERTIES
+ * @param propertyTypeOperation the operation to perform on each property.
+ */
+fun <T : Any> KClass<T>.processProperties(
     propertiesToIgnore: Set<String> = DEFAULT_IGNORED_PROPERTIES,
     propertyTypeOperation: (PropertyTypeDescription) -> Unit
 ) {

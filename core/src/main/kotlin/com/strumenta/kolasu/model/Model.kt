@@ -21,7 +21,7 @@ open class Node(
         get() = try {
             nodeProperties.map { PropertyDescription.buildFor(it, this) }
         } catch (e: Throwable) {
-            throw RuntimeException("Issue while getting properties of $this (${this.javaClass})")
+            throw RuntimeException("Issue while getting properties of $this (${this.javaClass})", e)
         }
 
     /**
