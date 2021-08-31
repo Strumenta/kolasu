@@ -57,4 +57,39 @@ class ModelTest {
         val stmts = eObject.eGet(cuClass.getEStructuralFeature("statements")) as EList<*>
         assertEquals(2, stmts.size)
     }
+
+    @Test
+    fun nullCollection() {
+        val cu = CompilationUnit(null)
+        val nsURI = "https://strumenta.com/simplemm"
+        val metamodelBuilder = MetamodelBuilder(packageName(CompilationUnit::class), nsURI, "simplemm")
+        metamodelBuilder.provideClass(CompilationUnit::class)
+        val ePackage = metamodelBuilder.generate()
+
+        val eo = cu.toEObject(ePackage)
+        assertEquals(nsURI, eo.eClass().ePackage.nsURI)
+        eo.saveXMI(File("simplemodel_null.xmi"))
+        val jsonFile = File("simplem_null.json")
+        eo.saveAsJson(jsonFile)
+
+        val resourceSet = ResourceSetImpl()
+        resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
+        // TODO this is to correctly resolve the metamodel, however what would happen if there were
+        // other references to https://... resources?
+        resourceSet.resourceFactoryRegistry.protocolToFactoryMap["https"] = JsonResourceFactory()
+        val metaURI = URI.createURI(nsURI)
+        val metaRes = resourceSet.createResource(metaURI)
+        metaRes.contents.add(ePackage)
+        val uri: URI = URI.createFileURI(jsonFile.absolutePath)
+        val resource: Resource = resourceSet.createResource(uri)
+        assertFalse(resource.isLoaded)
+        resource.load(null)
+        assertEquals(1, resource.contents.size)
+        assertTrue(resource.contents[0] is EObject)
+        val eObject = resource.contents[0] as EObject
+        val cuClass = ePackage.eClassifiers.find { c -> c.name.equals("CompilationUnit") } as EClass
+        assertEquals(cuClass, eObject.eClass())
+        val stmts = eObject.eGet(cuClass.getEStructuralFeature("statements")) as EList<*>
+        assertEquals(0, stmts.size)
+    }
 }

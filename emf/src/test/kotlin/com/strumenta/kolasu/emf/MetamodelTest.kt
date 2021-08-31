@@ -13,7 +13,7 @@ enum class Visibility {
 }
 class VarDeclaration(var visibility: Visibility, var name: String, var initialValue: Expression) : Statement()
 class StringLiteral(var value: String) : Expression()
-data class CompilationUnit(val statements: List<Statement>, override val specifiedPosition: Position? = null) :
+data class CompilationUnit(val statements: List<Statement>?, override val specifiedPosition: Position? = null) :
     Node(specifiedPosition)
 
 class MetamodelTest {

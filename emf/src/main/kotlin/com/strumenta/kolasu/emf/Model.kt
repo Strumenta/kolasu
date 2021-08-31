@@ -144,7 +144,7 @@ fun Node.toEObject(eResource: Resource): EObject {
             if (pd.provideNodes) {
                 if (pd.multiple) {
                     val elist = eo.eGet(esf) as MutableList<EObject>
-                    (pd.value as List<*>).forEach {
+                    (pd.value as List<*>?)?.forEach {
                         try {
                             val childEO = (it as Node).toEObject(eResource)
                             elist.add(childEO)
@@ -162,7 +162,7 @@ fun Node.toEObject(eResource: Resource): EObject {
             } else {
                 if (pd.multiple) {
                     val elist = eo.eGet(esf) as MutableList<Any>
-                    (pd.value as List<*>).forEach {
+                    (pd.value as List<*>?)?.forEach {
                         try {
                             val childValue = toValue(ec.ePackage, it, pd, esf)
                             elist.add(childValue!!)

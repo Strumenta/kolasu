@@ -1,6 +1,6 @@
 rpgast.ecore
 rpgast.json
-simplem.json
+simplem*.json
 simplemm.ecore
 simplemm.json
-simplemodel.xmi
+simplemodel*.xmi
