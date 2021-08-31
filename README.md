@@ -5,8 +5,8 @@
 [![Build Status](https://github.com/Strumenta/kolasu/workflows/BuildAndTest/badge.svg)](https://github.com/Strumenta/kolasu/actions)
 
 Kolasu supplies the infrastructure to build a custom, possibly mutable, Abstract Syntax Tree (AST) using Kotlin.
-In particular it can be integrated easily with ANTLR, but it can also be used on its own.
-The library aims to support well also using it from **Java**.
+In particular, it can be integrated easily with ANTLR, but it can also be used on its own.
+Kolasu strives to be usable and idiomatic also in Java projects.
 
 It stands for _**Ko**tlin_ _**La**nguage_ _**Su**pport_.
 

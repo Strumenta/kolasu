@@ -27,6 +27,7 @@ subprojects {
         dokkaSourceSets {
             named("main") {
                 moduleName = "kolasu-" + moduleName.get()
+                includes.from("README.md")
             }
         }
     }
