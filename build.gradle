@@ -26,6 +26,7 @@ subprojects {
     tasks.withType(DokkaTask).configureEach {
         dokkaSourceSets {
             named("main") {
+                includeNonPublic = true
                 moduleName = "kolasu-" + moduleName.get()
                 includes.from("README.md")
             }

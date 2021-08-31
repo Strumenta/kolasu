@@ -17,3 +17,7 @@ Utilities for resolving these references are supplied.
 
 Kolasu tries to be non-invasive and implements this functionality by introspecting the AST.
 All properties, and therefore the whole tree structure, will be detected automatically. 
+
+# Package com.strumenta.kolasu.parsing
+
+The main entry point into Kolasu when integrating it with an ANTLR parser.

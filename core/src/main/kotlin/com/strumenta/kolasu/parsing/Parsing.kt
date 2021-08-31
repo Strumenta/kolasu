@@ -169,6 +169,11 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
     })
 }
 
+/**
+ * A complete description of a multi-stage ANTLR-based parser, from source code to AST.
+ *
+ * You should extend this class to implement the parts that are specific to your language.
+ */
 abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
 
     protected abstract fun createANTLRLexer(inputStream: InputStream): Lexer
@@ -199,8 +204,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
         val tokens = LinkedList<Token>()
         val time = measureTimeMillis {
             val lexer = createANTLRLexer(inputStream)
-            lexer.removeErrorListeners()
-            lexer.injectErrorCollectorInLexer(issues)
+            attachListeners(lexer, issues)
             do {
                 val t = lexer.nextToken()
                 if (t == null) {
@@ -213,22 +217,31 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
             } while (t.type != Token.EOF)
 
             if (tokens.last.type != Token.EOF) {
-                issues.add(Issue(IssueType.SYNTACTIC, "Not whole input consumed", tokens.last!!.endPoint.asPosition))
+                issues.add(Issue(IssueType.SYNTACTIC, "The parser didn't consume the entire input", tokens.last!!.endPoint.asPosition))
             }
         }
 
         return LexingResult(issues, tokens, null, time)
     }
 
+    protected open fun attachListeners(lexer: Lexer, issues: MutableList<Issue>) {
+        lexer.injectErrorCollectorInLexer(issues)
+    }
+
+    protected open fun attachListeners(parser: P, issues: MutableList<Issue>) {
+        parser.injectErrorCollectorInParser(issues)
+    }
+
     fun createParser(inputStream: InputStream, issues: MutableList<Issue>): P {
         val lexer = createANTLRLexer(inputStream)
-        lexer.removeErrorListeners()
-        lexer.injectErrorCollectorInLexer(issues)
-        val commonTokenStream = CommonTokenStream(lexer)
-        val parser: P = createANTLRParser(commonTokenStream)
-        parser.injectErrorCollectorInParser(issues)
+        attachListeners(lexer, issues)
+        val tokenStream = createTokenStream(lexer)
+        val parser: P = createANTLRParser(tokenStream)
+        attachListeners(parser, issues)
         return parser
     }
+
+    protected open fun createTokenStream(lexer: Lexer) = CommonTokenStream(lexer)
 
     private fun verifyParseTree(parser: Parser, errors: MutableList<Issue>, root: ParserRuleContext) {
         val lastToken = parser.tokenStream.get(parser.tokenStream.index())
