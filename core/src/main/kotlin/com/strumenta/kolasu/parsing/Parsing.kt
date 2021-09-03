@@ -295,7 +295,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     }
 
     @JvmOverloads
-    fun parse(inputStream: InputStream, considerPosition: Boolean = true): ParsingResult<R> {
+    override fun parse(inputStream: InputStream, considerPosition: Boolean): ParsingResult<R> {
         val time = System.currentTimeMillis()
         val code = inputStreamToString(inputStream)
         val result = parseFirstStage(code)
@@ -307,7 +307,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     }
 
     @JvmOverloads
-    fun parse(code: String, considerPosition: Boolean = true): ParsingResult<R> {
+    override fun parse(code: String, considerPosition: Boolean): ParsingResult<R> {
         val time = System.currentTimeMillis()
         val result = parseFirstStage(code)
         val ast = parseTreeToAst(result.root!!, considerPosition)
