@@ -169,12 +169,17 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
     })
 }
 
+interface ASTParser<R: Node> {
+    fun parse(inputStream: InputStream, considerPosition: Boolean = true): ParsingResult<R>
+    fun parse(code: String, considerPosition: Boolean = true): ParsingResult<R>
+}
+
 /**
  * A complete description of a multi-stage ANTLR-based parser, from source code to AST.
  *
  * You should extend this class to implement the parts that are specific to your language.
  */
-abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> {
+abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTParser<R> {
 
     protected abstract fun createANTLRLexer(inputStream: InputStream): Lexer
     protected abstract fun createANTLRParser(tokenStream: TokenStream): P
