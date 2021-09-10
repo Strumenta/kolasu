@@ -14,7 +14,7 @@ open class Node(
     open val specifiedPosition: Position? = null
 ) {
 
-    open val type : String
+    open val nodeType : String
         get() = this.javaClass.canonicalName
 
     /**
