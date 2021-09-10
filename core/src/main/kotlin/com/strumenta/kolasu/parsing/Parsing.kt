@@ -222,7 +222,8 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
             } while (t.type != Token.EOF)
 
             if (tokens.last.type != Token.EOF) {
-                issues.add(Issue(IssueType.SYNTACTIC, "The parser didn't consume the entire input", tokens.last!!.endPoint.asPosition))
+                val message = "The parser didn't consume the entire input"
+                issues.add(Issue(IssueType.SYNTACTIC, message, tokens.last!!.endPoint.asPosition))
             }
         }
 
