@@ -13,6 +13,10 @@ open class Node(
      */
     open val specifiedPosition: Position? = null
 ) {
+
+    open val type : String
+        get() = this.javaClass.canonicalName
+
     /**
      * The properties of this AST nodes, including attributes, children, and references.
      */
