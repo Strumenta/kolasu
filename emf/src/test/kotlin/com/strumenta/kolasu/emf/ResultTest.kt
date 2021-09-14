@@ -40,7 +40,7 @@ class ResultTest {
 
         val result = Result(
             listOf(
-                Issue(IssueType.LEXICAL, "lex", Position(Point(1, 1), Point(2, 10))),
+                Issue(IssueType.LEXICAL, "lex", position = Position(Point(1, 1), Point(2, 10))),
                 Issue(IssueType.SEMANTIC, "foo")
             ),
             cu

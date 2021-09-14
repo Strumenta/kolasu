@@ -75,7 +75,7 @@ fun verifyParseTree(parser: Parser, errors: MutableList<Issue>, root: ParserRule
     val commonTokenStream = parser.tokenStream as CommonTokenStream
     val lastToken = commonTokenStream.get(commonTokenStream.index())
     if (lastToken.type != Token.EOF) {
-        errors.add(Issue(IssueType.SYNTACTIC, "Not whole input consumed", lastToken!!.endPoint.asPosition))
+        errors.add(Issue(IssueType.SYNTACTIC, "Not whole input consumed", position = lastToken!!.endPoint.asPosition))
     }
 
     root.processDescendantsAndErrors(
@@ -85,13 +85,13 @@ fun verifyParseTree(parser: Parser, errors: MutableList<Issue>, root: ParserRule
                     Issue(
                         IssueType.SYNTACTIC,
                         "Recognition exception: ${it.exception.message}",
-                        it.start.startPoint.asPosition
+                        position = it.start.startPoint.asPosition
                     )
                 )
             }
         },
         {
-            errors.add(Issue(IssueType.SYNTACTIC, "Error node found", it.toPosition(true)))
+            errors.add(Issue(IssueType.SYNTACTIC, "Error node found", position = it.toPosition(true)))
         }
     )
 }

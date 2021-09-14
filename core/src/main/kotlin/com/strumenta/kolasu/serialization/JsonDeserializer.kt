@@ -87,7 +87,7 @@ class JsonDeserializer {
             val type = IssueType.valueOf(it["type"].asString)
             val message = it["message"].asString
             val position = it["position"]?.asJsonObject?.decodeAsPosition()
-            Issue(type, message, position)
+            Issue(type, message, position = position)
         }
         val root = if (jo.has("root")) {
             deserialize(rootClass, jo["root"].asJsonObject)

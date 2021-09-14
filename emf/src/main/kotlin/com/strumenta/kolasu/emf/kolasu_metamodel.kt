@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.emf
 
+import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
@@ -66,9 +67,17 @@ fun createKolasuMetamodel(): EPackage {
     issueType.addLiteral(IssueType.SEMANTIC)
     ePackage.eClassifiers.add(issueType)
 
+    val issueSeverity = EcoreFactory.eINSTANCE.createEEnum()
+    issueSeverity.name = "IssueSeverity"
+    issueSeverity.addLiteral(IssueSeverity.ERROR)
+    issueSeverity.addLiteral(IssueSeverity.WARNING)
+    issueSeverity.addLiteral(IssueSeverity.INFO)
+    ePackage.eClassifiers.add(issueType)
+
     val issue = ePackage.createEClass("Issue").apply {
         addAttribute("type", issueType, 1, 1)
         addAttribute("message", stringDT, 1, 1)
+        addAttribute("severity", issueSeverity, 0, 1)
         addContainment("position", position, 0, 1)
     }
 
