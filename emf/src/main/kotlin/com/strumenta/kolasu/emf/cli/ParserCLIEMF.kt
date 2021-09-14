@@ -6,6 +6,7 @@ import com.strumenta.kolasu.cli.ParsingCommand
 import com.strumenta.kolasu.emf.EMFEnabledParser
 import com.strumenta.kolasu.emf.toEObject
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
@@ -58,13 +59,13 @@ open class ParserCLIEMF<R : Node>(
         mmResource: Resource,
         options: Map<String, Boolean>
     ) {
-        val node = result!!.root!!
+        val simplifiedResult = Result(result!!.issues, result!!.root)
         val start = System.currentTimeMillis()
         print("Saving AST to $target... ")
         val resource =
             resourceSet.createResource(URI.createFileURI(target))
                 ?: throw IOException("Unsupported destination: $target")
-        val eObject = node.toEObject(mmResource)
+        val eObject = simplifiedResult.toEObject(mmResource)
         resource.contents.add(eObject)
         resource.save(options)
         println("Done (${System.currentTimeMillis() - start}ms).")

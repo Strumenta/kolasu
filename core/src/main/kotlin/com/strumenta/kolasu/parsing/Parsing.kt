@@ -169,7 +169,7 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
     })
 }
 
-interface ASTParser<R: Node> {
+interface ASTParser<R : Node> {
     fun parse(inputStream: InputStream, considerPosition: Boolean = true): ParsingResult<R>
     fun parse(code: String, considerPosition: Boolean = true): ParsingResult<R>
 }
@@ -311,8 +311,10 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     override fun parse(code: String, considerPosition: Boolean): ParsingResult<R> {
         val time = System.currentTimeMillis()
         val result = parseFirstStage(code)
-        val ast = parseTreeToAst(result.root!!, considerPosition)
+        var ast = parseTreeToAst(result.root!!, considerPosition)
         assignParents(ast)
+        val myIssues = result.issues.toMutableList()
+        ast = if (ast == null) null else postProcessAst(ast, myIssues)
         return ParsingResult(result.issues, ast, code, null, result, System.currentTimeMillis() - time)
     }
 

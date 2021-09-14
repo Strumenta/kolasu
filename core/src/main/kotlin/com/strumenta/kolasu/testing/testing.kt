@@ -82,8 +82,8 @@ fun assertASTsAreEqual(
                     if (expectedPropValue is IgnoreChildren<*>) {
                         // Nothing to do
                     } else {
-                        val actualPropValueCollection = actualPropValue as Collection<out Node>
-                        val expectedPropValueCollection = expectedPropValue as Collection<out Node>
+                        val actualPropValueCollection = actualPropValue as Collection<Node>
+                        val expectedPropValueCollection = expectedPropValue as Collection<Node>
                         assertEquals(
                             expectedPropValueCollection.size, actualPropValueCollection.size,
                             "$context.${expectedProperty.name} length"

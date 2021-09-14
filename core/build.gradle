@@ -21,7 +21,6 @@ dependencies {
     implementation "org.antlr:antlr4-runtime:$antlr_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: "$kotlin_version"
     // we define some testing utilities
     implementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     implementation 'com.fifesoft:rsyntaxtextarea:2.5.8'
@@ -81,10 +80,12 @@ publishing {
 
     publications {
         kolasu_core(MavenPublication) {
-            from(components.java)
+            from components.java
             artifactId "kolasu-" +project.name
             artifact sourcesJar
             artifact javadocJar
+            suppressPomMetadataWarningsFor('cliApiElements')
+            suppressPomMetadataWarningsFor('cliRuntimeElements')
             pom {
                 name = "kolasu-" +project.name
                 description = "Framework to work with AST and building languages. Integrated with ANTLR."

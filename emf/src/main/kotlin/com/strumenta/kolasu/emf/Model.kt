@@ -3,6 +3,8 @@ package com.strumenta.kolasu.emf
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
@@ -63,6 +65,49 @@ fun Position.toEObject(): EObject {
     return eo
 }
 
+fun <T : Node> Result<T>.toEObject(astPackage: EPackage): EObject {
+    val resultEO = makeResultEObject(this)
+    val rootSF = resultEO.eClass().eAllStructuralFeatures.find { it.name == "root" }!!
+    if (root != null) {
+        resultEO.eSet(rootSF, root!!.toEObject(astPackage))
+    }
+    return resultEO
+}
+
+private fun makeResultEObject(result: Result<*>): EObject {
+    val resultEC = KOLASU_METAMODEL.getEClass(Result::class.java)
+    val resultEO = KOLASU_METAMODEL.eFactoryInstance.create(resultEC)
+    val issuesSF = resultEC.eAllStructuralFeatures.find { it.name == "issues" }!!
+    val issues = resultEO.eGet(issuesSF) as MutableList<EObject>
+    result.issues.forEach {
+        issues.add(it.toEObject())
+    }
+    return resultEO
+}
+
+fun <T : Node> Result<T>.toEObject(resource: Resource): EObject {
+    val resultEO = makeResultEObject(this)
+    val rootSF = resultEO.eClass().eAllStructuralFeatures.find { it.name == "root" }!!
+    if (root != null) {
+        resultEO.eSet(rootSF, root!!.toEObject(resource))
+    }
+    return resultEO
+}
+
+fun Issue.toEObject(): EObject {
+    val ec = KOLASU_METAMODEL.getEClass(Issue::class.java)
+    val eo = KOLASU_METAMODEL.eFactoryInstance.create(ec)
+    // TODO val typeSF = ec.eAllStructuralFeatures.find { it.name == "type" }!!
+    // TODO eo.eSet(typeSF, issue.type.ordinal)
+    val messageSF = ec.eAllStructuralFeatures.find { it.name == "message" }!!
+    eo.eSet(messageSF, message)
+    val positionSF = ec.eAllStructuralFeatures.find { it.name == "position" }!!
+    if (position != null) {
+        eo.eSet(positionSF, position!!.toEObject())
+    }
+    return eo
+}
+
 private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, esf: EStructuralFeature): Any? {
     val pdValue: Any? = value
     if (pdValue is Enum<*>) {
@@ -72,7 +117,7 @@ private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, es
         // this could be not a primitive value but a value that we mapped to an EClass
         if (pdValue != null) {
             val eClass = ePackage.eClassifiers.filterIsInstance<EClass>().find {
-                it.name == pdValue!!.javaClass.simpleName
+                it.name == pdValue.javaClass.simpleName
             }
             when {
                 eClass != null -> {

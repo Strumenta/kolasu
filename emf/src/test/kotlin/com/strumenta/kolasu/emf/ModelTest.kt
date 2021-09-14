@@ -42,6 +42,9 @@ class ModelTest {
         // TODO this is to correctly resolve the metamodel, however what would happen if there were
         // other references to https://... resources?
         resourceSet.resourceFactoryRegistry.protocolToFactoryMap["https"] = JsonResourceFactory()
+        val kolasuURI = URI.createURI(KOLASU_METAMODEL.nsURI)
+        val kolasuRes = resourceSet.createResource(kolasuURI)
+        kolasuRes.contents.add(KOLASU_METAMODEL)
         val metaURI = URI.createURI(nsURI)
         val metaRes = resourceSet.createResource(metaURI)
         metaRes.contents.add(ePackage)
