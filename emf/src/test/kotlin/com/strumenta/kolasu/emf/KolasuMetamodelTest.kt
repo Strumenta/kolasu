@@ -14,7 +14,7 @@ class KolasuMetamodelTest {
         ePackage.saveEcore(File("simplemm.ecore"))
         ePackage.saveAsJson(File("simplemm.json"))
         assertEquals("SimpleMM", ePackage.name)
-        assertEquals(6, ePackage.eClassifiers.size)
+        assertEquals(7, ePackage.eClassifiers.size)
 
 //        val cu: EClass = ePackage.eClassifiers.find { it.name == "CompilationUnit" } as EClass
 //        assertEquals(1, cu.eAllSuperTypes.size)

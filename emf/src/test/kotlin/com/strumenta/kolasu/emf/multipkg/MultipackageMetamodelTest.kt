@@ -20,7 +20,7 @@ class MultipackageMetamodelTest {
             "simplemm", resource
         )
         mb1.provideClass(CompilationUnit::class)
-        assertEquals(6, mb1.generate().eClassifiers.size)
+        assertEquals(7, mb1.generate().eClassifiers.size)
 
         val mb2 = MetamodelBuilder(
             "com.strumenta.kolasu.emf.multipkg",

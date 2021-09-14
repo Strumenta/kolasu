@@ -7,6 +7,7 @@ import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.LocalDate
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
@@ -140,6 +141,8 @@ class KolasuDataTypeHandler(val kolasuKClass: KClass<*>, val kolasuDataType: EDa
     override fun external(): Boolean = true
 }
 
+val LocalDateHandler = KolasuClassHandler(LocalDate::class, KOLASU_METAMODEL.getEClass("LocalDate"))
+
 val NodeHandler = KolasuClassHandler(Node::class, KOLASU_METAMODEL.getEClass("ASTNode"))
 val NamedHandler = KolasuClassHandler(Named::class, KOLASU_METAMODEL.getEClass("Named"))
 val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, KOLASU_METAMODEL.getEClass("ReferenceByName"))
@@ -194,6 +197,8 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         dataTypeHandlers.add(LongHandler)
         dataTypeHandlers.add(BigIntegerHandler)
         dataTypeHandlers.add(BigDecimalHandler)
+
+        eclassTypeHandlers.add(LocalDateHandler)
 
         eclassTypeHandlers.add(NodeHandler)
         eclassTypeHandlers.add(NamedHandler)
