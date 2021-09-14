@@ -13,10 +13,9 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.emfjson.jackson.resource.JsonResourceFactory
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.lang.RuntimeException
 import java.time.LocalDate
-import java.time.ZoneId
-import java.util.*
+import java.time.LocalDateTime
+import java.time.LocalTime
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
@@ -127,6 +126,22 @@ private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, es
         eObject.eSet(eClass.getEStructuralFeature("year"), pdValue.year)
         eObject.eSet(eClass.getEStructuralFeature("month"), pdValue.monthValue)
         eObject.eSet(eClass.getEStructuralFeature("dayOfMonth"), pdValue.dayOfMonth)
+        return eObject
+    } else if (pdValue is LocalTime) {
+        val eClass = KOLASU_METAMODEL.getEClass("LocalTime")
+        val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
+        eObject.eSet(eClass.getEStructuralFeature("hour"), pdValue.hour)
+        eObject.eSet(eClass.getEStructuralFeature("minute"), pdValue.minute)
+        eObject.eSet(eClass.getEStructuralFeature("second"), pdValue.second)
+        eObject.eSet(eClass.getEStructuralFeature("nanosecond"), pdValue.nano)
+        return eObject
+    } else if (pdValue is LocalDateTime) {
+        val eClass = KOLASU_METAMODEL.getEClass("LocalDateTime")
+        val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
+        val dateComponent = toValue(KOLASU_METAMODEL, pdValue.toLocalDate(), pd, esf)
+        val timeComponent = toValue(KOLASU_METAMODEL, pdValue.toLocalTime(), pd, esf)
+        eObject.eSet(eClass.getEStructuralFeature("date"), dateComponent)
+        eObject.eSet(eClass.getEStructuralFeature("time"), timeComponent)
         return eObject
     } else {
         // this could be not a primitive value but a value that we mapped to an EClass

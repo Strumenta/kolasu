@@ -4,7 +4,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
 import org.junit.Test
 import java.io.File
-import java.time.LocalDate
+import java.time.LocalDateTime
 import kotlin.test.assertEquals
 
 sealed class Statement : Node()
@@ -14,7 +14,7 @@ enum class Visibility {
 }
 class VarDeclaration(var visibility: Visibility, var name: String, var initialValue: Expression) : Statement()
 class StringLiteral(var value: String) : Expression()
-class LocalDateLiteral(var value: LocalDate) : Expression()
+class LocalDateTimeLiteral(var value: LocalDateTime) : Expression()
 data class CompilationUnit(val statements: List<Statement>?, override val specifiedPosition: Position? = null) :
     Node(specifiedPosition)
 

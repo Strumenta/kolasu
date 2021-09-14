@@ -12,6 +12,7 @@ import org.emfjson.jackson.resource.JsonResourceFactory
 import org.junit.Test
 import java.io.File
 import java.time.LocalDate
+import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -24,7 +25,7 @@ class ModelTest {
             listOf(
                 VarDeclaration(Visibility.PUBLIC, "a", StringLiteral("foo")),
                 VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar")),
-                VarDeclaration(Visibility.PRIVATE, "c", LocalDateLiteral(LocalDate.now())),
+                VarDeclaration(Visibility.PRIVATE, "c", LocalDateTimeLiteral(LocalDateTime.now())),
             ),
             Position(Point(1, 0), Point(1, 1))
         )

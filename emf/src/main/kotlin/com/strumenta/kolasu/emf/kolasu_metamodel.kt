@@ -6,7 +6,6 @@ import org.eclipse.emf.ecore.EcoreFactory
 import java.io.File
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.LocalDate
 
 val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
 
@@ -51,6 +50,16 @@ fun createKolasuMetamodel(): EPackage {
         addAttribute("year", intDT, 1, 1)
         addAttribute("month", intDT, 1, 1)
         addAttribute("dayOfMonth", intDT, 1, 1)
+    }
+    val localTime = ePackage.createEClass("LocalTime").apply {
+        addAttribute("hour", intDT, 1, 1)
+        addAttribute("minute", intDT, 1, 1)
+        addAttribute("second", intDT, 1, 1)
+        addAttribute("nanosecond", intDT, 1, 1)
+    }
+    val localDateTime = ePackage.createEClass("LocalDateTime").apply {
+        addContainment("date", localDate, 1, 1)
+        addContainment("time", localTime, 1, 1)
     }
 
     val point = ePackage.createEClass("Point").apply {
