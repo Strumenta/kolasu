@@ -223,7 +223,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
 
             if (tokens.last.type != Token.EOF) {
                 val message = "The parser didn't consume the entire input"
-                issues.add(Issue(IssueType.SYNTACTIC, message, tokens.last!!.endPoint.asPosition))
+                issues.add(Issue(IssueType.SYNTACTIC, message, position = tokens.last!!.endPoint.asPosition))
             }
         }
 
@@ -252,7 +252,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     private fun verifyParseTree(parser: Parser, errors: MutableList<Issue>, root: ParserRuleContext) {
         val lastToken = parser.tokenStream.get(parser.tokenStream.index())
         if (lastToken.type != Token.EOF) {
-            errors.add(Issue(IssueType.SYNTACTIC, "Not whole input consumed", lastToken!!.endPoint.asPosition))
+            errors.add(Issue(IssueType.SYNTACTIC, "Not whole input consumed", position = lastToken!!.endPoint.asPosition))
         }
 
         root.processDescendantsAndErrors(
@@ -261,13 +261,13 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
                     errors.add(
                         Issue(
                             IssueType.SYNTACTIC, "Recognition exception: ${it.exception.message}",
-                            it.start.startPoint.asPosition
+                            position = it.start.startPoint.asPosition
                         )
                     )
                 }
             },
             {
-                errors.add(Issue(IssueType.SYNTACTIC, "Error node found", it.toPosition(true)))
+                errors.add(Issue(IssueType.SYNTACTIC, "Error node found", position = it.toPosition(true)))
             }
         )
     }
