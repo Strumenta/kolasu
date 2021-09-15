@@ -285,7 +285,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
 
         eClass.isAbstract = kClass.isAbstract || kClass.isSealed
 
-        kClass.java.processProperties { prop ->
+        kClass.processProperties { prop ->
             try {
                 if (eClass.eAllStructuralFeatures.any { sf -> sf.name == prop.name }) {
                     // skip

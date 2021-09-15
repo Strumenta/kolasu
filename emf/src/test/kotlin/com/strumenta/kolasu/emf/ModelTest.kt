@@ -11,7 +11,6 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.emfjson.jackson.resource.JsonResourceFactory
 import org.junit.Test
 import java.io.File
-import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

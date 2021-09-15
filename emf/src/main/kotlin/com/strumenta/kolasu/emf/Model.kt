@@ -121,25 +121,14 @@ private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, es
         val ee = ePackage.getEEnum(pdValue.javaClass)
         return ee.getEEnumLiteral(pdValue.name)
     } else if (pdValue is LocalDate) {
-        val eClass = KOLASU_METAMODEL.getEClass("LocalDate")
-        val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
-        eObject.eSet(eClass.getEStructuralFeature("year"), pdValue.year)
-        eObject.eSet(eClass.getEStructuralFeature("month"), pdValue.monthValue)
-        eObject.eSet(eClass.getEStructuralFeature("dayOfMonth"), pdValue.dayOfMonth)
-        return eObject
+        return toLocalDateObject(pdValue)
     } else if (pdValue is LocalTime) {
-        val eClass = KOLASU_METAMODEL.getEClass("LocalTime")
-        val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
-        eObject.eSet(eClass.getEStructuralFeature("hour"), pdValue.hour)
-        eObject.eSet(eClass.getEStructuralFeature("minute"), pdValue.minute)
-        eObject.eSet(eClass.getEStructuralFeature("second"), pdValue.second)
-        eObject.eSet(eClass.getEStructuralFeature("nanosecond"), pdValue.nano)
-        return eObject
+        return toLocalTimeObject(pdValue)
     } else if (pdValue is LocalDateTime) {
         val eClass = KOLASU_METAMODEL.getEClass("LocalDateTime")
         val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
-        val dateComponent = toValue(KOLASU_METAMODEL, pdValue.toLocalDate(), pd, esf)
-        val timeComponent = toValue(KOLASU_METAMODEL, pdValue.toLocalTime(), pd, esf)
+        val dateComponent = toLocalDateObject(pdValue.toLocalDate())
+        val timeComponent = toLocalTimeObject(pdValue.toLocalTime())
         eObject.eSet(eClass.getEStructuralFeature("date"), dateComponent)
         eObject.eSet(eClass.getEStructuralFeature("time"), timeComponent)
         return eObject
@@ -181,6 +170,25 @@ private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, es
             }
         }
     }
+}
+
+private fun toLocalTimeObject(value: LocalTime): EObject {
+    val eClass = KOLASU_METAMODEL.getEClass("LocalTime")
+    val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
+    eObject.eSet(eClass.getEStructuralFeature("hour"), value.hour)
+    eObject.eSet(eClass.getEStructuralFeature("minute"), value.minute)
+    eObject.eSet(eClass.getEStructuralFeature("second"), value.second)
+    eObject.eSet(eClass.getEStructuralFeature("nanosecond"), value.nano)
+    return eObject
+}
+
+private fun toLocalDateObject(value: LocalDate): EObject {
+    val eClass = KOLASU_METAMODEL.getEClass("LocalDate")
+    val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
+    eObject.eSet(eClass.getEStructuralFeature("year"), value.year)
+    eObject.eSet(eClass.getEStructuralFeature("month"), value.monthValue)
+    eObject.eSet(eClass.getEStructuralFeature("dayOfMonth"), value.dayOfMonth)
+    return eObject
 }
 
 fun packageName(klass: KClass<*>): String =

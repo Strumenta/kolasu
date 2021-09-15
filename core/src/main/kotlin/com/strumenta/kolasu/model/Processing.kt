@@ -174,7 +174,7 @@ data class PropertyDescription(
     }
 }
 
-val DEFAULT_IGNORED_PROPERTIES = setOf("parseTreeNode", "position", "specifiedPosition")
+val DEFAULT_IGNORED_PROPERTIES = setOf("nodeType", "parseTreeNode", "position", "specifiedPosition")
 
 /**
  * Executes an operation on the properties of a node.
