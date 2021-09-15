@@ -47,6 +47,22 @@ fun createKolasuMetamodel(): EPackage {
     booleanDT.instanceClass = Boolean::class.java
     ePackage.eClassifiers.add(booleanDT)
 
+    val localDate = ePackage.createEClass("LocalDate").apply {
+        addAttribute("year", intDT, 1, 1)
+        addAttribute("month", intDT, 1, 1)
+        addAttribute("dayOfMonth", intDT, 1, 1)
+    }
+    val localTime = ePackage.createEClass("LocalTime").apply {
+        addAttribute("hour", intDT, 1, 1)
+        addAttribute("minute", intDT, 1, 1)
+        addAttribute("second", intDT, 1, 1)
+        addAttribute("nanosecond", intDT, 1, 1)
+    }
+    val localDateTime = ePackage.createEClass("LocalDateTime").apply {
+        addContainment("date", localDate, 1, 1)
+        addContainment("time", localTime, 1, 1)
+    }
+
     val point = ePackage.createEClass("Point").apply {
         addAttribute("line", intDT, 1, 1)
         addAttribute("column", intDT, 1, 1)

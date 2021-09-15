@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
 import org.junit.Test
 import java.io.File
+import java.time.LocalDateTime
 import kotlin.test.assertEquals
 
 sealed class Statement : Node()
@@ -13,6 +14,7 @@ enum class Visibility {
 }
 class VarDeclaration(var visibility: Visibility, var name: String, var initialValue: Expression) : Statement()
 class StringLiteral(var value: String) : Expression()
+class LocalDateTimeLiteral(var value: LocalDateTime) : Expression()
 data class CompilationUnit(val statements: List<Statement>?, override val specifiedPosition: Position? = null) :
     Node(specifiedPosition)
 
@@ -26,7 +28,7 @@ class MetamodelTest {
         ePackage.saveEcore(File("simplemm.ecore"))
         ePackage.saveAsJson(File("simplemm.json"))
         assertEquals("SimpleMM", ePackage.name)
-        assertEquals(6, ePackage.eClassifiers.size)
+        assertEquals(7, ePackage.eClassifiers.size)
 
 //        val cu: EClass = ePackage.eClassifiers.find { it.name == "CompilationUnit" } as EClass
 //        assertEquals(1, cu.eAllSuperTypes.size)

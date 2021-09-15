@@ -11,6 +11,8 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.emfjson.jackson.resource.JsonResourceFactory
 import org.junit.Test
 import java.io.File
+import java.time.LocalDate
+import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -22,7 +24,8 @@ class ModelTest {
         val cu = CompilationUnit(
             listOf(
                 VarDeclaration(Visibility.PUBLIC, "a", StringLiteral("foo")),
-                VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar"))
+                VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar")),
+                VarDeclaration(Visibility.PRIVATE, "c", LocalDateTimeLiteral(LocalDateTime.now())),
             ),
             Position(Point(1, 0), Point(1, 1))
         )
@@ -58,7 +61,7 @@ class ModelTest {
         val cuClass = ePackage.eClassifiers.find { c -> c.name.equals("CompilationUnit") } as EClass
         assertEquals(cuClass, eObject.eClass())
         val stmts = eObject.eGet(cuClass.getEStructuralFeature("statements")) as EList<*>
-        assertEquals(2, stmts.size)
+        assertEquals(3, stmts.size)
     }
 
     @Test
