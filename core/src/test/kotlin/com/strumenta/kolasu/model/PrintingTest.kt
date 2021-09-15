@@ -19,6 +19,7 @@ class PrintingTest {
       left = [
         Number {
           value = 3
+          nodeType = com.strumenta.kolasu.model.Number
           parseTreeNode = null
           specifiedPosition = null
         } // Number
@@ -26,10 +27,12 @@ class PrintingTest {
       right = [
         Number {
           value = 9
+          nodeType = com.strumenta.kolasu.model.Number
           parseTreeNode = null
           specifiedPosition = null
         } // Number
       ]
+      nodeType = com.strumenta.kolasu.model.Add
       parseTreeNode = null
       specifiedPosition = null
     } // Add
@@ -37,10 +40,12 @@ class PrintingTest {
   right = [
     Number {
       value = 1
+      nodeType = com.strumenta.kolasu.model.Number
       parseTreeNode = null
       specifiedPosition = null
     } // Number
   ]
+  nodeType = com.strumenta.kolasu.model.Add
   parseTreeNode = null
   specifiedPosition = null
 } // Add
@@ -56,6 +61,7 @@ class PrintingTest {
             """Add {
   left = [
     Sub {
+      nodeType = com.strumenta.kolasu.model.Sub
       parseTreeNode = null
       specifiedPosition = null
     } // Sub
@@ -63,10 +69,12 @@ class PrintingTest {
   right = [
     Number {
       value = 1
+      nodeType = com.strumenta.kolasu.model.Number
       parseTreeNode = null
       specifiedPosition = null
     } // Number
   ]
+  nodeType = com.strumenta.kolasu.model.Add
   parseTreeNode = null
   specifiedPosition = null
 } // Add
