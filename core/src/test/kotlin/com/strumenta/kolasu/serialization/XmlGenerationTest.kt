@@ -108,9 +108,12 @@ class XmlGenerationTest {
 
     @Test
     fun generateXMLWithErrors() {
-        val issues: List<Issue> = listOf<Issue>(
+        val issues: List<Issue> = listOf(
             Issue.lexical("lexical problem"),
-            Issue.semantic("semantic problem", Position(Point(10, 1), Point(12, 3)))
+            Issue.semantic(
+                "semantic problem",
+                position = Position(Point(10, 1), Point(12, 3))
+            )
         )
         val result = Result<Node>(issues, null)
         val serialized = XMLGenerator().generateString(result)

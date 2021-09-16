@@ -48,7 +48,12 @@ class JsonDeserializerTest {
     @Test
     fun deserializeNegativeResultFromJson() {
         val originalResult: Result<MyRoot> = Result(
-            listOf(Issue(IssueType.LEXICAL, "foo", Position(Point(1, 10), Point(4, 540)))),
+            listOf(
+                Issue(
+                    IssueType.LEXICAL, "foo",
+                    position = Position(Point(1, 10), Point(4, 540))
+                )
+            ),
             null
         )
         val json = JsonGenerator().generateString(originalResult)

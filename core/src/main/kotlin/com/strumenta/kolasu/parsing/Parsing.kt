@@ -2,6 +2,7 @@ package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import org.antlr.v4.runtime.*
 import java.io.*
@@ -16,7 +17,7 @@ open class CodeProcessingResult<D>(
     val code: String? = null
 ) {
     val correct: Boolean
-        get() = issues.isEmpty()
+        get() = issues.none { it.severity != IssueSeverity.INFO }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -252,7 +253,12 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     private fun verifyParseTree(parser: Parser, errors: MutableList<Issue>, root: ParserRuleContext) {
         val lastToken = parser.tokenStream.get(parser.tokenStream.index())
         if (lastToken.type != Token.EOF) {
-            errors.add(Issue(IssueType.SYNTACTIC, "Not whole input consumed", position = lastToken!!.endPoint.asPosition))
+            errors.add(
+                Issue(
+                    IssueType.SYNTACTIC, "Not whole input consumed",
+                    position = lastToken!!.endPoint.asPosition
+                )
+            )
         }
 
         root.processDescendantsAndErrors(
