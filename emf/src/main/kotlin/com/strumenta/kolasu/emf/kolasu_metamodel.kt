@@ -88,7 +88,7 @@ fun createKolasuMetamodel(): EPackage {
     issueSeverity.addLiteral(IssueSeverity.ERROR)
     issueSeverity.addLiteral(IssueSeverity.WARNING)
     issueSeverity.addLiteral(IssueSeverity.INFO)
-    ePackage.eClassifiers.add(issueType)
+    ePackage.eClassifiers.add(issueSeverity)
 
     val issue = ePackage.createEClass("Issue").apply {
         addAttribute("type", issueType, 1, 1)
@@ -110,10 +110,10 @@ fun createKolasuMetamodel(): EPackage {
 
     val referenceByName = ePackage.createEClass("ReferenceByName").apply {
         val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
-            this.name = "N"
-            this.eBounds.add(
+            name = "N"
+            eBounds.add(
                 EcoreFactory.eINSTANCE.createEGenericType().apply {
-                    this.eClassifier = astNode
+                    eClassifier = astNode
                 }
             )
         }
@@ -121,7 +121,7 @@ fun createKolasuMetamodel(): EPackage {
         val rootContainment = EcoreFactory.eINSTANCE.createEReference()
         rootContainment.name = "referenced"
         rootContainment.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
-            this.eTypeParameter = typeParameter
+            eTypeParameter = typeParameter
         }
         rootContainment.isContainment = true
         rootContainment.lowerBound = 0

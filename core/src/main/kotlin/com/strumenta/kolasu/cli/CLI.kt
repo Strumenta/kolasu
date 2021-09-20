@@ -14,7 +14,7 @@ import kotlin.system.exitProcess
 
 data class CLIContext<R : Node>(val language: KolasuParser<R, *, *>, var input: String? = null)
 
-class ParserCLI<R : Node>(val parser: KolasuParser<R, *, *>) : CliktCommand() {
+open class ParserCLI<R : Node>(val parser: KolasuParser<R, *, *>) : CliktCommand() {
     val input by argument()
     val context by findOrSetObject { CLIContext(parser) }
     override fun run() {

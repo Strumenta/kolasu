@@ -34,9 +34,7 @@ class ResultTest {
             nsURI, "simplemm"
         )
         metamodelBuilder.provideClass(CompilationUnit::class)
-        var ePackage = metamodelBuilder.generate()
-
-        val eo = cu.toEObject(ePackage)
+        val ePackage = metamodelBuilder.generate()
 
         val result = Result(
             listOf(
@@ -46,6 +44,7 @@ class ResultTest {
             cu
         )
 
+        val eo = result.toEObject(ePackage)
         // eo.saveXMI(File("simplemodel.xmi"))
         val emfString = JsonGenerator().generateEMFString(result, ePackage)
         println(emfString)

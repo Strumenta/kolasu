@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
 import java.lang.IllegalArgumentException
@@ -13,7 +14,9 @@ import java.time.LocalTime
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
+import kotlin.reflect.KClassifier
 import kotlin.reflect.KType
+import kotlin.reflect.KTypeParameter
 import kotlin.reflect.full.*
 
 interface EDataTypeHandler {
@@ -150,6 +153,7 @@ val LocalDateTimeHandler = KolasuClassHandler(LocalDateTime::class, KOLASU_METAM
 val NodeHandler = KolasuClassHandler(Node::class, KOLASU_METAMODEL.getEClass("ASTNode"))
 val NamedHandler = KolasuClassHandler(Named::class, KOLASU_METAMODEL.getEClass("Named"))
 val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, KOLASU_METAMODEL.getEClass("ReferenceByName"))
+val ResultHandler = KolasuClassHandler(Result::class, KOLASU_METAMODEL.getEClass("Result"))
 
 val StringHandler = KolasuDataTypeHandler(String::class, KOLASU_METAMODEL.getEClassifier("string") as EDataType)
 val BooleanHandler = KolasuDataTypeHandler(Boolean::class, KOLASU_METAMODEL.getEClassifier("boolean") as EDataType)
@@ -209,6 +213,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         eclassTypeHandlers.add(NodeHandler)
         eclassTypeHandlers.add(NamedHandler)
         eclassTypeHandlers.add(ReferenceByNameHandler)
+        eclassTypeHandlers.add(ResultHandler)
     }
 
     /**
@@ -291,6 +296,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                     // skip
                 } else {
                     // do not process inherited properties
+                    val classifier = prop.valueType.classifier
                     if (prop.provideNodes) {
                         val ec = EcoreFactory.eINSTANCE.createEReference()
                         ec.name = prop.name
@@ -302,7 +308,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                             ec.upperBound = 1
                         }
                         ec.isContainment = true
-                        ec.eType = provideClass(prop.valueType.classifier as KClass<*>)
+                        setType(ec, classifier)
                         eClass.eStructuralFeatures.add(ec)
 //                    } else if (prop.valueType.classifier == ReferenceByName::class) {
 //                        val ec = EcoreFactory.eINSTANCE.createEReference()
@@ -331,7 +337,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                                 eContainment.upperBound = 1
                             }
                             eContainment.isContainment = true
-                            eContainment.eType = provideClass(prop.valueType.classifier as KClass<*>)
+                            setType(eContainment, classifier)
                             eClass.eStructuralFeatures.add(eContainment)
                         } else {
                             val ea = EcoreFactory.eINSTANCE.createEAttribute()
@@ -353,6 +359,30 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             }
         }
         return eClass
+    }
+
+    private fun setType(element: ETypedElement, classifier: KClassifier?) {
+        when (classifier) {
+            is KClass<*> -> element.eType = provideClass(classifier)
+            is KTypeParameter -> {
+                val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
+                    name = classifier.name
+                    classifier.upperBounds.forEach {
+                        if (it is KClass<*>) {
+                            eBounds.add(
+                                EcoreFactory.eINSTANCE.createEGenericType().apply {
+                                    eClassifier = provideClass(it)
+                                }
+                            )
+                        }
+                    }
+                }
+                element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
+                    eTypeParameter = typeParameter
+                }
+            }
+            else -> throw Error("Not a valid classifier: $classifier")
+        }
     }
 
     private fun ensureClassifierNameIsNotUsed(classifier: EClassifier) {
