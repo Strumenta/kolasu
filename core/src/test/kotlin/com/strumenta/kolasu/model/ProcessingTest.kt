@@ -58,6 +58,7 @@ class ProcessingTest {
         b.assignParents()
         a2.replaceWith(a4)
         assertEquals("4", b.manyAs[0].s)
+        assertEquals(BW(a1, mutableListOf(a4, a3)), b)
     }
 
     @test
