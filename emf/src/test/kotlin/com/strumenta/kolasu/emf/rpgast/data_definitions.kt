@@ -502,7 +502,7 @@ fun encodeToDS(inValue: BigDecimal, digits: Int, scale: Int): String {
 fun decodeFromDS(value: String, digits: Int, scale: Int): BigDecimal {
     val buffer = IntArray(value.length)
     for (i in value.indices) {
-        buffer[i] = value[i].toInt()
+        buffer[i] = value[i].code
     }
 
     var sign: String = ""

@@ -290,15 +290,14 @@ data class CallStmt(
     }
 }
 
-data class KListStmt
-private constructor(val name: String, val fields: List<String>, override val specifiedPosition: Position?) :
+data class KListStmt(val name: String, val fields: List<String>, override val specifiedPosition: Position?) :
     Statement(
         specifiedPosition
     ),
     StatementThatCanDefineData {
     companion object {
         operator fun invoke(name: String, fields: List<String>, specifiedPosition: Position? = null): KListStmt {
-            return KListStmt(name.toUpperCase(), fields, specifiedPosition)
+            return KListStmt(name.uppercase(), fields, specifiedPosition)
         }
     }
 

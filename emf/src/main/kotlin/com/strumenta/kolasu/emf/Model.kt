@@ -5,6 +5,7 @@ import com.google.gson.JsonParser
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
+import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
@@ -115,7 +116,7 @@ fun Issue.toEObject(): EObject {
     return eo
 }
 
-private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, esf: EStructuralFeature): Any? {
+private fun toValue(ePackage: EPackage, value: Any?): Any? {
     val pdValue: Any? = value
     if (pdValue is Enum<*>) {
         val ee = ePackage.getEEnum(pdValue.javaClass)
@@ -134,40 +135,35 @@ private fun toValue(ePackage: EPackage, value: Any?, pd: PropertyDescription, es
         return eObject
     } else {
         // this could be not a primitive value but a value that we mapped to an EClass
-        if (pdValue != null) {
-            val eClass = ePackage.eClassifiers.filterIsInstance<EClass>().find {
+        val eClass = if (pdValue != null) {
+            ePackage.eClassifiers.filterIsInstance<EClass>().find {
                 it.name == pdValue.javaClass.simpleName
             }
-            when {
-                eClass != null -> {
-                    val eoValue = pdValue.dataToEObject(ePackage)
-                    try {
-                        return eoValue
-                    } catch (t: Throwable) {
-                        throw RuntimeException("Issue setting $esf to $eoValue", t)
-                    }
-                }
-                pdValue is ReferenceByName<*> -> {
-                    val refEC = KOLASU_METAMODEL.getEClass("ReferenceByName")
-                    val refEO = KOLASU_METAMODEL.eFactoryInstance.create(refEC)
-                    refEO.eSet(refEC.getEStructuralFeature("name")!!, pdValue.name)
-                    // TODO complete
-                    return refEO
-                }
-                else -> {
-                    try {
-                        return pdValue
-                    } catch (e: Exception) {
-                        throw RuntimeException("Unable to set property $pd. Structural feature: $esf", e)
-                    }
-                }
+        } else null
+        return when {
+            eClass != null -> {
+                pdValue!!.dataToEObject(ePackage)
             }
-        } else {
-            try {
-                return pdValue
-            } catch (e: Exception) {
-                throw RuntimeException("Unable to set property $pd. Structural feature: $esf", e)
+            pdValue is ReferenceByName<*> -> {
+                val refEC = KOLASU_METAMODEL.getEClass("ReferenceByName")
+                val refEO = KOLASU_METAMODEL.eFactoryInstance.create(refEC)
+                refEO.eSet(refEC.getEStructuralFeature("name")!!, pdValue.name)
+                // TODO complete
+                refEO
             }
+            pdValue is Result<*> -> {
+                val resEC = KOLASU_METAMODEL.getEClass("Result")
+                val resEO = KOLASU_METAMODEL.eFactoryInstance.create(resEC)
+                if (pdValue.root is Node) {
+                    resEO.eSet(resEC.getEStructuralFeature("root"), (pdValue.root as Node).toEObject(ePackage))
+                } else {
+                    resEO.eSet(resEC.getEStructuralFeature("root"), toValue(ePackage, pdValue.root))
+                }
+                val issues = resEO.eGet(resEC.getEStructuralFeature("issues")) as EList<EObject>
+                issues.addAll(pdValue.issues.map { it.toEObject() })
+                resEO
+            }
+            else -> pdValue
         }
     }
 }
@@ -247,14 +243,16 @@ fun Node.toEObject(eResource: Resource): EObject {
                     val elist = eo.eGet(esf) as MutableList<Any>
                     (pd.value as List<*>?)?.forEach {
                         try {
-                            val childValue = toValue(ec.ePackage, it, pd, esf)
+                            val childValue = toValue(ec.ePackage, it)
                             elist.add(childValue!!)
                         } catch (e: Exception) {
                             throw RuntimeException("Unable to map to EObject child $it in property $pd of $this", e)
                         }
                     }
-                } else {
-                    eo.eSet(esf, toValue(ec.ePackage, pd.value, pd, esf))
+                } else try {
+                    eo.eSet(esf, toValue(ec.ePackage, pd.value))
+                } catch (e: Exception) {
+                    throw RuntimeException("Unable to set property $pd. Structural feature: $esf", e)
                 }
             }
         }
