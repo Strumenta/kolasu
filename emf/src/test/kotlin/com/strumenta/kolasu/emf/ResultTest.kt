@@ -45,7 +45,7 @@ class ResultTest {
         )
 
         val eo = result.toEObject(ePackage)
-        // eo.saveXMI(File("simplemodel.xmi"))
+        //eo.saveXMI(java.io.File("simplemodel.xmi"))
         val emfString = JsonGenerator().generateEMFString(result, ePackage)
         println(emfString)
 

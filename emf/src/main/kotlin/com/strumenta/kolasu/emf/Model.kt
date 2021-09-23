@@ -105,8 +105,12 @@ fun <T : Node> Result<T>.toEObject(resource: Resource): EObject {
 fun Issue.toEObject(): EObject {
     val ec = KOLASU_METAMODEL.getEClass(Issue::class.java)
     val eo = KOLASU_METAMODEL.eFactoryInstance.create(ec)
-    // TODO val typeSF = ec.eAllStructuralFeatures.find { it.name == "type" }!!
-    // TODO eo.eSet(typeSF, issue.type.ordinal)
+    val et = KOLASU_METAMODEL.getEClassifier("IssueType")
+    val es = KOLASU_METAMODEL.getEClassifier("IssueSeverity")
+    val typeSF = ec.eAllStructuralFeatures.find { it.name == "type" }!!
+    eo.eSet(typeSF, (et as EEnum).getEEnumLiteral(type.ordinal))
+    val severitySF = ec.eAllStructuralFeatures.find { it.name == "severity" }!!
+    eo.eSet(severitySF, (es as EEnum).getEEnumLiteral(severity.ordinal))
     val messageSF = ec.eAllStructuralFeatures.find { it.name == "message" }!!
     eo.eSet(messageSF, message)
     val positionSF = ec.eAllStructuralFeatures.find { it.name == "position" }!!
