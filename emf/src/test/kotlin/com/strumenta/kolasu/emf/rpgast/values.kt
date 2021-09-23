@@ -956,7 +956,7 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
     fun asStringValue(): String {
         val builder = StringBuilder()
         value.forEach {
-            if (it.toInt() < 32 || it.toInt() > 128 || it in '0'..'9') {
+            if (it.code < 32 || it.code > 128 || it in '0'..'9') {
                 builder.append(' ')
             } else {
                 builder.append(it)
