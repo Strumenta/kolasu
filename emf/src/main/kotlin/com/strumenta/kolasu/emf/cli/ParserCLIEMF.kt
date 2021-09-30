@@ -67,14 +67,18 @@ open class ParserCLIEMF<R : Node>(
                 ?: throw IOException("Unsupported destination: $target")
         val eObject = simplifiedResult.toEObject(mmResource)
         resource.contents.add(eObject)
-        resource.save(options)
-        println("Done (${System.currentTimeMillis() - start}ms).")
+        try {
+            resource.save(options)
+            println("Done (${System.currentTimeMillis() - start}ms).")
+        } finally {
+            resource.contents.remove(eObject)
+        }
     }
 
     private fun saveMetamodel(target: String, resourceSet: ResourceSet, options: Map<String, Boolean>): Resource {
         val start = System.currentTimeMillis()
         val metamodel = if (this.metamodel != null) {
-            File(this.metamodel)
+            File(this.metamodel!!)
         } else {
             File(File(target).parentFile, "metamodel." + (target.substring(target.lastIndexOf(".") + 1)))
         }.absolutePath

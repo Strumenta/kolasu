@@ -298,18 +298,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                     // do not process inherited properties
                     val classifier = prop.valueType.classifier
                     if (prop.provideNodes) {
-                        val ec = EcoreFactory.eINSTANCE.createEReference()
-                        ec.name = prop.name
-                        if (prop.multiple) {
-                            ec.lowerBound = 0
-                            ec.upperBound = -1
-                        } else {
-                            ec.lowerBound = 0
-                            ec.upperBound = 1
-                        }
-                        ec.isContainment = true
-                        setType(ec, classifier)
-                        eClass.eStructuralFeatures.add(ec)
+                        registerReference(prop, classifier, eClass)
 //                    } else if (prop.valueType.classifier == ReferenceByName::class) {
 //                        val ec = EcoreFactory.eINSTANCE.createEReference()
 //                        ec.name = prop.name
@@ -327,18 +316,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                         val dataType = provideDataType(prop.valueType.withNullability(false))
                         if (dataType == null) {
                             // We can treat it like a class
-                            val eContainment = EcoreFactory.eINSTANCE.createEReference()
-                            eContainment.name = prop.name
-                            if (prop.multiple) {
-                                eContainment.lowerBound = 0
-                                eContainment.upperBound = -1
-                            } else {
-                                eContainment.lowerBound = 0
-                                eContainment.upperBound = 1
-                            }
-                            eContainment.isContainment = true
-                            setType(eContainment, classifier)
-                            eClass.eStructuralFeatures.add(eContainment)
+                            registerReference(prop, classifier, eClass)
                         } else {
                             val ea = EcoreFactory.eINSTANCE.createEAttribute()
                             ea.name = prop.name
@@ -359,6 +337,25 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             }
         }
         return eClass
+    }
+
+    private fun registerReference(
+        prop: PropertyTypeDescription,
+        classifier: KClassifier?,
+        eClass: EClass
+    ) {
+        val ec = EcoreFactory.eINSTANCE.createEReference()
+        ec.name = prop.name
+        if (prop.multiple) {
+            ec.lowerBound = 0
+            ec.upperBound = -1
+        } else {
+            ec.lowerBound = 0
+            ec.upperBound = 1
+        }
+        ec.isContainment = true
+        setType(ec, classifier)
+        eClass.eStructuralFeatures.add(ec)
     }
 
     private fun setType(element: ETypedElement, classifier: KClassifier?) {
