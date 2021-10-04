@@ -1,13 +1,12 @@
 package com.strumenta.kolasu.parsing
 
-import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.model.endPoint
-import com.strumenta.kolasu.model.startPoint
+import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.Parser
 import org.antlr.v4.runtime.tree.ErrorNode
+import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
 
 abstract class ParseTreeElement {
@@ -103,3 +102,15 @@ fun TerminalNode.toPosition(considerPosition: Boolean = true): Position? {
         null
     }
 }
+
+fun Token.toPosition(considerPosition: Boolean = true): Position? =
+    if(considerPosition) Position(this.startPoint, this.endPoint) else null
+
+fun ParseTree.toPosition(considerPosition: Boolean = true): Position? {
+    return when (this) {
+        is TerminalNode -> this.toPosition(considerPosition)
+        is ParserRuleContext -> this.toPosition(considerPosition)
+        else -> null
+    }
+}
+

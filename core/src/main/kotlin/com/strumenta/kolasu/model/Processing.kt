@@ -1,6 +1,7 @@
 @file:JvmName("Processing")
 package com.strumenta.kolasu.model
 
+import org.antlr.v4.runtime.ParserRuleContext
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
@@ -41,6 +42,24 @@ fun Node.assignParents() {
  */
 fun Node.processNodes(operation: (Node) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
     walker.invoke(this).forEach(operation)
+}
+
+fun Node.invalidPositions(): Sequence<Node> = this.walkDescendants().filter {
+    it.position == null ||
+            (it.parent != null &&
+                    !(it.parent!!.position!!.contains(it.position!!.start) && it.parent!!.position!!.contains(it.position!!.end)))
+}
+
+fun Node.findInvalidPosition(): Node? = this.invalidPositions().firstOrNull()
+
+fun <T : Node> T.withParseTreeNode(tree: ParserRuleContext?): T {
+    this.parseTreeNode = tree
+    return this
+}
+
+fun <T : Node> T.withParent(parent: Node?): T {
+    this.parent = parent
+    return this
 }
 
 private fun providesNodes(kTypeProjection: KTypeProjection): Boolean {
