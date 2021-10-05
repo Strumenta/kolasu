@@ -2,18 +2,31 @@ package com.strumenta.kolasu.parserbench
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
-import com.strumenta.kolasu.emf.saveAsJson
+import com.strumenta.kolasu.emf.EMFEnabledParser
 import com.strumenta.kolasu.emf.saveAsJsonObject
 import com.strumenta.kolasu.emf.toEObject
-import com.strumenta.kolasu.parsing.KolasuParser
-import org.eclipse.emf.ecore.EPackage
+import com.strumenta.kolasu.validation.Result
+import org.eclipse.emf.common.util.URI
+import org.emfjson.jackson.resource.JsonResourceFactory
 import java.io.File
+import java.io.FileOutputStream
 import java.io.FileWriter
 
-class ParserBenchExampleGenerator(val parser: KolasuParser<*, *, *>, val ePackage: EPackage, val directory: File) {
+class ParserBenchExampleGenerator(
+    val parser: EMFEnabledParser<*, *, *>,
+    val directory: File,
+    val failOnError: Boolean = true,
+    resourceURI: URI = URI.createURI("")
+) {
+
+    val resource = JsonResourceFactory().createResource(resourceURI)
 
     fun generateMetamodel() {
-        ePackage.saveAsJson(File(directory, "metamodel.json"))
+        parser.generateMetamodel(resource)
+        val metamodelFile = File(directory, "metamodel.json")
+        FileOutputStream(metamodelFile).use {
+            resource.save(it, null)
+        }
     }
 
     fun generateExample(file: File) {
@@ -25,16 +38,25 @@ class ParserBenchExampleGenerator(val parser: KolasuParser<*, *, *>, val ePackag
     }
 
     fun generateExample(name: String, code: String) {
+        val parsingResult = parser.parse(code)
+        if (!parsingResult.correct && failOnError) {
+            throw IllegalStateException("Cannot generate examples from code with errors")
+        }
+
         val jo = JsonObject()
         jo.add("name", JsonPrimitive(name))
         jo.add("code", JsonPrimitive(code))
-
-        val parsingResult = parser.parse(code)
-        if (!parsingResult.correct) {
-            throw IllegalStateException("Cannot generate examples from code with errors")
+        val eObject = Result(parsingResult.issues, parsingResult.root).toEObject(resource)
+        resource.contents.add(eObject)
+        val ast: JsonObject?
+        try {
+            ast = eObject.saveAsJsonObject()
+        } finally {
+            resource.contents.remove(eObject)
         }
-        val astEMF = parsingResult.root!!.toEObject(ePackage)
-        jo.add("ast", astEMF.saveAsJsonObject())
+        jo.add("ast", ast)
+        jo.addProperty("parsingTime", parsingResult.firstStage!!.time)
+        jo.addProperty("astBuildingTime", parsingResult.time)
         jo.toString()
         val file = File(directory, "$name.json")
         val fw = FileWriter(file)

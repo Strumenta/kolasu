@@ -3,7 +3,7 @@ package com.strumenta.kolasu.emf.cli
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.option
 import com.strumenta.kolasu.cli.ParsingCommand
-import com.strumenta.kolasu.emf.EMFEnabledParser
+import com.strumenta.kolasu.emf.EMFMetamodelSupport
 import com.strumenta.kolasu.emf.toEObject
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.validation.Result
@@ -38,7 +38,7 @@ open class ParserCLIEMF<R : Node>(
     val output by argument()
     val metamodel by option("--metamodel")
     override fun run() {
-        if (context.language !is EMFEnabledParser) {
+        if (context.language !is EMFMetamodelSupport) {
             System.err.println("The language ${context.language::class.qualifiedName} does not come with EMF support.")
             exitProcess(1)
         }
@@ -86,7 +86,7 @@ open class ParserCLIEMF<R : Node>(
         val resource =
             resourceSet.createResource(URI.createFileURI(metamodel))
                 ?: throw IOException("Unsupported destination: $metamodel")
-        (context.language as EMFEnabledParser).generateMetamodel(resource)
+        (context.language as EMFMetamodelSupport).generateMetamodel(resource)
         resource.save(options)
         println("Done (${System.currentTimeMillis() - start}ms).")
         return resource
