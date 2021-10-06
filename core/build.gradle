@@ -81,13 +81,13 @@ publishing {
     publications {
         kolasu_core(MavenPublication) {
             from components.java
-            artifactId "kolasu-" +project.name
+            artifactId "kolasu-" + project.name
             artifact sourcesJar
             artifact javadocJar
             suppressPomMetadataWarningsFor('cliApiElements')
             suppressPomMetadataWarningsFor('cliRuntimeElements')
             pom {
-                name = "kolasu-" +project.name
+                name = "kolasu-" + project.name
                 description = "Framework to work with AST and building languages. Integrated with ANTLR."
                 version = kolasu_version
                 packaging = 'jar'

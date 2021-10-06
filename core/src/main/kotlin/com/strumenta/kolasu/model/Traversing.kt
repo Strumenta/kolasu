@@ -26,7 +26,7 @@ fun <T> mutableStackOf(vararg elements: T): Stack<T> {
 fun Node.walk(): Sequence<Node> {
     val stack: Stack<Node> = mutableStackOf(this)
     return generateSequence {
-        if (stack.peek() == null) {
+        if (stack.isEmpty()) {
             null
         } else {
             val next: Node = stack.pop()

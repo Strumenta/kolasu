@@ -5,6 +5,7 @@ import com.google.gson.JsonPrimitive
 import com.strumenta.kolasu.emf.EMFEnabledParser
 import com.strumenta.kolasu.emf.saveAsJsonObject
 import com.strumenta.kolasu.emf.toEObject
+import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
 import org.emfjson.jackson.resource.JsonResourceFactory
@@ -40,7 +41,8 @@ class ParserBenchExampleGenerator(
     fun generateExample(name: String, code: String) {
         val parsingResult = parser.parse(code)
         if (!parsingResult.correct && failOnError) {
-            throw IllegalStateException("Cannot generate examples from code with errors")
+            throw ExampleGenerationFailure(
+                parsingResult, "Cannot generate examples from code with errors")
         }
 
         val jo = JsonObject()
@@ -64,3 +66,5 @@ class ParserBenchExampleGenerator(
         fw.close()
     }
 }
+
+class ExampleGenerationFailure(val result: ParsingResult<*>, message: String) : RuntimeException(message)

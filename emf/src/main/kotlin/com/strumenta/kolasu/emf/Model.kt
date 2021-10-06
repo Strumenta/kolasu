@@ -210,10 +210,15 @@ fun Resource.findEClass(klass: KClass<*>): EClass? {
 fun Resource.getEClass(klass: KClass<*>): EClass = this.findEClass(klass)
     ?: throw ClassNotFoundException(klass.qualifiedName)
 
-fun Node.toEObject(ePackage: EPackage): EObject {
-    return this.toEObject(ePackage.eResource())
-}
+fun Node.toEObject(ePackage: EPackage): EObject = toEObject(ePackage.eResource())
 
+/**
+ * Translates this node – and, recursively, its descendants – into an [EObject] (EMF/Ecore representation).
+ *
+ * The classes of the node are resolved against the provided [Resource]. That is, the resource must contain:
+ *  - the [Kolasu metamodel package][KOLASU_METAMODEL]
+ *  - every [EPackage] containing the definitions of the node classes in the tree.
+ */
 fun Node.toEObject(eResource: Resource): EObject {
     try {
         val ec = eResource.getEClass(this::class)

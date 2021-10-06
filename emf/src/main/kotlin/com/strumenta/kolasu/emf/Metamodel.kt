@@ -168,10 +168,10 @@ val BigDecimalHandler = KolasuDataTypeHandler(
 )
 val LongHandler = KolasuDataTypeHandler(Long::class, KOLASU_METAMODEL.getEClassifier("long") as EDataType)
 
-val KClass<*>.eClassifierName
+val KClass<*>.eClassifierName: String
     get() = this.java.eClassifierName
 
-val Class<*>.eClassifierName
+val Class<*>.eClassifierName: String
     get() = if (this.enclosingClass != null) {
         "${this.enclosingClass.simpleName}${this.simpleName}"
     } else {
@@ -181,14 +181,13 @@ val Class<*>.eClassifierName
 class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, resource: Resource? = null) :
     ClassifiersProvider {
 
-    private val ePackage: EPackage
+    private val ePackage: EPackage = EcoreFactory.eINSTANCE.createEPackage()
     private val eClasses = HashMap<KClass<*>, EClass>()
     private val dataTypes = HashMap<KType, EDataType>()
     private val eclassTypeHandlers = LinkedList<EClassTypeHandler>()
     private val dataTypeHandlers = LinkedList<EDataTypeHandler>()
 
     init {
-        ePackage = EcoreFactory.eINSTANCE.createEPackage()
         ePackage.name = packageName
         ePackage.nsURI = nsURI
         ePackage.nsPrefix = nsPrefix

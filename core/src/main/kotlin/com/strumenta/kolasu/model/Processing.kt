@@ -45,9 +45,11 @@ fun Node.processNodes(operation: (Node) -> Unit, walker: KFunction1<Node, Sequen
 }
 
 fun Node.invalidPositions(): Sequence<Node> = this.walkDescendants().filter {
-    it.position == null ||
-            (it.parent != null &&
-                    !(it.parent!!.position!!.contains(it.position!!.start) && it.parent!!.position!!.contains(it.position!!.end)))
+    it.position == null || run {
+        val parentPos = it.parent?.position
+        //If the parent position is null, we can't say anything about this node's position
+        (parentPos != null && !(parentPos.contains(it.position!!.start) && parentPos.contains(it.position!!.end)))
+    }
 }
 
 fun Node.findInvalidPosition(): Node? = this.invalidPositions().firstOrNull()
