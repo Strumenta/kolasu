@@ -3,6 +3,8 @@ package com.strumenta.kolasu.mapping
 import com.strumenta.kolasu.model.*
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Token
+import org.antlr.v4.runtime.tree.ParseTree
+import org.antlr.v4.runtime.tree.TerminalNode
 
 interface ParseTreeToAstMapper<in PTN : ParserRuleContext, out ASTN : Node> {
     fun map(parseTreeNode: PTN): ASTN
@@ -25,4 +27,23 @@ fun ParserRuleContext.toPosition(considerPosition: Boolean = true): Position? {
     return if (considerPosition && start != null && stop != null) {
         position
     } else null
+}
+
+fun TerminalNode.toPosition(considerPosition: Boolean = true): Position? {
+    return if (considerPosition) {
+        Position(this.symbol.startPoint, this.symbol.endPoint)
+    } else {
+        null
+    }
+}
+
+fun Token.toPosition(considerPosition: Boolean = true): Position? =
+    if(considerPosition) Position(this.startPoint, this.endPoint) else null
+
+fun ParseTree.toPosition(considerPosition: Boolean = true): Position? {
+    return when (this) {
+        is TerminalNode -> this.toPosition(considerPosition)
+        is ParserRuleContext -> this.toPosition(considerPosition)
+        else -> null
+    }
 }
