@@ -16,12 +16,19 @@ interface EMFMetamodelSupport {
  * In particular, this parser can generate the metamodel. We can then use [Node.toEObject] to translate a tree into
  * its EMF representation.
  */
-abstract class EMFEnabledParser<R : Node, P : Parser, C : ParserRuleContext> : KolasuParser<R, P, C>(),
-    EMFMetamodelSupport {
+abstract class EMFEnabledParser<R : Node, P : Parser, C : ParserRuleContext> :
+    KolasuParser<R, P, C>(), EMFMetamodelSupport {
+
+    /**
+     * Generates the metamodel. The standard Kolasu metamodel [EPackage][org.eclipse.emf.ecore.EPackage] is included.
+     */
     override fun generateMetamodel(resource: Resource) {
         resource.contents.add(KOLASU_METAMODEL)
         doGenerateMetamodel(resource)
     }
 
+    /**
+     * Implement this method to tell the parser how to generate the metamodel. See [MetamodelBuilder].
+     */
     abstract fun doGenerateMetamodel(resource: Resource)
 }

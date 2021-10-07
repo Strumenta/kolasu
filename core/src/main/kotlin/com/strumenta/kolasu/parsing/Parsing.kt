@@ -68,7 +68,8 @@ class FirstStageParsingResult<C : ParserRuleContext>(
     val root: C?,
     code: String? = null,
     val incompleteNode: Node? = null,
-    val time: Long? = null
+    val time: Long? = null,
+    val lexingTime: Long? = null,
 ) : CodeProcessingResult<C>(issues, root, code) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -172,8 +173,9 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
 }
 
 interface ASTParser<R : Node> {
-    fun parse(inputStream: InputStream, considerPosition: Boolean = true): ParsingResult<R>
-    fun parse(code: String, considerPosition: Boolean = true): ParsingResult<R>
+    fun parse(inputStream: InputStream, considerPosition: Boolean = true, measureLexingTime: Boolean = false):
+        ParsingResult<R> = parse(inputStreamToString(inputStream), considerPosition, measureLexingTime)
+    fun parse(code: String, considerPosition: Boolean = true, measureLexingTime: Boolean = false): ParsingResult<R>
 }
 
 /**
@@ -183,7 +185,14 @@ interface ASTParser<R : Node> {
  */
 abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTParser<R> {
 
+    /**
+     * Creates the lexer.
+     */
     protected abstract fun createANTLRLexer(inputStream: InputStream): Lexer
+
+    /**
+     * Creates the first-stage parser.
+     */
     protected abstract fun createANTLRParser(tokenStream: TokenStream): P
 
     /**
@@ -198,13 +207,22 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
         return entryPoint!!.call(parser) as C
     }
 
+    /**
+     * Transforms a parse tree into an AST (second parsing stage).
+     */
     protected abstract fun parseTreeToAst(parseTreeRoot: C, considerPosition: Boolean = true): R?
 
+    /**
+     * Performs "lexing" on the given code string, i.e., it breaks it into tokens.
+     */
     @JvmOverloads
     fun lex(code: String, onlyFromDefaultChannel: Boolean = true): LexingResult {
         return lex(code.byteInputStream(Charsets.UTF_8), onlyFromDefaultChannel)
     }
 
+    /**
+     * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.
+     */
     @JvmOverloads
     fun lex(inputStream: InputStream, onlyFromDefaultChannel: Boolean = true): LexingResult {
         val issues = LinkedList<Issue>()
@@ -240,6 +258,9 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
         parser.injectErrorCollectorInParser(issues)
     }
 
+    /**
+     * Creates the first-stage lexer and parser.
+     */
     fun createParser(inputStream: InputStream, issues: MutableList<Issue>): P {
         val lexer = createANTLRLexer(inputStream)
         attachListeners(lexer, issues)
@@ -251,12 +272,16 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
 
     protected open fun createTokenStream(lexer: Lexer) = CommonTokenStream(lexer)
 
-    private fun verifyParseTree(parser: Parser, errors: MutableList<Issue>, root: ParserRuleContext) {
+    /**
+     * Checks the parse tree for correctness. If you're concerned about performance, you may want to override this to
+     * do nothing.
+     */
+    open fun verifyParseTree(parser: Parser, issues: MutableList<Issue>, root: ParserRuleContext) {
         val lastToken = parser.tokenStream.get(parser.tokenStream.index())
         if (lastToken.type != Token.EOF) {
-            errors.add(
+            issues.add(
                 Issue(
-                    IssueType.SYNTACTIC, "Not whole input consumed",
+                    IssueType.SYNTACTIC, "The whole input was not consumed",
                     position = lastToken!!.endPoint.asPosition
                 )
             )
@@ -265,64 +290,67 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
         root.processDescendantsAndErrors(
             {
                 if (it.exception != null) {
-                    errors.add(
-                        Issue(
-                            IssueType.SYNTACTIC, "Recognition exception: ${it.exception.message}",
-                            position = it.start.startPoint.asPosition
-                        )
-                    )
+                    val message = "Recognition exception: ${it.exception.message}"
+                    issues.add(Issue.syntactic(message, position = it.toPosition()))
                 }
             },
             {
-                errors.add(Issue(IssueType.SYNTACTIC, "Error node found", position = it.toPosition(true)))
+                val message = "Error node found"
+                issues.add(Issue.syntactic(message, position = it.toPosition()))
             }
         )
     }
 
-    fun parseFirstStage(code: String): FirstStageParsingResult<C> {
-        return parseFirstStage(code.byteInputStream())
-    }
+    @JvmOverloads
+    fun parseFirstStage(code: String, measureLexingTime: Boolean = false): FirstStageParsingResult<C> =
+        parseFirstStage(code.byteInputStream(), measureLexingTime)
 
-    fun parseFirstStage(inputStream: InputStream): FirstStageParsingResult<C> {
+    @JvmOverloads
+    fun parseFirstStage(inputStream: InputStream, measureLexingTime: Boolean = false): FirstStageParsingResult<C> {
         val issues = LinkedList<Issue>()
         var root: C?
+        var lexingTime: Long? = null
         val time = measureTimeMillis {
             val parser = createParser(inputStream, issues)
+            if (measureLexingTime) {
+                val tokenStream = parser.inputStream
+                if (tokenStream is CommonTokenStream) {
+                    lexingTime = measureTimeMillis {
+                        tokenStream.fill()
+                        tokenStream.seek(0)
+                    }
+                }
+            }
             root = invokeRootRule(parser)
             if (root != null) {
                 verifyParseTree(parser, issues, root!!)
             }
         }
-        return FirstStageParsingResult(issues, root, null, null, time)
+        return FirstStageParsingResult(issues, root, null, null, time, lexingTime)
     }
 
-    fun parseFirstStage(file: File): FirstStageParsingResult<C> = parseFirstStage(FileInputStream(file))
+    @JvmOverloads
+    fun parseFirstStage(file: File, measureLexingTime: Boolean = false): FirstStageParsingResult<C> =
+        parseFirstStage(FileInputStream(file), measureLexingTime)
 
     protected open fun postProcessAst(ast: R, issues: MutableList<Issue>): R {
         return ast
     }
 
     @JvmOverloads
-    override fun parse(inputStream: InputStream, considerPosition: Boolean): ParsingResult<R> {
-        val time = System.currentTimeMillis()
-        val code = inputStreamToString(inputStream)
-        val result = parseFirstStage(code)
-        var ast = parseTreeToAst(result.root!!, considerPosition)
+    override fun parse(code: String, considerPosition: Boolean, measureLexingTime: Boolean): ParsingResult<R> {
+        val start = System.currentTimeMillis()
+        val firstStage = parseFirstStage(code, measureLexingTime)
+        var ast = parseTreeToAst(firstStage.root!!, considerPosition)
         assignParents(ast)
-        val myIssues = result.issues.toMutableList()
+        val myIssues = firstStage.issues.toMutableList()
         ast = if (ast == null) null else postProcessAst(ast, myIssues)
-        return ParsingResult(myIssues, ast, code, null, result, System.currentTimeMillis() - time)
-    }
-
-    @JvmOverloads
-    override fun parse(code: String, considerPosition: Boolean): ParsingResult<R> {
-        val time = System.currentTimeMillis()
-        val result = parseFirstStage(code)
-        var ast = parseTreeToAst(result.root!!, considerPosition)
-        assignParents(ast)
-        val myIssues = result.issues.toMutableList()
-        ast = if (ast == null) null else postProcessAst(ast, myIssues)
-        return ParsingResult(result.issues, ast, code, null, result, System.currentTimeMillis() - time)
+        if (ast != null && !considerPosition) {
+            // Remove parseTreeNodes because they cause the position to be computed
+            ast.walk().forEach { it.parseTreeNode = null }
+        }
+        val now = System.currentTimeMillis()
+        return ParsingResult(firstStage.issues, ast, code, null, firstStage, now - start)
     }
 
     /**

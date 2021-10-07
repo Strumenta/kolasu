@@ -33,7 +33,7 @@ fun TerminalNode.toPosition(considerPosition: Boolean = true): Position? =
     this.symbol.toPosition(considerPosition)
 
 fun Token.toPosition(considerPosition: Boolean = true): Position? =
-    if(considerPosition) Position(this.startPoint, this.endPoint) else null
+    if (considerPosition) Position(this.startPoint, this.endPoint) else null
 
 fun ParseTree.toPosition(considerPosition: Boolean = true): Position? {
     return when (this) {

@@ -41,8 +41,7 @@ class ParserBenchExampleGenerator(
     fun generateExample(name: String, code: String) {
         val parsingResult = parser.parse(code)
         if (!parsingResult.correct && failOnError) {
-            throw ExampleGenerationFailure(
-                parsingResult, "Cannot generate examples from code with errors")
+            throw ExampleGenerationFailure(parsingResult, "Cannot generate examples from code with errors")
         }
 
         val jo = JsonObject()
