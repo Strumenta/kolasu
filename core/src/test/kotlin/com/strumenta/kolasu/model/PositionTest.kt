@@ -110,7 +110,7 @@ class PositionTest {
         val parser = SimpleLangParser(CommonTokenStream(lexer))
         val cu = parser.compilationUnit()
         val setStmt = cu.statement(0) as SimpleLangParser.SetStmtContext
-        val pos = setStmt.position
+        val pos = setStmt.toPosition()
         assertEquals(Position(Point(1, 0), Point(1, 13)), pos)
     }
 
