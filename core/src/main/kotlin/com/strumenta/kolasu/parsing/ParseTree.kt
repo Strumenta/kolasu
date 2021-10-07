@@ -1,11 +1,12 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.mapping.toPosition
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.endPoint
+import com.strumenta.kolasu.model.startPoint
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import org.antlr.v4.runtime.*
-import org.antlr.v4.runtime.Parser
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.TerminalNode
 
@@ -35,7 +36,7 @@ class ParseTreeNode(val name: String) : ParseTreeElement() {
     override fun multiLineString(indentation: String): String {
         val sb = StringBuilder()
         sb.append("${indentation}$name\n")
-        children.forEach { c -> sb.append(c.multiLineString(indentation + "  ")) }
+        children.forEach { c -> sb.append(c.multiLineString("$indentation  ")) }
         return sb.toString()
     }
 }
@@ -95,3 +96,22 @@ fun verifyParseTree(parser: Parser, errors: MutableList<Issue>, root: ParserRule
     )
 }
 
+fun ParserRuleContext.getOriginalText(): String {
+    val a: Int = this.start.startIndex
+    val b: Int = this.stop.stopIndex
+    val interval = org.antlr.v4.runtime.misc.Interval(a, b)
+    return this.start.inputStream.getText(interval)
+}
+
+fun TerminalNode.getOriginalText(): String = this.symbol.getOriginalText()
+
+fun Token.getOriginalText(): String {
+    val a: Int = this.startIndex
+    val b: Int = this.stopIndex
+    val interval = org.antlr.v4.runtime.misc.Interval(a, b)
+    return this.inputStream.getText(interval)
+}
+
+fun Node.getText(): String? = parseTreeNode?.getOriginalText()
+
+fun Node.getText(code: String): String? = position?.text(code)

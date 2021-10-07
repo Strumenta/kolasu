@@ -29,13 +29,8 @@ fun ParserRuleContext.toPosition(considerPosition: Boolean = true): Position? {
     } else null
 }
 
-fun TerminalNode.toPosition(considerPosition: Boolean = true): Position? {
-    return if (considerPosition) {
-        Position(this.symbol.startPoint, this.symbol.endPoint)
-    } else {
-        null
-    }
-}
+fun TerminalNode.toPosition(considerPosition: Boolean = true): Position? =
+    this.symbol.toPosition(considerPosition)
 
 fun Token.toPosition(considerPosition: Boolean = true): Position? =
     if(considerPosition) Position(this.startPoint, this.endPoint) else null

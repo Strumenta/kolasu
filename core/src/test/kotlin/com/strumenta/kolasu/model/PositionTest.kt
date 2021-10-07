@@ -1,11 +1,11 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.mapping.position
+import com.strumenta.kolasu.mapping.toPosition
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
-import java.lang.Exception
+import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import org.junit.Test as test
@@ -132,6 +132,15 @@ class PositionTest {
     @test(expected = Exception::class)
     fun illegalPositionNotAccepted() {
         Position(Point(10, 1), Point(5, 2), validate = true)
+    }
+
+    @test fun parserTreePosition() {
+        val code = "set foo = 123"
+        val lexer = SimpleLangLexer(CharStreams.fromString(code))
+        val parser = SimpleLangParser(CommonTokenStream(lexer))
+        val cu: ParseTree = parser.compilationUnit()
+        val pos = cu.toPosition()
+        assertEquals(Position(Point(1, 0), Point(1, 13)), pos)
     }
 
 //    @test(expected = Exception::class) fun illegalPositionNotAcceptedByDefault() {

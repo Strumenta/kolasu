@@ -26,8 +26,8 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
     /**
      * Translate the Point to an offset in the original code stream.
      */
-    fun offset(code: String): Int {
-        val lines = code.split("\n")
+    fun offset(code: String, lineEnding: String = System.lineSeparator()): Int {
+        val lines = code.split(lineEnding)
         require(lines.size >= line) {
             "The point does not exist in the given text. It indicates line $line but there are only ${lines.size} lines"
         }
@@ -36,7 +36,7 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
                 "the point indicates column $column"
         }
         val newLines = this.line - 1
-        return lines.subList(0, this.line - 1).foldRight(0, { it, acc -> it.length + acc }) + newLines + column
+        return lines.subList(0, this.line - 1).foldRight(0) { it, acc -> it.length + acc } + newLines + column
     }
 
     /**
