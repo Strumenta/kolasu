@@ -295,7 +295,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
                 }
             },
             {
-                val message = "Error node found"
+                val message = "Error node found (token: ${it.symbol?.text})"
                 issues.add(Issue.syntactic(message, position = it.toPosition()))
             }
         )
