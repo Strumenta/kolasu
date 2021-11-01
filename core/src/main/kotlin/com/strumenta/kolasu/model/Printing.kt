@@ -29,8 +29,12 @@ fun Node.debugPrint(indent: String = "", skipEmptyCollections: Boolean = false, 
                     if (paramType is Class<*> && Node::class.java.isAssignableFrom(paramType)) {
                         sb.append("$indent$indentBlock${property.name} = [\n")
                         (value as List<Node>).forEach {
-                            sb.append(it.debugPrint(indent + indentBlock + indentBlock, skipEmptyCollections,
-                                skipNull))
+                            sb.append(
+                                it.debugPrint(
+                                    indent + indentBlock + indentBlock, skipEmptyCollections,
+                                    skipNull
+                                )
+                            )
                         }
                         sb.append("$indent$indentBlock]\n")
                     }

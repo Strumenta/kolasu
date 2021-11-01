@@ -91,7 +91,12 @@ fun verifyParseTree(parser: Parser, errors: MutableList<Issue>, root: ParserRule
             }
         },
         {
-            errors.add(Issue(IssueType.SYNTACTIC, "Error node found (token: ${it.symbol?.text})", position = it.toPosition(true)))
+            errors.add(
+                Issue(
+                    IssueType.SYNTACTIC, "Error node found (token: ${it.symbol?.text})",
+                    position = it.toPosition(true)
+                )
+            )
         }
     )
 }
