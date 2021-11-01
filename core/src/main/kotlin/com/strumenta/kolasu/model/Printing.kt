@@ -12,7 +12,7 @@ fun Node.relevantMemberProperties() = this.javaClass.kotlin.memberProperties
 
 // some fancy reflection tests make sure the cast always succeeds
 @Suppress("UNCHECKED_CAST")
-fun Node.debugPrint(indent: String = "", skipEmptyCollections: Boolean = false): String {
+fun Node.debugPrint(indent: String = "", skipEmptyCollections: Boolean = false, skipNull: Boolean = false): String {
     val sb = StringBuffer()
     if (this.relevantMemberProperties().isEmpty()) {
         sb.append("$indent${this.javaClass.simpleName}\n")
@@ -29,7 +29,8 @@ fun Node.debugPrint(indent: String = "", skipEmptyCollections: Boolean = false):
                     if (paramType is Class<*> && Node::class.java.isAssignableFrom(paramType)) {
                         sb.append("$indent$indentBlock${property.name} = [\n")
                         (value as List<Node>).forEach {
-                            sb.append(it.debugPrint(indent + indentBlock + indentBlock, skipEmptyCollections))
+                            sb.append(it.debugPrint(indent + indentBlock + indentBlock, skipEmptyCollections,
+                                skipNull))
                         }
                         sb.append("$indent$indentBlock]\n")
                     }
@@ -37,12 +38,21 @@ fun Node.debugPrint(indent: String = "", skipEmptyCollections: Boolean = false):
             } else {
                 if (property.visibility == PUBLIC) {
                     val value = property.get(this)
-                    if (value is Node) {
-                        sb.append("$indent$indentBlock${property.name} = [\n")
-                        sb.append(value.debugPrint(indent + indentBlock + indentBlock, skipEmptyCollections))
-                        sb.append("$indent$indentBlock]\n")
+                    if (value == null && skipNull) {
+                        // nothing to do
                     } else {
-                        sb.append("$indent$indentBlock${property.name} = ${property.get(this)}\n")
+                        if (value is Node) {
+                            sb.append("$indent$indentBlock${property.name} = [\n")
+                            sb.append(
+                                value.debugPrint(
+                                    indent + indentBlock + indentBlock, skipEmptyCollections,
+                                    skipNull
+                                )
+                            )
+                            sb.append("$indent$indentBlock]\n")
+                        } else {
+                            sb.append("$indent$indentBlock${property.name} = ${value}\n")
+                        }
                     }
                 }
             }
