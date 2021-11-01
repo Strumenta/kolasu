@@ -63,7 +63,14 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
         get() = Position(this, this)
 }
 
-val START_POINT = Point(1, 0)
+val START_LINE = 1
+val START_COLUMN = 0
+val START_POINT = Point(START_LINE, START_COLUMN)
+
+fun linePosition(lineNumber: Int, lineCode: String) : Position {
+    require(lineNumber >= 1) { "Line numbers are expected to be equal or greater than 1" }
+    return Position(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length))
+}
 
 /**
  * An area in a source file, from start to end.
