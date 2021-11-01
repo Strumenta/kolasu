@@ -61,6 +61,7 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
 
     val asPosition: Position
         get() = Position(this, this)
+
 }
 
 val START_POINT = Point(1, 0)
