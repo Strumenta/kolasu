@@ -4,9 +4,17 @@ import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.ParseTree
 
+val START_LINE = 1
+val START_COLUMN = 0
+val START_POINT = Point(START_LINE, START_COLUMN)
+
 /**
  * A location in a source code file.
- * The line should be in 1..n, the column in 0..n
+ * The line should be in 1..n, the column in 0..n.
+ *
+ * Consider a file with one line, containing text "HELLO":
+ * - the point before the first character will be Point(1, 0)
+ * - the point at the end of the first line, after the letter "O" will be Point(1, 5)
  */
 data class Point(val line: Int, val column: Int) : Comparable<Point> {
     override fun compareTo(other: Point): Int {
@@ -17,8 +25,17 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
     }
 
     init {
-        require(line >= 1) { "Line should be equal or greater than 1, was $line" }
-        require(column >= 0) { "Column should be equal or greater than 0, was $column" }
+        checkLine(line)
+        checkColumn(column)
+    }
+
+    companion object {
+        fun checkLine(line: Int) {
+            require(line >= START_LINE) { "Line should be equal or greater than 1, was $line" }
+        }
+        fun checkColumn(column: Int) {
+            require(column >= START_COLUMN) { "Column should be equal or greater than 0, was $column" }
+        }
     }
 
     override fun toString() = "Line $line, Column $column"
@@ -63,10 +80,6 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
         get() = Position(this, this)
 }
 
-val START_LINE = 1
-val START_COLUMN = 0
-val START_POINT = Point(START_LINE, START_COLUMN)
-
 fun linePosition(lineNumber: Int, lineCode: String) : Position {
     require(lineNumber >= 1) { "Line numbers are expected to be equal or greater than 1" }
     return Position(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length))
@@ -74,7 +87,12 @@ fun linePosition(lineNumber: Int, lineCode: String) : Position {
 
 /**
  * An area in a source file, from start to end.
- * Both the start point and the end point are included
+ * The start point is the point right before the starting character.
+ * The end point is the point right after the last character.
+ * An empty position will have coinciding points.
+ *
+ * Consider a file with one line, containing text "HELLO".
+ * The Position of such text will be Position(Point(1, 0), Point(1, 5)).
  */
 data class Position(val start: Point, val end: Point) : Comparable<Position> {
 
@@ -107,6 +125,8 @@ data class Position(val start: Point, val end: Point) : Comparable<Position> {
      * @param code the source text.
      */
     fun length(code: String) = end.offset(code) - start.offset(code)
+
+    fun isEmpty() : Boolean = start == end
 
     /**
      * Tests whether the given point is contained in the interval represented by this object.
