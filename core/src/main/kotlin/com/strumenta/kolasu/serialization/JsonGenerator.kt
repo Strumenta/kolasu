@@ -1,20 +1,22 @@
 package com.strumenta.kolasu.serialization
 
 import com.github.salomonbrys.kotson.jsonObject
+import com.github.salomonbrys.kotson.registerTypeAdapter
 import com.github.salomonbrys.kotson.toJsonArray
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonElement
-import com.google.gson.JsonNull
-import com.google.gson.JsonPrimitive
+import com.google.gson.*
+import com.google.gson.JsonDeserializer
 import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.processProperties
+import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import java.io.File
 import java.util.function.Function
+import kotlin.reflect.KType
+import kotlin.reflect.jvm.javaType
 
 const val JSON_TYPE_KEY = "#type"
 const val JSON_POSITION_KEY = "#position"
@@ -22,13 +24,23 @@ const val JSON_POSITION_KEY = "#position"
 class JsonGenerator {
 
     var shortClassNames = false
+
+    // DEPRECATED
     var jsonSerializer: JsonSerializer = AsStringJsonSerializer
+
+    private val customSerializers: MutableMap<KType, com.google.gson.JsonSerializer<*>> = HashMap()
+    private val gsonBuilder = GsonBuilder()
+
+    fun registerCustomSerializer(type: KType, serializer: com.google.gson.JsonSerializer<*>) {
+        customSerializers[type] = serializer
+        gsonBuilder.registerTypeAdapter(type.javaType, serializer)
+    }
 
     /**
      * Converts an AST to JSON format.
      */
     fun generateJSON(root: Node): JsonElement {
-        return root.toJson(shortClassNames)
+        return nodeToJson(root, shortClassNames)
     }
 
     /**
@@ -37,7 +49,17 @@ class JsonGenerator {
     fun generateJSON(result: Result<out Node>): JsonElement {
         return jsonObject(
             "errors" to result.issues.map { it.toJson() }.toJsonArray(),
-            "root" to result.root?.toJson(shortClassNames, jsonSerializer)
+            "root" to result.root?.let { nodeToJson(it, shortClassNames) }
+        )
+    }
+
+    /**
+     * Converts "results" to JSON format.
+     */
+    fun generateJSON(result: ParsingResult<out Node>): JsonElement {
+        return jsonObject(
+            "issues" to result.issues.map { it.toJson() }.toJsonArray(),
+            "root" to result.root?.let { nodeToJson(it, shortClassNames) }
         )
     }
 
@@ -73,6 +95,11 @@ class JsonGenerator {
         return gson.toJson(generateJSON(result))
     }
 
+    fun generateString(result: ParsingResult<out Node>): String {
+        val gson = GsonBuilder().setPrettyPrinting().create()
+        return gson.toJson(generateJSON(result))
+    }
+
     fun generateFile(root: Node, file: File) {
         File(file.toURI()).writeText(generateString(root))
     }
@@ -80,36 +107,60 @@ class JsonGenerator {
     fun generateFile(result: Result<out Node>, file: File) {
         File(file.toURI()).writeText(generateString(result))
     }
-}
 
-private fun Node.toJson(shortClassNames: Boolean = false, jsonSerializer: JsonSerializer = AsStringJsonSerializer):
-    JsonElement {
-    val jsonObject = jsonObject(
-        JSON_TYPE_KEY to if (shortClassNames) this.javaClass.simpleName else this.javaClass.canonicalName,
-        JSON_POSITION_KEY to this.position?.toJson()
-    )
-    this.processProperties {
-        if (it.value == null) {
-            jsonObject.add(it.name, JsonNull.INSTANCE)
-        } else if (it.multiple) {
-            if (it.provideNodes) {
-                jsonObject.add(
-                    it.name,
-                    (it.value as Collection<*>).map { el -> (el as Node).toJson(shortClassNames, jsonSerializer) }
-                        .toJsonArray()
-                )
-            } else {
-                jsonObject.add(it.name, (it.value as Collection<*>).toJsonArray())
-            }
-        } else {
-            if (it.provideNodes) {
-                jsonObject.add(it.name, (it.value as Node).toJson(shortClassNames, jsonSerializer))
-            } else {
-                jsonObject.add(it.name, it.value.toJson(jsonSerializer))
+    fun generateFile(result: ParsingResult<out Node>, file: File) {
+        File(file.toURI()).writeText(generateString(result))
+    }
+
+    private fun valueToJson(value: Any) : JsonElement {
+        return when (value) {
+            null -> JsonNull.INSTANCE
+            is String -> JsonPrimitive(value)
+            is Number -> JsonPrimitive(value)
+            is Boolean -> JsonPrimitive(value)
+            else -> {
+                return gsonBuilder.create().toJsonTree(value)
             }
         }
     }
-    return jsonObject
+
+    private fun nodeToJson(
+        node: Node,
+        shortClassNames: Boolean = false
+    ):
+            JsonElement {
+        val jsonObject = jsonObject(
+            JSON_TYPE_KEY to if (shortClassNames) node.javaClass.simpleName else node.javaClass.canonicalName,
+            JSON_POSITION_KEY to node.position?.toJson()
+        )
+        node.processProperties {
+            if (it.value == null) {
+                jsonObject.add(it.name, JsonNull.INSTANCE)
+            } else if (it.multiple) {
+                if (it.provideNodes) {
+                    jsonObject.add(
+                        it.name,
+                        (it.value as Collection<*>).map { el ->
+                            nodeToJson(
+                                el as Node,
+                                shortClassNames
+                            )
+                        }
+                            .toJsonArray()
+                    )
+                } else {
+                    jsonObject.add(it.name, valueToJson(it.value))
+                }
+            } else {
+                if (it.provideNodes) {
+                    jsonObject.add(it.name, nodeToJson(it.value as Node, shortClassNames))
+                } else {
+                    jsonObject.add(it.name, valueToJson(it.value))
+                }
+            }
+        }
+        return jsonObject
+    }
 }
 
 private fun Node.toJsonStreaming(writer: JsonWriter, shortClassNames: Boolean = false) {
@@ -147,7 +198,9 @@ private fun Node.toJsonStreaming(writer: JsonWriter, shortClassNames: Boolean = 
     writer.endObject()
 }
 
+// DEPRECATED use GSon stuff instead
 typealias JsonSerializer = Function<Any, JsonElement>
+// DEPRECATED use GSon stuff instead
 private val AsStringJsonSerializer = JsonSerializer { JsonPrimitive(it.toString()) }
 
 private fun Any?.toJson(jsonSerializer: JsonSerializer = AsStringJsonSerializer): JsonElement {
