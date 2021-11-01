@@ -40,6 +40,11 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
 
     override fun toString() = "Line $line, Column $column"
 
+    fun positionWithLength(length: Int) : Position {
+        require(length >= 0)
+        return Position(this, this.plus(length))
+    }
+
     /**
      * Translate the Point to an offset in the original code stream.
      */
@@ -66,6 +71,10 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
      * @param other the other point
      */
     fun isSameOrBefore(other: Point) = this <= other
+
+    operator fun plus(length: Int): Point {
+        return Point(this.line, this.column + length)
+    }
 
     operator fun plus(text: String): Point {
         return when {
