@@ -104,6 +104,10 @@ class JsonDeserializer {
                 throw IllegalStateException("Class ${clazz.canonicalName} has no primary or default constructor")
             }
         }
+        if (instance != null && jo.has(JSON_POSITION_KEY)) {
+            val position = jo[JSON_POSITION_KEY]?.asJsonObject?.decodeAsPosition()
+            instance.specifiedPosition = position
+        }
 
         return instance ?: throw UnsupportedOperationException()
     }

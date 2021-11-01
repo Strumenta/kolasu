@@ -84,50 +84,54 @@ fun assertASTsAreEqual(
 ) {
     if (expected::class == actual::class) {
         expected.properties.forEach { expectedProperty ->
-            val actualPropValue = actual.properties.find { it.name == expectedProperty.name }!!.value
-            val expectedPropValue = expectedProperty.value
-            if (expectedProperty.provideNodes) {
-                if (expectedProperty.multiple) {
-                    if (expectedPropValue is IgnoreChildren<*>) {
-                        // Nothing to do
+            if (expectedProperty.name == "parseTreeNode") {
+                // nothing to do here
+            } else {
+                val actualPropValue = actual.properties.find { it.name == expectedProperty.name }!!.value
+                val expectedPropValue = expectedProperty.value
+                if (expectedProperty.provideNodes) {
+                    if (expectedProperty.multiple) {
+                        if (expectedPropValue is IgnoreChildren<*>) {
+                            // Nothing to do
+                        } else {
+                            val actualPropValueCollection = actualPropValue as Collection<Node>
+                            val expectedPropValueCollection = expectedPropValue as Collection<Node>
+                            assertEquals(
+                                expectedPropValueCollection.size, actualPropValueCollection.size,
+                                "$context.${expectedProperty.name} length"
+                            )
+                            val expectedIt = expectedPropValueCollection.iterator()
+                            val actualIt = actualPropValueCollection.iterator()
+                            for (i in expectedPropValueCollection.indices) {
+                                assertASTsAreEqual(expectedIt.next(), actualIt.next(), "$context[$i]")
+                            }
+                        }
                     } else {
-                        val actualPropValueCollection = actualPropValue as Collection<Node>
-                        val expectedPropValueCollection = expectedPropValue as Collection<Node>
-                        assertEquals(
-                            expectedPropValueCollection.size, actualPropValueCollection.size,
-                            "$context.${expectedProperty.name} length"
-                        )
-                        val expectedIt = expectedPropValueCollection.iterator()
-                        val actualIt = actualPropValueCollection.iterator()
-                        for (i in expectedPropValueCollection.indices) {
-                            assertASTsAreEqual(expectedIt.next(), actualIt.next(), "$context[$i]")
+                        if (expectedPropValue == null && actualPropValue != null) {
+                            assertEquals<Any?>(
+                                expectedPropValue, actualPropValue,
+                                "$context.${expectedProperty.name}"
+                            )
+                        } else if (expectedPropValue != null && actualPropValue == null) {
+                            assertEquals<Any?>(
+                                expectedPropValue, actualPropValue,
+                                "$context.${expectedProperty.name}"
+                            )
+                        } else if (expectedPropValue == null && actualPropValue == null) {
+                            // that is ok
+                        } else {
+                            assertASTsAreEqual(
+                                expectedPropValue as Node, actualPropValue as Node,
+                                context = "$context.${expectedProperty.name}"
+                            )
                         }
                     }
                 } else {
-                    if (expectedPropValue == null && actualPropValue != null) {
-                        assertEquals<Any?>(
-                            expectedPropValue, actualPropValue,
-                            "$context.${expectedProperty.name}"
-                        )
-                    } else if (expectedPropValue != null && actualPropValue == null) {
-                        assertEquals<Any?>(
-                            expectedPropValue, actualPropValue,
-                            "$context.${expectedProperty.name}"
-                        )
-                    } else if (expectedPropValue == null && actualPropValue == null) {
-                        // that is ok
-                    } else {
-                        assertASTsAreEqual(
-                            expectedPropValue as Node, actualPropValue as Node,
-                            context = "$context.${expectedProperty.name}"
-                        )
-                    }
+                    assertEquals(
+                        expectedPropValue, actualPropValue,
+                        "$context, comparing property ${expectedProperty.name}"
+                    )
                 }
-            } else {
-                assertEquals(
-                    expectedPropValue, actualPropValue,
-                    "$context, comparing property ${expectedProperty.name}"
-                )
             }
         }
     } else {
