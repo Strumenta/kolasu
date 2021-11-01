@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.model
 
 import java.lang.reflect.ParameterizedType
-import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility.PUBLIC
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaType
@@ -11,19 +10,20 @@ private const val indentBlock = "  "
 fun Node.relevantMemberProperties() = this.javaClass.kotlin.memberProperties
     .filter { !it.name.startsWith("component") && it.name != "position" && it.name != "parent" }
 
-data class DebugPrintConfiguration(val skipEmptyCollections: Boolean = false,
-                                   val skipNull: Boolean = false,
-                                   val forceShowPosition: Boolean = false,
-                                   val hide: List<String> = emptyList())
-
+data class DebugPrintConfiguration(
+    val skipEmptyCollections: Boolean = false,
+    val skipNull: Boolean = false,
+    val forceShowPosition: Boolean = false,
+    val hide: List<String> = emptyList()
+)
 
 private fun Node.showSingleAttribute(indent: String, sb: StringBuilder, propertyName: String, value: Any?) {
-    sb.append("$indent$indentBlock${propertyName} = ${value}\n")
+    sb.append("$indent$indentBlock$propertyName = ${value}\n")
 }
 
-fun Any?.debugPrint(indent: String = "", configuration: DebugPrintConfiguration = DebugPrintConfiguration()) : String {
+fun Any?.debugPrint(indent: String = "", configuration: DebugPrintConfiguration = DebugPrintConfiguration()): String {
     val sb = StringBuilder()
-    sb.append("$indent${this.toString()}\n")
+    sb.append("$indent${this}\n")
     return sb.toString()
 }
 

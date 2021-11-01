@@ -69,7 +69,7 @@ class IgnoreChildren<N : Node> : List<N> {
 class ASTDifferenceException(val context: String, val expected: Any, val actual: Any) :
     Exception("$context: expecting $expected, actual $actual")
 
-fun <T: Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: ParsingResult<T>) {
+fun <T : Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: ParsingResult<T>) {
     assertEquals(expected.issues, actual.issues)
     assertEquals(expected.root != null, actual.root != null)
     if (expected.root != null) {

@@ -89,7 +89,9 @@ class JsonDeserializer {
                     val value = deserializeType(p.type, jo.get(p.name))
                     args[p] = value
                 } catch (t: Throwable) {
-                    throw RuntimeException("Issue deserializing property ${p.name} of ${p.type}. JSON: ${jo.get(p.name)}", t)
+                    throw RuntimeException(
+                        "Issue deserializing property ${p.name} of ${p.type}. JSON: ${jo.get(p.name)}", t
+                    )
                 }
             }
             instance = primaryConstructor.callBy(args)

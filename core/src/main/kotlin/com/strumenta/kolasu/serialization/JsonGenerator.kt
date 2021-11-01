@@ -4,7 +4,6 @@ import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.registerTypeAdapter
 import com.github.salomonbrys.kotson.toJsonArray
 import com.google.gson.*
-import com.google.gson.JsonDeserializer
 import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
@@ -112,7 +111,7 @@ class JsonGenerator {
         File(file.toURI()).writeText(generateString(result))
     }
 
-    private fun valueToJson(value: Any) : JsonElement {
+    private fun valueToJson(value: Any): JsonElement {
         return when (value) {
             null -> JsonNull.INSTANCE
             is String -> JsonPrimitive(value)
@@ -128,7 +127,7 @@ class JsonGenerator {
         node: Node,
         shortClassNames: Boolean = false
     ):
-            JsonElement {
+        JsonElement {
         val jsonObject = jsonObject(
             JSON_TYPE_KEY to if (shortClassNames) node.javaClass.simpleName else node.javaClass.canonicalName,
             JSON_POSITION_KEY to node.position?.toJson()
