@@ -3,7 +3,7 @@ package com.strumenta.kolasu.emf.simple
 import com.strumenta.kolasu.model.*
 import java.math.BigDecimal
 
-abstract class Expression(@Transient override val specifiedPosition: Position? = null) : Node(specifiedPosition) {
+abstract class Expression(@Transient override var specifiedPosition: Position? = null) : Node(specifiedPosition) {
     open fun render(): String = this.javaClass.simpleName
 }
 
@@ -11,21 +11,21 @@ abstract class Expression(@Transient override val specifiedPosition: Position? =
 // / Literals
 // /
 
-sealed class NumberLiteral(@Transient override val specifiedPosition: Position? = null) : Expression(specifiedPosition)
+sealed class NumberLiteral(@Transient override var specifiedPosition: Position? = null) : Expression(specifiedPosition)
 
-data class IntLiteral(val value: Long, override val specifiedPosition: Position? = null) : NumberLiteral(
+data class IntLiteral(val value: Long, override var specifiedPosition: Position? = null) : NumberLiteral(
     specifiedPosition
 ) {
     override fun render() = value.toString()
 }
 
-data class RealLiteral(val value: BigDecimal, override val specifiedPosition: Position? = null) : NumberLiteral(
+data class RealLiteral(val value: BigDecimal, override var specifiedPosition: Position? = null) : NumberLiteral(
     specifiedPosition
 ) {
     override fun render() = value.toString()
 }
 
-data class StringLiteral(val value: String, override val specifiedPosition: Position? = null) : Expression(
+data class StringLiteral(val value: String, override var specifiedPosition: Position? = null) : Expression(
     specifiedPosition
 ) {
     override fun render() = "\"$value\""
@@ -37,7 +37,7 @@ data class DataDefinition(
     var fields: List<FieldDefinition> = emptyList(),
     val initializationValue: Expression? = null,
     val inz: Boolean = false,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) :
     AbstractDataDefinition(name, type, specifiedPosition)
 
@@ -54,7 +54,7 @@ data class FieldDefinition(
     var overriddenContainer: DataDefinition? = null,
     val initializationValue: Expression? = null,
     val descend: Boolean = false,
-    override val specifiedPosition: Position? = null,
+    override var specifiedPosition: Position? = null,
 
     // true when the FieldDefinition contains a DIM keyword on its line
     val declaredArrayInLineOnThisField: Int? = null
@@ -64,7 +64,7 @@ data class FieldDefinition(
 abstract class AbstractDataDefinition(
     override val name: String,
     open val type: Type,
-    override val specifiedPosition: Position? = null,
+    override var specifiedPosition: Position? = null,
     private val hashCode: Int = name.hashCode()
 
 ) : Node(specifiedPosition), Named

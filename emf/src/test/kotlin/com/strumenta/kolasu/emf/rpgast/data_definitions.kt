@@ -8,7 +8,7 @@ import java.util.*
 abstract class AbstractDataDefinition(
     override val name: String,
     open val type: Type,
-    override val specifiedPosition: Position? = null,
+    override var specifiedPosition: Position? = null,
     private val hashCode: Int = name.hashCode()
 ) : Node(specifiedPosition), Named {
     fun numberOfElements() = type.numberOfElements()
@@ -24,7 +24,7 @@ abstract class AbstractDataDefinition(
         if (other is AbstractDataDefinition) name == other.name else false
 }
 
-data class FileDefinition private constructor(override val name: String, override val specifiedPosition: Position?) :
+data class FileDefinition private constructor(override val name: String, override var specifiedPosition: Position?) :
     Node(
         specifiedPosition
     ),
@@ -47,7 +47,7 @@ data class DataDefinition(
     var fields: List<FieldDefinition> = emptyList(),
     val initializationValue: Expression? = null,
     val inz: Boolean = false,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) :
     AbstractDataDefinition(name, type, specifiedPosition) {
 
@@ -92,7 +92,7 @@ data class FieldDefinition(
     var overriddenContainer: DataDefinition? = null,
     val initializationValue: Expression? = null,
     val descend: Boolean = false,
-    override val specifiedPosition: Position? = null,
+    override var specifiedPosition: Position? = null,
 
     // true when the FieldDefinition contains a DIM keyword on its line
     val declaredArrayInLineOnThisField: Int? = null
@@ -219,7 +219,7 @@ data class FieldDefinition(
 class InStatementDataDefinition(
     override val name: String,
     override val type: Type,
-    override val specifiedPosition: Position? = null,
+    override var specifiedPosition: Position? = null,
     val initializationValue: Expression? = null
 ) : AbstractDataDefinition(name, type, specifiedPosition) {
     override fun toString(): String {

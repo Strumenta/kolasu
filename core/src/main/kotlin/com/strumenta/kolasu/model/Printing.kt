@@ -40,7 +40,7 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
             if (property.name == "position") {
                 positionShouldBeDisplayed = false
             }
-            if (configuration.hide.contains(property.name)) {
+            if (configuration.hide.contains(property.name) || property.name == "properties") {
                 // skipping
             } else {
                 val mt = property.returnType.javaType

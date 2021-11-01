@@ -23,7 +23,7 @@ enum class AssignmentOperator(val text: String) {
 }
 
 abstract class Statement(
-    @Transient override val specifiedPosition: Position? = null
+    @Transient override var specifiedPosition: Position? = null
 ) : Node(specifiedPosition) {
 
     open fun simpleDescription() = "Issue executing ${javaClass.simpleName} at line ${startLine()}."
@@ -47,13 +47,13 @@ fun List<Statement>.explode(): List<Statement> {
 
 data class ExecuteSubroutine(
     var subroutine: ReferenceByName<Subroutine>,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition)
 
 data class SelectStmt(
     var cases: List<SelectCase>,
     var other: SelectOtherClause? = null,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), CompositeStatement {
 
     override val body: List<Statement>
@@ -67,7 +67,7 @@ data class SelectStmt(
         }
 }
 
-data class SelectOtherClause(override val body: List<Statement>, override val specifiedPosition: Position? = null) :
+data class SelectOtherClause(override val body: List<Statement>, override var specifiedPosition: Position? = null) :
     Node(
         specifiedPosition
     ),
@@ -76,7 +76,7 @@ data class SelectOtherClause(override val body: List<Statement>, override val sp
 data class SelectCase(
     val condition: Expression,
     override val body: List<Statement>,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Node(specifiedPosition), CompositeStatement
 
 data class EvalFlags(
@@ -90,7 +90,7 @@ data class EvalStmt(
     var expression: Expression,
     val operator: AssignmentOperator = AssignmentOperator.NORMAL_ASSIGNMENT,
     val flags: EvalFlags = EvalFlags(),
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) :
     Statement(specifiedPosition)
 
@@ -99,14 +99,14 @@ data class SubDurStmt(
     val target: AssignableExpression,
     val factor2: Expression,
     val durationCode: DurationCode,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) :
     Statement(specifiedPosition)
 
 data class MoveStmt(
     val target: AssignableExpression,
     var expression: Expression,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) :
     Statement(specifiedPosition)
 
@@ -114,7 +114,7 @@ data class MoveAStmt(
     val operationExtender: String?,
     val target: AssignableExpression,
     var expression: Expression,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) :
     Statement(specifiedPosition)
 
@@ -123,7 +123,7 @@ data class MoveLStmt(
     val target: AssignableExpression,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
     var expression: Expression,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         if (dataDefinition != null) {
@@ -136,7 +136,7 @@ data class MoveLStmt(
 abstract class AbstractReadEqualStmt(
     @Transient open val searchArg: Expression? = null, // Factor1
     @Transient open val name: String = "", // Factor 2
-    @Transient override val specifiedPosition: Position? = null,
+    @Transient override var specifiedPosition: Position? = null,
     private val logPref: String
 
 ) : Statement(specifiedPosition) {
@@ -146,7 +146,7 @@ abstract class AbstractReadEqualStmt(
 
 abstract class AbstractReadStmt(
     @Transient open val name: String = "", // Factor 2
-    @Transient override val specifiedPosition: Position? = null,
+    @Transient override var specifiedPosition: Position? = null,
     private val logPref: String
 ) : Statement(specifiedPosition) {
 
@@ -155,7 +155,7 @@ abstract class AbstractReadStmt(
 
 abstract class AbstractStoreStmt(
     @Transient open val name: String = "", // Factor 2
-    @Transient override val specifiedPosition: Position? = null,
+    @Transient override var specifiedPosition: Position? = null,
     private val logPref: String
 ) : Statement(specifiedPosition) {
 
@@ -166,7 +166,7 @@ abstract class AbstractSetStmt(
     // this one is a dummy expression needed to initialize because of "transient" annotation
     @Transient open val searchArg: Expression = StringLiteral(""), // Factor1
     @Transient open val name: String = "", // Factor 2
-    @Transient override val specifiedPosition: Position? = null,
+    @Transient override var specifiedPosition: Position? = null,
     private val logPref: String = ""
 ) : Statement(specifiedPosition) {
 
@@ -178,7 +178,7 @@ abstract class AbstractSetStmt(
 data class ChainStmt(
     override val searchArg: Expression, // Factor1
     override val name: String, // Factor 2
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : AbstractReadEqualStmt(searchArg, name, specifiedPosition, "CHAIN") {
     override fun read(dbFile: DBFile, kList: List<String>?): Result = Result()
 }
@@ -186,7 +186,7 @@ data class ChainStmt(
 data class ReadEqualStmt(
     override val searchArg: Expression?,
     override val name: String,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : AbstractReadEqualStmt(
     searchArg = searchArg, name = name, specifiedPosition = specifiedPosition,
     logPref = "READE"
@@ -198,7 +198,7 @@ data class ReadEqualStmt(
 data class ReadPreviousEqualStmt(
     override val searchArg: Expression?,
     override val name: String,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : AbstractReadEqualStmt(
     searchArg = searchArg, name = name, specifiedPosition = specifiedPosition,
     logPref = "READPE"
@@ -207,7 +207,7 @@ data class ReadPreviousEqualStmt(
     override fun read(dbFile: DBFile, kList: List<String>?): Result = Result()
 }
 
-data class ReadStmt(override val name: String, override val specifiedPosition: Position?) : AbstractReadStmt(
+data class ReadStmt(override val name: String, override var specifiedPosition: Position?) : AbstractReadStmt(
     name,
     specifiedPosition,
     "READ"
@@ -215,7 +215,7 @@ data class ReadStmt(override val name: String, override val specifiedPosition: P
     override fun readOp(dbFile: DBFile) = Result()
 }
 
-data class ReadPreviousStmt(override val name: String, override val specifiedPosition: Position?) : AbstractReadStmt(
+data class ReadPreviousStmt(override val name: String, override var specifiedPosition: Position?) : AbstractReadStmt(
     name,
     specifiedPosition,
     "READP"
@@ -223,7 +223,7 @@ data class ReadPreviousStmt(override val name: String, override val specifiedPos
     override fun readOp(dbFile: DBFile) = Result()
 }
 
-data class WriteStmt(override val name: String, override val specifiedPosition: Position?) : AbstractStoreStmt(
+data class WriteStmt(override val name: String, override var specifiedPosition: Position?) : AbstractStoreStmt(
     name = name,
     specifiedPosition = specifiedPosition,
     logPref = "WRITE"
@@ -231,7 +231,7 @@ data class WriteStmt(override val name: String, override val specifiedPosition: 
     override fun store(dbFile: DBFile, record: Record) = Result()
 }
 
-data class UpdateStmt(override val name: String, override val specifiedPosition: Position?) : AbstractStoreStmt(
+data class UpdateStmt(override val name: String, override var specifiedPosition: Position?) : AbstractStoreStmt(
     name = name,
     specifiedPosition = specifiedPosition,
     logPref = "UPDATE"
@@ -239,7 +239,7 @@ data class UpdateStmt(override val name: String, override val specifiedPosition:
     override fun store(dbFile: DBFile, record: Record) = Result()
 }
 
-data class DeleteStmt(override val name: String, override val specifiedPosition: Position?) : AbstractStoreStmt(
+data class DeleteStmt(override val name: String, override var specifiedPosition: Position?) : AbstractStoreStmt(
     name = name,
     specifiedPosition = specifiedPosition,
     logPref = "DELETE"
@@ -250,7 +250,7 @@ data class DeleteStmt(override val name: String, override val specifiedPosition:
 data class SetllStmt(
     override val searchArg: Expression,
     override val name: String,
-    override val specifiedPosition: Position?
+    override var specifiedPosition: Position?
 ) : AbstractSetStmt(
     searchArg = searchArg,
     name = name,
@@ -263,7 +263,7 @@ data class SetllStmt(
 data class SetgtStmt(
     override val searchArg: Expression,
     override val name: String,
-    override val specifiedPosition: Position?
+    override var specifiedPosition: Position?
 ) : AbstractSetStmt(searchArg = searchArg, name = name, specifiedPosition = specifiedPosition, logPref = "SETGT") {
 
     override fun set(dbFile: DBFile, kList: List<String>) = true
@@ -274,14 +274,14 @@ data class CheckStmt(
     val baseString: Expression,
     val start: Int = 1,
     val wrongCharPosition: AssignableExpression?,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition)
 
 data class CallStmt(
     val expression: Expression,
     val params: List<PlistParam>,
     val errorIndicator: IndicatorKey? = null,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         return params.mapNotNull() {
@@ -290,7 +290,7 @@ data class CallStmt(
     }
 }
 
-data class KListStmt(val name: String, val fields: List<String>, override val specifiedPosition: Position?) :
+data class KListStmt(val name: String, val fields: List<String>, override var specifiedPosition: Position?) :
     Statement(
         specifiedPosition
     ),
@@ -309,10 +309,10 @@ data class IfStmt(
     override val body: List<Statement>,
     val elseIfClauses: List<ElseIfClause> = emptyList(),
     val elseClause: ElseClause? = null,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), CompositeStatement
 
-data class ElseClause(override val body: List<Statement>, override val specifiedPosition: Position? = null) :
+data class ElseClause(override val body: List<Statement>, override var specifiedPosition: Position? = null) :
     Node(
         specifiedPosition
     ),
@@ -321,13 +321,13 @@ data class ElseClause(override val body: List<Statement>, override val specified
 data class ElseIfClause(
     val condition: Expression,
     override val body: List<Statement>,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Node(specifiedPosition), CompositeStatement
 
 data class SetStmt(
     val valueSet: ValueSet,
     val indicators: List<AssignableExpression>,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition) {
     enum class ValueSet {
         ON,
@@ -335,7 +335,7 @@ data class SetStmt(
     }
 }
 
-data class ReturnStmt(val expression: Expression?, override val specifiedPosition: Position? = null) : Statement(
+data class ReturnStmt(val expression: Expression?, override var specifiedPosition: Position? = null) : Statement(
     specifiedPosition
 )
 
@@ -344,7 +344,7 @@ data class ReturnStmt(val expression: Expression?, override val specifiedPositio
 data class PlistStmt(
     val params: List<PlistParam>,
     val isEntry: Boolean,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         val allDataDefinitions = params.mapNotNull { it.dataDefinition }
@@ -362,13 +362,13 @@ data class PlistStmt(
 data class PlistParam(
     val param: ReferenceByName<AbstractDataDefinition>,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Node(specifiedPosition)
 
 data class ClearStmt(
     val value: Expression,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         if (dataDefinition != null) {
@@ -381,7 +381,7 @@ data class ClearStmt(
 data class DefineStmt(
     val originalName: String,
     val newVarName: String,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         val containingCU = this.findAncestorOfType(CompilationUnit::class.java)
@@ -433,14 +433,14 @@ data class CompStmt(
     val left: Expression,
     val right: Expression,
     val rightIndicators: WithRightIndicators,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), WithRightIndicators by rightIndicators
 
 data class ZAddStmt(
     val target: AssignableExpression,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
     var expression: Expression,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) :
     Statement(specifiedPosition), StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
@@ -456,7 +456,7 @@ data class MultStmt(
     val halfAdjust: Boolean = false,
     val factor1: Expression?,
     val factor2: Expression,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition)
 
 data class DivStmt(
@@ -464,7 +464,7 @@ data class DivStmt(
     val halfAdjust: Boolean = false,
     val factor1: Expression?,
     val factor2: Expression,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition)
 
 data class AddStmt(
@@ -472,7 +472,7 @@ data class AddStmt(
     val result: AssignableExpression,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
     val right: Expression,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         if (dataDefinition != null) {
@@ -490,7 +490,7 @@ data class ZSubStmt(
     val target: AssignableExpression,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
     var expression: Expression,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         if (dataDefinition != null) {
@@ -505,7 +505,7 @@ data class SubStmt(
     val result: AssignableExpression,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
     val right: Expression,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         if (dataDefinition != null) {
@@ -521,13 +521,13 @@ data class SubStmt(
 
 data class TimeStmt(
     val value: Expression,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition)
 
 data class DisplayStmt(
     val factor1: Expression?,
     val response: Expression?,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition)
 
 data class DoStmt(
@@ -535,34 +535,34 @@ data class DoStmt(
     val index: AssignableExpression?,
     override val body: List<Statement>,
     val startLimit: Expression = IntLiteral(1),
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), CompositeStatement
 
 data class DowStmt(
     val endExpression: Expression,
     override val body: List<Statement>,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), CompositeStatement
 
 data class DouStmt(
     val endExpression: Expression,
     override val body: List<Statement>,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), CompositeStatement
 
-data class LeaveSrStmt(override val specifiedPosition: Position? = null) : Statement(specifiedPosition)
+data class LeaveSrStmt(override var specifiedPosition: Position? = null) : Statement(specifiedPosition)
 
-data class LeaveStmt(override val specifiedPosition: Position? = null) : Statement(specifiedPosition)
+data class LeaveStmt(override var specifiedPosition: Position? = null) : Statement(specifiedPosition)
 
-data class IterStmt(override val specifiedPosition: Position? = null) : Statement(specifiedPosition)
+data class IterStmt(override var specifiedPosition: Position? = null) : Statement(specifiedPosition)
 
-data class OtherStmt(override val specifiedPosition: Position? = null) : Statement(specifiedPosition)
+data class OtherStmt(override var specifiedPosition: Position? = null) : Statement(specifiedPosition)
 
-data class TagStmt constructor(val tag: String, override val specifiedPosition: Position? = null) : Statement(
+data class TagStmt constructor(val tag: String, override var specifiedPosition: Position? = null) : Statement(
     specifiedPosition
 )
 
-data class GotoStmt(val tag: String, override val specifiedPosition: Position? = null) : Statement(specifiedPosition)
+data class GotoStmt(val tag: String, override var specifiedPosition: Position? = null) : Statement(specifiedPosition)
 
 data class CabStmt(
     val factor1: Expression,
@@ -570,7 +570,7 @@ data class CabStmt(
     val comparison: ComparisonOperator?,
     val tag: String,
     val rightIndicators: WithRightIndicators,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), WithRightIndicators by rightIndicators
 
 data class ForStmt(
@@ -579,7 +579,7 @@ data class ForStmt(
     val byValue: Expression,
     val downward: Boolean = false,
     override val body: List<Statement>,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), CompositeStatement {
     fun iterDataDefinition(): AbstractDataDefinition {
         if (init is AssignmentExpr) {
@@ -599,7 +599,7 @@ data class ForStmt(
 * of the array to be sorted followed by the subfield to be used as a key for the sort.
 */
 
-data class SortAStmt(val target: Expression, override val specifiedPosition: Position? = null) : Statement(
+data class SortAStmt(val target: Expression, override var specifiedPosition: Position? = null) : Statement(
     specifiedPosition
 )
 
@@ -608,14 +608,14 @@ data class CatStmt(
     val right: Expression,
     val target: AssignableExpression,
     val blanksInBetween: Int,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition)
 
 data class LookupStmt(
     val left: Expression,
     val right: Expression,
     val rightIndicators: WithRightIndicators,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), WithRightIndicators by rightIndicators
 
 data class ScanStmt(
@@ -625,7 +625,7 @@ data class ScanStmt(
     val startPosition: Int,
     val target: AssignableExpression,
     val rightIndicators: WithRightIndicators,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), WithRightIndicators by rightIndicators
 
 data class XFootStmt(
@@ -633,7 +633,7 @@ data class XFootStmt(
     val result: AssignableExpression,
     val rightIndicators: WithRightIndicators,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
-    override val specifiedPosition: Position? = null
+    override var specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), WithRightIndicators by rightIndicators, StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         if (dataDefinition != null) {

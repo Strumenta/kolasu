@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import org.junit.Test as test
 
-data class MySetStatement(override val specifiedPosition: Position? = null) : Node(specifiedPosition)
+data class MySetStatement(override var specifiedPosition: Position? = null) : Node(specifiedPosition)
 
 class PositionTest {
 
