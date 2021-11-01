@@ -11,7 +11,7 @@ open class Node(
      * Explicitly set position.
      * @see Node.position
      */
-    open val specifiedPosition: Position? = null
+    open var specifiedPosition: Position? = null
 ) {
 
     open val nodeType: String
