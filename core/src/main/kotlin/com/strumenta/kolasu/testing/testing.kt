@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.testing
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.parsing.toParseTree
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Vocabulary
@@ -67,6 +68,14 @@ class IgnoreChildren<N : Node> : List<N> {
 
 class ASTDifferenceException(val context: String, val expected: Any, val actual: Any) :
     Exception("$context: expecting $expected, actual $actual")
+
+fun <T: Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: ParsingResult<T>) {
+    assertEquals(expected.issues, actual.issues)
+    assertEquals(expected.root != null, actual.root != null)
+    if (expected.root != null) {
+        assertASTsAreEqual(expected.root!!, actual.root!!)
+    }
+}
 
 fun assertASTsAreEqual(
     expected: Node,
