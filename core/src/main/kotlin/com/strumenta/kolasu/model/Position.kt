@@ -3,6 +3,7 @@ package com.strumenta.kolasu.model
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.ParseTree
+import java.io.File
 
 val START_LINE = 1
 val START_COLUMN = 0
@@ -89,10 +90,15 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
         get() = Position(this, this)
 }
 
-fun linePosition(lineNumber: Int, lineCode: String) : Position {
+fun linePosition(lineNumber: Int, lineCode: String, source: Source? = null) : Position {
     require(lineNumber >= 1) { "Line numbers are expected to be equal or greater than 1" }
-    return Position(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length))
+    return Position(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length), source)
 }
+
+abstract class Source
+class FileSource(file: File) : Source()
+class StringSource(code: String? = null) : Source()
+class CustomSource(description: String) : Source()
 
 /**
  * An area in a source file, from start to end.
@@ -103,7 +109,7 @@ fun linePosition(lineNumber: Int, lineCode: String) : Position {
  * Consider a file with one line, containing text "HELLO".
  * The Position of such text will be Position(Point(1, 0), Point(1, 5)).
  */
-data class Position(val start: Point, val end: Point) : Comparable<Position> {
+data class Position(val start: Point, val end: Point, var source: Source? = null) : Comparable<Position> {
 
     override fun compareTo(other: Position): Int {
         val cmp = this.start.compareTo(other.start)
@@ -114,7 +120,7 @@ data class Position(val start: Point, val end: Point) : Comparable<Position> {
         }
     }
 
-    constructor(start: Point, end: Point, validate: Boolean = true) : this(start, end) {
+    constructor(start: Point, end: Point, source: Source? = null, validate: Boolean = true) : this(start, end, source) {
         if (validate) {
             require(start.isBefore(end) || start == end) {
                 "End should follows start or be the same as start (start: $start, end: $end)"
