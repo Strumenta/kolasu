@@ -359,7 +359,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
             ast.walk().forEach { it.parseTreeNode = null }
         }
         val now = System.currentTimeMillis()
-        return ParsingResult(firstStage.issues, ast, code, null, firstStage, now - start)
+        return ParsingResult(myIssues, ast, code, null, firstStage, now - start)
     }
 
     /**
