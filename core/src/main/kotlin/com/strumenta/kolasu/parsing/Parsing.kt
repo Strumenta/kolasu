@@ -210,7 +210,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     /**
      * Transforms a parse tree into an AST (second parsing stage).
      */
-    protected open fun parseTreeToAst(parseTreeRoot: C, considerPosition: Boolean = true, issues: List<Issue>): R? {
+    protected open fun parseTreeToAst(parseTreeRoot: C, considerPosition: Boolean = true, issues: MutableList<Issue>): R? {
         return parseTreeToAst(parseTreeRoot, considerPosition)
     }
 
