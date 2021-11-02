@@ -210,6 +210,15 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     /**
      * Transforms a parse tree into an AST (second parsing stage).
      */
+    protected open fun parseTreeToAst(parseTreeRoot: C, considerPosition: Boolean = true, issues: List<Issue>): R? {
+        return parseTreeToAst(parseTreeRoot, considerPosition)
+    }
+
+    /**
+     * Transforms a parse tree into an AST (second parsing stage).
+     *
+     * To be removed.
+     */
     protected abstract fun parseTreeToAst(parseTreeRoot: C, considerPosition: Boolean = true): R?
 
     /**
@@ -341,9 +350,9 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     override fun parse(code: String, considerPosition: Boolean, measureLexingTime: Boolean): ParsingResult<R> {
         val start = System.currentTimeMillis()
         val firstStage = parseFirstStage(code, measureLexingTime)
-        var ast = parseTreeToAst(firstStage.root!!, considerPosition)
-        assignParents(ast)
         val myIssues = firstStage.issues.toMutableList()
+        var ast = parseTreeToAst(firstStage.root!!, considerPosition, myIssues)
+        assignParents(ast)
         ast = if (ast == null) null else postProcessAst(ast, myIssues)
         if (ast != null && !considerPosition) {
             // Remove parseTreeNodes because they cause the position to be computed
