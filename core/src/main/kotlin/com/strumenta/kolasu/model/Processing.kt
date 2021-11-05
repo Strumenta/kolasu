@@ -18,6 +18,7 @@ val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
         .filter { it.findAnnotation<Link>() == null }
         .filter { it.name != "parent" }
         .filter { it.name != "position" }
+        .filter { it.name != "specifiedPosition" }
         .filter { it.name != "parseTreeNode" }
 
 /**
