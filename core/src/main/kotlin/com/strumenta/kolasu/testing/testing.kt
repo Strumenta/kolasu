@@ -80,14 +80,12 @@ fun <T : Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: 
 fun assertASTsAreEqual(
     expected: Node,
     actual: Node,
-    ignorePosition: Boolean = true,
     context: String = "<root>"
 ) {
     if (expected::class == actual::class) {
         expected.properties.forEach { expectedProperty ->
             if (expectedProperty.name == "parseTreeNode") {
                 // nothing to do here
-            } else if (expectedProperty.name == "position" && ignorePosition) {
             } else {
                 val actualPropValue = actual.properties.find { it.name == expectedProperty.name }!!.value
                 val expectedPropValue = expectedProperty.value
