@@ -4,6 +4,8 @@ import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.ParseTree
 import java.io.File
+import java.net.URL
+import java.nio.file.Path
 
 val START_LINE = 1
 val START_COLUMN = 0
@@ -96,9 +98,11 @@ fun linePosition(lineNumber: Int, lineCode: String, source: Source? = null) : Po
 }
 
 abstract class Source
+class SourceSet(name:String, root: Path)
+class SourceSetElement(sourceSet: SourceSet, relativePath: Path) : Source()
 class FileSource(file: File) : Source()
 class StringSource(code: String? = null) : Source()
-class CustomSource(description: String) : Source()
+class URLSource(url: URL) : Source()
 
 /**
  * An area in a source file, from start to end.
