@@ -34,6 +34,9 @@ val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
  */
 fun Node.assignParents() {
     this.walkChildren().forEach {
+        if (it == this) {
+            throw java.lang.IllegalStateException("A node cannot be parent of itself: $this")
+        }
         it.parent = this
         it.assignParents()
     }

@@ -43,7 +43,7 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
 
     override fun toString() = "Line $line, Column $column"
 
-    fun positionWithLength(length: Int) : Position {
+    fun positionWithLength(length: Int): Position {
         require(length >= 0)
         return Position(this, this.plus(length))
     }
@@ -92,13 +92,13 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
         get() = Position(this, this)
 }
 
-fun linePosition(lineNumber: Int, lineCode: String, source: Source? = null) : Position {
+fun linePosition(lineNumber: Int, lineCode: String, source: Source? = null): Position {
     require(lineNumber >= 1) { "Line numbers are expected to be equal or greater than 1" }
     return Position(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length), source)
 }
 
 abstract class Source
-class SourceSet(name:String, root: Path)
+class SourceSet(name: String, root: Path)
 class SourceSetElement(sourceSet: SourceSet, relativePath: Path) : Source()
 class FileSource(file: File) : Source()
 class StringSource(code: String? = null) : Source()
@@ -114,6 +114,10 @@ class URLSource(url: URL) : Source()
  * The Position of such text will be Position(Point(1, 0), Point(1, 5)).
  */
 data class Position(val start: Point, val end: Point, var source: Source? = null) : Comparable<Position> {
+
+    override fun toString(): String {
+        return "Position(start=$start, end=$end${if (source == null) "" else ", source=$source"})"
+    }
 
     override fun compareTo(other: Position): Int {
         val cmp = this.start.compareTo(other.start)
@@ -145,7 +149,7 @@ data class Position(val start: Point, val end: Point, var source: Source? = null
      */
     fun length(code: String) = end.offset(code) - start.offset(code)
 
-    fun isEmpty() : Boolean = start == end
+    fun isEmpty(): Boolean = start == end
 
     /**
      * Tests whether the given point is contained in the interval represented by this object.
