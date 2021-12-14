@@ -14,7 +14,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.XMIResource
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
-import org.emfjson.jackson.resource.JsonResourceFactory
+import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.File
 import java.io.IOException
 import kotlin.system.exitProcess

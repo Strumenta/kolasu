@@ -3,7 +3,7 @@ package com.strumenta.kolasu.emf.multipkg
 import com.strumenta.kolasu.emf.CompilationUnit
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import org.eclipse.emf.common.util.URI
-import org.emfjson.jackson.resource.JsonResourceFactory
+import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import org.junit.Test
 import kotlin.test.assertEquals
 

@@ -12,7 +12,7 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import org.emfjson.jackson.resource.JsonResourceFactory
+import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

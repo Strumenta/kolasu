@@ -8,7 +8,7 @@ import com.strumenta.kolasu.emf.toEObject
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
-import org.emfjson.jackson.resource.JsonResourceFactory
+import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.io.FileWriter
