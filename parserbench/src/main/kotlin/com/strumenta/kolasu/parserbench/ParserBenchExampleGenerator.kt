@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.parserbench
 
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.strumenta.kolasu.emf.EMFEnabledParser
@@ -8,10 +9,12 @@ import com.strumenta.kolasu.emf.toEObject
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.io.FileWriter
+import java.io.Writer
 
 class ParserBenchExampleGenerator(
     val parser: EMFEnabledParser<*, *, *>,
@@ -44,26 +47,32 @@ class ParserBenchExampleGenerator(
             throw ExampleGenerationFailure(parsingResult, "Cannot generate examples from code with errors")
         }
 
-        val jo = JsonObject()
-        jo.add("name", JsonPrimitive(name))
-        jo.add("code", JsonPrimitive(code))
-        val eObject = Result(parsingResult.issues, parsingResult.root).toEObject(resource)
-        resource.contents.add(eObject)
-        val ast: JsonObject?
-        try {
-            ast = eObject.saveAsJsonObject()
-        } finally {
-            resource.contents.remove(eObject)
-        }
-        jo.add("ast", ast)
-        jo.addProperty("parsingTime", parsingResult.firstStage!!.time)
-        jo.addProperty("astBuildingTime", parsingResult.time)
-        jo.toString()
         val file = File(directory, "$name.json")
-        val fw = FileWriter(file)
-        fw.write(jo.toString())
-        fw.close()
+        FileWriter(file).use {
+            parsingResult.saveForParserBench(resource, it, name)
+        }
     }
 }
 
 class ExampleGenerationFailure(val result: ParsingResult<*>, message: String) : RuntimeException(message)
+
+fun ParsingResult<*>.saveForParserBench(
+    metamodel: Resource, writer: Writer, name: String) {
+    val simplifiedResult = Result(issues, root)
+    val eObject = simplifiedResult.toEObject(metamodel)
+    try {
+        metamodel.contents.add(eObject)
+        val ast = eObject.saveAsJsonObject()
+        val jsonObject = JsonObject()
+        jsonObject.addProperty("name", name)
+        jsonObject.addProperty("code", code)
+        jsonObject.add("ast", ast)
+        if(firstStage != null) {
+            jsonObject.addProperty("parsingTime", firstStage!!.time)
+        }
+        jsonObject.addProperty("astBuildingTime", time)
+        writer.write(jsonObject.toString())
+    } finally {
+        metamodel.contents.remove(eObject)
+    }
+}
