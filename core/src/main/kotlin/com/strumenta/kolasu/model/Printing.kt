@@ -62,7 +62,7 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                             sb.append("$indent$indentBlock]\n")
                         } else {
                             sb.append("$indent$indentBlock${property.name} = [\n")
-                            (value as List<*>).forEach {
+                            value.forEach {
                                 sb.append(
                                     it?.debugPrint(
                                         indent + indentBlock + indentBlock, configuration

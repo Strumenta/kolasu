@@ -73,7 +73,7 @@ fun <T : Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: 
     assertEquals(expected.issues, actual.issues)
     assertEquals(expected.root != null, actual.root != null)
     if (expected.root != null) {
-        assertASTsAreEqual(expected.root!!, actual.root!!)
+        assertASTsAreEqual(expected.root, actual.root!!)
     }
 }
 

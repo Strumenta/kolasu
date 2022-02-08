@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.ParserRuleContext
 import org.eclipse.emf.ecore.resource.Resource
 
 interface EMFMetamodelSupport {
-    fun generateMetamodel(resource: Resource)
+    fun generateMetamodel(resource: Resource, includingKolasuMetamodel: Boolean = true)
 }
 
 /**
@@ -22,8 +22,10 @@ abstract class EMFEnabledParser<R : Node, P : Parser, C : ParserRuleContext> :
     /**
      * Generates the metamodel. The standard Kolasu metamodel [EPackage][org.eclipse.emf.ecore.EPackage] is included.
      */
-    override fun generateMetamodel(resource: Resource) {
-        resource.contents.add(KOLASU_METAMODEL)
+    override fun generateMetamodel(resource: Resource, includingKolasuMetamodel: Boolean) {
+        if(includingKolasuMetamodel) {
+            resource.contents.add(KOLASU_METAMODEL)
+        }
         doGenerateMetamodel(resource)
     }
 

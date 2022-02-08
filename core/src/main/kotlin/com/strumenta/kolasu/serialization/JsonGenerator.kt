@@ -111,7 +111,7 @@ class JsonGenerator {
         File(file.toURI()).writeText(generateString(result))
     }
 
-    private fun valueToJson(value: Any): JsonElement {
+    private fun valueToJson(value: Any?): JsonElement {
         return when (value) {
             null -> JsonNull.INSTANCE
             is String -> JsonPrimitive(value)
