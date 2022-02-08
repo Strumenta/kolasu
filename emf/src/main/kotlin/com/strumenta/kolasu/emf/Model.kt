@@ -231,10 +231,10 @@ fun Node.toEObject(eResource: Resource): EObject {
             val esf = ec.eAllStructuralFeatures.find { it.name == pd.name }!!
             if (pd.provideNodes) {
                 if (pd.multiple) {
-                    val elist = eo.eGet(esf) as MutableList<EObject>
+                    val elist = eo.eGet(esf) as MutableList<EObject?>
                     (pd.value as List<*>?)?.forEach {
                         try {
-                            val childEO = (it as Node).toEObject(eResource)
+                            val childEO = (it as Node?)?.toEObject(eResource)
                             elist.add(childEO)
                         } catch (e: Exception) {
                             throw RuntimeException("Unable to map to EObject child $it in property $pd of $this", e)

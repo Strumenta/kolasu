@@ -288,6 +288,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         eClass.name = kClass.eClassifierName
 
         eClass.isAbstract = kClass.isAbstract || kClass.isSealed
+        eClass.isInterface = kClass.java.isInterface
 
         kClass.processProperties { prop ->
             try {
