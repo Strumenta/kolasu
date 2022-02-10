@@ -46,7 +46,9 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                 val mt = property.returnType.javaType
                 if (mt is ParameterizedType && mt.rawType == List::class.java) {
                     val value = property.get(this) as List<*>
-                    if (value.isEmpty() && configuration.skipEmptyCollections) {
+                    if (value == null) {
+                        sb.append("$indent$indentBlock${property.name} = null")
+                    } else if (value.isEmpty() && configuration.skipEmptyCollections) {
                         // nothing to do
                     } else {
                         val paramType = mt.actualTypeArguments[0]
