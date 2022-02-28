@@ -1,8 +1,6 @@
 package com.strumenta.kolasu.parserbench
 
-import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import com.strumenta.kolasu.emf.EMFEnabledParser
 import com.strumenta.kolasu.emf.saveAsJsonObject
 import com.strumenta.kolasu.emf.toEObject
@@ -57,7 +55,10 @@ class ParserBenchExampleGenerator(
 class ExampleGenerationFailure(val result: ParsingResult<*>, message: String) : RuntimeException(message)
 
 fun ParsingResult<*>.saveForParserBench(
-    metamodel: Resource, writer: Writer, name: String) {
+    metamodel: Resource,
+    writer: Writer,
+    name: String
+) {
     val simplifiedResult = Result(issues, root)
     val eObject = simplifiedResult.toEObject(metamodel)
     try {

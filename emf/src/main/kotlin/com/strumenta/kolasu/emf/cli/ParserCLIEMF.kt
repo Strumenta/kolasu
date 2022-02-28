@@ -5,11 +5,9 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.strumenta.kolasu.cli.ParsingCommand
 import com.strumenta.kolasu.emf.*
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import java.io.File
-import java.io.IOException
 import kotlin.system.exitProcess
 
 open class ParserCLIEMF<R : Node>(
@@ -57,5 +55,4 @@ open class ParserCLIEMF<R : Node>(
         println("Done (${System.currentTimeMillis() - start}ms).")
         return mmResource
     }
-
 }

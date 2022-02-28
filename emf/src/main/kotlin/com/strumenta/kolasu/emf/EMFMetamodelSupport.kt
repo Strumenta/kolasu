@@ -1,7 +1,5 @@
 package com.strumenta.kolasu.emf
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.KolasuParser
 import com.strumenta.kolasu.parsing.ParsingResult
@@ -17,7 +15,6 @@ import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.IOException
-import java.io.Writer
 
 interface EMFMetamodelSupport {
     fun generateMetamodel(resource: Resource, includingKolasuMetamodel: Boolean = true)
@@ -29,7 +26,8 @@ val RESET_URI = EMFMetamodelSupport::class.qualifiedName + ".resetURI"
 val DEFAULT_OPTIONS_FOR_METAMODEL = mapOf(
     Pair(XMIResource.OPTION_SCHEMA_LOCATION, true),
     Pair(INCLUDE_KOLASU, false),
-    Pair(RESET_URI, true))
+    Pair(RESET_URI, true)
+)
 
 fun EMFMetamodelSupport.saveMetamodel(
     target: URI,
@@ -44,14 +42,17 @@ fun EMFMetamodelSupport.saveMetamodel(
             ?: throw IOException("Unsupported destination: $target")
     this.generateMetamodel(resource, options[INCLUDE_KOLASU] ?: false)
     resource.save(options)
-    if(options[RESET_URI] != false) {
+    if (options[RESET_URI] != false) {
         resource.uri = URI.createURI("")
     }
     return resource
 }
 
 fun ParsingResult<*>.saveModel(
-    metamodel: Resource, target: URI, options: Map<String, Boolean>? = null): Resource {
+    metamodel: Resource,
+    target: URI,
+    options: Map<String, Boolean>? = null
+): Resource {
     val resource =
         metamodel.resourceSet.createResource(target)
             ?: throw IOException("Unsupported destination: $target")
@@ -79,7 +80,7 @@ abstract class EMFEnabledParser<R : Node, P : Parser, C : ParserRuleContext> :
      * Generates the metamodel. The standard Kolasu metamodel [EPackage][org.eclipse.emf.ecore.EPackage] is included.
      */
     override fun generateMetamodel(resource: Resource, includingKolasuMetamodel: Boolean) {
-        if(includingKolasuMetamodel) {
+        if (includingKolasuMetamodel) {
             resource.contents.add(KOLASU_METAMODEL)
         }
         doGenerateMetamodel(resource)
