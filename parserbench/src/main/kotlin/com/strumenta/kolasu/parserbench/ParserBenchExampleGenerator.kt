@@ -67,7 +67,7 @@ fun ParsingResult<*>.saveForParserBench(
         jsonObject.addProperty("name", name)
         jsonObject.addProperty("code", code)
         jsonObject.add("ast", ast)
-        if(firstStage != null) {
+        if (firstStage != null) {
             jsonObject.addProperty("parsingTime", firstStage!!.time)
         }
         jsonObject.addProperty("astBuildingTime", time)

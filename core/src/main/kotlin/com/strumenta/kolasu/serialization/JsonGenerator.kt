@@ -112,14 +112,18 @@ class JsonGenerator {
     }
 
     private fun valueToJson(value: Any?): JsonElement {
-        return when (value) {
-            null -> JsonNull.INSTANCE
-            is String -> JsonPrimitive(value)
-            is Number -> JsonPrimitive(value)
-            is Boolean -> JsonPrimitive(value)
-            else -> {
-                return gsonBuilder.create().toJsonTree(value)
+        try {
+            return when (value) {
+                null -> JsonNull.INSTANCE
+                is String -> JsonPrimitive(value)
+                is Number -> JsonPrimitive(value)
+                is Boolean -> JsonPrimitive(value)
+                else -> {
+                    return gsonBuilder.create().toJsonTree(value)
+                }
             }
+        } catch (e: Exception) {
+            throw RuntimeException("Unable to serialize $value (${value?.javaClass?.canonicalName})", e)
         }
     }
 
@@ -133,29 +137,33 @@ class JsonGenerator {
             JSON_POSITION_KEY to node.position?.toJson()
         )
         node.processProperties {
-            if (it.value == null) {
-                jsonObject.add(it.name, JsonNull.INSTANCE)
-            } else if (it.multiple) {
-                if (it.provideNodes) {
-                    jsonObject.add(
-                        it.name,
-                        (it.value as Collection<*>).map { el ->
-                            nodeToJson(
-                                el as Node,
-                                shortClassNames
-                            )
-                        }
-                            .toJsonArray()
-                    )
+            try {
+                if (it.value == null) {
+                    jsonObject.add(it.name, JsonNull.INSTANCE)
+                } else if (it.multiple) {
+                    if (it.provideNodes) {
+                        jsonObject.add(
+                            it.name,
+                            (it.value as Collection<*>).map { el ->
+                                nodeToJson(
+                                    el as Node,
+                                    shortClassNames
+                                )
+                            }
+                                .toJsonArray()
+                        )
+                    } else {
+                        jsonObject.add(it.name, valueToJson(it.value))
+                    }
                 } else {
-                    jsonObject.add(it.name, valueToJson(it.value))
+                    if (it.provideNodes) {
+                        jsonObject.add(it.name, nodeToJson(it.value as Node, shortClassNames))
+                    } else {
+                        jsonObject.add(it.name, valueToJson(it.value))
+                    }
                 }
-            } else {
-                if (it.provideNodes) {
-                    jsonObject.add(it.name, nodeToJson(it.value as Node, shortClassNames))
-                } else {
-                    jsonObject.add(it.name, valueToJson(it.value))
-                }
+            } catch (e: Exception) {
+                throw RuntimeException("Issue occurred while processing property $it of $node", e)
             }
         }
         return jsonObject
@@ -203,12 +211,16 @@ typealias JsonSerializer = Function<Any, JsonElement>
 private val AsStringJsonSerializer = JsonSerializer { JsonPrimitive(it.toString()) }
 
 private fun Any?.toJson(jsonSerializer: JsonSerializer = AsStringJsonSerializer): JsonElement {
-    return when (this) {
-        null -> JsonNull.INSTANCE
-        is String -> JsonPrimitive(this)
-        is Number -> JsonPrimitive(this)
-        is Boolean -> JsonPrimitive(this)
-        else -> jsonSerializer.apply(this)
+    try {
+        return when (this) {
+            null -> JsonNull.INSTANCE
+            is String -> JsonPrimitive(this)
+            is Number -> JsonPrimitive(this)
+            is Boolean -> JsonPrimitive(this)
+            else -> jsonSerializer.apply(this)
+        }
+    } catch (e: Exception) {
+        throw RuntimeException("Unable to serialize $this (${this?.javaClass?.canonicalName})", e)
     }
 }
 
