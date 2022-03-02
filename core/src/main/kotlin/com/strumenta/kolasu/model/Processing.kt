@@ -51,7 +51,7 @@ fun Node.processNodes(operation: (Node) -> Unit, walker: KFunction1<Node, Sequen
     walker.invoke(this).forEach(operation)
 }
 
-fun Node.invalidPositions(): Sequence<Node> = this.walkDescendants().filter {
+fun Node.invalidPositions(): Sequence<Node> = this.walk().filter {
     it.position == null || run {
         val parentPos = it.parent?.position
         // If the parent position is null, we can't say anything about this node's position
