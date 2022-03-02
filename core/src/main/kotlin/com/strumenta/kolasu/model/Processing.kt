@@ -314,8 +314,11 @@ val Node.children: List<Node>
     }
 
 // TODO reimplement using transformChildren
-fun Node.transformTree(operation: (Node) -> Node, inPlace: Boolean = false,
-                       mutationsCache : IdentityHashMap<Node, Node> = IdentityHashMap<Node, Node>()): Node {
+fun Node.transformTree(
+    operation: (Node) -> Node,
+    inPlace: Boolean = false,
+    mutationsCache: IdentityHashMap<Node, Node> = IdentityHashMap<Node, Node>()
+): Node {
     if (inPlace) TODO()
     mutationsCache.computeIfAbsent(this) { operation(this) }
     val changes = mutableMapOf<String, Any>()

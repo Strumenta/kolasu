@@ -7,14 +7,17 @@ import kotlin.reflect.jvm.javaType
 
 private const val indentBlock = "  "
 
-fun Node.relevantMemberProperties() = this.javaClass.kotlin.memberProperties
-    .filter { !it.name.startsWith("component")
-            && it.name != "position"
-            && it.name != "nodeType"
-            && it.name != "specifiedPosition"
-            && it.name != "properties"
-            && it.name != "parseTreeNode"
-            && it.name != "parent" }
+fun Node.relevantMemberProperties(withPosition: Boolean = false, withNodeType: Boolean = false) =
+    this.javaClass.kotlin.memberProperties
+        .filter {
+            !it.name.startsWith("component") &&
+                (it.name != "position" || withPosition) &&
+                (it.name != "nodeType" || withNodeType) &&
+                it.name != "specifiedPosition" &&
+                it.name != "properties" &&
+                it.name != "parseTreeNode" &&
+                it.name != "parent"
+        }
 
 data class DebugPrintConfiguration(
     val skipEmptyCollections: Boolean = false,
@@ -37,16 +40,12 @@ fun Any?.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
 @Suppress("UNCHECKED_CAST")
 fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration = DebugPrintConfiguration()): String {
     val sb = StringBuilder()
-    if (this.relevantMemberProperties().isEmpty()) {
+    if (this.relevantMemberProperties(withPosition = configuration.forceShowPosition).isEmpty()) {
         sb.append("$indent${this.javaClass.simpleName}\n")
     } else {
         sb.append("$indent${this.javaClass.simpleName} {\n")
-        var positionShouldBeDisplayed = configuration.forceShowPosition
-        this.relevantMemberProperties().forEach { property ->
-            if (property.name == "position") {
-                positionShouldBeDisplayed = false
-            }
-            if (configuration.hide.contains(property.name) || property.name == "properties") {
+        this.relevantMemberProperties(withPosition = configuration.forceShowPosition).forEach { property ->
+            if (configuration.hide.contains(property.name)) {
                 // skipping
             } else {
                 val mt = property.returnType.javaType
@@ -102,14 +101,6 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                         }
                     }
                 }
-            }
-        }
-        if (positionShouldBeDisplayed) {
-            val value = this.position
-            if (value == null && configuration.skipNull) {
-                // nothing to do
-            } else {
-                this.showSingleAttribute(indent, sb, "position", value)
             }
         }
         sb.append("$indent} // ${this.javaClass.simpleName}\n")

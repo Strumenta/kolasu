@@ -173,29 +173,38 @@ class ProcessingTest {
 
     @test
     fun transformVarName() {
-        val startTree = MiniCalcFile(listOf(
-            VarDeclaration("A", IntLit("10")),
-            Assignment(ReferenceByName("A"), IntLit("11")),
-            Print(ValueReference(ReferenceByName("A")))))
+        val startTree = MiniCalcFile(
+            listOf(
+                VarDeclaration("A", IntLit("10")),
+                Assignment(ReferenceByName("A"), IntLit("11")),
+                Print(ValueReference(ReferenceByName("A")))
+            )
+        )
 
-        val expectedTransformedTree = MiniCalcFile(listOf(
-            VarDeclaration("B", IntLit("10")),
-            Assignment(ReferenceByName("B"), IntLit("11")),
-            Print(ValueReference(ReferenceByName("B")))))
+        val expectedTransformedTree = MiniCalcFile(
+            listOf(
+                VarDeclaration("B", IntLit("10")),
+                Assignment(ReferenceByName("B"), IntLit("11")),
+                Print(ValueReference(ReferenceByName("B")))
+            )
+        )
 
         val nodesProcessed = HashSet<Node>()
 
-        assertEquals(expectedTransformedTree, startTree.transformTree(operation =  {
-            if (nodesProcessed.contains(it)) {
-                throw RuntimeException("Trying to process again node $it")
-            }
-            nodesProcessed.add(it)
-            when (it) {
-                is VarDeclaration -> VarDeclaration("B", it.value)
-                is ValueReference -> ValueReference(ReferenceByName("B"))
-                is Assignment -> Assignment(ReferenceByName("B"), it.value)
-                else -> it
-            }
-        }))
+        assertEquals(
+            expectedTransformedTree,
+            startTree.transformTree(operation = {
+                if (nodesProcessed.contains(it)) {
+                    throw RuntimeException("Trying to process again node $it")
+                }
+                nodesProcessed.add(it)
+                when (it) {
+                    is VarDeclaration -> VarDeclaration("B", it.value)
+                    is ValueReference -> ValueReference(ReferenceByName("B"))
+                    is Assignment -> Assignment(ReferenceByName("B"), it.value)
+                    else -> it
+                }
+            })
+        )
     }
 }
