@@ -186,7 +186,6 @@ class ProcessingTest {
         val nodesProcessed = HashSet<Node>()
 
         assertEquals(expectedTransformedTree, startTree.transformTree(operation =  {
-            println("hashcode ${it.hashCode()} ${it}")
             if (nodesProcessed.contains(it)) {
                 throw RuntimeException("Trying to process again node $it")
             }

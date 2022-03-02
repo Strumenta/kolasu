@@ -2,6 +2,7 @@
 package com.strumenta.kolasu.model
 
 import org.antlr.v4.runtime.ParserRuleContext
+import java.util.*
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
@@ -313,19 +314,20 @@ val Node.children: List<Node>
     }
 
 // TODO reimplement using transformChildren
-fun Node.transformTree(operation: (Node) -> Node, inPlace: Boolean = false): Node {
+fun Node.transformTree(operation: (Node) -> Node, inPlace: Boolean = false,
+                       mutationsCache : IdentityHashMap<Node, Node> = IdentityHashMap<Node, Node>()): Node {
     if (inPlace) TODO()
-    operation(this)
+    mutationsCache.computeIfAbsent(this) { operation(this) }
     val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { p ->
         val v = p.get(this)
         when (v) {
             is Node -> {
-                val newValue = v.transformTree(operation)
+                val newValue = v.transformTree(operation, inPlace, mutationsCache)
                 if (newValue != v) changes[p.name] = newValue
             }
             is Collection<*> -> {
-                val newValue = v.map { if (it is Node) it.transformTree(operation) else it }
+                val newValue = v.map { if (it is Node) it.transformTree(operation, inPlace, mutationsCache) else it }
                 if (newValue != v) changes[p.name] = newValue
             }
         }
@@ -343,7 +345,7 @@ fun Node.transformTree(operation: (Node) -> Node, inPlace: Boolean = false): Nod
         }
         instanceToTransform = constructor.callBy(params)
     }
-    return operation(instanceToTransform)
+    return mutationsCache.computeIfAbsent(instanceToTransform) { operation(instanceToTransform) }
 }
 
 class ImmutablePropertyException(property: KProperty<*>, node: Node) :
