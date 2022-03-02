@@ -18,6 +18,15 @@ interface FooNodeType
 
 interface BarNotNodeType
 
+data class MiniCalcFile(val elements: List<MCStatement>) : Node()
+data class VarDeclaration(override val name: String, val value: MCExpression) : MCStatement(), Named
+sealed class MCExpression : Node()
+data class IntLit(val value: String) : MCExpression()
+sealed class MCStatement : Node()
+data class Assignment(val ref: ReferenceByName<VarDeclaration>, val value: MCExpression) : MCStatement()
+data class Print(val value: MCExpression) : MCStatement()
+data class ValueReference(val ref: ReferenceByName<VarDeclaration>) : MCExpression()
+
 class ProcessingTest {
 
     @test
@@ -160,5 +169,34 @@ class ProcessingTest {
 
         assertSame(existing1, parentNode.manyAs[0])
         assertEquals(1, parentNode.manyAs.size)
+    }
+
+    @test
+    fun transformVarName() {
+        val startTree = MiniCalcFile(listOf(
+            VarDeclaration("A", IntLit("10")),
+            Assignment(ReferenceByName("A"), IntLit("11")),
+            Print(ValueReference(ReferenceByName("A")))))
+
+        val expectedTransformedTree = MiniCalcFile(listOf(
+            VarDeclaration("B", IntLit("10")),
+            Assignment(ReferenceByName("B"), IntLit("11")),
+            Print(ValueReference(ReferenceByName("B")))))
+
+        val nodesProcessed = HashSet<Node>()
+
+        assertEquals(expectedTransformedTree, startTree.transformTree(operation =  {
+            println("hashcode ${it.hashCode()} ${it}")
+            if (nodesProcessed.contains(it)) {
+                throw RuntimeException("Trying to process again node $it")
+            }
+            nodesProcessed.add(it)
+            when (it) {
+                is VarDeclaration -> VarDeclaration("B", it.value)
+                is ValueReference -> ValueReference(ReferenceByName("B"))
+                is Assignment -> Assignment(ReferenceByName("B"), it.value)
+                else -> it
+            }
+        }))
     }
 }
