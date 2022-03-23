@@ -50,34 +50,36 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
             } else {
                 val mt = property.returnType.javaType
                 if (mt is ParameterizedType && mt.rawType == List::class.java) {
-                    if (property.get(this) == null) {
-                        sb.append("$indent$indentBlock${property.name} = null")
-                    } else {
-                        val value = property.get(this) as List<*>
-                        if (value.isEmpty() && configuration.skipEmptyCollections) {
-                            // nothing to do
+                    if (property.visibility == PUBLIC) {
+                        if (property.get(this) == null) {
+                            sb.append("$indent$indentBlock${property.name} = null")
                         } else {
-                            val paramType = mt.actualTypeArguments[0]
-                            if (paramType is Class<*> && Node::class.java.isAssignableFrom(paramType)) {
-                                sb.append("$indent$indentBlock${property.name} = [\n")
-                                (value as List<Node>).forEach {
-                                    sb.append(
-                                        it.debugPrint(
-                                            indent + indentBlock + indentBlock, configuration
-                                        )
-                                    )
-                                }
-                                sb.append("$indent$indentBlock]\n")
+                            val value = property.get(this) as List<*>
+                            if (value.isEmpty() && configuration.skipEmptyCollections) {
+                                // nothing to do
                             } else {
-                                sb.append("$indent$indentBlock${property.name} = [\n")
-                                value.forEach {
-                                    sb.append(
-                                        it?.debugPrint(
-                                            indent + indentBlock + indentBlock, configuration
+                                val paramType = mt.actualTypeArguments[0]
+                                if (paramType is Class<*> && Node::class.java.isAssignableFrom(paramType)) {
+                                    sb.append("$indent$indentBlock${property.name} = [\n")
+                                    (value as List<Node>).forEach {
+                                        sb.append(
+                                            it.debugPrint(
+                                                indent + indentBlock + indentBlock, configuration
+                                            )
                                         )
-                                    )
+                                    }
+                                    sb.append("$indent$indentBlock]\n")
+                                } else {
+                                    sb.append("$indent$indentBlock${property.name} = [\n")
+                                    value.forEach {
+                                        sb.append(
+                                            it?.debugPrint(
+                                                indent + indentBlock + indentBlock, configuration
+                                            )
+                                        )
+                                    }
+                                    sb.append("$indent$indentBlock]\n")
                                 }
-                                sb.append("$indent$indentBlock]\n")
                             }
                         }
                     }

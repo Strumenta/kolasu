@@ -8,6 +8,8 @@ class Number(val value: Int) : Expr()
 class Add(val left: Expr, val right: Expr) : Expr()
 class Sub(private val left: Expr, private val right: Expr) : Expr()
 
+class Expressions(val public: List<Expr>, private val private: List<Expr>) : Expr()
+
 class PrintingTest {
     @test
     fun basicTest() {
@@ -55,6 +57,30 @@ class PrintingTest {
   ]
 } // Add
 """,
+            ast.debugPrint()
+        )
+    }
+
+    @test
+    fun privateListFieldsGetPrintedToo() {
+        val ast = Expressions(
+            public = listOf(Number(1), Number(2)),
+            private = listOf(Number(3), Number(4))
+        )
+        assertEquals(
+            """
+            Expressions {
+              public = [
+                Number {
+                  value = 1
+                } // Number
+                Number {
+                  value = 2
+                } // Number
+              ]
+            } // Expressions
+            
+            """.trimIndent(),
             ast.debugPrint()
         )
     }
