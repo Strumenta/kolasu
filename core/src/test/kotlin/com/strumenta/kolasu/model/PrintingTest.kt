@@ -8,6 +8,8 @@ class Number(val value: Int) : Expr()
 class Add(val left: Expr, val right: Expr) : Expr()
 class Sub(private val left: Expr, private val right: Expr) : Expr()
 
+class Empty(val empty: List<Expr>? = emptyList()) : Expr()
+
 class PrintingTest {
     @test
     fun basicTest() {
@@ -55,6 +57,20 @@ class PrintingTest {
   ]
 } // Add
 """,
+            ast.debugPrint()
+        )
+    }
+
+    @test
+    fun shortFormatForEmptyArrays() {
+        val ast = Empty()
+        assertEquals(
+            """
+              Empty {
+                empty = []
+              } // Empty
+              
+            """.trimIndent(),
             ast.debugPrint()
         )
     }
