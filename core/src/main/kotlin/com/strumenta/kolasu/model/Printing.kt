@@ -74,8 +74,12 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                             sb.append("$indent$indentBlock${property.name} = null")
                         } else {
                             val value = property.get(this) as List<*>
-                            if (value.isEmpty() && configuration.skipEmptyCollections) {
-                                // nothing to do
+                            if (value.isEmpty()) {
+                                if (configuration.skipEmptyCollections()) {
+                                    // nothing to do
+                                } else {
+                                    sb.append("$indent$indentBlock${property.name} = []\n")
+                                }
                             } else {
                                 val paramType = mt.actualTypeArguments[0]
                                 if (paramType is Class<*> && Node::class.java.isAssignableFrom(paramType)) {
