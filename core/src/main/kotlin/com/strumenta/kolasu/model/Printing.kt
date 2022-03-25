@@ -75,7 +75,7 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                         } else {
                             val value = property.get(this) as List<*>
                             if (value.isEmpty()) {
-                                if (configuration.skipEmptyCollections()) {
+                                if (configuration.skipEmptyCollections) {
                                     // nothing to do
                                 } else {
                                     sb.append("$indent$indentBlock${property.name} = []\n")
