@@ -17,6 +17,12 @@ open class Node(): WithPosition {
         }
     }
 
+    constructor(origin: WithPosition?) : this() {
+        if (origin != null) {
+            this.origin = origin
+        }
+    }
+
     open val nodeType: String
         get() = this.javaClass.canonicalName
 
