@@ -4,12 +4,12 @@ interface WithPosition {
     val position: Position?
 }
 
-class JustPosition(override val position: Position): WithPosition
+class JustPosition(override val position: Position) : WithPosition
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
-open class Node(): WithPosition {
+open class Node() : WithPosition {
 
     constructor(position: Position?) : this() {
         if (position != null) {

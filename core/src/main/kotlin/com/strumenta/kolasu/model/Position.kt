@@ -182,4 +182,3 @@ val Token.startPoint: Point
 
 val Token.endPoint: Point
     get() = if (this.type == Token.EOF) startPoint else startPoint + this.text
-

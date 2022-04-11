@@ -139,13 +139,13 @@ fun Node.getText(): String? = if (origin != null) {
 
 fun Node.getText(code: String): String? = position?.text(code)
 
-class ParseTreeOrigin(val parseTree: ParseTree): WithPosition {
+class ParseTreeOrigin(val parseTree: ParseTree) : WithPosition {
     override val position: Position?
         get() = parseTree.toPosition()
 }
 
 fun <T : Node> T.withParseTreeNode(tree: ParserRuleContext?): T {
-    if(tree != null) {
+    if (tree != null) {
         this.origin = ParseTreeOrigin(tree)
     }
     return this
