@@ -7,7 +7,9 @@ import com.github.ajalt.clikt.parameters.arguments.argument
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.parsing.KolasuParser
+import com.strumenta.kolasu.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.parsing.ParsingResult
+import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ParseTree
 import java.io.File
 import kotlin.system.exitProcess
@@ -63,8 +65,9 @@ open class ParsingCommand<R : Node>(
             "Done (${result!!.time}ms of which ${result!!.time!! - result!!.firstStage!!.time!!}ms to build the AST)."
         )
         val node = result!!.root!!
-        val parseTree = node.parseTreeNode!!
-        val lines = parseTree.stop.line - parseTree.start.line
+        val position = node.position!!
+        val lines = position.end.line - position.start.line
+        val parseTree = (node.origin as ParseTreeOrigin).parseTree as ParserRuleContext
         println(
             "The file has $lines lines and ${result!!.code?.length ?: "unknown"} characters. " +
                 "The parse tree has ${countParseTreeNodes(parseTree)} nodes " +

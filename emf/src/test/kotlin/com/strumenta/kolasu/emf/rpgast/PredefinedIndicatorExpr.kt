@@ -3,7 +3,7 @@ package com.smeup.rpgparser.parsing.ast
 import com.strumenta.kolasu.model.Position
 
 // *IN01..*IN99
-data class PredefinedIndicatorExpr(val index: Int, override var specifiedPosition: Position? = null) :
+data class PredefinedIndicatorExpr(val index: Int, val specifiedPosition: Position? = null) :
     AssignableExpression(specifiedPosition) {
     init {
         require(index in 1..99) { "Indicator not in range 01 to 99 at $specifiedPosition" }
@@ -12,7 +12,7 @@ data class PredefinedIndicatorExpr(val index: Int, override var specifiedPositio
 }
 
 // *IN
-data class PredefinedGlobalIndicatorExpr(override var specifiedPosition: Position? = null) :
+data class PredefinedGlobalIndicatorExpr(val specifiedPosition: Position? = null) :
     AssignableExpression(specifiedPosition) {
     override fun size(): Int {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
@@ -21,7 +21,7 @@ data class PredefinedGlobalIndicatorExpr(override var specifiedPosition: Positio
 
 data class DataWrapUpIndicatorExpr(
     val dataWrapUpChoice: DataWrapUpChoice,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) :
     AssignableExpression(specifiedPosition) {
     override fun size(): Int = 1

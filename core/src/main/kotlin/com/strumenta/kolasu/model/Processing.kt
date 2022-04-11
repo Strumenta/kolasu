@@ -1,7 +1,6 @@
 @file:JvmName("Processing")
 package com.strumenta.kolasu.model
 
-import org.antlr.v4.runtime.ParserRuleContext
 import java.util.*
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
@@ -60,11 +59,6 @@ fun Node.invalidPositions(): Sequence<Node> = this.walk().filter {
 }
 
 fun Node.findInvalidPosition(): Node? = this.invalidPositions().firstOrNull()
-
-fun <T : Node> T.withParseTreeNode(tree: ParserRuleContext?): T {
-    this.parseTreeNode = tree
-    return this
-}
 
 fun <T : Node> T.withParent(parent: Node?): T {
     this.parent = parent
@@ -179,7 +173,7 @@ data class PropertyDescription(
             }
         }
 
-        fun provideNodes(property: KProperty1<in Node, *>): Boolean {
+        fun providesNodes(property: KProperty1<in Node, *>): Boolean {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             return if (multiple(property)) {
@@ -191,7 +185,7 @@ data class PropertyDescription(
 
         fun buildFor(property: KProperty1<in Node, *>, node: Node): PropertyDescription {
             val multeplicity = multeplicity(property)
-            val provideNodes = provideNodes(property)
+            val provideNodes = providesNodes(property)
             return PropertyDescription(
                 name = property.name,
                 provideNodes = provideNodes,
@@ -202,7 +196,7 @@ data class PropertyDescription(
     }
 }
 
-val DEFAULT_IGNORED_PROPERTIES = setOf("nodeType", "parseTreeNode", "position", "specifiedPosition")
+val DEFAULT_IGNORED_PROPERTIES = setOf("nodeType", "origin", "position")
 
 /**
  * Executes an operation on the properties of a node.
@@ -288,9 +282,8 @@ fun <T> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<No
  */
 fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent: Node? = null) {
     operation(this, parent)
-    this.nodeProperties.forEach { p ->
-        val v = p.get(this)
-        when (v) {
+    this.properties.forEach { p ->
+        when (val v = p.value) {
             is Node -> v.processConsideringDirectParent(operation, this)
             is Collection<*> -> v.forEach { (it as? Node)?.processConsideringDirectParent(operation, this) }
         }

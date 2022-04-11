@@ -1,8 +1,6 @@
 package com.strumenta.kolasu.model
 
-import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token
-import org.antlr.v4.runtime.tree.ParseTree
 import java.io.File
 import java.net.URL
 import java.nio.file.Path
@@ -185,11 +183,3 @@ val Token.startPoint: Point
 val Token.endPoint: Point
     get() = if (this.type == Token.EOF) startPoint else startPoint + this.text
 
-val RuleContext.hasChildren: Boolean
-    get() = this.childCount > 0
-
-val RuleContext.firstChild: ParseTree?
-    get() = if (hasChildren) this.getChild(0) else null
-
-val RuleContext.lastChild: ParseTree?
-    get() = if (hasChildren) this.getChild(this.childCount - 1) else null

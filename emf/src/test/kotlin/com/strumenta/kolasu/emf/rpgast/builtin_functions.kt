@@ -12,16 +12,16 @@ import com.strumenta.kolasu.model.Position
 data class LookupExpr(
     var searchedValued: Expression,
     val array: Expression,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition)
 
 // %SCAN
 
 data class ScanExpr(
     var value: Expression,
-    val source: Expression,
+    val src: Expression,
     val start: Expression? = null,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition)
 
 // %XLATE
@@ -31,7 +31,7 @@ data class TranslateExpr(
     var to: Expression,
     var string: Expression,
     val startPos: Expression,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition)
 
 // %TRIM
@@ -39,7 +39,7 @@ data class TranslateExpr(
 data class TrimExpr(
     var value: Expression,
     val charactersToTrim: Expression? = null,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition) {
     override fun render(): String {
         val toTrim = if (this.charactersToTrim != null) ": ${this.charactersToTrim.render()}" else ""
@@ -52,7 +52,7 @@ data class TrimExpr(
 data class TrimrExpr(
     var value: Expression,
     val charactersToTrim: Expression? = null,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition) {
 
     override fun render(): String {
@@ -66,7 +66,7 @@ data class TrimrExpr(
 data class TrimlExpr(
     var value: Expression,
     val charactersToTrim: Expression? = null,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition) {
 
     override fun render(): String {
@@ -81,7 +81,7 @@ data class SubstExpr(
     var string: Expression,
     val start: Expression,
     val length: Expression? = null,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) :
     AssignableExpression(specifiedPosition) {
     override fun render(): String {
@@ -95,7 +95,7 @@ data class SubstExpr(
 
 // %LEN
 
-data class LenExpr(var value: Expression, override var specifiedPosition: Position? = null) :
+data class LenExpr(var value: Expression, val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render(): String {
         return "%LEN(${this.value.render()})"
@@ -107,7 +107,7 @@ data class LenExpr(var value: Expression, override var specifiedPosition: Positi
 data class RemExpr(
     val dividend: Expression,
     val divisor: Expression,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition)
 
 // %DEC
@@ -116,7 +116,7 @@ data class DecExpr(
     var value: Expression,
     var intDigits: Expression,
     val decDigits: Expression,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition) {
     override fun render(): String {
         return "${this.value.render()}"
@@ -127,7 +127,7 @@ data class DecExpr(
 
 data class IntExpr(
     var value: Expression,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) :
     Expression(specifiedPosition) {
     override fun render(): String {
@@ -137,7 +137,7 @@ data class IntExpr(
 
 // %SQRT
 
-data class SqrtExpr(var value: Expression, override var specifiedPosition: Position? = null) :
+data class SqrtExpr(var value: Expression, val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render(): String {
         return "${this.value.render()}"
@@ -150,7 +150,7 @@ data class SqrtExpr(var value: Expression, override var specifiedPosition: Posit
 data class EditcExpr(
     var value: Expression,
     val format: Expression,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition)
 
 // %EDITW
@@ -159,40 +159,40 @@ data class EditcExpr(
 data class EditwExpr(
     var value: Expression,
     val format: Expression,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition)
 
 // %FOUND
 
 data class FoundExpr(
     var name: String? = null,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition)
 
 // %EOF
 
 data class EofExpr(
     var name: String? = null,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition)
 
 // %EQUAL
 
 data class EqualExpr(
     var name: String? = null,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition)
 
 // %ABS
 
 data class AbsExpr(
     var value: Expression,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) : Expression(specifiedPosition)
 
 // %CHAR
 
-data class CharExpr(var value: Expression, val format: String?, override var specifiedPosition: Position? = null) :
+data class CharExpr(var value: Expression, val format: String?, val specifiedPosition: Position? = null) :
     Expression(specifiedPosition) {
     override fun render(): String {
         return "%CHAR(${value.render()})"
@@ -201,7 +201,7 @@ data class CharExpr(var value: Expression, val format: String?, override var spe
 
 // %TIMESTAMP
 
-data class TimeStampExpr(val value: Expression?, override var specifiedPosition: Position? = null) :
+data class TimeStampExpr(val value: Expression?, val specifiedPosition: Position? = null) :
     Expression(specifiedPosition)
 
 // %DIFF
@@ -210,7 +210,7 @@ data class DiffExpr(
     var value1: Expression,
     var value2: Expression,
     val durationCode: DurationCode,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) :
     Expression(specifiedPosition)
 
@@ -218,10 +218,10 @@ data class DiffExpr(
 
 data class ReplaceExpr(
     val replacement: Expression,
-    val source: Expression,
+    val src: Expression,
     val start: Expression? = null,
     val length: Expression? = null,
-    override var specifiedPosition: Position? = null
+    val specifiedPosition: Position? = null
 ) :
     Expression(specifiedPosition)
 

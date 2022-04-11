@@ -5,7 +5,7 @@ import com.strumenta.kolasu.model.Position
 
 // *IN01..*IN99 and *INLR *INRT
 
-data class IndicatorExpr(val index: IndicatorKey, override var specifiedPosition: Position? = null) :
+data class IndicatorExpr(val index: IndicatorKey, val specifiedPosition: Position? = null) :
     AssignableExpression(specifiedPosition) {
 
     constructor(dataWrapUpChoice: DataWrapUpChoice, specifiedPosition: Position? = null) :
@@ -16,7 +16,7 @@ data class IndicatorExpr(val index: IndicatorKey, override var specifiedPosition
 
 // *IN
 
-data class GlobalIndicatorExpr(override var specifiedPosition: Position? = null) :
+data class GlobalIndicatorExpr(val specifiedPosition: Position? = null) :
     AssignableExpression(specifiedPosition) {
     override fun size(): Int {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.

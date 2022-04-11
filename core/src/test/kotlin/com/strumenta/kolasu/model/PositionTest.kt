@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.mapping.toPosition
+import com.strumenta.kolasu.parsing.ParseTreeOrigin
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
 import org.antlr.v4.runtime.CharStreams
@@ -10,7 +11,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import org.junit.Test as test
 
-data class MySetStatement(override var specifiedPosition: Position? = null) : Node(specifiedPosition)
+data class MySetStatement(val specifiedPosition: Position? = null) : Node(specifiedPosition)
 
 class PositionTest {
 
@@ -121,7 +122,7 @@ class PositionTest {
         val cu = parser.compilationUnit()
         val setStmt = cu.statement(0) as SimpleLangParser.SetStmtContext
         val mySetStatement = MySetStatement()
-        mySetStatement.parseTreeNode = setStmt
+        mySetStatement.origin = ParseTreeOrigin(setStmt)
         assertEquals(Position(Point(1, 0), Point(1, 13)), mySetStatement.position)
     }
 

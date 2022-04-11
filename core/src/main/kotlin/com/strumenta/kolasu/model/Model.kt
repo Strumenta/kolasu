@@ -1,18 +1,21 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.mapping.position
-import org.antlr.v4.runtime.ParserRuleContext
+interface WithPosition {
+    val position: Position?
+}
+
+class JustPosition(override val position: Position): WithPosition
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
-open class Node(
-    /**
-     * Explicitly set position.
-     * @see Node.position
-     */
-    open var specifiedPosition: Position? = null
-) {
+open class Node(): WithPosition {
+
+    constructor(position: Position?) : this() {
+        if (position != null) {
+            origin = JustPosition(position)
+        }
+    }
 
     open val nodeType: String
         get() = this.javaClass.canonicalName
@@ -29,9 +32,10 @@ open class Node(
         }
 
     /**
-     * The parse-tree node from which this AST Node has been generated, if any.
+     * The node from which this AST Node has been generated, if any.
      */
-    var parseTreeNode: ParserRuleContext? = null
+    var origin: WithPosition? = null
+
     /**
      * The parent node, if any.
      */
@@ -42,8 +46,8 @@ open class Node(
      * If a position has been provided when creating this node, it is returned.
      * Otherwise, the value of this property is the position of the original parse tree node, if any.
      */
-    val position: Position?
-        get() = specifiedPosition ?: parseTreeNode?.position
+    override val position: Position?
+        get() = origin?.position
 }
 
 /**
