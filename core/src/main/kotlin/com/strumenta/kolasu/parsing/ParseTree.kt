@@ -116,32 +116,23 @@ fun Token.getOriginalText(): String {
     return this.inputStream.getText(interval)
 }
 
-fun Node.getText(): String? = if (origin != null) {
-    when (origin) {
-        is ParseTreeOrigin -> {
-            val parseTreeSource = origin as ParseTreeOrigin
-            when (parseTreeSource.parseTree) {
+fun Node.getText(code: String): String? = position?.text(code)
+
+class ParseTreeOrigin(val parseTree: ParseTree) : Origin {
+    override val position: Position?
+        get() = parseTree.toPosition()
+
+    override val sourceText: String?
+        get() =
+            when (parseTree) {
                 is ParserRuleContext -> {
-                    parseTreeSource.parseTree.getOriginalText()
+                    parseTree.getOriginalText()
                 }
                 is TerminalNode -> {
-                    parseTreeSource.parseTree.text
+                    parseTree.text
                 }
                 else -> null
             }
-        }
-        is Node -> {
-            (origin as Node).getText()
-        }
-        else -> null
-    }
-} else null
-
-fun Node.getText(code: String): String? = position?.text(code)
-
-class ParseTreeOrigin(val parseTree: ParseTree) : WithPosition {
-    override val position: Position?
-        get() = parseTree.toPosition()
 }
 
 fun <T : Node> T.withParseTreeNode(tree: ParserRuleContext?): T {

@@ -16,10 +16,6 @@ val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
         .filter { it.visibility == KVisibility.PUBLIC }
         .filter { it.findAnnotation<Derived>() == null }
         .filter { it.findAnnotation<Link>() == null }
-        .filter { it.name != "parent" }
-        .filter { it.name != "position" }
-        .filter { it.name != "specifiedPosition" }
-        .filter { it.name != "parseTreeNode" }
 
 /**
  * @return all properties of this node that are considered AST properties.

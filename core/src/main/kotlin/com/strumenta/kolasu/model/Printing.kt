@@ -20,6 +20,7 @@ fun Node.relevantMemberProperties(withPosition: Boolean = false, withNodeType: B
                 (it.name != "nodeType" || withNodeType) &&
                 it.name != "properties" &&
                 it.name != "origin" &&
+                it.name != "sourceText" &&
                 it.name != "parent"
         }
 

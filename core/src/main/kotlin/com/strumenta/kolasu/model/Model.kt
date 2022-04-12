@@ -1,15 +1,18 @@
 package com.strumenta.kolasu.model
 
-interface WithPosition {
+interface Origin {
     val position: Position?
+    val sourceText: String?
 }
 
-class JustPosition(override val position: Position) : WithPosition
+class JustPosition(override val position: Position) : Origin {
+    override val sourceText: String? = null
+}
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
-open class Node() : WithPosition {
+open class Node() : Origin {
 
     constructor(position: Position?) : this() {
         if (position != null) {
@@ -17,12 +20,13 @@ open class Node() : WithPosition {
         }
     }
 
-    constructor(origin: WithPosition?) : this() {
+    constructor(origin: Origin?) : this() {
         if (origin != null) {
             this.origin = origin
         }
     }
 
+    @Derived
     open val nodeType: String
         get() = this.javaClass.canonicalName
 
@@ -40,11 +44,13 @@ open class Node() : WithPosition {
     /**
      * The node from which this AST Node has been generated, if any.
      */
-    var origin: WithPosition? = null
+    @Derived
+    var origin: Origin? = null
 
     /**
      * The parent node, if any.
      */
+    @Derived
     var parent: Node? = null
 
     /**
@@ -52,8 +58,34 @@ open class Node() : WithPosition {
      * If a position has been provided when creating this node, it is returned.
      * Otherwise, the value of this property is the position of the original parse tree node, if any.
      */
-    override val position: Position?
+    @Derived
+    override var position: Position?
         get() = origin?.position
+        set(position) {
+            if (origin != null && origin !is JustPosition) {
+                throw IllegalStateException("Node $this already has an origin: $origin")
+            }
+            if (position != null) {
+                this.origin = JustPosition(position)
+            }
+        }
+
+    /**
+     * The source text for this node
+     */
+    @Derived
+    override val sourceText: String?
+        get() = origin?.sourceText
+}
+
+fun <N : Node> N.withPosition(position: Position?): N {
+    this.position = position
+    return this
+}
+
+fun <N : Node> N.withOrigin(origin: Origin?): N {
+    this.origin = origin
+    return this
 }
 
 /**
