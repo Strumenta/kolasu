@@ -37,6 +37,29 @@ fun Node.walk(): Sequence<Node> {
 }
 
 /**
+ * @param position the position within which the walk should remain
+ * @return walks the AST within the given [position] starting from this node, depth-first.
+ */
+fun Node.walkWithin(position: Position): Sequence<Node> {
+    return if (position.contains(this)) {
+        sequenceOf(this) + this.children.walkWithin(position)
+    } else if (this.contains(position)) {
+        this.children.walkWithin(position)
+    } else emptySequence<Node>()
+}
+
+/**
+ * @param position the position within which the walk should remain
+ * @return walks the AST within the given [position] starting from each node
+ * and concatenates all results in a single sequence
+ */
+fun List<Node>.walkWithin(position: Position): Sequence<Node> {
+    return this
+        .map { it.walkWithin(position) }
+        .reduceOrNull { previous, current -> previous + current } ?: emptySequence()
+}
+
+/**
  * Performs a post-order (or leaves-first) node traversal starting with a given node.
  */
 fun Node.walkLeavesFirst(): Sequence<Node> {
