@@ -5,7 +5,11 @@ import kotlin.test.assertEquals
 import kotlin.test.fail
 
 internal class TraversingTest {
-    class Box(val name: String, val contents: List<Node>, override var specifiedPosition: Position? = null) : Node(specifiedPosition)
+    class Box(
+        val name: String,
+        val contents: List<Node>,
+        override var specifiedPosition: Position? = null
+    ) : Node(specifiedPosition)
     class Item(val name: String, override var specifiedPosition: Position? = null) : Node(specifiedPosition)
 
     private fun printSequence(sequence: Sequence<Node>): String {
