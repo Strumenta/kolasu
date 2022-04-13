@@ -274,6 +274,7 @@ fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<No
  * @return the nearest node to the given [position]. Null if none is found.
  * @see searchByPosition
  */
+@JvmOverloads
 fun Node.findByPosition(position: Position, selfContained: Boolean = false): Node? {
     return this.searchByPosition(position, selfContained).lastOrNull()
 }
@@ -285,6 +286,7 @@ fun Node.findByPosition(position: Position, selfContained: Boolean = false): Nod
  * If **false (default)**: the research will cover all nodes from the starting node to the leaves.
  * @return all nodes contained within the given [position] using depth-first search. Empty list if none are found.
  */
+@JvmOverloads
 fun Node.searchByPosition(position: Position, selfContained: Boolean = false): Sequence<Node> {
     return if (selfContained) {
         this.walkWithin(position)
