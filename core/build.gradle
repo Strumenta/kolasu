@@ -41,18 +41,21 @@ generateTestGrammarSource {
 compileKotlin.dependsOn generateGrammarSource
 compileJava.dependsOn generateGrammarSource
 compileTestKotlin.dependsOn generateTestGrammarSource
+
 sourceSets {
-    generatedTest {
-        java.srcDir 'generated-test-src/antlr/main/'
+    test {
+        java {
+            srcDirs += "generated-test-src/antlr/main"
+        }
     }
 }
 
 compileKotlin.source sourceSets.main.java, sourceSets.main.kotlin
-compileJava.source sourceSets.generatedTest.java
 compileTestKotlin.source sourceSets.test.kotlin
 
 clean{
     delete "generated-src"
+    delete "generated-test-src"
 }
 
 compileJava.dependsOn generateTestGrammarSource
@@ -60,7 +63,6 @@ compileJava.dependsOn generateTestGrammarSource
 idea {
     module {
         testSourceDirs += file("generated-test-src/antlr/main")
-        generatedSourceDirs += file("generated-test-src/antlr/main")
     }
 }
 
