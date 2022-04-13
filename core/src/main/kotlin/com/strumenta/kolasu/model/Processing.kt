@@ -3,25 +3,9 @@ package com.strumenta.kolasu.model
 
 import java.util.*
 import kotlin.reflect.*
-import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
-
-val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
-    get() = this.kotlin.nodeProperties
-
-val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
-    get() = memberProperties
-        .filter { it.visibility == KVisibility.PUBLIC }
-        .filter { it.findAnnotation<Derived>() == null }
-        .filter { it.findAnnotation<Link>() == null }
-
-/**
- * @return all properties of this node that are considered AST properties.
- */
-val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
-    get() = this.javaClass.nodeProperties
 
 /**
  * Sets or corrects the parent of all AST nodes.

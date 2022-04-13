@@ -1,5 +1,11 @@
 package com.strumenta.kolasu.model
 
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.memberProperties
+
 interface Origin {
     val position: Position?
     val sourceText: String?
@@ -26,14 +32,14 @@ open class Node() : Origin {
         }
     }
 
-    @Derived
+    @Internal
     open val nodeType: String
-        get() = this.javaClass.canonicalName
+        get() = this::class.qualifiedName!!
 
     /**
      * The properties of this AST nodes, including attributes, children, and references.
      */
-    @Derived
+    @Internal
     open val properties: List<PropertyDescription>
         get() = try {
             nodeProperties.map { PropertyDescription.buildFor(it, this) }
@@ -44,13 +50,13 @@ open class Node() : Origin {
     /**
      * The node from which this AST Node has been generated, if any.
      */
-    @Derived
+    @Internal
     var origin: Origin? = null
 
     /**
      * The parent node, if any.
      */
-    @Derived
+    @Internal
     var parent: Node? = null
 
     /**
@@ -58,7 +64,7 @@ open class Node() : Origin {
      * If a position has been provided when creating this node, it is returned.
      * Otherwise, the value of this property is the position of the original parse tree node, if any.
      */
-    @Derived
+    @Internal
     override var position: Position?
         get() = origin?.position
         set(position) {
@@ -73,7 +79,7 @@ open class Node() : Origin {
     /**
      * The source text for this node
      */
-    @Derived
+    @Internal
     override val sourceText: String?
         get() = origin?.sourceText
 }
@@ -87,6 +93,27 @@ fun <N : Node> N.withOrigin(origin: Origin?): N {
     this.origin = origin
     return this
 }
+
+val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
+    get() = this.kotlin.nodeProperties
+val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
+    get() = memberProperties
+        .filter { it.visibility == KVisibility.PUBLIC }
+        .filter { it.findAnnotation<Derived>() == null }
+        .filter { it.findAnnotation<Internal>() == null }
+        .filter { it.findAnnotation<Link>() == null }
+
+/**
+ * @return all properties of this node that are considered AST properties.
+ */
+val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
+    get() = this.javaClass.nodeProperties
+
+/**
+ * Use this to mark properties that are internal, i.e., they are used for bookkeeping and are not part of the model,
+ * so that they will not be considered branches of the AST.
+ */
+annotation class Internal
 
 /**
  * Use this to mark all relations which are secondary, i.e., they are calculated from other relations,
