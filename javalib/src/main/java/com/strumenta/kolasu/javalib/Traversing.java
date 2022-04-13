@@ -1,11 +1,13 @@
 package com.strumenta.kolasu.javalib;
 
 import com.strumenta.kolasu.model.Node;
+import com.strumenta.kolasu.model.Position;
 import com.strumenta.kolasu.model.TraversingKt;
 import kotlin.jvm.internal.Reflection;
 import kotlin.sequences.Sequence;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
@@ -85,6 +87,28 @@ public class Traversing {
 
     public static <N> void walkDescendantsLeavesFirst(Node node, Class<N> clazz, Consumer<Node> consumer) {
         consumeSequence(TraversingKt.walkDescendants(node, Reflection.createKotlinClass(clazz), TraversingKt::walkLeavesFirst), consumer);
+    }
+
+    /**
+     * Walks the AST within the given position starting from the given node
+     * and returns the result as sequence to consume.
+     *
+     * @param node     the node from which the walk should start
+     * @param position the position within which the walk should remain
+     */
+    public static <N> void walkWithin(Node node, Position position, Consumer<Node> consumer) {
+        consumeSequence(TraversingKt.walkWithin(node, position), consumer);
+    }
+
+    /**
+     * Walks the AST within the given position starting from each give node
+     * and concatenates all results in a single sequence to consume.
+     *
+     * @param nodes    the nodes from which the walk should start
+     * @param position the position within which the walk should remain
+     */
+    public static <N> void walkWithin(List<Node> nodes, Position position, Consumer<Node> consumer) {
+        consumeSequence(TraversingKt.walkWithin(nodes, position), consumer);
     }
 
     public static <T> T findAncestorOfType(Node node, Class<T> clazz) {
