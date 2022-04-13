@@ -8,6 +8,8 @@ import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Test as test
 
 data class MySetStatement(override var specifiedPosition: Position? = null) : Node(specifiedPosition)
@@ -104,7 +106,49 @@ class PositionTest {
         assertEquals("this is some code\ns", Position(START_POINT, Point(2, 1)).text(code))
     }
 
-    @test fun parserRuleContextPosition() {
+    @test
+    fun containsPoint() {
+        val before = Point(1, 0)
+        val start = Point(1, 1)
+        val middle = Point(1, 2)
+        val end = Point(1, 3)
+        val after = Point(1, 4)
+        val position = Position(start, end)
+
+        assertFalse("contains should return false with point before") { position.contains(before) }
+        assertTrue("contains should return true with point at the beginning") { position.contains(start) }
+        assertTrue("contains should return true with point in the middle") { position.contains(middle) }
+        assertTrue("contains should return true with point at the end") { position.contains(end) }
+        assertFalse("contains should return false with point after") { position.contains(after) }
+    }
+
+    @test
+    fun containsPosition() {
+        val before = Position(Point(1, 0), Point(1, 10))
+        val inside = Position(Point(2, 3), Point(2, 8))
+        val after = Position(Point(3, 0), Point(3, 10))
+        val position = Position(Point(2, 0), Point(2, 10))
+
+        assertFalse("contains should return false with position before") { position.contains(before) }
+        assertTrue("contains should return true with same position") { position.contains(position) }
+        assertTrue("contains should return true with position inside") { position.contains(inside) }
+        assertFalse("contains should return false with position after") { position.contains(after) }
+    }
+
+    @test
+    fun containsNode() {
+        val before = Node(Position(Point(1, 0), Point(1, 10)))
+        val inside = Node(Position(Point(2, 3), Point(2, 8)))
+        val after = Node(Position(Point(3, 0), Point(3, 10)))
+        val position = Position(Point(2, 0), Point(2, 10))
+
+        assertFalse("contains should return false with node before") { position.contains(before) }
+        assertTrue("contains should return true with node inside") { position.contains(inside) }
+        assertFalse("contains should return false with node after") { position.contains(after) }
+    }
+
+    @test
+    fun parserRuleContextPosition() {
         val code = "set foo = 123"
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
@@ -114,7 +158,8 @@ class PositionTest {
         assertEquals(Position(Point(1, 0), Point(1, 13)), pos)
     }
 
-    @test fun positionDerivedFromParseTreeNode() {
+    @test
+    fun positionDerivedFromParseTreeNode() {
         val code = "set foo = 123"
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
