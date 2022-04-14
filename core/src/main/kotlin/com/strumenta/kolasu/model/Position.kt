@@ -67,11 +67,18 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
      * @param other the other point
      */
     fun isBefore(other: Point) = this < other
+
     /**
      * Computes whether this point is the same as, or comes before, another point.
      * @param other the other point
      */
     fun isSameOrBefore(other: Point) = this <= other
+
+    /**
+     * Computes whether this point is the same as, or comes after, another point.
+     * @param other the other point
+     */
+    fun isSameOrAfter(other: Point) = this >= other
 
     operator fun plus(length: Int): Point {
         return Point(this.line, this.column + length)
@@ -155,6 +162,24 @@ data class Position(val start: Point, val end: Point, var source: Source? = null
      */
     fun contains(point: Point): Boolean {
         return ((point == start || start.isBefore(point)) && (point == end || point.isBefore(end)))
+    }
+
+    /**
+     * Tests whether the given position is contained in the interval represented by this object.
+     * @param position the position
+     */
+    fun contains(position: Position?): Boolean {
+        return (position != null) &&
+            this.start.isSameOrBefore(position.start) &&
+            this.end.isSameOrAfter(position.end)
+    }
+
+    /**
+     * Tests whether the given node is contained in the interval represented by this object.
+     * @param node the node
+     */
+    fun contains(node: Node): Boolean {
+        return this.contains(node.position)
     }
 }
 

@@ -3,6 +3,7 @@ package com.strumenta.kolasu.model
 
 import java.util.*
 import kotlin.reflect.*
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
@@ -229,6 +230,35 @@ fun <T : Any> KClass<T>.processProperties(
  */
 fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<Node>> = Node::walk): Node? {
     return walker.invoke(this).find(predicate)
+}
+
+/**
+ * @param position the position where to search for nodes
+ * @param selfContained whether the starting node position contains the positions of all its children.
+ * If **true** no further search will be performed in subtrees where the root node falls outside the given position.
+ * If **false (default)** the research will cover all nodes from the starting node to the leaves.
+ * @return the nearest node to the given [position]. Null if none is found.
+ * @see searchByPosition
+ */
+@JvmOverloads
+fun Node.findByPosition(position: Position, selfContained: Boolean = false): Node? {
+    return this.searchByPosition(position, selfContained).lastOrNull()
+}
+
+/**
+ * @param position the position where to search for nodes
+ * @param selfContained whether the starting node position contains the positions of all its children.
+ * If **true**: no further search will be performed in subtrees where the root node falls outside the given position.
+ * If **false (default)**: the research will cover all nodes from the starting node to the leaves.
+ * @return all nodes contained within the given [position] using depth-first search. Empty list if none are found.
+ */
+@JvmOverloads
+fun Node.searchByPosition(position: Position, selfContained: Boolean = false): Sequence<Node> {
+    return if (selfContained) {
+        this.walkWithin(position)
+    } else {
+        this.walk().filter { position.contains(it) }
+    }
 }
 
 /**

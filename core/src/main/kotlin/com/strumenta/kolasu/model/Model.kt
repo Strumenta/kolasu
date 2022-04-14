@@ -75,6 +75,14 @@ open class Node() : Origin {
                 this.origin = JustPosition(position)
             }
         }
+        
+    /**
+     * Tests whether the given position is contained in the interval represented by this object.
+     * @param position the position
+     */
+    fun contains(position: Position?): Boolean {
+        return this.position?.contains(position) ?: false
+    }
 
     /**
      * The source text for this node
