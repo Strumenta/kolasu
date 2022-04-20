@@ -87,12 +87,25 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
     }
 
     operator fun plus(text: String): Point {
-        return when {
-            text.isEmpty() -> this
-            text.startsWith("\r\n") -> Point(line + 1, 0) + text.substring(2)
-            text.startsWith("\n") || text.startsWith("\r") -> Point(line + 1, 0) + text.substring(1)
-            else -> Point(line, column + 1) + text.substring(1)
+        if (text.isEmpty()) {
+            return this
         }
+        var line = this.line
+        var column = this.column
+        var i = 0
+        while (i < text.length) {
+            if(text[i] == '\n' || text[i] == '\r') {
+                line++
+                column = 0
+                if (text[i] == '\r' && i < text.length - 1 && text[i + 1] == '\n') {
+                    i++ // Count the \r\n sequence as 1 line
+                }
+            } else {
+                column++
+            }
+            i++
+        }
+        return Point(line, column)
     }
 
     val asPosition: Position
@@ -209,6 +222,9 @@ val Token.startPoint: Point
 
 val Token.endPoint: Point
     get() = if (this.type == Token.EOF) startPoint else startPoint + this.text
+
+val Token.position: Position
+    get() = Position(startPoint, endPoint)
 
 val RuleContext.hasChildren: Boolean
     get() = this.childCount > 0
