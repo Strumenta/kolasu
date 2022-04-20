@@ -94,7 +94,7 @@ data class Point(val line: Int, val column: Int) : Comparable<Point> {
         var column = this.column
         var i = 0
         while (i < text.length) {
-            if(text[i] == '\n' || text[i] == '\r') {
+            if (text[i] == '\n' || text[i] == '\r') {
                 line++
                 column = 0
                 if (text[i] == '\r' && i < text.length - 1 && text[i + 1] == '\n') {
