@@ -8,9 +8,9 @@ internal class TraversingTest {
     class Box(
         val name: String,
         val contents: List<Node>,
-        override var specifiedPosition: Position? = null
+        specifiedPosition: Position? = null
     ) : Node(specifiedPosition)
-    class Item(val name: String, override var specifiedPosition: Position? = null) : Node(specifiedPosition)
+    class Item(val name: String, specifiedPosition: Position? = null) : Node(specifiedPosition)
 
     private fun printSequence(sequence: Sequence<Node>): String {
         return sequence.map {
