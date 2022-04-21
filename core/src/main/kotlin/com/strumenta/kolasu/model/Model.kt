@@ -75,7 +75,7 @@ open class Node() : Origin {
                 this.origin = JustPosition(position)
             }
         }
-        
+
     /**
      * Tests whether the given position is contained in the interval represented by this object.
      * @param position the position

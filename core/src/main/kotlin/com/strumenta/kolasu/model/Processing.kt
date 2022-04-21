@@ -3,7 +3,6 @@ package com.strumenta.kolasu.model
 
 import java.util.*
 import kotlin.reflect.*
-import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
