@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Position
 import org.junit.Test
 import java.io.File
 import java.time.LocalDateTime
@@ -15,8 +14,7 @@ enum class Visibility {
 class VarDeclaration(var visibility: Visibility, var name: String, var initialValue: Expression) : Statement()
 class StringLiteral(var value: String) : Expression()
 class LocalDateTimeLiteral(var value: LocalDateTime) : Expression()
-data class CompilationUnit(val statements: List<Statement>?, override var specifiedPosition: Position? = null) :
-    Node(specifiedPosition)
+data class CompilationUnit(val statements: List<Statement>?) : Node()
 
 class MetamodelTest {
 

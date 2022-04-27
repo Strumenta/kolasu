@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.javalib;
 
+import com.strumenta.kolasu.model.Internal;
 import com.strumenta.kolasu.model.Multeplicity;
 import com.strumenta.kolasu.model.Node;
 import com.strumenta.kolasu.model.PropertyDescription;
@@ -20,6 +21,7 @@ public class CompilationUnit extends Node {
 
         @NotNull
         @Override
+        @Internal
         public List<PropertyDescription> getProperties() {
             return Arrays.asList(new PropertyDescription("bs", true, Multeplicity.MANY, getBs()));
         }
@@ -37,6 +39,7 @@ public class CompilationUnit extends Node {
 
     @NotNull
     @Override
+    @Internal
     public List<PropertyDescription> getProperties() {
         return Arrays.asList(new PropertyDescription("as", true, Multeplicity.MANY, getAs()));
     }

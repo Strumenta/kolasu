@@ -1,41 +1,11 @@
 @file:JvmName("Processing")
 package com.strumenta.kolasu.model
 
-import org.antlr.v4.runtime.ParserRuleContext
-import java.util.IdentityHashMap
-import kotlin.reflect.KClass
-import kotlin.reflect.KClassifier
-import kotlin.reflect.KFunction1
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KParameter
-import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty1
-import kotlin.reflect.KType
-import kotlin.reflect.KTypeProjection
-import kotlin.reflect.KVisibility
-import kotlin.reflect.full.findAnnotation
+import java.util.*
+import kotlin.reflect.*
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
-
-val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
-    get() = this.kotlin.nodeProperties
-
-val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
-    get() = memberProperties
-        .filter { it.visibility == KVisibility.PUBLIC }
-        .filter { it.findAnnotation<Derived>() == null }
-        .filter { it.findAnnotation<Link>() == null }
-        .filter { it.name != "parent" }
-        .filter { it.name != "position" }
-        .filter { it.name != "specifiedPosition" }
-        .filter { it.name != "parseTreeNode" }
-
-/**
- * @return all properties of this node that are considered AST properties.
- */
-val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
-    get() = this.javaClass.nodeProperties
 
 /**
  * Sets or corrects the parent of all AST nodes.
@@ -69,11 +39,6 @@ fun Node.invalidPositions(): Sequence<Node> = this.walk().filter {
 }
 
 fun Node.findInvalidPosition(): Node? = this.invalidPositions().firstOrNull()
-
-fun <T : Node> T.withParseTreeNode(tree: ParserRuleContext?): T {
-    this.parseTreeNode = tree
-    return this
-}
 
 fun <T : Node> T.withParent(parent: Node?): T {
     this.parent = parent
@@ -188,7 +153,7 @@ data class PropertyDescription(
             }
         }
 
-        fun provideNodes(property: KProperty1<in Node, *>): Boolean {
+        fun providesNodes(property: KProperty1<in Node, *>): Boolean {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             return if (multiple(property)) {
@@ -200,7 +165,7 @@ data class PropertyDescription(
 
         fun buildFor(property: KProperty1<in Node, *>, node: Node): PropertyDescription {
             val multeplicity = multeplicity(property)
-            val provideNodes = provideNodes(property)
+            val provideNodes = providesNodes(property)
             return PropertyDescription(
                 name = property.name,
                 provideNodes = provideNodes,
@@ -211,7 +176,7 @@ data class PropertyDescription(
     }
 }
 
-val DEFAULT_IGNORED_PROPERTIES = setOf("nodeType", "parseTreeNode", "position", "specifiedPosition")
+val DEFAULT_IGNORED_PROPERTIES = setOf("nodeType", "origin", "position")
 
 /**
  * Executes an operation on the properties of a node.
@@ -326,9 +291,8 @@ fun <T> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<No
  */
 fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent: Node? = null) {
     operation(this, parent)
-    this.nodeProperties.forEach { p ->
-        val v = p.get(this)
-        when (v) {
+    this.properties.forEach { p ->
+        when (val v = p.value) {
             is Node -> v.processConsideringDirectParent(operation, this)
             is Collection<*> -> v.forEach { (it as? Node)?.processConsideringDirectParent(operation, this) }
         }

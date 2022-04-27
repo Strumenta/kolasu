@@ -18,9 +18,9 @@ fun Node.relevantMemberProperties(withPosition: Boolean = false, withNodeType: B
             !it.name.startsWith("component") &&
                 (it.name != "position" || withPosition) &&
                 (it.name != "nodeType" || withNodeType) &&
-                it.name != "specifiedPosition" &&
                 it.name != "properties" &&
-                it.name != "parseTreeNode" &&
+                it.name != "origin" &&
+                it.name != "sourceText" &&
                 it.name != "parent"
         }
 

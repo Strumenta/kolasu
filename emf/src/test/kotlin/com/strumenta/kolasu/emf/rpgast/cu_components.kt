@@ -19,7 +19,7 @@ data class CompilationUnit(
     val subroutines: List<Subroutine>,
     val compileTimeArrays: List<CompileTimeArray>,
     val directives: List<Directive>,
-    override var specifiedPosition: Position??
+    val specifiedPosition: Position??
 ) : Node(specifiedPosition) {
 
     companion object {
@@ -105,7 +105,7 @@ data class CompilationUnit(
     fun getFileDefinition(name: String) = fileDefinitions.first { it.name.equals(name, ignoreCase = true) }
 }
 
-data class MainBody(val stmts: List<Statement>, override var specifiedPosition: Position?? = null) : Node(
+data class MainBody(val stmts: List<Statement>, val specifiedPosition: Position? = null) : Node(
     specifiedPosition
 )
 
@@ -113,17 +113,17 @@ data class Subroutine(
     override val name: String,
     val stmts: List<Statement>,
     val tag: String? = null,
-    override var specifiedPosition: Position?? = null
+    val specifiedPosition: Position? = null
 ) : Named, Node(specifiedPosition)
 
-data class Function(override val name: String, override var specifiedPosition: Position?? = null) : Named, Node(
+data class Function(override val name: String, val specifiedPosition: Position? = null) : Named, Node(
     specifiedPosition
 )
 
 data class CompileTimeArray(
     override val name: String,
     val lines: List<String>,
-    override var specifiedPosition: Position?? = null
+    val specifiedPosition: Position? = null
 ) : Named, Node(specifiedPosition)
 
 enum class DataWrapUpChoice {

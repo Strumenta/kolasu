@@ -373,7 +373,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
         ast = if (ast == null) null else postProcessAst(ast, myIssues)
         if (ast != null && !considerPosition) {
             // Remove parseTreeNodes because they cause the position to be computed
-            ast.walk().forEach { it.parseTreeNode = null }
+            ast.walk().forEach { it.origin = null }
         }
         val now = System.currentTimeMillis()
         return ParsingResult(myIssues, ast, code, null, firstStage, now - start)

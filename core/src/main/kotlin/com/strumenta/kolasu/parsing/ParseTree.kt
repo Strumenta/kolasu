@@ -1,13 +1,12 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.mapping.toPosition
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.endPoint
-import com.strumenta.kolasu.model.startPoint
+import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.tree.ErrorNode
+import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
 
 abstract class ParseTreeElement {
@@ -117,6 +116,35 @@ fun Token.getOriginalText(): String {
     return this.inputStream.getText(interval)
 }
 
-fun Node.getText(): String? = parseTreeNode?.getOriginalText()
-
 fun Node.getText(code: String): String? = position?.text(code)
+
+class ParseTreeOrigin(val parseTree: ParseTree) : Origin {
+    override val position: Position?
+        get() = parseTree.toPosition()
+
+    override val sourceText: String?
+        get() =
+            when (parseTree) {
+                is ParserRuleContext -> {
+                    parseTree.getOriginalText()
+                }
+                is TerminalNode -> {
+                    parseTree.text
+                }
+                else -> null
+            }
+}
+
+fun <T : Node> T.withParseTreeNode(tree: ParserRuleContext?): T {
+    if (tree != null) {
+        this.origin = ParseTreeOrigin(tree)
+    }
+    return this
+}
+
+val RuleContext.hasChildren: Boolean
+    get() = this.childCount > 0
+val RuleContext.firstChild: ParseTree?
+    get() = if (hasChildren) this.getChild(0) else null
+val RuleContext.lastChild: ParseTree?
+    get() = if (hasChildren) this.getChild(this.childCount - 1) else null
