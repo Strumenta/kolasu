@@ -307,5 +307,5 @@ fun EObject.saveAsJson(): String {
 }
 
 fun EObject.saveAsJsonObject(): JsonObject {
-    return JsonParser().parse(this.saveAsJson()).asJsonObject
+    return JsonParser.parseString(this.saveAsJson()).asJsonObject
 }

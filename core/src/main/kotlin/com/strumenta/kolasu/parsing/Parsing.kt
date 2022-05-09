@@ -6,6 +6,7 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import org.antlr.v4.runtime.*
+import org.antlr.v4.runtime.misc.Interval
 import java.io.*
 import java.nio.charset.Charset
 import java.util.*
@@ -193,7 +194,15 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     /**
      * Creates the lexer.
      */
-    protected abstract fun createANTLRLexer(inputStream: InputStream, charset: Charset = Charsets.UTF_8): Lexer
+    @JvmOverloads
+    protected open fun createANTLRLexer(inputStream: InputStream, charset: Charset = Charsets.UTF_8): Lexer {
+        return createANTLRLexer(CharStreams.fromStream(inputStream, charset))
+    }
+
+    /**
+     * Creates the lexer.
+     */
+    protected abstract fun createANTLRLexer(inputStream: CharStream): Lexer
 
     /**
      * Creates the first-stage parser.
@@ -275,8 +284,8 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     /**
      * Creates the first-stage lexer and parser.
      */
-    fun createParser(inputStream: InputStream, issues: MutableList<Issue>, charset: Charset = Charsets.UTF_8,): P {
-        val lexer = createANTLRLexer(inputStream, charset)
+    protected fun createParser(inputStream: CharStream, issues: MutableList<Issue>): P {
+        val lexer = createANTLRLexer(inputStream)
         attachListeners(lexer, issues)
         val tokenStream = createTokenStream(lexer)
         val parser: P = createANTLRParser(tokenStream)
@@ -316,10 +325,8 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     }
 
     @JvmOverloads
-    fun parseFirstStage(code: String, measureLexingTime: Boolean = false):
-        FirstStageParsingResult<C> {
-        val charset = Charsets.UTF_8
-        return parseFirstStage(code.byteInputStream(charset), charset, measureLexingTime)
+    fun parseFirstStage(code: String, measureLexingTime: Boolean = false): FirstStageParsingResult<C> {
+        return parseFirstStage(CharStreams.fromString(code), measureLexingTime)
     }
 
     @JvmOverloads
@@ -328,11 +335,16 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
         charset: Charset = Charsets.UTF_8,
         measureLexingTime: Boolean = false
     ): FirstStageParsingResult<C> {
+        return parseFirstStage(CharStreams.fromStream(inputStream, charset), measureLexingTime)
+    }
+
+    @JvmOverloads
+    fun parseFirstStage(inputStream: CharStream, measureLexingTime: Boolean = false): FirstStageParsingResult<C> {
         val issues = LinkedList<Issue>()
         var root: C?
         var lexingTime: Long? = null
         val time = measureTimeMillis {
-            val parser = createParser(inputStream, issues, charset)
+            val parser = createParser(inputStream, issues)
             if (measureLexingTime) {
                 val tokenStream = parser.inputStream
                 if (tokenStream is CommonTokenStream) {
@@ -360,13 +372,16 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     }
 
     @JvmOverloads
-    override fun parse(
-        code: String,
-        considerPosition: Boolean,
-        measureLexingTime: Boolean
-    ): ParsingResult<R> {
+    override fun parse(code: String, considerPosition: Boolean, measureLexingTime: Boolean): ParsingResult<R> {
+        val inputStream = CharStreams.fromString(code)
+        return parse(inputStream, considerPosition, measureLexingTime)
+    }
+
+    @JvmOverloads
+    fun parse(inputStream: CharStream, considerPosition: Boolean = true, measureLexingTime: Boolean = false):
+            ParsingResult<R> {
         val start = System.currentTimeMillis()
-        val firstStage = parseFirstStage(code, measureLexingTime)
+        val firstStage = parseFirstStage(inputStream, measureLexingTime)
         val myIssues = firstStage.issues.toMutableList()
         var ast = parseTreeToAst(firstStage.root!!, considerPosition, myIssues)
         assignParents(ast)
@@ -376,26 +391,14 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
             ast.walk().forEach { it.parseTreeNode = null }
         }
         val now = System.currentTimeMillis()
-        return ParsingResult(myIssues, ast, code, null, firstStage, now - start)
-    }
-
-    /**
-     * Traverses the AST to ensure that parent nodes are correctly assigned.
-     *
-     * If you assign the parents correctly when you build the AST, or you're not interested in tracking child-parent
-     * relationships, you can override this method to do nothing to improve performance.
-     */
-    protected open fun assignParents(ast: R?) {
-        ast?.assignParents()
+        return ParsingResult(
+            myIssues, ast, inputStream.getText(Interval(0, inputStream.index() + 1)),
+            null, firstStage, now - start)
     }
 
     @JvmOverloads
     fun parse(file: File, charset: Charset = Charsets.UTF_8, considerPosition: Boolean = true): ParsingResult<R> =
-        parse(
-            FileInputStream(file),
-            charset,
-            considerPosition
-        )
+        parse(FileInputStream(file), charset, considerPosition)
 
     // For convenient use from Java
     fun walk(node: Node) = node.walk()
@@ -406,6 +409,16 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
         propertyOperation: (PropertyDescription) -> Unit,
         propertiesToIgnore: Set<String> = DEFAULT_IGNORED_PROPERTIES
     ) = node.processProperties(propertiesToIgnore, propertyOperation)
+
+    /**
+     * Traverses the AST to ensure that parent nodes are correctly assigned.
+     *
+     * If you're already assigning the parents correctly when you build the AST, or you're not interested in tracking
+     * child-parent relationships, you can override this method to do nothing to improve performance.
+     */
+    protected open fun assignParents(ast: R?) {
+        ast?.assignParents()
+    }
 }
 
 private fun inputStreamToString(inputStream: InputStream, charset: Charset = Charsets.UTF_8): String =
