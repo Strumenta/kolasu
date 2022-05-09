@@ -378,8 +378,9 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     }
 
     @JvmOverloads
-    fun parse(inputStream: CharStream, considerPosition: Boolean = true, measureLexingTime: Boolean = false):
-            ParsingResult<R> {
+    fun parse(
+        inputStream: CharStream, considerPosition: Boolean = true, measureLexingTime: Boolean = false
+    ): ParsingResult<R> {
         val start = System.currentTimeMillis()
         val firstStage = parseFirstStage(inputStream, measureLexingTime)
         val myIssues = firstStage.issues.toMutableList()
@@ -393,7 +394,8 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
         val now = System.currentTimeMillis()
         return ParsingResult(
             myIssues, ast, inputStream.getText(Interval(0, inputStream.index() + 1)),
-            null, firstStage, now - start)
+            null, firstStage, now - start
+        )
     }
 
     @JvmOverloads
