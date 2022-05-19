@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.parsing
 
-import com.strumenta.kolasu.mapping.toPosition
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity

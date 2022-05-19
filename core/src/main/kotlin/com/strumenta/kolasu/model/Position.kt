@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.model
 
-import org.antlr.v4.runtime.Token
 import java.io.File
 import java.net.URL
 import java.nio.file.Path
@@ -211,15 +210,3 @@ val Node.startLine: Int?
 
 val Node.endLine: Int?
     get() = this.position?.end?.line
-
-val Token.length
-    get() = if (this.type == Token.EOF) 0 else text.length
-
-val Token.startPoint: Point
-    get() = Point(this.line, this.charPositionInLine)
-
-val Token.endPoint: Point
-    get() = if (this.type == Token.EOF) startPoint else startPoint + this.text
-
-val Token.position: Position
-    get() = Position(startPoint, endPoint)
