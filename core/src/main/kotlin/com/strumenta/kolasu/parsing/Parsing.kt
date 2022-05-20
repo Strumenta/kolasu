@@ -378,7 +378,9 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
 
     @JvmOverloads
     fun parse(
-        inputStream: CharStream, considerPosition: Boolean = true, measureLexingTime: Boolean = false
+        inputStream: CharStream,
+        considerPosition: Boolean = true,
+        measureLexingTime: Boolean = false
     ): ParsingResult<R> {
         val start = System.currentTimeMillis()
         val firstStage = parseFirstStage(inputStream, measureLexingTime)

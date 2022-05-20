@@ -160,7 +160,6 @@ val Token.endPoint: Point
 val Token.position: Position
     get() = Position(startPoint, endPoint)
 
-
 /**
  * Returns the position of the receiver parser rule context.
  */
