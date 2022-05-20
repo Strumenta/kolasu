@@ -3,7 +3,7 @@ parser grammar SimpleLangParser;
 options { tokenVocab = SimpleLangLexer; }
 
 compilationUnit:
-    statement+;
+    statement+ EOF;
 
 statement:
       DISPLAY expression #displayStmt

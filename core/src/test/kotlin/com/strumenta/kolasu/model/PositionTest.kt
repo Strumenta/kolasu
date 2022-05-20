@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.mapping.toPosition
 import com.strumenta.kolasu.parsing.ParseTreeOrigin
+import com.strumenta.kolasu.parsing.toPosition
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
 import org.antlr.v4.runtime.CharStreams

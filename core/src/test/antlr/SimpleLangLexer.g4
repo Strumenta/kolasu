@@ -5,7 +5,7 @@ channels {
 }
 
 WS : [ \t]+ -> channel(WS_CHANNEL);
-NEWLINE : '\r\n' | '\r' | '\n' ;
+NEWLINE : ('\r\n' | '\r' | '\n') -> channel(WS_CHANNEL);
 
 DISPLAY : 'display' ;
 SET : 'set' ;
