@@ -146,6 +146,7 @@ private fun Issue.toXML(document: Document): Element {
     val element = document.createElement("Issue")
     element.setAttribute("type", this.type.name)
     element.setAttribute("message", this.message)
+    element.setAttribute("severity", this.severity.name)
     this.position?.let {
         element.addChild(it.toXML(document = document))
     }

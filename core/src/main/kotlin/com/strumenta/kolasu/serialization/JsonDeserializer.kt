@@ -7,6 +7,7 @@ import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
 import java.lang.IllegalStateException
@@ -121,7 +122,8 @@ class JsonDeserializer {
             val type = IssueType.valueOf(it["type"].asString)
             val message = it["message"].asString
             val position = it["position"]?.asJsonObject?.decodeAsPosition()
-            Issue(type, message, position = position)
+            val severity = IssueSeverity.valueOf(it["severity"].asString)
+            Issue(type, message, severity=severity, position = position)
         }
         val root = if (jo.has("root")) {
             deserialize(rootClass, jo["root"].asJsonObject)
