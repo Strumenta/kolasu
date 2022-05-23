@@ -122,7 +122,7 @@ class JsonDeserializer {
             val message = it["message"].asString
             val position = it["position"]?.asJsonObject?.decodeAsPosition()
             val severity = IssueSeverity.valueOf(it["severity"].asString)
-            Issue(type, message, severity=severity, position = position)
+            Issue(type, message, severity = severity, position = position)
         }
         val root = if (jo.has("root")) {
             deserialize(rootClass, jo["root"].asJsonObject)
