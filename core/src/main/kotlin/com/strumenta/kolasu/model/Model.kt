@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.parsing.position
+import org.antlr.v4.runtime.ParserRuleContext
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
@@ -13,6 +15,13 @@ interface Origin {
 
 class JustPosition(override val position: Position) : Origin {
     override val sourceText: String? = null
+}
+
+class ParseTreeNodeOrigin(val parseTreeNode: ParserRuleContext) : Origin {
+    override val position: Position?
+        get() = parseTreeNode.position
+    override val sourceText: String?
+        get() = parseTreeNode.text
 }
 
 /**
