@@ -3,6 +3,7 @@ package com.strumenta.kolasu.serialization
 import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
 import org.junit.Test
@@ -12,11 +13,12 @@ import kotlin.test.assertEquals
 class JsonGenerationTest {
 
     @Test
-    fun generateJsonOfResultWithErrors() {
+    fun generateJsonOfResultWithIssues() {
         val result: Result<Node> = Result(
             listOf(
                 Issue(IssueType.SYNTACTIC, "An error"),
-                Issue(IssueType.SYNTACTIC, "Another error")
+                Issue(IssueType.LEXICAL, "A warning", severity = IssueSeverity.WARNING),
+                Issue(IssueType.SEMANTIC, "An info", severity = IssueSeverity.INFO)
             ),
             null
         )
@@ -26,11 +28,18 @@ class JsonGenerationTest {
   "errors": [
     {
       "type": "SYNTACTIC",
-      "message": "An error"
+      "message": "An error",
+      "severity": "ERROR"
     },
     {
-      "type": "SYNTACTIC",
-      "message": "Another error"
+      "type": "LEXICAL",
+      "message": "A warning",
+      "severity": "WARNING"
+    },
+    {
+      "type": "SEMANTIC",
+      "message": "An info",
+      "severity": "INFO"
     }
   ]
 }""",
