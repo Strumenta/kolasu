@@ -117,9 +117,9 @@ class XmlGenerationTest {
                 position = Position(Point(10, 1), Point(12, 3))
             ),
             Issue.semantic(
-                    "semantic warning",
-            severity = IssueSeverity.WARNING,
-            position = Position(Point(10, 1), Point(12, 3))
+                "semantic warning",
+                severity = IssueSeverity.WARNING,
+                position = Position(Point(10, 1), Point(12, 3))
             ),
             Issue.semantic(
                 "semantic info",
