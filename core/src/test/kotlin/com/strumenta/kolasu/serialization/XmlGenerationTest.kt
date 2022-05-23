@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.Result
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -107,11 +108,22 @@ class XmlGenerationTest {
     }
 
     @Test
-    fun generateXMLWithErrors() {
+    fun generateXMLWithIssues() {
         val issues: List<Issue> = listOf(
             Issue.lexical("lexical problem"),
             Issue.semantic(
                 "semantic problem",
+                severity = IssueSeverity.ERROR,
+                position = Position(Point(10, 1), Point(12, 3))
+            ),
+            Issue.semantic(
+                    "semantic warning",
+            severity = IssueSeverity.WARNING,
+            position = Position(Point(10, 1), Point(12, 3))
+            ),
+            Issue.semantic(
+                "semantic info",
+                severity = IssueSeverity.INFO,
                 position = Position(Point(10, 1), Point(12, 3))
             )
         )
@@ -121,8 +133,20 @@ class XmlGenerationTest {
             """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <result>
     <errors>
-        <Issue message="lexical problem" type="LEXICAL"/>
-        <Issue message="semantic problem" type="SEMANTIC">
+        <Issue message="lexical problem" severity="ERROR" type="LEXICAL"/>
+        <Issue message="semantic problem" severity="ERROR" type="SEMANTIC">
+            <position description="Position(start=Line 10, Column 1, end=Line 12, Column 3)">
+                <start column="1" line="10"/>
+                <end column="3" line="12"/>
+            </position>
+        </Issue>
+        <Issue message="semantic warning" severity="WARNING" type="SEMANTIC">
+            <position description="Position(start=Line 10, Column 1, end=Line 12, Column 3)">
+                <start column="1" line="10"/>
+                <end column="3" line="12"/>
+            </position>
+        </Issue>
+        <Issue message="semantic info" severity="INFO" type="SEMANTIC">
             <position description="Position(start=Line 10, Column 1, end=Line 12, Column 3)">
                 <start column="1" line="10"/>
                 <end column="3" line="12"/>
