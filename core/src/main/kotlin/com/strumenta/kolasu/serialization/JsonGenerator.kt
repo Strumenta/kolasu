@@ -238,6 +238,7 @@ private fun Issue.toJson(): JsonElement {
     return jsonObject(
         "type" to this.type.name,
         "message" to this.message,
+        "severity" to this.severity.name,
         "position" to this.position?.toJson()
     )
 }
