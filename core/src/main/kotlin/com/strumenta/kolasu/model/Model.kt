@@ -17,13 +17,6 @@ class JustPosition(override val position: Position) : Origin {
     override val sourceText: String? = null
 }
 
-class ParseTreeNodeOrigin(val parseTreeNode: ParserRuleContext) : Origin {
-    override val position: Position?
-        get() = parseTreeNode.position
-    override val sourceText: String?
-        get() = parseTreeNode.text
-}
-
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  *
