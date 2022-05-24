@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.parsing.position
-import org.antlr.v4.runtime.ParserRuleContext
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
