@@ -1,8 +1,16 @@
 package com.strumenta.kolasu.validation
 
 data class Result<C>(val issues: List<Issue>, val root: C?) {
-    val lexicalErrors
+    val lexicalIssues
         get() = issues.filter { it.type == IssueType.LEXICAL }.toList()
+    val syntacticIssues
+        get() = issues.filter { it.type == IssueType.SYNTACTIC }.toList()
+    val semanticIssues
+        get() = issues.filter { it.type == IssueType.SEMANTIC }.toList()
+    val errors
+        get() = issues.filter { it.severity == IssueSeverity.ERROR }.toList()
+    val warnings
+        get() = issues.filter { it.severity == IssueSeverity.WARNING }.toList()
     val correct: Boolean
         get() = issues.isEmpty()
 
