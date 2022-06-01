@@ -40,6 +40,10 @@ fun Node.invalidPositions(): Sequence<Node> = this.walk().filter {
 
 fun Node.findInvalidPosition(): Node? = this.invalidPositions().firstOrNull()
 
+fun Node.hasValidParents(parent: Node? = this.parent): Boolean {
+    return this.parent == parent && this.children.all { it.hasValidParents(this) }
+}
+
 fun <T : Node> T.withParent(parent: Node?): T {
     this.parent = parent
     return this

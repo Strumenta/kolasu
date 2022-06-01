@@ -4,9 +4,10 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.walkChildren
 import com.strumenta.kolasu.parsing.KolasuParser
 
+// TODO Alessio this is a work in progress
 class Unparser {
     fun unparse(root: Node): String? {
-        val sourceText = root.origin?.sourceText
+        val sourceText = root.sourceText
         return if (sourceText != null) {
             var template: String = sourceText
             root.walkChildren()
