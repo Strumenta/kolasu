@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.parsing.position
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -73,7 +74,15 @@ open class Node() : Origin {
         get() = origin?.position
         set(position) {
             if (origin != null && origin !is JustPosition) {
-                throw IllegalStateException("Node $this already has an origin: $origin")
+                if (origin is ParseTreeOrigin) {
+                    if (position == null) {
+                        // nothing to do
+                    } else {
+                        (origin as ParseTreeOrigin).overridePosition(position)
+                    }
+                } else {
+                    throw IllegalStateException("Node $this already has an origin: $origin")
+                }
             }
             if (position != null) {
                 this.origin = JustPosition(position)
