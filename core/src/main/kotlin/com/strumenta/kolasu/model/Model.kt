@@ -103,6 +103,9 @@ open class Node() : Origin {
     @Internal
     override val sourceText: String?
         get() = origin?.sourceText
+
+    @Internal
+    var destination: Position? = null
 }
 
 fun <N : Node> N.withPosition(position: Position?): N {
