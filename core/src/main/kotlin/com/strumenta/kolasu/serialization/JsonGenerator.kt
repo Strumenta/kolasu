@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.serialization
 
 import com.github.salomonbrys.kotson.jsonObject
-import com.github.salomonbrys.kotson.registerTypeAdapter
 import com.github.salomonbrys.kotson.toJsonArray
 import com.google.gson.*
 import com.google.gson.stream.JsonWriter
@@ -13,19 +12,20 @@ import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import java.io.File
+import java.util.IdentityHashMap
 import java.util.function.Function
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
 
 const val JSON_TYPE_KEY = "#type"
 const val JSON_POSITION_KEY = "#position"
+const val JSON_ORIGIN_KEY = "#origin"
+const val JSON_ID_KEY = "#id"
+const val JSON_DESTINATION_KEY = "#destination"
 
 class JsonGenerator {
 
     var shortClassNames = false
-
-    // DEPRECATED
-    var jsonSerializer: JsonSerializer = AsStringJsonSerializer
 
     private val customSerializers: MutableMap<KType, com.google.gson.JsonSerializer<*>> = HashMap()
     private val gsonBuilder = GsonBuilder()
@@ -38,8 +38,13 @@ class JsonGenerator {
     /**
      * Converts an AST to JSON format.
      */
-    fun generateJSON(root: Node): JsonElement {
-        return nodeToJson(root, shortClassNames)
+    fun generateJSON(root: Node,
+                     withIds: IdentityHashMap<Node, String>? = null,
+                     withOriginIds: IdentityHashMap<Node, String>? = null,
+                     withDestinationIds: IdentityHashMap<Node, String>? = null): JsonElement {
+        return nodeToJson(root, shortClassNames,
+            withIds=withIds,
+            withOriginIds=withOriginIds, withDestinationIds=withDestinationIds)
     }
 
     /**
@@ -47,7 +52,7 @@ class JsonGenerator {
      */
     fun generateJSON(result: Result<out Node>): JsonElement {
         return jsonObject(
-            "errors" to result.issues.map { it.toJson() }.toJsonArray(),
+            "issues" to result.issues.map { it.toJson() }.toJsonArray(),
             "root" to result.root?.let { nodeToJson(it, shortClassNames) }
         )
     }
@@ -67,7 +72,7 @@ class JsonGenerator {
      */
     fun generateJSONWithStreaming(result: Result<out Node>, writer: JsonWriter, shortClassNames: Boolean = false) {
         writer.beginObject()
-        writer.name("errors")
+        writer.name("issues")
         writer.beginArray()
         result.issues.forEach { it.toJsonStreaming(writer) }
         writer.endArray()
@@ -129,13 +134,33 @@ class JsonGenerator {
 
     private fun nodeToJson(
         node: Node,
-        shortClassNames: Boolean = false
+        shortClassNames: Boolean = false,
+        withIds: IdentityHashMap<Node, String>? = null,
+        withOriginIds: IdentityHashMap<Node, String>? = null,
+        withDestinationIds: IdentityHashMap<Node, String>? = null
     ):
         JsonElement {
         val jsonObject = jsonObject(
             JSON_TYPE_KEY to if (shortClassNames) node.javaClass.simpleName else node.javaClass.canonicalName,
             JSON_POSITION_KEY to node.position?.toJson()
         )
+        if (withIds != null) {
+            val id = withIds[node]
+            if (id != null) {
+                jsonObject.addProperty(JSON_ID_KEY, id)
+            }
+        }
+        if (withOriginIds != null) {
+            if (node.origin is Node) {
+                jsonObject.addProperty(JSON_ORIGIN_KEY, withOriginIds[node.origin as Node] ?: "<unknown>")
+            }
+        }
+        if (withDestinationIds != null) {
+            val destinationId = withDestinationIds[node]
+            if (destinationId != null) {
+                jsonObject.addProperty(JSON_DESTINATION_KEY, destinationId)
+            }
+        }
         node.processProperties {
             try {
                 if (it.value == null) {
@@ -147,7 +172,10 @@ class JsonGenerator {
                             (it.value as Collection<*>).map { el ->
                                 nodeToJson(
                                     el as Node,
-                                    shortClassNames
+                                    shortClassNames,
+                                    withIds=withIds,
+                                    withOriginIds=withOriginIds,
+                                    withDestinationIds=withDestinationIds
                                 )
                             }
                                 .toJsonArray()
@@ -157,7 +185,10 @@ class JsonGenerator {
                     }
                 } else {
                     if (it.provideNodes) {
-                        jsonObject.add(it.name, nodeToJson(it.value as Node, shortClassNames))
+                        jsonObject.add(it.name, nodeToJson(it.value as Node, shortClassNames,
+                            withIds=withIds,
+                            withOriginIds=withOriginIds,
+                            withDestinationIds=withDestinationIds))
                     } else {
                         jsonObject.add(it.name, valueToJson(it.value))
                     }
