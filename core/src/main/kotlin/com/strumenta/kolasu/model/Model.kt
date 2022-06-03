@@ -135,7 +135,7 @@ val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
  * Use this to mark properties that are internal, i.e., they are used for bookkeeping and are not part of the model,
  * so that they will not be considered branches of the AST.
  */
-@Target(AnnotationTarget.PROPERTY)
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Internal
 
