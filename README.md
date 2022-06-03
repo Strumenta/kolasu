@@ -10,6 +10,8 @@ Kolasu strives to be usable and idiomatic also in Java projects.
 
 It stands for _**Ko**tlin_ _**La**nguage_ _**Su**pport_.
 
+Kolasu is part of the [StarLasu](https://github.com/Strumenta/StarLasu) set of libraries. The other libraries provide similar support in other languages.
+
 ## Features
 
 Extend your AST classes from `Node` to get these features:
