@@ -55,3 +55,4 @@ fun <S: Node, T: Node>TranspilationTrace<S, T>.toJsonString(): String {
     val gson = GsonBuilder().setPrettyPrinting().create()
     return gson.toJson(toJson())
 }
+
