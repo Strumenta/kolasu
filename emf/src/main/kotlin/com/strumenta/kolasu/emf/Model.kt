@@ -30,8 +30,13 @@ fun EPackage.getEClass(klass: KClass<*>): EClass {
 }
 
 fun EPackage.getEClass(name: String): EClass {
-    return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("Class not found: $name"))
+    return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("EClass not found: $name"))
         as EClass
+}
+
+fun EPackage.getEDataType(name: String): EDataType {
+    return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("EDataType not found: $name"))
+            as EDataType
 }
 
 fun EPackage.getEEnum(javaClass: Class<*>): EEnum {

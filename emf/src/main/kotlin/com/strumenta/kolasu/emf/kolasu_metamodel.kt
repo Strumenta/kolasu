@@ -10,7 +10,7 @@ import java.math.BigInteger
 
 val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
 
-fun createKolasuMetamodel(): EPackage {
+private fun createKolasuMetamodel(): EPackage {
     val ePackage = EcoreFactory.eINSTANCE.createEPackage()
     val nsUri = "https://strumenta.com/kolasu/v2"
     ePackage.setResourceURI(nsUri)
