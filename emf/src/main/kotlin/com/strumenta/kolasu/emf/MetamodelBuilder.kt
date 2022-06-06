@@ -267,6 +267,9 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         if (!eClasses.containsKey(kClass)) {
             val ch = eclassTypeHandlers.find { it.canHandle(kClass) }
             val eClass = ch?.toEClass(kClass, this) ?: classToEClass(kClass)
+            if (kClass.packageName != this.ePackage.name) {
+                return eClass
+            }
             if (ch == null || !ch.external()) {
                 ensureClassifierNameIsNotUsed(eClass)
                 ePackage.eClassifiers.add(eClass)

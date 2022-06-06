@@ -2,6 +2,7 @@ package com.strumenta.kolasu.emf.multipkg
 
 import com.strumenta.kolasu.emf.CompilationUnit
 import com.strumenta.kolasu.emf.MetamodelBuilder
+import com.strumenta.kolasu.emf.MetamodelsBuilder
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import org.junit.Test
@@ -10,6 +11,23 @@ import kotlin.test.assertEquals
 data class MultiCU(val cus: List<CompilationUnit>)
 
 class MultipackageMetamodelTest {
+
+    @Test
+    fun generateRelatedMetamodels() {
+        val mbs = MetamodelsBuilder()
+        mbs.addMetamodel("com.strumenta.kolasu.emf.multipkg", "https://strumenta.com/foo1", "foo1")
+        mbs.addMetamodel("com.strumenta.kolasu.emf.multipkg.subpackage", "https://strumenta.com/foo2", "foo2")
+        mbs.provideClass(ExampleASTClassParent::class)
+
+        val packages = mbs.generate()
+        assertEquals(2, packages.size)
+        val package1 = packages.find { it.nsURI == "https://strumenta.com/foo1" }!!
+        val package2 = packages.find { it.nsURI == "https://strumenta.com/foo2" }!!
+        assertEquals(1, package1.eClassifiers.size)
+        assertEquals("ExampleASTClassParent", package1.eClassifiers.first().name)
+        assertEquals(1, package2.eClassifiers.size)
+        assertEquals("ExampleASTClassChild", package2.eClassifiers.first().name)
+    }
 
     @Test
     fun generateSimpleMetamodel() {
