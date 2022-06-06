@@ -201,7 +201,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     /**
      * Creates the lexer.
      */
-    protected abstract fun createANTLRLexer(inputStream: CharStream): Lexer
+    protected abstract fun createANTLRLexer(charStream: CharStream): Lexer
 
     /**
      * Creates the first-stage parser.

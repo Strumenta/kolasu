@@ -118,8 +118,14 @@ fun Token.getOriginalText(): String {
 fun Node.getText(code: String): String? = position?.text(code)
 
 class ParseTreeOrigin(val parseTree: ParseTree) : Origin {
+    private var overriddenPosition: Position? = null
+
+    fun overridePosition(overriddenPosition: Position) {
+        this.overriddenPosition = overriddenPosition
+    }
+
     override val position: Position?
-        get() = parseTree.toPosition()
+        get() = overriddenPosition ?: parseTree.toPosition()
 
     override val sourceText: String?
         get() =

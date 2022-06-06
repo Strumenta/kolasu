@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.parsing.position
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -43,7 +44,7 @@ open class Node() : Origin {
     /**
      * The properties of this AST nodes, including attributes, children, and references.
      */
-    @Internal
+    @property:Internal
     open val properties: List<PropertyDescription>
         get() = try {
             nodeProperties.map { PropertyDescription.buildFor(it, this) }
@@ -54,13 +55,13 @@ open class Node() : Origin {
     /**
      * The node from which this AST Node has been generated, if any.
      */
-    @Internal
+    @property:Internal
     var origin: Origin? = null
 
     /**
      * The parent node, if any.
      */
-    @Internal
+    @property:Internal
     var parent: Node? = null
 
     /**
@@ -68,12 +69,20 @@ open class Node() : Origin {
      * If a position has been provided when creating this node, it is returned.
      * Otherwise, the value of this property is the position of the original parse tree node, if any.
      */
-    @Internal
+    @property:Internal
     override var position: Position?
         get() = origin?.position
         set(position) {
             if (origin != null && origin !is JustPosition) {
-                throw IllegalStateException("Node $this already has an origin: $origin")
+                if (origin is ParseTreeOrigin) {
+                    if (position == null) {
+                        // nothing to do
+                    } else {
+                        (origin as ParseTreeOrigin).overridePosition(position)
+                    }
+                } else {
+                    throw IllegalStateException("Node $this already has an origin: $origin")
+                }
             }
             if (position != null) {
                 this.origin = JustPosition(position)
@@ -94,6 +103,9 @@ open class Node() : Origin {
     @Internal
     override val sourceText: String?
         get() = origin?.sourceText
+
+    @Internal
+    var destination: Position? = null
 }
 
 fun <N : Node> N.withPosition(position: Position?): N {
@@ -109,11 +121,12 @@ fun <N : Node> N.withOrigin(origin: Origin?): N {
 val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.kotlin.nodeProperties
 val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
-    get() = memberProperties
+    get() = memberProperties.asSequence()
         .filter { it.visibility == KVisibility.PUBLIC }
         .filter { it.findAnnotation<Derived>() == null }
         .filter { it.findAnnotation<Internal>() == null }
         .filter { it.findAnnotation<Link>() == null }
+        .toList()
 
 /**
  * @return all properties of this node that are considered AST properties.
@@ -125,6 +138,8 @@ val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
  * Use this to mark properties that are internal, i.e., they are used for bookkeeping and are not part of the model,
  * so that they will not be considered branches of the AST.
  */
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
 annotation class Internal
 
 /**

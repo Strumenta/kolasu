@@ -12,9 +12,9 @@ val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
 
 fun createKolasuMetamodel(): EPackage {
     val ePackage = EcoreFactory.eINSTANCE.createEPackage()
-    val nsUri = "https://strumenta.com/kolasu/v1"
+    val nsUri = "https://strumenta.com/kolasu/v2"
     ePackage.setResourceURI(nsUri)
-    ePackage.name = "StrumentaParser"
+    ePackage.name = "StrumentaLanguageSupport"
     ePackage.nsURI = nsUri
 
     val intDT = EcoreFactory.eINSTANCE.createEDataType()

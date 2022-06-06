@@ -24,7 +24,8 @@ class NodeFactory<S>(
         sourceProperty: KProperty1<S, *>,
         property: KMutableProperty1<*, *>,
         type: KClass<*>? = null
-    ): NodeFactory<S> =
+    ):
+        NodeFactory<S> =
         withChild(
             (sourceProperty as KProperty1<S, Any>)::get,
             (property as KMutableProperty1<Any, Any?>)::set,
@@ -36,7 +37,8 @@ class NodeFactory<S>(
         path: String,
         property: KMutableProperty1<T, *>,
         scopedToType: KClass<T>? = null
-    ): NodeFactory<S> =
+    ):
+        NodeFactory<S> =
         withChild(getter(path), (property as KMutableProperty1<Any, Any?>)::set, property.name, scopedToType)
 
     fun <T : Any> withChild(
@@ -82,7 +84,10 @@ class NodeFactory<S>(
 /**
  * Information on how to retrieve a child node.
  */
-data class ChildNodeFactory<S>(val name: String, val get: (S) -> Any?, val setter: (Any, Any?) -> Unit) {
+data class ChildNodeFactory<S>(val name: String,
+    val get: (S) -> Any?,
+    val setter: (Any, Any?) -> Unit
+) {
     fun set(node: Any, child: Any?) {
         try {
             setter(node, child)
@@ -148,6 +153,7 @@ open class ASTTransformer(
                     if (targetProp is KMutableProperty1 && mapped != null) {
                         val path = (mapped.path.ifEmpty { targetProp.name })
                         childNodeFactory = ChildNodeFactory(
+
                             childKey, factory.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set
                         )
                         factory.children[childKey] = childNodeFactory
