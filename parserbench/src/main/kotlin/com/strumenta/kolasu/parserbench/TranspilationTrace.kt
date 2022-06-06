@@ -23,6 +23,10 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emf.ecore.resource.ResourceSet
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
+import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.ByteArrayOutputStream
 import java.util.IdentityHashMap
@@ -72,12 +76,21 @@ fun <S: Node, T: Node>TranspilationTrace<S, T>.toEObject(resource: Resource): EO
     return transpilationTraceEO
 }
 
-fun <S: Node, T: Node>TranspilationTrace<S, T>.saveAsJson(vararg ePackages: EPackage): String {
-    val uri: URI = URI.createURI("dummy-URI")
-    val resource: Resource = JsonResourceFactory().createResource(uri)
+fun <S: Node, T: Node>TranspilationTrace<S, T>.saveAsJson(name: String, vararg ePackages: EPackage): String {
+    //val uri: URI = URI.createURI("dummy-URI")
+    val resourceSet = ResourceSetImpl()
+    resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
+    val resource = resourceSet.createResource(URI.createURI(name))
     ePackages.forEach {
-        resource.contents.add(it)
+        val packageResource = JsonResourceFactory().createResource(URI.createURI(it.nsURI))
+        resourceSet.resources.add(packageResource)
+        packageResource.contents.add(it)
     }
+    //val resource: Resource = JsonResourceFactory().createResource(uri)
+    //resource.resourceSet = resourceSet
+//    ePackages.forEach {
+//        resource.contents.add(it)
+//    }
     resource.contents.add(this.toEObject(resource))
     val output = ByteArrayOutputStream()
     resource.save(output, null)

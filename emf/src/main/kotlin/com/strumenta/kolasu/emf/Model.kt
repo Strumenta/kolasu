@@ -214,6 +214,22 @@ fun EPackage.findEClass(name: String): EClass? {
 }
 
 fun Resource.findEClass(klass: KClass<*>): EClass? {
+    val eClass = findEClassJustInThisResource(klass)
+    if (eClass == null) {
+        val otherResources = this.resourceSet?.resources?.filter { it != this } ?: emptyList()
+        for (r in otherResources) {
+            val c = r.findEClassJustInThisResource(klass)
+            if (c != null) {
+                return c
+            }
+        }
+        return null
+    } else {
+        return eClass
+    }
+}
+
+fun Resource.findEClassJustInThisResource(klass: KClass<*>): EClass? {
     val ePackage = this.contents.find { it is EPackage && it.name == packageName(klass) } as EPackage?
     return ePackage?.findEClass(klass)
 }
