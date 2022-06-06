@@ -4,7 +4,6 @@ import com.strumenta.kolasu.model.PropertyTypeDescription
 import com.strumenta.kolasu.model.processProperties
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
-import java.lang.IllegalStateException
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
@@ -15,6 +14,17 @@ import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.full.withNullability
 
+private val KClass<*>.packageName: String?
+    get() {
+        val qname = this.qualifiedName ?: throw IllegalStateException("The class has no qualified name: $this")
+        return if (qname == this.simpleName) {
+            null;
+        } else {
+            require(qname.endsWith(".${this.simpleName}"))
+            qname.removeSuffix(".${this.simpleName}")
+        }
+    }
+
 class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, resource: Resource? = null) :
     ClassifiersProvider {
 
@@ -23,6 +33,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
     private val dataTypes = HashMap<KType, EDataType>()
     private val eclassTypeHandlers = LinkedList<EClassTypeHandler>()
     private val dataTypeHandlers = LinkedList<EDataTypeHandler>()
+    private val usedEPackages = LinkedList<EPackage>()
 
     init {
         ePackage.name = packageName
@@ -50,6 +61,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         eclassTypeHandlers.add(NamedHandler)
         eclassTypeHandlers.add(ReferenceByNameHandler)
         eclassTypeHandlers.add(ResultHandler)
+    }
+
+    fun addUsedEPackage(ePackage: EPackage) {
+        usedEPackages.add(ePackage)
     }
 
     /**
@@ -111,6 +126,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
     private fun classToEClass(kClass: KClass<*>): EClass {
         if (kClass == Any::class) {
             return EcoreFactory.eINSTANCE.ecorePackage.eObject
+        }
+
+        if (kClass.packageName != this.ePackage.name) {
+            throw Error("This class does not belong to this EPackage: ${kClass.qualifiedName}")
         }
 
         val eClass = EcoreFactory.eINSTANCE.createEClass()
