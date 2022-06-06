@@ -5,7 +5,6 @@ import com.strumenta.kolasu.model.processProperties
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
 import java.util.*
-import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KType
@@ -25,6 +24,9 @@ private val KClass<*>.packageName: String?
         }
     }
 
+/**
+ * When building multiple related EPackages use MetamodelsBuilder instead.
+ */
 class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, resource: Resource? = null) :
     ClassifiersProvider {
 
@@ -33,7 +35,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
     private val dataTypes = HashMap<KType, EDataType>()
     private val eclassTypeHandlers = LinkedList<EClassTypeHandler>()
     private val dataTypeHandlers = LinkedList<EDataTypeHandler>()
-    private val usedEPackages = LinkedList<EPackage>()
+    internal var container : MetamodelsBuilder? = null
 
     init {
         ePackage.name = packageName
@@ -47,6 +49,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         }
 
         dataTypeHandlers.add(StringHandler)
+        dataTypeHandlers.add(CharHandler)
         dataTypeHandlers.add(BooleanHandler)
         dataTypeHandlers.add(IntHandler)
         dataTypeHandlers.add(LongHandler)
@@ -59,12 +62,9 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
 
         eclassTypeHandlers.add(NodeHandler)
         eclassTypeHandlers.add(NamedHandler)
+        eclassTypeHandlers.add(PossiblyNamedHandler)
         eclassTypeHandlers.add(ReferenceByNameHandler)
         eclassTypeHandlers.add(ResultHandler)
-    }
-
-    fun addUsedEPackage(ePackage: EPackage) {
-        usedEPackages.add(ePackage)
     }
 
     /**
@@ -129,7 +129,14 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         }
 
         if (kClass.packageName != this.ePackage.name) {
-            throw Error("This class does not belong to this EPackage: ${kClass.qualifiedName}")
+            if (container != null) {
+                for (sibling in container!!.singleMetamodelsBuilders) {
+                    if (sibling.canProvideClass(kClass)) {
+                        return sibling.provideClass(kClass)
+                    }
+                }
+            }
+            throw Error("This class does not belong to this EPackage: ${kClass.qualifiedName}. This EPackage: ${this.ePackage.name}")
         }
 
         val eClass = EcoreFactory.eINSTANCE.createEClass()
@@ -240,6 +247,20 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         } else {
             eClasses[kClass] = eClass
         }
+    }
+
+    fun canProvideClass(kClass: KClass<*>): Boolean {
+        if (eClasses.containsKey(kClass)) {
+            return true
+        }
+        if (eclassTypeHandlers.any { it.canHandle(kClass) }) {
+            return true
+        }
+        if (kClass == Any::class) {
+            return true
+        }
+
+        return kClass.packageName == this.ePackage.name
     }
 
     override fun provideClass(kClass: KClass<*>): EClass {

@@ -2,6 +2,7 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.ecore.EClass
@@ -78,10 +79,12 @@ val LocalDateTimeHandler = KolasuClassHandler(LocalDateTime::class, KOLASU_METAM
 
 val NodeHandler = KolasuClassHandler(Node::class, KOLASU_METAMODEL.getEClass("ASTNode"))
 val NamedHandler = KolasuClassHandler(Named::class, KOLASU_METAMODEL.getEClass("Named"))
+val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, KOLASU_METAMODEL.getEClass("PossiblyNamed"))
 val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, KOLASU_METAMODEL.getEClass("ReferenceByName"))
 val ResultHandler = KolasuClassHandler(Result::class, KOLASU_METAMODEL.getEClass("Result"))
 
 val StringHandler = KolasuDataTypeHandler(String::class, KOLASU_METAMODEL.getEClassifier("string") as EDataType)
+val CharHandler = KolasuDataTypeHandler(Char::class, KOLASU_METAMODEL.getEClassifier("char") as EDataType)
 val BooleanHandler = KolasuDataTypeHandler(Boolean::class, KOLASU_METAMODEL.getEClassifier("boolean") as EDataType)
 val IntHandler = KolasuDataTypeHandler(Int::class, KOLASU_METAMODEL.getEClassifier("int") as EDataType)
 val BigIntegerHandler = KolasuDataTypeHandler(

@@ -127,52 +127,58 @@ fun Issue.toEObject(): EObject {
 
 private fun toValue(ePackage: EPackage, value: Any?): Any? {
     val pdValue: Any? = value
-    if (pdValue is Enum<*>) {
-        val ee = ePackage.getEEnum(pdValue.javaClass)
-        return ee.getEEnumLiteral(pdValue.name)
-    } else if (pdValue is LocalDate) {
-        return toLocalDateObject(pdValue)
-    } else if (pdValue is LocalTime) {
-        return toLocalTimeObject(pdValue)
-    } else if (pdValue is LocalDateTime) {
-        val eClass = KOLASU_METAMODEL.getEClass("LocalDateTime")
-        val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
-        val dateComponent = toLocalDateObject(pdValue.toLocalDate())
-        val timeComponent = toLocalTimeObject(pdValue.toLocalTime())
-        eObject.eSet(eClass.getEStructuralFeature("date"), dateComponent)
-        eObject.eSet(eClass.getEStructuralFeature("time"), timeComponent)
-        return eObject
-    } else {
-        // this could be not a primitive value but a value that we mapped to an EClass
-        val eClass = if (pdValue != null) {
-            ePackage.eClassifiers.filterIsInstance<EClass>().find {
-                it.name == pdValue.javaClass.simpleName
-            }
-        } else null
-        return when {
-            eClass != null -> {
-                pdValue!!.dataToEObject(ePackage)
-            }
-            pdValue is ReferenceByName<*> -> {
-                val refEC = KOLASU_METAMODEL.getEClass("ReferenceByName")
-                val refEO = KOLASU_METAMODEL.eFactoryInstance.create(refEC)
-                refEO.eSet(refEC.getEStructuralFeature("name")!!, pdValue.name)
-                // TODO complete
-                refEO
-            }
-            pdValue is Result<*> -> {
-                val resEC = KOLASU_METAMODEL.getEClass("Result")
-                val resEO = KOLASU_METAMODEL.eFactoryInstance.create(resEC)
-                if (pdValue.root is Node) {
-                    resEO.eSet(resEC.getEStructuralFeature("root"), (pdValue.root as Node).toEObject(ePackage))
-                } else {
-                    resEO.eSet(resEC.getEStructuralFeature("root"), toValue(ePackage, pdValue.root))
+    when (pdValue) {
+        is Enum<*> -> {
+            val ee = ePackage.getEEnum(pdValue.javaClass)
+            return ee.getEEnumLiteral(pdValue.name)
+        }
+        is LocalDate -> {
+            return toLocalDateObject(pdValue)
+        }
+        is LocalTime -> {
+            return toLocalTimeObject(pdValue)
+        }
+        is LocalDateTime -> {
+            val eClass = KOLASU_METAMODEL.getEClass("LocalDateTime")
+            val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
+            val dateComponent = toLocalDateObject(pdValue.toLocalDate())
+            val timeComponent = toLocalTimeObject(pdValue.toLocalTime())
+            eObject.eSet(eClass.getEStructuralFeature("date"), dateComponent)
+            eObject.eSet(eClass.getEStructuralFeature("time"), timeComponent)
+            return eObject
+        }
+        else -> {
+            // this could be not a primitive value but a value that we mapped to an EClass
+            val eClass = if (pdValue != null) {
+                ePackage.eClassifiers.filterIsInstance<EClass>().find {
+                    it.name == pdValue.javaClass.simpleName
                 }
-                val issues = resEO.eGet(resEC.getEStructuralFeature("issues")) as EList<EObject>
-                issues.addAll(pdValue.issues.map { it.toEObject() })
-                resEO
+            } else null
+            return when {
+                eClass != null -> {
+                    pdValue!!.dataToEObject(ePackage)
+                }
+                pdValue is ReferenceByName<*> -> {
+                    val refEC = KOLASU_METAMODEL.getEClass("ReferenceByName")
+                    val refEO = KOLASU_METAMODEL.eFactoryInstance.create(refEC)
+                    refEO.eSet(refEC.getEStructuralFeature("name")!!, pdValue.name)
+                    // TODO complete
+                    refEO
+                }
+                pdValue is Result<*> -> {
+                    val resEC = KOLASU_METAMODEL.getEClass("Result")
+                    val resEO = KOLASU_METAMODEL.eFactoryInstance.create(resEC)
+                    if (pdValue.root is Node) {
+                        resEO.eSet(resEC.getEStructuralFeature("root"), (pdValue.root as Node).toEObject(ePackage))
+                    } else {
+                        resEO.eSet(resEC.getEStructuralFeature("root"), toValue(ePackage, pdValue.root))
+                    }
+                    val issues = resEO.eGet(resEC.getEStructuralFeature("issues")) as EList<EObject>
+                    issues.addAll(pdValue.issues.map { it.toEObject() })
+                    resEO
+                }
+                else -> pdValue
             }
-            else -> pdValue
         }
     }
 }
