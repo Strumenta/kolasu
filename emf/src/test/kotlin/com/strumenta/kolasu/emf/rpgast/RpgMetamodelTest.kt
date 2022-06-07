@@ -12,12 +12,12 @@ class RpgMetamodelTest {
 
     @Test
     fun generateSimpleMetamodel() {
-        val metamodelBuilder = MetamodelBuilder("RpgAst", "https://strumenta.com/rpgast", "rpgast")
+        val metamodelBuilder = MetamodelBuilder("com.smeup.rpgparser.parsing.ast", "https://strumenta.com/rpgast", "rpgast")
         metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
         ePackage.saveEcore(File("rpgast.ecore"))
         ePackage.saveAsJson(File("rpgast.json"))
-        assertEquals("RpgAst", ePackage.name)
+        assertEquals("com.smeup.rpgparser.parsing.ast", ePackage.name)
 
         assertEquals(null, ePackage.eClassifiers.find { it.name == "Int" })
 
