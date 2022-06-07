@@ -62,7 +62,7 @@ fun <S : Node, T : Node> TranspilationTrace<S, T>.toEObject(resource: Resource):
     val transpilationTraceEO = makeTranspilationTraceEObject(this)
     transpilationTraceEO.setStringAttribute("originalCode", this.originalCode)
     transpilationTraceEO.setSingleContainment("sourceAST", this.sourceAST.toEObject(resource))
-    transpilationTraceEO.setSingleContainment("targetAST", this.sourceAST.toEObject(resource))
+    transpilationTraceEO.setSingleContainment("targetAST", this.targetAST.toEObject(resource))
     transpilationTraceEO.setStringAttribute("generatedCode", this.generatedCode)
     return transpilationTraceEO
 }
