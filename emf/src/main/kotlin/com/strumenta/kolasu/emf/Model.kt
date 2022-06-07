@@ -251,9 +251,20 @@ fun Node.toEObject(eResource: Resource): EObject {
         val ec = eResource.getEClass(this::class)
         val eo = ec.ePackage.eFactoryInstance.create(ec)
         val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
+
         val position = astNode.getEStructuralFeature("position")
         val positionValue = this.position?.toEObject()
         eo.eSet(position, positionValue)
+
+        val destination = astNode.getEStructuralFeature("destination")
+        val destinationValue = this.destination?.toEObject()
+        eo.eSet(destination, destinationValue)
+
+        if (this.origin is Node) {
+            val origin = astNode.getEStructuralFeature("origin")
+            TODO()
+        }
+
         this.processProperties { pd ->
             val esf = ec.eAllStructuralFeatures.find { it.name == pd.name }!!
             if (pd.provideNodes) {
@@ -335,4 +346,13 @@ fun EObject.saveAsJson(): String {
 
 fun EObject.saveAsJsonObject(): JsonObject {
     return JsonParser.parseString(this.saveAsJson()).asJsonObject
+}
+
+fun EObject.eGet(name: String): Any? {
+    val sfs = this.eClass().eAllStructuralFeatures.filter { it.name == name }
+    when (sfs.size) {
+        0 -> throw IllegalArgumentException("No feature $name found")
+        1 -> return this.eGet(sfs.first())
+        else -> throw IllegalArgumentException("Feature $name is ambiguous")
+    }
 }

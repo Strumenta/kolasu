@@ -15,9 +15,10 @@ fun EEnum.addLiteral(name: String) {
     this.eLiterals.add(newLiteral)
 }
 
-fun EPackage.createEClass(name: String): EClass {
+fun EPackage.createEClass(name: String, isAbstract: Boolean = false): EClass {
     val eClass = EcoreFactory.eINSTANCE.createEClass()
     eClass.name = name
+    eClass.isAbstract = isAbstract
     this.eClassifiers.add(eClass)
     return eClass
 }
@@ -25,6 +26,17 @@ fun EPackage.createEClass(name: String): EClass {
 fun EClass.addContainment(name: String, type: EClass, min: Int, max: Int): EReference {
     val eReference = EcoreFactory.eINSTANCE.createEReference()
     eReference.isContainment = true
+    eReference.name = name
+    eReference.eType = type
+    eReference.lowerBound = min
+    eReference.upperBound = max
+    this.eStructuralFeatures.add(eReference)
+    return eReference
+}
+
+fun EClass.addReference(name: String, type: EClass, min: Int, max: Int): EReference {
+    val eReference = EcoreFactory.eINSTANCE.createEReference()
+    eReference.isContainment = false
     eReference.name = name
     eReference.eType = type
     eReference.lowerBound = min

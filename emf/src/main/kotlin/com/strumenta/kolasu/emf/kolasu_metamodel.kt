@@ -76,9 +76,13 @@ private fun createKolasuMetamodel(): EPackage {
         addContainment("start", point, 1, 1)
         addContainment("end", point, 1, 1)
     }
+    val origin = ePackage.createEClass("Origin", isAbstract = true)
     val astNode = ePackage.createEClass("ASTNode").apply {
         this.isAbstract = true
+        this.eSuperTypes.add(origin)
         addContainment("position", position, 0, 1)
+        addContainment("destination", position, 0, 1)
+        addReference("origin", origin, 0, 1)
     }
 
     val issueType = EcoreFactory.eINSTANCE.createEEnum()
