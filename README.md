@@ -10,13 +10,23 @@ Kolasu strives to be usable and idiomatic also in Java projects.
 
 It stands for _**Ko**tlin_ _**La**nguage_ _**Su**pport_.
 
-Kolasu is part of the [StarLasu](https://github.com/Strumenta/StarLasu) set of libraries. The other libraries provide similar support in other languages.
+Kolasu is part of the [StarLasu](https://github.com/Strumenta/StarLasu) set of libraries. The other libraries provide 
+similar support in other languages such as Typescript and Python.
+
+## What can Kolasu be used for?
+
+Kolasu has been used to implement:
+* Parsers
+* Editors
+* Transpilers
+* Code analysis tools
 
 ## Features
 
 Extend your AST classes from `Node` to get these features:
 * Navigation: utility methods to traverse, search, and modify the AST
-* Printing: print the AST as XML, as JSON, as a parse tree 
+* Printing: print the AST as XML, as JSON, as a parse tree
+* EMF interoperability: ASTs and their metamodel can be exported to EMF
 
 Classes can have a *name*, and classes can *reference* a name.
 Utilities for resolving these references are supplied.
@@ -26,7 +36,9 @@ All properties, and therefore the whole tree structure, will be detected automat
 
 ## Origin
 
-Kolasu was born as a small framework to support building languages using ANTLR and Kotlin. It evolved over the time as it was used at Strumenta as part of open-source and commercial projects for building transpilers, interpreters, compilers, and more.
+Kolasu was born as a small framework to support building languages using ANTLR and Kotlin. It evolved over the time as 
+it was used at Strumenta as part of open-source and commercial projects for building transpilers, interpreters, 
+compilers, and more.
 
 ## Using Kolasu in your project
 
@@ -34,7 +46,7 @@ Releases are published on Maven Central:
 
 ```
 dependencies {
-    compile "com.strumenta.kolasu:kolasu-core:1.3.4"
+    compile "com.strumenta.kolasu:kolasu-core:1.5.0-RC1"
 }
 ```
 
@@ -49,9 +61,6 @@ Run:
 ## Projects using Kolasu
 
 Kolasu is used in several internal and commercial projects developed at [Strumenta](https://strumenta.com).
-
-It is also used in an open-source project named [Jariko](https://github.com/smeup/jariko). 
-Jariko is an interpreter for RPG running on the JVM.
 
 ## Publishing
 
