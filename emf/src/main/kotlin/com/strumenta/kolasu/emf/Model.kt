@@ -17,6 +17,7 @@ import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
@@ -125,7 +126,7 @@ fun Issue.toEObject(): EObject {
     return eo
 }
 
-private fun toValue(ePackage: EPackage, value: Any?): Any? {
+private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping()): Any? {
     val pdValue: Any? = value
     when (pdValue) {
         is Enum<*> -> {
@@ -169,7 +170,7 @@ private fun toValue(ePackage: EPackage, value: Any?): Any? {
                     val resEC = KOLASU_METAMODEL.getEClass("Result")
                     val resEO = KOLASU_METAMODEL.eFactoryInstance.create(resEC)
                     if (pdValue.root is Node) {
-                        resEO.eSet(resEC.getEStructuralFeature("root"), (pdValue.root as Node).toEObject(ePackage))
+                        resEO.eSet(resEC.getEStructuralFeature("root"), (pdValue.root as Node).toEObject(ePackage, kolasuToEMFMapping))
                     } else {
                         resEO.eSet(resEC.getEStructuralFeature("root"), toValue(ePackage, pdValue.root))
                     }
@@ -237,7 +238,17 @@ fun Resource.findEClassJustInThisResource(klass: KClass<*>): EClass? {
 fun Resource.getEClass(klass: KClass<*>): EClass = this.findEClass(klass)
     ?: throw ClassNotFoundException(klass.qualifiedName)
 
-fun Node.toEObject(ePackage: EPackage): EObject = toEObject(ePackage.eResource())
+fun Node.toEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject = toEObject(ePackage.eResource(), mapping)
+
+class KolasuToEMFMapping {
+    private val nodeToEObjects = IdentityHashMap<Node, EObject>()
+    fun associate(node: Node, eo: EObject) {
+        nodeToEObjects[node] = eo
+    }
+    fun getAssociatedEObject(node: Node): EObject? {
+        return nodeToEObjects[node]
+    }
+}
 
 /**
  * Translates this node – and, recursively, its descendants – into an [EObject] (EMF/Ecore representation).
@@ -246,10 +257,11 @@ fun Node.toEObject(ePackage: EPackage): EObject = toEObject(ePackage.eResource()
  *  - the [Kolasu metamodel package][KOLASU_METAMODEL]
  *  - every [EPackage] containing the definitions of the node classes in the tree.
  */
-fun Node.toEObject(eResource: Resource): EObject {
+fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject {
     try {
         val ec = eResource.getEClass(this::class)
         val eo = ec.ePackage.eFactoryInstance.create(ec)
+        mapping.associate(this, eo)
         val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
 
         val position = astNode.getEStructuralFeature("position")
@@ -262,7 +274,9 @@ fun Node.toEObject(eResource: Resource): EObject {
 
         if (this.origin is Node) {
             val origin = astNode.getEStructuralFeature("origin")
-            TODO()
+            val eoCorrespondingToOrigin = mapping.getAssociatedEObject(this.origin as Node)
+                ?: throw IllegalStateException("No EObject mapped to origin ${this.origin}")
+            eo.eSet(origin, eoCorrespondingToOrigin)
         }
 
         this.processProperties { pd ->
@@ -272,7 +286,7 @@ fun Node.toEObject(eResource: Resource): EObject {
                     val elist = eo.eGet(esf) as MutableList<EObject?>
                     (pd.value as List<*>?)?.forEach {
                         try {
-                            val childEO = (it as Node?)?.toEObject(eResource)
+                            val childEO = (it as Node?)?.toEObject(eResource, mapping)
                             elist.add(childEO)
                         } catch (e: Exception) {
                             throw RuntimeException("Unable to map to EObject child $it in property $pd of $this", e)
@@ -282,7 +296,7 @@ fun Node.toEObject(eResource: Resource): EObject {
                     if (pd.value == null) {
                         eo.eSet(esf, null)
                     } else {
-                        eo.eSet(esf, (pd.value as Node).toEObject(eResource))
+                        eo.eSet(esf, (pd.value as Node).toEObject(eResource, mapping))
                     }
                 }
             } else {

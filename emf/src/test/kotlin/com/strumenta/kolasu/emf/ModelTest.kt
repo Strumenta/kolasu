@@ -110,8 +110,9 @@ class ModelTest {
         val ePackage = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo").apply {
             provideClass(NodeFoo::class)
         }.generate()
-        val eo1 = n1.toEObject(ePackage)
-        val eo2 = n2.toEObject(ePackage)
+        val mapping = KolasuToEMFMapping()
+        val eo1 = n1.toEObject(ePackage, mapping)
+        val eo2 = n2.toEObject(ePackage, mapping)
         assertEquals(null, eo1.eGet("origin"))
         assertEquals(true, eo2.eGet("origin") is EObject)
         assertEquals("abc", (eo2.eGet("origin") as EObject).eGet("name"))
