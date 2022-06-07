@@ -20,7 +20,8 @@ class MetamodelTest {
 
     @Test
     fun generateSimpleMetamodel() {
-        val metamodelBuilder = MetamodelBuilder("com.strumenta.kolasu.emf", "https://strumenta.com/simplemm", "simplemm")
+        val metamodelBuilder = MetamodelBuilder("com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm")
         metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
         ePackage.saveEcore(File("simplemm.ecore"))

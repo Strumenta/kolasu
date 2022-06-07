@@ -1,9 +1,6 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
@@ -79,6 +76,7 @@ val LocalDateTimeHandler = KolasuClassHandler(LocalDateTime::class, KOLASU_METAM
 
 val NodeHandler = KolasuClassHandler(Node::class, KOLASU_METAMODEL.getEClass("ASTNode"))
 val NamedHandler = KolasuClassHandler(Named::class, KOLASU_METAMODEL.getEClass("Named"))
+val PositionHandler = KolasuClassHandler(Position::class, KOLASU_METAMODEL.getEClass("Position"))
 val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, KOLASU_METAMODEL.getEClass("PossiblyNamed"))
 val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, KOLASU_METAMODEL.getEClass("ReferenceByName"))
 val ResultHandler = KolasuClassHandler(Result::class, KOLASU_METAMODEL.getEClass("Result"))

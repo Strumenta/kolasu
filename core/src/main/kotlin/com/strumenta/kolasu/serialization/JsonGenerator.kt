@@ -38,13 +38,17 @@ class JsonGenerator {
     /**
      * Converts an AST to JSON format.
      */
-    fun generateJSON(root: Node,
-                     withIds: IdentityHashMap<Node, String>? = null,
-                     withOriginIds: IdentityHashMap<Node, String>? = null,
-                     withDestinationIds: IdentityHashMap<Node, String>? = null): JsonElement {
-        return nodeToJson(root, shortClassNames,
-            withIds=withIds,
-            withOriginIds=withOriginIds, withDestinationIds=withDestinationIds)
+    fun generateJSON(
+        root: Node,
+        withIds: IdentityHashMap<Node, String>? = null,
+        withOriginIds: IdentityHashMap<Node, String>? = null,
+        withDestinationIds: IdentityHashMap<Node, String>? = null
+    ): JsonElement {
+        return nodeToJson(
+            root, shortClassNames,
+            withIds = withIds,
+            withOriginIds = withOriginIds, withDestinationIds = withDestinationIds
+        )
     }
 
     /**
@@ -173,9 +177,9 @@ class JsonGenerator {
                                 nodeToJson(
                                     el as Node,
                                     shortClassNames,
-                                    withIds=withIds,
-                                    withOriginIds=withOriginIds,
-                                    withDestinationIds=withDestinationIds
+                                    withIds = withIds,
+                                    withOriginIds = withOriginIds,
+                                    withDestinationIds = withDestinationIds
                                 )
                             }
                                 .toJsonArray()
@@ -185,10 +189,15 @@ class JsonGenerator {
                     }
                 } else {
                     if (it.provideNodes) {
-                        jsonObject.add(it.name, nodeToJson(it.value as Node, shortClassNames,
-                            withIds=withIds,
-                            withOriginIds=withOriginIds,
-                            withDestinationIds=withDestinationIds))
+                        jsonObject.add(
+                            it.name,
+                            nodeToJson(
+                                it.value as Node, shortClassNames,
+                                withIds = withIds,
+                                withOriginIds = withOriginIds,
+                                withDestinationIds = withDestinationIds
+                            )
+                        )
                     } else {
                         jsonObject.add(it.name, valueToJson(it.value))
                     }

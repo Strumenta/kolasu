@@ -28,7 +28,7 @@ class MetamodelsBuilder(val resource: Resource? = null) {
         throw IllegalArgumentException("Unable to provide EClass for ${kClass.qualifiedName}")
     }
 
-    fun generate() : List<EPackage> {
+    fun generate(): List<EPackage> {
         return singleMetamodelsBuilders.map { it.generate() }
     }
 }

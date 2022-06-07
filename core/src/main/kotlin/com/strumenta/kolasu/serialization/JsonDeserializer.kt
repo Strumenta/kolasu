@@ -118,7 +118,7 @@ class JsonDeserializer {
 
     fun <T : Node> deserializeResult(rootClass: Class<T>, json: String): Result<T> {
         val jo = JsonParser().parse(json).asJsonObject
-        val errors = jo["errors"].asJsonArray.map { it.asJsonObject }.map {
+        val errors = jo["issues"].asJsonArray.map { it.asJsonObject }.map {
             val type = IssueType.valueOf(it["type"].asString)
             val message = it["message"].asString
             val position = it["position"]?.asJsonObject?.decodeAsPosition()

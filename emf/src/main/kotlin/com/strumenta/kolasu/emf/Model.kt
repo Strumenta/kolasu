@@ -37,7 +37,7 @@ fun EPackage.getEClass(name: String): EClass {
 
 fun EPackage.getEDataType(name: String): EDataType {
     return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("EDataType not found: $name"))
-            as EDataType
+        as EDataType
 }
 
 fun EPackage.getEEnum(javaClass: Class<*>): EEnum {
@@ -126,7 +126,8 @@ fun Issue.toEObject(): EObject {
     return eo
 }
 
-private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping()): Any? {
+private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping()):
+    Any? {
     val pdValue: Any? = value
     when (pdValue) {
         is Enum<*> -> {
@@ -170,7 +171,11 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                     val resEC = KOLASU_METAMODEL.getEClass("Result")
                     val resEO = KOLASU_METAMODEL.eFactoryInstance.create(resEC)
                     if (pdValue.root is Node) {
-                        resEO.eSet(resEC.getEStructuralFeature("root"), (pdValue.root as Node).toEObject(ePackage, kolasuToEMFMapping))
+                        resEO.eSet(
+                            resEC.getEStructuralFeature("root"),
+                            (pdValue.root as Node)
+                                .toEObject(ePackage, kolasuToEMFMapping)
+                        )
                     } else {
                         resEO.eSet(resEC.getEStructuralFeature("root"), toValue(ePackage, pdValue.root))
                     }
@@ -238,7 +243,8 @@ fun Resource.findEClassJustInThisResource(klass: KClass<*>): EClass? {
 fun Resource.getEClass(klass: KClass<*>): EClass = this.findEClass(klass)
     ?: throw ClassNotFoundException(klass.qualifiedName)
 
-fun Node.toEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject = toEObject(ePackage.eResource(), mapping)
+fun Node.toEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject =
+    toEObject(ePackage.eResource(), mapping)
 
 class KolasuToEMFMapping {
     private val nodeToEObjects = IdentityHashMap<Node, EObject>()

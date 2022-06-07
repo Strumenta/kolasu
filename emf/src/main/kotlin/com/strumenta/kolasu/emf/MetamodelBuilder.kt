@@ -17,7 +17,7 @@ private val KClass<*>.packageName: String?
     get() {
         val qname = this.qualifiedName ?: throw IllegalStateException("The class has no qualified name: $this")
         return if (qname == this.simpleName) {
-            null;
+            null
         } else {
             require(qname.endsWith(".${this.simpleName}"))
             qname.removeSuffix(".${this.simpleName}")
@@ -35,7 +35,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
     private val dataTypes = HashMap<KType, EDataType>()
     private val eclassTypeHandlers = LinkedList<EClassTypeHandler>()
     private val dataTypeHandlers = LinkedList<EDataTypeHandler>()
-    internal var container : MetamodelsBuilder? = null
+    internal var container: MetamodelsBuilder? = null
 
     init {
         ePackage.name = packageName
@@ -62,6 +62,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
 
         eclassTypeHandlers.add(NodeHandler)
         eclassTypeHandlers.add(NamedHandler)
+        eclassTypeHandlers.add(PositionHandler)
         eclassTypeHandlers.add(PossiblyNamedHandler)
         eclassTypeHandlers.add(ReferenceByNameHandler)
         eclassTypeHandlers.add(ResultHandler)
@@ -136,7 +137,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                     }
                 }
             }
-            throw Error("This class does not belong to this EPackage: ${kClass.qualifiedName}. This EPackage: ${this.ePackage.name}")
+            throw Error(
+                "This class does not belong to this EPackage: ${kClass.qualifiedName}. " +
+                    "This EPackage: ${this.ePackage.name}"
+            )
         }
 
         val eClass = EcoreFactory.eINSTANCE.createEClass()
