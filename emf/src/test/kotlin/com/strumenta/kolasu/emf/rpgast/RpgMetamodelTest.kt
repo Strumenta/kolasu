@@ -1,28 +1,22 @@
 package com.strumenta.kolasu.emf.rpgast
 
-import com.smeup.rpgparser.parsing.ast.CompilationUnit
-import com.strumenta.kolasu.emf.MetamodelBuilder
-import com.strumenta.kolasu.emf.saveAsJson
-import com.strumenta.kolasu.emf.saveEcore
-import org.junit.Test
-import java.io.File
-import kotlin.test.assertEquals
-
 class RpgMetamodelTest {
 
-    @Test
-    fun generateSimpleMetamodel() {
-        val metamodelBuilder = MetamodelBuilder("com.smeup.rpgparser.parsing.ast",
-            "https://strumenta.com/rpgast", "rpgast")
-        metamodelBuilder.provideClass(CompilationUnit::class)
-        val ePackage = metamodelBuilder.generate()
-        ePackage.saveEcore(File("rpgast.ecore"))
-        ePackage.saveAsJson(File("rpgast.json"))
-        assertEquals("com.smeup.rpgparser.parsing.ast", ePackage.name)
+//    @Test
+//    fun generateSimpleMetamodel() {
+//        val metamodelBuilder = MetamodelBuilder(
+//            "com.smeup.rpgparser.parsing.ast",
+//            "https://strumenta.com/rpgast", "rpgast"
+//        )
+//        metamodelBuilder.provideClass(CompilationUnit::class)
+//        val ePackage = metamodelBuilder.generate()
+//        ePackage.saveEcore(File("rpgast.ecore"))
+//        ePackage.saveAsJson(File("rpgast.json"))
+//        assertEquals("com.smeup.rpgparser.parsing.ast", ePackage.name)
+//
+//        assertEquals(null, ePackage.eClassifiers.find { it.name == "Int" })
 
-        assertEquals(null, ePackage.eClassifiers.find { it.name == "Int" })
-
-        // assertEquals(34, ePackage.eClassifiers.size)
+    // assertEquals(34, ePackage.eClassifiers.size)
 
 //        val cu: EClass = ePackage.eClassifiers.find { it.name == "CompilationUnit" } as EClass
 //        assertEquals(1, cu.eAllSuperTypes.size)
@@ -43,5 +37,5 @@ class RpgMetamodelTest {
 //
 //        val vd: EClass = ePackage.eClassifiers.find { it.name == "VarDeclaration" } as EClass
 //        assertEquals(2, vd.eAllAttributes.size)
-    }
+//    }
 }
