@@ -1,15 +1,6 @@
 package com.strumenta.kolasu.parserbench
 
-import com.strumenta.kolasu.emf.KOLASU_METAMODEL
-import com.strumenta.kolasu.emf.addAttribute
-import com.strumenta.kolasu.emf.addContainment
-import com.strumenta.kolasu.emf.createEClass
-import com.strumenta.kolasu.emf.getEClass
-import com.strumenta.kolasu.emf.getEDataType
-import com.strumenta.kolasu.emf.setResourceURI
-import com.strumenta.kolasu.emf.setSingleContainment
-import com.strumenta.kolasu.emf.setStringAttribute
-import com.strumenta.kolasu.emf.toEObject
+import com.strumenta.kolasu.emf.*
 import com.strumenta.kolasu.model.Node
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
@@ -61,8 +52,9 @@ private fun <S : Node, T : Node> makeTranspilationTraceEObject(transpilationTrac
 fun <S : Node, T : Node> TranspilationTrace<S, T>.toEObject(resource: Resource): EObject {
     val transpilationTraceEO = makeTranspilationTraceEObject(this)
     transpilationTraceEO.setStringAttribute("originalCode", this.originalCode)
-    transpilationTraceEO.setSingleContainment("sourceAST", this.sourceAST.toEObject(resource))
-    transpilationTraceEO.setSingleContainment("targetAST", this.targetAST.toEObject(resource))
+    val mapping = KolasuToEMFMapping()
+    transpilationTraceEO.setSingleContainment("sourceAST", this.sourceAST.toEObject(resource, mapping))
+    transpilationTraceEO.setSingleContainment("targetAST", this.targetAST.toEObject(resource, mapping))
     transpilationTraceEO.setStringAttribute("generatedCode", this.generatedCode)
     return transpilationTraceEO
 }
