@@ -20,12 +20,15 @@ class MetamodelTest {
 
     @Test
     fun generateSimpleMetamodel() {
-        val metamodelBuilder = MetamodelBuilder("SimpleMM", "https://strumenta.com/simplemm", "simplemm")
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
         metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
         ePackage.saveEcore(File("simplemm.ecore"))
         ePackage.saveAsJson(File("simplemm.json"))
-        assertEquals("SimpleMM", ePackage.name)
+        assertEquals("com.strumenta.kolasu.emf", ePackage.name)
         assertEquals(7, ePackage.eClassifiers.size)
 
 //        val cu: EClass = ePackage.eClassifiers.find { it.name == "CompilationUnit" } as EClass

@@ -10,7 +10,7 @@ import java.math.BigInteger
 
 val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
 
-fun createKolasuMetamodel(): EPackage {
+private fun createKolasuMetamodel(): EPackage {
     val ePackage = EcoreFactory.eINSTANCE.createEPackage()
     val nsUri = "https://strumenta.com/kolasu/v2"
     ePackage.setResourceURI(nsUri)
@@ -42,6 +42,11 @@ fun createKolasuMetamodel(): EPackage {
     stringDT.instanceClass = String::class.java
     ePackage.eClassifiers.add(stringDT)
 
+    val charDT = EcoreFactory.eINSTANCE.createEDataType()
+    charDT.name = "char"
+    charDT.instanceClass = Char::class.java
+    ePackage.eClassifiers.add(charDT)
+
     val booleanDT = EcoreFactory.eINSTANCE.createEDataType()
     booleanDT.name = "boolean"
     booleanDT.instanceClass = Boolean::class.java
@@ -71,9 +76,13 @@ fun createKolasuMetamodel(): EPackage {
         addContainment("start", point, 1, 1)
         addContainment("end", point, 1, 1)
     }
+    val origin = ePackage.createEClass("Origin", isAbstract = true)
     val astNode = ePackage.createEClass("ASTNode").apply {
         this.isAbstract = true
+        this.eSuperTypes.add(origin)
         addContainment("position", position, 0, 1)
+        addContainment("destination", position, 0, 1)
+        addReference("origin", origin, 0, 1)
     }
 
     val issueType = EcoreFactory.eINSTANCE.createEEnum()

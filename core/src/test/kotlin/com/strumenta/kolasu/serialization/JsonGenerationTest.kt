@@ -25,7 +25,7 @@ class JsonGenerationTest {
         val json = JsonGenerator().generateString(result)
         assertEquals(
             """{
-  "errors": [
+  "issues": [
     {
       "type": "SYNTACTIC",
       "message": "An error",

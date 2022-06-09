@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.emf
 
+import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.withPosition
@@ -16,6 +17,8 @@ import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+
+data class NodeFoo(val name: String) : Node()
 
 class ModelTest {
 
@@ -96,5 +99,45 @@ class ModelTest {
         assertEquals(cuClass, eObject.eClass())
         val stmts = eObject.eGet(cuClass.getEStructuralFeature("statements")) as EList<*>
         assertEquals(0, stmts.size)
+    }
+
+    @Test
+    fun originIsSerialized() {
+        val n1 = NodeFoo("abc")
+        val n2 = NodeFoo("def").apply {
+            origin = n1
+        }
+        val ePackage = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo").apply {
+            provideClass(NodeFoo::class)
+        }.generate()
+        val mapping = KolasuToEMFMapping()
+        val eo1 = n1.toEObject(ePackage, mapping)
+        val eo2 = n2.toEObject(ePackage, mapping)
+        assertEquals(null, eo1.eGet("origin"))
+        assertEquals(true, eo2.eGet("origin") is EObject)
+        assertEquals("abc", (eo2.eGet("origin") as EObject).eGet("name"))
+    }
+
+    @Test
+    fun destinationIsSerialized() {
+        val n1 = NodeFoo("abc").apply {
+            destination = Position(Point(1, 8), Point(7, 4))
+        }
+        val ePackage = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo").apply {
+            provideClass(NodeFoo::class)
+        }.generate()
+        val eo1 = n1.toEObject(ePackage)
+        val eo2Destination = eo1.eGet("destination")
+        assertEquals(true, eo2Destination is EObject)
+        val eo2DestinationEO = eo2Destination as EObject
+        assertEquals("Position", eo2DestinationEO.eClass().name)
+        assertEquals(true, eo2DestinationEO.eGet("start") is EObject)
+        val startEO = eo2DestinationEO.eGet("start") as EObject
+        assertEquals(true, eo2DestinationEO.eGet("end") is EObject)
+        val endEO = eo2DestinationEO.eGet("end") as EObject
+        assertEquals(1, startEO.eGet("line"))
+        assertEquals(8, startEO.eGet("column"))
+        assertEquals(7, endEO.eGet("line"))
+        assertEquals(4, endEO.eGet("column"))
     }
 }

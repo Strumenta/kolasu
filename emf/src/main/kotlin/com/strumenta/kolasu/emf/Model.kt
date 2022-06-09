@@ -17,6 +17,7 @@ import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
@@ -30,8 +31,13 @@ fun EPackage.getEClass(klass: KClass<*>): EClass {
 }
 
 fun EPackage.getEClass(name: String): EClass {
-    return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("Class not found: $name"))
+    return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("EClass not found: $name"))
         as EClass
+}
+
+fun EPackage.getEDataType(name: String): EDataType {
+    return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("EDataType not found: $name"))
+        as EDataType
 }
 
 fun EPackage.getEEnum(javaClass: Class<*>): EEnum {
@@ -120,54 +126,65 @@ fun Issue.toEObject(): EObject {
     return eo
 }
 
-private fun toValue(ePackage: EPackage, value: Any?): Any? {
+private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping()):
+    Any? {
     val pdValue: Any? = value
-    if (pdValue is Enum<*>) {
-        val ee = ePackage.getEEnum(pdValue.javaClass)
-        return ee.getEEnumLiteral(pdValue.name)
-    } else if (pdValue is LocalDate) {
-        return toLocalDateObject(pdValue)
-    } else if (pdValue is LocalTime) {
-        return toLocalTimeObject(pdValue)
-    } else if (pdValue is LocalDateTime) {
-        val eClass = KOLASU_METAMODEL.getEClass("LocalDateTime")
-        val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
-        val dateComponent = toLocalDateObject(pdValue.toLocalDate())
-        val timeComponent = toLocalTimeObject(pdValue.toLocalTime())
-        eObject.eSet(eClass.getEStructuralFeature("date"), dateComponent)
-        eObject.eSet(eClass.getEStructuralFeature("time"), timeComponent)
-        return eObject
-    } else {
-        // this could be not a primitive value but a value that we mapped to an EClass
-        val eClass = if (pdValue != null) {
-            ePackage.eClassifiers.filterIsInstance<EClass>().find {
-                it.name == pdValue.javaClass.simpleName
-            }
-        } else null
-        return when {
-            eClass != null -> {
-                pdValue!!.dataToEObject(ePackage)
-            }
-            pdValue is ReferenceByName<*> -> {
-                val refEC = KOLASU_METAMODEL.getEClass("ReferenceByName")
-                val refEO = KOLASU_METAMODEL.eFactoryInstance.create(refEC)
-                refEO.eSet(refEC.getEStructuralFeature("name")!!, pdValue.name)
-                // TODO complete
-                refEO
-            }
-            pdValue is Result<*> -> {
-                val resEC = KOLASU_METAMODEL.getEClass("Result")
-                val resEO = KOLASU_METAMODEL.eFactoryInstance.create(resEC)
-                if (pdValue.root is Node) {
-                    resEO.eSet(resEC.getEStructuralFeature("root"), (pdValue.root as Node).toEObject(ePackage))
-                } else {
-                    resEO.eSet(resEC.getEStructuralFeature("root"), toValue(ePackage, pdValue.root))
+    when (pdValue) {
+        is Enum<*> -> {
+            val ee = ePackage.getEEnum(pdValue.javaClass)
+            return ee.getEEnumLiteral(pdValue.name)
+        }
+        is LocalDate -> {
+            return toLocalDateObject(pdValue)
+        }
+        is LocalTime -> {
+            return toLocalTimeObject(pdValue)
+        }
+        is LocalDateTime -> {
+            val eClass = KOLASU_METAMODEL.getEClass("LocalDateTime")
+            val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
+            val dateComponent = toLocalDateObject(pdValue.toLocalDate())
+            val timeComponent = toLocalTimeObject(pdValue.toLocalTime())
+            eObject.eSet(eClass.getEStructuralFeature("date"), dateComponent)
+            eObject.eSet(eClass.getEStructuralFeature("time"), timeComponent)
+            return eObject
+        }
+        else -> {
+            // this could be not a primitive value but a value that we mapped to an EClass
+            val eClass = if (pdValue != null) {
+                ePackage.eClassifiers.filterIsInstance<EClass>().find {
+                    it.name == pdValue.javaClass.simpleName
                 }
-                val issues = resEO.eGet(resEC.getEStructuralFeature("issues")) as EList<EObject>
-                issues.addAll(pdValue.issues.map { it.toEObject() })
-                resEO
+            } else null
+            return when {
+                eClass != null -> {
+                    pdValue!!.dataToEObject(ePackage)
+                }
+                pdValue is ReferenceByName<*> -> {
+                    val refEC = KOLASU_METAMODEL.getEClass("ReferenceByName")
+                    val refEO = KOLASU_METAMODEL.eFactoryInstance.create(refEC)
+                    refEO.eSet(refEC.getEStructuralFeature("name")!!, pdValue.name)
+                    // TODO complete
+                    refEO
+                }
+                pdValue is Result<*> -> {
+                    val resEC = KOLASU_METAMODEL.getEClass("Result")
+                    val resEO = KOLASU_METAMODEL.eFactoryInstance.create(resEC)
+                    if (pdValue.root is Node) {
+                        resEO.eSet(
+                            resEC.getEStructuralFeature("root"),
+                            (pdValue.root as Node)
+                                .toEObject(ePackage, kolasuToEMFMapping)
+                        )
+                    } else {
+                        resEO.eSet(resEC.getEStructuralFeature("root"), toValue(ePackage, pdValue.root))
+                    }
+                    val issues = resEO.eGet(resEC.getEStructuralFeature("issues")) as EList<EObject>
+                    issues.addAll(pdValue.issues.map { it.toEObject() })
+                    resEO
+                }
+                else -> pdValue
             }
-            else -> pdValue
         }
     }
 }
@@ -203,6 +220,22 @@ fun EPackage.findEClass(name: String): EClass? {
 }
 
 fun Resource.findEClass(klass: KClass<*>): EClass? {
+    val eClass = findEClassJustInThisResource(klass)
+    if (eClass == null) {
+        val otherResources = this.resourceSet?.resources?.filter { it != this } ?: emptyList()
+        for (r in otherResources) {
+            val c = r.findEClassJustInThisResource(klass)
+            if (c != null) {
+                return c
+            }
+        }
+        return null
+    } else {
+        return eClass
+    }
+}
+
+fun Resource.findEClassJustInThisResource(klass: KClass<*>): EClass? {
     val ePackage = this.contents.find { it is EPackage && it.name == packageName(klass) } as EPackage?
     return ePackage?.findEClass(klass)
 }
@@ -210,7 +243,20 @@ fun Resource.findEClass(klass: KClass<*>): EClass? {
 fun Resource.getEClass(klass: KClass<*>): EClass = this.findEClass(klass)
     ?: throw ClassNotFoundException(klass.qualifiedName)
 
-fun Node.toEObject(ePackage: EPackage): EObject = toEObject(ePackage.eResource())
+fun Node.toEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject =
+    toEObject(ePackage.eResource(), mapping)
+
+class KolasuToEMFMapping {
+    private val nodeToEObjects = IdentityHashMap<Node, EObject>()
+    fun associate(node: Node, eo: EObject) {
+        nodeToEObjects[node] = eo
+    }
+    fun getAssociatedEObject(node: Node): EObject? {
+        return nodeToEObjects[node]
+    }
+    val size
+        get() = nodeToEObjects.size
+}
 
 /**
  * Translates this node – and, recursively, its descendants – into an [EObject] (EMF/Ecore representation).
@@ -219,14 +265,29 @@ fun Node.toEObject(ePackage: EPackage): EObject = toEObject(ePackage.eResource()
  *  - the [Kolasu metamodel package][KOLASU_METAMODEL]
  *  - every [EPackage] containing the definitions of the node classes in the tree.
  */
-fun Node.toEObject(eResource: Resource): EObject {
+fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject {
     try {
         val ec = eResource.getEClass(this::class)
         val eo = ec.ePackage.eFactoryInstance.create(ec)
+        mapping.associate(this, eo)
         val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
+
         val position = astNode.getEStructuralFeature("position")
         val positionValue = this.position?.toEObject()
         eo.eSet(position, positionValue)
+
+        val destination = astNode.getEStructuralFeature("destination")
+        val destinationValue = this.destination?.toEObject()
+        eo.eSet(destination, destinationValue)
+
+        if (this.origin is Node) {
+            val origin = astNode.getEStructuralFeature("origin")
+            val eoCorrespondingToOrigin = mapping.getAssociatedEObject(this.origin as Node)
+                ?: throw IllegalStateException("No EObject mapped to origin ${this.origin}. " +
+                        "Mapping contains ${mapping.size} entries")
+            eo.eSet(origin, eoCorrespondingToOrigin)
+        }
+
         this.processProperties { pd ->
             val esf = ec.eAllStructuralFeatures.find { it.name == pd.name }!!
             if (pd.provideNodes) {
@@ -234,7 +295,7 @@ fun Node.toEObject(eResource: Resource): EObject {
                     val elist = eo.eGet(esf) as MutableList<EObject?>
                     (pd.value as List<*>?)?.forEach {
                         try {
-                            val childEO = (it as Node?)?.toEObject(eResource)
+                            val childEO = (it as Node?)?.toEObject(eResource, mapping)
                             elist.add(childEO)
                         } catch (e: Exception) {
                             throw RuntimeException("Unable to map to EObject child $it in property $pd of $this", e)
@@ -244,7 +305,7 @@ fun Node.toEObject(eResource: Resource): EObject {
                     if (pd.value == null) {
                         eo.eSet(esf, null)
                     } else {
-                        eo.eSet(esf, (pd.value as Node).toEObject(eResource))
+                        eo.eSet(esf, (pd.value as Node).toEObject(eResource, mapping))
                     }
                 }
             } else {
@@ -308,4 +369,13 @@ fun EObject.saveAsJson(): String {
 
 fun EObject.saveAsJsonObject(): JsonObject {
     return JsonParser.parseString(this.saveAsJson()).asJsonObject
+}
+
+fun EObject.eGet(name: String): Any? {
+    val sfs = this.eClass().eAllStructuralFeatures.filter { it.name == name }
+    when (sfs.size) {
+        0 -> throw IllegalArgumentException("No feature $name found")
+        1 -> return this.eGet(sfs.first())
+        else -> throw IllegalArgumentException("Feature $name is ambiguous")
+    }
 }
