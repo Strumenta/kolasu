@@ -4,6 +4,7 @@ import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
+import org.eclipse.emf.ecore.EcorePackage
 import java.io.File
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -17,15 +18,15 @@ private fun createKolasuMetamodel(): EPackage {
     ePackage.name = "StrumentaLanguageSupport"
     ePackage.nsURI = nsUri
 
-    val intDT = EcoreFactory.eINSTANCE.createEDataType()
-    intDT.name = "int"
-    intDT.instanceClass = Int::class.java
-    ePackage.eClassifiers.add(intDT)
-
-    val longDT = EcoreFactory.eINSTANCE.createEDataType()
-    longDT.name = "long"
-    longDT.instanceClass = Long::class.java
-    ePackage.eClassifiers.add(longDT)
+//    val intDT = EcoreFactory.eINSTANCE.createEDataType()
+//    intDT.name = "int"
+//    intDT.instanceClass = Int::class.java
+//    ePackage.eClassifiers.add(intDT)
+//
+//    val longDT = EcoreFactory.eINSTANCE.createEDataType()
+//    longDT.name = "long"
+//    longDT.instanceClass = Long::class.java
+//    ePackage.eClassifiers.add(longDT)
 
     val bigDecimalDT = EcoreFactory.eINSTANCE.createEDataType()
     bigDecimalDT.name = "BigDecimal"
@@ -37,15 +38,20 @@ private fun createKolasuMetamodel(): EPackage {
     bigIntegerDT.instanceClass = BigInteger::class.java
     ePackage.eClassifiers.add(bigIntegerDT)
 
-    val stringDT = EcoreFactory.eINSTANCE.createEDataType()
-    stringDT.name = "string"
-    stringDT.instanceClass = String::class.java
-    ePackage.eClassifiers.add(stringDT)
+    val stringDT = EcorePackage.eINSTANCE.eString
+    val charDT = EcorePackage.eINSTANCE.eChar
+    val intDT = EcorePackage.eINSTANCE.eInt
+    val longDT = EcorePackage.eINSTANCE.eLong
 
-    val charDT = EcoreFactory.eINSTANCE.createEDataType()
-    charDT.name = "char"
-    charDT.instanceClass = Char::class.java
-    ePackage.eClassifiers.add(charDT)
+//    val stringDT = EcoreFactory.eINSTANCE.createEDataType()
+//    stringDT.name = "string"
+//    stringDT.instanceClass = String::class.java
+//    ePackage.eClassifiers.add(stringDT)
+
+//    val charDT = EcoreFactory.eINSTANCE.createEDataType()
+//    charDT.name = "char"
+//    charDT.instanceClass = Char::class.java
+//    ePackage.eClassifiers.add(charDT)
 
     val booleanDT = EcoreFactory.eINSTANCE.createEDataType()
     booleanDT.name = "boolean"
