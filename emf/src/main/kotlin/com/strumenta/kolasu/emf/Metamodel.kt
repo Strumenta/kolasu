@@ -6,6 +6,7 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.resource.Resource
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -81,10 +82,10 @@ val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, KOLASU_METAM
 val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, KOLASU_METAMODEL.getEClass("ReferenceByName"))
 val ResultHandler = KolasuClassHandler(Result::class, KOLASU_METAMODEL.getEClass("Result"))
 
-val StringHandler = KolasuDataTypeHandler(String::class, KOLASU_METAMODEL.getEClassifier("string") as EDataType)
-val CharHandler = KolasuDataTypeHandler(Char::class, KOLASU_METAMODEL.getEClassifier("char") as EDataType)
-val BooleanHandler = KolasuDataTypeHandler(Boolean::class, KOLASU_METAMODEL.getEClassifier("boolean") as EDataType)
-val IntHandler = KolasuDataTypeHandler(Int::class, KOLASU_METAMODEL.getEClassifier("int") as EDataType)
+val StringHandler = KolasuDataTypeHandler(String::class, EcorePackage.eINSTANCE.eString)
+val CharHandler = KolasuDataTypeHandler(Char::class, EcorePackage.eINSTANCE.eChar)
+val BooleanHandler = KolasuDataTypeHandler(Boolean::class, EcorePackage.eINSTANCE.eBoolean)
+val IntHandler = KolasuDataTypeHandler(Int::class, EcorePackage.eINSTANCE.eInt)
 val BigIntegerHandler = KolasuDataTypeHandler(
     BigInteger::class,
     KOLASU_METAMODEL.getEClassifier("BigInteger") as EDataType
@@ -93,7 +94,7 @@ val BigDecimalHandler = KolasuDataTypeHandler(
     BigDecimal::class,
     KOLASU_METAMODEL.getEClassifier("BigDecimal") as EDataType
 )
-val LongHandler = KolasuDataTypeHandler(Long::class, KOLASU_METAMODEL.getEClassifier("long") as EDataType)
+val LongHandler = KolasuDataTypeHandler(Long::class, EcorePackage.eINSTANCE.eLong)
 
 val KClass<*>.eClassifierName: String
     get() = this.java.eClassifierName

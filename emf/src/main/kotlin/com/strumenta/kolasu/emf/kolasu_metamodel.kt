@@ -42,6 +42,7 @@ private fun createKolasuMetamodel(): EPackage {
     val charDT = EcorePackage.eINSTANCE.eChar
     val intDT = EcorePackage.eINSTANCE.eInt
     val longDT = EcorePackage.eINSTANCE.eLong
+    val booleanDT = EcorePackage.eINSTANCE.eBoolean
 
 //    val stringDT = EcoreFactory.eINSTANCE.createEDataType()
 //    stringDT.name = "string"
@@ -53,10 +54,10 @@ private fun createKolasuMetamodel(): EPackage {
 //    charDT.instanceClass = Char::class.java
 //    ePackage.eClassifiers.add(charDT)
 
-    val booleanDT = EcoreFactory.eINSTANCE.createEDataType()
-    booleanDT.name = "boolean"
-    booleanDT.instanceClass = Boolean::class.java
-    ePackage.eClassifiers.add(booleanDT)
+//    val booleanDT = EcoreFactory.eINSTANCE.createEDataType()
+//    booleanDT.name = "boolean"
+//    booleanDT.instanceClass = Boolean::class.java
+//    ePackage.eClassifiers.add(booleanDT)
 
     val localDate = ePackage.createEClass("LocalDate").apply {
         addAttribute("year", intDT, 1, 1)
