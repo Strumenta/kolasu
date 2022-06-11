@@ -6,6 +6,7 @@ import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
+import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
@@ -21,7 +22,7 @@ private fun createTranspilationMetamodel(): EPackage {
     ePackage.nsURI = nsUri
 
     val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
-    val string = KOLASU_METAMODEL.getEDataType("string")
+    val string = EcorePackage.eINSTANCE.eString
 
     val transpilationTrace = ePackage.createEClass("TranspilationTrace").apply {
         addAttribute("originalCode", string, 1, 1)
