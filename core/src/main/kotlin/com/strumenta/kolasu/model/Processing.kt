@@ -276,8 +276,14 @@ fun <T> Node.processNodesOfType(
     operation: (T) -> Unit,
     walker: KFunction1<Node, Sequence<Node>> = Node::walk
 ) {
-    walker.invoke(this).filterIsInstance(klass).forEach(operation)
+    searchByType(klass, walker).forEach(operation)
 }
+
+@JvmOverloads
+fun <T> Node.searchByType(
+    klass: Class<T>,
+    walker: KFunction1<Node, Sequence<Node>> = Node::walk
+) = walker.invoke(this).filterIsInstance(klass)
 
 /**
  * T is not forced to be a subtype of Node to support using interfaces.

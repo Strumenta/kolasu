@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.serialization
 
 import com.google.gson.*
-import com.strumenta.kolasu.model.JustPosition
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
@@ -110,7 +109,7 @@ class JsonDeserializer {
         }
         if (instance != null && jo.has(JSON_POSITION_KEY)) {
             val position = jo[JSON_POSITION_KEY]?.asJsonObject?.decodeAsPosition()
-            instance.origin = if (position != null) JustPosition(position) else null
+            instance.position = position
         }
 
         return instance ?: throw UnsupportedOperationException()
