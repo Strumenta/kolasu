@@ -283,8 +283,10 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
         if (this.origin is Node) {
             val origin = astNode.getEStructuralFeature("origin")
             val eoCorrespondingToOrigin = mapping.getAssociatedEObject(this.origin as Node)
-                ?: throw IllegalStateException("No EObject mapped to origin ${this.origin}. " +
-                        "Mapping contains ${mapping.size} entries")
+                ?: throw IllegalStateException(
+                    "No EObject mapped to origin ${this.origin}. " +
+                        "Mapping contains ${mapping.size} entries"
+                )
             eo.eSet(origin, eoCorrespondingToOrigin)
         }
 

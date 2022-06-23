@@ -84,7 +84,8 @@ class NodeFactory<S>(
 /**
  * Information on how to retrieve a child node.
  */
-data class ChildNodeFactory<S>(val name: String,
+data class ChildNodeFactory<S>(
+    val name: String,
     val get: (S) -> Any?,
     val setter: (Any, Any?) -> Unit
 ) {
