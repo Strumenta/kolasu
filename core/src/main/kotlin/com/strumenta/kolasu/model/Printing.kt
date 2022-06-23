@@ -24,15 +24,15 @@ fun Node.relevantMemberProperties(withPosition: Boolean = false, withNodeType: B
                 it.name != "parent"
         }
 
-data class DebugPrintConfiguration(
-    val skipEmptyCollections: Boolean = false,
-    val skipNull: Boolean = false,
-    val forceShowPosition: Boolean = false,
-    val hide: List<String> = emptyList(),
-    val skipPrivateProperties: Boolean = true,
-    val skipProtectedProperties: Boolean = true,
-    val skipInternalProperties: Boolean = true,
-    val skipPublicProperties: Boolean = false
+data class DebugPrintConfiguration constructor(
+    var skipEmptyCollections: Boolean = false,
+    var skipNull: Boolean = false,
+    var forceShowPosition: Boolean = false,
+    val hide: MutableList<String> = mutableListOf(),
+    var skipPrivateProperties: Boolean = true,
+    var skipProtectedProperties: Boolean = true,
+    var skipInternalProperties: Boolean = true,
+    var skipPublicProperties: Boolean = false
 )
 
 private fun KProperty1<Node, *>.hasRelevantVisibility(configuration: DebugPrintConfiguration): Boolean {

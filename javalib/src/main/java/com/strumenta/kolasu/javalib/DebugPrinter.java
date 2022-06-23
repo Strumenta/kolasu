@@ -15,10 +15,6 @@ public class DebugPrinter {
         return this.configuration;
     }
 
-    public void setConfiguration(DebugPrintConfiguration debugPrintConfiguration) {
-        this.configuration = debugPrintConfiguration;
-    }
-
     public String printNodeToString(Node node) {
         return PrintingKt.debugPrint(node, "", configuration);
     }
