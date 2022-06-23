@@ -19,6 +19,7 @@ fun Node.relevantMemberProperties(withPosition: Boolean = false, withNodeType: B
                 (it.name != "position" || withPosition) &&
                 (it.name != "nodeType" || withNodeType) &&
                 it.name != "properties" &&
+                it.name != "positionOverride" &&
                 it.name != "origin" &&
                 it.name != "destination" &&
                 it.name != "sourceText" &&

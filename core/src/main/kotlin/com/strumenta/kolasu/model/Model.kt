@@ -1,7 +1,5 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.parsing.position
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
@@ -13,10 +11,6 @@ interface Origin {
     val sourceText: String?
 }
 
-class JustPosition(override val position: Position) : Origin {
-    override val sourceText: String? = null
-}
-
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  *
@@ -25,10 +19,11 @@ class JustPosition(override val position: Position) : Origin {
  */
 open class Node() : Origin {
 
+    @Internal
+    protected var positionOverride: Position? = null
+
     constructor(position: Position?) : this() {
-        if (position != null) {
-            origin = JustPosition(position)
-        }
+        this.position = position
     }
 
     constructor(origin: Origin?) : this() {
@@ -71,22 +66,9 @@ open class Node() : Origin {
      */
     @property:Internal
     override var position: Position?
-        get() = origin?.position
+        get() = positionOverride ?: origin?.position
         set(position) {
-            if (origin != null && origin !is JustPosition) {
-                if (origin is ParseTreeOrigin) {
-                    if (position == null) {
-                        // nothing to do
-                    } else {
-                        (origin as ParseTreeOrigin).overridePosition(position)
-                    }
-                } else {
-                    throw IllegalStateException("Node $this already has an origin: $origin")
-                }
-            }
-            if (position != null) {
-                this.origin = JustPosition(position)
-            }
+            this.positionOverride = position
         }
 
     /**
