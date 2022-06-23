@@ -83,7 +83,7 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                                 }
                             } else {
                                 val paramType = mt.actualTypeArguments[0]
-                                if (paramType is Class<*> && Node::class.java.isAssignableFrom(paramType)) {
+                                if (paramType is Class<*> && paramType.kotlin.isANode()) {
                                     sb.append("$indent$indentBlock${property.name} = [\n")
                                     (value as List<Node>).forEach {
                                         sb.append(
