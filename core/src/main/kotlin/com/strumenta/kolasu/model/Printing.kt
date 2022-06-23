@@ -58,6 +58,7 @@ fun Any?.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
 
 // some fancy reflection tests make sure the cast always succeeds
 @Suppress("UNCHECKED_CAST")
+@JvmOverloads
 fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration = DebugPrintConfiguration()): String {
     val sb = StringBuilder()
     if (this.relevantMemberProperties(withPosition = configuration.forceShowPosition).isEmpty()) {
