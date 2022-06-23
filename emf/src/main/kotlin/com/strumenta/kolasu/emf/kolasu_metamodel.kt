@@ -18,16 +18,6 @@ private fun createKolasuMetamodel(): EPackage {
     ePackage.name = "StrumentaLanguageSupport"
     ePackage.nsURI = nsUri
 
-//    val intDT = EcoreFactory.eINSTANCE.createEDataType()
-//    intDT.name = "int"
-//    intDT.instanceClass = Int::class.java
-//    ePackage.eClassifiers.add(intDT)
-//
-//    val longDT = EcoreFactory.eINSTANCE.createEDataType()
-//    longDT.name = "long"
-//    longDT.instanceClass = Long::class.java
-//    ePackage.eClassifiers.add(longDT)
-
     val bigDecimalDT = EcoreFactory.eINSTANCE.createEDataType()
     bigDecimalDT.name = "BigDecimal"
     bigDecimalDT.instanceClass = BigDecimal::class.java
@@ -43,21 +33,6 @@ private fun createKolasuMetamodel(): EPackage {
     val intDT = EcorePackage.eINSTANCE.eInt
     val longDT = EcorePackage.eINSTANCE.eLong
     val booleanDT = EcorePackage.eINSTANCE.eBoolean
-
-//    val stringDT = EcoreFactory.eINSTANCE.createEDataType()
-//    stringDT.name = "string"
-//    stringDT.instanceClass = String::class.java
-//    ePackage.eClassifiers.add(stringDT)
-
-//    val charDT = EcoreFactory.eINSTANCE.createEDataType()
-//    charDT.name = "char"
-//    charDT.instanceClass = Char::class.java
-//    ePackage.eClassifiers.add(charDT)
-
-//    val booleanDT = EcoreFactory.eINSTANCE.createEDataType()
-//    booleanDT.name = "boolean"
-//    booleanDT.instanceClass = Boolean::class.java
-//    ePackage.eClassifiers.add(booleanDT)
 
     val localDate = ePackage.createEClass("LocalDate").apply {
         addAttribute("year", intDT, 1, 1)
