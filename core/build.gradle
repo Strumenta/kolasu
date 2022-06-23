@@ -26,9 +26,9 @@ dependencies {
     implementation 'com.fifesoft:rsyntaxtextarea:2.5.8'
     implementation 'com.fifesoft:autocomplete:2.5.8'
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
-    implementation 'org.redundent:kotlin-xml-builder:1.7.2'
+    implementation 'org.redundent:kotlin-xml-builder:1.7.3'
 
-    cliImplementation 'com.github.ajalt.clikt:clikt:3.4.0'
+    cliImplementation 'com.github.ajalt.clikt:clikt:3.5.0'
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 }
