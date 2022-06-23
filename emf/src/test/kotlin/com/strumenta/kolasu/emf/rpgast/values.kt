@@ -245,13 +245,13 @@ data class IntValue(val value: Long) : NumberValue() {
 
     override fun assignableTo(expectedType: Type): Boolean {
         // TODO check decimals
-        when (expectedType) {
-            is NumberType -> return true
+        return when (expectedType) {
+            is NumberType -> true
             is ArrayType -> {
-                return expectedType.element is NumberType
+                expectedType.element is NumberType
             }
+            else -> false
         }
-        return false
     }
 
     override fun asInt() = this
@@ -346,13 +346,11 @@ data class DecimalValue(val value: BigDecimal) : NumberValue() {
 
     override fun assignableTo(expectedType: Type): Boolean {
         // TODO check decimals
-        when (expectedType) {
-            is NumberType -> return true
-            is ArrayType -> {
-                return expectedType.element is NumberType
-            }
+        return when (expectedType) {
+            is NumberType -> true
+            is ArrayType -> expectedType.element is NumberType
+            else -> false
         }
-        return false
     }
 
     fun isPositive(): Boolean {
