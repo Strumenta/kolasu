@@ -119,7 +119,7 @@ fun Node.getText(code: String): String? = position?.text(code)
 
 class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = null) : Origin {
     override val position: Position?
-        get() = parseTree.toPosition(source=source)
+        get() = parseTree.toPosition(source = source)
 
     override val sourceText: String?
         get() =
