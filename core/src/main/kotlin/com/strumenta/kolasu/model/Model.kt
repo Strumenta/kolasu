@@ -9,6 +9,8 @@ import kotlin.reflect.full.memberProperties
 interface Origin {
     val position: Position?
     val sourceText: String?
+    val source: Source?
+        get() = position?.source
 }
 
 /**
@@ -70,6 +72,10 @@ open class Node() : Origin {
         set(position) {
             this.positionOverride = position
         }
+
+    @property:Internal
+    override val source: Source?
+        get() = origin?.source
 
     /**
      * Tests whether the given position is contained in the interval represented by this object.

@@ -117,9 +117,9 @@ fun Token.getOriginalText(): String {
 
 fun Node.getText(code: String): String? = position?.text(code)
 
-class ParseTreeOrigin(val parseTree: ParseTree) : Origin {
+class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = null) : Origin {
     override val position: Position?
-        get() = parseTree.toPosition()
+        get() = parseTree.toPosition(source=source)
 
     override val sourceText: String?
         get() =
@@ -170,22 +170,23 @@ val ParserRuleContext.position: Position
  * Returns the position of the receiver parser rule context.
  * @param considerPosition if it's false, this method returns null.
  */
-fun ParserRuleContext.toPosition(considerPosition: Boolean = true): Position? {
+fun ParserRuleContext.toPosition(considerPosition: Boolean = true, source: Source? = null): Position? {
     return if (considerPosition && start != null && stop != null) {
-        position
+        val position = position
+        if (source == null) position else Position(position.start, position.end, source)
     } else null
 }
 
-fun TerminalNode.toPosition(considerPosition: Boolean = true): Position? =
-    this.symbol.toPosition(considerPosition)
+fun TerminalNode.toPosition(considerPosition: Boolean = true, source: Source? = null): Position? =
+    this.symbol.toPosition(considerPosition, source)
 
-fun Token.toPosition(considerPosition: Boolean = true): Position? =
-    if (considerPosition) Position(this.startPoint, this.endPoint) else null
+fun Token.toPosition(considerPosition: Boolean = true, source: Source? = null): Position? =
+    if (considerPosition) Position(this.startPoint, this.endPoint, source) else null
 
-fun ParseTree.toPosition(considerPosition: Boolean = true): Position? {
+fun ParseTree.toPosition(considerPosition: Boolean = true, source: Source? = null): Position? {
     return when (this) {
-        is TerminalNode -> this.toPosition(considerPosition)
-        is ParserRuleContext -> this.toPosition(considerPosition)
+        is TerminalNode -> this.toPosition(considerPosition, source)
+        is ParserRuleContext -> this.toPosition(considerPosition, source)
         else -> null
     }
 }
