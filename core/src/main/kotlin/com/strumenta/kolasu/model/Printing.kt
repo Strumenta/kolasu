@@ -23,6 +23,7 @@ fun Node.relevantMemberProperties(withPosition: Boolean = false, withNodeType: B
                 it.name != "origin" &&
                 it.name != "destination" &&
                 it.name != "sourceText" &&
+                it.name != "source" &&
                 it.name != "parent"
         }
 

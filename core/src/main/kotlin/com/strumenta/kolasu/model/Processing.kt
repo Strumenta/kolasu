@@ -314,15 +314,7 @@ fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent
  */
 val Node.children: List<Node>
     get() {
-        val children = mutableListOf<Node>()
-        this.properties.forEach { p ->
-            val v = p.value
-            when (v) {
-                is Node -> children.add(v)
-                is Collection<*> -> v.forEach { if (it is Node) children.add(it) }
-            }
-        }
-        return children
+        return walkChildren().toList()
     }
 
 // TODO reimplement using transformChildren
@@ -335,8 +327,7 @@ fun Node.transformTree(
     mutationsCache.computeIfAbsent(this) { operation(this) }
     val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { p ->
-        val v = p.get(this)
-        when (v) {
+        when (val v = p.get(this)) {
             is Node -> {
                 val newValue = v.transformTree(operation, inPlace, mutationsCache)
                 if (newValue != v) changes[p.name] = newValue
