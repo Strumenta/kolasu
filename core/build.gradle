@@ -23,8 +23,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     // we define some testing utilities
     implementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
-    implementation 'com.fifesoft:rsyntaxtextarea:2.5.8'
-    implementation 'com.fifesoft:autocomplete:2.5.8'
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
     implementation 'org.redundent:kotlin-xml-builder:1.7.3'
 
