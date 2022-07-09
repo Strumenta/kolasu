@@ -402,7 +402,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     }
 
     @JvmOverloads
-    fun parse(file: File, charset: Charset = Charsets.UTF_8, considerPosition: Boolean = true): ParsingResult<R> =
+    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<R> =
         parse(FileInputStream(file), charset, considerPosition)
 
     // For convenient use from Java

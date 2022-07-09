@@ -1,8 +1,5 @@
 package com.strumenta.kolasu.cli
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.parameters.arguments.argument
-import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.help
@@ -14,17 +11,14 @@ import com.strumenta.kolasu.model.debugPrint
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.serialization.JsonGenerator
 import com.strumenta.kolasu.serialization.XMLGenerator
-import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.Result
 import java.io.File
-import java.nio.charset.Charset
-import kotlin.system.exitProcess
 
 /**
  * This command prints the AST on the console or on file.
  * The formats are the debugging format, JSON, XML, or EMF-JSON.
  */
-abstract class ASTSaverCommand<R: Node, P: ASTParser<R>> : ASTProcessingCommand<R, P>() {
+abstract class ASTSaverCommand<R : Node, P : ASTParser<R>> : ASTProcessingCommand<R, P>() {
 
     private val outputFormat by option("--format", "-f")
         .help("Pick the format to serialize ASTs: json (default), xml, json-emf, or debug-format")
@@ -97,5 +91,4 @@ abstract class ASTSaverCommand<R: Node, P: ASTParser<R>> : ASTProcessingCommand<
             else -> throw UnsupportedOperationException()
         }
     }
-
 }

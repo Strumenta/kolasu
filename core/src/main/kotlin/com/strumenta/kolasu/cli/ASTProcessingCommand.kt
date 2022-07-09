@@ -16,7 +16,7 @@ import java.io.File
 import java.nio.charset.Charset
 import kotlin.system.exitProcess
 
-abstract class ASTProcessingCommand<R: Node, P: ASTParser<R>> : CliktCommand() {
+abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>> : CliktCommand() {
     protected val inputs by argument().file(mustExist = true).multiple()
 
     protected val charset by option("--charset", "-c")
@@ -35,12 +35,18 @@ abstract class ASTProcessingCommand<R: Node, P: ASTParser<R>> : CliktCommand() {
             exitProcess(1)
         }
         inputs.forEach { processInput(it, explicit = true, relativePath = "") }
+        finalizeRun()
+    }
+
+    protected open fun initializeRun() {
+    }
+    protected open fun finalizeRun() {
     }
 
     /**
      * If null is returned it means we cannot parse this file
      */
-    protected abstract fun instantiateParser(input: File) : P?
+    protected abstract fun instantiateParser(input: File): P?
 
     protected abstract fun processResult(input: File, relativePath: String, result: Result<R>)
     protected abstract fun processException(input: File, relativePath: String, e: Exception)

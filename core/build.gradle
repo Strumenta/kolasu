@@ -26,7 +26,7 @@ dependencies {
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
     implementation 'org.redundent:kotlin-xml-builder:1.7.3'
 
-    cliImplementation 'com.github.ajalt.clikt:clikt:$clikt_version'
+    cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 }

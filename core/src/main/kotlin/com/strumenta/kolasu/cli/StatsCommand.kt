@@ -1,16 +1,10 @@
 package com.strumenta.kolasu.cli
 
-import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.types.choice
-import com.github.ajalt.clikt.parameters.types.file
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.debugPrint
 import com.strumenta.kolasu.parsing.ASTParser
-import com.strumenta.kolasu.serialization.JsonGenerator
-import com.strumenta.kolasu.serialization.XMLGenerator
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.Result
 import java.io.File
@@ -30,7 +24,7 @@ class StatsCollector {
         filesWithExceptions += 1
     }
 
-    fun registerResult(input: File, result: Result<Node>) {
+    fun registerResult(input: File, result: Result<out Node>) {
         filesProcessed += 1
         val errors = result.issues.filter { it.severity == IssueSeverity.ERROR }.count()
         if (errors > 0) {
@@ -68,7 +62,7 @@ class ErrorStatsCollector {
         println()
     }
 
-    fun registerResult(result: Result<Node>) {
+    fun registerResult(result: Result<out Node>) {
         val errors = result.issues.filter { it.severity == IssueSeverity.ERROR }
         errors.forEach { error ->
             val message = canonizeMessage(error.message)
@@ -81,78 +75,38 @@ class ErrorStatsCollector {
     }
 }
 
-abstract class StatsCommand<R: Node, P: ASTParser<R>> : ASTProcessingCommand<R, P>() {
+abstract class StatsCommand<R : Node, P : ASTParser<R>> : ASTProcessingCommand<R, P>() {
 
-    private val outputFormat by option("--format", "-f")
-        .help("Pick the format to serialize ASTs: json (default), xml, json-emf, or debug-format")
-        .choice("json", "xml", "debug-format").default("json")
-    private val outputDirectory by option("--output", "-o")
-        .file()
-        .help("Directory where to store the output. By default the current directory is used")
-        .default(File("."))
-    private val print by option("--print")
-        .help("ASTs are not saved on file but they are instead printed on the screen")
+    private val printStats by option("--stats", "-s")
+        .help("Print statistics on the number of files parsed correctly")
+        .flag(default = true)
+    private val printErrorStats by option("--error-stats", "-e")
+        .help("Print statistics on the prevalence of the different error messages")
         .flag(default = false)
 
-    override fun processException(input: File, relativePath: String, e: Exception) {
-        System.err.println("A problem prevented from processing ${input.absolutePath}")
-        e.printStackTrace()
-        if (verbose) {
-            println(" FAILURE ${e.message} (${e.javaClass.canonicalName})")
+    private var statsCollector: StatsCollector? = null
+    private var errorStatsCollector: ErrorStatsCollector? = null
+
+    override fun initializeRun() {
+        if (printStats) {
+            statsCollector = StatsCollector()
         }
+        if (printErrorStats) {
+            errorStatsCollector = ErrorStatsCollector()
+        }
+    }
+
+    override fun finalizeRun() {
+        statsCollector?.print()
+        errorStatsCollector?.print()
+    }
+
+    override fun processException(input: File, relativePath: String, e: Exception) {
+        statsCollector?.registerException(input, e)
     }
 
     override fun processResult(input: File, relativePath: String, result: Result<R>) {
-        if (!print) {
-            val targetFile = File(this.outputDirectory.absolutePath + File.separator + relativePath)
-            val targetFileParent = targetFile.parentFile
-            targetFileParent.absoluteFile.mkdirs()
-        }
-        when (outputFormat) {
-            "json" -> {
-                if (print) {
-                    if (verbose) {
-                        println(" -> generating AST for $relativePath (from ${input.absolutePath})")
-                    }
-                    println(JsonGenerator().generateString(result))
-                } else {
-                    val outputFile = File(outputDirectory, "${input.name}.json")
-                    if (verbose) {
-                        println(" -> generating ${outputFile.absolutePath}")
-                    }
-                    JsonGenerator().generateFile(result, outputFile)
-                }
-            }
-            "xml" -> {
-                if (print) {
-                    if (verbose) {
-                        println(" -> generating AST for $relativePath (from ${input.absolutePath})")
-                    }
-                    println(XMLGenerator().generateString(result))
-                } else {
-                    val outputFile = File(outputDirectory, "${input.name}.xml")
-                    if (verbose) {
-                        println(" -> generating ${outputFile.absolutePath}")
-                    }
-                    XMLGenerator().generateFile(result, outputFile)
-                }
-            }
-            "debug-format" -> {
-                if (print) {
-                    if (verbose) {
-                        println(" -> generating AST for $relativePath (from ${input.absolutePath})")
-                    }
-                    println(result.debugPrint())
-                } else {
-                    val outputFile = File(outputDirectory, "${input.name}.df")
-                    if (verbose) {
-                        println(" -> generating ${outputFile.absolutePath}")
-                    }
-                    outputFile.writeText(result.debugPrint())
-                }
-            }
-            else -> throw UnsupportedOperationException()
-        }
+        statsCollector?.registerResult(input, result)
+        errorStatsCollector?.registerResult(result)
     }
-
 }
