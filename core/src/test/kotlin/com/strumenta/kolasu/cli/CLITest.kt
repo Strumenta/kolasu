@@ -355,7 +355,8 @@ class CLITest {
         val console = CapturingCliktConsole()
         val cliTool = CLITool(parserInstantiator, console)
         cliTool.parse(arrayOf("stats", myFile.toString()))
-        assertEquals("""== Stats ==
+        assertEquals(
+            """== Stats ==
 
  [Did processing complete?]
   files processed         : 1
@@ -365,7 +366,9 @@ class CLITest {
  [Did processing complete successfully?]
   processing completed with errors    : 0
   processing completed without errors : 1
-  total number of errors              : 0""", console.stdOutput.trim())
+  total number of errors              : 0""",
+            console.stdOutput.trim()
+        )
         assertEquals("", console.errOutput)
     }
 
@@ -433,13 +436,16 @@ class CLITest {
         val console = CapturingCliktConsole()
         val cliTool = CLITool(parserInstantiator, console)
         cliTool.parse(arrayOf("stats", "--no-stats", "--node-stats", myFile.toString()))
-        assertEquals("""== Node Stats ==
+        assertEquals(
+            """== Node Stats ==
 
   com.strumenta.kolasu.cli.MyCompilationUnit        : 1
   com.strumenta.kolasu.cli.MyEntityDecl             : 2
   com.strumenta.kolasu.cli.MyFieldDecl              : 3
 
-  total number of nodes                             : 6""", console.stdOutput.trim())
+  total number of nodes                             : 6""",
+            console.stdOutput.trim()
+        )
         assertEquals("", console.errOutput)
     }
 
@@ -473,13 +479,16 @@ class CLITest {
         val console = CapturingCliktConsole()
         val cliTool = CLITool(parserInstantiator, console)
         cliTool.parse(arrayOf("stats", "--no-stats", "--node-stats", "-sn", myFile.toString()))
-        assertEquals("""== Node Stats ==
+        assertEquals(
+            """== Node Stats ==
 
   MyCompilationUnit        : 1
   MyEntityDecl             : 2
   MyFieldDecl              : 3
 
-  total number of nodes    : 6""", console.stdOutput.trim())
+  total number of nodes    : 6""",
+            console.stdOutput.trim()
+        )
         assertEquals("", console.errOutput)
     }
 }

@@ -13,6 +13,8 @@ import com.strumenta.kolasu.serialization.JsonGenerator
 import com.strumenta.kolasu.serialization.XMLGenerator
 import com.strumenta.kolasu.validation.Result
 import java.io.File
+import java.io.PrintWriter
+import java.io.StringWriter
 
 /**
  * This command prints the AST on the console or on file.
@@ -38,7 +40,11 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
 
     override fun processException(input: File, relativePath: String, e: Exception) {
         echo("A problem prevented from processing ${input.absolutePath}", err = true, trailingNewline = true)
-        e.printStackTrace()
+        val sw = StringWriter()
+        val pw = PrintWriter(sw)
+        e.printStackTrace(pw)
+        val stackTraceAsString = sw.toString()
+        echo(stackTraceAsString, trailingNewline = true, err = true)
         if (verbose) {
             echo(" FAILURE ${e.message} (${e.javaClass.canonicalName})", trailingNewline = true)
         }

@@ -40,7 +40,7 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
     override fun run() {
         initializeRun()
         if (inputs.isEmpty()) {
-            println("No inputs specified, exiting")
+            echo("No inputs specified, exiting", trailingNewline = true)
             exitProcess(1)
         }
         inputs.forEach { processInput(it, explicit = true, relativePath = "") }
@@ -67,12 +67,12 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
             val parser = instantiateParser(input)
             if (parser == null) {
                 if (verbose) {
-                    println("skipping ${input.absolutePath}")
+                    echo("skipping ${input.absolutePath}", trailingNewline = true)
                 }
                 return
             }
             if (verbose) {
-                println("processing ${input.absolutePath}")
+                echo("processing ${input.absolutePath}", trailingNewline = true)
             }
             val parsingResult =
                 parser.parse(input, Charset.forName(charset), considerPosition = !ignorePositions)
@@ -80,14 +80,14 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
                 val nErrors = parsingResult.issues.count { it.severity == IssueSeverity.ERROR }
                 val nWarnings = parsingResult.issues.count { it.severity == IssueSeverity.WARNING }
                 if (nErrors == 0 && nWarnings == 0) {
-                    println("  no errors and no warnings")
+                    echo("  no errors and no warnings", trailingNewline = true)
                 } else {
                     if (nErrors == 0) {
-                        println("  $nWarnings warnings")
+                        echo("  $nWarnings warnings", trailingNewline = true)
                     } else if (nWarnings == 0) {
-                        println("  $nErrors errors")
+                        echo("  $nErrors errors", trailingNewline = true)
                     } else {
-                        println("  $nErrors errors and $nWarnings warnings")
+                        echo("  $nErrors errors and $nWarnings warnings", trailingNewline = true)
                     }
                 }
             }
@@ -107,8 +107,11 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
             processSourceFile(input, relativePath)
         } else {
             if (explicit) {
-                echo("The provided input is neither a file or a directory, we will ignore it: " +
-                        "${input.absolutePath}", trailingNewline = true)
+                echo(
+                    "The provided input is neither a file or a directory, we will ignore it: " +
+                        "${input.absolutePath}",
+                    trailingNewline = true
+                )
             } else {
                 // ignore silently
             }

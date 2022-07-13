@@ -10,12 +10,11 @@ import java.io.File
 
 interface StatsCollector {
     fun registerException(input: File, e: Exception) {
-
     }
 
     fun registerResult(input: File, result: Result<out Node>)
 
-    fun print(println: (s: String)->Unit = ::println)
+    fun print(println: (s: String) -> Unit = ::println)
 }
 
 class GlobalStatsCollector : StatsCollector {
@@ -42,7 +41,7 @@ class GlobalStatsCollector : StatsCollector {
         }
     }
 
-    override fun print(println: (s: String)->Unit) {
+    override fun print(println: (s: String) -> Unit) {
         println("== Stats ==")
         println("")
         println(" [Did processing complete?]")
@@ -61,7 +60,6 @@ class NodeStatsCollector(val simpleNames: Boolean) : StatsCollector {
     private val nodePrevalence = HashMap<String, Int>()
 
     override fun registerException(input: File, e: Exception) {
-
     }
 
     override fun registerResult(input: File, result: Result<out Node>) {
@@ -73,7 +71,7 @@ class NodeStatsCollector(val simpleNames: Boolean) : StatsCollector {
         }
     }
 
-    override fun print(println: (s: String)->Unit) {
+    override fun print(println: (s: String) -> Unit) {
         val length = if (simpleNames) 25 else 50
         println("== Node Stats ==")
         println("")
@@ -92,7 +90,7 @@ class NodeStatsCollector(val simpleNames: Boolean) : StatsCollector {
 class ErrorStatsCollector : StatsCollector {
     private val errorsPrevalence = HashMap<String, Int>()
 
-    override fun print(println: (s: String)->Unit) {
+    override fun print(println: (s: String) -> Unit) {
         if (errorsPrevalence.isEmpty()) {
             return
         }
@@ -156,7 +154,7 @@ class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstant
 
     override fun finalizeRun() {
         collectors.forEach {
-            it.print {text: String -> echo(text, trailingNewline = true)}
+            it.print { text: String -> echo(text, trailingNewline = true) }
         }
     }
 
