@@ -324,4 +324,48 @@ class CLITest {
         )
         assertEquals("", console.errOutput)
     }
+
+    @Test
+    fun runStatsOnSimpleFile() {
+        val myDir = createTempDirectory()
+        val myFile = createTempFile(myDir, "myfile.mylang")
+        myDir.toFile().deleteOnExit()
+        myFile.toFile().deleteOnExit()
+
+        val parserInstantiator = { file: File ->
+            MyDummyParser().apply {
+                expectedResults[myFile.toFile()] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("Entity1", mutableListOf()),
+                            MyEntityDecl(
+                                "Entity2",
+                                mutableListOf(
+                                    MyFieldDecl("f1"),
+                                    MyFieldDecl("f2"),
+                                    MyFieldDecl("f3"),
+                                )
+                            )
+                        )
+                    )
+                )
+            }
+        }
+        val console = CapturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console)
+        cliTool.parse(arrayOf("stats", myFile.toString()))
+        assertEquals("""== Stats ==
+
+ [Did processing complete?]
+  files processed         : 1
+     processing failed    : 0
+     processing completed : 1
+
+ [Did processing complete successfully?]
+  processing completed with errors    : 0
+  processing completed without errors : 1
+  total number of errors              : 0""", console.stdOutput.trim())
+        assertEquals("", console.errOutput)
+    }
 }

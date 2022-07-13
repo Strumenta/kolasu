@@ -31,9 +31,9 @@ class StatsCollector {
         }
     }
 
-    fun print() {
+    fun print(println: (s: String)->Unit = ::println) {
         println("== Stats ==")
-        println()
+        println("")
         println(" [Did processing complete?]")
         println("  files processed         : $filesProcessed")
         println("     processing failed    : $filesWithExceptions")
@@ -49,7 +49,7 @@ class StatsCollector {
 class ErrorStatsCollector {
     private val errorsPrevalence = HashMap<String, Int>()
 
-    fun print() {
+    fun print(println: (s: String)->Unit = ::println) {
         if (errorsPrevalence.isEmpty()) {
             return
         }
@@ -57,7 +57,7 @@ class ErrorStatsCollector {
         errorsPrevalence.entries.sortedByDescending { it.value }.forEach { entry ->
             println(" ${entry.key.padEnd(50)} : ${entry.value} occurrences")
         }
-        println()
+        println("")
     }
 
     fun registerResult(result: Result<out Node>) {
@@ -107,8 +107,8 @@ class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstant
     }
 
     override fun finalizeRun() {
-        statsCollector?.print()
-        errorStatsCollector?.print()
+        statsCollector?.print {text: String -> echo(text, trailingNewline = true)}
+        errorStatsCollector?.print {text: String -> echo(text, trailingNewline = true)}
     }
 
     override fun processException(input: File, relativePath: String, e: Exception) {

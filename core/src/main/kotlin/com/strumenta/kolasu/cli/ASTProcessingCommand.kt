@@ -38,6 +38,7 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
         .flag(default = false)
 
     override fun run() {
+        initializeRun()
         if (inputs.isEmpty()) {
             println("No inputs specified, exiting")
             exitProcess(1)
