@@ -11,6 +11,7 @@ import java.nio.charset.Charset
 import java.util.*
 import kotlin.reflect.full.memberFunctions
 import kotlin.system.measureTimeMillis
+import com.strumenta.kolasu.validation.Result
 
 open class CodeProcessingResult<D>(
     val issues: List<Issue>,
@@ -116,6 +117,9 @@ class ParsingResult<RootNode : Node>(
         result = 31 * result + (incompleteNode?.hashCode() ?: 0)
         return result
     }
+
+    fun toResult(): Result<RootNode> = Result(issues, root)
+
 }
 
 fun String.toStream(charset: Charset = Charsets.UTF_8) = ByteArrayInputStream(toByteArray(charset))

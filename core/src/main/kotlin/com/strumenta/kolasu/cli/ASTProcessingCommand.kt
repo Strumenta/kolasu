@@ -10,6 +10,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.ASTParser
+import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.Result
 import java.io.File
@@ -59,7 +60,7 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
         return parserInstantiator.apply(input)
     }
 
-    protected abstract fun processResult(input: File, relativePath: String, result: Result<R>)
+    protected abstract fun processResult(input: File, relativePath: String, result: ParsingResult<R>, parser: P)
     protected abstract fun processException(input: File, relativePath: String, e: Exception)
 
     private fun processSourceFile(input: File, relativePath: String) {
@@ -91,8 +92,7 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
                     }
                 }
             }
-            val result = Result(parsingResult.issues, parsingResult.root)
-            processResult(input, relativePath, result)
+            processResult(input, relativePath, parsingResult, parser)
         } catch (e: Exception) {
             processException(input, relativePath, e)
         }
@@ -116,5 +116,19 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
                 // ignore silently
             }
         }
+    }
+}
+
+fun File.changeExtension(newExtension: String): File {
+    var name = this.name
+    val i = name.lastIndexOf('.');
+    if (i == -1) {
+        val prefix = this.path.substring(0, this.path.length - this.name.length)
+        name = "$name.$newExtension"
+        return File("${prefix}${name}")
+    } else {
+        val prefix = this.path.substring(0, this.path.length - this.name.length)
+        name = name.substring(0, i + 1) + newExtension
+        return File("${prefix}${name}")
     }
 }

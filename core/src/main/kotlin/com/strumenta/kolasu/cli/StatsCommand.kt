@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.parameters.options.*
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.walkDescendants
 import com.strumenta.kolasu.parsing.ASTParser
+import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.Result
 import java.io.File
@@ -12,7 +13,7 @@ interface StatsCollector {
     fun registerException(input: File, e: Exception) {
     }
 
-    fun registerResult(input: File, result: Result<out Node>)
+    fun registerResult(input: File, result: ParsingResult<out Node>)
 
     fun print(println: (s: String) -> Unit = ::println)
 }
@@ -32,7 +33,7 @@ class GlobalStatsCollector : StatsCollector {
         filesWithExceptions += 1
     }
 
-    override fun registerResult(input: File, result: Result<out Node>) {
+    override fun registerResult(input: File, result: ParsingResult<out Node>) {
         filesProcessed += 1
         val errors = result.issues.filter { it.severity == IssueSeverity.ERROR }.count()
         if (errors > 0) {
@@ -62,7 +63,7 @@ class NodeStatsCollector(val simpleNames: Boolean) : StatsCollector {
     override fun registerException(input: File, e: Exception) {
     }
 
-    override fun registerResult(input: File, result: Result<out Node>) {
+    override fun registerResult(input: File, result: ParsingResult<out Node>) {
         result.root?.apply {
             nodePrevalence[this.nodeType] = nodePrevalence.getOrDefault(this.nodeType, 0) + 1
             walkDescendants().forEach {
@@ -101,7 +102,7 @@ class ErrorStatsCollector : StatsCollector {
         println("")
     }
 
-    override fun registerResult(input: File, result: Result<out Node>) {
+    override fun registerResult(input: File, result: ParsingResult<out Node>) {
         val errors = result.issues.filter { it.severity == IssueSeverity.ERROR }
         errors.forEach { error ->
             val message = canonizeMessage(error.message)
@@ -164,7 +165,7 @@ class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstant
         }
     }
 
-    override fun processResult(input: File, relativePath: String, result: Result<R>) {
+    override fun processResult(input: File, relativePath: String, result: ParsingResult<R>, parser: P) {
         collectors.forEach {
             it.registerResult(input, result)
         }

@@ -9,6 +9,7 @@ import com.github.ajalt.clikt.parameters.types.file
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.debugPrint
 import com.strumenta.kolasu.parsing.ASTParser
+import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.serialization.JsonGenerator
 import com.strumenta.kolasu.serialization.XMLGenerator
 import com.strumenta.kolasu.validation.Result
@@ -50,7 +51,7 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
         }
     }
 
-    override fun processResult(input: File, relativePath: String, result: Result<R>) {
+    override fun processResult(input: File, relativePath: String, result: ParsingResult<R>, parser: P) {
         if (!print) {
             val targetFile = File(this.outputDirectory.absolutePath + File.separator + relativePath)
             val targetFileParent = targetFile.parentFile
@@ -82,13 +83,13 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
                             trailingNewline = true
                         )
                     }
-                    echo(XMLGenerator().generateString(result), trailingNewline = true)
+                    echo(XMLGenerator().generateString(result.toResult()), trailingNewline = true)
                 } else {
                     val outputFile = File(outputDirectory, "${input.name}.xml")
                     if (verbose) {
                         echo(" -> generating ${outputFile.absolutePath}", trailingNewline = true)
                     }
-                    XMLGenerator().generateFile(result, outputFile)
+                    XMLGenerator().generateFile(result.toResult(), outputFile)
                 }
             }
             "debug-format" -> {
