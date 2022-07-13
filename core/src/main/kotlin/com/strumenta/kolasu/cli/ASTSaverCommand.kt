@@ -23,7 +23,7 @@ import java.io.StringWriter
 class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstantiator<P>) :
     ASTProcessingCommand<R, P>(
         parserInstantiator,
-        help = "Parse files and save the ASTs in the chosen format",
+        help = "Parse files and save the ASTs in the chosen format.",
         name = "ast"
     ) {
 

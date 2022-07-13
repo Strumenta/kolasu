@@ -117,7 +117,7 @@ class ErrorStatsCollector : StatsCollector {
 class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstantiator<P>) :
     ASTProcessingCommand<R, P>(
         parserInstantiator,
-        help = "Produced various stats on parsing",
+        help = "Produced various stats on parsing.",
         name = "stats"
     ) {
 
