@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.validation.Result
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility.INTERNAL
@@ -9,7 +10,6 @@ import kotlin.reflect.KVisibility.PUBLIC
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaType
-import com.strumenta.kolasu.validation.Result
 
 private const val indentBlock = "  "
 
@@ -58,19 +58,22 @@ fun Any?.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
     return sb.toString()
 }
 
-fun <N: Node> Result<N>.debugPrint(indent: String = "", configuration: DebugPrintConfiguration = DebugPrintConfiguration()): String {
+fun <N : Node> Result<N>.debugPrint(
+    indent: String = "",
+    configuration: DebugPrintConfiguration = DebugPrintConfiguration()
+): String {
     val sb = StringBuilder()
     sb.append("${indent}Result {\n")
     sb.append("${indent}${indentBlock}issues= [\n")
-    sb.append("${indent}${indentBlock}]\n")
+    sb.append("${indent}$indentBlock]\n")
     if (this.root == null) {
         sb.append("${indent}${indentBlock}root = null\n")
     } else {
         sb.append("${indent}${indentBlock}root = [\n")
         sb.append(this.root!!.debugPrint(indent + indentBlock + indentBlock, configuration = configuration))
-        sb.append("${indent}${indentBlock}]\n")
+        sb.append("${indent}$indentBlock]\n")
     }
-    sb.append("${indent}}\n")
+    sb.append("$indent}\n")
     return sb.toString()
 }
 

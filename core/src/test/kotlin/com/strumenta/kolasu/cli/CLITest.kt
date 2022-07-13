@@ -32,7 +32,6 @@ class MyDummyParser : ASTParser<MyCompilationUnit> {
     override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<MyCompilationUnit> {
         return expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
     }
-
 }
 
 class CapturingCliktConsole : CliktConsole {
@@ -53,13 +52,12 @@ class CapturingCliktConsole : CliktConsole {
     override fun promptForLine(prompt: String, hideInput: Boolean): String? {
         TODO("Not yet implemented")
     }
-
 }
 
 class CLITest {
     @Test
     fun runSimpleASTSaverWithoutSpecifyingCommands() {
-        val parserInstantiator =  { file: File ->
+        val parserInstantiator = { file: File ->
             MyDummyParser()
         }
         val console = CapturingCliktConsole()
@@ -71,7 +69,7 @@ class CLITest {
 
     @Test
     fun runSimpleASTSaverAskHelp() {
-        val parserInstantiator =  { file: File ->
+        val parserInstantiator = { file: File ->
             MyDummyParser()
         }
         val console = CapturingCliktConsole()
@@ -88,22 +86,31 @@ class CLITest {
         myDir.toFile().deleteOnExit()
         myFile.toFile().deleteOnExit()
 
-        val parserInstantiator =  { file: File ->
+        val parserInstantiator = { file: File ->
             MyDummyParser().apply {
-                expectedResults[myFile.toFile()] = ParsingResult(emptyList(), MyCompilationUnit(mutableListOf(
-                    MyEntityDecl("Entity1", mutableListOf()),
-                    MyEntityDecl("Entity2", mutableListOf(
-                        MyFieldDecl("f1"),
-                        MyFieldDecl("f2"),
-                        MyFieldDecl("f3"),
-                    ))
-                )))
+                expectedResults[myFile.toFile()] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("Entity1", mutableListOf()),
+                            MyEntityDecl(
+                                "Entity2",
+                                mutableListOf(
+                                    MyFieldDecl("f1"),
+                                    MyFieldDecl("f2"),
+                                    MyFieldDecl("f3"),
+                                )
+                            )
+                        )
+                    )
+                )
             }
         }
         val console = CapturingCliktConsole()
         val cliTool = CLITool(parserInstantiator, console)
         cliTool.parse(arrayOf("ast", myFile.toString(), "--print"))
-        assertEquals("{\n" +
+        assertEquals(
+            "{\n" +
                 "  \"issues\": [],\n" +
                 "  \"root\": {\n" +
                 "    \"#type\": \"com.strumenta.kolasu.cli.MyCompilationUnit\",\n" +
@@ -133,7 +140,9 @@ class CLITest {
                 "      }\n" +
                 "    ]\n" +
                 "  }\n" +
-                "}\n", console.stdOutput)
+                "}\n",
+            console.stdOutput
+        )
         assertEquals("", console.errOutput)
     }
 
@@ -144,22 +153,31 @@ class CLITest {
         myDir.toFile().deleteOnExit()
         myFile.toFile().deleteOnExit()
 
-        val parserInstantiator =  { file: File ->
+        val parserInstantiator = { file: File ->
             MyDummyParser().apply {
-                expectedResults[myFile.toFile()] = ParsingResult(emptyList(), MyCompilationUnit(mutableListOf(
-                    MyEntityDecl("Entity1", mutableListOf()),
-                    MyEntityDecl("Entity2", mutableListOf(
-                        MyFieldDecl("f1"),
-                        MyFieldDecl("f2"),
-                        MyFieldDecl("f3"),
-                    ))
-                )))
+                expectedResults[myFile.toFile()] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("Entity1", mutableListOf()),
+                            MyEntityDecl(
+                                "Entity2",
+                                mutableListOf(
+                                    MyFieldDecl("f1"),
+                                    MyFieldDecl("f2"),
+                                    MyFieldDecl("f3"),
+                                )
+                            )
+                        )
+                    )
+                )
             }
         }
         val console = CapturingCliktConsole()
         val cliTool = CLITool(parserInstantiator, console)
         cliTool.parse(arrayOf("ast", myFile.toString(), "--print", "--format", "json"))
-        assertEquals("{\n" +
+        assertEquals(
+            "{\n" +
                 "  \"issues\": [],\n" +
                 "  \"root\": {\n" +
                 "    \"#type\": \"com.strumenta.kolasu.cli.MyCompilationUnit\",\n" +
@@ -189,7 +207,9 @@ class CLITest {
                 "      }\n" +
                 "    ]\n" +
                 "  }\n" +
-                "}\n", console.stdOutput)
+                "}\n",
+            console.stdOutput
+        )
         assertEquals("", console.errOutput)
     }
 
@@ -200,22 +220,31 @@ class CLITest {
         myDir.toFile().deleteOnExit()
         myFile.toFile().deleteOnExit()
 
-        val parserInstantiator =  { file: File ->
+        val parserInstantiator = { file: File ->
             MyDummyParser().apply {
-                expectedResults[myFile.toFile()] = ParsingResult(emptyList(), MyCompilationUnit(mutableListOf(
-                    MyEntityDecl("Entity1", mutableListOf()),
-                    MyEntityDecl("Entity2", mutableListOf(
-                        MyFieldDecl("f1"),
-                        MyFieldDecl("f2"),
-                        MyFieldDecl("f3"),
-                    ))
-                )))
+                expectedResults[myFile.toFile()] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("Entity1", mutableListOf()),
+                            MyEntityDecl(
+                                "Entity2",
+                                mutableListOf(
+                                    MyFieldDecl("f1"),
+                                    MyFieldDecl("f2"),
+                                    MyFieldDecl("f3"),
+                                )
+                            )
+                        )
+                    )
+                )
             }
         }
         val console = CapturingCliktConsole()
         val cliTool = CLITool(parserInstantiator, console)
         cliTool.parse(arrayOf("ast", myFile.toString(), "--print", "--format", "xml"))
-        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+        assertEquals(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
                 "<result>\n" +
                 "    <issues/>\n" +
                 "    <root type=\"MyCompilationUnit\">\n" +
@@ -226,7 +255,9 @@ class CLITest {
                 "            <fields name=\"f3\" type=\"MyFieldDecl\"/>\n" +
                 "        </decls>\n" +
                 "    </root>\n" +
-                "</result>", console.stdOutput.trim())
+                "</result>",
+            console.stdOutput.trim()
+        )
         assertEquals("", console.errOutput)
     }
 
@@ -237,22 +268,31 @@ class CLITest {
         myDir.toFile().deleteOnExit()
         myFile.toFile().deleteOnExit()
 
-        val parserInstantiator =  { file: File ->
+        val parserInstantiator = { file: File ->
             MyDummyParser().apply {
-                expectedResults[myFile.toFile()] = ParsingResult(emptyList(), MyCompilationUnit(mutableListOf(
-                    MyEntityDecl("Entity1", mutableListOf()),
-                    MyEntityDecl("Entity2", mutableListOf(
-                        MyFieldDecl("f1"),
-                        MyFieldDecl("f2"),
-                        MyFieldDecl("f3"),
-                    ))
-                )))
+                expectedResults[myFile.toFile()] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("Entity1", mutableListOf()),
+                            MyEntityDecl(
+                                "Entity2",
+                                mutableListOf(
+                                    MyFieldDecl("f1"),
+                                    MyFieldDecl("f2"),
+                                    MyFieldDecl("f3"),
+                                )
+                            )
+                        )
+                    )
+                )
             }
         }
         val console = CapturingCliktConsole()
         val cliTool = CLITool(parserInstantiator, console)
         cliTool.parse(arrayOf("ast", myFile.toString(), "--print", "--format", "debug-format"))
-        assertEquals("Result {\n" +
+        assertEquals(
+            "Result {\n" +
                 "  issues= [\n" +
                 "  ]\n" +
                 "  root = [\n" +
@@ -279,7 +319,9 @@ class CLITest {
                 "      ]\n" +
                 "    } // MyCompilationUnit\n" +
                 "  ]\n" +
-                "}", console.stdOutput.trim())
+                "}",
+            console.stdOutput.trim()
+        )
         assertEquals("", console.errOutput)
     }
 }

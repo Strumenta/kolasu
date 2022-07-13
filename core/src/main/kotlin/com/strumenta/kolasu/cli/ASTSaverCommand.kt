@@ -18,10 +18,12 @@ import java.io.File
  * This command prints the AST on the console or on file.
  * The formats are the debugging format, JSON, XML, or EMF-JSON.
  */
-class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstantiator<P>)
-    : ASTProcessingCommand<R, P>(parserInstantiator,
+class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstantiator<P>) :
+    ASTProcessingCommand<R, P>(
+        parserInstantiator,
         help = "Parse files and save the ASTs in the chosen format",
-        name = "ast") {
+        name = "ast"
+    ) {
 
     private val outputFormat by option("--format", "-f")
         .help("Pick the format to serialize ASTs: json (default), xml, json-emf, or debug-format")
@@ -52,7 +54,10 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
             "json" -> {
                 if (print) {
                     if (verbose) {
-                        echo(" -> generating AST for $relativePath (from ${input.absolutePath})", trailingNewline = true)
+                        echo(
+                            " -> generating AST for $relativePath (from ${input.absolutePath})",
+                            trailingNewline = true
+                        )
                     }
                     echo(JsonGenerator().generateString(result), trailingNewline = true)
                 } else {
@@ -66,7 +71,10 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
             "xml" -> {
                 if (print) {
                     if (verbose) {
-                        echo(" -> generating AST for $relativePath (from ${input.absolutePath})", trailingNewline = true)
+                        echo(
+                            " -> generating AST for $relativePath (from ${input.absolutePath})",
+                            trailingNewline = true
+                        )
                     }
                     echo(XMLGenerator().generateString(result), trailingNewline = true)
                 } else {
@@ -80,7 +88,10 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
             "debug-format" -> {
                 if (print) {
                     if (verbose) {
-                        echo(" -> generating AST for $relativePath (from ${input.absolutePath})", trailingNewline = true)
+                        echo(
+                            " -> generating AST for $relativePath (from ${input.absolutePath})",
+                            trailingNewline = true
+                        )
                     }
                     echo(result.debugPrint(), trailingNewline = true)
                 } else {

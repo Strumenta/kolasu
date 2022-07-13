@@ -73,10 +73,12 @@ class ErrorStatsCollector {
     }
 }
 
-class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstantiator<P>)
-    : ASTProcessingCommand<R, P>(parserInstantiator,
+class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstantiator<P>) :
+    ASTProcessingCommand<R, P>(
+        parserInstantiator,
         help = "Produced various stats on parsing",
-        name = "stats") {
+        name = "stats"
+    ) {
 
     private val printStats by option("--stats", "-s")
         .help("Print statistics on the number of files parsed correctly")
