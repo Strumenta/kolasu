@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 class XmlGenerationTest {
 
     @Test
-    fun generateXMBasic() {
+    fun generateXMLBasic() {
         val myRoot = MyRoot(
             mainSection = Section(
                 "Section1",
