@@ -132,7 +132,7 @@ class XmlGenerationTest {
         assertEquals(
             """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <result>
-    <errors>
+    <issues>
         <Issue message="lexical problem" severity="ERROR" type="LEXICAL"/>
         <Issue message="semantic problem" severity="ERROR" type="SEMANTIC">
             <position description="Position(start=Line 10, Column 1, end=Line 12, Column 3)">
@@ -152,7 +152,7 @@ class XmlGenerationTest {
                 <end column="3" line="12"/>
             </position>
         </Issue>
-    </errors>
+    </issues>
     <root/>
 </result>""",
             serialized.trim()
