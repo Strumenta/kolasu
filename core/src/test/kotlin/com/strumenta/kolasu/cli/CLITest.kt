@@ -368,4 +368,118 @@ class CLITest {
   total number of errors              : 0""", console.stdOutput.trim())
         assertEquals("", console.errOutput)
     }
+
+    @Test
+    fun runStatsOnSimpleFileNoStats() {
+        val myDir = createTempDirectory()
+        val myFile = createTempFile(myDir, "myfile.mylang")
+        myDir.toFile().deleteOnExit()
+        myFile.toFile().deleteOnExit()
+
+        val parserInstantiator = { file: File ->
+            MyDummyParser().apply {
+                expectedResults[myFile.toFile()] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("Entity1", mutableListOf()),
+                            MyEntityDecl(
+                                "Entity2",
+                                mutableListOf(
+                                    MyFieldDecl("f1"),
+                                    MyFieldDecl("f2"),
+                                    MyFieldDecl("f3"),
+                                )
+                            )
+                        )
+                    )
+                )
+            }
+        }
+        val console = CapturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console)
+        cliTool.parse(arrayOf("stats", "--no-stats", myFile.toString()))
+        assertEquals("""""", console.stdOutput.trim())
+        assertEquals("", console.errOutput)
+    }
+
+    @Test
+    fun runStatsOnSimpleFileNodeStats() {
+        val myDir = createTempDirectory()
+        val myFile = createTempFile(myDir, "myfile.mylang")
+        myDir.toFile().deleteOnExit()
+        myFile.toFile().deleteOnExit()
+
+        val parserInstantiator = { file: File ->
+            MyDummyParser().apply {
+                expectedResults[myFile.toFile()] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("Entity1", mutableListOf()),
+                            MyEntityDecl(
+                                "Entity2",
+                                mutableListOf(
+                                    MyFieldDecl("f1"),
+                                    MyFieldDecl("f2"),
+                                    MyFieldDecl("f3"),
+                                )
+                            )
+                        )
+                    )
+                )
+            }
+        }
+        val console = CapturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console)
+        cliTool.parse(arrayOf("stats", "--no-stats", "--node-stats", myFile.toString()))
+        assertEquals("""== Node Stats ==
+
+  com.strumenta.kolasu.cli.MyCompilationUnit        : 1
+  com.strumenta.kolasu.cli.MyEntityDecl             : 2
+  com.strumenta.kolasu.cli.MyFieldDecl              : 3
+
+  total number of nodes                             : 6""", console.stdOutput.trim())
+        assertEquals("", console.errOutput)
+    }
+
+    @Test
+    fun runStatsOnSimpleFileNodeStatsSimpleNames() {
+        val myDir = createTempDirectory()
+        val myFile = createTempFile(myDir, "myfile.mylang")
+        myDir.toFile().deleteOnExit()
+        myFile.toFile().deleteOnExit()
+
+        val parserInstantiator = { file: File ->
+            MyDummyParser().apply {
+                expectedResults[myFile.toFile()] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("Entity1", mutableListOf()),
+                            MyEntityDecl(
+                                "Entity2",
+                                mutableListOf(
+                                    MyFieldDecl("f1"),
+                                    MyFieldDecl("f2"),
+                                    MyFieldDecl("f3"),
+                                )
+                            )
+                        )
+                    )
+                )
+            }
+        }
+        val console = CapturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console)
+        cliTool.parse(arrayOf("stats", "--no-stats", "--node-stats", "-sn", myFile.toString()))
+        assertEquals("""== Node Stats ==
+
+  MyCompilationUnit        : 1
+  MyEntityDecl             : 2
+  MyFieldDecl              : 3
+
+  total number of nodes    : 6""", console.stdOutput.trim())
+        assertEquals("", console.errOutput)
+    }
 }

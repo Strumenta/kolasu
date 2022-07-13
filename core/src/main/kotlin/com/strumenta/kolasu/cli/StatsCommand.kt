@@ -2,6 +2,7 @@ package com.strumenta.kolasu.cli
 
 import com.github.ajalt.clikt.parameters.options.*
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.walkDescendants
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.Result
@@ -46,6 +47,38 @@ class StatsCollector {
     }
 }
 
+class NodeStatsCollector(val simpleNames: Boolean) {
+    private val nodePrevalence = HashMap<String, Int>()
+
+    fun registerException(input: File, e: Exception) {
+
+    }
+
+    fun registerResult(input: File, result: Result<out Node>) {
+        result.root?.apply {
+            nodePrevalence[this.nodeType] = nodePrevalence.getOrDefault(this.nodeType, 0) + 1
+            walkDescendants().forEach {
+                nodePrevalence[it.nodeType] = nodePrevalence.getOrDefault(it.nodeType, 0) + 1
+            }
+        }
+    }
+
+    fun print(println: (s: String)->Unit = ::println) {
+        val length = if (simpleNames) 25 else 50
+        println("== Node Stats ==")
+        println("")
+        nodePrevalence.keys.sorted().forEach { nodeType ->
+            var label = nodeType
+            if (simpleNames) {
+                label = label.split(".").last()
+            }
+            println("  ${label.padEnd(length)}: ${nodePrevalence[nodeType]}")
+        }
+        println("")
+        println("  ${"total number of nodes".padEnd(length)}: ${nodePrevalence.values.sum()}")
+    }
+}
+
 class ErrorStatsCollector {
     private val errorsPrevalence = HashMap<String, Int>()
 
@@ -82,7 +115,7 @@ class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstant
 
     private val printStats by option("--stats", "-s")
         .help("Print statistics on the number of files parsed correctly")
-        .flag(default = true)
+        .flag("--no-stats", "-ns", default = true)
     private val printErrorStats by option("--error-stats", "-e")
         .help("Print statistics on the prevalence of the different error messages")
         .flag(default = false)
@@ -93,9 +126,13 @@ class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstant
         .help("Remove the node types indicated")
         .split(",")
         .default(emptyList())
+    private val simpleNames by option("--simple-names", "-sn")
+        .help("Print simple names instead of qualified names")
+        .flag(default = false)
 
     private var statsCollector: StatsCollector? = null
     private var errorStatsCollector: ErrorStatsCollector? = null
+    private var nodeStatsCollector: NodeStatsCollector? = null
 
     override fun initializeRun() {
         if (printStats) {
@@ -104,19 +141,25 @@ class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstant
         if (printErrorStats) {
             errorStatsCollector = ErrorStatsCollector()
         }
+        if (nodeStats) {
+            nodeStatsCollector = NodeStatsCollector(simpleNames)
+        }
     }
 
     override fun finalizeRun() {
         statsCollector?.print {text: String -> echo(text, trailingNewline = true)}
         errorStatsCollector?.print {text: String -> echo(text, trailingNewline = true)}
+        nodeStatsCollector?.print {text: String -> echo(text, trailingNewline = true)}
     }
 
     override fun processException(input: File, relativePath: String, e: Exception) {
         statsCollector?.registerException(input, e)
+        nodeStatsCollector?.registerException(input, e)
     }
 
     override fun processResult(input: File, relativePath: String, result: Result<R>) {
         statsCollector?.registerResult(input, result)
         errorStatsCollector?.registerResult(result)
+        nodeStatsCollector?.registerResult(input, result)
     }
 }
