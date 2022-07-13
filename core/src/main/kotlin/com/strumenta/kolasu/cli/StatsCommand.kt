@@ -1,8 +1,6 @@
 package com.strumenta.kolasu.cli
 
-import com.github.ajalt.clikt.parameters.options.flag
-import com.github.ajalt.clikt.parameters.options.help
-import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.*
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.validation.IssueSeverity
@@ -75,7 +73,10 @@ class ErrorStatsCollector {
     }
 }
 
-abstract class StatsCommand<R : Node, P : ASTParser<R>> : ASTProcessingCommand<R, P>() {
+class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstantiator<P>)
+    : ASTProcessingCommand<R, P>(parserInstantiator,
+        help = "Produced various stats on parsing",
+        name = "stats") {
 
     private val printStats by option("--stats", "-s")
         .help("Print statistics on the number of files parsed correctly")
@@ -83,6 +84,13 @@ abstract class StatsCommand<R : Node, P : ASTParser<R>> : ASTProcessingCommand<R
     private val printErrorStats by option("--error-stats", "-e")
         .help("Print statistics on the prevalence of the different error messages")
         .flag(default = false)
+    private val nodeStats by option("--node-stats", "-n")
+        .help("Print statistics on the prevalence of the different kinds of nodes")
+        .flag(default = false)
+    private val nodeTypesToExclude by option("--exclude", "-x")
+        .help("Remove the node types indicated")
+        .split(",")
+        .default(emptyList())
 
     private var statsCollector: StatsCollector? = null
     private var errorStatsCollector: ErrorStatsCollector? = null

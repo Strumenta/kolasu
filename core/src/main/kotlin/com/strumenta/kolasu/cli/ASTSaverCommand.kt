@@ -18,7 +18,10 @@ import java.io.File
  * This command prints the AST on the console or on file.
  * The formats are the debugging format, JSON, XML, or EMF-JSON.
  */
-abstract class ASTSaverCommand<R : Node, P : ASTParser<R>> : ASTProcessingCommand<R, P>() {
+class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstantiator<P>)
+    : ASTProcessingCommand<R, P>(parserInstantiator,
+        help = "Parse files and save the ASTs in the chosen format",
+        name = "ast") {
 
     private val outputFormat by option("--format", "-f")
         .help("Pick the format to serialize ASTs: json (default), xml, json-emf, or debug-format")
@@ -32,10 +35,10 @@ abstract class ASTSaverCommand<R : Node, P : ASTParser<R>> : ASTProcessingComman
         .flag(default = false)
 
     override fun processException(input: File, relativePath: String, e: Exception) {
-        System.err.println("A problem prevented from processing ${input.absolutePath}")
+        echo("A problem prevented from processing ${input.absolutePath}", err = true, trailingNewline = true)
         e.printStackTrace()
         if (verbose) {
-            println(" FAILURE ${e.message} (${e.javaClass.canonicalName})")
+            echo(" FAILURE ${e.message} (${e.javaClass.canonicalName})", trailingNewline = true)
         }
     }
 
@@ -49,13 +52,13 @@ abstract class ASTSaverCommand<R : Node, P : ASTParser<R>> : ASTProcessingComman
             "json" -> {
                 if (print) {
                     if (verbose) {
-                        println(" -> generating AST for $relativePath (from ${input.absolutePath})")
+                        echo(" -> generating AST for $relativePath (from ${input.absolutePath})", trailingNewline = true)
                     }
-                    println(JsonGenerator().generateString(result))
+                    echo(JsonGenerator().generateString(result), trailingNewline = true)
                 } else {
                     val outputFile = File(outputDirectory, "${input.name}.json")
                     if (verbose) {
-                        println(" -> generating ${outputFile.absolutePath}")
+                        echo(" -> generating ${outputFile.absolutePath}", trailingNewline = true)
                     }
                     JsonGenerator().generateFile(result, outputFile)
                 }
@@ -63,13 +66,13 @@ abstract class ASTSaverCommand<R : Node, P : ASTParser<R>> : ASTProcessingComman
             "xml" -> {
                 if (print) {
                     if (verbose) {
-                        println(" -> generating AST for $relativePath (from ${input.absolutePath})")
+                        echo(" -> generating AST for $relativePath (from ${input.absolutePath})", trailingNewline = true)
                     }
-                    println(XMLGenerator().generateString(result))
+                    echo(XMLGenerator().generateString(result), trailingNewline = true)
                 } else {
                     val outputFile = File(outputDirectory, "${input.name}.xml")
                     if (verbose) {
-                        println(" -> generating ${outputFile.absolutePath}")
+                        echo(" -> generating ${outputFile.absolutePath}", trailingNewline = true)
                     }
                     XMLGenerator().generateFile(result, outputFile)
                 }
@@ -77,13 +80,13 @@ abstract class ASTSaverCommand<R : Node, P : ASTParser<R>> : ASTProcessingComman
             "debug-format" -> {
                 if (print) {
                     if (verbose) {
-                        println(" -> generating AST for $relativePath (from ${input.absolutePath})")
+                        echo(" -> generating AST for $relativePath (from ${input.absolutePath})", trailingNewline = true)
                     }
-                    println(result.debugPrint())
+                    echo(result.debugPrint(), trailingNewline = true)
                 } else {
                     val outputFile = File(outputDirectory, "${input.name}.df")
                     if (verbose) {
-                        println(" -> generating ${outputFile.absolutePath}")
+                        echo(" -> generating ${outputFile.absolutePath}", trailingNewline = true)
                     }
                     outputFile.writeText(result.debugPrint())
                 }

@@ -15,8 +15,14 @@ import com.strumenta.kolasu.validation.Result
 import java.io.File
 import java.nio.charset.Charset
 import kotlin.system.exitProcess
+import java.util.function.Function
 
-abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>> : CliktCommand() {
+typealias ParserInstantiator<P> = Function<File, P?>
+
+abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(val parserInstantiator: ParserInstantiator<P>,
+                                                                help: String = "",
+                                                                name: String? = null,)
+    : CliktCommand(help = help, name = name) {
     protected val inputs by argument().file(mustExist = true).multiple()
 
     protected val charset by option("--charset", "-c")
@@ -46,7 +52,9 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>> : CliktCommand()
     /**
      * If null is returned it means we cannot parse this file
      */
-    protected abstract fun instantiateParser(input: File): P?
+    private fun instantiateParser(input: File): P? {
+        return parserInstantiator.apply(input)
+    }
 
     protected abstract fun processResult(input: File, relativePath: String, result: Result<R>)
     protected abstract fun processException(input: File, relativePath: String, e: Exception)
