@@ -107,7 +107,8 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
             processSourceFile(input, relativePath)
         } else {
             if (explicit) {
-                println("The provided input is neither a file or a directory, we will ignore it: ${input.absolutePath}")
+                echo("The provided input is neither a file or a directory, we will ignore it: " +
+                        "${input.absolutePath}", trailingNewline = true)
             } else {
                 // ignore silently
             }

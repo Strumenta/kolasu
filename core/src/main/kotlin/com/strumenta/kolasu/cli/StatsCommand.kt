@@ -8,7 +8,17 @@ import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.Result
 import java.io.File
 
-class StatsCollector {
+interface StatsCollector {
+    fun registerException(input: File, e: Exception) {
+
+    }
+
+    fun registerResult(input: File, result: Result<out Node>)
+
+    fun print(println: (s: String)->Unit = ::println)
+}
+
+class GlobalStatsCollector : StatsCollector {
     private var filesProcessed: Int = 0
     private var filesWithExceptions: Int = 0
     private val filesProcessedSuccessfully: Int
@@ -18,12 +28,12 @@ class StatsCollector {
         get() = filesProcessedSuccessfully - filesWithErrors
     private var totalErrors: Int = 0
 
-    fun registerException(input: File, e: Exception) {
+    override fun registerException(input: File, e: Exception) {
         filesProcessed += 1
         filesWithExceptions += 1
     }
 
-    fun registerResult(input: File, result: Result<out Node>) {
+    override fun registerResult(input: File, result: Result<out Node>) {
         filesProcessed += 1
         val errors = result.issues.filter { it.severity == IssueSeverity.ERROR }.count()
         if (errors > 0) {
@@ -32,7 +42,7 @@ class StatsCollector {
         }
     }
 
-    fun print(println: (s: String)->Unit = ::println) {
+    override fun print(println: (s: String)->Unit) {
         println("== Stats ==")
         println("")
         println(" [Did processing complete?]")
@@ -47,14 +57,14 @@ class StatsCollector {
     }
 }
 
-class NodeStatsCollector(val simpleNames: Boolean) {
+class NodeStatsCollector(val simpleNames: Boolean) : StatsCollector {
     private val nodePrevalence = HashMap<String, Int>()
 
-    fun registerException(input: File, e: Exception) {
+    override fun registerException(input: File, e: Exception) {
 
     }
 
-    fun registerResult(input: File, result: Result<out Node>) {
+    override fun registerResult(input: File, result: Result<out Node>) {
         result.root?.apply {
             nodePrevalence[this.nodeType] = nodePrevalence.getOrDefault(this.nodeType, 0) + 1
             walkDescendants().forEach {
@@ -63,7 +73,7 @@ class NodeStatsCollector(val simpleNames: Boolean) {
         }
     }
 
-    fun print(println: (s: String)->Unit = ::println) {
+    override fun print(println: (s: String)->Unit) {
         val length = if (simpleNames) 25 else 50
         println("== Node Stats ==")
         println("")
@@ -79,10 +89,10 @@ class NodeStatsCollector(val simpleNames: Boolean) {
     }
 }
 
-class ErrorStatsCollector {
+class ErrorStatsCollector : StatsCollector {
     private val errorsPrevalence = HashMap<String, Int>()
 
-    fun print(println: (s: String)->Unit = ::println) {
+    override fun print(println: (s: String)->Unit) {
         if (errorsPrevalence.isEmpty()) {
             return
         }
@@ -93,7 +103,7 @@ class ErrorStatsCollector {
         println("")
     }
 
-    fun registerResult(result: Result<out Node>) {
+    override fun registerResult(input: File, result: Result<out Node>) {
         val errors = result.issues.filter { it.severity == IssueSeverity.ERROR }
         errors.forEach { error ->
             val message = canonizeMessage(error.message)
@@ -130,36 +140,35 @@ class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstant
         .help("Print simple names instead of qualified names")
         .flag(default = false)
 
-    private var statsCollector: StatsCollector? = null
-    private var errorStatsCollector: ErrorStatsCollector? = null
-    private var nodeStatsCollector: NodeStatsCollector? = null
+    private val collectors = mutableListOf<StatsCollector>()
 
     override fun initializeRun() {
         if (printStats) {
-            statsCollector = StatsCollector()
+            collectors.add(GlobalStatsCollector())
         }
         if (printErrorStats) {
-            errorStatsCollector = ErrorStatsCollector()
+            collectors.add(ErrorStatsCollector())
         }
         if (nodeStats) {
-            nodeStatsCollector = NodeStatsCollector(simpleNames)
+            collectors.add(NodeStatsCollector(simpleNames))
         }
     }
 
     override fun finalizeRun() {
-        statsCollector?.print {text: String -> echo(text, trailingNewline = true)}
-        errorStatsCollector?.print {text: String -> echo(text, trailingNewline = true)}
-        nodeStatsCollector?.print {text: String -> echo(text, trailingNewline = true)}
+        collectors.forEach {
+            it.print {text: String -> echo(text, trailingNewline = true)}
+        }
     }
 
     override fun processException(input: File, relativePath: String, e: Exception) {
-        statsCollector?.registerException(input, e)
-        nodeStatsCollector?.registerException(input, e)
+        collectors.forEach {
+            it.registerException(input, e)
+        }
     }
 
     override fun processResult(input: File, relativePath: String, result: Result<R>) {
-        statsCollector?.registerResult(input, result)
-        errorStatsCollector?.registerResult(result)
-        nodeStatsCollector?.registerResult(input, result)
+        collectors.forEach {
+            it.registerResult(input, result)
+        }
     }
 }
