@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KProperty1
@@ -58,7 +59,7 @@ fun Any?.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
     return sb.toString()
 }
 
-fun <N : Node> Result<N>.debugPrint(
+fun <N : Node> ParsingResult<N>.debugPrint(
     indent: String = "",
     configuration: DebugPrintConfiguration = DebugPrintConfiguration()
 ): String {
