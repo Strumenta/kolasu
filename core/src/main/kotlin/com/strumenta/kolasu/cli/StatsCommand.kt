@@ -199,7 +199,7 @@ class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstant
     private val simpleNames by option("--simple-names", "-sn")
         .help("Print simple names instead of qualified names")
         .flag(default = false)
-    private val csv by option("--csv", "-c")
+    private val csv by option("--csv")
         .help("Save stats in CSV files instead of printing them")
         .flag(default = false)
 
