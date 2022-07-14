@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.cli
 
 import com.github.ajalt.clikt.parameters.options.*
+import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.walkDescendants
 import com.strumenta.kolasu.parsing.ASTParser
@@ -16,6 +17,12 @@ interface StatsCollector {
     fun registerResult(input: File, result: ParsingResult<out Node>)
 
     fun print(println: (s: String) -> Unit = ::println)
+
+    fun saveToCSV()
+
+    val description: String
+
+    val csvFile: File
 }
 
 class GlobalStatsCollector : StatsCollector {
@@ -55,6 +62,23 @@ class GlobalStatsCollector : StatsCollector {
         println("  processing completed without errors : $filesWithoutErrors")
         println("  total number of errors              : $totalErrors")
     }
+
+    override fun saveToCSV() {
+        csvWriter().open(csvFile.absolutePath) {
+            writeRow(listOf("Key", "Value"))
+            writeRow(listOf("filesProcessed", filesProcessed))
+            writeRow(listOf("filesWithExceptions", filesWithExceptions))
+            writeRow(listOf("filesProcessedSuccessfully", filesProcessedSuccessfully))
+            writeRow(listOf("filesWithErrors", filesWithErrors))
+            writeRow(listOf("filesWithoutErrors", filesWithoutErrors))
+            writeRow(listOf("totalErrors", totalErrors))
+        }
+    }
+
+    override val description: String
+        get() = "Global Stats"
+    override val csvFile: File
+        get() = File("global-stats.csv")
 }
 
 class NodeStatsCollector(val simpleNames: Boolean) : StatsCollector {
@@ -86,6 +110,25 @@ class NodeStatsCollector(val simpleNames: Boolean) : StatsCollector {
         println("")
         println("  ${"total number of nodes".padEnd(length)}: ${nodePrevalence.values.sum()}")
     }
+
+    override fun saveToCSV() {
+        csvWriter().open(csvFile.absolutePath) {
+            writeRow(listOf("Key", "Value"))
+            nodePrevalence.keys.sorted().forEach { nodeType ->
+                var label = nodeType
+                if (simpleNames) {
+                    label = label.split(".").last()
+                }
+                writeRow(listOf(label, nodePrevalence[nodeType]))
+            }
+            writeRow(listOf("total", nodePrevalence.values.sum()))
+        }
+    }
+
+    override val description: String
+        get() = "Node Stats"
+    override val csvFile: File
+        get() = File("node-stats.csv")
 }
 
 class ErrorStatsCollector : StatsCollector {
@@ -113,6 +156,25 @@ class ErrorStatsCollector : StatsCollector {
     private fun canonizeMessage(message: String): String {
         return message.replace("[0-9]", "*")
     }
+
+    override fun saveToCSV() {
+        println("# Errors prevalence")
+        errorsPrevalence.entries.sortedByDescending { it.value }.forEach { entry ->
+            println(" ${entry.key.padEnd(50)} : ${entry.value} occurrences")
+        }
+        println("")
+        csvWriter().open(csvFile.absolutePath) {
+            writeRow(listOf("Key", "Value"))
+            errorsPrevalence.entries.sortedByDescending { it.value }.forEach { entry ->
+                writeRow(listOf(entry.key, entry.value))
+            }
+        }
+    }
+
+    override val description: String
+        get() = "Error Stats"
+    override val csvFile: File
+        get() = File("error-stats.csv")
 }
 
 class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstantiator<P>) :
@@ -137,6 +199,9 @@ class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstant
         .default(emptyList())
     private val simpleNames by option("--simple-names", "-sn")
         .help("Print simple names instead of qualified names")
+        .flag(default = false)
+    private val csv by option("--csv", "-c")
+        .help("Save stats in CSV files instead of printing them")
         .flag(default = false)
 
     private val collectors = mutableListOf<StatsCollector>()
@@ -167,7 +232,12 @@ class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstant
 
     override fun processResult(input: File, relativePath: String, result: ParsingResult<R>, parser: P) {
         collectors.forEach {
-            it.registerResult(input, result)
+            if (csv) {
+                echo("Saving ${it.description} to ${it.csvFile}", trailingNewline = true)
+                it.saveToCSV()
+            } else {
+                it.registerResult(input, result)
+            }
         }
     }
 }
