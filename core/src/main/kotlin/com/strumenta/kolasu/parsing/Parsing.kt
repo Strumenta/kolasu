@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
+import com.strumenta.kolasu.validation.Result
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.misc.Interval
 import java.io.*
@@ -11,7 +12,6 @@ import java.nio.charset.Charset
 import java.util.*
 import kotlin.reflect.full.memberFunctions
 import kotlin.system.measureTimeMillis
-import com.strumenta.kolasu.validation.Result
 
 open class CodeProcessingResult<D>(
     val issues: List<Issue>,
@@ -119,7 +119,6 @@ class ParsingResult<RootNode : Node>(
     }
 
     fun toResult(): Result<RootNode> = Result(issues, root)
-
 }
 
 fun String.toStream(charset: Charset = Charsets.UTF_8) = ByteArrayInputStream(toByteArray(charset))

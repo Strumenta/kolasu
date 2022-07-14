@@ -49,12 +49,17 @@ fun EMFMetamodelSupport.saveMetamodel(
     return resource
 }
 
-fun ParsingResult<*>.saveModel(metamodel: Resource, target: URI, includeMetamodel: Boolean = true, options: Map<String, Boolean>? = null): Resource {
+fun ParsingResult<*>.saveModel(
+    metamodel: Resource,
+    target: URI,
+    includeMetamodel: Boolean = true,
+    options: Map<String, Boolean>? = null
+): Resource {
     val resource =
         metamodel.resourceSet.createResource(target)
             ?: throw IOException("Unsupported destination: $target")
     val simplifiedResult = Result(issues, root)
-    var eObject : EObject? = null
+    var eObject: EObject? = null
     if (includeMetamodel) {
         eObject = simplifiedResult.toEObject(metamodel)
         resource.contents.add(eObject)

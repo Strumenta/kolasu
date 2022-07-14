@@ -12,7 +12,6 @@ import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.serialization.JsonGenerator
 import com.strumenta.kolasu.serialization.XMLGenerator
-import com.strumenta.kolasu.validation.Result
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter

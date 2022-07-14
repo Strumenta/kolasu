@@ -15,7 +15,7 @@ class EMFCLITool<R : Node, P>(
     parserInstantiator: ParserInstantiator<P>,
     metamodelGenerator: Supplier<EPackage>,
     replacedConsole: CliktConsole? = null
-) : CliktCommand(invokeWithoutSubcommand = false)  where P : EMFMetamodelSupport, P: ASTParser<R> {
+) : CliktCommand(invokeWithoutSubcommand = false) where P : EMFMetamodelSupport, P : ASTParser<R> {
     init {
         subcommands(EMFModelCommand(parserInstantiator), EMFMetaModelCommand(metamodelGenerator))
         context { replacedConsole?.apply { console = replacedConsole } }

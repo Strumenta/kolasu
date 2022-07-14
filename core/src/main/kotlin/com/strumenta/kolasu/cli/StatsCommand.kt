@@ -7,7 +7,6 @@ import com.strumenta.kolasu.model.walkDescendants
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.IssueSeverity
-import com.strumenta.kolasu.validation.Result
 import java.io.File
 
 interface StatsCollector {
