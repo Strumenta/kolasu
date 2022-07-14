@@ -7,6 +7,7 @@ import com.strumenta.kolasu.validation.Result
 import org.antlr.v4.runtime.Parser
 import org.antlr.v4.runtime.ParserRuleContext
 import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
@@ -48,17 +49,20 @@ fun EMFMetamodelSupport.saveMetamodel(
     return resource
 }
 
-fun ParsingResult<*>.saveModel(metamodel: Resource, target: URI, options: Map<String, Boolean>? = null): Resource {
+fun ParsingResult<*>.saveModel(metamodel: Resource, target: URI, includeMetamodel: Boolean = true, options: Map<String, Boolean>? = null): Resource {
     val resource =
         metamodel.resourceSet.createResource(target)
             ?: throw IOException("Unsupported destination: $target")
     val simplifiedResult = Result(issues, root)
-    val eObject = simplifiedResult.toEObject(metamodel)
-    resource.contents.add(eObject)
+    var eObject : EObject? = null
+    if (includeMetamodel) {
+        eObject = simplifiedResult.toEObject(metamodel)
+        resource.contents.add(eObject)
+    }
     try {
         resource.save(options)
     } finally {
-        resource.contents.remove(eObject)
+        eObject?.apply { resource.contents.remove(eObject) }
     }
     return resource
 }
