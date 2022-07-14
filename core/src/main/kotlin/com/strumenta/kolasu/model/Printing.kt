@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.parsing.ParsingResult
-import com.strumenta.kolasu.validation.Result
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility.INTERNAL
