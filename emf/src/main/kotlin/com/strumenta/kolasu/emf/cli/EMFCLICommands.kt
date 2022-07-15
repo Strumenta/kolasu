@@ -9,23 +9,26 @@ import com.github.ajalt.clikt.parameters.types.file
 import com.strumenta.kolasu.cli.ASTProcessingCommand
 import com.strumenta.kolasu.cli.ParserInstantiator
 import com.strumenta.kolasu.cli.changeExtension
-import com.strumenta.kolasu.emf.*
+import com.strumenta.kolasu.emf.EMFEnabledParser
+import com.strumenta.kolasu.emf.EMFMetamodelSupport
+import com.strumenta.kolasu.emf.saveMetamodel
+import com.strumenta.kolasu.emf.saveModel
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.File
 import java.util.function.Supplier
+
+typealias ParserInstantiatorWithoutInput<P> = Supplier<P>
 
 class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
     ASTProcessingCommand<R, P>(
         parserInstantiator,
         help = "Parses a file and exports the AST to an EMF (XMI) file.",
         name = "emfmodel"
-    ) where P : EMFMetamodelSupport, P : ASTParser<R> {
+    ) where P : EMFEnabledParser<R, *, *> {
     val metamodel by option("--metamodel")
     val outputDirectory by option("--output", "-o")
         .file()
@@ -78,11 +81,11 @@ class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
     }
 }
 
-class EMFMetaModelCommand(val metamodelGenerator: Supplier<EPackage>) :
+class EMFMetaModelCommand<R : Node, P>(val parserInstantiator: ParserInstantiatorWithoutInput<P>) :
     CliktCommand(
         help = "Generate the metamodel for a language.",
         name = "emfmetamodel"
-    ) {
+    ) where P : EMFEnabledParser<R, *, *>{
     val verbose by option("--verbose", "-v")
         .help("Print additional messages")
         .flag(default = false)
@@ -93,12 +96,9 @@ class EMFMetaModelCommand(val metamodelGenerator: Supplier<EPackage>) :
     val includeKolasu by option("--include-kolasu", "-ik").flag(default = false)
 
     override fun run() {
-        val metamodel = metamodelGenerator.get()
+        val parser = parserInstantiator.get()
         val mmResource = JsonResourceFactory().createResource(URI.createFileURI(output.path))
-        if (includeKolasu) {
-            mmResource.contents.add(KOLASU_METAMODEL)
-        }
-        mmResource.contents.add(metamodel)
+        val metamodel = parser.generateMetamodel(mmResource, includeKolasu)
         if (verbose) {
             echo("Metamodel saved to ${output.absolutePath}")
         }

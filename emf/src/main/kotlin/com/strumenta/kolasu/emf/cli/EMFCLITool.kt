@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.output.CliktConsole
 import com.strumenta.kolasu.cli.ParserInstantiator
+import com.strumenta.kolasu.emf.EMFEnabledParser
 import com.strumenta.kolasu.emf.EMFMetamodelSupport
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.ASTParser
@@ -13,11 +14,12 @@ import java.util.function.Supplier
 
 class EMFCLITool<R : Node, P>(
     parserInstantiator: ParserInstantiator<P>,
+    parserInstantiatorWithoutInput: ParserInstantiatorWithoutInput<P>,
     metamodelGenerator: Supplier<EPackage>,
     replacedConsole: CliktConsole? = null
-) : CliktCommand(invokeWithoutSubcommand = false) where P : EMFMetamodelSupport, P : ASTParser<R> {
+) : CliktCommand(invokeWithoutSubcommand = false) where P : EMFEnabledParser<R, *, *> {
     init {
-        subcommands(EMFModelCommand(parserInstantiator), EMFMetaModelCommand(metamodelGenerator))
+        subcommands(EMFModelCommand(parserInstantiator), EMFMetaModelCommand(parserInstantiatorWithoutInput))
         context { replacedConsole?.apply { console = replacedConsole } }
     }
 

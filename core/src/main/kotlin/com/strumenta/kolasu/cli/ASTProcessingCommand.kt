@@ -15,6 +15,7 @@ import com.strumenta.kolasu.validation.IssueSeverity
 import java.io.File
 import java.nio.charset.Charset
 import java.util.function.Function
+import java.util.function.Supplier
 import kotlin.system.exitProcess
 
 typealias ParserInstantiator<P> = Function<File, P?>
@@ -121,13 +122,13 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
 fun File.changeExtension(newExtension: String): File {
     var name = this.name
     val i = name.lastIndexOf('.')
-    if (i == -1) {
+    return if (i == -1) {
         val prefix = this.path.substring(0, this.path.length - this.name.length)
         name = "$name.$newExtension"
-        return File("${prefix}$name")
+        File("${prefix}$name")
     } else {
         val prefix = this.path.substring(0, this.path.length - this.name.length)
         name = name.substring(0, i + 1) + newExtension
-        return File("${prefix}$name")
+        File("${prefix}$name")
     }
 }
