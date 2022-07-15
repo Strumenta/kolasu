@@ -2,6 +2,7 @@ package com.strumenta.kolasu.parserbench
 
 import com.google.gson.JsonObject
 import com.strumenta.kolasu.emf.EMFEnabledParser
+import com.strumenta.kolasu.emf.createResource
 import com.strumenta.kolasu.emf.saveAsJsonObject
 import com.strumenta.kolasu.emf.toEObject
 import com.strumenta.kolasu.parsing.ParsingResult
@@ -21,7 +22,7 @@ class ParserBenchExampleGenerator(
     resourceURI: URI = URI.createURI("")
 ) {
 
-    val resource = JsonResourceFactory().createResource(resourceURI)
+    val resource = createResource(resourceURI)!!
 
     fun generateMetamodel() {
         parser.generateMetamodel(resource)

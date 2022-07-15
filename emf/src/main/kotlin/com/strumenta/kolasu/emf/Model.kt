@@ -335,10 +335,7 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
 }
 
 fun EObject.saveXMI(xmiFile: File) {
-    val resourceSet = ResourceSetImpl()
-    resourceSet.resourceFactoryRegistry.extensionToFactoryMap["xmi"] = XMIResourceFactoryImpl()
-    val uri: URI = URI.createFileURI(xmiFile.absolutePath)
-    val resource: Resource = resourceSet.createResource(uri)
+    val resource: Resource = createResource(URI.createFileURI(xmiFile.absolutePath))!!
     resource.contents.add(this)
     resource.save(null)
 }
@@ -352,17 +349,13 @@ fun EPackage.saveAsJson(jsonFile: File, restoringURI: Boolean = true) {
 }
 
 fun EObject.saveAsJson(jsonFile: File) {
-    val resourceSet = ResourceSetImpl()
-    resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
-    val uri: URI = URI.createFileURI(jsonFile.absolutePath)
-    val resource: Resource = resourceSet.createResource(uri)
+    val resource: Resource = createResource(URI.createFileURI(jsonFile.absolutePath))!!
     resource.contents.add(this)
     resource.save(null)
 }
 
 fun EObject.saveAsJson(): String {
-    val uri: URI = URI.createURI("dummy-URI")
-    val resource: Resource = JsonResourceFactory().createResource(uri)
+    val resource: Resource = createResource(URI.createURI("dummy-URI"))!!
     resource.contents.add(this)
     val output = ByteArrayOutputStream()
     resource.save(output, null)

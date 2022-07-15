@@ -9,12 +9,7 @@ import org.antlr.v4.runtime.ParserRuleContext
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.XMIResource
-import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
-import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.IOException
 
 interface EMFMetamodelSupport {
@@ -34,12 +29,8 @@ fun EMFMetamodelSupport.saveMetamodel(
     target: URI,
     options: Map<String, Boolean> = DEFAULT_OPTIONS_FOR_METAMODEL
 ): Resource {
-    val resourceSet: ResourceSet = ResourceSetImpl()
-    resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
-    resourceSet.resourceFactoryRegistry.extensionToFactoryMap["xmi"] = XMIResourceFactoryImpl()
-    resourceSet.resourceFactoryRegistry.extensionToFactoryMap["ecore"] = EcoreResourceFactoryImpl()
     val resource =
-        resourceSet.createResource(target)
+        createResource(target)
             ?: throw IOException("Unsupported destination: $target")
     this.generateMetamodel(resource, options[INCLUDE_KOLASU] ?: false)
     resource.save(options)
@@ -50,18 +41,18 @@ fun EMFMetamodelSupport.saveMetamodel(
 }
 
 fun ParsingResult<*>.saveModel(
-    metamodel: Resource,
+    metamodelResource: Resource,
     target: URI,
     includeMetamodel: Boolean = true,
     options: Map<String, Boolean>? = null
 ): Resource {
     val resource =
-        metamodel.resourceSet.createResource(target)
+        metamodelResource.resourceSet.createResource(target)
             ?: throw IOException("Unsupported destination: $target")
     val simplifiedResult = Result(issues, root)
     var eObject: EObject? = null
     if (includeMetamodel) {
-        eObject = simplifiedResult.toEObject(metamodel)
+        eObject = simplifiedResult.toEObject(metamodelResource)
         resource.contents.add(eObject)
     }
     try {

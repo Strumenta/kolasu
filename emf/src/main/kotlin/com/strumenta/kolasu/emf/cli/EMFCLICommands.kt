@@ -9,17 +9,16 @@ import com.github.ajalt.clikt.parameters.types.file
 import com.strumenta.kolasu.cli.ASTProcessingCommand
 import com.strumenta.kolasu.cli.ParserInstantiator
 import com.strumenta.kolasu.cli.changeExtension
-import com.strumenta.kolasu.emf.EMFEnabledParser
-import com.strumenta.kolasu.emf.EMFMetamodelSupport
-import com.strumenta.kolasu.emf.saveMetamodel
-import com.strumenta.kolasu.emf.saveModel
+import com.strumenta.kolasu.emf.*
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
+import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.File
-import java.util.function.Supplier
 
 class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
     ASTProcessingCommand<R, P>(
@@ -94,7 +93,7 @@ class EMFMetaModelCommand(val metamodelSupport: EMFMetamodelSupport) :
     val includeKolasu by option("--include-kolasu", "-ik").flag(default = false)
 
     override fun run() {
-        val mmResource = JsonResourceFactory().createResource(URI.createFileURI(output.path))
+        val mmResource = createResource(URI.createFileURI(output.path))
         metamodelSupport.generateMetamodel(mmResource, includeKolasu)
         mmResource.save(emptyMap<Any, Any>())
         if (verbose) {

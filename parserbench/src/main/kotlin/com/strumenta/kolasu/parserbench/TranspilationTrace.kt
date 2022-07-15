@@ -61,20 +61,13 @@ fun <S : Node, T : Node> TranspilationTrace<S, T>.toEObject(resource: Resource):
 }
 
 fun <S : Node, T : Node> TranspilationTrace<S, T>.saveAsJson(name: String, vararg ePackages: EPackage): String {
-    // val uri: URI = URI.createURI("dummy-URI")
-    val resourceSet = ResourceSetImpl()
-    resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
+    val resourceSet = createResourceSet()
     val resource = resourceSet.createResource(URI.createURI(name))
     ePackages.forEach {
         val packageResource = JsonResourceFactory().createResource(URI.createURI(it.nsURI))
         resourceSet.resources.add(packageResource)
         packageResource.contents.add(it)
     }
-    // val resource: Resource = JsonResourceFactory().createResource(uri)
-    // resource.resourceSet = resourceSet
-//    ePackages.forEach {
-//        resource.contents.add(it)
-//    }
     resource.contents.add(this.toEObject(resource))
     val output = ByteArrayOutputStream()
     resource.save(output, null)
