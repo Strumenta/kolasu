@@ -1,19 +1,11 @@
 package com.strumenta.kolasu.cli
 
-import com.github.ajalt.clikt.core.PrintHelpMessage
-import com.github.ajalt.clikt.output.CliktConsole
-import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.junit.Test
 import java.io.File
-import java.nio.charset.Charset
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.createTempFile
-import kotlin.io.path.pathString
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class CLITestStatsCommand {
     @Test
@@ -101,14 +93,17 @@ class CLITestStatsCommand {
 
         val globalStatsFile = File("global-stats.csv")
         assert(globalStatsFile.exists())
-        assertEquals("""Key,Value
+        assertEquals(
+            """Key,Value
 filesProcessed,1
 filesWithExceptions,0
 filesProcessedSuccessfully,1
 filesWithErrors,0
 filesWithoutErrors,1
 totalErrors,0
-""", globalStatsFile.readText())
+""",
+            globalStatsFile.readText()
+        )
         globalStatsFile.delete()
     }
 
@@ -227,12 +222,15 @@ totalErrors,0
 
         val nodeStatsFile = File("node-stats.csv")
         assert(nodeStatsFile.exists())
-        assertEquals("""Key,Value
+        assertEquals(
+            """Key,Value
 com.strumenta.kolasu.cli.MyCompilationUnit,1
 com.strumenta.kolasu.cli.MyEntityDecl,2
 com.strumenta.kolasu.cli.MyFieldDecl,3
 total,6
-""", nodeStatsFile.readText())
+""",
+            nodeStatsFile.readText()
+        )
         nodeStatsFile.delete()
     }
 
@@ -274,12 +272,15 @@ total,6
 
         val nodeStatsFile = File("node-stats.csv")
         assert(nodeStatsFile.exists())
-        assertEquals("""Key,Value
+        assertEquals(
+            """Key,Value
 MyCompilationUnit,1
 MyEntityDecl,2
 MyFieldDecl,3
 total,6
-""".lines(), nodeStatsFile.readText().lines())
+""".lines(),
+            nodeStatsFile.readText().lines()
+        )
         nodeStatsFile.delete()
     }
 

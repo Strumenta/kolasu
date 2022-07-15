@@ -3,11 +3,9 @@ package com.strumenta.kolasu.emf.cli
 import com.github.ajalt.clikt.core.PrintHelpMessage
 import com.github.ajalt.clikt.output.CliktConsole
 import com.strumenta.kolasu.emf.EMFEnabledParser
-import com.strumenta.kolasu.emf.EMFMetamodelSupport
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.runtime.CharStream
@@ -20,8 +18,6 @@ import org.junit.Test
 import java.io.File
 import java.nio.charset.Charset
 import kotlin.io.path.createTempDirectory
-import kotlin.io.path.createTempFile
-import kotlin.io.path.pathString
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
@@ -130,7 +126,8 @@ class EMFCLIToolTest {
         println(console.stdOutput)
         assertEquals("", console.errOutput)
         assert(myFile.exists())
-        assertEquals("""{
+        assertEquals(
+            """{
   "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
   "name" : "com.strumenta.kolasu.emf.cli",
   "nsURI" : "https://dummy.com/mm",
@@ -183,7 +180,9 @@ class EMFCLIToolTest {
       "containment" : true
     } ]
   } ]
-}""", myFile.readText())
+}""",
+            myFile.readText()
+        )
     }
 
     @Test
@@ -201,7 +200,8 @@ class EMFCLIToolTest {
         println(console.stdOutput)
         assertEquals("", console.errOutput)
         assert(myFile.exists())
-        assertEquals("""[ {
+        assertEquals(
+            """[ {
   "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
   "name" : "StrumentaLanguageSupport",
   "nsURI" : "https://strumenta.com/kolasu/v2",
@@ -582,7 +582,8 @@ class EMFCLIToolTest {
       "containment" : true
     } ]
   } ]
-} ]""", myFile.readText())
+} ]""",
+            myFile.readText()
+        )
     }
-
 }

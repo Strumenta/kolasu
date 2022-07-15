@@ -51,7 +51,7 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
     }
 
     override fun processResult(input: File, relativePath: String, result: ParsingResult<R>, parser: P) {
-        var targetFile : File? = null
+        var targetFile: File? = null
         if (!print) {
             val extension = when (outputFormat) {
                 "json", "xml" -> outputFormat

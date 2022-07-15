@@ -372,7 +372,8 @@ class CLITest {
         val outMyFile1 = File(outDir.toFile(), "myfile1.mylang.json")
         val outMyFile2 = File(File(outDir.toFile(), "mySubDir"), "myfile2.mylang.json")
         assert(outMyFile1.exists())
-        assertEquals("""{
+        assertEquals(
+            """{
   "issues": [],
   "root": {
     "#type": "com.strumenta.kolasu.cli.MyCompilationUnit",
@@ -384,8 +385,11 @@ class CLITest {
       }
     ]
   }
-}""", outMyFile1.readText())
-        assertEquals("""{
+}""",
+            outMyFile1.readText()
+        )
+        assertEquals(
+            """{
   "issues": [],
   "root": {
     "#type": "com.strumenta.kolasu.cli.MyCompilationUnit",
@@ -397,7 +401,9 @@ class CLITest {
       }
     ]
   }
-}""", outMyFile2.readText())
+}""",
+            outMyFile2.readText()
+        )
         assert(outMyFile2.exists())
     }
 
@@ -447,22 +453,28 @@ class CLITest {
         val outMyFile1 = File(outDir.toFile(), "myfile1.mylang.xml")
         val outMyFile2 = File(File(outDir.toFile(), "mySubDir"), "myfile2.mylang.xml")
         assert(outMyFile1.exists())
-        assertEquals("""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        assertEquals(
+            """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <result>
     <issues/>
     <root type="MyCompilationUnit">
         <decls name="EntityFoo" type="MyEntityDecl"/>
     </root>
 </result>
-""", outMyFile1.readText())
-        assertEquals("""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+""",
+            outMyFile1.readText()
+        )
+        assertEquals(
+            """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <result>
     <issues/>
     <root type="MyCompilationUnit">
         <decls name="EntityBar" type="MyEntityDecl"/>
     </root>
 </result>
-""", outMyFile2.readText())
+""",
+            outMyFile2.readText()
+        )
         assert(outMyFile2.exists())
     }
 
@@ -512,7 +524,8 @@ class CLITest {
         val outMyFile1 = File(outDir.toFile(), "myfile1.mylang.txt")
         val outMyFile2 = File(File(outDir.toFile(), "mySubDir"), "myfile2.mylang.txt")
         assert(outMyFile1.exists())
-        assertEquals("""Result {
+        assertEquals(
+            """Result {
   issues= [
   ]
   root = [
@@ -526,8 +539,11 @@ class CLITest {
     } // MyCompilationUnit
   ]
 }
-""", outMyFile1.readText())
-        assertEquals("""Result {
+""",
+            outMyFile1.readText()
+        )
+        assertEquals(
+            """Result {
   issues= [
   ]
   root = [
@@ -541,8 +557,9 @@ class CLITest {
     } // MyCompilationUnit
   ]
 }
-""", outMyFile2.readText())
+""",
+            outMyFile2.readText()
+        )
         assert(outMyFile2.exists())
     }
-
 }
