@@ -20,7 +20,7 @@ class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
     ASTProcessingCommand<R, P>(
         parserInstantiator,
         help = "Parses a file and exports the AST to an EMF (XMI) file.",
-        name = "emfmodel"
+        name = "model"
     ) where P : EMFEnabledParser<R, *, *> {
     val metamodel by option("--metamodel")
     val outputDirectory by option("--output", "-o")
@@ -77,7 +77,7 @@ class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
 class EMFMetaModelCommand(val metamodelSupport: EMFMetamodelSupport) :
     CliktCommand(
         help = "Generate the metamodel for a language.",
-        name = "emfmetamodel"
+        name = "metamodel"
     ) {
     val verbose by option("--verbose", "-v")
         .help("Print additional messages")
