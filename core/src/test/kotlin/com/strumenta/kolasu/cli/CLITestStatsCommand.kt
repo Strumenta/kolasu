@@ -101,8 +101,8 @@ filesProcessedSuccessfully,1
 filesWithErrors,0
 filesWithoutErrors,1
 totalErrors,0
-""",
-            globalStatsFile.readText()
+""".lines(),
+            globalStatsFile.readText().lines()
         )
         globalStatsFile.delete()
     }
@@ -228,8 +228,8 @@ com.strumenta.kolasu.cli.MyCompilationUnit,1
 com.strumenta.kolasu.cli.MyEntityDecl,2
 com.strumenta.kolasu.cli.MyFieldDecl,3
 total,6
-""",
-            nodeStatsFile.readText()
+""".lines(),
+            nodeStatsFile.readText().lines()
         )
         nodeStatsFile.delete()
     }

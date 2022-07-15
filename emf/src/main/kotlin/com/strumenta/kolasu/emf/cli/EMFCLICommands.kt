@@ -25,11 +25,11 @@ class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
     val metamodel by option("--metamodel")
     val outputDirectory by option("--output", "-o")
         .file()
-        .help("Directory where to store the output. By default the current directory is used")
+        .help("Directory where to store the output. By default the current directory is used.")
         .default(File("."))
-    // val addMetamodel by option("--add-metamodel", "-amm").flag(default = false)
-    val includeKolasu by option("--include-kolasu", "-ik").flag(default = false)
-    val includeMetamodel by option("--include-metamodel", "-imm").flag(default = false)
+    val includeMetamodel by option("--include-metamodel", "-imm")
+        .help("Include metamodel in each saved model.")
+        .flag(default = false)
 
     override fun finalizeRun() {
         // Nothing to do
@@ -45,7 +45,9 @@ class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
         val targetFileParent = targetFile.parentFile
         targetFileParent.absoluteFile.mkdirs()
 
-        val resource = saveMetamodel(parser, targetFile)
+        val mmFile = File("metamodel.json")
+
+        val resource = saveMetamodel(parser, mmFile)
         val start = System.currentTimeMillis()
         if (verbose) {
             echo("Saving AST for $input to $targetFile... ")

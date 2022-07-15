@@ -51,15 +51,14 @@ fun ParsingResult<*>.saveModel(
             ?: throw IOException("Unsupported destination: $target")
     val simplifiedResult = Result(issues, root)
     var eObject: EObject? = null
-    if (includeMetamodel) {
-        eObject = simplifiedResult.toEObject(metamodelResource)
-        resource.contents.add(eObject)
+    eObject = if (includeMetamodel) {
+        resource.contents.addAll(metamodelResource.contents)
+        simplifiedResult.toEObject(resource)
+    } else {
+        simplifiedResult.toEObject(metamodelResource)
     }
-    try {
-        resource.save(options)
-    } finally {
-        eObject?.apply { resource.contents.remove(eObject) }
-    }
+    resource.contents.add(eObject)
+    resource.save(options)
     return resource
 }
 

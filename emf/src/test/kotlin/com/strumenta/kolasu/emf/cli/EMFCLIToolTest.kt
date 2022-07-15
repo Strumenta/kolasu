@@ -18,6 +18,7 @@ import org.junit.Test
 import java.io.File
 import java.nio.charset.Charset
 import kotlin.io.path.createTempDirectory
+import kotlin.io.path.pathString
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
@@ -585,5 +586,79 @@ class EMFCLIToolTest {
 } ]""",
             myFile.readText()
         )
+    }
+
+    @Test
+    fun runSimpleModelSaverSWithMultipleFiles() {
+        val myDir = createTempDirectory()
+        val myFile1 = File(myDir.toFile(), "myfile1.mylang")
+        myFile1.writeText("")
+        val mySubDir = File(myDir.toFile(), "mySubDir")
+        mySubDir.mkdir()
+        val myFile2 = File(mySubDir, "myfile2.mylang")
+        myFile2.writeText("")
+        myFile1.deleteOnExit()
+        myFile2.deleteOnExit()
+        mySubDir.deleteOnExit()
+        myDir.toFile().deleteOnExit()
+
+        val outDir = createTempDirectory()
+        outDir.toFile().deleteOnExit()
+
+        val parserInstantiator = { file: File ->
+            MyDummyParser().apply {
+                expectedResults[myFile1] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("EntityFoo", mutableListOf()),
+                        )
+                    )
+                )
+                expectedResults[myFile2] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("EntityBar", mutableListOf()),
+                        )
+                    )
+                )
+            }
+        }
+        val mmSupport = MyDummyParser()
+        val console = CapturingCliktConsole()
+        val cliTool = EMFCLITool(parserInstantiator, mmSupport, console)
+        cliTool.parse(arrayOf("model", myDir.toString(), "-o", outDir.pathString, "-v"))
+        println(console.stdOutput)
+//        assertEquals("", console.stdOutput)
+//        assertEquals("", console.errOutput)
+        val outMyFile1 = File(outDir.toFile(), "myfile1.json")
+        val outMyFile2 = File(File(outDir.toFile(), "mySubDir"), "myfile2.json")
+        assert(outMyFile1.exists())
+        assertEquals(
+            """{
+  "eClass" : "https://strumenta.com/kolasu/v2#//Result",
+  "root" : {
+    "eClass" : "#//MyCompilationUnit",
+    "decls" : [ {
+      "name" : "EntityFoo"
+    } ]
+  }
+}""",
+            outMyFile1.readText()
+        )
+        assertEquals(
+            """{
+  "eClass" : "https://strumenta.com/kolasu/v2#//Result",
+  "root" : {
+    "eClass" : "#//MyCompilationUnit",
+    "decls" : [ {
+      "name" : "EntityBar"
+    } ]
+  }
+}""",
+            outMyFile2.readText()
+        )
+        assert(outMyFile2.exists())
     }
 }
