@@ -11,6 +11,7 @@ import java.io.File
 import java.nio.charset.Charset
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.createTempFile
+import kotlin.io.path.pathString
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
@@ -323,6 +324,225 @@ class CLITest {
             console.stdOutput.trim()
         )
         assertEquals("", console.errOutput)
+    }
+
+    @Test
+    fun runSimpleASTSaverSimpleFileSpecifyingJSONOnDiskWithMultipleFiles() {
+        val myDir = createTempDirectory()
+        val myFile1 = File(myDir.toFile(), "myfile1.mylang")
+        myFile1.writeText("")
+        val mySubDir = File(myDir.toFile(), "mySubDir")
+        mySubDir.mkdir()
+        val myFile2 = File(mySubDir, "myfile2.mylang")
+        myFile2.writeText("")
+        myFile1.deleteOnExit()
+        myFile2.deleteOnExit()
+        mySubDir.deleteOnExit()
+        myDir.toFile().deleteOnExit()
+
+        val outDir = createTempDirectory()
+        outDir.toFile().deleteOnExit()
+
+        val parserInstantiator = { file: File ->
+            MyDummyParser().apply {
+                expectedResults[myFile1] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("EntityFoo", mutableListOf()),
+                        )
+                    )
+                )
+                expectedResults[myFile2] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("EntityBar", mutableListOf()),
+                        )
+                    )
+                )
+            }
+        }
+        val console = CapturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console)
+        cliTool.parse(arrayOf("ast", myDir.toString(), "-o", outDir.pathString, "--format", "json", "-v"))
+        println(console.stdOutput)
+//        assertEquals("", console.stdOutput)
+//        assertEquals("", console.errOutput)
+        val outMyFile1 = File(outDir.toFile(), "myfile1.mylang.json")
+        val outMyFile2 = File(File(outDir.toFile(), "mySubDir"), "myfile2.mylang.json")
+        assert(outMyFile1.exists())
+        assertEquals("""{
+  "issues": [],
+  "root": {
+    "#type": "com.strumenta.kolasu.cli.MyCompilationUnit",
+    "decls": [
+      {
+        "#type": "com.strumenta.kolasu.cli.MyEntityDecl",
+        "fields": [],
+        "name": "EntityFoo"
+      }
+    ]
+  }
+}""", outMyFile1.readText())
+        assertEquals("""{
+  "issues": [],
+  "root": {
+    "#type": "com.strumenta.kolasu.cli.MyCompilationUnit",
+    "decls": [
+      {
+        "#type": "com.strumenta.kolasu.cli.MyEntityDecl",
+        "fields": [],
+        "name": "EntityBar"
+      }
+    ]
+  }
+}""", outMyFile2.readText())
+        assert(outMyFile2.exists())
+    }
+
+    @Test
+    fun runSimpleASTSaverSimpleFileSpecifyingXMLOnDiskWithMultipleFiles() {
+        val myDir = createTempDirectory()
+        val myFile1 = File(myDir.toFile(), "myfile1.mylang")
+        myFile1.writeText("")
+        val mySubDir = File(myDir.toFile(), "mySubDir")
+        mySubDir.mkdir()
+        val myFile2 = File(mySubDir, "myfile2.mylang")
+        myFile2.writeText("")
+        myFile1.deleteOnExit()
+        myFile2.deleteOnExit()
+        mySubDir.deleteOnExit()
+        myDir.toFile().deleteOnExit()
+
+        val outDir = createTempDirectory()
+        outDir.toFile().deleteOnExit()
+
+        val parserInstantiator = { file: File ->
+            MyDummyParser().apply {
+                expectedResults[myFile1] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("EntityFoo", mutableListOf()),
+                        )
+                    )
+                )
+                expectedResults[myFile2] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("EntityBar", mutableListOf()),
+                        )
+                    )
+                )
+            }
+        }
+        val console = CapturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console)
+        cliTool.parse(arrayOf("ast", myDir.toString(), "-o", outDir.pathString, "--format", "xml", "-v"))
+        println(console.stdOutput)
+//        assertEquals("", console.stdOutput)
+//        assertEquals("", console.errOutput)
+        val outMyFile1 = File(outDir.toFile(), "myfile1.mylang.xml")
+        val outMyFile2 = File(File(outDir.toFile(), "mySubDir"), "myfile2.mylang.xml")
+        assert(outMyFile1.exists())
+        assertEquals("""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<result>
+    <issues/>
+    <root type="MyCompilationUnit">
+        <decls name="EntityFoo" type="MyEntityDecl"/>
+    </root>
+</result>
+""", outMyFile1.readText())
+        assertEquals("""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<result>
+    <issues/>
+    <root type="MyCompilationUnit">
+        <decls name="EntityBar" type="MyEntityDecl"/>
+    </root>
+</result>
+""", outMyFile2.readText())
+        assert(outMyFile2.exists())
+    }
+
+    @Test
+    fun runSimpleASTSaverSimpleFileSpecifyingDebugFormatOnDiskWithMultipleFiles() {
+        val myDir = createTempDirectory()
+        val myFile1 = File(myDir.toFile(), "myfile1.mylang")
+        myFile1.writeText("")
+        val mySubDir = File(myDir.toFile(), "mySubDir")
+        mySubDir.mkdir()
+        val myFile2 = File(mySubDir, "myfile2.mylang")
+        myFile2.writeText("")
+        myFile1.deleteOnExit()
+        myFile2.deleteOnExit()
+        mySubDir.deleteOnExit()
+        myDir.toFile().deleteOnExit()
+
+        val outDir = createTempDirectory()
+        outDir.toFile().deleteOnExit()
+
+        val parserInstantiator = { file: File ->
+            MyDummyParser().apply {
+                expectedResults[myFile1] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("EntityFoo", mutableListOf()),
+                        )
+                    )
+                )
+                expectedResults[myFile2] = ParsingResult(
+                    emptyList(),
+                    MyCompilationUnit(
+                        mutableListOf(
+                            MyEntityDecl("EntityBar", mutableListOf()),
+                        )
+                    )
+                )
+            }
+        }
+        val console = CapturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console)
+        cliTool.parse(arrayOf("ast", myDir.toString(), "-o", outDir.pathString, "--format", "debug-format", "-v"))
+        println(console.stdOutput)
+//        assertEquals("", console.stdOutput)
+//        assertEquals("", console.errOutput)
+        val outMyFile1 = File(outDir.toFile(), "myfile1.mylang.txt")
+        val outMyFile2 = File(File(outDir.toFile(), "mySubDir"), "myfile2.mylang.txt")
+        assert(outMyFile1.exists())
+        assertEquals("""Result {
+  issues= [
+  ]
+  root = [
+    MyCompilationUnit {
+      decls = [
+        MyEntityDecl {
+          fields = []
+          name = EntityFoo
+        } // MyEntityDecl
+      ]
+    } // MyCompilationUnit
+  ]
+}
+""", outMyFile1.readText())
+        assertEquals("""Result {
+  issues= [
+  ]
+  root = [
+    MyCompilationUnit {
+      decls = [
+        MyEntityDecl {
+          fields = []
+          name = EntityBar
+        } // MyEntityDecl
+      ]
+    } // MyCompilationUnit
+  ]
+}
+""", outMyFile2.readText())
+        assert(outMyFile2.exists())
     }
 
     @Test

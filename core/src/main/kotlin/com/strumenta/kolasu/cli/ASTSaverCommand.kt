@@ -51,8 +51,14 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
     }
 
     override fun processResult(input: File, relativePath: String, result: ParsingResult<R>, parser: P) {
+        var targetFile : File? = null
         if (!print) {
-            val targetFile = File(this.outputDirectory.absolutePath + File.separator + relativePath)
+            val extension = when (outputFormat) {
+                "json", "xml" -> outputFormat
+                "debug-format" -> "txt"
+                else -> TODO()
+            }
+            targetFile = File(this.outputDirectory.absolutePath + File.separator + relativePath + "." + extension)
             val targetFileParent = targetFile.parentFile
             targetFileParent.absoluteFile.mkdirs()
         }
@@ -67,11 +73,10 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
                     }
                     echo(JsonGenerator().generateString(result), trailingNewline = true)
                 } else {
-                    val outputFile = File(outputDirectory, "${input.name}.json")
                     if (verbose) {
-                        echo(" -> generating ${outputFile.absolutePath}", trailingNewline = true)
+                        echo(" -> generating ${targetFile!!.absolutePath}", trailingNewline = true)
                     }
-                    JsonGenerator().generateFile(result, outputFile)
+                    JsonGenerator().generateFile(result, targetFile!!)
                 }
             }
             "xml" -> {
@@ -84,11 +89,10 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
                     }
                     echo(XMLGenerator().generateString(result.toResult()), trailingNewline = true)
                 } else {
-                    val outputFile = File(outputDirectory, "${input.name}.xml")
                     if (verbose) {
-                        echo(" -> generating ${outputFile.absolutePath}", trailingNewline = true)
+                        echo(" -> generating ${targetFile!!.absolutePath}", trailingNewline = true)
                     }
-                    XMLGenerator().generateFile(result.toResult(), outputFile)
+                    XMLGenerator().generateFile(result.toResult(), targetFile!!)
                 }
             }
             "debug-format" -> {
@@ -101,11 +105,10 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
                     }
                     echo(result.debugPrint(), trailingNewline = true)
                 } else {
-                    val outputFile = File(outputDirectory, "${input.name}.df")
                     if (verbose) {
-                        echo(" -> generating ${outputFile.absolutePath}", trailingNewline = true)
+                        echo(" -> generating ${targetFile!!.absolutePath}", trailingNewline = true)
                     }
-                    outputFile.writeText(result.debugPrint())
+                    targetFile!!.writeText(result.debugPrint())
                 }
             }
             else -> throw UnsupportedOperationException()
