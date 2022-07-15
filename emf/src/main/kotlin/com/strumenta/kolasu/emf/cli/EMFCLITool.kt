@@ -14,12 +14,11 @@ import java.util.function.Supplier
 
 class EMFCLITool<R : Node, P>(
     parserInstantiator: ParserInstantiator<P>,
-    parserInstantiatorWithoutInput: ParserInstantiatorWithoutInput<P>,
-    metamodelGenerator: Supplier<EPackage>,
+    metamodelSupport: EMFMetamodelSupport,
     replacedConsole: CliktConsole? = null
 ) : CliktCommand(invokeWithoutSubcommand = false) where P : EMFEnabledParser<R, *, *> {
     init {
-        subcommands(EMFModelCommand(parserInstantiator), EMFMetaModelCommand(parserInstantiatorWithoutInput))
+        subcommands(EMFModelCommand(parserInstantiator), EMFMetaModelCommand(metamodelSupport))
         context { replacedConsole?.apply { console = replacedConsole } }
     }
 

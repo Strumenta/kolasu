@@ -83,6 +83,7 @@ abstract class EMFEnabledParser<R : Node, P : Parser, C : ParserRuleContext> :
 
     /**
      * Generates the metamodel. The standard Kolasu metamodel [EPackage][org.eclipse.emf.ecore.EPackage] is included.
+     * It does not actually save the resource.
      */
     override fun generateMetamodel(resource: Resource, includingKolasuMetamodel: Boolean) {
         if (includingKolasuMetamodel) {
@@ -93,6 +94,7 @@ abstract class EMFEnabledParser<R : Node, P : Parser, C : ParserRuleContext> :
 
     /**
      * Implement this method to tell the parser how to generate the metamodel. See [MetamodelBuilder].
+     * It does not actually save the resource.
      */
     abstract fun doGenerateMetamodel(resource: Resource)
 }

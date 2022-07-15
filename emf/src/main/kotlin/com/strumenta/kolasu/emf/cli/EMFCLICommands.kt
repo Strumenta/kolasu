@@ -21,8 +21,6 @@ import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.File
 import java.util.function.Supplier
 
-typealias ParserInstantiatorWithoutInput<P> = Supplier<P>
-
 class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
     ASTProcessingCommand<R, P>(
         parserInstantiator,
@@ -81,11 +79,11 @@ class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
     }
 }
 
-class EMFMetaModelCommand<R : Node, P>(val parserInstantiator: ParserInstantiatorWithoutInput<P>) :
+class EMFMetaModelCommand(val metamodelSupport: EMFMetamodelSupport) :
     CliktCommand(
         help = "Generate the metamodel for a language.",
         name = "emfmetamodel"
-    ) where P : EMFEnabledParser<R, *, *>{
+    ) {
     val verbose by option("--verbose", "-v")
         .help("Print additional messages")
         .flag(default = false)
@@ -96,9 +94,9 @@ class EMFMetaModelCommand<R : Node, P>(val parserInstantiator: ParserInstantiato
     val includeKolasu by option("--include-kolasu", "-ik").flag(default = false)
 
     override fun run() {
-        val parser = parserInstantiator.get()
         val mmResource = JsonResourceFactory().createResource(URI.createFileURI(output.path))
-        val metamodel = parser.generateMetamodel(mmResource, includeKolasu)
+        metamodelSupport.generateMetamodel(mmResource, includeKolasu)
+        mmResource.save(emptyMap<Any, Any>())
         if (verbose) {
             echo("Metamodel saved to ${output.absolutePath}")
         }
