@@ -219,7 +219,12 @@ class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstant
 
     override fun finalizeRun() {
         collectors.forEach {
-            it.print { text: String -> echo(text, trailingNewline = true) }
+            if (csv) {
+                echo("Saving ${it.description} to ${it.csvFile}", trailingNewline = true)
+                it.saveToCSV()
+            } else {
+                it.print { text: String -> echo(text, trailingNewline = true) }
+            }
         }
     }
 
@@ -231,12 +236,7 @@ class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstant
 
     override fun processResult(input: File, relativePath: String, result: ParsingResult<R>, parser: P) {
         collectors.forEach {
-            if (csv) {
-                echo("Saving ${it.description} to ${it.csvFile}", trailingNewline = true)
-                it.saveToCSV()
-            } else {
-                it.registerResult(input, result)
-            }
+            it.registerResult(input, result)
         }
     }
 }
