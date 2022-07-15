@@ -9,6 +9,7 @@ import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.time.LocalDate
@@ -352,7 +353,8 @@ fun EObject.saveAsJson(jsonFile: File) {
 }
 
 fun EObject.saveAsJson(): String {
-    val resource: Resource = createResource(URI.createURI("dummy-URI"))!!
+    val uri: URI = URI.createURI("dummy-URI")
+    val resource: Resource = JsonResourceFactory().createResource(uri)
     resource.contents.add(this)
     val output = ByteArrayOutputStream()
     resource.save(output, null)

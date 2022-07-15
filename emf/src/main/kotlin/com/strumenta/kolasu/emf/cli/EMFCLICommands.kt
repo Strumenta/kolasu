@@ -89,7 +89,7 @@ class EMFMetaModelCommand(val metamodelSupport: EMFMetamodelSupport) :
     val includeKolasu by option("--include-kolasu", "-ik").flag(default = false)
 
     override fun run() {
-        val mmResource = createResource(URI.createFileURI(output.path))
+        val mmResource = createResource(URI.createFileURI(output.path))!!
         metamodelSupport.generateMetamodel(mmResource, includeKolasu)
         mmResource.save(emptyMap<Any, Any>())
         if (verbose) {
