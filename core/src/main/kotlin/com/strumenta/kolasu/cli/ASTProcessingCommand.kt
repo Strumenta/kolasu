@@ -15,7 +15,6 @@ import com.strumenta.kolasu.validation.IssueSeverity
 import java.io.File
 import java.nio.charset.Charset
 import java.util.function.Function
-import java.util.function.Supplier
 import kotlin.system.exitProcess
 
 typealias ParserInstantiator<P> = Function<File, P?>

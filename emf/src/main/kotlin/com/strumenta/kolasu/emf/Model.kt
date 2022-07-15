@@ -9,9 +9,6 @@ import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
-import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.time.LocalDate

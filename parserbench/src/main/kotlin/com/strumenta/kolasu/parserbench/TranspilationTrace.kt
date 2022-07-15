@@ -8,7 +8,6 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.ByteArrayOutputStream
 

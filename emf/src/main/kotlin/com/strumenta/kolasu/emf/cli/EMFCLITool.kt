@@ -8,9 +8,6 @@ import com.strumenta.kolasu.cli.ParserInstantiator
 import com.strumenta.kolasu.emf.EMFEnabledParser
 import com.strumenta.kolasu.emf.EMFMetamodelSupport
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.parsing.ASTParser
-import org.eclipse.emf.ecore.EPackage
-import java.util.function.Supplier
 
 class EMFCLITool<R : Node, P>(
     parserInstantiator: ParserInstantiator<P>,

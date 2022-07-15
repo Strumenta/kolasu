@@ -14,10 +14,6 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
-import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.File
 
 class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :

@@ -19,7 +19,7 @@ fun EObject.setSingleContainment(propertyName: String, propertyValue: EObject) {
     this.eSet(structuralFeature, propertyValue)
 }
 
-fun createResourceSet() : ResourceSet {
+fun createResourceSet(): ResourceSet {
     val resourceSet: ResourceSet = ResourceSetImpl()
     resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
     resourceSet.resourceFactoryRegistry.extensionToFactoryMap["xmi"] = XMIResourceFactoryImpl()
@@ -27,7 +27,7 @@ fun createResourceSet() : ResourceSet {
     return resourceSet
 }
 
-fun createResource(uri: URI) : Resource? {
+fun createResource(uri: URI): Resource? {
     val resourceSet = createResourceSet()
     return resourceSet.createResource(uri)
 }
