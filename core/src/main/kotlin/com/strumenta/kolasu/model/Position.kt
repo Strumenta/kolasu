@@ -122,6 +122,16 @@ class StringSource(val code: String? = null) : Source()
 class URLSource(val url: URL) : Source()
 
 /**
+ * This source is intended to be used for nodes that are "calculated".
+ * For example, nodes representing types that are derived by examining the code
+ * but cannot be associated to any specific point in the code.
+ *
+ * @param description this is a description of the source. It is used to describe the process that calculated the node.
+ *                    Examples of values could be "type inference".
+ */
+data class SyntheticSource(val description: String) : Source()
+
+/**
  * An area in a source file, from start to end.
  * The start point is the point right before the starting character.
  * The end point is the point right after the last character.
