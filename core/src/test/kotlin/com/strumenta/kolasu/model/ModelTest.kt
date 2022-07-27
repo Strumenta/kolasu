@@ -54,23 +54,12 @@ class ModelTest {
     fun duplicatePropertiesInheritedByInterface() {
         val properties = NodeOverridingName::class.nodeProperties
         assertEquals(1, properties.size)
-        val json = JsonGenerator().generateString(NodeOverridingName("foo"))
-        assertEquals("""{
-  "#type": "com.strumenta.kolasu.model.NodeOverridingName",
-  "name": "foo"
-}""", json)
     }
-
 
     @test
     fun duplicatePropertiesInheritedByClass() {
         val properties = ExtNode::class.nodeProperties
         assertEquals(1, properties.size)
-        val json = JsonGenerator().generateString(ExtNode(123))
-        assertEquals("""{
-  "#type": "com.strumenta.kolasu.model.ExtNode",
-  "attr1": 123
-}""", json)
     }
 
 }
