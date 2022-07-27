@@ -7,44 +7,36 @@ import kotlin.reflect.KVisibility.INTERNAL
 import kotlin.reflect.KVisibility.PRIVATE
 import kotlin.reflect.KVisibility.PROTECTED
 import kotlin.reflect.KVisibility.PUBLIC
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaType
 
 private const val indentBlock = "  "
 
-fun Node.relevantMemberProperties(withPosition: Boolean = false, withNodeType: Boolean = false) =
-    this.javaClass.kotlin.memberProperties
-        .filter {
-            !it.name.startsWith("component") &&
-                (it.name != "position" || withPosition) &&
-                (it.name != "nodeType" || withNodeType) &&
-                it.name != "properties" &&
-                it.name != "positionOverride" &&
-                it.name != "origin" &&
-                it.name != "destination" &&
-                it.name != "sourceText" &&
-                it.name != "source" &&
-                it.name != "parent"
-        }
+fun Node.relevantMemberProperties(withPosition: Boolean = false, withNodeType: Boolean = false):
+    List<KProperty1<Node, *>> {
+    val list = this.javaClass.kotlin.nodeProperties.toMutableList()
+    if (withPosition) {
+        list.add(Node::position)
+    }
+    if (withNodeType) {
+        list.add(Node::nodeType)
+    }
+    return list.toList()
+}
 
 data class DebugPrintConfiguration constructor(
     var skipEmptyCollections: Boolean = false,
     var skipNull: Boolean = false,
     var forceShowPosition: Boolean = false,
-    val hide: MutableList<String> = mutableListOf(),
-    var skipPrivateProperties: Boolean = true,
-    var skipProtectedProperties: Boolean = true,
-    var skipInternalProperties: Boolean = true,
-    var skipPublicProperties: Boolean = false
+    val hide: MutableList<String> = mutableListOf()
 )
 
 private fun KProperty1<Node, *>.hasRelevantVisibility(configuration: DebugPrintConfiguration): Boolean {
     return when (requireNotNull(this.visibility)) {
-        PRIVATE -> !configuration.skipPrivateProperties
-        PROTECTED -> !configuration.skipProtectedProperties
-        INTERNAL -> !configuration.skipInternalProperties
-        PUBLIC -> !configuration.skipPublicProperties
+        PRIVATE -> false
+        PROTECTED -> false
+        INTERNAL -> false
+        PUBLIC -> true
     }
 }
 
