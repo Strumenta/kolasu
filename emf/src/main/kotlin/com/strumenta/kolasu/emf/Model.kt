@@ -9,8 +9,6 @@ import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -335,10 +333,7 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
 }
 
 fun EObject.saveXMI(xmiFile: File) {
-    val resourceSet = ResourceSetImpl()
-    resourceSet.resourceFactoryRegistry.extensionToFactoryMap["xmi"] = XMIResourceFactoryImpl()
-    val uri: URI = URI.createFileURI(xmiFile.absolutePath)
-    val resource: Resource = resourceSet.createResource(uri)
+    val resource: Resource = createResource(URI.createFileURI(xmiFile.absolutePath))!!
     resource.contents.add(this)
     resource.save(null)
 }
@@ -352,10 +347,7 @@ fun EPackage.saveAsJson(jsonFile: File, restoringURI: Boolean = true) {
 }
 
 fun EObject.saveAsJson(jsonFile: File) {
-    val resourceSet = ResourceSetImpl()
-    resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
-    val uri: URI = URI.createFileURI(jsonFile.absolutePath)
-    val resource: Resource = resourceSet.createResource(uri)
+    val resource: Resource = createResource(URI.createFileURI(jsonFile.absolutePath))!!
     resource.contents.add(this)
     resource.save(null)
 }
