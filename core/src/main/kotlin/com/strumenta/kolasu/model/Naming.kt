@@ -44,8 +44,10 @@ data class ReferenceByName<N>(val name: String, var referred: N? = null) where N
  * Try to resolve the reference by finding a named element with a matching name.
  * The name match is performed in a case sensitive or insensitive way depending on the value of @param[caseInsensitive].
  */
-fun <N> ReferenceByName<N>.tryToResolve(candidates: List<N>, caseInsensitive: Boolean = false):
-    Boolean where N : PossiblyNamed {
+fun <N> ReferenceByName<N>.tryToResolve(
+    candidates: List<N>,
+    caseInsensitive: Boolean = false
+): Boolean where N : PossiblyNamed {
     val res: N? = candidates.find { if (it.name == null) false else it.name.equals(this.name, caseInsensitive) }
     this.referred = res
     return res != null
@@ -65,3 +67,27 @@ fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : Po
         true
     }
 }
+
+interface Symbol : PossiblyNamed
+
+data class Scope(
+    val symbols: MutableMap<String, MutableList<Symbol>> = mutableMapOf(),
+    val parent: Scope? = null,
+) {
+    constructor(symbols: MutableList<Symbol>, parent: Scope? = null) : this(
+        symbols = symbols.groupBy { it.name!! }.mapValues { it.value.toMutableList() }.toMutableMap(),
+        parent = parent
+    )
+
+    constructor(vararg symbols: Symbol, parent: Scope? = null) : this(
+        symbols = mutableListOf(*symbols),
+        parent = parent
+    )
+}
+
+fun Scope.lookup(symbolName: String, symbolType: Class<*> = Symbol::class.java): Symbol? =
+    this.symbols.getOrDefault(symbolName, mutableListOf()).find { symbol -> symbolType.isInstance(symbol) }
+        ?: this.parent?.lookup(symbolName, symbolType)
+
+fun Scope.add(symbol: Symbol) =
+    this.symbols.computeIfAbsent(symbol.name!!) { mutableListOf() }.add(symbol)
