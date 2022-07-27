@@ -3,16 +3,12 @@ package com.strumenta.kolasu.model
 import com.strumenta.kolasu.parsing.ParsingResult
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KProperty1
-import kotlin.reflect.KVisibility.INTERNAL
-import kotlin.reflect.KVisibility.PRIVATE
-import kotlin.reflect.KVisibility.PROTECTED
-import kotlin.reflect.KVisibility.PUBLIC
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaType
 
 private const val indentBlock = "  "
 
-fun<T: Node> T.relevantMemberProperties(withPosition: Boolean = false, withNodeType: Boolean = false):
+fun <T : Node> T.relevantMemberProperties(withPosition: Boolean = false, withNodeType: Boolean = false):
     List<KProperty1<T, *>> {
     val list = this::class.nodeProperties.map { it as KProperty1<T, *> }.toMutableList()
     if (withPosition) {
