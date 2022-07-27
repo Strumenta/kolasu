@@ -31,15 +31,6 @@ data class DebugPrintConfiguration constructor(
     val hide: MutableList<String> = mutableListOf()
 )
 
-private fun KProperty1<Node, *>.hasRelevantVisibility(configuration: DebugPrintConfiguration): Boolean {
-    return when (requireNotNull(this.visibility)) {
-        PRIVATE -> false
-        PROTECTED -> false
-        INTERNAL -> false
-        PUBLIC -> true
-    }
-}
-
 private fun Node.showSingleAttribute(indent: String, sb: StringBuilder, propertyName: String, value: Any?) {
     sb.append("$indent$indentBlock$propertyName = ${value}\n")
 }
