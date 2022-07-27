@@ -12,14 +12,14 @@ import kotlin.reflect.jvm.javaType
 
 private const val indentBlock = "  "
 
-fun Node.relevantMemberProperties(withPosition: Boolean = false, withNodeType: Boolean = false):
-    List<KProperty1<Node, *>> {
-    val list = this.javaClass.kotlin.nodeProperties.toMutableList()
+fun<T: Node> T.relevantMemberProperties(withPosition: Boolean = false, withNodeType: Boolean = false):
+    List<KProperty1<T, *>> {
+    val list = this::class.nodeProperties.map { it as KProperty1<T, *> }.toMutableList()
     if (withPosition) {
-        list.add(Node::position)
+        list.add(Node::position as KProperty1<T, *>)
     }
     if (withNodeType) {
-        list.add(Node::nodeType)
+        list.add(Node::nodeType as KProperty1<T, *>)
     }
     return list.toList()
 }
@@ -84,62 +84,58 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
             } else {
                 val mt = property.returnType.javaType
                 if (mt is ParameterizedType && mt.rawType == List::class.java) {
-                    if (property.hasRelevantVisibility(configuration)) {
-                        property.isAccessible = true
-                        if (property.get(this) == null && !configuration.skipNull) {
-                            sb.append("$indent$indentBlock${property.name} = null")
-                        } else {
-                            val value = property.get(this) as List<*>
-                            if (value.isEmpty()) {
-                                if (configuration.skipEmptyCollections) {
-                                    // nothing to do
-                                } else {
-                                    sb.append("$indent$indentBlock${property.name} = []\n")
-                                }
+                    property.isAccessible = true
+                    if (property.get(this) == null && !configuration.skipNull) {
+                        sb.append("$indent$indentBlock${property.name} = null")
+                    } else {
+                        val value = property.get(this) as List<*>
+                        if (value.isEmpty()) {
+                            if (configuration.skipEmptyCollections) {
+                                // nothing to do
                             } else {
-                                val paramType = mt.actualTypeArguments[0]
-                                if (paramType is Class<*> && paramType.kotlin.isANode()) {
-                                    sb.append("$indent$indentBlock${property.name} = [\n")
-                                    (value as List<Node>).forEach {
-                                        sb.append(
-                                            it.debugPrint(
-                                                indent + indentBlock + indentBlock, configuration
-                                            )
+                                sb.append("$indent$indentBlock${property.name} = []\n")
+                            }
+                        } else {
+                            val paramType = mt.actualTypeArguments[0]
+                            if (paramType is Class<*> && paramType.kotlin.isANode()) {
+                                sb.append("$indent$indentBlock${property.name} = [\n")
+                                (value as List<Node>).forEach {
+                                    sb.append(
+                                        it.debugPrint(
+                                            indent + indentBlock + indentBlock, configuration
                                         )
-                                    }
-                                    sb.append("$indent$indentBlock]\n")
-                                } else {
-                                    sb.append("$indent$indentBlock${property.name} = [\n")
-                                    value.forEach {
-                                        sb.append(
-                                            it?.debugPrint(
-                                                indent + indentBlock + indentBlock, configuration
-                                            )
-                                        )
-                                    }
-                                    sb.append("$indent$indentBlock]\n")
+                                    )
                                 }
+                                sb.append("$indent$indentBlock]\n")
+                            } else {
+                                sb.append("$indent$indentBlock${property.name} = [\n")
+                                value.forEach {
+                                    sb.append(
+                                        it?.debugPrint(
+                                            indent + indentBlock + indentBlock, configuration
+                                        )
+                                    )
+                                }
+                                sb.append("$indent$indentBlock]\n")
                             }
                         }
                     }
                 } else {
-                    if (property.hasRelevantVisibility(configuration)) {
-                        property.isAccessible = true
-                        val value = property.get(this)
-                        if (value == null && configuration.skipNull) {
-                            // nothing to do
-                        } else {
-                            if (value is Node) {
-                                sb.append("$indent$indentBlock${property.name} = [\n")
-                                sb.append(
-                                    value.debugPrint(
-                                        indent + indentBlock + indentBlock, configuration
-                                    )
+                    property.isAccessible = true
+                    val value = property.get(this)
+                    if (value == null && configuration.skipNull) {
+                        // nothing to do
+                    } else {
+                        if (value is Node) {
+                            sb.append("$indent$indentBlock${property.name} = [\n")
+                            sb.append(
+                                value.debugPrint(
+                                    indent + indentBlock + indentBlock, configuration
                                 )
-                                sb.append("$indent$indentBlock]\n")
-                            } else {
-                                this.showSingleAttribute(indent, sb, property.name, value)
-                            }
+                            )
+                            sb.append("$indent$indentBlock]\n")
+                        } else {
+                            this.showSingleAttribute(indent, sb, property.name, value)
                         }
                     }
                 }
