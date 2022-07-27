@@ -38,11 +38,21 @@ class MetamodelTest {
         assertEquals(7, ePackage.eClassifiers.size)
 
         val cu: EClass = ePackage.eClassifiers.find { it.name == "CompilationUnit" } as EClass
-        assertEquals(setOf("ASTNode", "Origin"), cu.eAllGenericSuperTypes.map{ it.eClassifier.name }.toSet())
+        assertEquals(setOf("ASTNode", "Origin"), cu.eAllGenericSuperTypes.map { it.eClassifier.name }.toSet())
         assertEquals(0, cu.eAllAttributes.size)
         assertEquals(setOf("position", "destination", "statements"), cu.eAllContainments.map { it.name }.toSet())
-        assertEquals(setOf("position", "destination", "origin", "statements"), cu.eAllReferences.map { it.name }.toSet())
-        assertEquals(setOf("position", "destination", "origin", "statements"), cu.eAllStructuralFeatures.map { it.name }.toSet())
+        assertEquals(
+            setOf("position", "destination", "origin", "statements"),
+            cu.eAllReferences.map {
+                it.name
+            }.toSet()
+        )
+        assertEquals(
+            setOf("position", "destination", "origin", "statements"),
+            cu.eAllStructuralFeatures.map {
+                it.name
+            }.toSet()
+        )
 
         val e: EClass = ePackage.eClassifiers.find { it.name == "Expression" } as EClass
         assertEquals(true, e.isAbstract)
