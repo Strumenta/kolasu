@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.parserbench
+package com.strumenta.kolasu.playground
 
 import com.strumenta.kolasu.emf.*
 import com.strumenta.kolasu.model.Node

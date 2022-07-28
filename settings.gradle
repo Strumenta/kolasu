@@ -1,5 +1,5 @@
 rootProject.name = 'kolasu'
 include 'core'
 include 'emf'
-include 'parserbench'
+include 'playground'
 include 'javalib'

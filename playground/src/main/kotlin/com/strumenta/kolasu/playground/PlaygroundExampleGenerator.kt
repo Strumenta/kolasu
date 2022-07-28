@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.parserbench
+package com.strumenta.kolasu.playground
 
 import com.google.gson.JsonObject
 import com.strumenta.kolasu.emf.EMFEnabledParser
@@ -14,7 +14,7 @@ import java.io.FileOutputStream
 import java.io.FileWriter
 import java.io.Writer
 
-class ParserBenchExampleGenerator(
+class PalaygroundExampleGenerator(
     val parser: EMFEnabledParser<*, *, *>,
     val directory: File,
     val failOnError: Boolean = true,
@@ -47,14 +47,14 @@ class ParserBenchExampleGenerator(
 
         val file = File(directory, "$name.json")
         FileWriter(file).use {
-            parsingResult.saveForParserBench(resource, it, name)
+            parsingResult.saveForPlayground(resource, it, name)
         }
     }
 }
 
 class ExampleGenerationFailure(val result: ParsingResult<*>, message: String) : RuntimeException(message)
 
-fun ParsingResult<*>.saveForParserBench(
+fun ParsingResult<*>.saveForPlayground(
     metamodel: Resource,
     writer: Writer,
     name: String
