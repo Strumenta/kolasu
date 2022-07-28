@@ -84,7 +84,11 @@ val ResultHandler = KolasuClassHandler(Result::class, KOLASU_METAMODEL.getEClass
 
 val StatementHandler = KolasuClassHandler(Statement::class, KOLASU_METAMODEL.getEClass("Statement"))
 val ExpressionHandler = KolasuClassHandler(Expression::class, KOLASU_METAMODEL.getEClass("Expression"))
-val EntityDeclarationHandler = KolasuClassHandler(EntityDeclaration::class, KOLASU_METAMODEL.getEClass("EntityDeclaration"))
+val EntityDeclarationHandler = KolasuClassHandler(
+    EntityDeclaration::class,
+    KOLASU_METAMODEL
+        .getEClass("EntityDeclaration")
+)
 
 val StringHandler = KolasuDataTypeHandler(String::class, EcorePackage.eINSTANCE.eString)
 val CharHandler = KolasuDataTypeHandler(Char::class, EcorePackage.eINSTANCE.eChar)

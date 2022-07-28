@@ -21,7 +21,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 data class NodeFoo(val name: String) : Node()
-class MyRoot(val foo: Int) : Node(), Statement {}
+class MyRoot(val foo: Int) : Node(), Statement
 
 class ModelTest {
 
@@ -168,5 +168,4 @@ class ModelTest {
         println(eo1.eClass().eSuperTypes)
         assertEquals(setOf("ASTNode", "Statement"), eo1.eClass().eSuperTypes.map { it.name }.toSet())
     }
-
 }
