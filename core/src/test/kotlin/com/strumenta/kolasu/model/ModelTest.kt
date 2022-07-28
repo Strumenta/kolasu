@@ -1,7 +1,5 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.serialization.JsonGenerator
-import com.strumenta.kolasu.serialization.JsonSerializer
 import kotlin.test.assertEquals
 import org.junit.Test as test
 
@@ -61,5 +59,4 @@ class ModelTest {
         val properties = ExtNode::class.nodeProperties
         assertEquals(1, properties.size)
     }
-
 }
