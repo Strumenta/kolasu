@@ -72,8 +72,7 @@ fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : Po
 
 interface Symbol : PossiblyNamed
 
-@Suppress("DataClassPrivateConstructor")
-data class Scope private constructor(
+class Scope private constructor(
     private val symbols: MutableMap<String, MutableList<Symbol>> = mutableMapOf(),
     private val parent: Scope? = null,
 ) {
