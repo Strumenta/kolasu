@@ -136,7 +136,8 @@ class ModelTest {
     fun lookupSymbolByNameAndTypeNotFoundDifferentType() {
         val scope = Scope(ASymbol(name = "a"))
         assertNull(scope.lookup(symbolName = "a", symbolType = BSymbol::class))
-    
+    }
+
     @test
     fun duplicatePropertiesInheritedByInterface() {
         val properties = NodeOverridingName::class.nodeProperties
