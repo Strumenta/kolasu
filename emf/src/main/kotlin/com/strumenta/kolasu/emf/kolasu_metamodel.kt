@@ -2,6 +2,7 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
+import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.EcorePackage
@@ -10,7 +11,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
-val ASTNODE_ECLASS by lazy { KOLASU_METAMODEL.eClassifiers.find { it.name == "ASTNode" }!! }
+val ASTNODE_ECLASS by lazy { KOLASU_METAMODEL.eClassifiers.find { it.name == "ASTNode" }!! as EClass }
 
 private fun createKolasuMetamodel(): EPackage {
     val ePackage = EcoreFactory.eINSTANCE.createEPackage()

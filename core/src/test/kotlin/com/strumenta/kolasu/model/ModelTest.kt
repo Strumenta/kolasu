@@ -10,8 +10,14 @@ class MyNode(override val name: String) : Node(), Named
 
 data class ASymbol(override val name: String, val index: Int = 0) : Symbol
 data class BSymbol(override val name: String, val index: Int = 0) : Symbol
-
 data class USymbol(override val name: String? = null) : Symbol
+
+data class NodeOverridingName(
+    override var name: String
+) : Node(), Named
+
+open class BaseNode(open var attr1: Int) : Node()
+data class ExtNode(override var attr1: Int) : BaseNode(attr1)
 
 class ModelTest {
 
@@ -130,5 +136,16 @@ class ModelTest {
     fun lookupSymbolByNameAndTypeNotFoundDifferentType() {
         val scope = Scope(ASymbol(name = "a"))
         assertNull(scope.lookup(symbolName = "a", symbolType = BSymbol::class))
+    
+    @test
+    fun duplicatePropertiesInheritedByInterface() {
+        val properties = NodeOverridingName::class.nodeProperties
+        assertEquals(1, properties.size)
+    }
+
+    @test
+    fun duplicatePropertiesInheritedByClass() {
+        val properties = ExtNode::class.nodeProperties
+        assertEquals(1, properties.size)
     }
 }

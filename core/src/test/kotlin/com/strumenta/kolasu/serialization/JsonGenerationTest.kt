@@ -1,7 +1,9 @@
 package com.strumenta.kolasu.serialization
 
 import com.google.gson.stream.JsonWriter
+import com.strumenta.kolasu.model.ExtNode
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeOverridingName
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
@@ -114,6 +116,30 @@ class JsonGenerationTest {
                 |{"#type":"com.strumenta.kolasu.serialization.Content","annidatedContent":
                 |{"#type":"com.strumenta.kolasu.serialization.Content","annidatedContent":null,"id":4},"id":3},"id":2}],
                 |"name":"Section1"},"otherSections":[]}""".trimMargin().replace("\n", ""),
+            json
+        )
+    }
+
+    @Test
+    fun duplicatePropertiesInheritedByInterface() {
+        val json = JsonGenerator().generateString(NodeOverridingName("foo"))
+        assertEquals(
+            """{
+  "#type": "com.strumenta.kolasu.model.NodeOverridingName",
+  "name": "foo"
+}""",
+            json
+        )
+    }
+
+    @Test
+    fun duplicatePropertiesInheritedByClass() {
+        val json = JsonGenerator().generateString(ExtNode(123))
+        assertEquals(
+            """{
+  "#type": "com.strumenta.kolasu.model.ExtNode",
+  "attr1": 123
+}""",
             json
         )
     }
