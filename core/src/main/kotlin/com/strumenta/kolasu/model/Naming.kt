@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.model
 
+import kotlin.reflect.KClass
+
 /**
  * An entity that can have a name
  */
@@ -70,24 +72,30 @@ fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : Po
 
 interface Symbol : PossiblyNamed
 
-data class Scope(
-    val symbols: MutableMap<String, MutableList<Symbol>> = mutableMapOf(),
-    val parent: Scope? = null,
+@Suppress("DataClassPrivateConstructor")
+data class Scope private constructor(
+    private val symbols: MutableMap<String, MutableList<Symbol>> = mutableMapOf(),
+    private val parent: Scope? = null,
 ) {
-    constructor(symbols: MutableList<Symbol>, parent: Scope? = null) : this(
-        symbols = symbols.groupBy { it.name!! }.mapValues { it.value.toMutableList() }.toMutableMap(),
+    constructor(vararg symbols: Symbol, parent: Scope? = null) : this(symbols = listOf(*symbols), parent = parent)
+
+    constructor(symbols: List<Symbol> = emptyList(), parent: Scope? = null) : this(
+        symbols = symbols.groupBy { it.name ?: throw IllegalArgumentException("All given symbols must have a name") }
+            .mapValues { it.value.toMutableList() }.toMutableMap(),
         parent = parent
     )
 
-    constructor(vararg symbols: Symbol, parent: Scope? = null) : this(
-        symbols = mutableListOf(*symbols),
-        parent = parent
-    )
+    fun add(symbol: Symbol) {
+        val symbolName: String = symbol.name ?: throw IllegalArgumentException("The given symbol must have a name")
+        this.symbols.computeIfAbsent(symbolName) { mutableListOf() }.add(symbol)
+    }
+
+    fun lookup(symbolName: String, symbolType: KClass<*> = Symbol::class): Symbol? {
+        return this.symbols.getOrDefault(symbolName, mutableListOf()).find { symbolType.isInstance(it) }
+            ?: this.parent?.lookup(symbolName, symbolType)
+    }
+
+    fun getSymbols(): Map<String, List<Symbol>> {
+        return this.symbols
+    }
 }
-
-fun Scope.lookup(symbolName: String, symbolType: Class<*> = Symbol::class.java): Symbol? =
-    this.symbols.getOrDefault(symbolName, mutableListOf()).find { symbol -> symbolType.isInstance(symbol) }
-        ?: this.parent?.lookup(symbolName, symbolType)
-
-fun Scope.add(symbol: Symbol) =
-    this.symbols.computeIfAbsent(symbol.name!!) { mutableListOf() }.add(symbol)
