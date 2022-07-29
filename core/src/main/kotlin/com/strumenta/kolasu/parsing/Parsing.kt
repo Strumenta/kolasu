@@ -415,7 +415,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     fun processProperties(
         node: Node,
         propertyOperation: (PropertyDescription) -> Unit,
-        propertiesToIgnore: Set<String> = DEFAULT_IGNORED_PROPERTIES
+        propertiesToIgnore: Set<String> = emptySet()
     ) = node.processProperties(propertiesToIgnore, propertyOperation)
 
     /**
