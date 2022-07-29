@@ -14,7 +14,7 @@ import java.io.FileOutputStream
 import java.io.FileWriter
 import java.io.Writer
 
-class PalaygroundExampleGenerator(
+class PlaygroundExampleGenerator(
     val parser: EMFEnabledParser<*, *, *>,
     val directory: File,
     val failOnError: Boolean = true,
