@@ -18,6 +18,7 @@ import kotlin.reflect.KClassifier
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeParameter
 import kotlin.reflect.full.*
+import kotlin.reflect.jvm.internal.impl.types.Variance
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean
@@ -290,6 +291,12 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         eClass.isAbstract = kClass.isAbstract || kClass.isSealed
         eClass.isInterface = kClass.java.isInterface
 
+        kClass.typeParameters.forEach { kTypeParameter : KTypeParameter ->
+            eClass.eTypeParameters.add(EcoreFactory.eINSTANCE.createETypeParameter().apply {
+                name = kTypeParameter.name
+            })
+        }
+
         kClass.processProperties { prop ->
             try {
                 if (eClass.eAllStructuralFeatures.any { sf -> sf.name == prop.name }) {
@@ -354,29 +361,59 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             ec.upperBound = 1
         }
         ec.isContainment = true
-        setType(ec, classifier)
+        setType(ec, classifier, eClass)
         eClass.eStructuralFeatures.add(ec)
     }
 
-    private fun setType(element: ETypedElement, classifier: KClassifier?) {
+    private fun setType(element: ETypedElement, classifier: KClassifier?, container: EClass) {
         when (classifier) {
-            is KClass<*> -> element.eType = provideClass(classifier)
-            is KTypeParameter -> {
-                val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
-                    name = classifier.name
-                    classifier.upperBounds.forEach {
-                        if (it is KClass<*>) {
-                            eBounds.add(
-                                EcoreFactory.eINSTANCE.createEGenericType().apply {
-                                    eClassifier = provideClass(it)
-                                }
-                            )
-                        }
+            is KClass<*> -> {
+                if (classifier.typeParameters.isEmpty()) {
+                    element.eType = provideClass(classifier)
+                } else {
+                    element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
+                        eClassifier = provideClass(classifier)
+                        eTypeArguments.addAll( classifier.typeParameters.map {
+                            EcoreFactory.eINSTANCE.createEGenericType().apply {
+                            }
+                        } )
                     }
                 }
+            }
+            is KTypeParameter -> {
                 element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
-                    eTypeParameter = typeParameter
+                    eTypeParameter = container.eTypeParameters.find { it.name == classifier.name } ?: throw IllegalStateException("Type parameter not found")
                 }
+                // FIXME classifier.
+//                val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
+//                    name = classifier.name
+//                    classifier.upperBounds.forEach {
+//                        if (it is KClass<*>) {
+//                            eBounds.add(
+//                                EcoreFactory.eINSTANCE.createEGenericType().apply {
+//                                    eClassifier = provideClass(it)
+//                                }
+//                            )
+//                        }
+//                    }
+//                }
+
+                // FIXME Trovare la classe a cui si rifa il type parameter e inserire li
+//
+//                element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
+//                    eTypeParameter = typeParameter
+//                    //this.eClassifier =
+////                    eLowerBound
+////                    when (classifier.variance.name) {
+////                        Variance.OUT_VARIANCE.label.toUpperCase() -> {
+////
+////                        }
+////                        else -> TODO("Variance ${classifier.variance.name}")
+////                    }
+//                    //eRawType = EcoreFactory.eINSTANCE.create
+//                }
+//                element.eType = element.eGenericType
+//                ePackage.eResource().contents.add(element.eGenericType)
             }
             else -> throw Error("Not a valid classifier: $classifier")
         }
