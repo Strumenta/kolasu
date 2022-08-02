@@ -54,7 +54,9 @@ class KolasuMetamodelTest {
 
         assertEquals(setOf("Pair", "Serializable", "ANodeWithAPair"), ePackage.eClassifiers.map { it.name }.toSet())
 
-        assertEquals(jsonFile.readText(), """{
+        assertEquals(
+            jsonFile.readText(),
+            """{
   "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
   "name" : "SimpleMM",
   "nsURI" : "https://strumenta.com/simplemm",
@@ -127,6 +129,7 @@ class KolasuMetamodelTest {
       "containment" : true
     } ]
   } ]
-}""")
+}"""
+        )
     }
 }

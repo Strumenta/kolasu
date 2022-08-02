@@ -284,7 +284,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         eClass.eStructuralFeatures.add(ec)
     }
 
-    private fun provideType(valueType: KTypeProjection) : EGenericType {
+    private fun provideType(valueType: KTypeProjection): EGenericType {
         when (valueType.variance) {
             KVariance.INVARIANT -> {
                 return provideType(valueType.type!!)
@@ -293,7 +293,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         }
     }
 
-    private fun provideType(valueType: KType) : EGenericType {
+    private fun provideType(valueType: KType): EGenericType {
         val dataType = provideDataType(valueType.withNullability(false))
         if (dataType != null) {
             return EcoreFactory.eINSTANCE.createEGenericType().apply {
@@ -301,7 +301,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             }
         }
         if (valueType.arguments.isNotEmpty()) {
-            TODO("Not yet supported: type arguments in ${valueType}")
+            TODO("Not yet supported: type arguments in $valueType")
         }
         if (valueType.classifier is KClass<*>) {
             return EcoreFactory.eINSTANCE.createEGenericType().apply {
