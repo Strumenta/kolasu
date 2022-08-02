@@ -13,10 +13,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.*
 import kotlin.collections.HashMap
-import kotlin.reflect.KClass
-import kotlin.reflect.KClassifier
-import kotlin.reflect.KType
-import kotlin.reflect.KTypeParameter
+import kotlin.reflect.*
 import kotlin.reflect.full.*
 
 interface EDataTypeHandler {
@@ -63,7 +60,7 @@ class KolasuClassHandler(val kolasuKClass: KClass<*>, val kolasuEClass: EClass) 
 
 class KolasuDataTypeHandler(val kolasuKClass: KClass<*>, val kolasuDataType: EDataType) : EDataTypeHandler {
     override fun canHandle(ktype: KType): Boolean {
-        return ktype == kolasuKClass.createType()
+        return ktype.classifier == kolasuKClass.createType().classifier && ktype.arguments.isEmpty()
     }
 
     override fun toDataType(ktype: KType): EDataType {
@@ -85,6 +82,7 @@ val ResultHandler = KolasuClassHandler(Result::class, KOLASU_METAMODEL.getEClass
 val StringHandler = KolasuDataTypeHandler(String::class, KOLASU_METAMODEL.getEClassifier("string") as EDataType)
 val BooleanHandler = KolasuDataTypeHandler(Boolean::class, KOLASU_METAMODEL.getEClassifier("boolean") as EDataType)
 val IntHandler = KolasuDataTypeHandler(Int::class, KOLASU_METAMODEL.getEClassifier("int") as EDataType)
+val IntegerHandler = KolasuDataTypeHandler(Integer::class, KOLASU_METAMODEL.getEClassifier("int") as EDataType)
 val BigIntegerHandler = KolasuDataTypeHandler(
     BigInteger::class,
     KOLASU_METAMODEL.getEClassifier("BigInteger") as EDataType
@@ -128,6 +126,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         dataTypeHandlers.add(StringHandler)
         dataTypeHandlers.add(BooleanHandler)
         dataTypeHandlers.add(IntHandler)
+        dataTypeHandlers.add(IntegerHandler)
         dataTypeHandlers.add(LongHandler)
         dataTypeHandlers.add(BigIntegerHandler)
         dataTypeHandlers.add(BigDecimalHandler)
@@ -231,15 +230,15 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                     // skip
                 } else {
                     // do not process inherited properties
-                    val classifier = prop.valueType.classifier
+                    val valueType = prop.valueType
                     if (prop.provideNodes) {
-                        registerReference(prop, classifier, eClass)
+                        registerReference(prop, valueType, eClass)
                     } else {
                         val nullable = prop.valueType.isMarkedNullable
                         val dataType = provideDataType(prop.valueType.withNullability(false))
                         if (dataType == null) {
                             // We can treat it like a class
-                            registerReference(prop, classifier, eClass)
+                            registerReference(prop, valueType, eClass)
                         } else {
                             val ea = EcoreFactory.eINSTANCE.createEAttribute()
                             ea.name = prop.name
@@ -264,7 +263,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
 
     private fun registerReference(
         prop: PropertyTypeDescription,
-        classifier: KClassifier?,
+        valueType: KType,
         eClass: EClass
     ) {
         val ec = EcoreFactory.eINSTANCE.createEReference()
@@ -281,26 +280,54 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         // on the class should be visible. We are not expecting containing classes to expose
         // type parameters
         val visibleTypeParameters = eClass.eTypeParameters.associateBy { it.name }
-        setType(ec, classifier, visibleTypeParameters)
+        setType(ec, valueType, visibleTypeParameters)
         eClass.eStructuralFeatures.add(ec)
+    }
+
+    private fun provideType(valueType: KTypeProjection) : EGenericType {
+        when (valueType.variance) {
+            KVariance.INVARIANT -> {
+                return provideType(valueType.type!!)
+            }
+            else -> TODO("Variance ${valueType.variance} not yet sypported")
+        }
+    }
+
+    private fun provideType(valueType: KType) : EGenericType {
+        val dataType = provideDataType(valueType.withNullability(false))
+        if (dataType != null) {
+            return EcoreFactory.eINSTANCE.createEGenericType().apply {
+                eClassifier = dataType
+            }
+        }
+        if (valueType.arguments.isNotEmpty()) {
+            TODO("Not yet supported")
+        }
+        if (valueType.classifier is KClass<*>) {
+            return EcoreFactory.eINSTANCE.createEGenericType().apply {
+                eClassifier = provideClass(valueType.classifier as KClass<*>)
+            }
+        } else {
+            TODO("Not yet supported")
+        }
     }
 
     private fun setType(
         element: ETypedElement,
-        classifier: KClassifier?,
+        valueType: KType,
         visibleTypeParameters: Map<String, ETypeParameter>
     ) {
-        when (classifier) {
+        when (val classifier = valueType.classifier) {
             is KClass<*> -> {
                 if (classifier.typeParameters.isEmpty()) {
                     element.eType = provideClass(classifier)
                 } else {
                     element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
                         eClassifier = provideClass(classifier)
+                        require(classifier.typeParameters.size == valueType.arguments.size)
                         eTypeArguments.addAll(
-                            classifier.typeParameters.map {
-                                EcoreFactory.eINSTANCE.createEGenericType().apply {
-                                }
+                            valueType.arguments.map {
+                                provideType(it)
                             }
                         )
                     }
