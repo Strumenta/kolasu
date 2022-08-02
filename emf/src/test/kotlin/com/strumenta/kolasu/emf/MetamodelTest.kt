@@ -2,7 +2,6 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeType
-import com.strumenta.kolasu.model.Position
 import org.eclipse.emf.ecore.EClass
 import org.junit.Test
 import java.io.File
