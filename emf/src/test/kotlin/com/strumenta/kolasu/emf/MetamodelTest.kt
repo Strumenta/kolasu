@@ -2,6 +2,7 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeType
+import com.strumenta.kolasu.model.Position
 import org.eclipse.emf.ecore.EClass
 import org.junit.Test
 import java.io.File
@@ -24,6 +25,12 @@ data class AltCompilationUnit(val elements: List<SomeInterface>) : Node()
 
 class MetamodelTest {
 
+    private fun temporaryFile(suffix: String): File {
+        val f = kotlin.io.path.createTempFile(suffix = suffix).toFile()
+        f.deleteOnExit()
+        return f
+    }
+
     @Test
     fun generateSimpleMetamodel() {
         val metamodelBuilder = MetamodelBuilder(
@@ -32,8 +39,9 @@ class MetamodelTest {
         )
         metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
-        ePackage.saveEcore(File("simplemm.ecore"))
-        ePackage.saveAsJson(File("simplemm.json"))
+
+        ePackage.saveEcore(temporaryFile("simplemm.ecore"))
+        ePackage.saveAsJson(temporaryFile("simplemm.json"))
         assertEquals("com.strumenta.kolasu.emf", ePackage.name)
         assertEquals(7, ePackage.eClassifiers.size)
 
@@ -58,10 +66,14 @@ class MetamodelTest {
         assertEquals(true, e.isAbstract)
 
         val sl: EClass = ePackage.eClassifiers.find { it.name == "StringLiteral" } as EClass
+        assertEquals(
+            2, sl.eAllSuperTypes.size,
+            sl.eAllSuperTypes.joinToString(", ") { it.name }
+        )
         assertEquals(1, sl.eSuperTypes.size)
         assertEquals(1, sl.eAttributes.size)
-        assertEquals(2, sl.eAllContainments.size)
-        assertEquals(0, sl.eReferences.size)
+        assertEquals(1, sl.eAllContainments.size, sl.eAllContainments.joinToString(", ") { it.name })
+        assertEquals(1, sl.eAllReferences.size, sl.eAllReferences.joinToString(", ") { it.name })
         assertEquals(1, sl.eStructuralFeatures.size)
 
         val vd: EClass = ePackage.eClassifiers.find { it.name == "VarDeclaration" } as EClass

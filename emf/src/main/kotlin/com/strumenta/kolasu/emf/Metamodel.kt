@@ -16,6 +16,10 @@ import java.time.LocalTime
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
+import java.util.*
+import kotlin.collections.HashMap
+import kotlin.reflect.*
+import kotlin.reflect.full.*
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean
@@ -38,11 +42,11 @@ interface EClassTypeHandler {
 
 interface ClassifiersProvider {
     fun isDataType(ktype: KType): Boolean {
-        try {
+        return try {
             provideDataType(ktype)
-            return true
+            true
         } catch (e: Exception) {
-            return false
+            false
         }
     }
     fun provideClass(kClass: KClass<*>): EClass
@@ -61,7 +65,7 @@ class KolasuClassHandler(val kolasuKClass: KClass<*>, val kolasuEClass: EClass) 
 
 class KolasuDataTypeHandler(val kolasuKClass: KClass<*>, val kolasuDataType: EDataType) : EDataTypeHandler {
     override fun canHandle(ktype: KType): Boolean {
-        return ktype == kolasuKClass.createType()
+        return ktype.classifier == kolasuKClass && ktype.arguments.isEmpty()
     }
 
     override fun toDataType(ktype: KType): EDataType {
@@ -86,13 +90,14 @@ val StringHandler = KolasuDataTypeHandler(String::class, EcorePackage.eINSTANCE.
 val CharHandler = KolasuDataTypeHandler(Char::class, EcorePackage.eINSTANCE.eChar)
 val BooleanHandler = KolasuDataTypeHandler(Boolean::class, EcorePackage.eINSTANCE.eBoolean)
 val IntHandler = KolasuDataTypeHandler(Int::class, EcorePackage.eINSTANCE.eInt)
+val IntegerHandler = KolasuDataTypeHandler(Integer::class, KOLASU_METAMODEL.getEClassifier("int") as EDataType)
 val BigIntegerHandler = KolasuDataTypeHandler(
     BigInteger::class,
-    KOLASU_METAMODEL.getEClassifier("BigInteger") as EDataType
+    KOLASU_METAMODEL.getEClassifier(BigInteger::class.simpleName) as EDataType
 )
 val BigDecimalHandler = KolasuDataTypeHandler(
     BigDecimal::class,
-    KOLASU_METAMODEL.getEClassifier("BigDecimal") as EDataType
+    KOLASU_METAMODEL.getEClassifier(BigDecimal::class.simpleName) as EDataType
 )
 val LongHandler = KolasuDataTypeHandler(Long::class, EcorePackage.eINSTANCE.eLong)
 
