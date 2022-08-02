@@ -47,18 +47,24 @@ class KolasuMetamodelTest {
             resourceSet.createResource(mmuri)
                 ?: throw IOException("Unsupported destination: $mmuri")
 
-        val javaIOMetamodelBuilder = MetamodelBuilder("java.io", "https://strumenta.com/javaio", "javaio",
-            resource)
+        val javaIOMetamodelBuilder = MetamodelBuilder(
+            "java.io", "https://strumenta.com/javaio", "javaio",
+            resource
+        )
         javaIOMetamodelBuilder.provideClass(java.io.Serializable::class)
         javaIOMetamodelBuilder.generate()
 
-        val dependencyMetamodelBuilder = MetamodelBuilder("kotlin", "https://strumenta.com/kotlin", "kotlin",
-            resource)
+        val dependencyMetamodelBuilder = MetamodelBuilder(
+            "kotlin", "https://strumenta.com/kotlin", "kotlin",
+            resource
+        )
         dependencyMetamodelBuilder.provideClass(Pair::class)
         dependencyMetamodelBuilder.generate()
 
-        val metamodelBuilder = MetamodelBuilder("com.strumenta.kolasu.emf", "https://strumenta.com/simplemm", "simplemm",
-            resource)
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf", "https://strumenta.com/simplemm", "simplemm",
+            resource
+        )
         metamodelBuilder.provideClass(ANodeWithAPair::class)
         val ePackage = metamodelBuilder.generate()
 
@@ -152,7 +158,8 @@ class KolasuMetamodelTest {
       "containment" : true
     } ]
   } ]
-} ]""", jsonFile.readText()
+} ]""",
+            jsonFile.readText()
         )
     }
 }
