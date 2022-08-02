@@ -60,7 +60,7 @@ class KolasuClassHandler(val kolasuKClass: KClass<*>, val kolasuEClass: EClass) 
 
 class KolasuDataTypeHandler(val kolasuKClass: KClass<*>, val kolasuDataType: EDataType) : EDataTypeHandler {
     override fun canHandle(ktype: KType): Boolean {
-        return ktype.classifier == kolasuKClass.createType().classifier && ktype.arguments.isEmpty()
+        return ktype.classifier == kolasuKClass && ktype.arguments.isEmpty()
     }
 
     override fun toDataType(ktype: KType): EDataType {
@@ -85,11 +85,11 @@ val IntHandler = KolasuDataTypeHandler(Int::class, KOLASU_METAMODEL.getEClassifi
 val IntegerHandler = KolasuDataTypeHandler(Integer::class, KOLASU_METAMODEL.getEClassifier("int") as EDataType)
 val BigIntegerHandler = KolasuDataTypeHandler(
     BigInteger::class,
-    KOLASU_METAMODEL.getEClassifier("BigInteger") as EDataType
+    KOLASU_METAMODEL.getEClassifier(BigInteger::class.simpleName) as EDataType
 )
 val BigDecimalHandler = KolasuDataTypeHandler(
     BigDecimal::class,
-    KOLASU_METAMODEL.getEClassifier("BigDecimal") as EDataType
+    KOLASU_METAMODEL.getEClassifier(BigDecimal::class.simpleName) as EDataType
 )
 val LongHandler = KolasuDataTypeHandler(Long::class, KOLASU_METAMODEL.getEClassifier("long") as EDataType)
 
@@ -301,14 +301,14 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             }
         }
         if (valueType.arguments.isNotEmpty()) {
-            TODO("Not yet supported")
+            TODO("Not yet supported: type arguments in ${valueType}")
         }
         if (valueType.classifier is KClass<*>) {
             return EcoreFactory.eINSTANCE.createEGenericType().apply {
                 eClassifier = provideClass(valueType.classifier as KClass<*>)
             }
         } else {
-            TODO("Not yet supported")
+            TODO("Not yet supported: ${valueType.classifier}")
         }
     }
 

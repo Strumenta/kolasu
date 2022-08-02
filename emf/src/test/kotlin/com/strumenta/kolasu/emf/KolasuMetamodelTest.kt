@@ -30,17 +30,6 @@ class KolasuMetamodelTest {
     }
 
     @Test
-    fun generateSimpleMetamodel() {
-        val metamodelBuilder = MetamodelBuilder("SimpleMM", "https://strumenta.com/simplemm", "simplemm")
-        metamodelBuilder.provideClass(CompilationUnit::class)
-        val ePackage = metamodelBuilder.generate()
-        ePackage.saveEcore(temporaryFile("simplemm.ecore"))
-        ePackage.saveAsJson(temporaryFile("simplemm.json"))
-        assertEquals("SimpleMM", ePackage.name)
-        assertEquals(7, ePackage.eClassifiers.size)
-    }
-
-    @Test
     fun handleJavaLangInteger() {
         assertTrue(IntegerHandler.canHandle(java.lang.Integer::class.createType()))
     }
