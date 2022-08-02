@@ -36,12 +36,9 @@ class KolasuMetamodelTest {
 
     @Test
     fun generateMetamodelWithGenerics() {
-        val metamodelBuilder = MetamodelBuilder("SimpleMM", "https://strumenta.com/simplemm", "simplemm")
-        metamodelBuilder.provideClass(ANodeWithAPair::class)
-        val ePackage = metamodelBuilder.generate()
-
         val jsonFile = temporaryFile("metamodel.json")
         val mmuri = URI.createFileURI(jsonFile.absolutePath)
+
         val resourceSet: ResourceSet = ResourceSetImpl()
         resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
         resourceSet.resourceFactoryRegistry.extensionToFactoryMap["xmi"] = XMIResourceFactoryImpl()
@@ -49,24 +46,44 @@ class KolasuMetamodelTest {
         val resource =
             resourceSet.createResource(mmuri)
                 ?: throw IOException("Unsupported destination: $mmuri")
-        resource.contents.add(ePackage)
+
+        val javaIOMetamodelBuilder = MetamodelBuilder("java.io", "https://strumenta.com/javaio", "javaio",
+            resource)
+        javaIOMetamodelBuilder.provideClass(java.io.Serializable::class)
+        javaIOMetamodelBuilder.generate()
+
+        val dependencyMetamodelBuilder = MetamodelBuilder("kotlin", "https://strumenta.com/kotlin", "kotlin",
+            resource)
+        dependencyMetamodelBuilder.provideClass(Pair::class)
+        dependencyMetamodelBuilder.generate()
+
+        val metamodelBuilder = MetamodelBuilder("com.strumenta.kolasu.emf", "https://strumenta.com/simplemm", "simplemm",
+            resource)
+        metamodelBuilder.provideClass(ANodeWithAPair::class)
+        val ePackage = metamodelBuilder.generate()
+
         resource.save(null)
 
-        assertEquals(setOf("Pair", "Serializable", "ANodeWithAPair"), ePackage.eClassifiers.map { it.name }.toSet())
+        assertEquals(setOf("ANodeWithAPair"), ePackage.eClassifiers.map { it.name }.toSet())
 
         assertEquals(
-            jsonFile.readText(),
-            """{
+            """[ {
   "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
-  "name" : "SimpleMM",
-  "nsURI" : "https://strumenta.com/simplemm",
-  "nsPrefix" : "simplemm",
+  "name" : "java.io",
+  "nsURI" : "https://strumenta.com/javaio",
+  "nsPrefix" : "javaio",
   "eClassifiers" : [ {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
     "name" : "Serializable",
     "abstract" : true,
     "interface" : true
-  }, {
+  } ]
+}, {
+  "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
+  "name" : "kotlin",
+  "nsURI" : "https://strumenta.com/kotlin",
+  "nsPrefix" : "kotlin",
+  "eClassifiers" : [ {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
     "name" : "Pair",
     "eTypeParameters" : [ {
@@ -76,7 +93,7 @@ class KolasuMetamodelTest {
     } ],
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "//Serializable"
+      "${'$'}ref" : "/0/Serializable"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
@@ -84,7 +101,7 @@ class KolasuMetamodelTest {
       "eGenericType" : {
         "eTypeParameter" : {
           "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//ETypeParameter",
-          "${'$'}ref" : "//Pair/A"
+          "${'$'}ref" : "/1/Pair/A"
         }
       },
       "containment" : true
@@ -94,17 +111,23 @@ class KolasuMetamodelTest {
       "eGenericType" : {
         "eTypeParameter" : {
           "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//ETypeParameter",
-          "${'$'}ref" : "//Pair/B"
+          "${'$'}ref" : "/1/Pair/B"
         }
       },
       "containment" : true
     } ]
-  }, {
+  } ]
+}, {
+  "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
+  "name" : "com.strumenta.kolasu.emf",
+  "nsURI" : "https://strumenta.com/simplemm",
+  "nsPrefix" : "simplemm",
+  "eClassifiers" : [ {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
     "name" : "ANodeWithAPair",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "https://strumenta.com/kolasu/v1#//ASTNode"
+      "${'$'}ref" : "https://strumenta.com/kolasu/v2#//ASTNode"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
@@ -113,23 +136,23 @@ class KolasuMetamodelTest {
         "eTypeArguments" : [ {
           "eClassifier" : {
             "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-            "${'$'}ref" : "https://strumenta.com/kolasu/v1#//string"
+            "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
           }
         }, {
           "eClassifier" : {
             "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-            "${'$'}ref" : "https://strumenta.com/kolasu/v1#//int"
+            "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
           }
         } ],
         "eClassifier" : {
           "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-          "${'$'}ref" : "//Pair"
+          "${'$'}ref" : "/1/Pair"
         }
       },
       "containment" : true
     } ]
   } ]
-}"""
+} ]""", jsonFile.readText()
         )
     }
 }

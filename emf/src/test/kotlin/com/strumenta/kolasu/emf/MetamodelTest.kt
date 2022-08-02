@@ -66,13 +66,13 @@ class MetamodelTest {
 
         val sl: EClass = ePackage.eClassifiers.find { it.name == "StringLiteral" } as EClass
         assertEquals(
-            2, sl.eAllSuperTypes.size,
+            3, sl.eAllSuperTypes.size,
             sl.eAllSuperTypes.joinToString(", ") { it.name }
         )
         assertEquals(1, sl.eSuperTypes.size)
         assertEquals(1, sl.eAttributes.size)
-        assertEquals(1, sl.eAllContainments.size, sl.eAllContainments.joinToString(", ") { it.name })
-        assertEquals(1, sl.eAllReferences.size, sl.eAllReferences.joinToString(", ") { it.name })
+        assertEquals(2, sl.eAllContainments.size, sl.eAllContainments.joinToString(", ") { it.name })
+        assertEquals(3, sl.eAllReferences.size, sl.eAllReferences.joinToString(", ") { it.name })
         assertEquals(1, sl.eStructuralFeatures.size)
 
         val vd: EClass = ePackage.eClassifiers.find { it.name == "VarDeclaration" } as EClass

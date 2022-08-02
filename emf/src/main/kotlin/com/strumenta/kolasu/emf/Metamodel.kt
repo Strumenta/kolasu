@@ -88,7 +88,7 @@ val StringHandler = KolasuDataTypeHandler(String::class, EcorePackage.eINSTANCE.
 val CharHandler = KolasuDataTypeHandler(Char::class, EcorePackage.eINSTANCE.eChar)
 val BooleanHandler = KolasuDataTypeHandler(Boolean::class, EcorePackage.eINSTANCE.eBoolean)
 val IntHandler = KolasuDataTypeHandler(Int::class, EcorePackage.eINSTANCE.eInt)
-val IntegerHandler = KolasuDataTypeHandler(Integer::class, KOLASU_METAMODEL.getEClassifier("int") as EDataType)
+val IntegerHandler = KolasuDataTypeHandler(Integer::class, EcorePackage.eINSTANCE.eInt)
 val BigIntegerHandler = KolasuDataTypeHandler(
     BigInteger::class,
     KOLASU_METAMODEL.getEClassifier(BigInteger::class.simpleName) as EDataType
