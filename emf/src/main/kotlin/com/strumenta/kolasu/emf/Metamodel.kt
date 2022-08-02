@@ -18,7 +18,6 @@ import kotlin.reflect.KClassifier
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeParameter
 import kotlin.reflect.full.*
-import kotlin.reflect.jvm.internal.impl.types.Variance
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean
@@ -41,89 +40,16 @@ interface EClassTypeHandler {
 
 interface ClassifiersProvider {
     fun isDataType(ktype: KType): Boolean {
-        try {
+        return try {
             provideDataType(ktype)
-            return true
+            true
         } catch (e: Exception) {
-            return false
+            false
         }
     }
     fun provideClass(kClass: KClass<*>): EClass
     fun provideDataType(ktype: KType): EDataType?
 }
-
-// object StandardEClassHandler : EClassTypeHandler {
-//        override fun canHandle(kclass: KClass<*>): Boolean {
-//            if (kclass == Named::class) {
-//                return true
-//            } else if (kclass == String::class) {
-//                return false
-//            } else if (kclass == Boolean::class) {
-//                return false
-//            } else if (kclass == Int::class) {
-//                return false
-//            } else if (kclass == ReferenceByName::class) {
-//                return false
-//            } else {
-//                //TODO("Not yet implemented")
-//                return true
-//            }
-//        }
-//
-//        override fun toEClass(kclass: KClass<*>, classifiersProvider: ClassifiersProvider): EClass {
-//            if (kclass == Named::class) {
-//                return KOLASU_METAMODEL.getEClass(Named::class.java)
-//            } else {
-//                val ec = EcoreFactory.eINSTANCE.createEClass()
-//                ec.isAbstract = kclass.isSealed || kclass.isAbstract
-//                ec.isInterface = kclass.java.isInterface
-//                ec.name = kclass.simpleName
-//                kclass.supertypes.forEach {
-//                    if (it == Any::class.createType()) {
-//                        // ignore
-//                    } else {
-//                        val parent = classifiersProvider.provideClass(it.classifier as KClass<*>)
-//                        ec.eSuperTypes.add(parent)
-//                    }
-//                }
-//                kclass.memberProperties.forEach {
-//                    val isDerived = it.annotations.any { it is Derived }
-//
-//                    if (!isDerived) {
-//                        val isMany = it.returnType.isSubtypeOf(Collection::class.createType(listOf(KTypeProjection.STAR)))
-//                        val baseType = if (isMany) it.returnType.arguments[0].type!! else it.returnType
-//                        if (baseType.classifier == ReferenceByName::class){
-//                            TODO()
-//                        }
-//                        val isAttr = classifiersProvider.isDataType(baseType)
-//                        if (isAttr) {
-//                            val ea = EcoreFactory.eINSTANCE.createEAttribute()
-//                            ea.name = it.name
-//                            if (isMany) {
-//                                ea.upperBound = -1
-//                                ea.lowerBound = 0
-//                            }
-//                            ea.eType = classifiersProvider.provideDataType(baseType)
-//                            ec.eStructuralFeatures.add(ea)
-//                        } else {
-//                            val er = EcoreFactory.eINSTANCE.createEReference()
-//                            er.name = it.name
-//                            if (isMany) {
-//                                er.upperBound = -1
-//                                er.lowerBound = 0
-//                            }
-//                            er.isContainment = true
-//                            er.eType = classifiersProvider.provideClass(baseType.classifier as KClass<*>)
-//                            ec.eStructuralFeatures.add(er)
-//                        }
-//                    }
-//                }
-//                return ec
-//                //TODO("Not yet implemented")
-//            }
-//        }
-//
-//    }
 
 class KolasuClassHandler(val kolasuKClass: KClass<*>, val kolasuEClass: EClass) : EClassTypeHandler {
     override fun canHandle(kclass: KClass<*>): Boolean = kclass == kolasuKClass
@@ -291,10 +217,12 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         eClass.isAbstract = kClass.isAbstract || kClass.isSealed
         eClass.isInterface = kClass.java.isInterface
 
-        kClass.typeParameters.forEach { kTypeParameter : KTypeParameter ->
-            eClass.eTypeParameters.add(EcoreFactory.eINSTANCE.createETypeParameter().apply {
-                name = kTypeParameter.name
-            })
+        kClass.typeParameters.forEach { kTypeParameter: KTypeParameter ->
+            eClass.eTypeParameters.add(
+                EcoreFactory.eINSTANCE.createETypeParameter().apply {
+                    name = kTypeParameter.name
+                }
+            )
         }
 
         kClass.processProperties { prop ->
@@ -306,18 +234,6 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                     val classifier = prop.valueType.classifier
                     if (prop.provideNodes) {
                         registerReference(prop, classifier, eClass)
-//                    } else if (prop.valueType.classifier == ReferenceByName::class) {
-//                        val ec = EcoreFactory.eINSTANCE.createEReference()
-//                        ec.name = prop.name
-//                        ec.isContainment = true
-//                        ec.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
-//                            this.eClassifier = KOLASU_METAMODEL.getEClass(ReferenceByName::class.java)
-//                            val eClassForReferenced : EClass = provideClass(prop.valueType.arguments[0].type!!.classifier!! as KClass<*>)
-//                            this.eTypeArguments.add(EcoreFactory.eINSTANCE.createEGenericType().apply {
-//                                this.eClassifier = eClassForReferenced
-//                            })
-//                        }
-//                        eClass.eStructuralFeatures.add(ec)
                     } else {
                         val nullable = prop.valueType.isMarkedNullable
                         val dataType = provideDataType(prop.valueType.withNullability(false))
@@ -361,11 +277,19 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             ec.upperBound = 1
         }
         ec.isContainment = true
-        setType(ec, classifier, eClass)
+        // No type parameters on methods should be allowed elsewhere and only the type parameters
+        // on the class should be visible. We are not expecting containing classes to expose
+        // type parameters
+        val visibleTypeParameters = eClass.eTypeParameters.associateBy { it.name }
+        setType(ec, classifier, visibleTypeParameters)
         eClass.eStructuralFeatures.add(ec)
     }
 
-    private fun setType(element: ETypedElement, classifier: KClassifier?, container: EClass) {
+    private fun setType(
+        element: ETypedElement,
+        classifier: KClassifier?,
+        visibleTypeParameters: Map<String, ETypeParameter>
+    ) {
         when (classifier) {
             is KClass<*> -> {
                 if (classifier.typeParameters.isEmpty()) {
@@ -373,47 +297,20 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                 } else {
                     element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
                         eClassifier = provideClass(classifier)
-                        eTypeArguments.addAll( classifier.typeParameters.map {
-                            EcoreFactory.eINSTANCE.createEGenericType().apply {
+                        eTypeArguments.addAll(
+                            classifier.typeParameters.map {
+                                EcoreFactory.eINSTANCE.createEGenericType().apply {
+                                }
                             }
-                        } )
+                        )
                     }
                 }
             }
             is KTypeParameter -> {
                 element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
-                    eTypeParameter = container.eTypeParameters.find { it.name == classifier.name } ?: throw IllegalStateException("Type parameter not found")
+                    eTypeParameter = visibleTypeParameters[classifier.name]
+                        ?: throw IllegalStateException("Type parameter not found")
                 }
-                // FIXME classifier.
-//                val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
-//                    name = classifier.name
-//                    classifier.upperBounds.forEach {
-//                        if (it is KClass<*>) {
-//                            eBounds.add(
-//                                EcoreFactory.eINSTANCE.createEGenericType().apply {
-//                                    eClassifier = provideClass(it)
-//                                }
-//                            )
-//                        }
-//                    }
-//                }
-
-                // FIXME Trovare la classe a cui si rifa il type parameter e inserire li
-//
-//                element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
-//                    eTypeParameter = typeParameter
-//                    //this.eClassifier =
-////                    eLowerBound
-////                    when (classifier.variance.name) {
-////                        Variance.OUT_VARIANCE.label.toUpperCase() -> {
-////
-////                        }
-////                        else -> TODO("Variance ${classifier.variance.name}")
-////                    }
-//                    //eRawType = EcoreFactory.eINSTANCE.create
-//                }
-//                element.eType = element.eGenericType
-//                ePackage.eResource().contents.add(element.eGenericType)
             }
             else -> throw Error("Not a valid classifier: $classifier")
         }

@@ -12,11 +12,12 @@ import java.io.File
 import java.io.IOException
 import kotlin.test.assertEquals
 
-
 data class ARoot(val nodes: List<ANodeWithAPair>) : Node()
 
-data class ANodeWithAPair(val p : Pair<String, Integer>,
-                          /*val fieldLocation: Pair<Int, Int>? = Pair(0, 0),*/) : Node()
+data class ANodeWithAPair(
+    val p: Pair<String, Integer>,
+    /*val fieldLocation: Pair<Int, Int>? = Pair(0, 0),*/
+) : Node()
 
 class KolasuMetamodelTest {
 

@@ -21,7 +21,7 @@ data class CompilationUnit(val statements: List<Statement>?, override var specif
 
 class MetamodelTest {
 
-    private fun temporaryFile(suffix: String) : File {
+    private fun temporaryFile(suffix: String): File {
         val f = kotlin.io.path.createTempFile(suffix = suffix).toFile()
         f.deleteOnExit()
         return f
@@ -48,8 +48,10 @@ class MetamodelTest {
         assertEquals(true, e.isAbstract)
 
         val sl: EClass = ePackage.eClassifiers.find { it.name == "StringLiteral" } as EClass
-        assertEquals(2, sl.eAllSuperTypes.size,
-            sl.eAllSuperTypes.joinToString(", ") { it.name })
+        assertEquals(
+            2, sl.eAllSuperTypes.size,
+            sl.eAllSuperTypes.joinToString(", ") { it.name }
+        )
         assertEquals(1, sl.eAllAttributes.size)
         assertEquals(1, sl.eAllContainments.size, sl.eAllContainments.joinToString(", ") { it.name })
         assertEquals(1, sl.eAllReferences.size, sl.eAllReferences.joinToString(", ") { it.name })
