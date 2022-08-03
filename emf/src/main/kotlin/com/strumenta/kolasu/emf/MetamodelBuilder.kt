@@ -162,6 +162,8 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         kClass.typeParameters.forEach { kTypeParameter: KTypeParameter ->
             eClass.eTypeParameters.add(
                 EcoreFactory.eINSTANCE.createETypeParameter().apply {
+                    // TODO consider bounds, taking in account that in Kotlin we have variance (in/out)
+                    // which may not exactly correspond to how bounds work in EMF
                     name = kTypeParameter.name
                 }
             )
