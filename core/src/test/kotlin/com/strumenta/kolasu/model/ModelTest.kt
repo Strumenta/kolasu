@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.model
 
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.Test as test
 
 class MyNode(override val name: String) : Node(), Named
@@ -39,5 +40,9 @@ class ModelTest {
         val ref = ReferenceByName<MyNode>("foo")
         assertEquals(false, ref.tryToResolve(listOf(MyNode("foO"))))
         assertEquals(false, ref.resolved)
+    }
+
+    @test fun nameIsProperty() {
+        assertTrue { MyNode("").properties.map { it.name }.contains("name") }
     }
 }
