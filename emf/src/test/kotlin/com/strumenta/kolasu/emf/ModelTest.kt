@@ -3,12 +3,14 @@ package com.strumenta.kolasu.emf
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Statement
 import com.strumenta.kolasu.model.withPosition
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import org.junit.Test
@@ -19,6 +21,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 data class NodeFoo(val name: String) : Node()
+class MyRoot(val foo: Int) : Node(), Statement
 
 class ModelTest {
 
@@ -139,5 +142,30 @@ class ModelTest {
         assertEquals(8, startEO.eGet("column"))
         assertEquals(7, endEO.eGet("line"))
         assertEquals(4, endEO.eGet("column"))
+    }
+
+    @Test
+    fun statementIsConsideredCorrectlyInMetamodel() {
+        val mmb = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo")
+        mmb.provideClass(MyRoot::class)
+        val ePackage = mmb.generate()
+        assertEquals(1, ePackage.eClassifiers.size)
+        val ec = ePackage.eClassifiers[0] as EClass
+        assertEquals("MyRoot", ec.name)
+        assertEquals(setOf("ASTNode", "Statement"), ec.eSuperTypes.map { it.name }.toSet())
+    }
+
+    @Test
+    fun statementIsSerializedCorrectly() {
+        val mmb = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo")
+        mmb.provideClass(MyRoot::class)
+        val ePackage = mmb.generate()
+
+        val res = ResourceImpl()
+        res.contents.add(ePackage)
+        val r1 = MyRoot(124)
+        val eo1 = r1.toEObject(res)
+        println(eo1.eClass().eSuperTypes)
+        assertEquals(setOf("ASTNode", "Statement"), eo1.eClass().eSuperTypes.map { it.name }.toSet())
     }
 }
