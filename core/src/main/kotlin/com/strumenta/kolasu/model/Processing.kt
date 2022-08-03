@@ -180,16 +180,14 @@ data class PropertyDescription(
     }
 }
 
-val DEFAULT_IGNORED_PROPERTIES = setOf("nodeType", "origin", "position")
-
 /**
  * Executes an operation on the properties of a node.
- * @param propertiesToIgnore which properties to ignore. @see DEFAULT_IGNORED_PROPERTIES
+ * @param propertiesToIgnore which properties to ignore
  * @param propertyOperation the operation to perform on each property.
  */
 @JvmOverloads
 fun Node.processProperties(
-    propertiesToIgnore: Set<String> = DEFAULT_IGNORED_PROPERTIES,
+    propertiesToIgnore: Set<String> = emptySet(),
     propertyOperation: (PropertyDescription) -> Unit
 ) {
     this.properties.filter { it.name !in propertiesToIgnore }.forEach {
@@ -203,21 +201,21 @@ fun Node.processProperties(
 
 /**
  * Executes an operation on the properties definitions of a node class.
- * @param propertiesToIgnore which properties to ignore. @see DEFAULT_IGNORED_PROPERTIES
+ * @param propertiesToIgnore which properties to ignore
  * @param propertyTypeOperation the operation to perform on each property.
  */
 fun <T : Any> Class<T>.processProperties(
-    propertiesToIgnore: Set<String> = DEFAULT_IGNORED_PROPERTIES,
+    propertiesToIgnore: Set<String> = emptySet(),
     propertyTypeOperation: (PropertyTypeDescription) -> Unit
 ) = kotlin.processProperties(propertiesToIgnore, propertyTypeOperation)
 
 /**
  * Executes an operation on the properties definitions of a node class.
- * @param propertiesToIgnore which properties to ignore. @see DEFAULT_IGNORED_PROPERTIES
+ * @param propertiesToIgnore which properties to ignore
  * @param propertyTypeOperation the operation to perform on each property.
  */
 fun <T : Any> KClass<T>.processProperties(
-    propertiesToIgnore: Set<String> = DEFAULT_IGNORED_PROPERTIES,
+    propertiesToIgnore: Set<String> = emptySet(),
     propertyTypeOperation: (PropertyTypeDescription) -> Unit
 ) {
     nodeProperties.forEach { p ->

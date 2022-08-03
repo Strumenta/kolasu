@@ -25,8 +25,9 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
     implementation 'org.redundent:kotlin-xml-builder:1.7.3'
+    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.4.0")
 
-    cliImplementation 'com.github.ajalt.clikt:clikt:3.5.0'
+    cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 }

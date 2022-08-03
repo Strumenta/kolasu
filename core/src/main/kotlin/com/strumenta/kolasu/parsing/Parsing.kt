@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
+import com.strumenta.kolasu.validation.Result
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.misc.Interval
 import java.io.*
@@ -116,6 +117,8 @@ class ParsingResult<RootNode : Node>(
         result = 31 * result + (incompleteNode?.hashCode() ?: 0)
         return result
     }
+
+    fun toResult(): Result<RootNode> = Result(issues, root)
 }
 
 fun String.toStream(charset: Charset = Charsets.UTF_8) = ByteArrayInputStream(toByteArray(charset))
@@ -181,6 +184,8 @@ interface ASTParser<R : Node> {
     ):
         ParsingResult<R> = parse(inputStreamToString(inputStream, charset), considerPosition, measureLexingTime)
     fun parse(code: String, considerPosition: Boolean = true, measureLexingTime: Boolean = false): ParsingResult<R>
+
+    fun parse(file: File, charset: Charset = Charsets.UTF_8, considerPosition: Boolean = true): ParsingResult<R>
 }
 
 /**
@@ -400,7 +405,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     }
 
     @JvmOverloads
-    fun parse(file: File, charset: Charset = Charsets.UTF_8, considerPosition: Boolean = true): ParsingResult<R> =
+    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<R> =
         parse(FileInputStream(file), charset, considerPosition)
 
     // For convenient use from Java
@@ -410,7 +415,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     fun processProperties(
         node: Node,
         propertyOperation: (PropertyDescription) -> Unit,
-        propertiesToIgnore: Set<String> = DEFAULT_IGNORED_PROPERTIES
+        propertiesToIgnore: Set<String> = emptySet()
     ) = node.processProperties(propertiesToIgnore, propertyOperation)
 
     /**

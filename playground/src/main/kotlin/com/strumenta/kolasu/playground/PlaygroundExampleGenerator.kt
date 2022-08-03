@@ -1,27 +1,27 @@
-package com.strumenta.kolasu.parserbench
+package com.strumenta.kolasu.playground
 
 import com.google.gson.JsonObject
 import com.strumenta.kolasu.emf.EMFEnabledParser
+import com.strumenta.kolasu.emf.createResource
 import com.strumenta.kolasu.emf.saveAsJsonObject
 import com.strumenta.kolasu.emf.toEObject
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.io.FileWriter
 import java.io.Writer
 
-class ParserBenchExampleGenerator(
+class PlaygroundExampleGenerator(
     val parser: EMFEnabledParser<*, *, *>,
     val directory: File,
     val failOnError: Boolean = true,
     resourceURI: URI = URI.createURI("")
 ) {
 
-    val resource = JsonResourceFactory().createResource(resourceURI)
+    val resource = createResource(resourceURI)!!
 
     fun generateMetamodel() {
         parser.generateMetamodel(resource)
@@ -47,14 +47,14 @@ class ParserBenchExampleGenerator(
 
         val file = File(directory, "$name.json")
         FileWriter(file).use {
-            parsingResult.saveForParserBench(resource, it, name)
+            parsingResult.saveForPlayground(resource, it, name)
         }
     }
 }
 
 class ExampleGenerationFailure(val result: ParsingResult<*>, message: String) : RuntimeException(message)
 
-fun ParsingResult<*>.saveForParserBench(
+fun ParsingResult<*>.saveForPlayground(
     metamodel: Resource,
     writer: Writer,
     name: String

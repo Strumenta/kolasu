@@ -34,7 +34,7 @@ class XMLGenerator {
         val documentBuilder = documentFactory.newDocumentBuilder()
         val document = documentBuilder.newDocument()
         val root = document.createElement("result")
-        root.addListOfElements("errors", result.issues.map { it.toXML(document) }, document)
+        root.addListOfElements("issues", result.issues.map { it.toXML(document) }, document)
         root.addChildPossiblyEmpty("root", result.root, document)
         document.appendChild(root)
         return document

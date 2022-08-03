@@ -38,7 +38,7 @@ publishing {
     }
 
     publications {
-        kolasu_parserbench(MavenPublication) {
+        kolasu_playground(MavenPublication) {
             from(components.java)
             artifactId "kolasu-" +project.name
             artifact sourcesJar
@@ -83,5 +83,5 @@ publishing {
 }
 
 signing {
-    sign publishing.publications.kolasu_parserbench
+    sign publishing.publications.kolasu_playground
 }
