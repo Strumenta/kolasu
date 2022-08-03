@@ -379,6 +379,18 @@ class EMFCLIToolTest {
       }
     } ]
   }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "Statement",
+    "interface" : true
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "Expression",
+    "interface" : true
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "EntityDeclaration",
+    "interface" : true
+  }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EEnum",
     "name" : "IssueType",
     "eLiterals" : [ {
