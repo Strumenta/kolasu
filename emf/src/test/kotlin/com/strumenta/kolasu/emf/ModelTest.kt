@@ -1,14 +1,12 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.model.Statement
-import com.strumenta.kolasu.model.withPosition
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
@@ -18,6 +16,7 @@ import java.io.File
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 data class NodeFoo(val name: String) : Node()
@@ -167,5 +166,95 @@ class ModelTest {
         val eo1 = r1.toEObject(res)
         println(eo1.eClass().eSuperTypes)
         assertEquals(setOf("ASTNode", "Statement"), eo1.eClass().eSuperTypes.map { it.name }.toSet())
+    }
+
+    @Test
+    fun cyclicReferenceByNameOnSingleReference() {
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
+        metamodelBuilder.provideClass(NodeWithReference::class)
+        val ePackage = metamodelBuilder.generate()
+
+        val res = ResourceImpl()
+        res.contents.add(ePackage)
+        val r1 = NodeWithReference("foo", ReferenceByName("foo"), mutableListOf())
+        r1.singlePointer.referred = r1
+        val eo1 = r1.toEObject(res)
+        val reference = eo1.eGet("singlePointer") as EObject
+        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), reference.eClass())
+        assertEquals(eo1, reference.eGet("referenced"))
+        assertEquals("""{
+  "eClass" : "#//NodeWithReference",
+  "name" : "foo",
+  "singlePointer" : {
+    "name" : "foo",
+    "referenced" : {
+      "eClass" : "#//NodeWithReference",
+      "${'$'}ref" : "/"
+    }
+  }
+}""", eo1.saveAsJson())
+    }
+
+    @Test
+    fun cyclicReferenceByNameOnMultipleReference() {
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
+        metamodelBuilder.provideClass(NodeWithReference::class)
+        val ePackage = metamodelBuilder.generate()
+
+        val res = ResourceImpl()
+        res.contents.add(ePackage)
+        val r1 = NodeWithReference("foo", ReferenceByName("foo"), mutableListOf())
+        r1.pointers.add(ReferenceByName("a", r1))
+        r1.pointers.add(ReferenceByName("b", r1))
+        r1.pointers.add(ReferenceByName("c", r1))
+        val eo1 = r1.toEObject(res)
+
+        val pointers = eo1.eGet("pointers") as EList<*>
+        assertEquals(3, pointers.size)
+
+        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[0] as EObject).eClass())
+        assertEquals("a", (pointers[0] as EObject).eGet("name"))
+        assertEquals(eo1, (pointers[0] as EObject).eGet("referenced"))
+
+        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[1] as EObject).eClass())
+        assertEquals("b", (pointers[1] as EObject).eGet("name"))
+        assertEquals(eo1, (pointers[1] as EObject).eGet("referenced"))
+
+        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[2] as EObject).eClass())
+        assertEquals("c", (pointers[2] as EObject).eGet("name"))
+        assertEquals(eo1, (pointers[2] as EObject).eGet("referenced"))
+
+        assertEquals("""{
+  "eClass" : "#//NodeWithReference",
+  "name" : "foo",
+  "pointers" : [ {
+    "name" : "a",
+    "referenced" : {
+      "eClass" : "#//NodeWithReference",
+      "${'$'}ref" : "/"
+    }
+  }, {
+    "name" : "b",
+    "referenced" : {
+      "eClass" : "#//NodeWithReference",
+      "${'$'}ref" : "/"
+    }
+  }, {
+    "name" : "c",
+    "referenced" : {
+      "eClass" : "#//NodeWithReference",
+      "${'$'}ref" : "/"
+    }
+  } ],
+  "singlePointer" : {
+    "name" : "foo"
+  }
+}""", eo1.saveAsJson())
     }
 }

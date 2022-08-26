@@ -123,7 +123,7 @@ private fun createKolasuMetamodel(): EPackage {
         rootContainment.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
             eTypeParameter = typeParameter
         }
-        rootContainment.isContainment = true
+        rootContainment.isContainment = false
         rootContainment.lowerBound = 0
         rootContainment.upperBound = 1
 

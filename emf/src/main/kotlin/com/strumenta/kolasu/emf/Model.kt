@@ -81,7 +81,7 @@ fun <T : Node> Result<T>.toEObject(astPackage: EPackage): EObject {
     val resultEO = makeResultEObject(this)
     val rootSF = resultEO.eClass().eAllStructuralFeatures.find { it.name == "root" }!!
     if (root != null) {
-        resultEO.eSet(rootSF, root!!.toEObject(astPackage))
+        resultEO.eSet(rootSF, root!!.getEObject(astPackage))
     }
     return resultEO
 }
@@ -162,7 +162,7 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                     val refEC = KOLASU_METAMODEL.getEClass("ReferenceByName")
                     val refEO = KOLASU_METAMODEL.eFactoryInstance.create(refEC)
                     refEO.eSet(refEC.getEStructuralFeature("name")!!, pdValue.name)
-                    // TODO complete
+                    refEO.eSet(refEC.getEStructuralFeature("referenced")!!, (pdValue.referred as? Node)?.getEObject(ePackage, kolasuToEMFMapping))
                     refEO
                 }
                 pdValue is Result<*> -> {
@@ -172,7 +172,7 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                         resEO.eSet(
                             resEC.getEStructuralFeature("root"),
                             (pdValue.root as Node)
-                                .toEObject(ePackage, kolasuToEMFMapping)
+                                .getEObject(ePackage, kolasuToEMFMapping)
                         )
                     } else {
                         resEO.eSet(resEC.getEStructuralFeature("root"), toValue(ePackage, pdValue.root))
@@ -244,6 +244,9 @@ fun Resource.getEClass(klass: KClass<*>): EClass = this.findEClass(klass)
 fun Node.toEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject =
     toEObject(ePackage.eResource(), mapping)
 
+fun Node.getEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject =
+    getEObject(ePackage.eResource(), mapping)
+
 class KolasuToEMFMapping {
     private val nodeToEObjects = IdentityHashMap<Node, EObject>()
     fun associate(node: Node, eo: EObject) {
@@ -252,8 +255,24 @@ class KolasuToEMFMapping {
     fun getAssociatedEObject(node: Node): EObject? {
         return nodeToEObjects[node]
     }
+
+    fun getOrMap(node: Node, eResource: Resource) : EObject {
+        val existing = getAssociatedEObject(node)
+        return if (existing != null) {
+            existing
+        } else {
+            val eo = node.toEObject(eResource, this)
+            associate(node, eo)
+            eo
+        }
+    }
+
     val size
         get() = nodeToEObjects.size
+}
+
+fun Node.getEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject {
+    return mapping.getOrMap(this, eResource)
 }
 
 /**
@@ -295,7 +314,7 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
                     val elist = eo.eGet(esf) as MutableList<EObject?>
                     (pd.value as List<*>?)?.forEach {
                         try {
-                            val childEO = (it as Node?)?.toEObject(eResource, mapping)
+                            val childEO = (it as Node?)?.getEObject(eResource, mapping)
                             elist.add(childEO)
                         } catch (e: Exception) {
                             throw RuntimeException("Unable to map to EObject child $it in property $pd of $this", e)
@@ -305,7 +324,7 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
                     if (pd.value == null) {
                         eo.eSet(esf, null)
                     } else {
-                        eo.eSet(esf, (pd.value as Node).toEObject(eResource, mapping))
+                        eo.eSet(esf, (pd.value as Node).getEObject(eResource, mapping))
                     }
                 }
             } else {
@@ -313,14 +332,14 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
                     val elist = eo.eGet(esf) as MutableList<Any>
                     (pd.value as List<*>?)?.forEach {
                         try {
-                            val childValue = toValue(ec.ePackage, it)
+                            val childValue = toValue(ec.ePackage, it, mapping)
                             elist.add(childValue!!)
                         } catch (e: Exception) {
                             throw RuntimeException("Unable to map to EObject child $it in property $pd of $this", e)
                         }
                     }
                 } else try {
-                    eo.eSet(esf, toValue(ec.ePackage, pd.value))
+                    eo.eSet(esf, toValue(ec.ePackage, pd.value, mapping))
                 } catch (e: Exception) {
                     throw RuntimeException("Unable to set property $pd. Structural feature: $esf", e)
                 }

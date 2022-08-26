@@ -1,8 +1,11 @@
 package com.strumenta.kolasu.emf
 
+import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeType
+import com.strumenta.kolasu.model.ReferenceByName
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EReference
 import org.junit.Test
 import java.io.File
 import java.time.LocalDateTime
@@ -21,6 +24,12 @@ data class CompilationUnit(val statements: List<Statement>?) : Node()
 @NodeType
 interface SomeInterface
 data class AltCompilationUnit(val elements: List<SomeInterface>) : Node()
+
+
+data class NodeWithReference(
+    override val name: String,
+    val singlePointer: ReferenceByName<NodeWithReference>,
+    val pointers: MutableList<ReferenceByName<NodeWithReference>>) : Node(), Named
 
 class MetamodelTest {
 
@@ -97,5 +106,28 @@ class MetamodelTest {
 
         val SomeInterface: EClass = ePackage.eClassifiers.find { it.name == "SomeInterface" } as EClass
         assertEquals(true, SomeInterface.isInterface)
+    }
+
+    @Test
+    fun referenceByName() {
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
+        metamodelBuilder.provideClass(NodeWithReference::class)
+        val ePackage = metamodelBuilder.generate()
+        println(ePackage.saveAsJsonObject().toString())
+        assertEquals("com.strumenta.kolasu.emf", ePackage.name)
+        assertEquals(1, ePackage.eClassifiers.size)
+
+        val nodeWithReference: EClass = ePackage.eClassifiers.find { it.name == "NodeWithReference" } as EClass
+        assertEquals(false, nodeWithReference.isInterface)
+        assertEquals(2, nodeWithReference.eStructuralFeatures.size)
+
+        val singlePointer = nodeWithReference.eStructuralFeatures.find { it.name == "singlePointer" } as EReference
+        assertEquals(true, singlePointer.isContainment)
+
+        val pointers = nodeWithReference.eStructuralFeatures.find { it.name == "pointers" } as EReference
+        assertEquals(true, pointers.isContainment)
     }
 }
