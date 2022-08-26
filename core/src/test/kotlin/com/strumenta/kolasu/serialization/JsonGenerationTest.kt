@@ -29,7 +29,8 @@ class JsonGenerationTest {
                 Issue(IssueType.SYNTACTIC, "An error"),
                 Issue(IssueType.LEXICAL, "A warning", severity = IssueSeverity.WARNING),
                 Issue(IssueType.SEMANTIC, "An info", severity = IssueSeverity.INFO)
-            ), null
+            ),
+            null
         )
         val json = JsonGenerator().generateString(result)
         assertEquals(
@@ -51,7 +52,8 @@ class JsonGenerationTest {
       "severity": "INFO"
     }
   ]
-}""", json
+}""",
+            json
         )
     }
 
@@ -59,10 +61,12 @@ class JsonGenerationTest {
     fun generateJson() {
         val myRoot = MyRoot(
             mainSection = Section(
-                "Section1", listOf(
+                "Section1",
+                listOf(
                     Content(1, null), Content(2, Content(3, Content(4, null)))
                 )
-            ), otherSections = listOf()
+            ),
+            otherSections = listOf()
         )
         val json = JsonGenerator().generateString(myRoot)
         assertEquals(
@@ -91,7 +95,8 @@ class JsonGenerationTest {
     "name": "Section1"
   },
   "otherSections": []
-}""", json
+}""",
+            json
         )
     }
 
@@ -99,10 +104,12 @@ class JsonGenerationTest {
     fun generateJsonWithStreaming() {
         val myRoot = MyRoot(
             mainSection = Section(
-                "Section1", listOf(
+                "Section1",
+                listOf(
                     Content(1, null), Content(2, Content(3, Content(4, null)))
                 )
-            ), otherSections = listOf()
+            ),
+            otherSections = listOf()
         )
         val writer = StringWriter()
         JsonGenerator().generateJSONWithStreaming(myRoot, JsonWriter(writer))
@@ -114,7 +121,8 @@ class JsonGenerationTest {
                 |{"#type":"com.strumenta.kolasu.serialization.Content","annidatedContent":
                 |{"#type":"com.strumenta.kolasu.serialization.Content","annidatedContent":
                 |{"#type":"com.strumenta.kolasu.serialization.Content","annidatedContent":null,"id":4},"id":3},"id":2}],
-                |"name":"Section1"},"otherSections":[]}""".trimMargin().replace("\n", ""), json
+                |"name":"Section1"},"otherSections":[]}""".trimMargin().replace("\n", ""),
+            json
         )
     }
 
@@ -125,7 +133,8 @@ class JsonGenerationTest {
             """{
   "#type": "com.strumenta.kolasu.model.NodeOverridingName",
   "name": "foo"
-}""", json
+}""",
+            json
         )
     }
 
@@ -136,7 +145,8 @@ class JsonGenerationTest {
             """{
   "#type": "com.strumenta.kolasu.model.ExtNode",
   "attr1": 123
-}""", json
+}""",
+            json
         )
     }
 
@@ -155,7 +165,8 @@ class JsonGenerationTest {
                 "name": "self"
               }
             }
-            """.trimIndent(), json
+            """.trimIndent(),
+            json
         )
     }
 
@@ -177,7 +188,8 @@ class JsonGenerationTest {
                 "referred": "example_id"
               }
             }
-            """.trimIndent(), json
+            """.trimIndent(),
+            json
         )
     }
 }
