@@ -12,6 +12,16 @@ class SequentialIdProvider(private var counter: Int = 0) : IdProvider {
     }
 }
 
+class OnlyReferencedIdProvider(
+    private var idProvider: IdProvider = SequentialIdProvider()
+) : IdProvider {
+    override fun getId(node: Node): String? {
+        return node.properties
+            .find { property -> property.value is ReferenceByName<*> && property.value.referred == node }
+            ?.let { idProvider.getId(node) }
+    }
+}
+
 /**
  * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method.
  * @param idProvider a provider that takes a node and returns a String identifier representing it
@@ -20,7 +30,7 @@ class SequentialIdProvider(private var counter: Int = 0) : IdProvider {
  **/
 fun Node.computeIds(
     walker: (Node) -> Sequence<Node> = Node::walk,
-    idProvider: IdProvider = SequentialIdProvider()
+    idProvider: IdProvider = OnlyReferencedIdProvider()
 ): IdentityHashMap<Node, String> {
     val idsMap = IdentityHashMap<Node, String>()
     walker.invoke(this).forEach {

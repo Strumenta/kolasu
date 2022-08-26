@@ -158,7 +158,6 @@ class JsonGenerationTest {
             """
             {
               "#type": "com.strumenta.kolasu.serialization.NodeWithReference",
-              "#id": "0",
               "name": "nodeWithReference",
               "reference": {
                 "name": "self"
