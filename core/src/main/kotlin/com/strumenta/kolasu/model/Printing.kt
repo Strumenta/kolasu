@@ -6,6 +6,7 @@ import kotlin.reflect.KVisibility.INTERNAL
 import kotlin.reflect.KVisibility.PRIVATE
 import kotlin.reflect.KVisibility.PROTECTED
 import kotlin.reflect.KVisibility.PUBLIC
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaType
@@ -21,7 +22,8 @@ fun Node.relevantMemberProperties(withPosition: Boolean = false, withNodeType: B
                 it.name != "specifiedPosition" &&
                 it.name != "properties" &&
                 it.name != "parseTreeNode" &&
-                it.name != "parent"
+                it.name != "parent" &&
+                it.findAnnotation<Derived>() == null
         }
 
 data class DebugPrintConfiguration constructor(
