@@ -31,6 +31,12 @@ data class NodeWithReference(
     val pointers: MutableList<ReferenceByName<NodeWithReference>>
 ) : Node(), Named
 
+data class NodeWithForwardReference(
+    override val name: String,
+    val myChildren: MutableList<NodeWithForwardReference> = mutableListOf(),
+    var pointer: ReferenceByName<NodeWithForwardReference>? = null
+) : Node(), Named
+
 class MetamodelTest {
 
     private fun temporaryFile(suffix: String): File {

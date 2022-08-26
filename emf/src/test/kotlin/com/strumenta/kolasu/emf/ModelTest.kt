@@ -261,4 +261,89 @@ class ModelTest {
             eo1.saveAsJson()
         )
     }
+
+    @Test
+    fun forwardAndBackwardReferences() {
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
+        metamodelBuilder.provideClass(NodeWithForwardReference::class)
+        val ePackage = metamodelBuilder.generate()
+
+        val res = ResourceImpl()
+        res.contents.add(ePackage)
+        val a = NodeWithForwardReference("a", mutableListOf())
+        val b = NodeWithForwardReference("b", mutableListOf())
+        val c = NodeWithForwardReference("c", mutableListOf())
+        val d = NodeWithForwardReference("d", mutableListOf())
+        val e = NodeWithForwardReference("e", mutableListOf())
+
+        a.myChildren.add(b)
+        a.myChildren.add(c)
+        b.myChildren.add(d)
+        d.myChildren.add(e)
+
+        a.pointer = ReferenceByName("e", e)
+        e.pointer = ReferenceByName("a", a)
+        b.pointer = ReferenceByName("c", c)
+        c.pointer = ReferenceByName("d", d)
+        d.pointer = ReferenceByName("b", b)
+
+        val eoA = a.toEObject(res)
+
+        assertEquals(
+            """{
+  "eClass" : "#//NodeWithForwardReference",
+  "name" : "a",
+  "myChildren" : [ {
+    "name" : "b",
+    "myChildren" : [ {
+      "name" : "d",
+      "myChildren" : [ {
+        "name" : "e",
+        "pointer" : {
+          "name" : "a",
+          "referenced" : {
+            "eClass" : "#//NodeWithForwardReference",
+            "${'$'}ref" : "/"
+          }
+        }
+      } ],
+      "pointer" : {
+        "name" : "b",
+        "referenced" : {
+          "eClass" : "#//NodeWithForwardReference",
+          "${'$'}ref" : "//@myChildren.0"
+        }
+      }
+    } ],
+    "pointer" : {
+      "name" : "c",
+      "referenced" : {
+        "eClass" : "#//NodeWithForwardReference",
+        "${'$'}ref" : "//@myChildren.1"
+      }
+    }
+  }, {
+    "name" : "c",
+    "pointer" : {
+      "name" : "d",
+      "referenced" : {
+        "eClass" : "#//NodeWithForwardReference",
+        "${'$'}ref" : "//@myChildren.0/@myChildren.0"
+      }
+    }
+  } ],
+  "pointer" : {
+    "name" : "e",
+    "referenced" : {
+      "eClass" : "#//NodeWithForwardReference",
+      "${'$'}ref" : "//@myChildren.0/@myChildren.0/@myChildren.0"
+    }
+  }
+}""",
+            eoA.saveAsJson()
+        )
+    }
 }
