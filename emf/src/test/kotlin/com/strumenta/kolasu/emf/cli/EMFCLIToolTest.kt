@@ -506,8 +506,7 @@ class EMFCLIToolTest {
           "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//ETypeParameter",
           "${'$'}ref" : "/0/ReferenceByName/N"
         }
-      },
-      "containment" : true
+      }
     } ]
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
