@@ -288,7 +288,6 @@ class KolasuToEMFMapping {
         get() = nodeToEObjects.size
 }
 
-
 /**
  * This method retrieves the EObject already built for this Node or create it if it does not exist.
  */
