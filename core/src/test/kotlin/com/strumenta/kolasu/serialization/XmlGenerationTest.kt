@@ -26,7 +26,7 @@ class XmlGenerationTest {
 <root type="MyRoot">
     <mainSection name="Section1" type="Section"/>
 </root>
-""",
+""".replace("\n", System.lineSeparator()),
             xml
         )
     }
@@ -60,7 +60,7 @@ class XmlGenerationTest {
         </contents>
     </mainSection>
 </root>
-""",
+""".replace("\n", System.lineSeparator()),
             xml
         )
     }
@@ -102,7 +102,7 @@ class XmlGenerationTest {
         </contents>
     </mainSection>
 </root>
-""",
+""".replace("\n", System.lineSeparator()),
             xml
         )
     }
@@ -154,7 +154,7 @@ class XmlGenerationTest {
         </Issue>
     </errors>
     <root/>
-</result>""",
+</result>""".replace("\n", System.lineSeparator()),
             serialized.trim()
         )
     }
