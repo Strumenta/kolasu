@@ -25,11 +25,11 @@ data class CompilationUnit(val statements: List<Statement>?) : Node()
 interface SomeInterface
 data class AltCompilationUnit(val elements: List<SomeInterface>) : Node()
 
-
 data class NodeWithReference(
     override val name: String,
     val singlePointer: ReferenceByName<NodeWithReference>,
-    val pointers: MutableList<ReferenceByName<NodeWithReference>>) : Node(), Named
+    val pointers: MutableList<ReferenceByName<NodeWithReference>>
+) : Node(), Named
 
 class MetamodelTest {
 

@@ -6,7 +6,6 @@ import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
@@ -16,7 +15,6 @@ import java.io.File
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 data class NodeFoo(val name: String) : Node()
@@ -185,7 +183,8 @@ class ModelTest {
         val reference = eo1.eGet("singlePointer") as EObject
         assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), reference.eClass())
         assertEquals(eo1, reference.eGet("referenced"))
-        assertEquals("""{
+        assertEquals(
+            """{
   "eClass" : "#//NodeWithReference",
   "name" : "foo",
   "singlePointer" : {
@@ -195,7 +194,9 @@ class ModelTest {
       "${'$'}ref" : "/"
     }
   }
-}""", eo1.saveAsJson())
+}""",
+            eo1.saveAsJson()
+        )
     }
 
     @Test
@@ -230,7 +231,8 @@ class ModelTest {
         assertEquals("c", (pointers[2] as EObject).eGet("name"))
         assertEquals(eo1, (pointers[2] as EObject).eGet("referenced"))
 
-        assertEquals("""{
+        assertEquals(
+            """{
   "eClass" : "#//NodeWithReference",
   "name" : "foo",
   "pointers" : [ {
@@ -255,6 +257,8 @@ class ModelTest {
   "singlePointer" : {
     "name" : "foo"
   }
-}""", eo1.saveAsJson())
+}""",
+            eo1.saveAsJson()
+        )
     }
 }

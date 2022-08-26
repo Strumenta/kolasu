@@ -162,7 +162,10 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                     val refEC = KOLASU_METAMODEL.getEClass("ReferenceByName")
                     val refEO = KOLASU_METAMODEL.eFactoryInstance.create(refEC)
                     refEO.eSet(refEC.getEStructuralFeature("name")!!, pdValue.name)
-                    refEO.eSet(refEC.getEStructuralFeature("referenced")!!, (pdValue.referred as? Node)?.getEObject(ePackage, kolasuToEMFMapping))
+                    refEO.eSet(
+                        refEC.getEStructuralFeature("referenced")!!,
+                        (pdValue.referred as? Node)?.getEObject(ePackage, kolasuToEMFMapping)
+                    )
                     refEO
                 }
                 pdValue is Result<*> -> {
@@ -256,7 +259,7 @@ class KolasuToEMFMapping {
         return nodeToEObjects[node]
     }
 
-    fun getOrMap(node: Node, eResource: Resource) : EObject {
+    fun getOrMap(node: Node, eResource: Resource): EObject {
         val existing = getAssociatedEObject(node)
         return if (existing != null) {
             existing
