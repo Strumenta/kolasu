@@ -26,12 +26,12 @@ class IndexingTest {
         val a2 = A(s = "a2")
         val a3 = A(s = "a3")
         val b1 = B(a = a1, manyAs = listOf(a2, a3))
-        val idsMap = b1.computeIds(walker = Node::walkLeavesFirst)
-        assertEquals(4, idsMap.size)
-        assertContains(idsMap, a1)
-        assertContains(idsMap, a2)
-        assertContains(idsMap, a3)
-        assertContains(idsMap, b1)
+        val ids = b1.computeIds(walker = Node::walkLeavesFirst)
+        assertEquals(4, ids.size)
+        assertContains(ids, a1)
+        assertContains(ids, a2)
+        assertContains(ids, a3)
+        assertContains(ids, b1)
     }
 
     @Test
@@ -40,13 +40,19 @@ class IndexingTest {
         val a2 = A(s = "a2")
         val a3 = A(s = "a3")
         val b1 = B(a = a1, manyAs = listOf(a2, a3))
-        var counter = 0
-        val idsMap = b1.computeIds { "${counter++}" }
-        assertEquals(4, idsMap.size)
-        assertEquals(idsMap[b1], "0")
-        assertEquals(idsMap[a1], "1")
-        assertEquals(idsMap[a2], "2")
-        assertEquals(idsMap[a3], "3")
+        val ids = b1.computeIds(
+            idProvider = object : IdProvider {
+                private var counter: Int = 0
+                override fun getId(node: Node): String? {
+                    return "custom_${this.counter++}"
+                }
+            }
+        )
+        assertEquals(4, ids.size)
+        assertEquals(ids[b1], "custom_0")
+        assertEquals(ids[a1], "custom_1")
+        assertEquals(ids[a2], "custom_2")
+        assertEquals(ids[a3], "custom_3")
     }
 
     @Test
@@ -55,13 +61,20 @@ class IndexingTest {
         val a2 = A(s = "a2")
         val a3 = A(s = "a3")
         val b1 = B(a = a1, manyAs = listOf(a2, a3))
-        var counter = 0
-        val ids = b1.computeIds(walker = Node::walkLeavesFirst) { "${counter++}" }
+        val ids = b1.computeIds(
+            walker = Node::walkLeavesFirst,
+            idProvider = object : IdProvider {
+                private var counter: Int = 0
+                override fun getId(node: Node): String? {
+                    return "custom_${this.counter++}"
+                }
+            }
+        )
         assertEquals(4, ids.size)
-        assertEquals(ids[a1], "0")
-        assertEquals(ids[a2], "1")
-        assertEquals(ids[a3], "2")
-        assertEquals(ids[b1], "3")
+        assertEquals(ids[a1], "custom_0")
+        assertEquals(ids[a2], "custom_1")
+        assertEquals(ids[a3], "custom_2")
+        assertEquals(ids[b1], "custom_3")
         print(ids)
     }
 }

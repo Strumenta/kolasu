@@ -153,13 +153,12 @@ class JsonGenerationTest {
     @Test
     fun nodeWithUnresolvedReferenceByName() {
         val node = NodeWithReference(name = "nodeWithReference", reference = ReferenceByName(name = "self"))
-        val ids = node.computeIds { "example_id" }
-        val json = JsonGenerator().generateString(node, withIds = ids)
+        val json = JsonGenerator().generateString(node, withIds = node.computeIds())
         assertEquals(
             """
             {
-              "#type": "com.strumenta.kolasu.model.NodeWithReference",
-              "#id": "example_id",
+              "#type": "com.strumenta.kolasu.serialization.NodeWithReference",
+              "#id": "0",
               "name": "nodeWithReference",
               "reference": {
                 "name": "self"
@@ -175,17 +174,16 @@ class JsonGenerationTest {
         val node = NodeWithReference(
             name = "nodeWithReference", reference = ReferenceByName(name = "self")
         ).apply { reference!!.referred = this }
-        val ids = node.computeIds { "example_id" }
-        val json = JsonGenerator().generateString(node, withIds = ids)
+        val json = JsonGenerator().generateString(node, withIds = node.computeIds())
         assertEquals(
             """
             {
-              "#type": "com.strumenta.kolasu.model.NodeWithReference",
-              "#id": "example_id",
+              "#type": "com.strumenta.kolasu.serialization.NodeWithReference",
+              "#id": "0",
               "name": "nodeWithReference",
               "reference": {
                 "name": "self",
-                "referred": "example_id"
+                "referred": "0"
               }
             }
             """.trimIndent(),
