@@ -16,7 +16,8 @@ class OnlyReferencedIdProvider(
     private var idProvider: IdProvider = SequentialIdProvider()
 ) : IdProvider {
     override fun getId(node: Node): String? {
-        return node.walk().find { otherNode ->
+        val root = (node.walkAncestors().lastOrNull() ?: node).apply { assignParents() }
+        return root.walk().find { otherNode ->
             otherNode.properties.any { property ->
                 property.value is ReferenceByName<*> && property.value.referred == node
             }
