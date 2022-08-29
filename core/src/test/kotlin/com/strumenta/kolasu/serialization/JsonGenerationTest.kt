@@ -17,7 +17,8 @@ import kotlin.test.assertEquals
 
 data class NodeWithReference(
     override val name: String? = null,
-    val reference: ReferenceByName<NodeWithReference>? = null
+    val reference: ReferenceByName<NodeWithReference>? = null,
+    val children: MutableList<Node> = mutableListOf()
 ) : Node(), PossiblyNamed
 
 class JsonGenerationTest {
@@ -158,6 +159,7 @@ class JsonGenerationTest {
             """
             {
               "#type": "com.strumenta.kolasu.serialization.NodeWithReference",
+              "children": [],
               "name": "nodeWithReference",
               "reference": {
                 "name": "self"
@@ -179,6 +181,7 @@ class JsonGenerationTest {
             {
               "#type": "com.strumenta.kolasu.serialization.NodeWithReference",
               "#id": "0",
+              "children": [],
               "name": "nodeWithReference",
               "reference": {
                 "name": "self",

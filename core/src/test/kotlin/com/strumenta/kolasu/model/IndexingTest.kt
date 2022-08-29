@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.serialization.NodeWithReference
 import org.junit.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -75,6 +76,57 @@ class IndexingTest {
         assertEquals(ids[a2], "custom_1")
         assertEquals(ids[a3], "custom_2")
         assertEquals(ids[b1], "custom_3")
-        print(ids)
+    }
+
+    @Test
+    fun computeIdsForReferencedNodesWithDefaultWalker() {
+        val parent = NodeWithReference(name = "root", reference = ReferenceByName(name = "self"))
+        parent.reference!!.referred = parent
+        val firstChild = NodeWithReference(name = "child", reference = ReferenceByName(name = "parent"))
+        firstChild.reference!!.referred = parent
+        parent.children.add(firstChild)
+        val secondChild = NodeWithReference(name = "child", reference = ReferenceByName(name = "previous"))
+        secondChild.reference!!.referred = firstChild
+        parent.children.add(secondChild)
+        val ids = parent.computeIdsForReferencedNodes()
+        assertEquals(2, ids.size)
+        assertEquals(ids[parent], "0")
+        assertEquals(ids[firstChild], "1")
+    }
+
+    @Test
+    fun computeIdsForReferencedNodesWithCustomWalker() {
+        val parent = NodeWithReference(name = "root", reference = ReferenceByName(name = "self"))
+        parent.reference!!.referred = parent
+        val firstChild = NodeWithReference(name = "child", reference = ReferenceByName(name = "parent"))
+        firstChild.reference!!.referred = parent
+        parent.children.add(firstChild)
+        val secondChild = NodeWithReference(name = "child", reference = ReferenceByName(name = "previous"))
+        secondChild.reference!!.referred = firstChild
+        parent.children.add(secondChild)
+        val ids = parent.computeIdsForReferencedNodes(walker = Node::walkLeavesFirst)
+        assertEquals(2, ids.size)
+        assertEquals(ids[parent], "1")
+        assertEquals(ids[firstChild], "0")
+    }
+
+    @Test
+    fun computeIdsForReferencedNodesWithDefaultWalkerAndNoReferences() {
+        val a1 = A(s = "a1")
+        val a2 = A(s = "a2")
+        val a3 = A(s = "a3")
+        val b1 = B(a = a1, manyAs = listOf(a2, a3))
+        val ids = b1.computeIdsForReferencedNodes()
+        assertEquals(0, ids.size)
+    }
+
+    @Test
+    fun computeIdsForReferencedNodesWithCustomWalkerAndNoReferences() {
+        val a1 = A(s = "a1")
+        val a2 = A(s = "a2")
+        val a3 = A(s = "a3")
+        val b1 = B(a = a1, manyAs = listOf(a2, a3))
+        val ids = b1.computeIdsForReferencedNodes(walker = Node::walkLeavesFirst)
+        assertEquals(0, ids.size)
     }
 }
