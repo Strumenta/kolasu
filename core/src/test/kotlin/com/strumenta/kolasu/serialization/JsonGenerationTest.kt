@@ -6,7 +6,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeOverridingName
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.computeIds
+import com.strumenta.kolasu.model.computeIdsForReferencedNodes
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
@@ -153,7 +153,7 @@ class JsonGenerationTest {
     @Test
     fun nodeWithUnresolvedReferenceByName() {
         val node = NodeWithReference(name = "nodeWithReference", reference = ReferenceByName(name = "self"))
-        val json = JsonGenerator().generateString(node, withIds = node.computeIds())
+        val json = JsonGenerator().generateString(node, withIds = node.computeIdsForReferencedNodes())
         assertEquals(
             """
             {
@@ -173,7 +173,7 @@ class JsonGenerationTest {
         val node = NodeWithReference(
             name = "nodeWithReference", reference = ReferenceByName(name = "self")
         ).apply { reference!!.referred = this }
-        val json = JsonGenerator().generateString(node, withIds = node.computeIds())
+        val json = JsonGenerator().generateString(node, withIds = node.computeIdsForReferencedNodes())
         assertEquals(
             """
             {
