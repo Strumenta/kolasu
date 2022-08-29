@@ -13,15 +13,20 @@ class SequentialIdProvider(private var counter: Int = 0) : IdProvider {
 }
 
 class OnlyReferencedIdProvider(
-    private var idProvider: IdProvider = SequentialIdProvider()
+    private val root: Node,
+    private var idProvider: IdProvider = SequentialIdProvider(),
 ) : IdProvider {
+
+    private val referencedElements: Set<PossiblyNamed> by lazy {
+        this.root.walk().flatMap { node ->
+            node.properties.filter { property -> property.value is ReferenceByName<*> }
+                .mapNotNull { property -> (property.value as ReferenceByName<*>).referred }
+        }.toSet()
+    }
+
     override fun getId(node: Node): String? {
-        val root = (node.walkAncestors().lastOrNull() ?: node).apply { assignParents() }
-        return root.walk().find { otherNode ->
-            otherNode.properties.any { property ->
-                property.value is ReferenceByName<*> && property.value.referred == node
-            }
-        }?.let { idProvider.getId(node) }
+        return this.referencedElements.find { referencedElement -> referencedElement == node }
+            ?.let { idProvider.getId(node) }
     }
 }
 
@@ -45,5 +50,5 @@ fun Node.computeIds(
 
 fun Node.computeIdsForReferencedNodes(
     walker: (Node) -> Sequence<Node> = Node::walk,
-    idProvider: IdProvider = OnlyReferencedIdProvider()
+    idProvider: IdProvider = OnlyReferencedIdProvider(this)
 ): IdentityHashMap<Node, String> = computeIds(walker, idProvider)
