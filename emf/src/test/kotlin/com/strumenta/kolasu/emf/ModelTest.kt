@@ -1,10 +1,7 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.model.Statement
-import com.strumenta.kolasu.model.withPosition
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
@@ -167,5 +164,186 @@ class ModelTest {
         val eo1 = r1.toEObject(res)
         println(eo1.eClass().eSuperTypes)
         assertEquals(setOf("ASTNode", "Statement"), eo1.eClass().eSuperTypes.map { it.name }.toSet())
+    }
+
+    @Test
+    fun cyclicReferenceByNameOnSingleReference() {
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
+        metamodelBuilder.provideClass(NodeWithReference::class)
+        val ePackage = metamodelBuilder.generate()
+
+        val res = ResourceImpl()
+        res.contents.add(ePackage)
+        val r1 = NodeWithReference("foo", ReferenceByName("foo"), mutableListOf())
+        r1.singlePointer.referred = r1
+        val eo1 = r1.toEObject(res)
+        val reference = eo1.eGet("singlePointer") as EObject
+        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), reference.eClass())
+        assertEquals(eo1, reference.eGet("referenced"))
+        assertEquals(
+            """{
+  "eClass" : "#//NodeWithReference",
+  "name" : "foo",
+  "singlePointer" : {
+    "name" : "foo",
+    "referenced" : {
+      "eClass" : "#//NodeWithReference",
+      "${'$'}ref" : "/"
+    }
+  }
+}""",
+            eo1.saveAsJson()
+        )
+    }
+
+    @Test
+    fun cyclicReferenceByNameOnMultipleReference() {
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
+        metamodelBuilder.provideClass(NodeWithReference::class)
+        val ePackage = metamodelBuilder.generate()
+
+        val res = ResourceImpl()
+        res.contents.add(ePackage)
+        val r1 = NodeWithReference("foo", ReferenceByName("foo"), mutableListOf())
+        r1.pointers.add(ReferenceByName("a", r1))
+        r1.pointers.add(ReferenceByName("b", r1))
+        r1.pointers.add(ReferenceByName("c", r1))
+        val eo1 = r1.toEObject(res)
+
+        val pointers = eo1.eGet("pointers") as EList<*>
+        assertEquals(3, pointers.size)
+
+        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[0] as EObject).eClass())
+        assertEquals("a", (pointers[0] as EObject).eGet("name"))
+        assertEquals(eo1, (pointers[0] as EObject).eGet("referenced"))
+
+        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[1] as EObject).eClass())
+        assertEquals("b", (pointers[1] as EObject).eGet("name"))
+        assertEquals(eo1, (pointers[1] as EObject).eGet("referenced"))
+
+        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[2] as EObject).eClass())
+        assertEquals("c", (pointers[2] as EObject).eGet("name"))
+        assertEquals(eo1, (pointers[2] as EObject).eGet("referenced"))
+
+        assertEquals(
+            """{
+  "eClass" : "#//NodeWithReference",
+  "name" : "foo",
+  "pointers" : [ {
+    "name" : "a",
+    "referenced" : {
+      "eClass" : "#//NodeWithReference",
+      "${'$'}ref" : "/"
+    }
+  }, {
+    "name" : "b",
+    "referenced" : {
+      "eClass" : "#//NodeWithReference",
+      "${'$'}ref" : "/"
+    }
+  }, {
+    "name" : "c",
+    "referenced" : {
+      "eClass" : "#//NodeWithReference",
+      "${'$'}ref" : "/"
+    }
+  } ],
+  "singlePointer" : {
+    "name" : "foo"
+  }
+}""",
+            eo1.saveAsJson()
+        )
+    }
+
+    @Test
+    fun forwardAndBackwardReferences() {
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
+        metamodelBuilder.provideClass(NodeWithForwardReference::class)
+        val ePackage = metamodelBuilder.generate()
+
+        val res = ResourceImpl()
+        res.contents.add(ePackage)
+        val a = NodeWithForwardReference("a", mutableListOf())
+        val b = NodeWithForwardReference("b", mutableListOf())
+        val c = NodeWithForwardReference("c", mutableListOf())
+        val d = NodeWithForwardReference("d", mutableListOf())
+        val e = NodeWithForwardReference("e", mutableListOf())
+
+        a.myChildren.add(b)
+        a.myChildren.add(c)
+        b.myChildren.add(d)
+        d.myChildren.add(e)
+
+        a.pointer = ReferenceByName("e", e)
+        e.pointer = ReferenceByName("a", a)
+        b.pointer = ReferenceByName("c", c)
+        c.pointer = ReferenceByName("d", d)
+        d.pointer = ReferenceByName("b", b)
+
+        val eoA = a.toEObject(res)
+
+        assertEquals(
+            """{
+  "eClass" : "#//NodeWithForwardReference",
+  "name" : "a",
+  "myChildren" : [ {
+    "name" : "b",
+    "myChildren" : [ {
+      "name" : "d",
+      "myChildren" : [ {
+        "name" : "e",
+        "pointer" : {
+          "name" : "a",
+          "referenced" : {
+            "eClass" : "#//NodeWithForwardReference",
+            "${'$'}ref" : "/"
+          }
+        }
+      } ],
+      "pointer" : {
+        "name" : "b",
+        "referenced" : {
+          "eClass" : "#//NodeWithForwardReference",
+          "${'$'}ref" : "//@myChildren.0"
+        }
+      }
+    } ],
+    "pointer" : {
+      "name" : "c",
+      "referenced" : {
+        "eClass" : "#//NodeWithForwardReference",
+        "${'$'}ref" : "//@myChildren.1"
+      }
+    }
+  }, {
+    "name" : "c",
+    "pointer" : {
+      "name" : "d",
+      "referenced" : {
+        "eClass" : "#//NodeWithForwardReference",
+        "${'$'}ref" : "//@myChildren.0/@myChildren.0"
+      }
+    }
+  } ],
+  "pointer" : {
+    "name" : "e",
+    "referenced" : {
+      "eClass" : "#//NodeWithForwardReference",
+      "${'$'}ref" : "//@myChildren.0/@myChildren.0/@myChildren.0"
+    }
+  }
+}""",
+            eoA.saveAsJson()
+        )
     }
 }
