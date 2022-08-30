@@ -4,6 +4,9 @@ import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.model.ExtNode
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeOverridingName
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.computeIdsForReferencedNodes
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
@@ -11,6 +14,12 @@ import com.strumenta.kolasu.validation.Result
 import org.junit.Test
 import java.io.StringWriter
 import kotlin.test.assertEquals
+
+data class NodeWithReference(
+    override val name: String? = null,
+    val reference: ReferenceByName<NodeWithReference>? = null,
+    val children: MutableList<Node> = mutableListOf()
+) : Node(), PossiblyNamed
 
 class JsonGenerationTest {
 
@@ -55,8 +64,7 @@ class JsonGenerationTest {
             mainSection = Section(
                 "Section1",
                 listOf(
-                    Content(1, null),
-                    Content(2, Content(3, Content(4, null)))
+                    Content(1, null), Content(2, Content(3, Content(4, null)))
                 )
             ),
             otherSections = listOf()
@@ -99,8 +107,7 @@ class JsonGenerationTest {
             mainSection = Section(
                 "Section1",
                 listOf(
-                    Content(1, null),
-                    Content(2, Content(3, Content(4, null)))
+                    Content(1, null), Content(2, Content(3, Content(4, null)))
                 )
             ),
             otherSections = listOf()
@@ -140,6 +147,48 @@ class JsonGenerationTest {
   "#type": "com.strumenta.kolasu.model.ExtNode",
   "attr1": 123
 }""",
+            json
+        )
+    }
+
+    @Test
+    fun nodeWithUnresolvedReferenceByName() {
+        val node = NodeWithReference(name = "nodeWithReference", reference = ReferenceByName(name = "self"))
+        val json = JsonGenerator().generateString(node, withIds = node.computeIdsForReferencedNodes())
+        assertEquals(
+            """
+            {
+              "#type": "com.strumenta.kolasu.serialization.NodeWithReference",
+              "children": [],
+              "name": "nodeWithReference",
+              "reference": {
+                "name": "self"
+              }
+            }
+            """.trimIndent(),
+            json
+        )
+    }
+
+    @Test
+    fun nodeWithResolvedReferencedByName() {
+        val node = NodeWithReference(
+            name = "nodeWithReference", reference = ReferenceByName(name = "self")
+        ).apply { reference!!.referred = this }
+        val json = JsonGenerator().generateString(node, withIds = node.computeIdsForReferencedNodes())
+        assertEquals(
+            """
+            {
+              "#type": "com.strumenta.kolasu.serialization.NodeWithReference",
+              "#id": "0",
+              "children": [],
+              "name": "nodeWithReference",
+              "reference": {
+                "name": "self",
+                "referred": "0"
+              }
+            }
+            """.trimIndent(),
             json
         )
     }
