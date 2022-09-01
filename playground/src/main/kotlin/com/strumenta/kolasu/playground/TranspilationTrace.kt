@@ -2,6 +2,7 @@ package com.strumenta.kolasu.playground
 
 import com.strumenta.kolasu.emf.*
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.validation.Issue
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
@@ -21,6 +22,7 @@ private fun createTranspilationMetamodel(): EPackage {
     ePackage.nsURI = nsUri
 
     val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
+    val issue = KOLASU_METAMODEL.getEClass("Issue")
     val string = EcorePackage.eINSTANCE.eString
 
     val transpilationTrace = ePackage.createEClass("TranspilationTrace").apply {
@@ -28,6 +30,7 @@ private fun createTranspilationMetamodel(): EPackage {
         addContainment("sourceAST", astNode, 1, 1)
         addContainment("targetAST", astNode, 1, 1)
         addAttribute("generatedCode", string, 1, 1)
+        addContainment("issues", issue, 0, -1)
     }
 
     return ePackage
@@ -40,7 +43,8 @@ class TranspilationTrace<S : Node, T : Node>(
     val originalCode: String,
     val sourceAST: S,
     val targetAST: T,
-    val generatedCode: String
+    val generatedCode: String,
+    val issues: List<Issue>
 )
 
 private fun <S : Node, T : Node> makeTranspilationTraceEObject(transpilationTrace: TranspilationTrace<S, T>): EObject {
@@ -56,6 +60,7 @@ fun <S : Node, T : Node> TranspilationTrace<S, T>.toEObject(resource: Resource):
     transpilationTraceEO.setSingleContainment("sourceAST", this.sourceAST.toEObject(resource, mapping))
     transpilationTraceEO.setSingleContainment("targetAST", this.targetAST.toEObject(resource, mapping))
     transpilationTraceEO.setStringAttribute("generatedCode", this.generatedCode)
+    transpilationTraceEO.setMultipleContainment("issues", this.issues.map { it.toEObject() })
     return transpilationTraceEO
 }
 
