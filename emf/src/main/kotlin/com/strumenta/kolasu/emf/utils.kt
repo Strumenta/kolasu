@@ -16,7 +16,8 @@ fun EObject.setStringAttribute(propertyName: String, propertyValue: String) {
 }
 
 fun EObject.setSingleContainment(propertyName: String, propertyValue: EObject) {
-    val structuralFeature = this.eClass().eAllStructuralFeatures.find { it.name == propertyName }!!
+    val structuralFeature = this.eClass().eAllStructuralFeatures.find { it.name == propertyName }
+        ?: throw IllegalArgumentException("Property $propertyName not found in EClass ${this.eClass()}")
     this.eSet(structuralFeature, propertyValue)
 }
 

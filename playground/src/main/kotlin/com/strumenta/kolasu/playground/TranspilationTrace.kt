@@ -2,8 +2,8 @@ package com.strumenta.kolasu.playground
 
 import com.strumenta.kolasu.emf.*
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
@@ -12,7 +12,6 @@ import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.ByteArrayOutputStream
-import com.strumenta.kolasu.validation.Result
 
 val TRANSPILATION_METAMODEL by lazy { createTranspilationMetamodel() }
 
@@ -24,13 +23,14 @@ private fun createTranspilationMetamodel(): EPackage {
     ePackage.nsURI = nsUri
 
     val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
+    val result = KOLASU_METAMODEL.getEClass("Result")
     val issue = KOLASU_METAMODEL.getEClass("Issue")
     val string = EcorePackage.eINSTANCE.eString
 
     val transpilationTrace = ePackage.createEClass("TranspilationTrace").apply {
         addAttribute("originalCode", string, 1, 1)
-        addContainment("sourceAST", astNode, 1, 1)
-        addContainment("targetAST", astNode, 1, 1)
+        addContainment("sourceResult", result, 1, 1)
+        addContainment("targetResult", result, 1, 1)
         addAttribute("generatedCode", string, 1, 1)
         addContainment("issues", issue, 0, -1)
     }
@@ -48,10 +48,16 @@ class TranspilationTrace<S : Node, T : Node>(
     val targetResult: Result<T>,
     val transpilationIssues: List<Issue> = emptyList()
 ) {
-    constructor(originalCode: String, generatedCode: String, sourceAST: S,
-                    targetAST: T,
-                    transpilationIssues: List<Issue> = emptyList()) : this(originalCode, generatedCode,
-        Result(emptyList(), sourceAST), Result(emptyList(), targetAST), transpilationIssues)
+    constructor(
+        originalCode: String,
+        generatedCode: String,
+        sourceAST: S,
+        targetAST: T,
+        transpilationIssues: List<Issue> = emptyList()
+    ) : this(
+        originalCode, generatedCode,
+        Result(emptyList(), sourceAST), Result(emptyList(), targetAST), transpilationIssues
+    )
 }
 
 private fun <S : Node, T : Node> makeTranspilationTraceEObject(transpilationTrace: TranspilationTrace<S, T>): EObject {

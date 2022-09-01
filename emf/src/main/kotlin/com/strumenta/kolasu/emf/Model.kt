@@ -97,15 +97,15 @@ private fun makeResultEObject(result: Result<*>): EObject {
     return resultEO
 }
 
-fun <T : Node> Result<T>.toEObject(resource: Resource, kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject {
+fun <T : Node> Result<T>.toEObject(
+    resource: Resource,
+    kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping()
+): EObject {
     val resultEO = makeResultEObject(this)
     val rootSF = resultEO.eClass().eAllStructuralFeatures.find { it.name == "root" }!!
     if (root != null) {
         resultEO.eSet(rootSF, root!!.toEObject(resource, kolasuToEMFMapping))
     }
-
-    val issuesSF = resultEO.eClass().eAllStructuralFeatures.find { it.name == "issues" }!!
-    (resultEO.eGet(issuesSF) as EList<EObject>).addAll(this.issues.map { it.toEObject() })
     return resultEO
 }
 

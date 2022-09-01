@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.playground
 
+import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.validation.Issue
@@ -13,24 +14,114 @@ data class ANode(override val name: String, val value: Int) : Node(), Named
 
 class TranspilationTraceTest {
 
+    val mm = MetamodelBuilder(
+        "com.strumenta.kolasu.playground",
+        "http://mypackage.com", "myp"
+    ).apply { provideClass(ANode::class) }.generate()
+
     @Test
     fun serializeTranspilationIssues() {
-        val tt = TranspilationTrace("a:1", "b:2", ANode("a", 1), ANode("b", 2),
-            listOf(Issue(IssueType.TRANSPILATION, "some issue", IssueSeverity.WARNING)))
-        assertEquals("", tt.saveAsJson())
+        val tt = TranspilationTrace(
+            "a:1", "b:2", ANode("a", 1), ANode("b", 2),
+            listOf(Issue(IssueType.TRANSPILATION, "some issue", IssueSeverity.WARNING))
+        )
+        assertEquals(
+            """{
+  "eClass" : "https://strumenta.com/kolasu/transpilation/v1#//TranspilationTrace",
+  "originalCode" : "a:1",
+  "sourceResult" : {
+    "root" : {
+      "eClass" : "http://mypackage.com#//ANode",
+      "name" : "a",
+      "value" : 1
+    }
+  },
+  "targetResult" : {
+    "root" : {
+      "eClass" : "http://mypackage.com#//ANode",
+      "name" : "b",
+      "value" : 2
+    }
+  },
+  "generatedCode" : "b:2",
+  "issues" : [ {
+    "message" : "some issue",
+    "severity" : "WARNING"
+  } ]
+}""",
+            tt.saveAsJson("foo.json", mm)
+        )
     }
 
     @Test
     fun serializeSourceIssues() {
-        val tt = TranspilationTrace("a:1", "b:2",
+        val tt = TranspilationTrace(
+            "a:1", "b:2",
             Result(listOf(Issue(IssueType.SYNTACTIC, "some issue", IssueSeverity.WARNING)), ANode("a", 1)),
-            Result(emptyList(), ANode("b", 2)))
+            Result(emptyList(), ANode("b", 2))
+        )
+        assertEquals(
+            """{
+  "eClass" : "https://strumenta.com/kolasu/transpilation/v1#//TranspilationTrace",
+  "originalCode" : "a:1",
+  "sourceResult" : {
+    "root" : {
+      "eClass" : "http://mypackage.com#//ANode",
+      "name" : "a",
+      "value" : 1
+    },
+    "issues" : [ {
+      "type" : "SYNTACTIC",
+      "message" : "some issue",
+      "severity" : "WARNING"
+    } ]
+  },
+  "targetResult" : {
+    "root" : {
+      "eClass" : "http://mypackage.com#//ANode",
+      "name" : "b",
+      "value" : 2
+    }
+  },
+  "generatedCode" : "b:2"
+}""",
+            tt.saveAsJson("foo.json", mm)
+        )
     }
 
     @Test
     fun serializeTargetIssues() {
-        val tt = TranspilationTrace("a:1", "b:2",
+        val tt = TranspilationTrace(
+            "a:1", "b:2",
             Result(emptyList(), ANode("a", 1)),
-            Result(listOf(Issue(IssueType.SYNTACTIC, "some issue", IssueSeverity.WARNING)), ANode("b", 2)))
+            Result(listOf(Issue(IssueType.SYNTACTIC, "some issue", IssueSeverity.WARNING)), ANode("b", 2))
+        )
+        assertEquals(
+            """{
+  "eClass" : "https://strumenta.com/kolasu/transpilation/v1#//TranspilationTrace",
+  "originalCode" : "a:1",
+  "sourceResult" : {
+    "root" : {
+      "eClass" : "http://mypackage.com#//ANode",
+      "name" : "a",
+      "value" : 1
+    }
+  },
+  "targetResult" : {
+    "root" : {
+      "eClass" : "http://mypackage.com#//ANode",
+      "name" : "b",
+      "value" : 2
+    },
+    "issues" : [ {
+      "type" : "SYNTACTIC",
+      "message" : "some issue",
+      "severity" : "WARNING"
+    } ]
+  },
+  "generatedCode" : "b:2"
+}""",
+            tt.saveAsJson("foo.json", mm)
+        )
     }
 }
