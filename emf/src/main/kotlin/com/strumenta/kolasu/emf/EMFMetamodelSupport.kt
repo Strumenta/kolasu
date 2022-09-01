@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.parsing.KolasuParser
+import com.strumenta.kolasu.parsing.KolasuANTLRBasedParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
 import org.antlr.v4.runtime.Parser
@@ -69,7 +69,7 @@ fun ParsingResult<*>.saveModel(
  * its EMF representation.
  */
 abstract class EMFEnabledParser<R : Node, P : Parser, C : ParserRuleContext> :
-    KolasuParser<R, P, C>(), EMFMetamodelSupport {
+    KolasuANTLRBasedParser<R, P, C>(), EMFMetamodelSupport {
 
     /**
      * Generates the metamodel. The standard Kolasu metamodel [EPackage][org.eclipse.emf.ecore.EPackage] is included.
