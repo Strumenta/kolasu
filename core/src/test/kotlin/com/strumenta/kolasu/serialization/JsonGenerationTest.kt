@@ -6,7 +6,6 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeOverridingName
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.computeIdsForReferencedNodes
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
