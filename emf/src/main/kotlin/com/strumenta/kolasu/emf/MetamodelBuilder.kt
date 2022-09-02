@@ -50,6 +50,8 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         dataTypeHandlers.add(BooleanHandler)
         dataTypeHandlers.add(IntHandler)
         dataTypeHandlers.add(IntegerHandler)
+        dataTypeHandlers.add(FloatHandler)
+        dataTypeHandlers.add(DoubleHandler)
         dataTypeHandlers.add(LongHandler)
         dataTypeHandlers.add(BigIntegerHandler)
         dataTypeHandlers.add(BigDecimalHandler)
