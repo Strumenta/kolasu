@@ -13,6 +13,10 @@ It stands for _**Ko**tlin_ _**La**nguage_ _**Su**pport_.
 Kolasu is part of the [StarLasu](https://github.com/Strumenta/StarLasu) set of libraries. The other libraries provide 
 similar support in other languages such as Typescript and Python.
 
+## Documentation
+
+You can take a look at the documentation for StarLasu, as it explain the principles used in the whole set of libraries, including Kolasu: [StarLasu documentation](https://github.com/Strumenta/StarLasu/tree/main/documentation).
+
 ## What can Kolasu be used for?
 
 Kolasu has been used to implement:
@@ -46,7 +50,7 @@ Releases are published on Maven Central:
 
 ```
 dependencies {
-    compile "com.strumenta.kolasu:kolasu-core:1.5.0-RC1"
+    compile "com.strumenta.kolasu:kolasu-core:1.5.0-RC5"
 }
 ```
 
