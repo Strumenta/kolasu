@@ -11,17 +11,18 @@ import com.strumenta.kolasu.cli.ParserInstantiator
 import com.strumenta.kolasu.cli.changeExtension
 import com.strumenta.kolasu.emf.*
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import java.io.File
 
-class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
+class EMFModelCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstantiator<P>) :
     ASTProcessingCommand<R, P>(
         parserInstantiator,
         help = "Parses a file and exports the AST to an EMF (XMI) file.",
         name = "model"
-    ) where P : EMFEnabledParser<R, *, *> {
+    ) where P : EMFEnabledParser<R> {
     val metamodel by option("--metamodel")
     val outputDirectory by option("--output", "-o")
         .file()

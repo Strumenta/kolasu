@@ -2,22 +2,15 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Result
-import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EClassifier
-import org.eclipse.emf.ecore.EDataType
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.EcorePackage
+import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.*
-import kotlin.reflect.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
-import kotlin.reflect.full.*
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean

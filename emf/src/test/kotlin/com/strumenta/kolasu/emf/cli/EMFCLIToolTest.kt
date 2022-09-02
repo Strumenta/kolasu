@@ -7,12 +7,6 @@ import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.ParsingResult
-import com.strumenta.kolasu.validation.Issue
-import org.antlr.v4.runtime.CharStream
-import org.antlr.v4.runtime.Lexer
-import org.antlr.v4.runtime.Parser
-import org.antlr.v4.runtime.ParserRuleContext
-import org.antlr.v4.runtime.TokenStream
 import org.eclipse.emf.ecore.resource.Resource
 import org.junit.Test
 import java.io.File
@@ -26,28 +20,12 @@ data class MyCompilationUnit(val decls: List<MyEntityDecl>) : Node()
 data class MyEntityDecl(override var name: String, val fields: List<MyFieldDecl>) : Node(), Named
 data class MyFieldDecl(override var name: String) : Node(), Named
 
-class MyDummyParser : EMFEnabledParser<MyCompilationUnit, Parser, ParserRuleContext>() {
+class MyDummyParser : EMFEnabledParser<MyCompilationUnit>() {
     override fun doGenerateMetamodel(resource: Resource) {
         val mmbuilder = MetamodelBuilder("com.strumenta.kolasu.emf.cli", "https://dummy.com/mm", "dm")
         mmbuilder.provideClass(MyCompilationUnit::class)
         val mm = mmbuilder.generate()
         resource.contents.add(mm)
-    }
-
-    override fun createANTLRLexer(charStream: CharStream): Lexer {
-        TODO("Not yet implemented")
-    }
-
-    override fun createANTLRParser(tokenStream: TokenStream): Parser {
-        TODO("Not yet implemented")
-    }
-
-    override fun parseTreeToAst(
-        parseTreeRoot: ParserRuleContext,
-        considerPosition: Boolean,
-        issues: MutableList<Issue>
-    ): MyCompilationUnit? {
-        TODO("Not yet implemented")
     }
 
     override fun parse(
