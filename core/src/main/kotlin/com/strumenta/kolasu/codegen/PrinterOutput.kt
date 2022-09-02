@@ -54,6 +54,14 @@ class PrinterOutput(private val nodePrinters: Map<KClass<*>, NodePrinter>) {
         currentPoint += text
     }
 
+    fun print(text: Char) {
+        this.print(text.toString())
+    }
+
+    fun print(value: Int) {
+        this.print(value.toString())
+    }
+
     private fun considerIndentation() {
         if (onNewLine) {
             onNewLine = false
