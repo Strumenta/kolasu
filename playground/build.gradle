@@ -45,7 +45,7 @@ publishing {
             artifact javadocJar
             pom {
                 name = "kolasu-" +project.name
-                description = "Framework to work with AST and building languages. Integrated with ANTLR."
+                description = "Support for visualization of Kolasu artifacts and integration with Strumenta Playground."
                 version = kolasu_version
                 packaging = 'jar'
                 url = 'https://github.com/Strumenta/kolasu'

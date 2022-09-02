@@ -83,7 +83,7 @@ publishing {
             suppressPomMetadataWarningsFor('cliRuntimeElements')
             pom {
                 name = "kolasu-" + project.name
-                description = "Framework to work with AST and building languages. Integrated with ANTLR."
+                description = "ANTLR integration for Kolasu."
                 version = kolasu_version
                 packaging = 'jar'
                 url = 'https://github.com/Strumenta/kolasu'
