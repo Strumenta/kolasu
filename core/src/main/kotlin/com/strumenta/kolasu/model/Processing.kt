@@ -120,7 +120,7 @@ data class PropertyTypeDescription(
     }
 }
 
-enum class Multeplicity {
+enum class Multiplicity {
     OPTIONAL,
     SINGULAR,
     MANY
@@ -129,12 +129,12 @@ enum class Multeplicity {
 data class PropertyDescription(
     val name: String,
     val provideNodes: Boolean,
-    val multeplicity: Multeplicity,
+    val multiplicity: Multiplicity,
     val value: Any?
 ) {
 
     val multiple: Boolean
-        get() = multeplicity == Multeplicity.MANY
+        get() = multiplicity == Multiplicity.MANY
 
     companion object {
 
@@ -149,11 +149,11 @@ data class PropertyDescription(
             return !multiple(property) && propertyType.isMarkedNullable
         }
 
-        fun multeplicity(property: KProperty1<in Node, *>): Multeplicity {
+        fun multiplicity(property: KProperty1<in Node, *>): Multiplicity {
             return when {
-                multiple(property) -> Multeplicity.MANY
-                optional(property) -> Multeplicity.OPTIONAL
-                else -> Multeplicity.SINGULAR
+                multiple(property) -> Multiplicity.MANY
+                optional(property) -> Multiplicity.OPTIONAL
+                else -> Multiplicity.SINGULAR
             }
         }
 
@@ -168,12 +168,12 @@ data class PropertyDescription(
         }
 
         fun buildFor(property: KProperty1<in Node, *>, node: Node): PropertyDescription {
-            val multeplicity = multeplicity(property)
+            val multiplicity = multiplicity(property)
             val provideNodes = providesNodes(property)
             return PropertyDescription(
                 name = property.name,
                 provideNodes = provideNodes,
-                multeplicity = multeplicity,
+                multiplicity = multiplicity,
                 value = property.get(node)
             )
         }
