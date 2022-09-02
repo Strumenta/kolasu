@@ -17,7 +17,6 @@ java {
 
 dependencies {
     api project(":core")
-    api project(":antlr")
     api group: 'org.eclipse.emf', name: 'org.eclipse.emf.common', version: '2.23.0'
     api group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore', version: '2.25.0'
     api group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore.xmi', version: '2.16.0'

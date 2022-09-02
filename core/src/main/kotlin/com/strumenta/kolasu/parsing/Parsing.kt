@@ -41,7 +41,7 @@ class ParsingResult<RootNode : Node>(
     code: String? = null,
     val incompleteNode: Node? = null,
     /**
-     * It can contains intermediate results depending on how the parsing has been performed.
+     * It can contain intermediate results depending on how the parsing has been performed.
      * For example, a list of tokens or a parse tree.
      */
     val intermediateResults: Map<String, Any> = emptyMap(),
