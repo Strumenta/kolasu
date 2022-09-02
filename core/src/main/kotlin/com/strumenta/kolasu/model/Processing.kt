@@ -102,7 +102,7 @@ data class PropertyTypeDescription(
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             val multiple = (classifier?.isSubclassOf(Collection::class) == true)
-            var valueType: KType
+            val valueType: KType
             val provideNodes = if (multiple) {
                 valueType = propertyType.arguments[0].type!!
                 providesNodes(propertyType.arguments[0])
