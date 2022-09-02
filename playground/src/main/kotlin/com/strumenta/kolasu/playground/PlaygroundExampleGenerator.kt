@@ -1,10 +1,11 @@
 package com.strumenta.kolasu.playground
 
 import com.google.gson.JsonObject
-import com.strumenta.kolasu.emf.EMFEnabledParser
+import com.strumenta.kolasu.emf.EMFMetamodelSupport
 import com.strumenta.kolasu.emf.createResource
 import com.strumenta.kolasu.emf.saveAsJsonObject
 import com.strumenta.kolasu.emf.toEObject
+import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
@@ -14,12 +15,12 @@ import java.io.FileOutputStream
 import java.io.FileWriter
 import java.io.Writer
 
-class PlaygroundExampleGenerator(
-    val parser: EMFEnabledParser<*>,
+class PlaygroundExampleGenerator<P>(
+    val parser: P,
     val directory: File,
     val failOnError: Boolean = true,
     resourceURI: URI = URI.createURI("")
-) {
+) where P : EMFMetamodelSupport, P : ASTParser<*> {
 
     val resource = createResource(resourceURI)!!
 

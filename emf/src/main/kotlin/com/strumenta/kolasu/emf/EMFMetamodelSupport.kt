@@ -1,7 +1,5 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
@@ -60,29 +58,3 @@ fun ParsingResult<*>.saveModel(
     return resource
 }
 
-/**
- * A Kolasu parser that supports exporting AST's to EMF/Ecore.
- *
- * In particular, this parser can generate the metamodel. We can then use [Node.toEObject] to translate a tree into
- * its EMF representation.
- */
-abstract class EMFEnabledParser<R : Node> :
-    ASTParser<R>, EMFMetamodelSupport {
-
-    /**
-     * Generates the metamodel. The standard Kolasu metamodel [EPackage][org.eclipse.emf.ecore.EPackage] is included.
-     * It does not actually save the resource.
-     */
-    override fun generateMetamodel(resource: Resource, includingKolasuMetamodel: Boolean) {
-        if (includingKolasuMetamodel) {
-            resource.contents.add(KOLASU_METAMODEL)
-        }
-        doGenerateMetamodel(resource)
-    }
-
-    /**
-     * Implement this method to tell the parser how to generate the metamodel. See [MetamodelBuilder].
-     * It does not actually save the resource.
-     */
-    abstract fun doGenerateMetamodel(resource: Resource)
-}

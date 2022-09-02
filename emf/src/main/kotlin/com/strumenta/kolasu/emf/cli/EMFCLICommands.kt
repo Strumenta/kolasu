@@ -22,7 +22,7 @@ class EMFModelCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
         parserInstantiator,
         help = "Parses a file and exports the AST to an EMF (XMI) file.",
         name = "model"
-    ) where P : EMFEnabledParser<R> {
+    ) where P : EMFMetamodelSupport {
     val metamodel by option("--metamodel")
     val outputDirectory by option("--output", "-o")
         .file()
