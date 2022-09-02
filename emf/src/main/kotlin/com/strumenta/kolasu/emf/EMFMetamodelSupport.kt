@@ -57,4 +57,3 @@ fun ParsingResult<*>.saveModel(
     resource.save(options)
     return resource
 }
-
