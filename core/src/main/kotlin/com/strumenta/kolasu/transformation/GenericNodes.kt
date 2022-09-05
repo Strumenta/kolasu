@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.transfomation
+package com.strumenta.kolasu.transformation
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.children
