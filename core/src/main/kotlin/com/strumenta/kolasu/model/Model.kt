@@ -13,13 +13,23 @@ interface Origin {
         get() = position?.source
 }
 
+data class CompositeOrigin(val elements: List<Origin>,
+                           override val position: Position?,
+                           override val sourceText: String?
+) : Origin
+
+interface Destination
+
+data class CompositeDestination(val elements: List<Destination>) : Destination
+
+
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  *
  * It implements Origin as it could be the source of a AST-to-AST transformation, so the node itself can be
  * the Origin of another node.
  */
-open class Node() : Origin {
+open class Node() : Origin, Destination {
 
     @Internal
     protected var positionOverride: Position? = null
@@ -93,7 +103,7 @@ open class Node() : Origin {
         get() = origin?.sourceText
 
     @Internal
-    var destination: Position? = null
+    var destination: Destination? = null
 }
 
 fun <N : Node> N.withPosition(position: Position?): N {
