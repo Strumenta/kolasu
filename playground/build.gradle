@@ -75,6 +75,11 @@ publishing {
                         name = 'Alessio Stalla'
                         email = 'alessio.stalla@strumenta.com'
                     }
+                    developer {
+                        id = 'lorenzoaddazi'
+                        name = 'Lorenzo Addazi'
+                        email = 'lorenzo.addazi@strumenta.com'
+                    }
                 }
 
             }
