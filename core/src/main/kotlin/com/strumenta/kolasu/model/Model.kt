@@ -13,15 +13,15 @@ interface Origin {
         get() = position?.source
 }
 
-data class CompositeOrigin(val elements: List<Origin>,
-                           override val position: Position?,
-                           override val sourceText: String?
+data class CompositeOrigin(
+    val elements: List<Origin>,
+    override val position: Position?,
+    override val sourceText: String?
 ) : Origin
 
 interface Destination
 
 data class CompositeDestination(val elements: List<Destination>) : Destination
-
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
