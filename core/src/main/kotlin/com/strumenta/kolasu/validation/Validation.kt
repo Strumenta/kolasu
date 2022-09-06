@@ -6,7 +6,7 @@ enum class IssueType {
     LEXICAL,
     SYNTACTIC,
     SEMANTIC,
-    TRANSPILATION
+    TRANSLATION
 }
 
 enum class IssueSeverity {

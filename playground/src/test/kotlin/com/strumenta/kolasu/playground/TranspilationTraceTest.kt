@@ -20,10 +20,10 @@ class TranspilationTraceTest {
     ).apply { provideClass(ANode::class) }.generate()
 
     @Test
-    fun serializeTranspilationIssues() {
+    fun serializeTranslationIssues() {
         val tt = TranspilationTrace(
             "a:1", "b:2", ANode("a", 1), ANode("b", 2),
-            listOf(Issue(IssueType.TRANSPILATION, "some issue", IssueSeverity.WARNING))
+            listOf(Issue(IssueType.TRANSLATION, "some issue", IssueSeverity.WARNING))
         )
         assertEquals(
             """{
