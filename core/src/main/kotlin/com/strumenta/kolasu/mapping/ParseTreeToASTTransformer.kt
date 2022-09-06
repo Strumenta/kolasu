@@ -4,7 +4,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.parsing.withParseTreeNode
-import com.strumenta.kolasu.transfomation.ASTTransformer
+import com.strumenta.kolasu.transformation.ASTTransformer
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ParseTree
