@@ -22,6 +22,7 @@ data class CompositeOrigin(
 interface Destination
 
 data class CompositeDestination(val elements: List<Destination>) : Destination
+data class TextFileDestination(val position: Position?) : Destination
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
