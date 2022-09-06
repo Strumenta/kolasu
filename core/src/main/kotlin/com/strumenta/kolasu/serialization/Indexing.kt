@@ -1,5 +1,9 @@
-package com.strumenta.kolasu.model
+package com.strumenta.kolasu.serialization
 
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.walk
 import java.util.IdentityHashMap
 
 fun interface IdProvider {
