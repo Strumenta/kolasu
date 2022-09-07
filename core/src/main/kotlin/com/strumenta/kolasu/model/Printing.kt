@@ -5,17 +5,25 @@ import java.lang.reflect.ParameterizedType
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaType
 
-private const val indentBlock = "  "
-
+/**
+ * Influence what and how we print the debug information.
+ */
 data class DebugPrintConfiguration constructor(
     var skipEmptyCollections: Boolean = false,
     var skipNull: Boolean = false,
     var forceShowPosition: Boolean = false,
-    val hide: MutableList<String> = mutableListOf()
+    val hide: MutableList<String> = mutableListOf(),
+    var indentBlock: String = "  "
 )
 
-private fun Node.showSingleAttribute(indent: String, sb: StringBuilder, propertyName: String, value: Any?) {
-    sb.append("$indent$indentBlock$propertyName = ${value}\n")
+private fun Node.showSingleAttribute(
+    indent: String,
+    sb: StringBuilder,
+    propertyName: String,
+    value: Any?,
+    configuration: DebugPrintConfiguration = DebugPrintConfiguration()
+) {
+    sb.append("$indent${configuration.indentBlock}$propertyName = ${value}\n")
 }
 
 fun Any?.debugPrint(indent: String = "", configuration: DebugPrintConfiguration = DebugPrintConfiguration()): String {
@@ -28,6 +36,7 @@ fun <N : Node> ParsingResult<N>.debugPrint(
     indent: String = "",
     configuration: DebugPrintConfiguration = DebugPrintConfiguration()
 ): String {
+    val indentBlock = configuration.indentBlock
     val sb = StringBuilder()
     sb.append("${indent}Result {\n")
     sb.append("${indent}${indentBlock}issues= [\n")
@@ -43,10 +52,9 @@ fun <N : Node> ParsingResult<N>.debugPrint(
     return sb.toString()
 }
 
-// some fancy reflection tests make sure the cast always succeeds
-@Suppress("UNCHECKED_CAST")
 @JvmOverloads
 fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration = DebugPrintConfiguration()): String {
+    val indentBlock = configuration.indentBlock
     val sb = StringBuilder()
     if (this.relevantMemberProperties(withPosition = configuration.forceShowPosition).isEmpty()) {
         sb.append("$indent${this.javaClass.simpleName}\n")
@@ -109,7 +117,7 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                             )
                             sb.append("$indent$indentBlock]\n")
                         } else {
-                            this.showSingleAttribute(indent, sb, property.name, value)
+                            this.showSingleAttribute(indent, sb, property.name, value, configuration)
                         }
                     }
                 }
