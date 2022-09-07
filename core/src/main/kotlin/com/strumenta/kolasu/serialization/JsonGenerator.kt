@@ -13,8 +13,8 @@ import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.processProperties
-import com.strumenta.kolasu.model.walk
 import com.strumenta.kolasu.parsing.ParsingResult
+import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import java.io.File

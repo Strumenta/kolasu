@@ -1,9 +1,8 @@
 package com.smeup.rpgparser.parsing.ast
 
-import com.smeup.rpgparser.parsing.*
 import com.strumenta.kolasu.emf.rpgast.*
 import com.strumenta.kolasu.model.*
-import java.util.*
+import com.strumenta.kolasu.traversing.findAncestorOfType
 
 class DBFile
 class Record

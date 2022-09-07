@@ -1,5 +1,10 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.traversing.walk
+import com.strumenta.kolasu.traversing.walkAncestors
+import com.strumenta.kolasu.traversing.walkDescendants
+import com.strumenta.kolasu.traversing.walkLeavesFirst
+import com.strumenta.kolasu.traversing.walkWithin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail

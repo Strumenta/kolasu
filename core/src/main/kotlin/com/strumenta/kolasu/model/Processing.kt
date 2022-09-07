@@ -1,9 +1,12 @@
 @file:JvmName("Processing")
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.traversing.children
+import com.strumenta.kolasu.traversing.searchByType
+import com.strumenta.kolasu.traversing.walk
+import com.strumenta.kolasu.traversing.walkChildren
 import java.util.*
 import kotlin.reflect.*
-import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
@@ -49,137 +52,6 @@ fun <T : Node> T.withParent(parent: Node?): T {
     return this
 }
 
-private fun providesNodes(kTypeProjection: KTypeProjection): Boolean {
-    val ktype = kTypeProjection.type
-    return when (ktype) {
-        is KClass<*> -> providesNodes(ktype as? KClass<*>)
-        is KType -> providesNodes((ktype as? KType)?.classifier)
-        else -> throw UnsupportedOperationException(
-            "We are not able to determine if the type $ktype provides AST Nodes or not"
-        )
-    }
-}
-
-private fun providesNodes(classifier: KClassifier?): Boolean {
-    if (classifier == null) {
-        return false
-    }
-    if (classifier is KClass<*>) {
-        return providesNodes(classifier as? KClass<*>)
-    } else {
-        throw UnsupportedOperationException(
-            "We are not able to determine if the classifier $classifier provides AST Nodes or not"
-        )
-    }
-}
-
-private fun providesNodes(kclass: KClass<*>?): Boolean {
-    return kclass?.isANode() ?: false
-}
-
-/**
- * @return can [this] class be considered an AST node?
- */
-fun KClass<*>.isANode(): Boolean {
-    return this.isSubclassOf(Node::class) || this.isMarkedAsNodeType()
-}
-
-/**
- * @return is [this] class annotated with NodeType?
- */
-fun KClass<*>.isMarkedAsNodeType(): Boolean {
-    return this.annotations.any { it.annotationClass == NodeType::class }
-}
-
-data class PropertyTypeDescription(
-    val name: String,
-    val provideNodes: Boolean,
-    val multiple: Boolean,
-    val valueType: KType
-) {
-    companion object {
-        fun buildFor(property: KProperty1<*, *>): PropertyTypeDescription {
-            val propertyType = property.returnType
-            val classifier = propertyType.classifier as? KClass<*>
-            val multiple = (classifier?.isSubclassOf(Collection::class) == true)
-            val valueType: KType
-            val provideNodes = if (multiple) {
-                valueType = propertyType.arguments[0].type!!
-                providesNodes(propertyType.arguments[0])
-            } else {
-                valueType = propertyType
-                providesNodes(classifier)
-            }
-            return PropertyTypeDescription(
-                name = property.name,
-                provideNodes = provideNodes,
-                multiple = multiple,
-                valueType = valueType
-            )
-        }
-    }
-}
-
-enum class Multiplicity {
-    OPTIONAL,
-    SINGULAR,
-    MANY
-}
-
-data class PropertyDescription(
-    val name: String,
-    val provideNodes: Boolean,
-    val multiplicity: Multiplicity,
-    val value: Any?
-) {
-
-    val multiple: Boolean
-        get() = multiplicity == Multiplicity.MANY
-
-    companion object {
-
-        fun multiple(property: KProperty1<in Node, *>): Boolean {
-            val propertyType = property.returnType
-            val classifier = propertyType.classifier as? KClass<*>
-            return (classifier?.isSubclassOf(Collection::class) == true)
-        }
-
-        fun optional(property: KProperty1<in Node, *>): Boolean {
-            val propertyType = property.returnType
-            return !multiple(property) && propertyType.isMarkedNullable
-        }
-
-        fun multiplicity(property: KProperty1<in Node, *>): Multiplicity {
-            return when {
-                multiple(property) -> Multiplicity.MANY
-                optional(property) -> Multiplicity.OPTIONAL
-                else -> Multiplicity.SINGULAR
-            }
-        }
-
-        fun providesNodes(property: KProperty1<in Node, *>): Boolean {
-            val propertyType = property.returnType
-            val classifier = propertyType.classifier as? KClass<*>
-            return if (multiple(property)) {
-                providesNodes(propertyType.arguments[0])
-            } else {
-                providesNodes(classifier)
-            }
-        }
-
-        fun buildFor(property: KProperty1<in Node, *>, node: Node): PropertyDescription {
-            val multiplicity = multiplicity(property)
-            val provideNodes = providesNodes(property)
-            return PropertyDescription(
-                name = property.name,
-                provideNodes = provideNodes,
-                multiplicity = multiplicity,
-                value = property.get(node)
-            )
-        }
-    }
-}
-
 /**
  * Executes an operation on the properties of a node.
  * @param propertiesToIgnore which properties to ignore
@@ -210,56 +82,11 @@ fun <T : Any> Class<T>.processProperties(
 ) = kotlin.processProperties(propertiesToIgnore, propertyTypeOperation)
 
 /**
- * Executes an operation on the properties definitions of a node class.
- * @param propertiesToIgnore which properties to ignore
- * @param propertyTypeOperation the operation to perform on each property.
- */
-fun <T : Any> KClass<T>.processProperties(
-    propertiesToIgnore: Set<String> = emptySet(),
-    propertyTypeOperation: (PropertyTypeDescription) -> Unit
-) {
-    nodeProperties.forEach { p ->
-        if (!propertiesToIgnore.contains(p.name)) {
-            propertyTypeOperation(PropertyTypeDescription.buildFor(p))
-        }
-    }
-}
-
-/**
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  * @return the first node in the AST for which the [predicate] is true. Null if none are found.
  */
 fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<Node>> = Node::walk): Node? {
     return walker.invoke(this).find(predicate)
-}
-
-/**
- * @param position the position where to search for nodes
- * @param selfContained whether the starting node position contains the positions of all its children.
- * If **true** no further search will be performed in subtrees where the root node falls outside the given position.
- * If **false (default)** the research will cover all nodes from the starting node to the leaves.
- * @return the nearest node to the given [position]. Null if none is found.
- * @see searchByPosition
- */
-@JvmOverloads
-fun Node.findByPosition(position: Position, selfContained: Boolean = false): Node? {
-    return this.searchByPosition(position, selfContained).lastOrNull()
-}
-
-/**
- * @param position the position where to search for nodes
- * @param selfContained whether the starting node position contains the positions of all its children.
- * If **true**: no further search will be performed in subtrees where the root node falls outside the given position.
- * If **false (default)**: the research will cover all nodes from the starting node to the leaves.
- * @return all nodes contained within the given [position] using depth-first search. Empty list if none are found.
- */
-@JvmOverloads
-fun Node.searchByPosition(position: Position, selfContained: Boolean = false): Sequence<Node> {
-    return if (selfContained) {
-        this.walkWithin(position)
-    } else {
-        this.walk().filter { position.contains(it) }
-    }
 }
 
 /**
@@ -277,22 +104,6 @@ fun <T> Node.processNodesOfType(
     searchByType(klass, walker).forEach(operation)
 }
 
-@JvmOverloads
-fun <T> Node.searchByType(
-    klass: Class<T>,
-    walker: KFunction1<Node, Sequence<Node>> = Node::walk
-) = walker.invoke(this).filterIsInstance(klass)
-
-/**
- * T is not forced to be a subtype of Node to support using interfaces.
- *
- * @param walker the function that generates the nodes to operate on in the desired sequence.
- * @return all nodes in this AST (sub)tree that are instances of, or extend [klass].
- */
-fun <T> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<Node>> = Node::walk): List<T> {
-    return walker.invoke(this).filterIsInstance(klass).toList()
-}
-
 /**
  * Recursively execute [operation] on this node, and all nodes below this node.
  * Every node is informed about its [parent] node. (But not about the parent's parent!)
@@ -306,14 +117,6 @@ fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent
         }
     }
 }
-
-/**
- * @return all direct children of this node.
- */
-val Node.children: List<Node>
-    get() {
-        return walkChildren().toList()
-    }
 
 // TODO reimplement using transformChildren
 fun Node.transformTree(

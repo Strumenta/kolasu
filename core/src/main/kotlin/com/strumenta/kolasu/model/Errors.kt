@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.traversing.walkDescendants
+
 /**
  * An AST node that marks the presence of an error, for example a syntactic or semantic error in the original tree.
  */

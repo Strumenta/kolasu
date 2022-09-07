@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import org.antlr.v4.runtime.*

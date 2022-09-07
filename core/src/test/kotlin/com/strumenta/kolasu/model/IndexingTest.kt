@@ -4,6 +4,7 @@ import com.strumenta.kolasu.serialization.IdProvider
 import com.strumenta.kolasu.serialization.NodeWithReference
 import com.strumenta.kolasu.serialization.computeIds
 import com.strumenta.kolasu.serialization.computeIdsForReferencedNodes
+import com.strumenta.kolasu.traversing.walkLeavesFirst
 import org.junit.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals

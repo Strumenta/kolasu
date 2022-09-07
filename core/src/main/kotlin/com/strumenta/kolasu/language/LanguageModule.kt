@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.language
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.walkChildren
 import com.strumenta.kolasu.parsing.KolasuParser
+import com.strumenta.kolasu.traversing.walkChildren
 
 /**
  * This permits to transform an AST into code. It can be used only for ASTs obtained from parsing, and not on
