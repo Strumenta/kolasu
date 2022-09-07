@@ -161,9 +161,8 @@ class ImmutablePropertyException(property: KProperty<*>, node: Node) :
 // assumption: every MutableList in the AST contains Nodes.
 @Suppress("UNCHECKED_CAST")
 fun Node.transformChildren(operation: (Node) -> Node) {
-    relevantMemberProperties().forEach { property ->
-        val value = property.get(this)
-        when (value) {
+    nodeProperties.forEach { property ->
+        when (val value = property.get(this)) {
             is Node -> {
                 val newValue = operation(value)
                 if (newValue != value) {

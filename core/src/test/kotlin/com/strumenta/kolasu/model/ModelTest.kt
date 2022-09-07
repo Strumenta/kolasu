@@ -149,4 +149,8 @@ class ModelTest {
         val properties = ExtNode::class.nodeProperties
         assertEquals(1, properties.size)
     }
+
+    @test fun nameIsProperty() {
+        assertTrue { MyNode("").properties.map { it.name }.contains("name") }
+    }
 }

@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.emf
 
+import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
@@ -15,8 +16,14 @@ fun EObject.setStringAttribute(propertyName: String, propertyValue: String) {
 }
 
 fun EObject.setSingleContainment(propertyName: String, propertyValue: EObject) {
-    val structuralFeature = this.eClass().eAllStructuralFeatures.find { it.name == propertyName }!!
+    val structuralFeature = this.eClass().eAllStructuralFeatures.find { it.name == propertyName }
+        ?: throw IllegalArgumentException("Property $propertyName not found in EClass ${this.eClass()}")
     this.eSet(structuralFeature, propertyValue)
+}
+
+fun EObject.setMultipleContainment(propertyName: String, propertyValue: List<EObject>) {
+    val structuralFeature = this.eClass().eAllStructuralFeatures.find { it.name == propertyName }!!
+    (this.eGet(structuralFeature) as EList<EObject>).addAll(propertyValue)
 }
 
 fun createResourceSet(): ResourceSet {

@@ -2,6 +2,8 @@ package com.strumenta.kolasu.playground
 
 import com.strumenta.kolasu.emf.*
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
@@ -21,13 +23,16 @@ private fun createTranspilationMetamodel(): EPackage {
     ePackage.nsURI = nsUri
 
     val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
+    val result = KOLASU_METAMODEL.getEClass("Result")
+    val issue = KOLASU_METAMODEL.getEClass("Issue")
     val string = EcorePackage.eINSTANCE.eString
 
     val transpilationTrace = ePackage.createEClass("TranspilationTrace").apply {
         addAttribute("originalCode", string, 1, 1)
-        addContainment("sourceAST", astNode, 1, 1)
-        addContainment("targetAST", astNode, 1, 1)
+        addContainment("sourceResult", result, 1, 1)
+        addContainment("targetResult", result, 1, 1)
         addAttribute("generatedCode", string, 1, 1)
+        addContainment("issues", issue, 0, -1)
     }
 
     return ePackage
@@ -38,10 +43,22 @@ private fun createTranspilationMetamodel(): EPackage {
  */
 class TranspilationTrace<S : Node, T : Node>(
     val originalCode: String,
-    val sourceAST: S,
-    val targetAST: T,
-    val generatedCode: String
-)
+    val generatedCode: String,
+    val sourceResult: Result<S>,
+    val targetResult: Result<T>,
+    val transpilationIssues: List<Issue> = emptyList()
+) {
+    constructor(
+        originalCode: String,
+        generatedCode: String,
+        sourceAST: S,
+        targetAST: T,
+        transpilationIssues: List<Issue> = emptyList()
+    ) : this(
+        originalCode, generatedCode,
+        Result(emptyList(), sourceAST), Result(emptyList(), targetAST), transpilationIssues
+    )
+}
 
 private fun <S : Node, T : Node> makeTranspilationTraceEObject(transpilationTrace: TranspilationTrace<S, T>): EObject {
     val transpilationTraceEC = TRANSPILATION_METAMODEL.getEClass(TranspilationTrace::class.java)
@@ -53,9 +70,10 @@ fun <S : Node, T : Node> TranspilationTrace<S, T>.toEObject(resource: Resource):
     val transpilationTraceEO = makeTranspilationTraceEObject(this)
     transpilationTraceEO.setStringAttribute("originalCode", this.originalCode)
     val mapping = KolasuToEMFMapping()
-    transpilationTraceEO.setSingleContainment("sourceAST", this.sourceAST.toEObject(resource, mapping))
-    transpilationTraceEO.setSingleContainment("targetAST", this.targetAST.toEObject(resource, mapping))
+    transpilationTraceEO.setSingleContainment("sourceResult", this.sourceResult.toEObject(resource, mapping))
+    transpilationTraceEO.setSingleContainment("targetResult", this.targetResult.toEObject(resource, mapping))
     transpilationTraceEO.setStringAttribute("generatedCode", this.generatedCode)
+    transpilationTraceEO.setMultipleContainment("issues", this.transpilationIssues.map { it.toEObject() })
     return transpilationTraceEO
 }
 

@@ -64,7 +64,7 @@ open class Node() : Origin {
     /**
      * The position of this node in the source text.
      * If a position has been provided when creating this node, it is returned.
-     * Otherwise, the value of this property is the position of the original parse tree node, if any.
+     * Otherwise, the value of this property is the position of the origin, if any.
      */
     @property:Internal
     override var position: Position?
