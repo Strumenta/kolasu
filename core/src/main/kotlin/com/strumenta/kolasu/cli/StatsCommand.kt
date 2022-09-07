@@ -3,9 +3,9 @@ package com.strumenta.kolasu.cli
 import com.github.ajalt.clikt.parameters.options.*
 import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.walkDescendants
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
+import com.strumenta.kolasu.traversing.walkDescendants
 import com.strumenta.kolasu.validation.IssueSeverity
 import java.io.File
 

@@ -13,9 +13,11 @@ import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.util.*
+import kotlin.reflect.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
-import kotlin.reflect.full.createType
+import kotlin.reflect.full.*
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean
@@ -38,11 +40,11 @@ interface EClassTypeHandler {
 
 interface ClassifiersProvider {
     fun isDataType(ktype: KType): Boolean {
-        try {
+        return try {
             provideDataType(ktype)
-            return true
+            true
         } catch (e: Exception) {
-            return false
+            false
         }
     }
     fun provideClass(kClass: KClass<*>): EClass
@@ -61,7 +63,7 @@ class KolasuClassHandler(val kolasuKClass: KClass<*>, val kolasuEClass: EClass) 
 
 class KolasuDataTypeHandler(val kolasuKClass: KClass<*>, val kolasuDataType: EDataType) : EDataTypeHandler {
     override fun canHandle(ktype: KType): Boolean {
-        return ktype == kolasuKClass.createType()
+        return ktype.classifier == kolasuKClass && ktype.arguments.isEmpty()
     }
 
     override fun toDataType(ktype: KType): EDataType {
@@ -82,17 +84,28 @@ val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, KOLASU_METAM
 val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, KOLASU_METAMODEL.getEClass("ReferenceByName"))
 val ResultHandler = KolasuClassHandler(Result::class, KOLASU_METAMODEL.getEClass("Result"))
 
+val StatementHandler = KolasuClassHandler(Statement::class, KOLASU_METAMODEL.getEClass("Statement"))
+val ExpressionHandler = KolasuClassHandler(Expression::class, KOLASU_METAMODEL.getEClass("Expression"))
+val EntityDeclarationHandler = KolasuClassHandler(
+    EntityDeclaration::class,
+    KOLASU_METAMODEL
+        .getEClass("EntityDeclaration")
+)
+
 val StringHandler = KolasuDataTypeHandler(String::class, EcorePackage.eINSTANCE.eString)
 val CharHandler = KolasuDataTypeHandler(Char::class, EcorePackage.eINSTANCE.eChar)
 val BooleanHandler = KolasuDataTypeHandler(Boolean::class, EcorePackage.eINSTANCE.eBoolean)
 val IntHandler = KolasuDataTypeHandler(Int::class, EcorePackage.eINSTANCE.eInt)
+val IntegerHandler = KolasuDataTypeHandler(Integer::class, EcorePackage.eINSTANCE.eInt)
+val FloatHandler = KolasuDataTypeHandler(Float::class, EcorePackage.eINSTANCE.eFloat)
+val DoubleHandler = KolasuDataTypeHandler(Double::class, EcorePackage.eINSTANCE.eDouble)
 val BigIntegerHandler = KolasuDataTypeHandler(
     BigInteger::class,
-    KOLASU_METAMODEL.getEClassifier("BigInteger") as EDataType
+    KOLASU_METAMODEL.getEClassifier(BigInteger::class.simpleName) as EDataType
 )
 val BigDecimalHandler = KolasuDataTypeHandler(
     BigDecimal::class,
-    KOLASU_METAMODEL.getEClassifier("BigDecimal") as EDataType
+    KOLASU_METAMODEL.getEClassifier(BigDecimal::class.simpleName) as EDataType
 )
 val LongHandler = KolasuDataTypeHandler(Long::class, EcorePackage.eINSTANCE.eLong)
 

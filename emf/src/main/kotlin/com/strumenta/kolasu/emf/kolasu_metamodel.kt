@@ -31,10 +31,7 @@ private fun createKolasuMetamodel(): EPackage {
     ePackage.eClassifiers.add(bigIntegerDT)
 
     val stringDT = EcorePackage.eINSTANCE.eString
-    val charDT = EcorePackage.eINSTANCE.eChar
     val intDT = EcorePackage.eINSTANCE.eInt
-    val longDT = EcorePackage.eINSTANCE.eLong
-    val booleanDT = EcorePackage.eINSTANCE.eBoolean
 
     val localDate = ePackage.createEClass("LocalDate").apply {
         addAttribute("year", intDT, 1, 1)
@@ -67,6 +64,16 @@ private fun createKolasuMetamodel(): EPackage {
         addContainment("position", position, 0, 1)
         addContainment("destination", position, 0, 1)
         addReference("origin", origin, 0, 1)
+    }
+
+    ePackage.createEClass("Statement").apply {
+        this.isInterface = true
+    }
+    ePackage.createEClass("Expression").apply {
+        this.isInterface = true
+    }
+    ePackage.createEClass("EntityDeclaration").apply {
+        this.isInterface = true
     }
 
     val issueType = EcoreFactory.eINSTANCE.createEEnum()
@@ -116,7 +123,7 @@ private fun createKolasuMetamodel(): EPackage {
         rootContainment.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
             eTypeParameter = typeParameter
         }
-        rootContainment.isContainment = true
+        rootContainment.isContainment = false
         rootContainment.lowerBound = 0
         rootContainment.upperBound = 1
 

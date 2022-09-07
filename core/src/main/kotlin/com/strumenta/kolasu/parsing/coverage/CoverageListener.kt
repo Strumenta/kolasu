@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.parsing.coverage
 
-import com.strumenta.kolasu.model.mutableStackOf
+import com.strumenta.kolasu.traversing.mutableStackOf
 import org.antlr.v4.runtime.Parser
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.atn.AtomTransition

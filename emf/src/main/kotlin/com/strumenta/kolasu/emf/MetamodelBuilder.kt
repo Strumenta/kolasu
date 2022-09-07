@@ -5,10 +5,7 @@ import com.strumenta.kolasu.model.processProperties
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
 import java.util.*
-import kotlin.reflect.KClass
-import kotlin.reflect.KClassifier
-import kotlin.reflect.KType
-import kotlin.reflect.KTypeParameter
+import kotlin.reflect.*
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.full.withNullability
@@ -52,6 +49,9 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         dataTypeHandlers.add(CharHandler)
         dataTypeHandlers.add(BooleanHandler)
         dataTypeHandlers.add(IntHandler)
+        dataTypeHandlers.add(IntegerHandler)
+        dataTypeHandlers.add(FloatHandler)
+        dataTypeHandlers.add(DoubleHandler)
         dataTypeHandlers.add(LongHandler)
         dataTypeHandlers.add(BigIntegerHandler)
         dataTypeHandlers.add(BigDecimalHandler)
@@ -66,6 +66,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         eclassTypeHandlers.add(PossiblyNamedHandler)
         eclassTypeHandlers.add(ReferenceByNameHandler)
         eclassTypeHandlers.add(ResultHandler)
+
+        eclassTypeHandlers.add(StatementHandler)
+        eclassTypeHandlers.add(ExpressionHandler)
+        eclassTypeHandlers.add(EntityDeclarationHandler)
     }
 
     /**
@@ -157,21 +161,31 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         eClass.isAbstract = kClass.isAbstract || kClass.isSealed
         eClass.isInterface = kClass.java.isInterface
 
+        kClass.typeParameters.forEach { kTypeParameter: KTypeParameter ->
+            eClass.eTypeParameters.add(
+                EcoreFactory.eINSTANCE.createETypeParameter().apply {
+                    // TODO consider bounds, taking in account that in Kotlin we have variance (in/out)
+                    // which may not exactly correspond to how bounds work in EMF
+                    name = kTypeParameter.name
+                }
+            )
+        }
+
         kClass.processProperties { prop ->
             try {
                 if (eClass.eAllStructuralFeatures.any { sf -> sf.name == prop.name }) {
                     // skip
                 } else {
                     // do not process inherited properties
-                    val classifier = prop.valueType.classifier
+                    val valueType = prop.valueType
                     if (prop.provideNodes) {
-                        registerReference(prop, classifier, eClass)
+                        registerReference(prop, valueType, eClass)
                     } else {
                         val nullable = prop.valueType.isMarkedNullable
                         val dataType = provideDataType(prop.valueType.withNullability(false))
                         if (dataType == null) {
                             // We can treat it like a class
-                            registerReference(prop, classifier, eClass)
+                            registerReference(prop, valueType, eClass)
                         } else {
                             val ea = EcoreFactory.eINSTANCE.createEAttribute()
                             ea.name = prop.name
@@ -196,7 +210,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
 
     private fun registerReference(
         prop: PropertyTypeDescription,
-        classifier: KClassifier?,
+        valueType: KType,
         eClass: EClass
     ) {
         val ec = EcoreFactory.eINSTANCE.createEReference()
@@ -209,28 +223,67 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             ec.upperBound = 1
         }
         ec.isContainment = true
-        setType(ec, classifier)
+        // No type parameters on methods should be allowed elsewhere and only the type parameters
+        // on the class should be visible. We are not expecting containing classes to expose
+        // type parameters
+        val visibleTypeParameters = eClass.eTypeParameters.associateBy { it.name }
+        setType(ec, valueType, visibleTypeParameters)
         eClass.eStructuralFeatures.add(ec)
     }
 
-    private fun setType(element: ETypedElement, classifier: KClassifier?) {
-        when (classifier) {
-            is KClass<*> -> element.eType = provideClass(classifier)
-            is KTypeParameter -> {
-                val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
-                    name = classifier.name
-                    classifier.upperBounds.forEach {
-                        if (it is KClass<*>) {
-                            eBounds.add(
-                                EcoreFactory.eINSTANCE.createEGenericType().apply {
-                                    eClassifier = provideClass(it)
-                                }
-                            )
-                        }
+    private fun provideType(valueType: KTypeProjection): EGenericType {
+        when (valueType.variance) {
+            KVariance.INVARIANT -> {
+                return provideType(valueType.type!!)
+            }
+            else -> TODO("Variance ${valueType.variance} not yet sypported")
+        }
+    }
+
+    private fun provideType(valueType: KType): EGenericType {
+        val dataType = provideDataType(valueType.withNullability(false))
+        if (dataType != null) {
+            return EcoreFactory.eINSTANCE.createEGenericType().apply {
+                eClassifier = dataType
+            }
+        }
+        if (valueType.arguments.isNotEmpty()) {
+            TODO("Not yet supported: type arguments in $valueType")
+        }
+        if (valueType.classifier is KClass<*>) {
+            return EcoreFactory.eINSTANCE.createEGenericType().apply {
+                eClassifier = provideClass(valueType.classifier as KClass<*>)
+            }
+        } else {
+            TODO("Not yet supported: ${valueType.classifier}")
+        }
+    }
+
+    private fun setType(
+        element: ETypedElement,
+        valueType: KType,
+        visibleTypeParameters: Map<String, ETypeParameter>
+    ) {
+        when (val classifier = valueType.classifier) {
+            is KClass<*> -> {
+                if (classifier.typeParameters.isEmpty()) {
+                    element.eType = provideClass(classifier)
+                } else {
+                    element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
+                        eClassifier = provideClass(classifier)
+                        require(classifier.typeParameters.size == valueType.arguments.size)
+                        eTypeArguments.addAll(
+                            valueType.arguments.map {
+                                provideType(it)
+                            }
+                        )
                     }
                 }
+            }
+            is KTypeParameter -> {
                 element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
-                    eTypeParameter = typeParameter
+                    eTypeParameter = visibleTypeParameters[classifier.name]
+                        ?: throw IllegalStateException("Type parameter not found")
                 }
             }
             else -> throw Error("Not a valid classifier: $classifier")
