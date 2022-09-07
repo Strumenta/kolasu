@@ -5,7 +5,8 @@ import com.strumenta.kolasu.model.Position
 enum class IssueType {
     LEXICAL,
     SYNTACTIC,
-    SEMANTIC
+    SEMANTIC,
+    TRANSLATION
 }
 
 enum class IssueSeverity {
