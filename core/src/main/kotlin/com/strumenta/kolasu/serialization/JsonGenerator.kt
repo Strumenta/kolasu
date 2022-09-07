@@ -30,6 +30,10 @@ const val JSON_ORIGIN_KEY = "#origin"
 const val JSON_ID_KEY = "#id"
 const val JSON_DESTINATION_KEY = "#destination"
 
+/**
+ * Converts an AST to JSON.
+ * Note that ASTs may also be exported to the EMF-JSON format, which is different.
+ */
 class JsonGenerator {
 
     var shortClassNames = false

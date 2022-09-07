@@ -17,7 +17,9 @@ import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
 /**
- * Converts an AST to XML
+ * Converts an AST to XML.
+ * The XML Generator is not supporting all features of Kolasu, at this time.
+ * It may be removed in future version of Kolasu.
  */
 class XMLGenerator {
 
