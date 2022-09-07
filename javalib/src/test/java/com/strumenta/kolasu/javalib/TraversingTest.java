@@ -2,6 +2,7 @@ package com.strumenta.kolasu.javalib;
 
 import com.strumenta.kolasu.model.Node;
 import com.strumenta.kolasu.model.Processing;
+import com.strumenta.kolasu.traversing.ProcessingStructurally;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -33,7 +34,7 @@ public class TraversingTest {
 
     @Test
     public void testGetChildren() {
-        assertEquals(Arrays.asList(a1, a2), Processing.getChildren(cu));
+        assertEquals(Arrays.asList(a1, a2), ProcessingStructurally.getChildren(cu));
     }
 
     @Test

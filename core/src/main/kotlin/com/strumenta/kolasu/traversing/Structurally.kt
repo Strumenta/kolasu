@@ -1,3 +1,4 @@
+@file:JvmName("ProcessingStructurally")
 package com.strumenta.kolasu.traversing
 
 import com.strumenta.kolasu.model.Node
@@ -6,24 +7,9 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
 
 /**
- * Some Kotlinization of Deques used as a stack.
- */
-typealias Stack<T> = Deque<T>
-
-fun <T> mutableStackOf(): Stack<T> = ArrayDeque()
-
-fun <T> Stack<T>.pushAll(elements: Collection<T>) {
-    elements.reversed().forEach(this::push)
-}
-
-fun <T> mutableStackOf(vararg elements: T): Stack<T> {
-    val stack = mutableStackOf<T>()
-    stack.pushAll(elements.asList())
-    return stack
-}
-
-/**
- * @return walks the whole AST starting from this node, depth-first.
+ * Traverse the entire tree, deep first, starting from this Node.
+ *
+ * @return a Sequence representing the Nodes encountered.
  */
 fun Node.walk(): Sequence<Node> {
     val stack: Stack<Node> = mutableStackOf(this)
