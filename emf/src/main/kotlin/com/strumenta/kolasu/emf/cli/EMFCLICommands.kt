@@ -52,7 +52,7 @@ class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
         if (verbose) {
             echo("Saving AST for $input to $targetFile... ")
         }
-        result!!.saveModel(resource, URI.createFileURI(targetFile.path), includeMetamodel = includeMetamodel)
+        result.saveModel(resource, URI.createFileURI(targetFile.path), includeMetamodel = includeMetamodel)
         if (verbose) {
             echo("Done (${System.currentTimeMillis() - start}ms).")
         }
