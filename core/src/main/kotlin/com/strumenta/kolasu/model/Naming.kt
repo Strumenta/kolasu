@@ -22,6 +22,9 @@ interface Named : PossiblyNamed {
 
 /**
  * A reference associated by using a name.
+ * It can be used only to refer to Nodes and not to other values.
+ *
+ * This is not enforced as we may want to use some interface, which cannot extend Node.
  */
 data class ReferenceByName<N>(val name: String, var referred: N? = null) where N : PossiblyNamed {
     override fun toString(): String {
