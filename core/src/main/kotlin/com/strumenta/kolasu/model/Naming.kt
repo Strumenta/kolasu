@@ -24,9 +24,21 @@ interface Named : PossiblyNamed {
  * A reference associated by using a name.
  * It can be used only to refer to Nodes and not to other values.
  *
- * This is not enforced as we may want to use some interface, which cannot extend Node.
+ * This is not statically enforced as we may want to use some interface, which cannot extend Node.
+ * However, this is enforced dynamically.
  */
-data class ReferenceByName<N>(val name: String, var referred: N? = null) where N : PossiblyNamed {
+class ReferenceByName<N>(val name: String, initialReferred: N? = null) where N : PossiblyNamed {
+
+    var referred: N? = null
+        set(value) {
+            require(value is Node || value == null) {
+                "We cannot enforce it statically but only Node should be referred to"
+            }
+            field = value
+        }
+    init {
+        this.referred = initialReferred
+    }
     override fun toString(): String {
         return if (referred == null) {
             "Ref($name)[Unsolved]"
@@ -35,12 +47,22 @@ data class ReferenceByName<N>(val name: String, var referred: N? = null) where N
         }
     }
 
+    val resolved: Boolean
+        get() = referred != null
+
     override fun hashCode(): Int {
         return name.hashCode() * (7 + if (referred == null) 1 else 2)
     }
 
-    val resolved: Boolean
-        get() = referred != null
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ReferenceByName<*>) return false
+
+        if (name != other.name) return false
+        if (referred != other.referred) return false
+
+        return true
+    }
 }
 
 /**
