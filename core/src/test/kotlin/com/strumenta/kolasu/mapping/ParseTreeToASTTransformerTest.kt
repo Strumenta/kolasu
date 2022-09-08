@@ -56,7 +56,7 @@ class ParseTreeToASTTransformerTest {
 
         val cu = CU(
             statements = listOf(
-                GenericErrorNode(message = "Exception java.lang.NullPointerException")
+                GenericErrorNode(message = "Exception java.lang.IllegalStateException: Parse error")
                     .withParseTreeNode(pt.statement(0)),
                 GenericErrorNode(message = "Exception java.lang.IllegalStateException: Parse error")
                     .withParseTreeNode(pt.statement(1))
@@ -113,6 +113,10 @@ class ParseTreeToASTTransformerTest {
             DisplayIntStatement(value = ctx.expression().INT_LIT().text.toInt())
         }
         transformer.registerNodeFactory(SimpleLangParser.SetStmtContext::class) { ctx ->
+            if (ctx.exception != null || ctx.expression().exception != null) {
+                // We throw a custom error so that we can check that it's recorded in the AST
+                throw IllegalStateException("Parse error")
+            }
             SetStatement(variable = ctx.ID().text, value = ctx.expression().INT_LIT().text.toInt())
         }
     }
