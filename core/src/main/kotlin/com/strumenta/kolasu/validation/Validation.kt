@@ -38,5 +38,10 @@ data class Issue(
             severity: IssueSeverity = IssueSeverity.ERROR,
             position: Position? = null
         ): Issue = Issue(IssueType.SEMANTIC, message, severity, position)
+        fun translation(
+            message: String,
+            severity: IssueSeverity = IssueSeverity.ERROR,
+            position: Position? = null
+        ): Issue = Issue(IssueType.TRANSLATION, message, severity, position)
     }
 }
