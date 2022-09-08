@@ -13,6 +13,10 @@ It stands for _**Ko**tlin_ _**La**nguage_ _**Su**pport_.
 Kolasu is part of the [StarLasu](https://github.com/Strumenta/StarLasu) set of libraries. The other libraries provide 
 similar support in other languages such as Typescript and Python.
 
+## JDK supported
+
+We support JDK 8, 11, and 17. All JDKs in between should work too, but these are explicitly tested.
+
 ## Documentation
 
 You can take a look at the documentation for StarLasu, as it explain the principles used in the whole set of libraries, including Kolasu: [StarLasu documentation](https://github.com/Strumenta/StarLasu/tree/main/documentation).
