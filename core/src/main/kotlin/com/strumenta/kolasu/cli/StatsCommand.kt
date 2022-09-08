@@ -176,6 +176,9 @@ class ErrorStatsCollector : StatsCollector {
         get() = File("error-stats.csv")
 }
 
+/**
+ * Command to calcualte statistics on the ASTs produced and print them.
+ */
 class StatsCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstantiator<P>) :
     ASTProcessingCommand<R, P>(
         parserInstantiator,
