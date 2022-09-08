@@ -45,6 +45,14 @@ subprojects {
         from { sourceSets.main.allSource }
     }
 
+    test {
+        testLogging {
+            showStandardStreams = true
+            showExceptions = true
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        }
+    }
+
 //    test {
 //        testLogging {
 //            exceptionFormat = 'FULL'
@@ -67,12 +75,20 @@ subprojects {
 //        outputs.upToDateWhen {false}
 //    }
 
-    val jvmTest by getting(Test::class) {
+//    val jvmTest by getting(Test::class) {
+//        testLogging {
+//            events("PASSED", "FAILED", "SKIPPED")
+//            exceptionFormat = TestExceptionFormat.FULL
+//            showStandardStreams = true
+//            showStackTraces = true
+//        }
+//    }
+
+    tasks.withType(Test).all {
         testLogging {
-            events("PASSED", "FAILED", "SKIPPED")
-            exceptionFormat = TestExceptionFormat.FULL
             showStandardStreams = true
-            showStackTraces = true
+            showExceptions = true
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         }
     }
 
