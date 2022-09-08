@@ -58,12 +58,23 @@ private fun createKolasuMetamodel(): EPackage {
         addContainment("end", point, 1, 1)
     }
     val origin = ePackage.createEClass("Origin", isAbstract = true)
+    val destination = ePackage.createEClass("Destination", isAbstract = true)
+    val nodeDestination = ePackage.createEClass("NodeDestination").apply {
+        eSuperTypes.add(destination)
+    }
+    val textFileDestination = ePackage.createEClass("TextFileDestination").apply {
+        eSuperTypes.add(destination)
+        addContainment("position", position, 0, 1)
+    }
     val astNode = ePackage.createEClass("ASTNode").apply {
         this.isAbstract = true
         this.eSuperTypes.add(origin)
         addContainment("position", position, 0, 1)
-        addContainment("destination", position, 0, 1)
         addReference("origin", origin, 0, 1)
+        addContainment("destination", destination, 0, 1)
+    }
+    nodeDestination.apply {
+        addReference("node", astNode, 1, 1)
     }
 
     ePackage.createEClass("Statement").apply {

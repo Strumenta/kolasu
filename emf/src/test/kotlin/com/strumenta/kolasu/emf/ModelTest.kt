@@ -121,7 +121,7 @@ class ModelTest {
     @Test
     fun destinationIsSerialized() {
         val n1 = NodeFoo("abc").apply {
-            destination = Position(Point(1, 8), Point(7, 4))
+            destination = TextFileDestination(Position(Point(1, 8), Point(7, 4)))
         }
         val ePackage = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo").apply {
             provideClass(NodeFoo::class)
@@ -130,11 +130,14 @@ class ModelTest {
         val eo2Destination = eo1.eGet("destination")
         assertEquals(true, eo2Destination is EObject)
         val eo2DestinationEO = eo2Destination as EObject
-        assertEquals("Position", eo2DestinationEO.eClass().name)
-        assertEquals(true, eo2DestinationEO.eGet("start") is EObject)
-        val startEO = eo2DestinationEO.eGet("start") as EObject
-        assertEquals(true, eo2DestinationEO.eGet("end") is EObject)
-        val endEO = eo2DestinationEO.eGet("end") as EObject
+        assertEquals("TextFileDestination", eo2DestinationEO.eClass().name)
+        val textFileDestinationPosition = eo2DestinationEO.eGet("position") as EObject
+        assertEquals("Position", textFileDestinationPosition.eClass().name)
+
+        assertEquals(true, textFileDestinationPosition.eGet("start") is EObject)
+        val startEO = textFileDestinationPosition.eGet("start") as EObject
+        assertEquals(true, textFileDestinationPosition.eGet("end") is EObject)
+        val endEO = textFileDestinationPosition.eGet("end") as EObject
         assertEquals(1, startEO.eGet("line"))
         assertEquals(8, startEO.eGet("column"))
         assertEquals(7, endEO.eGet("line"))

@@ -262,6 +262,10 @@ fun Node.toEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMF
 fun Node.getOrCreateEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject =
     getOrCreateEObject(ePackage.eResource(), mapping)
 
+fun EClass.instantiate(): EObject {
+    return this.ePackage.eFactoryInstance.create(this)
+}
+
 class KolasuToEMFMapping {
     private val nodeToEObjects = IdentityHashMap<Node, EObject>()
     fun associate(node: Node, eo: EObject) {
@@ -298,6 +302,60 @@ fun Node.getOrCreateEObject(eResource: Resource, mapping: KolasuToEMFMapping = K
     return mapping.getOrCreate(this, eResource)
 }
 
+private fun setOrigin(eo: EObject, origin: Origin?, mapping: KolasuToEMFMapping = KolasuToEMFMapping()) {
+    if (origin == null) {
+        return
+    }
+    if (origin is Node) {
+        val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
+        val originSF = astNode.getEStructuralFeature("origin")
+        val eoCorrespondingToOrigin = mapping.getAssociatedEObject(origin)
+            ?: throw IllegalStateException(
+                "No EObject mapped to origin $origin. " +
+                    "Mapping contains ${mapping.size} entries"
+            )
+        eo.eSet(originSF, eoCorrespondingToOrigin)
+    } else {
+        throw IllegalStateException("Only origins represented Nodes are currently supported")
+    }
+}
+
+private fun setDestination(eo: EObject, destination: Destination?, mapping: KolasuToEMFMapping = KolasuToEMFMapping()) {
+    val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
+    when (destination) {
+        null -> return
+        is Node -> {
+            val nodeDestination = KOLASU_METAMODEL.getEClass("NodeDestination")
+
+            val nodeDestinationInstance = nodeDestination.instantiate()
+            val nodeSF = nodeDestination.getEStructuralFeature("node")
+            val eoCorrespondingToOrigin = mapping.getAssociatedEObject(destination)
+                ?: throw IllegalStateException(
+                    "No EObject mapped to destination $destination. " +
+                        "Mapping contains ${mapping.size} entries"
+                )
+            nodeDestinationInstance.eSet(nodeSF, eoCorrespondingToOrigin)
+
+            val destinationSF = astNode.getEStructuralFeature("destination")
+            eo.eSet(destinationSF, nodeDestinationInstance)
+        }
+        is TextFileDestination -> {
+            val textFileInstance = KOLASU_METAMODEL.getEClass("TextFileDestination").instantiate()
+
+            val positionSF = KOLASU_METAMODEL.getEClass("TextFileDestination").getEStructuralFeature("position")
+            textFileInstance.eSet(positionSF, destination.position?.toEObject())
+
+            val destinationSF = astNode.getEStructuralFeature("destination")
+            eo.eSet(destinationSF, textFileInstance)
+        }
+        else -> {
+            throw IllegalStateException(
+                "Only destinations represented Nodes or TextFileDestinations are currently supported"
+            )
+        }
+    }
+}
+
 /**
  * Translates this node – and, recursively, its descendants – into an [EObject] (EMF/Ecore representation).
  *
@@ -316,19 +374,8 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
         val positionValue = this.position?.toEObject()
         eo.eSet(position, positionValue)
 
-        val destination = astNode.getEStructuralFeature("destination")
-        val destinationValue = this.destination?.toEObject()
-        eo.eSet(destination, destinationValue)
-
-        if (this.origin is Node) {
-            val origin = astNode.getEStructuralFeature("origin")
-            val eoCorrespondingToOrigin = mapping.getAssociatedEObject(this.origin as Node)
-                ?: throw IllegalStateException(
-                    "No EObject mapped to origin ${this.origin}. " +
-                        "Mapping contains ${mapping.size} entries"
-                )
-            eo.eSet(origin, eoCorrespondingToOrigin)
-        }
+        setOrigin(eo, this.origin, mapping)
+        setDestination(eo, this.destination, mapping)
 
         this.processProperties { pd ->
             val esf = ec.eAllStructuralFeatures.find { it.name == pd.name }!!
