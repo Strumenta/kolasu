@@ -3,6 +3,7 @@ package com.strumenta.kolasu.transformation
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
+import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
@@ -113,7 +114,8 @@ open class ASTTransformer(
     /**
      * Additional issues found during the transformation process.
      */
-    val issues: MutableList<Issue> = mutableListOf()
+    val issues: MutableList<Issue> = mutableListOf(),
+    val allowGenericNode: Boolean = true
 ) {
     /**
      * Factories that map from source tree node to target tree node.
@@ -137,7 +139,7 @@ open class ASTTransformer(
         val factory = getNodeFactory(source::class) as NodeFactory<Any>?
         val node: Node
         if (factory != null) {
-            node = makeNode(factory, source)
+            node = makeNode(factory, source, allowGenericNode = allowGenericNode)
             node::class.processProperties { pd ->
                 val childKey = node::class.qualifiedName + "#" + pd.name
                 var childNodeFactory = factory.children[childKey]
@@ -166,15 +168,19 @@ open class ASTTransformer(
             }
             node.parent = parent
         } else {
-            val origin = asOrigin(source)
-            node = GenericNode(parent).withOrigin(origin)
-            issues.add(
-                Issue.semantic(
-                    "Source node not mapped: ${source::class.qualifiedName}",
-                    IssueSeverity.INFO,
-                    origin?.position
+            if (allowGenericNode) {
+                val origin = asOrigin(source)
+                node = GenericNode(parent).withOrigin(origin)
+                issues.add(
+                    Issue.semantic(
+                        "Source node not mapped: ${source::class.qualifiedName}",
+                        IssueSeverity.INFO,
+                        origin?.position
+                    )
                 )
-            )
+            } else {
+                throw IllegalStateException("Unable to translate node $source (class ${source.javaClass})")
+            }
         }
         return node
     }
@@ -204,11 +210,15 @@ open class ASTTransformer(
         return source
     }
 
-    protected open fun <S : Any> makeNode(factory: NodeFactory<S>, source: S): Node {
+    protected open fun <S : Any> makeNode(factory: NodeFactory<S>, source: S, allowGenericNode: Boolean = true): Node {
         return try {
             factory.constructor(source, this, factory)
         } catch (e: Exception) {
-            GenericErrorNode(e)
+            if (allowGenericNode) {
+                GenericErrorNode(e)
+            } else {
+                throw e
+            }
         }.withOrigin(asOrigin(source))
     }
 
@@ -247,7 +257,12 @@ open class ASTTransformer(
 
     fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeFactory<S> {
         registerKnownClass(target)
-        val nodeFactory = NodeFactory<S>({ _, _, _ -> target.createInstance() })
+        val nodeFactory = NodeFactory<S>({ _, _, _ ->
+            if (target.isSealed) {
+                throw IllegalStateException("Unable to instantiate sealed class $target")
+            }
+            target.createInstance()
+        })
         factories[source] = nodeFactory
         return nodeFactory
     }
