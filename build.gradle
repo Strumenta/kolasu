@@ -48,10 +48,10 @@ subprojects {
     test {
         testLogging {
             exceptionFormat = 'full'
-            showCauses = false
-            showExceptions = false
-            showStackTraces = false
-            showStandardStreams = false
+            showCauses = true
+            showExceptions = true
+            showStackTraces = true
+            showStandardStreams = true
 
             afterSuite { desc, result ->
                 println("desc ${desc}")
