@@ -18,6 +18,22 @@ import com.strumenta.kolasu.parsing.ASTParser
  *
  * In the future we may want to provide the name of the actual parser as a class name and instantiate it through
  * reflection.
+ *
+ * Alternatively, the user may want to group several commands, including the ones used here and others coming
+ * from extensions (such as the EMF one) or created within specific projects.
+ *
+ * For example:
+ * ```
+ * class MyCLI<R : Node, P : ASTParser<R>>(
+ *   parserInstantiator: ParserInstantiator<P>,
+ *   ) : CliktCommand(invokeWithoutSubcommand = false) {
+ *   init {
+ *      subcommands(ASTSaverCommand(parserInstantiator), StatsCommand(parserInstantiator), MyOtherCommand(...))
+ *   }
+ *
+ *   override fun run() = Unit
+ *   }
+ * ```
  */
 class CLITool<R : Node, P : ASTParser<R>>(
     parserInstantiator: ParserInstantiator<P>,
@@ -28,7 +44,5 @@ class CLITool<R : Node, P : ASTParser<R>>(
         context { replacedConsole?.apply { console = replacedConsole } }
     }
 
-    override fun run() {
-        // Nothing to do here
-    }
+    override fun run() = Unit
 }
