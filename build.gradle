@@ -48,6 +48,17 @@ subprojects {
     test {
         testLogging {
             exceptionFormat = 'full'
+            showCauses = false
+            showExceptions = false
+            showStackTraces = false
+            showStandardStreams = false
+
+            afterTest(
+                    KotlinClosure2({ desc: TestDescriptor, result: TestResult ->
+                            println("${desc.className} | ${desc.displayName} = ${getColoredResultType(result.resultType)}")
+                    })
+            )
+
             afterSuite { desc, result ->
                 println("desc ${desc}")
                 println("result ${result}")
