@@ -45,45 +45,6 @@ subprojects {
         from { sourceSets.main.allSource }
     }
 
-    test {
-        testLogging {
-            showStandardStreams = true
-            showExceptions = true
-            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-        }
-    }
-
-//    test {
-//        testLogging {
-//            exceptionFormat = 'FULL'
-//            showCauses = true
-//            showExceptions = true
-//            showStackTraces = true
-//            showStandardStreams = true
-//
-//            afterSuite { desc, result ->
-//                println("desc ${desc}")
-//                println("result ${result}")
-//                if (!desc.parent) { // will match the outermost suite
-//                    println "------------------------------------------------------------------------------------"
-//                    println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
-//                    println "------------------------------------------------------------------------------------"
-//                }
-//            }
-//            events "PASSED", "SKIPPED", "FAILED", "STANDARD_OUT", "STANDARD_ERROR"
-//        }
-//        outputs.upToDateWhen {false}
-//    }
-
-//    val jvmTest by getting(Test::class) {
-//        testLogging {
-//            events("PASSED", "FAILED", "SKIPPED")
-//            exceptionFormat = TestExceptionFormat.FULL
-//            showStandardStreams = true
-//            showStackTraces = true
-//        }
-//    }
-
     tasks.withType(Test).all {
         testLogging {
             showStandardStreams = true
