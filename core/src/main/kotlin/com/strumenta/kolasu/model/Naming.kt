@@ -22,10 +22,8 @@ interface Named : PossiblyNamed {
 
 /**
  * A reference associated by using a name.
- * It can be used only to refer to Nodes and not to other values.
  */
-data class ReferenceByName<N>(val name: String, var referred: N? = null) where N : PossiblyNamed,
-                                                                               N : Node {
+data class ReferenceByName<N>(val name: String, var referred: N? = null) where N : PossiblyNamed {
     override fun toString(): String {
         return if (referred == null) {
             "Ref($name)[Unsolved]"
@@ -49,7 +47,7 @@ data class ReferenceByName<N>(val name: String, var referred: N? = null) where N
 fun <N> ReferenceByName<N>.tryToResolve(
     candidates: List<N>,
     caseInsensitive: Boolean = false
-): Boolean where N : PossiblyNamed, N : Node {
+): Boolean where N : PossiblyNamed {
     val res: N? = candidates.find { if (it.name == null) false else it.name.equals(this.name, caseInsensitive) }
     this.referred = res
     return res != null
@@ -61,7 +59,7 @@ fun <N> ReferenceByName<N>.tryToResolve(
  *
  * @return true if the assignment has been performed
  */
-fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : PossiblyNamed, N : Node {
+fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : PossiblyNamed {
     return if (possibleValue == null) {
         false
     } else {
