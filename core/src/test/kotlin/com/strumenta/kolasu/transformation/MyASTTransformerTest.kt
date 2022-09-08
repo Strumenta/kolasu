@@ -25,6 +25,9 @@ data class BLangMult(val left: BLangExpression, val right: BLangExpression) : BL
 
 class MyASTTransformerTest {
 
+    /**
+     * Example of transformation to perform a refactoring within the same language.
+     */
     @Test
     fun translateBinaryExpression() {
         val myTransformer = ASTTransformer(allowGenericNode = false).apply {
@@ -34,6 +37,7 @@ class MyASTTransformerTest {
                     Operator.PLUS -> Sum(transform(source.left) as Expression, transform(source.right) as Expression)
                 }
             }
+            // This may benefit of specific support: for example a NodeFactory that returns the same element
             registerNodeFactory(IntLiteral::class) { source: IntLiteral -> source }
         }
         assertASTsAreEqual(
@@ -46,6 +50,9 @@ class MyASTTransformerTest {
         )
     }
 
+    /**
+     * Example of transformation to perform a translation to another language.
+     */
     @Test
     fun translateAcrossLanguages() {
         val myTransformer = ASTTransformer(allowGenericNode = false).apply {
