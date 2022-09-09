@@ -35,3 +35,4 @@ src/test/gen
 generated-test-src
 /*.ecore
 /*.json
+/*.xmi

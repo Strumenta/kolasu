@@ -207,14 +207,6 @@ class EMFCLIToolTest {
   "name" : "StrumentaLanguageSupport",
   "nsURI" : "https://strumenta.com/kolasu/v2",
   "eClassifiers" : [ {
-    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-    "name" : "BigDecimal",
-    "instanceClassName" : "java.math.BigDecimal"
-  }, {
-    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-    "name" : "BigInteger",
-    "instanceClassName" : "java.math.BigInteger"
-  }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
     "name" : "LocalDate",
     "eStructuralFeatures" : [ {

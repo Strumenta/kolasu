@@ -2,22 +2,15 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Result
-import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EClassifier
-import org.eclipse.emf.ecore.EDataType
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.EcorePackage
+import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.*
-import kotlin.reflect.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
-import kotlin.reflect.full.*
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean
@@ -99,14 +92,8 @@ val IntHandler = KolasuDataTypeHandler(Int::class, EcorePackage.eINSTANCE.eInt)
 val IntegerHandler = KolasuDataTypeHandler(Integer::class, EcorePackage.eINSTANCE.eInt)
 val FloatHandler = KolasuDataTypeHandler(Float::class, EcorePackage.eINSTANCE.eFloat)
 val DoubleHandler = KolasuDataTypeHandler(Double::class, EcorePackage.eINSTANCE.eDouble)
-val BigIntegerHandler = KolasuDataTypeHandler(
-    BigInteger::class,
-    KOLASU_METAMODEL.getEClassifier(BigInteger::class.simpleName) as EDataType
-)
-val BigDecimalHandler = KolasuDataTypeHandler(
-    BigDecimal::class,
-    KOLASU_METAMODEL.getEClassifier(BigDecimal::class.simpleName) as EDataType
-)
+val BigIntegerHandler = KolasuDataTypeHandler(BigInteger::class, EcorePackage.eINSTANCE.eBigInteger)
+val BigDecimalHandler = KolasuDataTypeHandler(BigDecimal::class, EcorePackage.eINSTANCE.eBigDecimal)
 val LongHandler = KolasuDataTypeHandler(Long::class, EcorePackage.eINSTANCE.eLong)
 
 val KClass<*>.eClassifierName: String
