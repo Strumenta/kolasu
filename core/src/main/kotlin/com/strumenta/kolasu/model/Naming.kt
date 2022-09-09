@@ -33,7 +33,7 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) where N :
         set(value) {
             require(value is Node || value == null) {
                 "We cannot enforce it statically but only Node should be referred to. Instead $value was assigned " +
-                        "(class: ${value?.javaClass})"
+                    "(class: ${value?.javaClass})"
             }
             field = value
         }

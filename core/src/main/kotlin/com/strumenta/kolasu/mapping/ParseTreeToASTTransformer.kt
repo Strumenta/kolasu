@@ -13,7 +13,8 @@ import org.antlr.v4.runtime.tree.ParseTree
  * Implements a transformation from an ANTLR parse tree (the output of the parser) to an AST (a higher-level
  * representation of the source code).
  */
-open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf()) : ASTTransformer(issues) {
+open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf(), allowGenericNode: Boolean = true) :
+    ASTTransformer(issues, allowGenericNode) {
     /**
      * Performs the transformation of a node and, recursively, its descendants. In addition to the overridden method,
      * it also assigns the parseTreeNode to the AST node so that it can keep track of its position.
