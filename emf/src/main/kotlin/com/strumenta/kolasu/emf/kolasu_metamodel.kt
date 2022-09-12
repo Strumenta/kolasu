@@ -7,8 +7,6 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.EcorePackage
 import java.io.File
-import java.math.BigDecimal
-import java.math.BigInteger
 
 val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
 val ASTNODE_ECLASS by lazy { KOLASU_METAMODEL.eClassifiers.find { it.name == "ASTNode" }!! as EClass }
@@ -20,18 +18,8 @@ private fun createKolasuMetamodel(): EPackage {
     ePackage.name = "StrumentaLanguageSupport"
     ePackage.nsURI = nsUri
 
-    val bigDecimalDT = EcoreFactory.eINSTANCE.createEDataType()
-    bigDecimalDT.name = "BigDecimal"
-    bigDecimalDT.instanceClass = BigDecimal::class.java
-    ePackage.eClassifiers.add(bigDecimalDT)
-
-    val bigIntegerDT = EcoreFactory.eINSTANCE.createEDataType()
-    bigIntegerDT.name = "BigInteger"
-    bigIntegerDT.instanceClass = BigInteger::class.java
-    ePackage.eClassifiers.add(bigIntegerDT)
-
-    val stringDT = EcorePackage.eINSTANCE.eString
     val intDT = EcorePackage.eINSTANCE.eInt
+    val stringDT = EcorePackage.eINSTANCE.eString
 
     val localDate = ePackage.createEClass("LocalDate").apply {
         addAttribute("year", intDT, 1, 1)
@@ -169,6 +157,7 @@ private fun createKolasuMetamodel(): EPackage {
 }
 
 fun main(args: Array<String>) {
-    KOLASU_METAMODEL.saveEcore(File("kolasu.ecore"))
-    KOLASU_METAMODEL.saveAsJson(File("kolasu.json"))
+    KOLASU_METAMODEL.saveEcore(File("kolasu-2.0.ecore"))
+    KOLASU_METAMODEL.saveEcore(File("kolasu-2.0.xmi"))
+    KOLASU_METAMODEL.saveAsJson(File("kolasu-2.0.json"))
 }

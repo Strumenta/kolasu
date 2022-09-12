@@ -37,9 +37,11 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) where N :
             }
             field = value
         }
+
     init {
         this.referred = initialReferred
     }
+
     override fun toString(): String {
         return if (referred == null) {
             "Ref($name)[Unsolved]"
