@@ -13,7 +13,7 @@ val ASTNODE_ECLASS by lazy { KOLASU_METAMODEL.eClassifiers.find { it.name == "AS
 
 private fun createKolasuMetamodel(): EPackage {
     val ePackage = EcoreFactory.eINSTANCE.createEPackage()
-    val nsUri = "https://strumenta.com/kolasu/v2"
+    val nsUri = "https://strumenta.com/starlasu/v2"
     ePackage.setResourceURI(nsUri)
     ePackage.name = "StrumentaLanguageSupport"
     ePackage.nsURI = nsUri
