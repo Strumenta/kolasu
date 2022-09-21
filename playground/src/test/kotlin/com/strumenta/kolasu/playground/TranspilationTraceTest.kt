@@ -136,7 +136,8 @@ class TranspilationTraceTest {
             Result(emptyList(), aRoot),
             Result(emptyList(), bRoot)
         )
-        assertEquals("""{
+        assertEquals(
+            """{
   "eClass" : "https://strumenta.com/kolasu/transpilation/v1#//TranspilationTrace",
   "originalCode" : "a:1",
   "sourceResult" : {
@@ -165,6 +166,8 @@ class TranspilationTraceTest {
     }
   },
   "generatedCode" : "b:2"
-}""", tt.saveAsJson("foo.json", mm))
+}""",
+            tt.saveAsJson("foo.json", mm)
+        )
     }
 }

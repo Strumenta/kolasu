@@ -303,7 +303,12 @@ fun Node.getOrCreateEObject(eResource: Resource, mapping: KolasuToEMFMapping = K
     return mapping.getOrCreate(this, eResource)
 }
 
-private fun setOrigin(eo: EObject, origin: Origin?, eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()) {
+private fun setOrigin(
+    eo: EObject,
+    origin: Origin?,
+    eResource: Resource,
+    mapping: KolasuToEMFMapping = KolasuToEMFMapping()
+) {
     if (origin == null) {
         return
     }
@@ -317,7 +322,12 @@ private fun setOrigin(eo: EObject, origin: Origin?, eResource: Resource, mapping
     }
 }
 
-private fun setDestination(eo: EObject, destination: Destination?, eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()) {
+private fun setDestination(
+    eo: EObject,
+    destination: Destination?,
+    eResource: Resource,
+    mapping: KolasuToEMFMapping = KolasuToEMFMapping()
+) {
     val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
     when (destination) {
         null -> return
