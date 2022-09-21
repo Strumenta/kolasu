@@ -138,13 +138,13 @@ class TranspilationTraceTest {
         )
         assertEquals(
             """{
-  "eClass" : "https://strumenta.com/kolasu/transpilation/v1#//TranspilationTrace",
+  "eClass" : "https://strumenta.com/starlasu/transpilation/v1#//TranspilationTrace",
   "originalCode" : "a:1",
   "sourceResult" : {
     "root" : {
       "eClass" : "http://mypackage.com#//ANode",
       "destination" : {
-        "eClass" : "https://strumenta.com/kolasu/v2#//NodeDestination",
+        "eClass" : "https://strumenta.com/starlasu/v2#//NodeDestination",
         "node" : {
           "eClass" : "http://mypackage.com#//ANode",
           "${'$'}ref" : "//@targetResult/@root"
