@@ -302,25 +302,21 @@ fun Node.getOrCreateEObject(eResource: Resource, mapping: KolasuToEMFMapping = K
     return mapping.getOrCreate(this, eResource)
 }
 
-private fun setOrigin(eo: EObject, origin: Origin?, mapping: KolasuToEMFMapping = KolasuToEMFMapping()) {
+private fun setOrigin(eo: EObject, origin: Origin?, eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()) {
     if (origin == null) {
         return
     }
     if (origin is Node) {
         val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
         val originSF = astNode.getEStructuralFeature("origin")
-        val eoCorrespondingToOrigin = mapping.getAssociatedEObject(origin)
-            ?: throw IllegalStateException(
-                "No EObject mapped to origin $origin. " +
-                    "Mapping contains ${mapping.size} entries"
-            )
+        val eoCorrespondingToOrigin = origin.getOrCreateEObject(eResource, mapping)
         eo.eSet(originSF, eoCorrespondingToOrigin)
     } else {
         throw IllegalStateException("Only origins represented Nodes are currently supported")
     }
 }
 
-private fun setDestination(eo: EObject, destination: Destination?, mapping: KolasuToEMFMapping = KolasuToEMFMapping()) {
+private fun setDestination(eo: EObject, destination: Destination?, eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()) {
     val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
     when (destination) {
         null -> return
@@ -329,11 +325,7 @@ private fun setDestination(eo: EObject, destination: Destination?, mapping: Kola
 
             val nodeDestinationInstance = nodeDestination.instantiate()
             val nodeSF = nodeDestination.getEStructuralFeature("node")
-            val eoCorrespondingToOrigin = mapping.getAssociatedEObject(destination)
-                ?: throw IllegalStateException(
-                    "No EObject mapped to destination $destination. " +
-                        "Mapping contains ${mapping.size} entries"
-                )
+            val eoCorrespondingToOrigin = destination.getOrCreateEObject(eResource, mapping)
             nodeDestinationInstance.eSet(nodeSF, eoCorrespondingToOrigin)
 
             val destinationSF = astNode.getEStructuralFeature("destination")
@@ -374,8 +366,8 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
         val positionValue = this.position?.toEObject()
         eo.eSet(position, positionValue)
 
-        setOrigin(eo, this.origin, mapping)
-        setDestination(eo, this.destination, mapping)
+        setOrigin(eo, this.origin, eResource, mapping)
+        setDestination(eo, this.destination, eResource, mapping)
 
         this.processProperties { pd ->
             val esf = ec.eAllStructuralFeatures.find { it.name == pd.name }!!

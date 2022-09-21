@@ -136,6 +136,35 @@ class TranspilationTraceTest {
             Result(emptyList(), aRoot),
             Result(emptyList(), bRoot)
         )
-        assertEquals("""""", tt.saveAsJson("foo.json", mm))
+        assertEquals("""{
+  "eClass" : "https://strumenta.com/kolasu/transpilation/v1#//TranspilationTrace",
+  "originalCode" : "a:1",
+  "sourceResult" : {
+    "root" : {
+      "eClass" : "http://mypackage.com#//ANode",
+      "destination" : {
+        "eClass" : "https://strumenta.com/kolasu/v2#//NodeDestination",
+        "node" : {
+          "eClass" : "http://mypackage.com#//ANode",
+          "${'$'}ref" : "#//@targetResult/@root"
+        }
+      },
+      "name" : "a",
+      "value" : 1
+    }
+  },
+  "targetResult" : {
+    "root" : {
+      "eClass" : "http://mypackage.com#//ANode",
+      "origin" : {
+        "eClass" : "http://mypackage.com#//ANode",
+        "${'$'}ref" : "//@sourceResult/@root"
+      },
+      "name" : "b",
+      "value" : 2
+    }
+  },
+  "generatedCode" : "b:2"
+}""", tt.saveAsJson("foo.json", mm))
     }
 }
