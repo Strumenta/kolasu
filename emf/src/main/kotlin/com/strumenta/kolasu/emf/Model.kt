@@ -104,7 +104,7 @@ fun <T : Node> Result<T>.toEObject(
     val resultEO = makeResultEObject(this)
     val rootSF = resultEO.eClass().eAllStructuralFeatures.find { it.name == "root" }!!
     if (root != null) {
-        resultEO.eSet(rootSF, root!!.toEObject(resource, kolasuToEMFMapping))
+        resultEO.eSet(rootSF, kolasuToEMFMapping.getOrCreate(root!!, resource))
     }
     return resultEO
 }
@@ -268,6 +268,7 @@ fun EClass.instantiate(): EObject {
 
 class KolasuToEMFMapping {
     private val nodeToEObjects = IdentityHashMap<Node, EObject>()
+
     fun associate(node: Node, eo: EObject) {
         nodeToEObjects[node] = eo
     }

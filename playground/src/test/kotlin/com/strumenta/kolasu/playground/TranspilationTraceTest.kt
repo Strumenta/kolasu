@@ -146,7 +146,7 @@ class TranspilationTraceTest {
         "eClass" : "https://strumenta.com/kolasu/v2#//NodeDestination",
         "node" : {
           "eClass" : "http://mypackage.com#//ANode",
-          "${'$'}ref" : "#//@targetResult/@root"
+          "${'$'}ref" : "//@targetResult/@root"
         }
       },
       "name" : "a",
