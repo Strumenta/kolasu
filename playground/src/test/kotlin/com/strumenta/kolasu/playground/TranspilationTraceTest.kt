@@ -124,4 +124,18 @@ class TranspilationTraceTest {
             tt.saveAsJson("foo.json", mm)
         )
     }
+
+    @Test
+    fun serializeSourceAndDestination() {
+        val aRoot = ANode("a", 1)
+        val bRoot = ANode("b", 2)
+        aRoot.destination = bRoot
+        bRoot.origin = aRoot
+        val tt = TranspilationTrace(
+            "a:1", "b:2",
+            Result(emptyList(), aRoot),
+            Result(emptyList(), bRoot)
+        )
+        assertEquals("""""", tt.saveAsJson("foo.json", mm))
+    }
 }
