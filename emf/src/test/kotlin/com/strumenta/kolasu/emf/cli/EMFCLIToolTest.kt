@@ -138,20 +138,20 @@ class EMFCLIToolTest {
     "name" : "MyFieldDecl",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "https://strumenta.com/kolasu/v2#//ASTNode"
+      "${'$'}ref" : "https://strumenta.com/starlasu/v2#//ASTNode"
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "https://strumenta.com/kolasu/v2#//Named"
+      "${'$'}ref" : "https://strumenta.com/starlasu/v2#//Named"
     } ]
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
     "name" : "MyEntityDecl",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "https://strumenta.com/kolasu/v2#//ASTNode"
+      "${'$'}ref" : "https://strumenta.com/starlasu/v2#//ASTNode"
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "https://strumenta.com/kolasu/v2#//Named"
+      "${'$'}ref" : "https://strumenta.com/starlasu/v2#//Named"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
@@ -168,7 +168,7 @@ class EMFCLIToolTest {
     "name" : "MyCompilationUnit",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "https://strumenta.com/kolasu/v2#//ASTNode"
+      "${'$'}ref" : "https://strumenta.com/starlasu/v2#//ASTNode"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
@@ -205,7 +205,7 @@ class EMFCLIToolTest {
             """[ {
   "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
   "name" : "StrumentaLanguageSupport",
-  "nsURI" : "https://strumenta.com/kolasu/v2",
+  "nsURI" : "https://strumenta.com/starlasu/v2",
   "eClassifiers" : [ {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
     "name" : "LocalDate",
@@ -676,7 +676,7 @@ class EMFCLIToolTest {
         assert(outMyFile1.exists())
         assertEquals(
             """{
-  "eClass" : "https://strumenta.com/kolasu/v2#//Result",
+  "eClass" : "https://strumenta.com/starlasu/v2#//Result",
   "root" : {
     "eClass" : "#//MyCompilationUnit",
     "decls" : [ {
@@ -688,7 +688,7 @@ class EMFCLIToolTest {
         )
         assertEquals(
             """{
-  "eClass" : "https://strumenta.com/kolasu/v2#//Result",
+  "eClass" : "https://strumenta.com/starlasu/v2#//Result",
   "root" : {
     "eClass" : "#//MyCompilationUnit",
     "decls" : [ {

@@ -17,7 +17,7 @@ val TRANSPILATION_METAMODEL by lazy { createTranspilationMetamodel() }
 
 private fun createTranspilationMetamodel(): EPackage {
     val ePackage = EcoreFactory.eINSTANCE.createEPackage()
-    val nsUri = "https://strumenta.com/kolasu/transpilation/v1"
+    val nsUri = "https://strumenta.com/starlasu/transpilation/v1"
     ePackage.setResourceURI(nsUri)
     ePackage.name = "StrumentaLanguageSupportTranspilation"
     ePackage.nsURI = nsUri
