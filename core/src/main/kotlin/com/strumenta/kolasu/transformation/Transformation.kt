@@ -185,7 +185,7 @@ open class ASTTransformer(
         return node
     }
 
-    protected open fun asOrigin(source: Any): Origin? = null
+    protected open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
 
     protected open fun setChild(
         childNodeFactory: ChildNodeFactory<*>,
@@ -211,6 +211,14 @@ open class ASTTransformer(
     }
 
     protected open fun <S : Any> makeNode(factory: NodeFactory<S>, source: S, allowGenericNode: Boolean = true): Node {
+        var origin = asOrigin(source)
+        if (origin == source) {
+            if (origin is Node) {
+                origin = origin.origin
+            } else {
+                origin = null
+            }
+        }
         return try {
             factory.constructor(source, this, factory)
         } catch (e: Exception) {
@@ -219,7 +227,7 @@ open class ASTTransformer(
             } else {
                 throw e
             }
-        }.withOrigin(asOrigin(source))
+        }.withOrigin(origin)
     }
 
     protected open fun <S : Any> getNodeFactory(kClass: KClass<S>): NodeFactory<S>? {
