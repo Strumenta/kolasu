@@ -129,7 +129,7 @@ class KolasuMetamodelTest {
       "containment" : true
     } ]
   } ]
-}"""
+}""".replace("\n", System.lineSeparator()),
         )
     }
 }
