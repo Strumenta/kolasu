@@ -351,6 +351,58 @@ val Node.children: List<Node>
         return children
     }
 
+/**
+ * @return the next sibling node. Notice that children of a sibling collection are considered siblings
+ * and not the collection itself.
+ */
+val Node.nextSibling: Node?
+    get() {
+        if (this.parent != null) {
+            val siblings = this.parent!!.children
+            val index = siblings.indexOf(this)
+            return if (index == children.size - 1) null else siblings[index + 1]
+        }
+        return null
+    }
+
+/**
+ * @return the previous sibling. Notice that children of a sibling collection are considered siblings
+ * and not the collection itself.
+ */
+val Node.previousSibling: Node?
+    get() {
+        if (this.parent != null) {
+            val siblings = this.parent!!.children
+            val index = siblings.indexOf(this)
+            return if (index == 0) null else siblings[index - 1]
+        }
+        return null
+    }
+
+/**
+ * @return the next sibling of the specified type. Notice that children of a sibling collection are considered siblings
+ * and not the collection itself.
+ */
+inline fun <reified T : Node> Node.nextSibling(): Node? {
+    if (this.parent != null) {
+        val siblings = this.parent!!.children
+        return siblings.takeLast(siblings.size - 1 - siblings.indexOf(this)).firstOrNull { it is T }
+    }
+    return null
+}
+
+/**
+ * @return the previous sibling of the specified type. Notice that children of a sibling collection are considered siblings
+ * and not the collection itself.
+ */
+inline fun <reified T : Node> Node.previousSibling(): Node? {
+    if (this.parent != null) {
+        val siblings = this.parent!!.children
+        return siblings.take(siblings.indexOf(this)).lastOrNull { it is T }
+    }
+    return null
+}
+
 // TODO reimplement using transformChildren
 fun Node.transformTree(
     operation: (Node) -> Node,
