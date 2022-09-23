@@ -118,6 +118,114 @@ fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent
     }
 }
 
+/**
+ * @return all direct children of this node.
+ */
+val Node.children: List<Node>
+    get() {
+        val children = mutableListOf<Node>()
+        this.properties.forEach { p ->
+            val v = p.value
+            when (v) {
+                is Node -> children.add(v)
+                is Collection<*> -> v.forEach { if (it is Node) children.add(it) }
+            }
+        }
+        return children
+    }
+
+/**
+ * @return the next sibling node. Notice that children of a sibling collection are considered siblings
+ * and not the collection itself.
+ */
+val Node.nextSibling: Node?
+    get() {
+        if (this.parent != null) {
+            val siblings = this.parent!!.children
+            val index = siblings.indexOf(this)
+            return if (index == children.size - 1) null else siblings[index + 1]
+        }
+        return null
+    }
+
+/**
+ * @return the previous sibling. Notice that children of a sibling collection are considered siblings
+ * and not the collection itself.
+ */
+val Node.previousSibling: Node?
+    get() {
+        if (this.parent != null) {
+            val siblings = this.parent!!.children
+            val index = siblings.indexOf(this)
+            return if (index == 0) null else siblings[index - 1]
+        }
+        return null
+    }
+
+/**
+ * @return the next sibling node in the same property.
+ */
+val Node.nextSamePropertySibling: Node?
+    get() {
+        if (this.parent != null) {
+            val siblings = this.parent!!.properties.find { p ->
+                val v = p.value
+                when (v) {
+                    is Collection<*> -> v.contains(this)
+                    else -> false
+                }
+            }?.value as? Collection<*> ?: emptyList<Node>()
+
+            val index = siblings.indexOf(this)
+            return if (index == siblings.size - 1 || index == -1) null else siblings.elementAt(index + 1) as Node
+        }
+        return null
+    }
+
+/**
+ * @return the previous sibling in the same property.
+ */
+val Node.previousSamePropertySibling: Node?
+    get() {
+        if (this.parent != null) {
+            val siblings = this.parent!!.properties.find { p ->
+                val v = p.value
+                when (v) {
+                    is Collection<*> -> v.contains(this)
+                    else -> false
+                }
+            }?.value as? Collection<*> ?: emptyList<Node>()
+
+            val index = siblings.indexOf(this)
+            return if (index == 0 || index == -1) null else siblings.elementAt(index - 1) as Node
+        }
+        return null
+    }
+
+/**
+ * @return the next sibling of the specified type. Notice that children of a sibling collection are considered siblings
+ * and not the collection itself.
+ */
+inline fun <reified T : Node> Node.nextSibling(): Node? {
+    if (this.parent != null) {
+        val siblings = this.parent!!.children
+        return siblings.takeLast(siblings.size - 1 - siblings.indexOf(this)).firstOrNull { it is T }
+    }
+    return null
+}
+
+/**
+ * @return the previous sibling of the specified type. Notice that children of a sibling collection are considered siblings
+ * and not the collection itself.
+ */
+inline fun <reified T : Node> Node.previousSibling(): Node? {
+    if (this.parent != null) {
+        val siblings = this.parent!!.children
+        return siblings.take(siblings.indexOf(this)).lastOrNull { it is T }
+    }
+    return null
+}
+
 // TODO reimplement using transformChildren
 fun Node.transformTree(
     operation: (Node) -> Node,
