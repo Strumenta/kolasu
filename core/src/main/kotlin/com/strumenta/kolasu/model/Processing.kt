@@ -380,6 +380,46 @@ val Node.previousSibling: Node?
     }
 
 /**
+ * @return the next sibling node in the same property.
+ */
+val Node.nextSamePropertySibling: Node?
+    get() {
+        if (this.parent != null) {
+            val siblings = this.parent!!.properties.find { p ->
+                val v = p.value
+                when (v) {
+                    is Collection<*> -> v.contains(this)
+                    else -> false
+                }
+            }?.value as? Collection<*> ?: emptyList<Node>()
+
+            val index = siblings.indexOf(this)
+            return if (index == siblings.size - 1 || index == -1) null else siblings.elementAt(index + 1) as Node
+        }
+        return null
+    }
+
+/**
+ * @return the previous sibling in the same property.
+ */
+val Node.previousSamePropertySibling: Node?
+    get() {
+        if (this.parent != null) {
+            val siblings = this.parent!!.properties.find { p ->
+                val v = p.value
+                when (v) {
+                    is Collection<*> -> v.contains(this)
+                    else -> false
+                }
+            }?.value as? Collection<*> ?: emptyList<Node>()
+
+            val index = siblings.indexOf(this)
+            return if (index == 0 || index == -1) null else siblings.elementAt(index - 1) as Node
+        }
+        return null
+    }
+
+/**
  * @return the next sibling of the specified type. Notice that children of a sibling collection are considered siblings
  * and not the collection itself.
  */
