@@ -69,6 +69,14 @@ private fun createKolasuMetamodel(): EPackage {
         this.eSuperTypes.add(origin)
         addContainment("position", position, 0, 1)
     }
+    // We need this as a wrapper around the Node, as the ASTNode.Origin link is a containment link
+    // (otherwise parseTreeOrigin would be orphan), but we want to use a reference, so we use a containment link
+    // to a node holding a reference. The node holding a reference is NodeOrigin
+    val nodeOrigin = ePackage.createEClass("NodeOrigin").apply {
+        this.isAbstract = false
+        this.eSuperTypes.add(origin)
+        addReference("node", astNode, 1, 1)
+    }
 
     ePackage.createEClass("Statement").apply {
         this.isInterface = true

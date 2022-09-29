@@ -400,4 +400,36 @@ class ModelTest {
             eo.saveAsJson()
         )
     }
+
+    @Test
+    fun saveToJSONNodeOrigin() {
+        val someOtherNode = MyRoot(123)
+        val ast = MySimpleLangCu().withOrigin(someOtherNode)
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
+        metamodelBuilder.provideClass(MySimpleLangCu::class)
+        metamodelBuilder.provideClass(MyRoot::class)
+        val ePackage = metamodelBuilder.generate()
+
+        val res = ResourceImpl()
+        res.contents.add(ePackage)
+        val mapping = KolasuToEMFMapping()
+        val eo1 = someOtherNode.toEObject(res, mapping)
+        val eo2 = ast.toEObject(res, mapping)
+        assertEquals(
+            """{
+  "eClass" : "#//MySimpleLangCu",
+  "origin" : {
+    "eClass" : "https://strumenta.com/starlasu/v2#//NodeOrigin",
+    "node" : {
+      "eClass" : "#//MyRoot",
+      "${'$'}ref" : "#//"
+    }
+  }
+}""",
+            eo2.saveAsJson()
+        )
+    }
 }
