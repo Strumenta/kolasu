@@ -63,16 +63,16 @@ fun Any.dataToEObject(ePackage: EPackage): EObject {
 }
 
 fun Point.toEObject(): EObject {
-    val ec = KOLASU_METAMODEL.getEClass("Point")
-    val eo = KOLASU_METAMODEL.eFactoryInstance.create(ec)
+    val ec = STARLASU_METAMODEL.getEClass("Point")
+    val eo = STARLASU_METAMODEL.eFactoryInstance.create(ec)
     eo.eSet(ec.getEStructuralFeature("line"), this.line)
     eo.eSet(ec.getEStructuralFeature("column"), this.column)
     return eo
 }
 
 fun Position.toEObject(): EObject {
-    val ec = KOLASU_METAMODEL.getEClass("Position")
-    val eo = KOLASU_METAMODEL.eFactoryInstance.create(ec)
+    val ec = STARLASU_METAMODEL.getEClass("Position")
+    val eo = STARLASU_METAMODEL.eFactoryInstance.create(ec)
     eo.eSet(ec.getEStructuralFeature("start"), this.start.toEObject())
     eo.eSet(ec.getEStructuralFeature("end"), this.end.toEObject())
     return eo
@@ -88,8 +88,8 @@ fun <T : Node> Result<T>.toEObject(astPackage: EPackage): EObject {
 }
 
 private fun makeResultEObject(result: Result<*>): EObject {
-    val resultEC = KOLASU_METAMODEL.getEClass(Result::class.java)
-    val resultEO = KOLASU_METAMODEL.eFactoryInstance.create(resultEC)
+    val resultEC = STARLASU_METAMODEL.getEClass(Result::class.java)
+    val resultEO = STARLASU_METAMODEL.eFactoryInstance.create(resultEC)
     val issuesSF = resultEC.eAllStructuralFeatures.find { it.name == "issues" }!!
     val issues = resultEO.eGet(issuesSF) as MutableList<EObject>
     result.issues.forEach {
@@ -111,10 +111,10 @@ fun <T : Node> Result<T>.toEObject(
 }
 
 fun Issue.toEObject(): EObject {
-    val ec = KOLASU_METAMODEL.getEClass(Issue::class.java)
-    val eo = KOLASU_METAMODEL.eFactoryInstance.create(ec)
-    val et = KOLASU_METAMODEL.getEClassifier("IssueType")
-    val es = KOLASU_METAMODEL.getEClassifier("IssueSeverity")
+    val ec = STARLASU_METAMODEL.getEClass(Issue::class.java)
+    val eo = STARLASU_METAMODEL.eFactoryInstance.create(ec)
+    val et = STARLASU_METAMODEL.getEClassifier("IssueType")
+    val es = STARLASU_METAMODEL.getEClassifier("IssueSeverity")
     val typeSF = ec.eAllStructuralFeatures.find { it.name == "type" }!!
     eo.eSet(typeSF, (et as EEnum).getEEnumLiteral(type.ordinal))
     val severitySF = ec.eAllStructuralFeatures.find { it.name == "severity" }!!
@@ -143,8 +143,8 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
             return toLocalTimeObject(pdValue)
         }
         is LocalDateTime -> {
-            val eClass = KOLASU_METAMODEL.getEClass("LocalDateTime")
-            val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
+            val eClass = STARLASU_METAMODEL.getEClass("LocalDateTime")
+            val eObject = STARLASU_METAMODEL.eFactoryInstance.create(eClass)
             val dateComponent = toLocalDateObject(pdValue.toLocalDate())
             val timeComponent = toLocalTimeObject(pdValue.toLocalTime())
             eObject.eSet(eClass.getEStructuralFeature("date"), dateComponent)
@@ -163,8 +163,8 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                     pdValue!!.dataToEObject(ePackage)
                 }
                 pdValue is ReferenceByName<*> -> {
-                    val refEC = KOLASU_METAMODEL.getEClass("ReferenceByName")
-                    val refEO = KOLASU_METAMODEL.eFactoryInstance.create(refEC)
+                    val refEC = STARLASU_METAMODEL.getEClass("ReferenceByName")
+                    val refEO = STARLASU_METAMODEL.eFactoryInstance.create(refEC)
                     refEO.eSet(refEC.getEStructuralFeature("name")!!, pdValue.name)
                     // Note that we could either find references to nodes we have already encountered and to nodes
                     // that we have not yet encountered
@@ -179,8 +179,8 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                     refEO
                 }
                 pdValue is Result<*> -> {
-                    val resEC = KOLASU_METAMODEL.getEClass("Result")
-                    val resEO = KOLASU_METAMODEL.eFactoryInstance.create(resEC)
+                    val resEC = STARLASU_METAMODEL.getEClass("Result")
+                    val resEO = STARLASU_METAMODEL.eFactoryInstance.create(resEC)
                     if (pdValue.root is Node) {
                         resEO.eSet(
                             resEC.getEStructuralFeature("root"),
@@ -201,8 +201,8 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
 }
 
 private fun toLocalTimeObject(value: LocalTime): EObject {
-    val eClass = KOLASU_METAMODEL.getEClass("LocalTime")
-    val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
+    val eClass = STARLASU_METAMODEL.getEClass("LocalTime")
+    val eObject = STARLASU_METAMODEL.eFactoryInstance.create(eClass)
     eObject.eSet(eClass.getEStructuralFeature("hour"), value.hour)
     eObject.eSet(eClass.getEStructuralFeature("minute"), value.minute)
     eObject.eSet(eClass.getEStructuralFeature("second"), value.second)
@@ -211,8 +211,8 @@ private fun toLocalTimeObject(value: LocalTime): EObject {
 }
 
 private fun toLocalDateObject(value: LocalDate): EObject {
-    val eClass = KOLASU_METAMODEL.getEClass("LocalDate")
-    val eObject = KOLASU_METAMODEL.eFactoryInstance.create(eClass)
+    val eClass = STARLASU_METAMODEL.getEClass("LocalDate")
+    val eObject = STARLASU_METAMODEL.eFactoryInstance.create(eClass)
     eObject.eSet(eClass.getEStructuralFeature("year"), value.year)
     eObject.eSet(eClass.getEStructuralFeature("month"), value.monthValue)
     eObject.eSet(eClass.getEStructuralFeature("dayOfMonth"), value.dayOfMonth)
@@ -307,11 +307,11 @@ private fun setOrigin(eo: EObject, origin: Origin?, resource: Resource, mapping:
     if (origin == null) {
         return
     }
-    val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
+    val astNode = STARLASU_METAMODEL.getEClass("ASTNode")
     val originSF = astNode.getEStructuralFeature("origin")
     when (origin) {
         is Node -> {
-            val nodeOriginClass = KOLASU_METAMODEL.getEClass("NodeOrigin")
+            val nodeOriginClass = STARLASU_METAMODEL.getEClass("NodeOrigin")
             val nodeSF = nodeOriginClass.getEStructuralFeature("node")
             val nodeOrigin = nodeOriginClass.instantiate()
             val eoCorrespondingToOrigin = mapping.getAssociatedEObject(origin) ?: throw IllegalStateException(
@@ -322,7 +322,7 @@ private fun setOrigin(eo: EObject, origin: Origin?, resource: Resource, mapping:
             eo.eSet(originSF, nodeOrigin)
         }
         is ParseTreeOrigin -> {
-            val parseTreeOriginClass = KOLASU_METAMODEL.getEClass("ParseTreeOrigin")
+            val parseTreeOriginClass = STARLASU_METAMODEL.getEClass("ParseTreeOrigin")
             val parseTreeOrigin = parseTreeOriginClass.instantiate()
             val positionSF = parseTreeOriginClass.getEStructuralFeature("position")
             parseTreeOrigin.eSet(positionSF, origin.position?.toEObject())
@@ -335,11 +335,11 @@ private fun setOrigin(eo: EObject, origin: Origin?, resource: Resource, mapping:
 }
 
 private fun setDestination(eo: EObject, destination: Destination?, mapping: KolasuToEMFMapping = KolasuToEMFMapping()) {
-    val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
+    val astNode = STARLASU_METAMODEL.getEClass("ASTNode")
     when (destination) {
         null -> return
         is Node -> {
-            val nodeDestination = KOLASU_METAMODEL.getEClass("NodeDestination")
+            val nodeDestination = STARLASU_METAMODEL.getEClass("NodeDestination")
 
             val nodeDestinationInstance = nodeDestination.instantiate()
             val nodeSF = nodeDestination.getEStructuralFeature("node")
@@ -354,9 +354,9 @@ private fun setDestination(eo: EObject, destination: Destination?, mapping: Kola
             eo.eSet(destinationSF, nodeDestinationInstance)
         }
         is TextFileDestination -> {
-            val textFileInstance = KOLASU_METAMODEL.getEClass("TextFileDestination").instantiate()
+            val textFileInstance = STARLASU_METAMODEL.getEClass("TextFileDestination").instantiate()
 
-            val positionSF = KOLASU_METAMODEL.getEClass("TextFileDestination").getEStructuralFeature("position")
+            val positionSF = STARLASU_METAMODEL.getEClass("TextFileDestination").getEStructuralFeature("position")
             textFileInstance.eSet(positionSF, destination.position?.toEObject())
 
             val destinationSF = astNode.getEStructuralFeature("destination")
@@ -374,7 +374,7 @@ private fun setDestination(eo: EObject, destination: Destination?, mapping: Kola
  * Translates this node – and, recursively, its descendants – into an [EObject] (EMF/Ecore representation).
  *
  * The classes of the node are resolved against the provided [Resource]. That is, the resource must contain:
- *  - the [Kolasu metamodel package][KOLASU_METAMODEL]
+ *  - the [Kolasu metamodel package][STARLASU_METAMODEL]
  *  - every [EPackage] containing the definitions of the node classes in the tree.
  */
 fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject {
@@ -382,7 +382,7 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
         val ec = eResource.getEClass(this::class)
         val eo = ec.ePackage.eFactoryInstance.create(ec)
         mapping.associate(this, eo)
-        val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
+        val astNode = STARLASU_METAMODEL.getEClass("ASTNode")
 
         val position = astNode.getEStructuralFeature("position")
         val positionValue = this.position?.toEObject()

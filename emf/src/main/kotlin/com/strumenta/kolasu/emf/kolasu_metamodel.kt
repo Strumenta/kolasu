@@ -8,10 +8,10 @@ import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.EcorePackage
 import java.io.File
 
-val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
-val ASTNODE_ECLASS by lazy { KOLASU_METAMODEL.eClassifiers.find { it.name == "ASTNode" }!! as EClass }
+val STARLASU_METAMODEL by lazy { createStarlasuMetamodel() }
+val ASTNODE_ECLASS by lazy { STARLASU_METAMODEL.eClassifiers.find { it.name == "ASTNode" }!! as EClass }
 
-private fun createKolasuMetamodel(): EPackage {
+private fun createStarlasuMetamodel(): EPackage {
     val ePackage = EcoreFactory.eINSTANCE.createEPackage()
     val nsUri = "https://strumenta.com/starlasu/v2"
     ePackage.setResourceURI(nsUri)
@@ -170,7 +170,7 @@ private fun createKolasuMetamodel(): EPackage {
 }
 
 fun main(args: Array<String>) {
-    KOLASU_METAMODEL.saveEcore(File("kolasu-2.0.ecore"))
-    KOLASU_METAMODEL.saveEcore(File("kolasu-2.0.xmi"))
-    KOLASU_METAMODEL.saveAsJson(File("kolasu-2.0.json"))
+    STARLASU_METAMODEL.saveEcore(File("kolasu-2.0.ecore"))
+    STARLASU_METAMODEL.saveEcore(File("kolasu-2.0.xmi"))
+    STARLASU_METAMODEL.saveAsJson(File("kolasu-2.0.json"))
 }

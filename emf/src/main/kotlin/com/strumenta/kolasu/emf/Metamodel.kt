@@ -66,22 +66,22 @@ class KolasuDataTypeHandler(val kolasuKClass: KClass<*>, val kolasuDataType: EDa
     override fun external(): Boolean = true
 }
 
-val LocalDateHandler = KolasuClassHandler(LocalDate::class, KOLASU_METAMODEL.getEClass("LocalDate"))
-val LocalTimeHandler = KolasuClassHandler(LocalTime::class, KOLASU_METAMODEL.getEClass("LocalTime"))
-val LocalDateTimeHandler = KolasuClassHandler(LocalDateTime::class, KOLASU_METAMODEL.getEClass("LocalDateTime"))
+val LocalDateHandler = KolasuClassHandler(LocalDate::class, STARLASU_METAMODEL.getEClass("LocalDate"))
+val LocalTimeHandler = KolasuClassHandler(LocalTime::class, STARLASU_METAMODEL.getEClass("LocalTime"))
+val LocalDateTimeHandler = KolasuClassHandler(LocalDateTime::class, STARLASU_METAMODEL.getEClass("LocalDateTime"))
 
-val NodeHandler = KolasuClassHandler(Node::class, KOLASU_METAMODEL.getEClass("ASTNode"))
-val NamedHandler = KolasuClassHandler(Named::class, KOLASU_METAMODEL.getEClass("Named"))
-val PositionHandler = KolasuClassHandler(Position::class, KOLASU_METAMODEL.getEClass("Position"))
-val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, KOLASU_METAMODEL.getEClass("PossiblyNamed"))
-val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, KOLASU_METAMODEL.getEClass("ReferenceByName"))
-val ResultHandler = KolasuClassHandler(Result::class, KOLASU_METAMODEL.getEClass("Result"))
+val NodeHandler = KolasuClassHandler(Node::class, STARLASU_METAMODEL.getEClass("ASTNode"))
+val NamedHandler = KolasuClassHandler(Named::class, STARLASU_METAMODEL.getEClass("Named"))
+val PositionHandler = KolasuClassHandler(Position::class, STARLASU_METAMODEL.getEClass("Position"))
+val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, STARLASU_METAMODEL.getEClass("PossiblyNamed"))
+val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, STARLASU_METAMODEL.getEClass("ReferenceByName"))
+val ResultHandler = KolasuClassHandler(Result::class, STARLASU_METAMODEL.getEClass("Result"))
 
-val StatementHandler = KolasuClassHandler(Statement::class, KOLASU_METAMODEL.getEClass("Statement"))
-val ExpressionHandler = KolasuClassHandler(Expression::class, KOLASU_METAMODEL.getEClass("Expression"))
+val StatementHandler = KolasuClassHandler(Statement::class, STARLASU_METAMODEL.getEClass("Statement"))
+val ExpressionHandler = KolasuClassHandler(Expression::class, STARLASU_METAMODEL.getEClass("Expression"))
 val EntityDeclarationHandler = KolasuClassHandler(
     EntityDeclaration::class,
-    KOLASU_METAMODEL
+    STARLASU_METAMODEL
         .getEClass("EntityDeclaration")
 )
 

@@ -54,9 +54,9 @@ class ModelTest {
         // TODO this is to correctly resolve the metamodel, however what would happen if there were
         // other references to https://... resources?
         resourceSet.resourceFactoryRegistry.protocolToFactoryMap["https"] = JsonResourceFactory()
-        val kolasuURI = URI.createURI(KOLASU_METAMODEL.nsURI)
+        val kolasuURI = URI.createURI(STARLASU_METAMODEL.nsURI)
         val kolasuRes = resourceSet.createResource(kolasuURI)
-        kolasuRes.contents.add(KOLASU_METAMODEL)
+        kolasuRes.contents.add(STARLASU_METAMODEL)
         val metaURI = URI.createURI(nsURI)
         val metaRes = resourceSet.createResource(metaURI)
         metaRes.contents.add(ePackage)
@@ -191,7 +191,7 @@ class ModelTest {
         r1.singlePointer.referred = r1
         val eo1 = r1.toEObject(res)
         val reference = eo1.eGet("singlePointer") as EObject
-        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), reference.eClass())
+        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), reference.eClass())
         assertEquals(eo1, reference.eGet("referenced"))
         assertEquals(
             """{
@@ -229,15 +229,15 @@ class ModelTest {
         val pointers = eo1.eGet("pointers") as EList<*>
         assertEquals(3, pointers.size)
 
-        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[0] as EObject).eClass())
+        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[0] as EObject).eClass())
         assertEquals("a", (pointers[0] as EObject).eGet("name"))
         assertEquals(eo1, (pointers[0] as EObject).eGet("referenced"))
 
-        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[1] as EObject).eClass())
+        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[1] as EObject).eClass())
         assertEquals("b", (pointers[1] as EObject).eGet("name"))
         assertEquals(eo1, (pointers[1] as EObject).eGet("referenced"))
 
-        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[2] as EObject).eClass())
+        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[2] as EObject).eClass())
         assertEquals("c", (pointers[2] as EObject).eGet("name"))
         assertEquals(eo1, (pointers[2] as EObject).eGet("referenced"))
 
