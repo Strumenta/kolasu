@@ -3,6 +3,7 @@ package com.strumenta.kolasu.emf
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.EList
@@ -306,17 +307,27 @@ private fun setOrigin(eo: EObject, origin: Origin?, mapping: KolasuToEMFMapping 
     if (origin == null) {
         return
     }
-    if (origin is Node) {
-        val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
-        val originSF = astNode.getEStructuralFeature("origin")
-        val eoCorrespondingToOrigin = mapping.getAssociatedEObject(origin)
-            ?: throw IllegalStateException(
-                "No EObject mapped to origin $origin. " +
-                    "Mapping contains ${mapping.size} entries"
-            )
-        eo.eSet(originSF, eoCorrespondingToOrigin)
-    } else {
-        throw IllegalStateException("Only origins represented Nodes are currently supported")
+    val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
+    val originSF = astNode.getEStructuralFeature("origin")
+    when (origin) {
+        is Node -> {
+            val eoCorrespondingToOrigin = mapping.getAssociatedEObject(origin)
+                ?: throw IllegalStateException(
+                    "No EObject mapped to origin $origin. " +
+                            "Mapping contains ${mapping.size} entries"
+                )
+            eo.eSet(originSF, eoCorrespondingToOrigin)
+        }
+        is ParseTreeOrigin -> {
+            val parseTreeOriginClass  = KOLASU_METAMODEL.getEClass("ParseTreeOrigin")
+            val parseTreeOrigin = parseTreeOriginClass.instantiate()
+            val positionSF = parseTreeOriginClass.getEStructuralFeature("position")
+            parseTreeOrigin.eSet(positionSF, origin.position?.toEObject())
+            eo.eSet(originSF, parseTreeOrigin)
+        }
+        else -> {
+            throw IllegalStateException("Only origins representing Nodes or ParseTreeOrigins are currently supported")
+        }
     }
 }
 

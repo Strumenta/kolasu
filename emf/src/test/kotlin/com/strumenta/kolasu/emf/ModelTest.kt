@@ -2,6 +2,11 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.model.Statement
+import com.strumenta.kolasu.parsing.withParseTreeNode
+import com.strumenta.simplelang.SimpleLangLexer
+import com.strumenta.simplelang.SimpleLangParser
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
@@ -19,6 +24,8 @@ import kotlin.test.assertTrue
 
 data class NodeFoo(val name: String) : Node()
 class MyRoot(val foo: Int) : Node(), Statement
+
+class MySimpleLangCu() : Node()
 
 class ModelTest {
 
@@ -348,5 +355,45 @@ class ModelTest {
 }""",
             eoA.saveAsJson()
         )
+    }
+
+    @Test
+    fun saveToJSONWithParseTreeOrigin() {
+        val pt = SimpleLangParser(CommonTokenStream(SimpleLangLexer(CharStreams.fromString("input A is string")))).compilationUnit()
+        val ast = MySimpleLangCu().withParseTreeNode(pt)
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
+        metamodelBuilder.provideClass(MySimpleLangCu::class)
+        val ePackage = metamodelBuilder.generate()
+
+        val res = ResourceImpl()
+        res.contents.add(ePackage)
+        val eo = ast.toEObject(res)
+        assertEquals("""{
+  "eClass" : "#//MySimpleLangCu",
+  "position" : {
+    "start" : {
+      "line" : 1
+    },
+    "end" : {
+      "line" : 1,
+      "column" : 17
+    }
+  },
+  "origin" : {
+    "eClass" : "https://strumenta.com/starlasu/v2#//ParseTreeOrigin",
+    "position" : {
+      "start" : {
+        "line" : 1
+      },
+      "end" : {
+        "line" : 1,
+        "column" : 17
+      }
+    }
+  }
+}""", eo.saveAsJson())
     }
 }

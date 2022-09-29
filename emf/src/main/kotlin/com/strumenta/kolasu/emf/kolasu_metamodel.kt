@@ -58,11 +58,16 @@ private fun createKolasuMetamodel(): EPackage {
         this.isAbstract = true
         this.eSuperTypes.add(origin)
         addContainment("position", position, 0, 1)
-        addReference("origin", origin, 0, 1)
+        addContainment("origin", origin, 0, 1)
         addContainment("destination", destination, 0, 1)
     }
     nodeDestination.apply {
         addReference("node", astNode, 1, 1)
+    }
+    val parseTreeOrigin = ePackage.createEClass("ParseTreeOrigin").apply {
+        this.isAbstract = false
+        this.eSuperTypes.add(origin)
+        addContainment("position", position, 0, 1)
     }
 
     ePackage.createEClass("Statement").apply {

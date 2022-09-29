@@ -5,6 +5,7 @@ plugins {
     id("idea")
     id("signing")
     id("org.jetbrains.dokka")
+    id "antlr"
 }
 
 java {
@@ -16,6 +17,7 @@ java {
 }
 
 dependencies {
+    antlr "org.antlr:antlr4:$antlr_version"
     api project(":core")
     api group: 'org.eclipse.emf', name: 'org.eclipse.emf.common', version: '2.23.0'
     api group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore', version: '2.25.0'
@@ -31,6 +33,41 @@ dependencies {
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testImplementation "junit:junit:$junit_version"
+    testImplementation "org.antlr:antlr4-runtime:$antlr_version"
+
+}
+
+generateTestGrammarSource {
+    maxHeapSize = "64m"
+    arguments += ['-package', 'com.strumenta.simplelang']
+    outputDirectory = new File("generated-test-src/antlr/main/com/strumenta/simplelang".toString())
+}
+compileKotlin.dependsOn generateGrammarSource
+compileJava.dependsOn generateGrammarSource
+compileTestKotlin.dependsOn generateTestGrammarSource
+
+sourceSets {
+    test {
+        java {
+            srcDirs += "generated-test-src/antlr/main"
+        }
+    }
+}
+
+compileKotlin.source sourceSets.main.java, sourceSets.main.kotlin
+compileTestKotlin.source sourceSets.test.kotlin
+
+clean{
+    delete "generated-src"
+    delete "generated-test-src"
+}
+
+compileJava.dependsOn generateTestGrammarSource
+
+idea {
+    module {
+        testSourceDirs += file("generated-test-src/antlr/main")
+    }
 }
 
 publishing {
