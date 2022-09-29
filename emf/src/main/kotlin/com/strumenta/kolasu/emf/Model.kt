@@ -303,7 +303,12 @@ fun Node.getOrCreateEObject(eResource: Resource, mapping: KolasuToEMFMapping = K
     return mapping.getOrCreate(this, eResource)
 }
 
-private fun setOrigin(eo: EObject, origin: Origin?, resource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()) {
+private fun setOrigin(
+    eo: EObject,
+    origin: Origin?,
+    resource: Resource,
+    mapping: KolasuToEMFMapping = KolasuToEMFMapping()
+) {
     if (origin == null) {
         return
     }
@@ -316,7 +321,7 @@ private fun setOrigin(eo: EObject, origin: Origin?, resource: Resource, mapping:
             val nodeOrigin = nodeOriginClass.instantiate()
             val eoCorrespondingToOrigin = mapping.getAssociatedEObject(origin) ?: throw IllegalStateException(
                 "No EObject mapped to origin $origin. " +
-                        "Mapping contains ${mapping.size} entries"
+                    "Mapping contains ${mapping.size} entries"
             )
             nodeOrigin.eSet(nodeSF, eoCorrespondingToOrigin)
             eo.eSet(originSF, nodeOrigin)
