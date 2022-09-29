@@ -359,7 +359,8 @@ class ModelTest {
 
     @Test
     fun saveToJSONWithParseTreeOrigin() {
-        val pt = SimpleLangParser(CommonTokenStream(SimpleLangLexer(CharStreams.fromString("input A is string")))).compilationUnit()
+        val pt = SimpleLangParser(CommonTokenStream(SimpleLangLexer(CharStreams.fromString("input A is string"))))
+            .compilationUnit()
         val ast = MySimpleLangCu().withParseTreeNode(pt)
         val metamodelBuilder = MetamodelBuilder(
             "com.strumenta.kolasu.emf",
@@ -371,7 +372,8 @@ class ModelTest {
         val res = ResourceImpl()
         res.contents.add(ePackage)
         val eo = ast.toEObject(res)
-        assertEquals("""{
+        assertEquals(
+            """{
   "eClass" : "#//MySimpleLangCu",
   "position" : {
     "start" : {
@@ -394,6 +396,8 @@ class ModelTest {
       }
     }
   }
-}""", eo.saveAsJson())
+}""",
+            eo.saveAsJson()
+        )
     }
 }

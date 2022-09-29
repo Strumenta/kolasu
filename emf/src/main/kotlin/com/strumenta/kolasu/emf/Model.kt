@@ -314,12 +314,12 @@ private fun setOrigin(eo: EObject, origin: Origin?, mapping: KolasuToEMFMapping 
             val eoCorrespondingToOrigin = mapping.getAssociatedEObject(origin)
                 ?: throw IllegalStateException(
                     "No EObject mapped to origin $origin. " +
-                            "Mapping contains ${mapping.size} entries"
+                        "Mapping contains ${mapping.size} entries"
                 )
             eo.eSet(originSF, eoCorrespondingToOrigin)
         }
         is ParseTreeOrigin -> {
-            val parseTreeOriginClass  = KOLASU_METAMODEL.getEClass("ParseTreeOrigin")
+            val parseTreeOriginClass = KOLASU_METAMODEL.getEClass("ParseTreeOrigin")
             val parseTreeOrigin = parseTreeOriginClass.instantiate()
             val positionSF = parseTreeOriginClass.getEStructuralFeature("position")
             parseTreeOrigin.eSet(positionSF, origin.position?.toEObject())
