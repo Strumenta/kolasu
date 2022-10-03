@@ -43,10 +43,10 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) where N :
     }
 
     override fun toString(): String {
-        return if (referred == null) {
-            "Ref($name)[Unsolved]"
-        } else {
+        return if (resolved) {
             "Ref($name)[Solved]"
+        } else {
+            "Ref($name)[Unsolved]"
         }
     }
 
@@ -54,7 +54,7 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) where N :
         get() = referred != null
 
     override fun hashCode(): Int {
-        return name.hashCode() * (7 + if (referred == null) 1 else 2)
+        return name.hashCode() * (7 + if (resolved) 2 else 1)
     }
 
     override fun equals(other: Any?): Boolean {
