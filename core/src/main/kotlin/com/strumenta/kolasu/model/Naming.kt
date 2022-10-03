@@ -73,7 +73,7 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) where N :
  * The name match is performed in a case sensitive or insensitive way depending on the value of @param[caseInsensitive].
  */
 fun <N> ReferenceByName<N>.tryToResolve(
-    candidates: List<N>,
+    candidates: Iterable<N>,
     caseInsensitive: Boolean = false
 ): Boolean where N : PossiblyNamed {
     val res: N? = candidates.find { if (it.name == null) false else it.name.equals(this.name, caseInsensitive) }
