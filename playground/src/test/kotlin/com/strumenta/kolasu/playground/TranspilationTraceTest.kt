@@ -124,4 +124,50 @@ class TranspilationTraceTest {
             tt.saveAsJson("foo.json", mm)
         )
     }
+
+    @Test
+    fun serializeSourceAndDestination() {
+        val aRoot = ANode("a", 1)
+        val bRoot = ANode("b", 2)
+        aRoot.destination = bRoot
+        bRoot.origin = aRoot
+        val tt = TranspilationTrace(
+            "a:1", "b:2",
+            Result(emptyList(), aRoot),
+            Result(emptyList(), bRoot)
+        )
+        assertEquals(
+            """{
+  "eClass" : "https://strumenta.com/starlasu/transpilation/v1#//TranspilationTrace",
+  "originalCode" : "a:1",
+  "sourceResult" : {
+    "root" : {
+      "eClass" : "http://mypackage.com#//ANode",
+      "destination" : {
+        "eClass" : "https://strumenta.com/starlasu/v2#//NodeDestination",
+        "node" : {
+          "eClass" : "http://mypackage.com#//ANode",
+          "${'$'}ref" : "//@targetResult/@root"
+        }
+      },
+      "name" : "a",
+      "value" : 1
+    }
+  },
+  "targetResult" : {
+    "root" : {
+      "eClass" : "http://mypackage.com#//ANode",
+      "origin" : {
+        "eClass" : "http://mypackage.com#//ANode",
+        "${'$'}ref" : "//@sourceResult/@root"
+      },
+      "name" : "b",
+      "value" : 2
+    }
+  },
+  "generatedCode" : "b:2"
+}""",
+            tt.saveAsJson("foo.json", mm)
+        )
+    }
 }
