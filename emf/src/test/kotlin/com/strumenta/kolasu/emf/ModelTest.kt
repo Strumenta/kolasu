@@ -364,6 +364,7 @@ class ModelTest {
 
     @Test
     fun saveToJSONWithParseTreeOrigin() {
+        // We verify the ParseTreeOrigin is not saved, but the position is
         val pt = SimpleLangParser(CommonTokenStream(SimpleLangLexer(CharStreams.fromString("input A is string"))))
             .compilationUnit()
         val ast = MySimpleLangCu().withParseTreeNode(pt)
@@ -387,18 +388,6 @@ class ModelTest {
     "end" : {
       "line" : 1,
       "column" : 17
-    }
-  },
-  "origin" : {
-    "eClass" : "https://strumenta.com/starlasu/v2#//ParseTreeOrigin",
-    "position" : {
-      "start" : {
-        "line" : 1
-      },
-      "end" : {
-        "line" : 1,
-        "column" : 17
-      }
     }
   }
 }""",

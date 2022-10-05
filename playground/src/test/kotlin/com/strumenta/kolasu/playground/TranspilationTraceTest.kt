@@ -158,8 +158,11 @@ class TranspilationTraceTest {
     "root" : {
       "eClass" : "http://mypackage.com#//ANode",
       "origin" : {
-        "eClass" : "http://mypackage.com#//ANode",
-        "${'$'}ref" : "//@sourceResult/@root"
+        "eClass" : "https://strumenta.com/starlasu/v2#//NodeOrigin",
+        "node" : {
+          "eClass" : "http://mypackage.com#//ANode",
+          "${'$'}ref" : "//@sourceResult/@root"
+        }
       },
       "name" : "b",
       "value" : 2
