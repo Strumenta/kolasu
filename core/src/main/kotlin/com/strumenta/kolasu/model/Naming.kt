@@ -43,10 +43,10 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) where N :
     }
 
     override fun toString(): String {
-        return if (referred == null) {
-            "Ref($name)[Unsolved]"
-        } else {
+        return if (resolved) {
             "Ref($name)[Solved]"
+        } else {
+            "Ref($name)[Unsolved]"
         }
     }
 
@@ -54,7 +54,7 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) where N :
         get() = referred != null
 
     override fun hashCode(): Int {
-        return name.hashCode() * (7 + if (referred == null) 1 else 2)
+        return name.hashCode() * (7 + if (resolved) 2 else 1)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -73,7 +73,7 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) where N :
  * The name match is performed in a case sensitive or insensitive way depending on the value of @param[caseInsensitive].
  */
 fun <N> ReferenceByName<N>.tryToResolve(
-    candidates: List<N>,
+    candidates: Iterable<N>,
     caseInsensitive: Boolean = false
 ): Boolean where N : PossiblyNamed {
     val res: N? = candidates.find { if (it.name == null) false else it.name.equals(this.name, caseInsensitive) }

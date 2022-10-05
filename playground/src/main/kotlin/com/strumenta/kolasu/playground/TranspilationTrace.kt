@@ -86,6 +86,7 @@ fun <S : Node, T : Node> TranspilationTrace<S, T>.saveAsJson(name: String, varar
         packageResource.contents.add(it)
     }
     resource.contents.add(this.toEObject(resource))
+
     val output = ByteArrayOutputStream()
     resource.save(output, null)
     return output.toString(Charsets.UTF_8.name())
