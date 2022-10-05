@@ -77,7 +77,7 @@ abstract class EMFEnabledParser<R : Node, P : Parser, C : ParserRuleContext> :
      */
     override fun generateMetamodel(resource: Resource, includingKolasuMetamodel: Boolean) {
         if (includingKolasuMetamodel) {
-            resource.contents.add(KOLASU_METAMODEL)
+            resource.contents.add(STARLASU_METAMODEL)
         }
         doGenerateMetamodel(resource)
     }

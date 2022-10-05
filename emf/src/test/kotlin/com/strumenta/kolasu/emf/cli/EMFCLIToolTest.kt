@@ -396,7 +396,8 @@ class EMFCLIToolTest {
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
         "${'$'}ref" : "/0/Origin"
-      }
+      },
+      "containment" : true
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
       "name" : "destination",
@@ -405,6 +406,38 @@ class EMFCLIToolTest {
         "${'$'}ref" : "/0/Destination"
       },
       "containment" : true
+    } ]
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "ParseTreeOrigin",
+    "eSuperTypes" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+      "${'$'}ref" : "/0/Origin"
+    } ],
+    "eStructuralFeatures" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
+      "name" : "position",
+      "eType" : {
+        "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+        "${'$'}ref" : "/0/Position"
+      },
+      "containment" : true
+    } ]
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "NodeOrigin",
+    "eSuperTypes" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+      "${'$'}ref" : "/0/Origin"
+    } ],
+    "eStructuralFeatures" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
+      "name" : "node",
+      "lowerBound" : 1,
+      "eType" : {
+        "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+        "${'$'}ref" : "/0/ASTNode"
+      }
     } ]
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",

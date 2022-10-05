@@ -22,9 +22,9 @@ private fun createTranspilationMetamodel(): EPackage {
     ePackage.name = "StrumentaLanguageSupportTranspilation"
     ePackage.nsURI = nsUri
 
-    val astNode = KOLASU_METAMODEL.getEClass("ASTNode")
-    val result = KOLASU_METAMODEL.getEClass("Result")
-    val issue = KOLASU_METAMODEL.getEClass("Issue")
+    val astNode = STARLASU_METAMODEL.getEClass("ASTNode")
+    val result = STARLASU_METAMODEL.getEClass("Result")
+    val issue = STARLASU_METAMODEL.getEClass("Issue")
     val string = EcorePackage.eINSTANCE.eString
 
     val transpilationTrace = ePackage.createEClass("TranspilationTrace").apply {

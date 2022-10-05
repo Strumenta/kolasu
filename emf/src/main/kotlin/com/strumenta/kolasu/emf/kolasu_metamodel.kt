@@ -8,10 +8,10 @@ import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.EcorePackage
 import java.io.File
 
-val KOLASU_METAMODEL by lazy { createKolasuMetamodel() }
-val ASTNODE_ECLASS by lazy { KOLASU_METAMODEL.eClassifiers.find { it.name == "ASTNode" }!! as EClass }
+val STARLASU_METAMODEL by lazy { createStarlasuMetamodel() }
+val ASTNODE_ECLASS by lazy { STARLASU_METAMODEL.eClassifiers.find { it.name == "ASTNode" }!! as EClass }
 
-private fun createKolasuMetamodel(): EPackage {
+private fun createStarlasuMetamodel(): EPackage {
     val ePackage = EcoreFactory.eINSTANCE.createEPackage()
     val nsUri = "https://strumenta.com/starlasu/v2"
     ePackage.setResourceURI(nsUri)
@@ -58,10 +58,23 @@ private fun createKolasuMetamodel(): EPackage {
         this.isAbstract = true
         this.eSuperTypes.add(origin)
         addContainment("position", position, 0, 1)
-        addReference("origin", origin, 0, 1)
+        addContainment("origin", origin, 0, 1)
         addContainment("destination", destination, 0, 1)
     }
     nodeDestination.apply {
+        addReference("node", astNode, 1, 1)
+    }
+    val parseTreeOrigin = ePackage.createEClass("ParseTreeOrigin").apply {
+        this.isAbstract = false
+        this.eSuperTypes.add(origin)
+        addContainment("position", position, 0, 1)
+    }
+    // We need this as a wrapper around the Node, as the ASTNode.Origin link is a containment link
+    // (otherwise parseTreeOrigin would be orphan), but we want to use a reference, so we use a containment link
+    // to a node holding a reference. The node holding a reference is NodeOrigin
+    val nodeOrigin = ePackage.createEClass("NodeOrigin").apply {
+        this.isAbstract = false
+        this.eSuperTypes.add(origin)
         addReference("node", astNode, 1, 1)
     }
 
@@ -157,7 +170,7 @@ private fun createKolasuMetamodel(): EPackage {
 }
 
 fun main(args: Array<String>) {
-    KOLASU_METAMODEL.saveEcore(File("kolasu-2.0.ecore"))
-    KOLASU_METAMODEL.saveEcore(File("kolasu-2.0.xmi"))
-    KOLASU_METAMODEL.saveAsJson(File("kolasu-2.0.json"))
+    STARLASU_METAMODEL.saveEcore(File("kolasu-2.0.ecore"))
+    STARLASU_METAMODEL.saveEcore(File("kolasu-2.0.xmi"))
+    STARLASU_METAMODEL.saveAsJson(File("kolasu-2.0.json"))
 }
