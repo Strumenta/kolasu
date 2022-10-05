@@ -107,7 +107,7 @@ val Class<*>.eClassifierName: String
     }
 
 class ResourceClassTypeHandler(val resource: Resource, val ownPackage: EPackage) : EClassTypeHandler {
-    override fun canHandle(ktype: KClass<*>): Boolean = getPackage(packageName(ktype)) != null
+    override fun canHandle(klass: KClass<*>): Boolean = getPackage(packageName(klass)) != null
 
     private fun getPackage(packageName: String): EPackage? =
         resource.contents.find { it is EPackage && it != ownPackage && it.name == packageName } as EPackage?
