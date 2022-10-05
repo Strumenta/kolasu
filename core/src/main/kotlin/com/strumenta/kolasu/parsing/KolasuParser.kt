@@ -201,7 +201,6 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
         return ast
     }
 
-    @JvmOverloads
     override fun parse(code: String, considerPosition: Boolean, measureLexingTime: Boolean): ParsingResult<R> {
         val inputStream = CharStreams.fromString(code)
         return parse(inputStream, considerPosition, measureLexingTime)
@@ -230,7 +229,6 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
         )
     }
 
-    @JvmOverloads
     override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<R> =
         parse(FileInputStream(file), charset, considerPosition)
 
