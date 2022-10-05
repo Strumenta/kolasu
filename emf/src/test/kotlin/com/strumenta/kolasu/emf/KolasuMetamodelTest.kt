@@ -133,7 +133,7 @@ class KolasuMetamodelTest {
     "name" : "ANodeWithAPair",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "https://strumenta.com/kolasu/v2#//ASTNode"
+      "${'$'}ref" : "https://strumenta.com/starlasu/v2#//ASTNode"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
@@ -158,7 +158,7 @@ class KolasuMetamodelTest {
       "containment" : true
     } ]
   } ]
-} ]""",
+} ]""".replace("\n", System.lineSeparator()),
             jsonFile.readText()
         )
     }

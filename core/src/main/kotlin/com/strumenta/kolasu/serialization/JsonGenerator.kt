@@ -13,8 +13,8 @@ import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.processProperties
-import com.strumenta.kolasu.model.walk
 import com.strumenta.kolasu.parsing.ParsingResult
+import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import java.io.File
@@ -30,6 +30,10 @@ const val JSON_ORIGIN_KEY = "#origin"
 const val JSON_ID_KEY = "#id"
 const val JSON_DESTINATION_KEY = "#destination"
 
+/**
+ * Converts an AST to JSON.
+ * Note that ASTs may also be exported to the EMF-JSON format, which is different.
+ */
 class JsonGenerator {
 
     var shortClassNames = false

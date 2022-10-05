@@ -1,7 +1,5 @@
 package com.strumenta.kolasu.model
 
-import kotlin.reflect.KClass
-
 /**
  * An entity that can have a name
  */
@@ -24,22 +22,50 @@ interface Named : PossiblyNamed {
 
 /**
  * A reference associated by using a name.
+ * It can be used only to refer to Nodes and not to other values.
+ *
+ * This is not statically enforced as we may want to use some interface, which cannot extend Node.
+ * However, this is enforced dynamically.
  */
-data class ReferenceByName<N>(val name: String, var referred: N? = null) where N : PossiblyNamed {
-    override fun toString(): String {
-        return if (referred == null) {
-            "Ref($name)[Unsolved]"
-        } else {
-            "Ref($name)[Solved]"
+class ReferenceByName<N>(val name: String, initialReferred: N? = null) where N : PossiblyNamed {
+
+    var referred: N? = null
+        set(value) {
+            require(value is Node || value == null) {
+                "We cannot enforce it statically but only Node should be referred to. Instead $value was assigned " +
+                    "(class: ${value?.javaClass})"
+            }
+            field = value
         }
+
+    init {
+        this.referred = initialReferred
     }
 
-    override fun hashCode(): Int {
-        return name.hashCode() * (7 + if (referred == null) 1 else 2)
+    override fun toString(): String {
+        return if (resolved) {
+            "Ref($name)[Solved]"
+        } else {
+            "Ref($name)[Unsolved]"
+        }
     }
 
     val resolved: Boolean
         get() = referred != null
+
+    override fun hashCode(): Int {
+        return name.hashCode() * (7 + if (resolved) 2 else 1)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ReferenceByName<*>) return false
+
+        if (name != other.name) return false
+        if (referred != other.referred) return false
+
+        return true
+    }
 }
 
 /**
@@ -47,7 +73,7 @@ data class ReferenceByName<N>(val name: String, var referred: N? = null) where N
  * The name match is performed in a case sensitive or insensitive way depending on the value of @param[caseInsensitive].
  */
 fun <N> ReferenceByName<N>.tryToResolve(
-    candidates: List<N>,
+    candidates: Iterable<N>,
     caseInsensitive: Boolean = false
 ): Boolean where N : PossiblyNamed {
     val res: N? = candidates.find { if (it.name == null) false else it.name.equals(this.name, caseInsensitive) }
@@ -67,34 +93,5 @@ fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : Po
     } else {
         this.referred = possibleValue
         true
-    }
-}
-
-interface Symbol : PossiblyNamed
-
-class Scope private constructor(
-    private val symbols: MutableMap<String, MutableList<Symbol>> = mutableMapOf(),
-    private val parent: Scope? = null,
-) {
-    constructor(vararg symbols: Symbol, parent: Scope? = null) : this(symbols = listOf(*symbols), parent = parent)
-
-    constructor(symbols: List<Symbol> = emptyList(), parent: Scope? = null) : this(
-        symbols = symbols.groupBy { it.name ?: throw IllegalArgumentException("All given symbols must have a name") }
-            .mapValues { it.value.toMutableList() }.toMutableMap(),
-        parent = parent
-    )
-
-    fun add(symbol: Symbol) {
-        val symbolName: String = symbol.name ?: throw IllegalArgumentException("The given symbol must have a name")
-        this.symbols.computeIfAbsent(symbolName) { mutableListOf() }.add(symbol)
-    }
-
-    fun lookup(symbolName: String, symbolType: KClass<*> = Symbol::class): Symbol? {
-        return this.symbols.getOrDefault(symbolName, mutableListOf()).find { symbolType.isInstance(it) }
-            ?: this.parent?.lookup(symbolName, symbolType)
-    }
-
-    fun getSymbols(): Map<String, List<Symbol>> {
-        return this.symbols
     }
 }

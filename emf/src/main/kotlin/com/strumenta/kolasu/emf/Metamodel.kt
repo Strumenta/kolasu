@@ -2,22 +2,15 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Result
-import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EClassifier
-import org.eclipse.emf.ecore.EDataType
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.EcorePackage
+import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.*
-import kotlin.reflect.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
-import kotlin.reflect.full.*
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean
@@ -73,22 +66,22 @@ class KolasuDataTypeHandler(val kolasuKClass: KClass<*>, val kolasuDataType: EDa
     override fun external(): Boolean = true
 }
 
-val LocalDateHandler = KolasuClassHandler(LocalDate::class, KOLASU_METAMODEL.getEClass("LocalDate"))
-val LocalTimeHandler = KolasuClassHandler(LocalTime::class, KOLASU_METAMODEL.getEClass("LocalTime"))
-val LocalDateTimeHandler = KolasuClassHandler(LocalDateTime::class, KOLASU_METAMODEL.getEClass("LocalDateTime"))
+val LocalDateHandler = KolasuClassHandler(LocalDate::class, STARLASU_METAMODEL.getEClass("LocalDate"))
+val LocalTimeHandler = KolasuClassHandler(LocalTime::class, STARLASU_METAMODEL.getEClass("LocalTime"))
+val LocalDateTimeHandler = KolasuClassHandler(LocalDateTime::class, STARLASU_METAMODEL.getEClass("LocalDateTime"))
 
-val NodeHandler = KolasuClassHandler(Node::class, KOLASU_METAMODEL.getEClass("ASTNode"))
-val NamedHandler = KolasuClassHandler(Named::class, KOLASU_METAMODEL.getEClass("Named"))
-val PositionHandler = KolasuClassHandler(Position::class, KOLASU_METAMODEL.getEClass("Position"))
-val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, KOLASU_METAMODEL.getEClass("PossiblyNamed"))
-val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, KOLASU_METAMODEL.getEClass("ReferenceByName"))
-val ResultHandler = KolasuClassHandler(Result::class, KOLASU_METAMODEL.getEClass("Result"))
+val NodeHandler = KolasuClassHandler(Node::class, STARLASU_METAMODEL.getEClass("ASTNode"))
+val NamedHandler = KolasuClassHandler(Named::class, STARLASU_METAMODEL.getEClass("Named"))
+val PositionHandler = KolasuClassHandler(Position::class, STARLASU_METAMODEL.getEClass("Position"))
+val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, STARLASU_METAMODEL.getEClass("PossiblyNamed"))
+val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, STARLASU_METAMODEL.getEClass("ReferenceByName"))
+val ResultHandler = KolasuClassHandler(Result::class, STARLASU_METAMODEL.getEClass("Result"))
 
-val StatementHandler = KolasuClassHandler(Statement::class, KOLASU_METAMODEL.getEClass("Statement"))
-val ExpressionHandler = KolasuClassHandler(Expression::class, KOLASU_METAMODEL.getEClass("Expression"))
+val StatementHandler = KolasuClassHandler(Statement::class, STARLASU_METAMODEL.getEClass("Statement"))
+val ExpressionHandler = KolasuClassHandler(Expression::class, STARLASU_METAMODEL.getEClass("Expression"))
 val EntityDeclarationHandler = KolasuClassHandler(
     EntityDeclaration::class,
-    KOLASU_METAMODEL
+    STARLASU_METAMODEL
         .getEClass("EntityDeclaration")
 )
 
@@ -97,14 +90,10 @@ val CharHandler = KolasuDataTypeHandler(Char::class, EcorePackage.eINSTANCE.eCha
 val BooleanHandler = KolasuDataTypeHandler(Boolean::class, EcorePackage.eINSTANCE.eBoolean)
 val IntHandler = KolasuDataTypeHandler(Int::class, EcorePackage.eINSTANCE.eInt)
 val IntegerHandler = KolasuDataTypeHandler(Integer::class, EcorePackage.eINSTANCE.eInt)
-val BigIntegerHandler = KolasuDataTypeHandler(
-    BigInteger::class,
-    KOLASU_METAMODEL.getEClassifier(BigInteger::class.simpleName) as EDataType
-)
-val BigDecimalHandler = KolasuDataTypeHandler(
-    BigDecimal::class,
-    KOLASU_METAMODEL.getEClassifier(BigDecimal::class.simpleName) as EDataType
-)
+val FloatHandler = KolasuDataTypeHandler(Float::class, EcorePackage.eINSTANCE.eFloat)
+val DoubleHandler = KolasuDataTypeHandler(Double::class, EcorePackage.eINSTANCE.eDouble)
+val BigIntegerHandler = KolasuDataTypeHandler(BigInteger::class, EcorePackage.eINSTANCE.eBigInteger)
+val BigDecimalHandler = KolasuDataTypeHandler(BigDecimal::class, EcorePackage.eINSTANCE.eBigDecimal)
 val LongHandler = KolasuDataTypeHandler(Long::class, EcorePackage.eINSTANCE.eLong)
 
 val KClass<*>.eClassifierName: String
@@ -118,7 +107,7 @@ val Class<*>.eClassifierName: String
     }
 
 class ResourceClassTypeHandler(val resource: Resource, val ownPackage: EPackage) : EClassTypeHandler {
-    override fun canHandle(ktype: KClass<*>): Boolean = getPackage(packageName(ktype)) != null
+    override fun canHandle(klass: KClass<*>): Boolean = getPackage(packageName(klass)) != null
 
     private fun getPackage(packageName: String): EPackage? =
         resource.contents.find { it is EPackage && it != ownPackage && it.name == packageName } as EPackage?

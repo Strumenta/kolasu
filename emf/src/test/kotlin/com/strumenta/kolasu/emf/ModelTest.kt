@@ -2,6 +2,11 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.model.Statement
+import com.strumenta.kolasu.parsing.withParseTreeNode
+import com.strumenta.simplelang.SimpleLangLexer
+import com.strumenta.simplelang.SimpleLangParser
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
@@ -19,6 +24,8 @@ import kotlin.test.assertTrue
 
 data class NodeFoo(val name: String) : Node()
 class MyRoot(val foo: Int) : Node(), Statement
+
+class MySimpleLangCu() : Node()
 
 class ModelTest {
 
@@ -47,9 +54,9 @@ class ModelTest {
         // TODO this is to correctly resolve the metamodel, however what would happen if there were
         // other references to https://... resources?
         resourceSet.resourceFactoryRegistry.protocolToFactoryMap["https"] = JsonResourceFactory()
-        val kolasuURI = URI.createURI(KOLASU_METAMODEL.nsURI)
+        val kolasuURI = URI.createURI(STARLASU_METAMODEL.nsURI)
         val kolasuRes = resourceSet.createResource(kolasuURI)
-        kolasuRes.contents.add(KOLASU_METAMODEL)
+        kolasuRes.contents.add(STARLASU_METAMODEL)
         val metaURI = URI.createURI(nsURI)
         val metaRes = resourceSet.createResource(metaURI)
         metaRes.contents.add(ePackage)
@@ -107,21 +114,26 @@ class ModelTest {
         val n2 = NodeFoo("def").apply {
             origin = n1
         }
-        val ePackage = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo").apply {
-            provideClass(NodeFoo::class)
-        }.generate()
+        val ePackage = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo")
+            .apply {
+                provideClass(NodeFoo::class)
+            }.generate()
         val mapping = KolasuToEMFMapping()
         val eo1 = n1.toEObject(ePackage, mapping)
         val eo2 = n2.toEObject(ePackage, mapping)
         assertEquals(null, eo1.eGet("origin"))
         assertEquals(true, eo2.eGet("origin") is EObject)
-        assertEquals("abc", (eo2.eGet("origin") as EObject).eGet("name"))
+        assertEquals(
+            "abc",
+            ((eo2.eGet("origin") as EObject).eGet("node") as EObject)
+                .eGet("name")
+        )
     }
 
     @Test
     fun destinationIsSerialized() {
         val n1 = NodeFoo("abc").apply {
-            destination = Position(Point(1, 8), Point(7, 4))
+            destination = TextFileDestination(Position(Point(1, 8), Point(7, 4)))
         }
         val ePackage = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo").apply {
             provideClass(NodeFoo::class)
@@ -130,11 +142,14 @@ class ModelTest {
         val eo2Destination = eo1.eGet("destination")
         assertEquals(true, eo2Destination is EObject)
         val eo2DestinationEO = eo2Destination as EObject
-        assertEquals("Position", eo2DestinationEO.eClass().name)
-        assertEquals(true, eo2DestinationEO.eGet("start") is EObject)
-        val startEO = eo2DestinationEO.eGet("start") as EObject
-        assertEquals(true, eo2DestinationEO.eGet("end") is EObject)
-        val endEO = eo2DestinationEO.eGet("end") as EObject
+        assertEquals("TextFileDestination", eo2DestinationEO.eClass().name)
+        val textFileDestinationPosition = eo2DestinationEO.eGet("position") as EObject
+        assertEquals("Position", textFileDestinationPosition.eClass().name)
+
+        assertEquals(true, textFileDestinationPosition.eGet("start") is EObject)
+        val startEO = textFileDestinationPosition.eGet("start") as EObject
+        assertEquals(true, textFileDestinationPosition.eGet("end") is EObject)
+        val endEO = textFileDestinationPosition.eGet("end") as EObject
         assertEquals(1, startEO.eGet("line"))
         assertEquals(8, startEO.eGet("column"))
         assertEquals(7, endEO.eGet("line"))
@@ -181,7 +196,7 @@ class ModelTest {
         r1.singlePointer.referred = r1
         val eo1 = r1.toEObject(res)
         val reference = eo1.eGet("singlePointer") as EObject
-        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), reference.eClass())
+        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), reference.eClass())
         assertEquals(eo1, reference.eGet("referenced"))
         assertEquals(
             """{
@@ -219,15 +234,15 @@ class ModelTest {
         val pointers = eo1.eGet("pointers") as EList<*>
         assertEquals(3, pointers.size)
 
-        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[0] as EObject).eClass())
+        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[0] as EObject).eClass())
         assertEquals("a", (pointers[0] as EObject).eGet("name"))
         assertEquals(eo1, (pointers[0] as EObject).eGet("referenced"))
 
-        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[1] as EObject).eClass())
+        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[1] as EObject).eClass())
         assertEquals("b", (pointers[1] as EObject).eGet("name"))
         assertEquals(eo1, (pointers[1] as EObject).eGet("referenced"))
 
-        assertEquals(KOLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[2] as EObject).eClass())
+        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[2] as EObject).eClass())
         assertEquals("c", (pointers[2] as EObject).eGet("name"))
         assertEquals(eo1, (pointers[2] as EObject).eGet("referenced"))
 
@@ -344,6 +359,71 @@ class ModelTest {
   }
 }""",
             eoA.saveAsJson()
+        )
+    }
+
+    @Test
+    fun saveToJSONWithParseTreeOrigin() {
+        // We verify the ParseTreeOrigin is not saved, but the position is
+        val pt = SimpleLangParser(CommonTokenStream(SimpleLangLexer(CharStreams.fromString("input A is string"))))
+            .compilationUnit()
+        val ast = MySimpleLangCu().withParseTreeNode(pt)
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
+        metamodelBuilder.provideClass(MySimpleLangCu::class)
+        val ePackage = metamodelBuilder.generate()
+
+        val res = ResourceImpl()
+        res.contents.add(ePackage)
+        val eo = ast.toEObject(res)
+        assertEquals(
+            """{
+  "eClass" : "#//MySimpleLangCu",
+  "position" : {
+    "start" : {
+      "line" : 1
+    },
+    "end" : {
+      "line" : 1,
+      "column" : 17
+    }
+  }
+}""",
+            eo.saveAsJson()
+        )
+    }
+
+    @Test
+    fun saveToJSONNodeOrigin() {
+        val someOtherNode = MyRoot(123)
+        val ast = MySimpleLangCu().withOrigin(someOtherNode)
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
+        metamodelBuilder.provideClass(MySimpleLangCu::class)
+        metamodelBuilder.provideClass(MyRoot::class)
+        val ePackage = metamodelBuilder.generate()
+
+        val res = ResourceImpl()
+        res.contents.add(ePackage)
+        val mapping = KolasuToEMFMapping()
+        val eo1 = someOtherNode.toEObject(res, mapping)
+        val eo2 = ast.toEObject(res, mapping)
+        assertEquals(
+            """{
+  "eClass" : "#//MySimpleLangCu",
+  "origin" : {
+    "eClass" : "https://strumenta.com/starlasu/v2#//NodeOrigin",
+    "node" : {
+      "eClass" : "#//MyRoot",
+      "${'$'}ref" : "#//"
+    }
+  }
+}""",
+            eo2.saveAsJson()
         )
     }
 }

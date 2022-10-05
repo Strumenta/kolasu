@@ -5,6 +5,7 @@ plugins {
     id("idea")
     id("signing")
     id("org.jetbrains.dokka")
+    id "antlr"
 }
 
 java {
@@ -16,13 +17,14 @@ java {
 }
 
 dependencies {
+    antlr "org.antlr:antlr4:$antlr_version"
     api project(":core")
     api group: 'org.eclipse.emf', name: 'org.eclipse.emf.common', version: '2.23.0'
     api group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore', version: '2.25.0'
     api group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore.xmi', version: '2.16.0'
     api group: 'org.eclipse.emfcloud', name: 'emfjson-jackson', version: '2.0.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
-    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation "com.google.code.gson:gson:$gson_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: "$kotlin_version"
@@ -30,7 +32,42 @@ dependencies {
     cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation "junit:junit:$junit_version"
+    testImplementation "org.antlr:antlr4-runtime:$antlr_version"
+
+}
+
+generateTestGrammarSource {
+    maxHeapSize = "64m"
+    arguments += ['-package', 'com.strumenta.simplelang']
+    outputDirectory = new File("generated-test-src/antlr/main/com/strumenta/simplelang".toString())
+}
+compileKotlin.dependsOn generateGrammarSource
+compileJava.dependsOn generateGrammarSource
+compileTestKotlin.dependsOn generateTestGrammarSource
+
+sourceSets {
+    test {
+        java {
+            srcDirs += "generated-test-src/antlr/main"
+        }
+    }
+}
+
+compileKotlin.source sourceSets.main.java, sourceSets.main.kotlin
+compileTestKotlin.source sourceSets.test.kotlin
+
+clean{
+    delete "generated-src"
+    delete "generated-test-src"
+}
+
+compileJava.dependsOn generateTestGrammarSource
+
+idea {
+    module {
+        testSourceDirs += file("generated-test-src/antlr/main")
+    }
 }
 
 publishing {
@@ -86,6 +123,11 @@ publishing {
                         id = 'alessiostalla'
                         name = 'Alessio Stalla'
                         email = 'alessio.stalla@strumenta.com'
+                    }
+                    developer {
+                        id = 'lorenzoaddazi'
+                        name = 'Lorenzo Addazi'
+                        email = 'lorenzo.addazi@strumenta.com'
                     }
                 }
 

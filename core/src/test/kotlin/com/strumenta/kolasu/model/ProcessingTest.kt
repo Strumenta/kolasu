@@ -12,6 +12,7 @@ data class B(val a: A, val manyAs: List<A>) : Node()
 data class AW(var s: String) : Node()
 data class BW(var a: AW, val manyAs: MutableList<AW>) : Node()
 data class CW(var a: AW, val manyAs: MutableSet<AW>) : Node()
+data class DW(var a: BW, val manyAs: MutableList<AW>) : Node()
 
 @NodeType
 interface FooNodeType
@@ -206,5 +207,49 @@ class ProcessingTest {
                 }
             })
         )
+    }
+
+    @test
+    fun getNextAndPreviousSibling() {
+        val a1 = AW("1")
+        val a2 = AW("2")
+        val a3 = AW("3")
+        val a4 = AW("4")
+        val b = BW(a1, mutableListOf(a2, a3, a4))
+        b.assignParents()
+        assertSame(a2, b.manyAs[1].previousSibling)
+        assertSame(a4, b.manyAs[1].nextSibling)
+    }
+
+    @test
+    fun getNextAndPreviousSiblingOfSpecifiedType() {
+        val a1 = AW("1")
+        val a2 = AW("2")
+        val a3 = AW("3")
+        val a4 = AW("4")
+        val b = BW(a1, mutableListOf(a2, a3, a4))
+        val d = DW(b, mutableListOf(a2, a3, a4))
+        b.assignParents()
+
+        assert(b.manyAs[1].previousSibling<BW>() == null)
+        assert(b.manyAs[1].nextSibling<BW>() == null)
+        d.assignParents()
+        assertSame(b, d.manyAs[0].previousSibling<BW>())
+    }
+
+    @test
+    fun getNextAndPreviousSamePropertySibling() {
+        val a1 = AW("1")
+        val a2 = AW("2")
+        val a3 = AW("3")
+        val a4 = AW("4")
+        val b = BW(a1, mutableListOf(a2, a3, a4))
+        b.assignParents()
+
+        assert(b.a.previousSamePropertySibling == null)
+        assert(b.a.nextSamePropertySibling == null)
+        assertSame(b.manyAs[0], b.manyAs[1].previousSamePropertySibling)
+        assertSame(b.manyAs[2], b.manyAs[1].nextSamePropertySibling)
+        assertSame(null, b.manyAs[2].nextSamePropertySibling)
     }
 }

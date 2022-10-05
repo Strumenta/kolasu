@@ -1,27 +1,15 @@
-package com.strumenta.kolasu.model
+@file:JvmName("ProcessingStructurally")
+package com.strumenta.kolasu.traversing
 
+import com.strumenta.kolasu.model.Node
 import java.util.*
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction1
 
 /**
- * Some Kotlinization of Deques used as a stack.
- */
-typealias Stack<T> = Deque<T>
-
-fun <T> mutableStackOf(): Stack<T> = ArrayDeque()
-
-fun <T> Stack<T>.pushAll(elements: Collection<T>) {
-    elements.reversed().forEach(this::push)
-}
-
-fun <T> mutableStackOf(vararg elements: T): Stack<T> {
-    val stack = mutableStackOf<T>()
-    stack.pushAll(elements.asList())
-    return stack
-}
-
-/**
- * @return walks the whole AST starting from this node, depth-first.
+ * Traverse the entire tree, deep first, starting from this Node.
+ *
+ * @return a Sequence representing the Nodes encountered.
  */
 fun Node.walk(): Sequence<Node> {
     val stack: Stack<Node> = mutableStackOf(this)
@@ -34,29 +22,6 @@ fun Node.walk(): Sequence<Node> {
             next
         }
     }
-}
-
-/**
- * @param position the position within which the walk should remain
- * @return walks the AST within the given [position] starting from this node, depth-first.
- */
-fun Node.walkWithin(position: Position): Sequence<Node> {
-    return if (position.contains(this)) {
-        sequenceOf(this) + this.children.walkWithin(position)
-    } else if (this.contains(position)) {
-        this.children.walkWithin(position)
-    } else emptySequence<Node>()
-}
-
-/**
- * @param position the position within which the walk should remain
- * @return walks the AST within the given [position] starting from each node
- * and concatenates all results in a single sequence
- */
-fun List<Node>.walkWithin(position: Position): Sequence<Node> {
-    return this
-        .map { it.walkWithin(position) }
-        .reduceOrNull { previous, current -> previous + current } ?: emptySequence()
 }
 
 /**
@@ -163,4 +128,28 @@ fun <N : Any> Node.walkDescendants(type: KClass<N>, walker: (Node) -> Sequence<N
  */
 fun <T> Node.findAncestorOfType(klass: Class<T>): T? {
     return walkAncestors().filterIsInstance(klass).firstOrNull()
+}
+
+/**
+ * @return all direct children of this node.
+ */
+val Node.children: List<Node>
+    get() {
+        return walkChildren().toList()
+    }
+
+@JvmOverloads
+fun <T> Node.searchByType(
+    klass: Class<T>,
+    walker: KFunction1<Node, Sequence<Node>> = Node::walk
+) = walker.invoke(this).filterIsInstance(klass)
+
+/**
+ * T is not forced to be a subtype of Node to support using interfaces.
+ *
+ * @param walker the function that generates the nodes to operate on in the desired sequence.
+ * @return all nodes in this AST (sub)tree that are instances of, or extend [klass].
+ */
+fun <T> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<Node>> = Node::walk): List<T> {
+    return walker.invoke(this).filterIsInstance(klass).toList()
 }

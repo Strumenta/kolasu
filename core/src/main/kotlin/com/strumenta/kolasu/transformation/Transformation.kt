@@ -1,8 +1,9 @@
-package com.strumenta.kolasu.transfomation
+package com.strumenta.kolasu.transformation
 
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
+import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
@@ -113,7 +114,8 @@ open class ASTTransformer(
     /**
      * Additional issues found during the transformation process.
      */
-    val issues: MutableList<Issue> = mutableListOf()
+    val issues: MutableList<Issue> = mutableListOf(),
+    val allowGenericNode: Boolean = true
 ) {
     /**
      * Factories that map from source tree node to target tree node.
@@ -137,7 +139,7 @@ open class ASTTransformer(
         val factory = getNodeFactory(source::class) as NodeFactory<Any>?
         val node: Node
         if (factory != null) {
-            node = makeNode(factory, source)
+            node = makeNode(factory, source, allowGenericNode = allowGenericNode)
             node::class.processProperties { pd ->
                 val childKey = node::class.qualifiedName + "#" + pd.name
                 var childNodeFactory = factory.children[childKey]
@@ -166,20 +168,24 @@ open class ASTTransformer(
             }
             node.parent = parent
         } else {
-            val origin = asOrigin(source)
-            node = GenericNode(parent).withOrigin(origin)
-            issues.add(
-                Issue.semantic(
-                    "Source node not mapped: ${source::class.qualifiedName}",
-                    IssueSeverity.INFO,
-                    origin?.position
+            if (allowGenericNode) {
+                val origin = asOrigin(source)
+                node = GenericNode(parent).withOrigin(origin)
+                issues.add(
+                    Issue.semantic(
+                        "Source node not mapped: ${source::class.qualifiedName}",
+                        IssueSeverity.INFO,
+                        origin?.position
+                    )
                 )
-            )
+            } else {
+                throw IllegalStateException("Unable to translate node $source (class ${source.javaClass})")
+            }
         }
         return node
     }
 
-    protected open fun asOrigin(source: Any): Origin? = null
+    protected open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
 
     protected open fun setChild(
         childNodeFactory: ChildNodeFactory<*>,
@@ -204,12 +210,24 @@ open class ASTTransformer(
         return source
     }
 
-    protected open fun <S : Any> makeNode(factory: NodeFactory<S>, source: S): Node {
+    protected open fun <S : Any> makeNode(factory: NodeFactory<S>, source: S, allowGenericNode: Boolean = true): Node {
+        var origin = asOrigin(source)
+        if (origin == source) {
+            if (origin is Node) {
+                origin = origin.origin
+            } else {
+                origin = null
+            }
+        }
         return try {
             factory.constructor(source, this, factory)
         } catch (e: Exception) {
-            GenericErrorNode(e)
-        }.withOrigin(asOrigin(source))
+            if (allowGenericNode) {
+                GenericErrorNode(e)
+            } else {
+                throw e
+            }
+        }.withOrigin(origin)
     }
 
     protected open fun <S : Any> getNodeFactory(kClass: KClass<S>): NodeFactory<S>? {
@@ -247,7 +265,12 @@ open class ASTTransformer(
 
     fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeFactory<S> {
         registerKnownClass(target)
-        val nodeFactory = NodeFactory<S>({ _, _, _ -> target.createInstance() })
+        val nodeFactory = NodeFactory<S>({ _, _, _ ->
+            if (target.isSealed) {
+                throw IllegalStateException("Unable to instantiate sealed class $target")
+            }
+            target.createInstance()
+        })
         factories[source] = nodeFactory
         return nodeFactory
     }
@@ -269,36 +292,4 @@ open class ASTTransformer(
         issues.add(issue)
         return issue
     }
-}
-
-/**
- * A generic AST node. We use it to represent parts of a source tree that we don't know how to translate yet.
- */
-class GenericNode(parent: Node? = null) : Node() {
-    init {
-        this.parent = parent
-    }
-}
-
-/**
- * An AST node that marks the presence of an error, for example a syntactic or semantic error in the original tree.
- */
-interface ErrorNode {
-    val message: String
-    val position: Position?
-}
-
-/**
- * Generic implementation of [ErrorNode].
- */
-class GenericErrorNode(error: Exception? = null, message: String? = null) : Node(), ErrorNode {
-    override val message: String = message ?: error?.message ?: "Unspecified error node"
-}
-
-fun Node.errors(): Sequence<ErrorNode> = this.walkDescendants(ErrorNode::class)
-
-fun Node.findError(): ErrorNode? = this.errors().firstOrNull()
-
-fun Node.findGenericNode(): GenericNode? {
-    return if (this is GenericNode) this else this.children.firstNotNullOfOrNull { it.findGenericNode() }
 }

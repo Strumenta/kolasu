@@ -2,7 +2,7 @@ package com.strumenta.kolasu.testing
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.ParsingResult
-import com.strumenta.kolasu.parsing.toParseTree
+import com.strumenta.kolasu.parsing.toParseTreeModel
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Vocabulary
 import kotlin.test.assertEquals
@@ -14,7 +14,7 @@ fun assertParseTreeStr(
     vocabulary: Vocabulary,
     printParseTree: Boolean = true
 ) {
-    val actualParseTree = toParseTree(root, vocabulary).multiLineString()
+    val actualParseTree = toParseTreeModel(root, vocabulary).multiLineString()
     if (printParseTree) {
         println("parse tree:\n\n${actualParseTree}\n")
     }
@@ -80,9 +80,13 @@ fun <T : Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: 
 fun assertASTsAreEqual(
     expected: Node,
     actual: Node,
-    context: String = "<root>"
+    context: String = "<root>",
+    considerPosition: Boolean = false
 ) {
     if (expected::class == actual::class) {
+        if (considerPosition) {
+            assertEquals(expected.position, actual.position, "$context.position")
+        }
         expected.properties.forEach { expectedProperty ->
             val actualPropValue = actual.properties.find { it.name == expectedProperty.name }!!.value
             val expectedPropValue = expectedProperty.value

@@ -5,7 +5,8 @@ import com.strumenta.kolasu.model.Position
 enum class IssueType {
     LEXICAL,
     SYNTACTIC,
-    SEMANTIC
+    SEMANTIC,
+    TRANSLATION
 }
 
 enum class IssueSeverity {
@@ -37,5 +38,10 @@ data class Issue(
             severity: IssueSeverity = IssueSeverity.ERROR,
             position: Position? = null
         ): Issue = Issue(IssueType.SEMANTIC, message, severity, position)
+        fun translation(
+            message: String,
+            severity: IssueSeverity = IssueSeverity.ERROR,
+            position: Position? = null
+        ): Issue = Issue(IssueType.TRANSLATION, message, severity, position)
     }
 }

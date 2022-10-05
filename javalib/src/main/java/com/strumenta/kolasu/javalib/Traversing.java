@@ -2,7 +2,8 @@ package com.strumenta.kolasu.javalib;
 
 import com.strumenta.kolasu.model.Node;
 import com.strumenta.kolasu.model.Position;
-import com.strumenta.kolasu.model.TraversingKt;
+import com.strumenta.kolasu.traversing.ProcessingByPosition;
+import com.strumenta.kolasu.traversing.ProcessingStructurally;
 import kotlin.jvm.internal.Reflection;
 import kotlin.sequences.Sequence;
 
@@ -28,65 +29,65 @@ public class Traversing {
     }
 
     public static Stream<Node> walk(Node node) {
-        return asStream(TraversingKt.walk(node));
+        return asStream(ProcessingStructurally.walk(node));
     }
 
     /**
      * Performs a post-order (or leaves-first) node traversal starting with a given node.
      */
     public static Stream<Node> walkLeavesFirst(Node node) {
-        return asStream(TraversingKt.walkLeavesFirst(node));
+        return asStream(ProcessingStructurally.walkLeavesFirst(node));
     }
 
     public static Stream<Node> walkAncestors(Node node) {
-        return asStream(TraversingKt.walkAncestors(node));
+        return asStream(ProcessingStructurally.walkAncestors(node));
     }
 
     public static Stream<Node> walkDescendantsBreadthFirst(Node node) {
-        return asStream(TraversingKt.walkDescendants(node, TraversingKt::walk));
+        return asStream(ProcessingStructurally.walkDescendants(node, ProcessingStructurally::walk));
     }
 
     public static Stream<Node> walkDescendantsLeavesFirst(Node node) {
-        return asStream(TraversingKt.walkDescendants(node, TraversingKt::walkLeavesFirst));
+        return asStream(ProcessingStructurally.walkDescendants(node, ProcessingStructurally::walkLeavesFirst));
     }
 
     public static <N> Stream<N> walkDescendantsBreadthFirst(Node node, Class<N> clazz) {
-        return asStream(TraversingKt.walkDescendants(node, Reflection.createKotlinClass(clazz), TraversingKt::walk));
+        return asStream(ProcessingStructurally.walkDescendants(node, Reflection.createKotlinClass(clazz), ProcessingStructurally::walk));
     }
 
     public static <N> Stream<N> walkDescendantsLeavesFirst(Node node, Class<N> clazz) {
-        return asStream(TraversingKt.walkDescendants(node, Reflection.createKotlinClass(clazz), TraversingKt::walkLeavesFirst));
+        return asStream(ProcessingStructurally.walkDescendants(node, Reflection.createKotlinClass(clazz), ProcessingStructurally::walkLeavesFirst));
     }
 
     public static void walk(Node node, Consumer<Node> consumer) {
-        consumeSequence(TraversingKt.walk(node), consumer);
+        consumeSequence(ProcessingStructurally.walk(node), consumer);
     }
 
     /**
      * Performs a post-order (or leaves-first) node traversal starting with a given node.
      */
     public static void walkLeavesFirst(Node node, Consumer<Node> consumer) {
-        consumeSequence(TraversingKt.walkLeavesFirst(node), consumer);
+        consumeSequence(ProcessingStructurally.walkLeavesFirst(node), consumer);
     }
 
     public static void walkAncestors(Node node, Consumer<Node> consumer) {
-        consumeSequence(TraversingKt.walkAncestors(node), consumer);
+        consumeSequence(ProcessingStructurally.walkAncestors(node), consumer);
     }
 
     public static void walkDescendantsBreadthFirst(Node node, Consumer<Node> consumer) {
-        consumeSequence(TraversingKt.walkDescendants(node, TraversingKt::walk), consumer);
+        consumeSequence(ProcessingStructurally.walkDescendants(node, ProcessingStructurally::walk), consumer);
     }
 
     public static void walkDescendantsLeavesFirst(Node node, Consumer<Node> consumer) {
-        consumeSequence(TraversingKt.walkDescendants(node, TraversingKt::walkLeavesFirst), consumer);
+        consumeSequence(ProcessingStructurally.walkDescendants(node, ProcessingStructurally::walkLeavesFirst), consumer);
     }
 
     public static <N> void walkDescendantsBreadthFirst(Node node, Class<N> clazz, Consumer<Node> consumer) {
-        consumeSequence(TraversingKt.walkDescendants(node, Reflection.createKotlinClass(clazz), TraversingKt::walk), consumer);
+        consumeSequence(ProcessingStructurally.walkDescendants(node, Reflection.createKotlinClass(clazz), ProcessingStructurally::walk), consumer);
     }
 
     public static <N> void walkDescendantsLeavesFirst(Node node, Class<N> clazz, Consumer<Node> consumer) {
-        consumeSequence(TraversingKt.walkDescendants(node, Reflection.createKotlinClass(clazz), TraversingKt::walkLeavesFirst), consumer);
+        consumeSequence(ProcessingStructurally.walkDescendants(node, Reflection.createKotlinClass(clazz), ProcessingStructurally::walkLeavesFirst), consumer);
     }
 
     /**
@@ -97,7 +98,7 @@ public class Traversing {
      * @param position the position within which the walk should remain
      */
     public static <N> void walkWithin(Node node, Position position, Consumer<Node> consumer) {
-        consumeSequence(TraversingKt.walkWithin(node, position), consumer);
+        consumeSequence(ProcessingByPosition.walkWithin(node, position), consumer);
     }
 
     /**
@@ -108,10 +109,10 @@ public class Traversing {
      * @param position the position within which the walk should remain
      */
     public static <N> void walkWithin(List<Node> nodes, Position position, Consumer<Node> consumer) {
-        consumeSequence(TraversingKt.walkWithin(nodes, position), consumer);
+        consumeSequence(ProcessingByPosition.walkWithin(nodes, position), consumer);
     }
 
     public static <T> T findAncestorOfType(Node node, Class<T> clazz) {
-        return TraversingKt.findAncestorOfType(node, clazz);
+        return ProcessingStructurally.findAncestorOfType(node, clazz);
     }
 }

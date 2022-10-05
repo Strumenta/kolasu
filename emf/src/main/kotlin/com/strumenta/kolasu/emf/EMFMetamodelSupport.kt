@@ -50,7 +50,7 @@ fun ParsingResult<*>.saveModel(
         metamodelResource.resourceSet.createResource(target)
             ?: throw IOException("Unsupported destination: $target")
     val simplifiedResult = Result(issues, root)
-    var eObject: EObject? = null
+    var eObject: EObject?
     eObject = if (includeMetamodel) {
         resource.contents.addAll(metamodelResource.contents)
         simplifiedResult.toEObject(resource)
@@ -77,7 +77,7 @@ abstract class EMFEnabledParser<R : Node, P : Parser, C : ParserRuleContext> :
      */
     override fun generateMetamodel(resource: Resource, includingKolasuMetamodel: Boolean) {
         if (includingKolasuMetamodel) {
-            resource.contents.add(KOLASU_METAMODEL)
+            resource.contents.add(STARLASU_METAMODEL)
         }
         doGenerateMetamodel(resource)
     }

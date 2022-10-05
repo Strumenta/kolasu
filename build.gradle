@@ -45,21 +45,12 @@ subprojects {
         from { sourceSets.main.allSource }
     }
 
-    test {
+    tasks.withType(Test).all {
         testLogging {
-            exceptionFormat = 'full'
-            afterSuite { desc, result ->
-                println("desc ${desc}")
-                println("result ${result}")
-                if (!desc.parent) { // will match the outermost suite
-                    println "------------------------------------------------------------------------------------"
-                    println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
-                    println "------------------------------------------------------------------------------------"
-                }
-            }
-            events "PASSED", "SKIPPED", "FAILED", "STANDARD_OUT", "STANDARD_ERROR"
+            showStandardStreams = true
+            showExceptions = true
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         }
-        outputs.upToDateWhen {false}
     }
 
     ktlint {
@@ -72,7 +63,7 @@ subprojects {
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         kotlinOptions {
-            jvmTarget = "11"
+            jvmTarget = "${jvm_version}"
         }
     }
 

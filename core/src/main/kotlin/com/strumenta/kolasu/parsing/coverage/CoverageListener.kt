@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.parsing.coverage
 
-import com.strumenta.kolasu.model.mutableStackOf
+import com.strumenta.kolasu.traversing.mutableStackOf
 import org.antlr.v4.runtime.Parser
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.atn.AtomTransition
@@ -38,6 +38,45 @@ data class Path(val elements: List<PathElement> = listOf(), val states: MutableS
     }
 }
 
+/**
+ * EXPERIMENTAL. Listener to compute an estimate of the coverage of a grammar by the code examples at your disposal.
+ * The idea is to exercise the parser with a series of code examples and the listener attached. After processing all
+ * the examples, we can ask the listener to compute an estimate of the percentage of the grammar that's covered by those
+ * examples.
+ *
+ * USAGE
+ *
+ * In pseudo-Kotlin:
+ * ```
+ * coverageListener = CoverageListener()
+ * for example in examples:
+ *     parser = createParser(example)
+ *     coverageListener.listenTo(parser)
+ *     parser.sourceFile()
+ * coverage = coverageListener.percentage()
+ * last10UncoveredPaths = coverageListener.uncoveredPaths(10)
+ * ```
+ * LIMITATIONS
+ * * The estimate that this computes is incorrect. Due to how ANTLR works and the integration points that it offers,
+ * we can only compute a percentage considering the rules that the examples actually used. If there is a rule that, in
+ * its ramifications, consists in, say, 50% of the grammar, but no example uses that rule, then it won't be considered
+ * in the computation of the coverage. So, the computed coverage percentage is more likely to be somewhat correct if
+ * the examples cover a reasonable subset of the grammar.
+ * * A single instance of this listener is not thread safe. You cannot attach it to multiple parsers that run in
+ * parallel.
+ *
+ * HOW IT WORKS
+ *
+ * At each decision/branching point that the parser encounters, we record the paths that are possible and those that
+ * are actually taken, and compute the ratio between the two.
+ *
+ * HOW IT SHOULD WORK
+ *
+ * It would be nicer if ANTLR allowed to intercept state changes, then we could compute a more precise estimate with
+ * (number of activated states / total number of states). Even though the number of states does not correlate completely
+ * with the number of rules and alternatives, as parsing certain patterns requires more states than other patterns with
+ * similar complexity, it would still be a better measure than what we have now.
+ */
 open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths: Boolean = true) : ParseTreeListener {
 
     val paths = mutableMapOf<Path, Boolean>()
