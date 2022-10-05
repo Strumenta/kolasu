@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.language
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.walkChildren
+import com.strumenta.kolasu.traversing.walkChildren
 
 // TODO Alessio this is a work in progress
 class Unparser {

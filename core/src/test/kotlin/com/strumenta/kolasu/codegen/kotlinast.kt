@@ -82,7 +82,10 @@ data class KMethodCallExpression(
 
 data class KFieldAccessExpr(var qualifier: KExpression, var field: String) : KExpression()
 
-data class KLambda(val params: MutableList<KLambdaParamDecl> = mutableListOf(), val body: MutableList<KStatement> = mutableListOf()) : KExpression()
+data class KLambda(
+    val params: MutableList<KLambdaParamDecl> = mutableListOf(),
+    val body: MutableList<KStatement> = mutableListOf()
+) : KExpression()
 data class KLambdaParamDecl(override val name: String) : Node(), Named
 data class KParameterValue(val value: KExpression, val name: String? = null) : Node()
 
@@ -93,7 +96,10 @@ data class KInstantiationExpression(
 
 interface KFunctionSymbol : Named
 interface KMethodSymbol : Named
-data class KFunctionCall(val function: ReferenceByName<KFunctionSymbol>, val args: MutableList<KParameterValue> = mutableListOf()) : KExpression()
+data class KFunctionCall(
+    val function: ReferenceByName<KFunctionSymbol>,
+    val args: MutableList<KParameterValue> = mutableListOf()
+) : KExpression()
 
 sealed class KName : Node() {
     companion object {

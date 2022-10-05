@@ -3,6 +3,7 @@ package com.strumenta.kolasu.codegen
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.START_POINT
+import com.strumenta.kolasu.model.TextFileDestination
 import kotlin.reflect.KClass
 
 /**
@@ -107,7 +108,7 @@ class PrinterOutput(private val nodePrinters: Map<KClass<*>, NodePrinter>) {
         generation()
         val endPoint = currentPoint
         val nodePositionInGeneratedCode = Position(startPoint, endPoint)
-        ast.destination = nodePositionInGeneratedCode
+        ast.destination = TextFileDestination(nodePositionInGeneratedCode)
     }
 
     fun <T : Node> printList(elements: List<T>, separator: String = ", ") {

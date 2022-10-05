@@ -190,5 +190,4 @@ class KotlinPrinter : ASTCodeGenerator<KCompilationUnit>() {
         o.print(expression)
         return o.text()
     }
-
 }

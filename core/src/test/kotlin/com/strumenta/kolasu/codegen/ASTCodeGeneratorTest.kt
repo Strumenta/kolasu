@@ -7,8 +7,10 @@ import kotlin.test.assertEquals
 class ASTCodeGeneratorTest {
     @Test
     fun printSimpleKotlinExpression() {
-        val ex = KMethodCallExpression(KThisExpression(), ReferenceByName("myMethod"),
-            mutableListOf(KStringLiteral("abc"), KIntLiteral(123), KStringLiteral("qer")))
+        val ex = KMethodCallExpression(
+            KThisExpression(), ReferenceByName("myMethod"),
+            mutableListOf(KStringLiteral("abc"), KIntLiteral(123), KStringLiteral("qer"))
+        )
         val code = KotlinPrinter().printToString(ex)
         assertEquals("""this.myMethod("abc", 123, "qer")""", code)
     }
@@ -21,7 +23,8 @@ class ASTCodeGeneratorTest {
             mutableListOf(KFunctionDeclaration("foo")),
         )
         val code = KotlinPrinter().printToString(cu)
-        assertEquals("""package my.splendid.packag
+        assertEquals(
+            """package my.splendid.packag
             |
             |import my.imported.stuff
             |
@@ -29,6 +32,8 @@ class ASTCodeGeneratorTest {
             |fun foo() {
             |}
             |
-        """.trimMargin(), code)
+        """.trimMargin(),
+            code
+        )
     }
 }
