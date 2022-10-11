@@ -2,13 +2,11 @@ package com.strumenta.kolasu.mapping
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.hasValidParents
-import com.strumenta.kolasu.model.invalidPositions
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.transformation.ASTTransformer
 import org.junit.Test
 import kotlin.reflect.KClass
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ASTTransformerTest {
