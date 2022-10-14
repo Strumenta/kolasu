@@ -45,14 +45,18 @@ class PrinterOutput(private val nodePrinters: Map<KClass<*>, NodePrinter>) {
     }
 
     fun print(text: String) {
-        if (text == "\n") {
-            println()
-            return
+        var text = text
+        val needPrintln = text.endsWith("\n");
+        if (needPrintln) {
+            text = text.removeSuffix("\n")
         }
         considerIndentation()
         require(text.lines().size < 2) { "Given text span multiple lines: $text" }
         sb.append(text)
         currentPoint += text
+        if (needPrintln) {
+            println()
+        }
     }
 
     fun print(text: Char) {
@@ -135,4 +139,5 @@ class PrinterOutput(private val nodePrinters: Map<KClass<*>, NodePrinter>) {
             print(postfix)
         }
     }
+
 }
