@@ -85,16 +85,16 @@ class PrinterOutput(private val nodePrinters: Map<KClass<*>, NodePrinter>) {
         print(postfix)
     }
 
-    fun print(ast: Node?, prefix: String = "", postfix: String = "") {
+    fun print(ast: Node?, prefix: String? = null, postfix: String? = null) {
         if (ast == null) {
             return
         }
-        print(prefix)
+        prefix?.let { print(it) }
         val printer = nodePrinters[ast::class] ?: throw java.lang.IllegalArgumentException("Unable to print $ast")
         associate(ast) {
             printer.print(this, ast)
         }
-        print(postfix)
+        postfix?.let { print(it) }
     }
 
     fun println(ast: Node?, prefix: String = "", postfix: String = "") {
