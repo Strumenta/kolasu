@@ -102,7 +102,7 @@ open class Node() : Origin, Destination {
      * @param position the position
      */
     fun overlaps(position: Position?): Boolean {
-        return this.position?.contains(position) ?: false
+        return this.position?.overlaps(position) ?: false
     }
 
     /**
