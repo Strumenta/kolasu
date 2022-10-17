@@ -46,7 +46,7 @@ class PrinterOutput(private val nodePrinters: Map<KClass<*>, NodePrinter>) {
 
     fun print(text: String) {
         var text = text
-        val needPrintln = text.endsWith("\n");
+        val needPrintln = text.endsWith("\n")
         if (needPrintln) {
             text = text.removeSuffix("\n")
         }
@@ -139,5 +139,4 @@ class PrinterOutput(private val nodePrinters: Map<KClass<*>, NodePrinter>) {
             print(postfix)
         }
     }
-
 }
