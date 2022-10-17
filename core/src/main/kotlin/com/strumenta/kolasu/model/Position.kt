@@ -209,11 +209,12 @@ data class Position(val start: Point, val end: Point, var source: Source? = null
      * @param position the position
      */
     fun overlaps(position: Position?): Boolean {
-        return (position != null) &&
-                ((this.start.isSameOrAfter(position.start) && this.start.isSameOrBefore(position.end)) ||
-                 (this.end.isSameOrAfter(position.start) && this.end.isSameOrBefore(position.end)) ||
-                 (position.start.isSameOrAfter(this.start) && position.start.isSameOrBefore(this.end)) ||
-                 (position.end.isSameOrAfter(this.start) && position.end.isSameOrBefore(this.end)))
+        return (position != null) && (
+            (this.start.isSameOrAfter(position.start) && this.start.isSameOrBefore(position.end)) ||
+                (this.end.isSameOrAfter(position.start) && this.end.isSameOrBefore(position.end)) ||
+                (position.start.isSameOrAfter(this.start) && position.start.isSameOrBefore(this.end)) ||
+                (position.end.isSameOrAfter(this.start) && position.end.isSameOrBefore(this.end))
+            )
     }
 }
 
