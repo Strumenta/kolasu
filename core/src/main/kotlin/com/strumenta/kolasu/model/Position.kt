@@ -203,6 +203,16 @@ data class Position(val start: Point, val end: Point, var source: Source? = null
     fun contains(node: Node): Boolean {
         return this.contains(node.position)
     }
+
+    /**
+     * Tests whether the given position overlaps the interval represented by this object.
+     * @param position the position
+     */
+    fun overlaps(position: Position?): Boolean {
+        return (position != null) &&
+                ((this.start.isSameOrAfter(position.start) && this.start.isSameOrBefore(position.end)) ||
+                 (this.end.isSameOrAfter(position.start) && this.end.isSameOrBefore(position.end)))
+    }
 }
 
 /**

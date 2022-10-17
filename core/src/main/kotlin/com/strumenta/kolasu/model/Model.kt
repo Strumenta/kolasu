@@ -96,6 +96,15 @@ open class Node() : Origin, Destination {
         return this.position?.contains(position) ?: false
     }
 
+
+    /**
+     * Tests whether the given position overlaps the interval represented by this object.
+     * @param position the position
+     */
+    fun overlaps(position: Position?): Boolean {
+        return this.position?.contains(position) ?: false
+    }
+
     /**
      * The source text for this node
      */
