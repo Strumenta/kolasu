@@ -132,4 +132,9 @@ class KolasuMetamodelTest {
 }""".replace("\n", System.lineSeparator()),
         )
     }
+
+    @Test
+    fun handleJavaLangCharacter() {
+        assertTrue(CharHandler.canHandle(java.lang.Character::class.createType()))
+    }
 }

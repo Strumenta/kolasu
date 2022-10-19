@@ -92,6 +92,7 @@ val BigDecimalHandler = KolasuDataTypeHandler(
     KOLASU_METAMODEL.getEClassifier(BigDecimal::class.simpleName) as EDataType
 )
 val LongHandler = KolasuDataTypeHandler(Long::class, KOLASU_METAMODEL.getEClassifier("long") as EDataType)
+val CharHandler = KolasuDataTypeHandler(Char::class, KOLASU_METAMODEL.getEClassifier("char") as EDataType)
 
 val KClass<*>.eClassifierName: String
     get() = this.java.eClassifierName
@@ -130,6 +131,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         dataTypeHandlers.add(LongHandler)
         dataTypeHandlers.add(BigIntegerHandler)
         dataTypeHandlers.add(BigDecimalHandler)
+        dataTypeHandlers.add(CharHandler)
 
         eclassTypeHandlers.add(LocalDateHandler)
         eclassTypeHandlers.add(LocalTimeHandler)
