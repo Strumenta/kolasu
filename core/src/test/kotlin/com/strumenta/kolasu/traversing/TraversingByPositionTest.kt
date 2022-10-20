@@ -5,6 +5,7 @@ import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.pos
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.fail
 
 internal class TraversingByPositionTest {
@@ -78,9 +79,40 @@ internal class TraversingByPositionTest {
     }
 
     @Test
+    fun walkWithinPointInLeafPosition() {
+        val position: Position = pos(13, 4, 13, 5)
+        assertEquals("", printSequence(testCase.walkWithin(position)))
+    }
+
+    @Test
     fun walkWithinWithSubTreePosition() {
         val position: Position = pos(7, 5, 11, 5)
         val result: String = printSequence(testCase.walkWithin(position))
         assertEquals("small, 3, 4, 5", result)
+    }
+
+    @Test
+    fun findByPosition() {
+        val leaf1: Position = pos(13, 4, 13, 5)
+        assertEquals("root, 6", printSequence(testCase.searchByPosition(leaf1, true)))
+        assertEquals("6", printSequence(sequenceOf(testCase.findByPosition(leaf1, true)!!)))
+        assertEquals("root, 6", printSequence(testCase.searchByPosition(leaf1, false)))
+        assertEquals("6", printSequence(sequenceOf(testCase.findByPosition(leaf1, false)!!)))
+
+        val leaf2: Position = pos(10, 8, 10, 12)
+        assertEquals("root, big, small, 5", printSequence(testCase.searchByPosition(leaf2, true)))
+        assertEquals("5", printSequence(sequenceOf(testCase.findByPosition(leaf2, true)!!)))
+        assertEquals("root, big, small, 5", printSequence(testCase.searchByPosition(leaf2, false)))
+        assertEquals("5", printSequence(sequenceOf(testCase.findByPosition(leaf2, false)!!)))
+
+        val internal: Position = pos(8, 8, 10, 12)
+        assertEquals("root, big, small", printSequence(testCase.searchByPosition(internal, true)))
+        assertEquals("small", printSequence(sequenceOf(testCase.findByPosition(internal, true)!!)))
+        assertEquals("root, big, small", printSequence(testCase.searchByPosition(internal, false)))
+        assertEquals("small", printSequence(sequenceOf(testCase.findByPosition(internal, false)!!)))
+
+        val outside: Position = pos(100, 100, 101, 101)
+        assertEquals("", printSequence(testCase.searchByPosition(outside, true)))
+        assertNull(testCase.findByPosition(outside, true))
     }
 }

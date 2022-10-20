@@ -9,7 +9,7 @@ import com.strumenta.kolasu.model.Position
  * @param selfContained whether the starting node position contains the positions of all its children.
  * If **true** no further search will be performed in subtrees where the root node falls outside the given position.
  * If **false (default)** the research will cover all nodes from the starting node to the leaves.
- * @return the nearest node to the given [position]. Null if none is found.
+ * @return the node most closely containing the given [position]. Null if none is found.
  * @see searchByPosition
  */
 @JvmOverloads
@@ -21,16 +21,32 @@ fun Node.findByPosition(position: Position, selfContained: Boolean = false): Nod
  * @param position the position where to search for nodes
  * @param selfContained whether the starting node position contains the positions of all its children.
  * If **true**: no further search will be performed in subtrees where the root node falls outside the given position.
- * If **false (default)**: the research will cover all nodes from the starting node to the leaves.
- * @return all nodes contained within the given [position] using depth-first search. Empty list if none are found.
+ * If **false (default)**: the search will cover all nodes from the starting node to the leaves.
+ * In any case, the search stops at the first subtree found to be containing the position.
+ * @return all nodes containing the given [position] using depth-first search. Empty list if none are found.
  */
 @JvmOverloads
 fun Node.searchByPosition(position: Position, selfContained: Boolean = false): Sequence<Node> {
-    return if (selfContained) {
-        this.walkWithin(position)
-    } else {
-        this.walk().filter { position.contains(it) }
+    val contains = this.contains(position)
+    if (!selfContained || contains) {
+        if (children.isEmpty()) {
+            return if (contains) sequenceOf(this) else emptySequence()
+        } else {
+            for (c in children) {
+                val seq = c.searchByPosition(position, selfContained).iterator()
+                if (seq.hasNext()) {
+                    return sequence {
+                        yield(this@searchByPosition)
+                        yieldAll(seq)
+                    }
+                }
+            }
+            if (contains) {
+                return sequenceOf(this)
+            }
+        }
     }
+    return emptySequence()
 }
 
 /**
@@ -40,9 +56,9 @@ fun Node.searchByPosition(position: Position, selfContained: Boolean = false): S
 fun Node.walkWithin(position: Position): Sequence<Node> {
     return if (position.contains(this)) {
         sequenceOf(this) + this.children.walkWithin(position)
-    } else if (this.contains(position)) {
+    } else if (this.overlaps(position)) {
         this.children.walkWithin(position)
-    } else emptySequence<Node>()
+    } else emptySequence()
 }
 
 /**
