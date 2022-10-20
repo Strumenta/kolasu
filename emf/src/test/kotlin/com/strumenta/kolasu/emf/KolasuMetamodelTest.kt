@@ -162,4 +162,9 @@ class KolasuMetamodelTest {
             jsonFile.readText()
         )
     }
+
+    @Test
+    fun handleJavaLangCharacter() {
+        assertTrue(CharHandler.canHandle(java.lang.Character::class.createType()))
+    }
 }
