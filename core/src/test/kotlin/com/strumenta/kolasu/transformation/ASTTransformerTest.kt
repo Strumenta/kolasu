@@ -14,7 +14,6 @@ data class DisplayIntStatement(val specifiedPosition: Position? = null, val valu
 data class SetStatement(val specifiedPosition: Position? = null, var variable: String = "", val value: Int = 0) :
     Node(specifiedPosition)
 
-
 enum class Operator {
     PLUS, MULT
 }
@@ -33,7 +32,6 @@ sealed class BLangExpression : Node()
 data class BLangIntLiteral(val value: Int) : BLangExpression()
 data class BLangSum(val left: BLangExpression, val right: BLangExpression) : BLangExpression()
 data class BLangMult(val left: BLangExpression, val right: BLangExpression) : BLangExpression()
-
 
 class ASTTransformerTest {
 
