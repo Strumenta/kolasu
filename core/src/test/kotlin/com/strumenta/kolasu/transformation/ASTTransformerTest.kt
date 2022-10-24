@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.testing.assertASTsAreEqual
+import com.strumenta.kolasu.validation.IssueSeverity
 import org.junit.Test
 import kotlin.reflect.KClass
 import kotlin.test.assertEquals
@@ -32,6 +33,23 @@ sealed class BLangExpression : Node()
 data class BLangIntLiteral(val value: Int) : BLangExpression()
 data class BLangSum(val left: BLangExpression, val right: BLangExpression) : BLangExpression()
 data class BLangMult(val left: BLangExpression, val right: BLangExpression) : BLangExpression()
+
+enum class Type {
+    INT, STR
+}
+data class TypedExpressions(var expressions: MutableList<TypedExpression> = mutableListOf()) : Node()
+sealed class TypedExpression(open var type: Type? = null) : Node()
+data class TypedLiteral(var value: String, override var type: Type?) : TypedExpression(type)
+data class TypedSum(
+    var left: TypedExpression,
+    var right: TypedExpression,
+    override var type: Type? = null
+) : TypedExpression(type)
+data class TypedConcat(
+    var left: TypedExpression,
+    var right: TypedExpression,
+    override var type: Type? = null
+) : TypedExpression(type)
 
 class ASTTransformerTest {
 
@@ -112,6 +130,70 @@ class ASTTransformerTest {
                         ALangMult(ALangIntLiteral(2), ALangIntLiteral(3))
                     ),
                     ALangIntLiteral(4)
+                )
+            )!!
+        )
+    }
+
+    /**
+     * Example of transformation to perform a simple type calculation.
+     */
+    @Test
+    fun computeTypes() {
+        val myTransformer = ASTTransformer(allowGenericNode = false).apply {
+            registerIdentityTransformation(this, TypedExpressions::class)
+                .withChild(TypedExpressions::expressions, TypedExpressions::expressions)
+            registerIdentityTransformation(this, TypedSum::class).finally {
+                if (it.left.type == Type.INT && it.right.type == Type.INT) {
+                    it.type = Type.INT
+                } else {
+                    addIssue(
+                        "Illegal types for sum operation. Only integer values are allowed. " +
+                            "Found: (${it.left.type?.name ?: "null"}, ${it.right.type?.name ?: "null"})",
+                        IssueSeverity.ERROR, it.position
+                    )
+                }
+            }
+            registerIdentityTransformation(this, TypedConcat::class).finally {
+                if (it.left.type == Type.STR && it.right.type == Type.STR) {
+                    it.type = Type.STR
+                } else {
+                    addIssue(
+                        "Illegal types for concat operation. Only string values are allowed. " +
+                            "Found: (${it.left.type?.name ?: "null"}, ${it.right.type?.name ?: "null"})",
+                        IssueSeverity.ERROR, it.position
+                    )
+                }
+            }
+            registerIdentityTransformation(this, TypedLiteral::class)
+        }
+        assertASTsAreEqual(
+            TypedExpressions(
+                mutableListOf(
+                    TypedSum(
+                        TypedLiteral("1", Type.INT),
+                        TypedLiteral("1", Type.INT),
+                        Type.INT
+                    ),
+                    TypedConcat(
+                        TypedLiteral("test", Type.STR),
+                        TypedLiteral("test", Type.STR),
+                        Type.STR
+                    )
+                )
+            ),
+            myTransformer.transform(
+                TypedExpressions(
+                    mutableListOf(
+                        TypedSum(
+                            TypedLiteral("1", Type.INT),
+                            TypedLiteral("1", Type.INT)
+                        ),
+                        TypedConcat(
+                            TypedLiteral("test", Type.STR),
+                            TypedLiteral("test", Type.STR),
+                        )
+                    )
                 )
             )!!
         )
