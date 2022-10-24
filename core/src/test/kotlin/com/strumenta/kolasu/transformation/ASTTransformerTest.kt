@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.testing.assertASTsAreEqual
+import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import org.junit.Test
 import kotlin.reflect.KClass
@@ -18,6 +19,7 @@ data class SetStatement(val specifiedPosition: Position? = null, var variable: S
 enum class Operator {
     PLUS, MULT
 }
+
 sealed class Expression : Node()
 data class IntLiteral(val value: Int) : Expression()
 data class GenericBinaryExpression(val operator: Operator, val left: Expression, val right: Expression) : Node()
@@ -37,7 +39,7 @@ data class BLangMult(val left: BLangExpression, val right: BLangExpression) : BL
 enum class Type {
     INT, STR
 }
-data class TypedExpressions(var expressions: MutableList<TypedExpression> = mutableListOf()) : Node()
+
 sealed class TypedExpression(open var type: Type? = null) : Node()
 data class TypedLiteral(var value: String, override var type: Type?) : TypedExpression(type)
 data class TypedSum(
@@ -45,6 +47,7 @@ data class TypedSum(
     var right: TypedExpression,
     override var type: Type? = null
 ) : TypedExpression(type)
+
 data class TypedConcat(
     var left: TypedExpression,
     var right: TypedExpression,
@@ -141,8 +144,6 @@ class ASTTransformerTest {
     @Test
     fun computeTypes() {
         val myTransformer = ASTTransformer(allowGenericNode = false).apply {
-            registerIdentityTransformation(this, TypedExpressions::class)
-                .withChild(TypedExpressions::expressions, TypedExpressions::expressions)
             registerIdentityTransformation(this, TypedSum::class).finally {
                 if (it.left.type == Type.INT && it.right.type == Type.INT) {
                     it.type = Type.INT
@@ -167,35 +168,79 @@ class ASTTransformerTest {
             }
             registerIdentityTransformation(this, TypedLiteral::class)
         }
+        // sum - legal
         assertASTsAreEqual(
-            TypedExpressions(
-                mutableListOf(
-                    TypedSum(
-                        TypedLiteral("1", Type.INT),
-                        TypedLiteral("1", Type.INT),
-                        Type.INT
-                    ),
-                    TypedConcat(
-                        TypedLiteral("test", Type.STR),
-                        TypedLiteral("test", Type.STR),
-                        Type.STR
-                    )
-                )
+            TypedSum(
+                TypedLiteral("1", Type.INT),
+                TypedLiteral("1", Type.INT),
+                Type.INT
             ),
             myTransformer.transform(
-                TypedExpressions(
-                    mutableListOf(
-                        TypedSum(
-                            TypedLiteral("1", Type.INT),
-                            TypedLiteral("1", Type.INT)
-                        ),
-                        TypedConcat(
-                            TypedLiteral("test", Type.STR),
-                            TypedLiteral("test", Type.STR),
-                        )
-                    )
+                TypedSum(
+                    TypedLiteral("1", Type.INT),
+                    TypedLiteral("1", Type.INT),
                 )
             )!!
+        )
+        assertEquals(0, myTransformer.issues.size)
+        // concat - legal
+        assertASTsAreEqual(
+            TypedConcat(
+                TypedLiteral("test", Type.STR),
+                TypedLiteral("test", Type.STR),
+                Type.STR
+            ),
+            myTransformer.transform(
+                TypedConcat(
+                    TypedLiteral("test", Type.STR),
+                    TypedLiteral("test", Type.STR),
+                )
+            )!!
+        )
+        assertEquals(0, myTransformer.issues.size)
+        // sum - error
+        assertASTsAreEqual(
+            TypedSum(
+                TypedLiteral("1", Type.INT),
+                TypedLiteral("test", Type.STR),
+                null
+            ),
+            myTransformer.transform(
+                TypedSum(
+                    TypedLiteral("1", Type.INT),
+                    TypedLiteral("test", Type.STR),
+                )
+            )!!
+        )
+        assertEquals(1, myTransformer.issues.size)
+        assertEquals(
+            Issue.semantic(
+                "Illegal types for sum operation. Only integer values are allowed. Found: (INT, STR)",
+                IssueSeverity.ERROR
+            ),
+            myTransformer.issues[0]
+        )
+        // concat - error
+        assertASTsAreEqual(
+            TypedConcat(
+                TypedLiteral("1", Type.INT),
+                TypedLiteral("test", Type.STR),
+                null
+            ),
+            myTransformer.transform(
+                TypedConcat(
+                    TypedLiteral("1", Type.INT),
+                    TypedLiteral("test", Type.STR),
+                )
+            )!!
+        )
+        assertEquals(2, myTransformer.issues.size)
+        assertEquals(
+            Issue.semantic(
+                "Illegal types for concat operation. Only string values are allowed. Found: (INT, STR)",
+                IssueSeverity.ERROR
+            ),
+            myTransformer.issues[1]
         )
     }
 }
