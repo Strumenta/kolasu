@@ -1,8 +1,19 @@
 package com.strumenta.kolasu.transformation
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import org.junit.Test
+import kotlin.reflect.KClass
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+data class CU(val specifiedPosition: Position? = null, var statements: List<Node> = listOf()) : Node(specifiedPosition)
+data class DisplayIntStatement(val specifiedPosition: Position? = null, val value: Int) : Node(specifiedPosition)
+data class SetStatement(val specifiedPosition: Position? = null, var variable: String = "", val value: Int = 0) :
+    Node(specifiedPosition)
+
 
 enum class Operator {
     PLUS, MULT
@@ -23,7 +34,31 @@ data class BLangIntLiteral(val value: Int) : BLangExpression()
 data class BLangSum(val left: BLangExpression, val right: BLangExpression) : BLangExpression()
 data class BLangMult(val left: BLangExpression, val right: BLangExpression) : BLangExpression()
 
-class MyASTTransformerTest {
+
+class ASTTransformerTest {
+
+    @Test
+    fun testIdentitiyTransformer() {
+        val transformer = ASTTransformer()
+        transformer.registerNodeFactory(CU::class, CU::class)
+            .withChild(CU::statements, CU::statements)
+        registerIdentityTransformation(transformer, DisplayIntStatement::class)
+        registerIdentityTransformation(transformer, SetStatement::class)
+
+        val cu = CU(
+            statements = listOf(
+                SetStatement(variable = "foo", value = 123),
+                DisplayIntStatement(value = 456)
+            )
+        )
+        val transformedCU = transformer.transform(cu)!!
+        assertASTsAreEqual(cu, transformedCU, considerPosition = true)
+        assertTrue { transformedCU.hasValidParents() }
+        assertEquals(transformedCU.origin, cu)
+    }
+
+    fun <T : Node> registerIdentityTransformation(transformer: ASTTransformer, nodeClass: KClass<T>) =
+        transformer.registerNodeFactory(nodeClass) { node -> node }
 
     /**
      * Example of transformation to perform a refactoring within the same language.

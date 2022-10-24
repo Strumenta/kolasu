@@ -17,44 +17,37 @@ annotation class Mapped(val path: String = "")
 /**
  * Factory that, given a tree node, will instantiate the corresponding transformed node.
  */
-class NodeFactory<S>(
-    val constructor: (S, ASTTransformer, NodeFactory<S>) -> Node,
-    val children: MutableMap<String, ChildNodeFactory<*>?> = mutableMapOf()
+class NodeFactory<Source>(
+    val constructor: (Source, ASTTransformer, NodeFactory<Source>) -> Node,
+    val children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf()
 ) {
     fun withChild(
-        sourceProperty: KProperty1<S, *>,
-        property: KMutableProperty1<*, *>,
-        type: KClass<*>? = null
-    ):
-        NodeFactory<S> =
-        withChild(
-            (sourceProperty as KProperty1<S, Any>)::get,
-            (property as KMutableProperty1<Any, Any?>)::set,
-            property.name,
-            type
-        )
+        sourceProperty: KProperty1<Source, *>, property: KMutableProperty1<*, *>, type: KClass<*>? = null
+    ): NodeFactory<Source> = withChild(
+        (sourceProperty as KProperty1<Source, Any>)::get,
+        (property as KMutableProperty1<Any, Any?>)::set,
+        property.name,
+        type
+    )
 
-    fun <T : Any> withChild(
-        path: String,
-        property: KMutableProperty1<T, *>,
-        scopedToType: KClass<T>? = null
-    ):
-        NodeFactory<S> =
+    fun <Target : Any> withChild(
+        path: String, property: KMutableProperty1<Target, *>, scopedToType: KClass<Target>? = null
+    ): NodeFactory<Source> =
         withChild(getter(path), (property as KMutableProperty1<Any, Any?>)::set, property.name, scopedToType)
 
-    fun <T : Any> withChild(
-        get: (S) -> Any?,
-        property: KMutableProperty1<in T, *>,
-        scopedToType: KClass<T>? = null
-    ): NodeFactory<S> = withChild(get, (property as KMutableProperty1<Any, Any?>)::set, property.name, scopedToType)
+    fun <Target : Any> withChild(
+        get: (Source) -> Any?, property: KMutableProperty1<in Target, *>, scopedToType: KClass<Target>? = null
+    ): NodeFactory<Source> = withChild(get, (property as KMutableProperty1<Target, Any?>)::set, property.name, scopedToType)
 
-    fun withChild(get: (S) -> Any?, set: (Any, Any?) -> Unit, name: String, type: KClass<*>? = null): NodeFactory<S> {
+    fun <Target : Any, Child : Any> withChild(
+        get: (Source) -> Any?, set: (Target, Child?) -> Unit, name: String, type: KClass<*>? = null
+    ): NodeFactory<Source> {
         val prefix = if (type != null) type.qualifiedName + "#" else ""
         children[prefix + name] = ChildNodeFactory(prefix + name, get, set)
         return this
     }
 
-    fun getter(path: String) = { src: S ->
+    fun getter(path: String) = { src: Source ->
         var sub: Any? = src
         for (elem in path.split('.')) {
             if (sub == null) {
@@ -85,12 +78,9 @@ class NodeFactory<S>(
 /**
  * Information on how to retrieve a child node.
  */
-data class ChildNodeFactory<S>(
-    val name: String,
-    val get: (S) -> Any?,
-    val setter: (Any, Any?) -> Unit
-) {
-    fun set(node: Any, child: Any?) {
+data class ChildNodeFactory<Source, Target, Child>(
+    val name: String, val get: (Source) -> Any?, val setter: (Target, Child?) -> Unit) {
+    fun set(node: Target, child: Child?) {
         try {
             setter(node, child)
         } catch (e: Exception) {
@@ -101,7 +91,7 @@ data class ChildNodeFactory<S>(
 /**
  * Sentinel value used to represent the information that a given property is not a child node.
  */
-private val NO_CHILD_NODE = ChildNodeFactory<Any>("", { x -> x }, { _, _ -> })
+private val NO_CHILD_NODE = ChildNodeFactory<Any, Any, Any>("", { x -> x }, { _, _ -> })
 
 /**
  * Implementation of a tree-to-tree transformation. For each source node type, we can register a factory that knows how
@@ -156,9 +146,7 @@ open class ASTTransformer(
                     if (targetProp is KMutableProperty1 && mapped != null) {
                         val path = (mapped.path.ifEmpty { targetProp.name })
                         childNodeFactory = ChildNodeFactory(
-
-                            childKey, factory.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set
-                        )
+                            childKey, factory.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set)
                         factory.children[childKey] = childNodeFactory
                         setChild(childNodeFactory, source, node, pd)
                     } else {
@@ -188,12 +176,12 @@ open class ASTTransformer(
     protected open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
 
     protected open fun setChild(
-        childNodeFactory: ChildNodeFactory<*>,
+        childNodeFactory: ChildNodeFactory<*, *, *>,
         source: Any,
         node: Node,
         pd: PropertyTypeDescription
     ) {
-        val src = (childNodeFactory as ChildNodeFactory<Any>).get(getSource(node, source))
+        val src = (childNodeFactory as ChildNodeFactory<Any, Any, Any>).get(getSource(node, source))
         val child = if (pd.multiple) {
             (src as Collection<*>?)?.map { transform(it, node) } ?: listOf<Node?>()
         } else {
@@ -241,8 +229,7 @@ open class ASTTransformer(
     }
 
     fun <S : Any, T : Node> registerNodeFactory(
-        kclass: KClass<S>,
-        factory: (S, ASTTransformer, NodeFactory<S>) -> T
+        kclass: KClass<S>, factory: (S, ASTTransformer, NodeFactory<S>) -> T
     ): NodeFactory<S> {
         val nodeFactory = NodeFactory(factory)
         factories[kclass] = nodeFactory
