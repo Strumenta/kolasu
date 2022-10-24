@@ -22,7 +22,9 @@ class NodeFactory<Source>(
     val children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf()
 ) {
     fun withChild(
-        sourceProperty: KProperty1<Source, *>, property: KMutableProperty1<*, *>, type: KClass<*>? = null
+        sourceProperty: KProperty1<Source, *>,
+        property: KMutableProperty1<*, *>,
+        type: KClass<*>? = null
     ): NodeFactory<Source> = withChild(
         (sourceProperty as KProperty1<Source, Any>)::get,
         (property as KMutableProperty1<Any, Any?>)::set,
@@ -31,16 +33,24 @@ class NodeFactory<Source>(
     )
 
     fun <Target : Any> withChild(
-        path: String, property: KMutableProperty1<Target, *>, scopedToType: KClass<Target>? = null
+        path: String,
+        property: KMutableProperty1<Target, *>,
+        scopedToType: KClass<Target>? = null
     ): NodeFactory<Source> =
         withChild(getter(path), (property as KMutableProperty1<Any, Any?>)::set, property.name, scopedToType)
 
     fun <Target : Any> withChild(
-        get: (Source) -> Any?, property: KMutableProperty1<in Target, *>, scopedToType: KClass<Target>? = null
-    ): NodeFactory<Source> = withChild(get, (property as KMutableProperty1<Target, Any?>)::set, property.name, scopedToType)
+        get: (Source) -> Any?,
+        property: KMutableProperty1<in Target, *>,
+        scopedToType: KClass<Target>? = null
+    ): NodeFactory<Source> =
+        withChild(get, (property as KMutableProperty1<Target, Any?>)::set, property.name, scopedToType)
 
     fun <Target : Any, Child : Any> withChild(
-        get: (Source) -> Any?, set: (Target, Child?) -> Unit, name: String, type: KClass<*>? = null
+        get: (Source) -> Any?,
+        set: (Target, Child?) -> Unit,
+        name: String,
+        type: KClass<*>? = null
     ): NodeFactory<Source> {
         val prefix = if (type != null) type.qualifiedName + "#" else ""
         children[prefix + name] = ChildNodeFactory(prefix + name, get, set)
@@ -79,7 +89,10 @@ class NodeFactory<Source>(
  * Information on how to retrieve a child node.
  */
 data class ChildNodeFactory<Source, Target, Child>(
-    val name: String, val get: (Source) -> Any?, val setter: (Target, Child?) -> Unit) {
+    val name: String,
+    val get: (Source) -> Any?,
+    val setter: (Target, Child?) -> Unit
+) {
     fun set(node: Target, child: Child?) {
         try {
             setter(node, child)
@@ -88,6 +101,7 @@ data class ChildNodeFactory<Source, Target, Child>(
         }
     }
 }
+
 /**
  * Sentinel value used to represent the information that a given property is not a child node.
  */
@@ -146,7 +160,8 @@ open class ASTTransformer(
                     if (targetProp is KMutableProperty1 && mapped != null) {
                         val path = (mapped.path.ifEmpty { targetProp.name })
                         childNodeFactory = ChildNodeFactory(
-                            childKey, factory.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set)
+                            childKey, factory.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set
+                        )
                         factory.children[childKey] = childNodeFactory
                         setChild(childNodeFactory, source, node, pd)
                     } else {
@@ -229,7 +244,8 @@ open class ASTTransformer(
     }
 
     fun <S : Any, T : Node> registerNodeFactory(
-        kclass: KClass<S>, factory: (S, ASTTransformer, NodeFactory<S>) -> T
+        kclass: KClass<S>,
+        factory: (S, ASTTransformer, NodeFactory<S>) -> T
     ): NodeFactory<S> {
         val nodeFactory = NodeFactory(factory)
         factories[kclass] = nodeFactory
