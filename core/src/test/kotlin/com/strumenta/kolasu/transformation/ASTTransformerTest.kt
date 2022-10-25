@@ -144,7 +144,7 @@ class ASTTransformerTest {
     @Test
     fun computeTypes() {
         val myTransformer = ASTTransformer(allowGenericNode = false).apply {
-            registerIdentityTransformation(this, TypedSum::class).finally {
+            registerIdentityTransformation(this, TypedSum::class).withFinalizer {
                 if (it.left.type == Type.INT && it.right.type == Type.INT) {
                     it.type = Type.INT
                 } else {
@@ -155,7 +155,7 @@ class ASTTransformerTest {
                     )
                 }
             }
-            registerIdentityTransformation(this, TypedConcat::class).finally {
+            registerIdentityTransformation(this, TypedConcat::class).withFinalizer {
                 if (it.left.type == Type.STR && it.right.type == Type.STR) {
                     it.type = Type.STR
                 } else {

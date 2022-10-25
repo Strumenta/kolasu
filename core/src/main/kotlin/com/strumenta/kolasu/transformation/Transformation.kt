@@ -22,18 +22,9 @@ annotation class Mapped(val path: String = "")
  */
 class NodeFactory<Source, Output : Node>(
     val constructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output,
-    val children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf()
+    val children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
+    var finalizer: (Output) -> Unit = {}
 ) {
-
-    private var finalizer: (Output) -> Unit = {}
-
-    fun finally(node: Output) {
-        this.finalizer(node)
-    }
-
-    fun finally(finalizer: (Output) -> Unit) {
-        this.finalizer = finalizer
-    }
 
     fun withChild(
         sourceProperty: KProperty1<Source, *>,
@@ -69,6 +60,10 @@ class NodeFactory<Source, Output : Node>(
         val prefix = if (type != null) type.qualifiedName + "#" else ""
         children[prefix + name] = ChildNodeFactory(prefix + name, get, set)
         return this
+    }
+
+    fun withFinalizer(finalizer: (Output) -> Unit) {
+        this.finalizer = finalizer
     }
 
     fun getter(path: String) = { src: Source ->
@@ -183,7 +178,7 @@ open class ASTTransformer(
                     }
                 }
             }
-            factory.finally(node)
+            factory.finalizer(node)
             node.parent = parent
         } else {
             if (allowGenericNode) {
