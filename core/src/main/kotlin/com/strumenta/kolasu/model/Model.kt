@@ -91,13 +91,19 @@ open class Node() : Origin, Destination {
         get() = origin?.source
 
     fun detach(keepPosition: Boolean = true, keepSourceText: Boolean = false) {
-        val existingOrigin = this.origin
-        this.origin = DetachedOrigin(
-            if (keepPosition) existingOrigin?.position else null,
-            if (keepSourceText) existingOrigin?.sourceText else null
-        )
-        if (existingOrigin is Node && existingOrigin.destination == this) {
-            existingOrigin.destination = null
+        val existingOrigin = origin
+        if (existingOrigin != null) {
+            if (keepPosition || keepSourceText) {
+                this.origin = DetachedOrigin(
+                    if (keepPosition) existingOrigin.position else null,
+                    if (keepSourceText) existingOrigin.sourceText else null
+                )
+            } else {
+                this.origin = null
+            }
+            if (existingOrigin is Node && existingOrigin.destination == this) {
+                existingOrigin.destination = null
+            }
         }
     }
 

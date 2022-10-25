@@ -36,10 +36,12 @@ class OriginTest {
         node = Node().withOrigin(rootOrigin)
         assertEquals(rootOrigin.position, node.position)
         node.detach(keepPosition = false)
+        assertNull(node.origin)
         assertNull(node.position)
         node = Node().withOrigin(rootOrigin).withPosition(pos(1, 2, 3, 4))
         assertEquals(pos(1, 2, 3, 4), node.position)
         node.detach(keepPosition = false)
+        assertNull(node.origin)
         assertEquals(pos(1, 2, 3, 4), node.position)
     }
 
