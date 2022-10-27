@@ -6,6 +6,7 @@ import com.strumenta.simplelang.SimpleLangParser
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.junit.Test as test
 
 class OriginTest {
@@ -23,6 +24,25 @@ class OriginTest {
 
         val inputStatement = ParseTreeOrigin(parseTreeRoot.statement(1))
         assertEquals(Position(Point(2, 0), Point(2, 17)), inputStatement.position)
+
+        var node = Node().withOrigin(rootOrigin)
+        assertEquals(rootOrigin.position, node.position)
+        node.detach()
+        assertEquals(rootOrigin.position, node.position)
+        node = Node().withOrigin(rootOrigin)
+        assertEquals(rootOrigin.position, node.position)
+        node.detach(keepPosition = true)
+        assertEquals(rootOrigin.position, node.position)
+        node = Node().withOrigin(rootOrigin)
+        assertEquals(rootOrigin.position, node.position)
+        node.detach(keepPosition = false)
+        assertNull(node.origin)
+        assertNull(node.position)
+        node = Node().withOrigin(rootOrigin).withPosition(pos(1, 2, 3, 4))
+        assertEquals(pos(1, 2, 3, 4), node.position)
+        node.detach(keepPosition = false)
+        assertNull(node.origin)
+        assertEquals(pos(1, 2, 3, 4), node.position)
     }
 
     @test fun parseTreeOriginsSourceText() {
@@ -37,6 +57,20 @@ class OriginTest {
         assertEquals(code, rootOrigin.sourceText)
 
         val inputStatement = ParseTreeOrigin(parseTreeRoot.statement(1))
-        assertEquals("input c is string", inputStatement.sourceText)
+        val text = "input c is string"
+        assertEquals(text, inputStatement.sourceText)
+
+        var node = Node().withOrigin(rootOrigin)
+        assertEquals(rootOrigin.sourceText, node.sourceText)
+        node.detach()
+        assertNull(node.sourceText)
+        node = Node().withOrigin(rootOrigin)
+        assertEquals(rootOrigin.sourceText, node.sourceText)
+        node.detach(keepSourceText = true)
+        assertEquals(rootOrigin.sourceText, node.sourceText)
+        node = Node().withOrigin(rootOrigin)
+        assertEquals(rootOrigin.sourceText, node.sourceText)
+        node.detach(keepSourceText = false)
+        assertNull(node.sourceText)
     }
 }

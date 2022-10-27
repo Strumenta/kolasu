@@ -13,6 +13,8 @@ interface Origin {
         get() = position?.source
 }
 
+class SimpleOrigin(override val position: Position?, override val sourceText: String?) : Origin
+
 data class CompositeOrigin(
     val elements: List<Origin>,
     override val position: Position?,
@@ -87,6 +89,23 @@ open class Node() : Origin, Destination {
     @property:Internal
     override val source: Source?
         get() = origin?.source
+
+    fun detach(keepPosition: Boolean = true, keepSourceText: Boolean = false) {
+        val existingOrigin = origin
+        if (existingOrigin != null) {
+            if (keepPosition || keepSourceText) {
+                this.origin = SimpleOrigin(
+                    if (keepPosition) existingOrigin.position else null,
+                    if (keepSourceText) existingOrigin.sourceText else null
+                )
+            } else {
+                this.origin = null
+            }
+            if (existingOrigin is Node && existingOrigin.destination == this) {
+                existingOrigin.destination = null
+            }
+        }
+    }
 
     /**
      * Tests whether the given position is contained in the interval represented by this object.
