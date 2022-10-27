@@ -7,7 +7,6 @@ import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import org.junit.Test
-import kotlin.reflect.KClass
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
