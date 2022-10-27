@@ -61,8 +61,8 @@ class ASTTransformerTest {
         val transformer = ASTTransformer()
         transformer.registerNodeFactory(CU::class, CU::class)
             .withChild(CU::statements, CU::statements)
-        registerIdentityTransformation(transformer, DisplayIntStatement::class)
-        registerIdentityTransformation(transformer, SetStatement::class)
+        transformer.registerIdentityTransformation(DisplayIntStatement::class)
+        transformer.registerIdentityTransformation(SetStatement::class)
 
         val cu = CU(
             statements = listOf(
@@ -76,9 +76,6 @@ class ASTTransformerTest {
         assertEquals(transformedCU.origin, cu)
     }
 
-    fun <T : Node> registerIdentityTransformation(transformer: ASTTransformer, nodeClass: KClass<T>) =
-        transformer.registerNodeFactory(nodeClass) { node -> node }
-
     /**
      * Example of transformation to perform a refactoring within the same language.
      */
@@ -91,8 +88,7 @@ class ASTTransformerTest {
                     Operator.PLUS -> Sum(transform(source.left) as Expression, transform(source.right) as Expression)
                 }
             }
-            // This may benefit of specific support: for example a NodeFactory that returns the same element
-            registerNodeFactory(IntLiteral::class) { source: IntLiteral -> source }
+            registerIdentityTransformation(IntLiteral::class)
         }
         assertASTsAreEqual(
             Mult(IntLiteral(7), IntLiteral(8)),
@@ -144,7 +140,7 @@ class ASTTransformerTest {
     @Test
     fun computeTypes() {
         val myTransformer = ASTTransformer(allowGenericNode = false).apply {
-            registerIdentityTransformation(this, TypedSum::class).withFinalizer {
+            registerIdentityTransformation(TypedSum::class).withFinalizer {
                 if (it.left.type == Type.INT && it.right.type == Type.INT) {
                     it.type = Type.INT
                 } else {
@@ -155,7 +151,7 @@ class ASTTransformerTest {
                     )
                 }
             }
-            registerIdentityTransformation(this, TypedConcat::class).withFinalizer {
+            registerIdentityTransformation(TypedConcat::class).withFinalizer {
                 if (it.left.type == Type.STR && it.right.type == Type.STR) {
                     it.type = Type.STR
                 } else {
@@ -166,7 +162,7 @@ class ASTTransformerTest {
                     )
                 }
             }
-            registerIdentityTransformation(this, TypedLiteral::class)
+            registerIdentityTransformation(TypedLiteral::class)
         }
         // sum - legal
         assertASTsAreEqual(
@@ -242,5 +238,26 @@ class ASTTransformerTest {
             ),
             myTransformer.issues[1]
         )
+    }
+
+    @Test
+    fun testDroppingNodes() {
+        val transformer = ASTTransformer()
+        transformer.registerNodeFactory(CU::class, CU::class)
+            .withChild(CU::statements, CU::statements)
+        transformer.registerNodeFactory(DisplayIntStatement::class) { _ -> null }
+        transformer.registerIdentityTransformation(SetStatement::class)
+
+        val cu = CU(
+            statements = listOf(
+                DisplayIntStatement(value = 456),
+                SetStatement(variable = "foo", value = 123)
+            )
+        )
+        val transformedCU = transformer.transform(cu)!! as CU
+        assertTrue { transformedCU.hasValidParents() }
+        assertEquals(transformedCU.origin, cu)
+        assertEquals(1, transformedCU.statements.size)
+        assertASTsAreEqual(cu.statements[1], transformedCU.statements[0])
     }
 }

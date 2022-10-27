@@ -21,7 +21,7 @@ annotation class Mapped(val path: String = "")
  * Factory that, given a tree node, will instantiate the corresponding transformed node.
  */
 class NodeFactory<Source, Output : Node>(
-    val constructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output,
+    val constructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output?,
     val children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
     var finalizer: (Output) -> Unit = {}
 ) {
@@ -150,9 +150,12 @@ open class ASTTransformer(
             throw Error("Mapping error: received collection when value was expected")
         }
         val factory = getNodeFactory<Any, Node>(source::class as KClass<Any>)
-        val node: Node
+        val node: Node?
         if (factory != null) {
             node = makeNode(factory, source, allowGenericNode = allowGenericNode)
+            if (node == null) {
+                return null
+            }
             node::class.processProperties { pd ->
                 val childKey = node::class.qualifiedName + "#" + pd.name
                 var childNodeFactory = factory.children[childKey]
@@ -207,8 +210,8 @@ open class ASTTransformer(
         pd: PropertyTypeDescription
     ) {
         val src = (childNodeFactory as ChildNodeFactory<Any, Any, Any>).get(getSource(node, source))
-        val child = if (pd.multiple) {
-            (src as Collection<*>?)?.map { transform(it, node) } ?: listOf<Node?>()
+        val child: Any? = if (pd.multiple) {
+            (src as Collection<*>?)?.mapNotNull { transform(it, node) } ?: listOf<Node?>()
         } else {
             transform(src, node)
         }
@@ -227,7 +230,7 @@ open class ASTTransformer(
         factory: NodeFactory<S, T>,
         source: S,
         allowGenericNode: Boolean = true
-    ): Node {
+    ): Node? {
         return try {
             factory.constructor(source, this, factory)
         } catch (e: Exception) {
@@ -236,7 +239,7 @@ open class ASTTransformer(
             } else {
                 throw e
             }
-        }.withOrigin(asOrigin(source))
+        }?.withOrigin(asOrigin(source))
     }
 
     protected open fun <S : Any, T : Node> getNodeFactory(kClass: KClass<S>): NodeFactory<S, T>? {
@@ -259,7 +262,7 @@ open class ASTTransformer(
 
     fun <S : Any, T : Node> registerNodeFactory(
         kclass: KClass<S>,
-        factory: (S, ASTTransformer, NodeFactory<S, T>) -> T
+        factory: (S, ASTTransformer, NodeFactory<S, T>) -> T?
     ): NodeFactory<S, T> {
         val nodeFactory = NodeFactory(factory)
         factories[kclass] = nodeFactory
@@ -268,10 +271,10 @@ open class ASTTransformer(
 
     fun <S : Any, T : Node> registerNodeFactory(
         kclass: KClass<S>,
-        factory: (S, ASTTransformer) -> T
+        factory: (S, ASTTransformer) -> T?
     ): NodeFactory<S, T> = registerNodeFactory(kclass) { source, transformer, _ -> factory(source, transformer) }
 
-    fun <S : Any, T : Node> registerNodeFactory(kclass: KClass<S>, factory: (S) -> T): NodeFactory<S, T> =
+    fun <S : Any, T : Node> registerNodeFactory(kclass: KClass<S>, factory: (S) -> T?): NodeFactory<S, T> =
         registerNodeFactory(kclass) { input, _, _ -> factory(input) }
 
     fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeFactory<S, T> {
@@ -285,6 +288,9 @@ open class ASTTransformer(
         factories[source] = nodeFactory
         return nodeFactory
     }
+
+    fun <T : Node> registerIdentityTransformation(nodeClass: KClass<T>) =
+        registerNodeFactory(nodeClass) { node -> node }
 
     private fun registerKnownClass(target: KClass<*>) {
         val qualifiedName = target.qualifiedName
