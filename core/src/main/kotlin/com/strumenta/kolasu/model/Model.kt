@@ -13,7 +13,7 @@ interface Origin {
         get() = position?.source
 }
 
-class DetachedOrigin(override val position: Position?, override val sourceText: String?) : Origin
+class SimpleOrigin(override val position: Position?, override val sourceText: String?) : Origin
 
 data class CompositeOrigin(
     val elements: List<Origin>,
@@ -94,7 +94,7 @@ open class Node() : Origin, Destination {
         val existingOrigin = origin
         if (existingOrigin != null) {
             if (keepPosition || keepSourceText) {
-                this.origin = DetachedOrigin(
+                this.origin = SimpleOrigin(
                     if (keepPosition) existingOrigin.position else null,
                     if (keepSourceText) existingOrigin.sourceText else null
                 )
