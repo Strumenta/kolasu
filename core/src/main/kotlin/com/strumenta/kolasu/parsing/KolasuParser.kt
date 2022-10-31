@@ -129,7 +129,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
      * Checks the parse tree for correctness. If you're concerned about performance, you may want to override this to
      * do nothing.
      */
-    open fun verifyParseTree(parser: Parser, issues: MutableList<Issue>, root: ParserRuleContext) {
+    protected open fun verifyParseTree(parser: Parser, issues: MutableList<Issue>, root: ParserRuleContext) {
         val lastToken = parser.tokenStream.get(parser.tokenStream.index())
         if (lastToken.type != Token.EOF) {
             issues.add(
@@ -168,6 +168,10 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
         return parseFirstStage(CharStreams.fromStream(inputStream, charset), measureLexingTime)
     }
 
+    /**
+     * Executes only the first stage of the parser, i.e., the production of a parse tree. Usually, you'll want to use
+     * the [parse] method, that returns an AST which is simpler to use and query.
+     */
     @JvmOverloads
     fun parseFirstStage(inputStream: CharStream, measureLexingTime: Boolean = false): FirstStageParsingResult<C> {
         val issues = LinkedList<Issue>()
