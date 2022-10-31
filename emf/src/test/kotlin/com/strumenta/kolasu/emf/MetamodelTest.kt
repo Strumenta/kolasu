@@ -4,12 +4,17 @@ import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeType
 import com.strumenta.kolasu.model.ReferenceByName
+import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EReference
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
+import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import org.junit.Test
 import java.io.File
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 sealed class Statement : Node()
 sealed class Expression : Node()
@@ -55,7 +60,25 @@ class MetamodelTest {
         val ePackage = metamodelBuilder.generate()
 
         ePackage.saveEcore(temporaryFile("simplemm.ecore"))
-        ePackage.saveAsJson(temporaryFile("simplemm.json"))
+        val jsonFile = temporaryFile("simplemm.json")
+        ePackage.saveAsJson(jsonFile)
+        checkEPackage(ePackage)
+
+        val resourceSet = ResourceSetImpl()
+        resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
+        resourceSet.resourceFactoryRegistry.protocolToFactoryMap["https"] = JsonResourceFactory()
+        val kolasuURI = URI.createURI(STARLASU_METAMODEL.nsURI)
+        val kolasuRes = resourceSet.createResource(kolasuURI)
+        kolasuRes.contents.add(STARLASU_METAMODEL)
+        val metaURI = URI.createFileURI(jsonFile.absolutePath)
+        val metaRes = resourceSet.createResource(metaURI)
+        metaRes.load(null)
+        assertEquals(1, metaRes.contents.size)
+        assertTrue(metaRes.contents[0] is EPackage)
+        checkEPackage(metaRes.contents[0] as EPackage)
+    }
+
+    private fun checkEPackage(ePackage: EPackage) {
         assertEquals("com.strumenta.kolasu.emf", ePackage.name)
         assertEquals(7, ePackage.eClassifiers.size)
 
