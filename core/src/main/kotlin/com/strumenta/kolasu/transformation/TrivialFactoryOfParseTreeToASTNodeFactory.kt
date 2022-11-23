@@ -4,6 +4,7 @@ import com.strumenta.kolasu.mapping.ParseTreeToASTTransformer
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.children
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token
@@ -88,7 +89,9 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
                 }
             }.toTypedArray()
             try {
-                constructor.call(*args)
+                val instance = constructor.call(*args)
+                instance.children.forEach { it.parent = instance }
+                instance
             } catch (e: java.lang.IllegalArgumentException) {
                 throw java.lang.RuntimeException(
                     "Failure while invoking constructor $constructor with args: " +

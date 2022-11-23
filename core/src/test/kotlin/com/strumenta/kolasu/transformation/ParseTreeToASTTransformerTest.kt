@@ -4,7 +4,9 @@ import com.strumenta.kolasu.mapping.ParseTreeToASTTransformer
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.testing.assertASTsAreEqual
+import com.strumenta.kolasu.traversing.walk
 import com.strumenta.simplelang.AntlrEntityLexer
 import com.strumenta.simplelang.AntlrEntityParser
 import com.strumenta.simplelang.AntlrEntityParser.Boolean_typeContext
@@ -32,6 +34,7 @@ import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
 import org.junit.Test
 import java.util.*
+import kotlin.test.assertSame
 
 data class EModule(override val name: String, val entities: MutableList<EEntity>) : Node(), Named
 data class EEntity(override val name: String, val features: MutableList<EFeature>) : Node(), Named
@@ -218,10 +221,10 @@ class ParseTreeToASTTransformerTest {
         transformer.registerNodeFactory(Div_mult_expressionContext::class) { pt, t ->
             when (pt.op.text) {
                 "/" -> {
-                    SDivision(t.transform(pt.left) as SExpression, t.transform(pt.right) as SExpression)
+                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<Div_mult_expressionContext, SDivision>()(pt, t)
                 }
                 "*" -> {
-                    SMultiplication(t.transform(pt.left) as SExpression, t.transform(pt.right) as SExpression)
+                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<Div_mult_expressionContext, SMultiplication>()(pt, t)
                 }
                 else -> TODO()
             }
@@ -229,10 +232,10 @@ class ParseTreeToASTTransformerTest {
         transformer.registerNodeFactory(Sum_sub_expressionContext::class) { pt, t ->
             when (pt.op.text) {
                 "+" -> {
-                    SSum(t.transform(pt.left) as SExpression, t.transform(pt.right) as SExpression)
+                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<Sum_sub_expressionContext, SSum>()(pt, t)
                 }
                 "-" -> {
-                    SSubtraction(t.transform(pt.left) as SExpression, t.transform(pt.right) as SExpression)
+                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<Sum_sub_expressionContext, SSubtraction>()(pt, t)
                 }
                 else -> TODO()
             }
@@ -289,6 +292,11 @@ class ParseTreeToASTTransformerTest {
                 """.trimIndent()
             )
         )!!
+        actualAST.walk().forEach { parent ->
+            parent.children.forEach { child ->
+                assertSame(parent, child.parent)
+            }
+        }
         assertASTsAreEqual(expectedAST, actualAST)
     }
 }
