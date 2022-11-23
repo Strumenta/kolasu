@@ -6,8 +6,12 @@ import kotlin.reflect.full.memberProperties
 
 object TrivialFactoryOfParseTreeToASTNodeFactory {
 
+    private fun convert(value: Any, astTransformer: ASTTransformer) : Any? {
+        TODO()
+    }
+
     inline fun <S : RuleContext, reified T : Node> trivialFactory(): (S, ASTTransformer) -> T? {
-        return { parseTreeNode, _ ->
+        return { parseTreeNode, astTransformer ->
             val constructors = T::class.constructors
             println("class ${T::class}")
             println("constructors ${constructors}")
@@ -26,11 +30,13 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
                 if (parseTreeMember == null) {
                     TODO()
                 } else {
-                    parseTreeMember.get(parseTreeNode)
+                    val value = parseTreeMember.get(parseTreeNode)
+                    println("producing value $value (${value?.javaClass}) for $parameterName")
+                    convert(value, astTransformer)
                 }
 
             }.toTypedArray()
-            constructor.call(args)
+            constructor.call(*args)
         }
     }
 }
