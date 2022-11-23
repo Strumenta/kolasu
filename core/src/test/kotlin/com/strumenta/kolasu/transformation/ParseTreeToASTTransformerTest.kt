@@ -221,10 +221,12 @@ class ParseTreeToASTTransformerTest {
         transformer.registerNodeFactory(Div_mult_expressionContext::class) { pt, t ->
             when (pt.op.text) {
                 "/" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<Div_mult_expressionContext, SDivision>()(pt, t)
+                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
+                        Div_mult_expressionContext, SDivision>()(pt, t)
                 }
                 "*" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<Div_mult_expressionContext, SMultiplication>()(pt, t)
+                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
+                        Div_mult_expressionContext, SMultiplication>()(pt, t)
                 }
                 else -> TODO()
             }
@@ -232,10 +234,12 @@ class ParseTreeToASTTransformerTest {
         transformer.registerNodeFactory(Sum_sub_expressionContext::class) { pt, t ->
             when (pt.op.text) {
                 "+" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<Sum_sub_expressionContext, SSum>()(pt, t)
+                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
+                        Sum_sub_expressionContext, SSum>()(pt, t)
                 }
                 "-" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<Sum_sub_expressionContext, SSubtraction>()(pt, t)
+                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
+                        Sum_sub_expressionContext, SSubtraction>()(pt, t)
                 }
                 else -> TODO()
             }
