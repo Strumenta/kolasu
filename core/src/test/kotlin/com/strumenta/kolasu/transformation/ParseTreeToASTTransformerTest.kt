@@ -84,14 +84,8 @@ class ParseTreeToASTTransformerTest {
     @Test
     fun testSimpleEntitiesTransformer() {
         val transformer = ParseTreeToASTTransformer(allowGenericNode = false)
-        transformer.registerNodeFactory(
-            ModuleContext::class,
-            TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<ModuleContext, EModule>()
-        )
-        transformer.registerNodeFactory(
-            EntityContext::class,
-            TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<EntityContext, EEntity>()
-        )
+        transformer.registerTrivialPTtoASTConversion<ModuleContext, EModule>()
+        transformer.registerTrivialPTtoASTConversion<EntityContext, EEntity>()
         val expectedAST = EModule(
             "M",
             mutableListOf(
@@ -115,30 +109,12 @@ class ParseTreeToASTTransformerTest {
     @Test
     fun testEntitiesWithFeaturesTransformer() {
         val transformer = ParseTreeToASTTransformer(allowGenericNode = false)
-        transformer.registerNodeFactory(
-            ModuleContext::class,
-            TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<ModuleContext, EModule>()
-        )
-        transformer.registerNodeFactory(
-            EntityContext::class,
-            TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<EntityContext, EEntity>()
-        )
-        transformer.registerNodeFactory(
-            FeatureContext::class,
-            TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<FeatureContext, EFeature>()
-        )
-        transformer.registerNodeFactory(
-            String_typeContext::class,
-            TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<String_typeContext, EStringType>()
-        )
-        transformer.registerNodeFactory(
-            Boolean_typeContext::class,
-            TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<Boolean_typeContext, EBooleanType>()
-        )
-        transformer.registerNodeFactory(
-            Entity_typeContext::class,
-            TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<Entity_typeContext, EEntityRefType>("target" to "entity")
-        )
+        transformer.registerTrivialPTtoASTConversion<ModuleContext, EModule>()
+        transformer.registerTrivialPTtoASTConversion<EntityContext, EEntity>()
+        transformer.registerTrivialPTtoASTConversion<FeatureContext, EFeature>()
+        transformer.registerTrivialPTtoASTConversion<String_typeContext, EStringType>()
+        transformer.registerTrivialPTtoASTConversion<Boolean_typeContext, EBooleanType>()
+        transformer.registerTrivialPTtoASTConversion<Entity_typeContext, EEntityRefType>("target" to "entity")
         val expectedAST = EModule(
             "M",
             mutableListOf(

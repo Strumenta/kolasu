@@ -60,3 +60,10 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
         }
     }
 }
+
+inline fun <reified S : RuleContext, reified T : Node> ASTTransformer.registerTrivialPTtoASTConversion(vararg nameConversions: Pair<String, String>) {
+    this.registerNodeFactory(
+        S::class,
+        TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<S, T>(*nameConversions)
+    )
+}
