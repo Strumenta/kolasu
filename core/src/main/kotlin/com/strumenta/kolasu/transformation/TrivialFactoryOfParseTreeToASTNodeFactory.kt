@@ -120,3 +120,10 @@ inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer
             .toTypedArray()
     )
 }
+
+inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer.unwrap(wrappingMember: KCallable<*>) {
+    this.registerNodeFactory(S::class) { parseTreeNode, astTransformer ->
+        val wrapped = wrappingMember.call(parseTreeNode)
+        astTransformer.transform(wrapped) as T?
+    }
+}

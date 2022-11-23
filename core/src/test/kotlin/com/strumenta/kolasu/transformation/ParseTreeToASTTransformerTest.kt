@@ -240,9 +240,7 @@ class ParseTreeToASTTransformerTest {
                 else -> TODO()
             }
         }
-        transformer.registerNodeFactory(Parens_expressionContext::class) { pt, t ->
-            t.transform(pt.expression())
-        }
+        transformer.unwrap<Parens_expressionContext, SExpression>(Parens_expressionContext::expression)
         transformer.registerTrivialPTtoASTConversion<Print_statementContext, SPrintStatement>()
         transformer.registerTrivialPTtoASTConversion<Concat_expressionContext, SConcat>()
         transformer.registerTrivialPTtoASTConversion<Feature_access_expressionContext, SFeatureAccess>(
