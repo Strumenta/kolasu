@@ -415,7 +415,8 @@ private fun Node.findMutableListContainingChild(
         when (val value = property.get(this)) {
             is MutableList<*> -> {
                 for (i in 0 until value.size) {
-                    if (value[i] == targetNode) {
+                    // We want to find a particular child, not just one which is equal to it
+                    if (value[i] === targetNode) {
                         whenFoundDo(value as MutableList<Node>, i)
                         return
                     }
