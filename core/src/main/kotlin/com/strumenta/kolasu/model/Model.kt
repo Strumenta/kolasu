@@ -132,6 +132,10 @@ open class Node() : Origin, Destination {
 
     @Internal
     var destination: Destination? = null
+
+    override fun toString(): String {
+        return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
+    }
 }
 
 fun <N : Node> N.withPosition(position: Position?): N {

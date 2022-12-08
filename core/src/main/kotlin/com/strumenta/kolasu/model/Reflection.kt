@@ -41,6 +41,24 @@ data class PropertyDescription(
     val multiplicity: Multiplicity,
     val value: Any?
 ) {
+    fun valueToString(): String {
+        if (value == null) {
+            return "null"
+        }
+        return if (provideNodes) {
+            if (multiplicity == Multiplicity.MANY) {
+                "[${(value as Collection<Node>).joinToString(",") { it.nodeType }}]"
+            } else {
+                "${(value as Node).nodeType}(...)"
+            }
+        } else {
+            if (multiplicity == Multiplicity.MANY) {
+                "[${(value as Collection<*>).joinToString(",") { it.toString() }}]"
+            } else {
+                value.toString()
+            }
+        }
+    }
 
     val multiple: Boolean
         get() = multiplicity == Multiplicity.MANY
