@@ -132,6 +132,15 @@ open class Node() : Origin, Destination {
 
     @Internal
     var destination: Destination? = null
+
+    /**
+     * This must be final because otherwise data classes extending this will automatically generate
+     * their own implementation. If Link properties are present it could lead to stack overflows in case
+     * of circular graphs.
+     */
+    final override fun toString(): String {
+        return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
+    }
 }
 
 fun <N : Node> N.withPosition(position: Position?): N {
