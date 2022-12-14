@@ -8,6 +8,7 @@ plugins {
     id("signing")
     id("org.jetbrains.dokka") version "${kotlin_version}"
     id 'java-library'
+    id 'net.researchgate.release' version '3.0.2'
 }
 
 allprojects {
