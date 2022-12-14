@@ -90,7 +90,7 @@ publishing {
             pom {
                 name = "kolasu-" + project.name
                 description = "Framework to work with AST and building languages. Integrated with ANTLR."
-                version = kolasu_version
+                version = project.version
                 packaging = 'jar'
                 url = 'https://github.com/Strumenta/kolasu'
 

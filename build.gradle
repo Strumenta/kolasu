@@ -13,7 +13,7 @@ plugins {
 
 allprojects {
     project.group = "com.strumenta.kolasu"
-    project.version = kolasu_version
+    project.version = version
 
     repositories {
         mavenLocal()
