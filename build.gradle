@@ -79,3 +79,10 @@ subprojects {
 }
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+release {
+    git {
+        requireBranch.set('master')
+        pushToRemote.set('origin')
+    }
+}
