@@ -70,6 +70,14 @@ Run:
 
 Kolasu is used in several internal and commercial projects developed at [Strumenta](https://strumenta.com).
 
-## Publishing
+## Publishing a new release
 
 To publish releases you need to set the environment variables GPR_USER and GPR_API_KEY.
+
+New release can be made by running:
+
+```
+./gradlew release
+```
+
+Releases must then be manually completed by visiting https://oss.sonatype.org/#stagingRepositories.
