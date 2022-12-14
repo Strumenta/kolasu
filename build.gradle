@@ -81,7 +81,7 @@ subprojects {
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 release {
-    buildTasks = [publish]
+    buildTasks = ['publish']
     git {
         requireBranch.set('master')
         pushToRemote.set('origin')
