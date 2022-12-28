@@ -346,12 +346,15 @@ fun Node.mapChildren(operation: (Node) -> Node): Node {
 /**
  * Replace [this] node with [other] (by modifying the children of the parent node.)
  * For this to work, [Node.assignParents] must have been called.
+ *
+ * Note that we recognize the exact same Node, looking at its identity, not using
+ * equality.
  */
 fun Node.replaceWith(other: Node) {
     if (this.parent == null) {
         throw IllegalStateException("Parent not set")
     }
-    this.parent!!.transformChildren { if (it == this) other else it }
+    this.parent!!.transformChildren { if (it === this) other else it }
 }
 
 /**
