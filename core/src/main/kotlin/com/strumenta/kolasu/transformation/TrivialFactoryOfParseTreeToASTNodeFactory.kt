@@ -16,16 +16,16 @@ import kotlin.reflect.full.memberProperties
 
 object TrivialFactoryOfParseTreeToASTNodeFactory {
 
-    public fun convertString(text: String, astTransformer: ASTTransformer, expectedType: KType): Any? {
+    fun convertString(text: String, astTransformer: ASTTransformer, expectedType: KType): Any? {
         return when (expectedType.classifier) {
             ReferenceByName::class -> {
-                return ReferenceByName<PossiblyNamed>(name = text)
+                ReferenceByName<PossiblyNamed>(name = text)
             }
             String::class -> {
-                return text
+                text
             }
             Int::class -> {
-                return text.toInt()
+                text.toInt()
             }
             else -> {
                 TODO()
@@ -33,7 +33,7 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
         }
     }
 
-    public fun convert(value: Any?, astTransformer: ASTTransformer, expectedType: KType): Any? {
+    fun convert(value: Any?, astTransformer: ASTTransformer, expectedType: KType): Any? {
         when (value) {
             is Token -> {
                 return convertString(value.text, astTransformer, expectedType)
@@ -50,7 +50,7 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
             is TerminalNode -> {
                 return convertString(value.text, astTransformer, expectedType)
             }
-            else -> TODO("value $value (${value?.javaClass})")
+            else -> TODO("value $value (${value.javaClass})")
         }
     }
 
@@ -69,8 +69,7 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
             val constructor = constructors.first()
             val args: Array<Any?> = constructor.parameters.map {
                 val parameterName = it.name
-                val searchedName = nameConversions.find { it.second == parameterName }?.let { it.first }
-                    ?: parameterName
+                val searchedName = nameConversions.find { it.second == parameterName }?.first ?: parameterName
                 val parseTreeMember = parseTreeNode.javaClass.kotlin.memberProperties.find { it.name == searchedName }
                 if (parseTreeMember == null) {
                     val method = parseTreeNode.javaClass.kotlin.memberFunctions.find { it.name == searchedName }
@@ -95,7 +94,7 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
             } catch (e: java.lang.IllegalArgumentException) {
                 throw java.lang.RuntimeException(
                     "Failure while invoking constructor $constructor with args: " +
-                        "${args.joinToString(",") { "$it (${it?.javaClass})" }}",
+                            args.joinToString(",") { "$it (${it?.javaClass})" },
                     e
                 )
             }

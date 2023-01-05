@@ -83,9 +83,9 @@ class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = n
  * Set the origin of the AST node as a ParseTreeOrigin, providing the parseTree is not null.
  * If the parseTree is null, no operation is performed.
  */
-fun <T : Node> T.withParseTreeNode(parseTree: ParserRuleContext?): T {
+fun <T : Node> T.withParseTreeNode(parseTree: ParserRuleContext?, source: Source? = null): T {
     if (parseTree != null) {
-        this.origin = ParseTreeOrigin(parseTree)
+        this.origin = ParseTreeOrigin(parseTree, source)
     }
     return this
 }

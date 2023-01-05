@@ -106,7 +106,7 @@ class ParseTreeToASTTransformerTest {
         }
     }
 
-    private fun parseEntities(code: String): AntlrEntityParser.ModuleContext {
+    private fun parseEntities(code: String): ModuleContext {
         val errorListener = MyErrorListener()
 
         val lexer = AntlrEntityLexer(CharStreams.fromString(code))
@@ -118,7 +118,7 @@ class ParseTreeToASTTransformerTest {
         return parser.module()
     }
 
-    private fun parseScript(code: String): AntlrScriptParser.ScriptContext {
+    private fun parseScript(code: String): ScriptContext {
         val errorListener = MyErrorListener()
 
         val lexer = AntlrScriptLexer(CharStreams.fromString(code))
