@@ -87,6 +87,10 @@ private fun createStarlasuMetamodel(): EPackage {
     ePackage.createEClass("EntityDeclaration").apply {
         this.isInterface = true
     }
+    ePackage.createEClass("QuotedElement").apply {
+        this.isInterface = true
+        addAttribute("placeholderName", stringDT, 0, 1)
+    }
 
     val issueType = EcoreFactory.eINSTANCE.createEEnum()
     issueType.name = "IssueType"
