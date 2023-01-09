@@ -452,6 +452,18 @@ class EMFCLIToolTest {
     "name" : "EntityDeclaration",
     "interface" : true
   }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "PlaceholderElement",
+    "interface" : true,
+    "eStructuralFeatures" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
+      "name" : "placeholderName",
+      "eType" : {
+        "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
+        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
+      }
+    } ]
+  }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EEnum",
     "name" : "IssueType",
     "eLiterals" : [ {
