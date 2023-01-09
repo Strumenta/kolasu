@@ -186,7 +186,7 @@ class KotlinPrinter : ASTCodeGenerator<KCompilationUnit>() {
     }
 
     fun printToString(expression: KExpression): String {
-        val o = PrinterOutput(nodePrinters)
+        val o = PrinterOutput(nodePrinters, nodePrinterOverrider)
         o.print(expression)
         return o.text()
     }
