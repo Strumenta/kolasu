@@ -87,7 +87,7 @@ private fun createStarlasuMetamodel(): EPackage {
     ePackage.createEClass("EntityDeclaration").apply {
         this.isInterface = true
     }
-    ePackage.createEClass("QuotedElement").apply {
+    ePackage.createEClass("PlaceholderElement").apply {
         this.isInterface = true
         addAttribute("placeholderName", stringDT, 0, 1)
     }

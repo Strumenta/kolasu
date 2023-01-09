@@ -84,10 +84,10 @@ val EntityDeclarationHandler = KolasuClassHandler(
     STARLASU_METAMODEL
         .getEClass("EntityDeclaration")
 )
-val QuotedElementHandler = KolasuClassHandler(
-    QuotedElement::class,
+val PlaceholderElementHandler = KolasuClassHandler(
+    PlaceholderElement::class,
     STARLASU_METAMODEL
-        .getEClass("QuotedElement")
+        .getEClass("PlaceholderElement")
 )
 
 val StringHandler = KolasuDataTypeHandler(String::class, EcorePackage.eINSTANCE.eString)

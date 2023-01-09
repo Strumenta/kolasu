@@ -453,7 +453,7 @@ class EMFCLIToolTest {
     "interface" : true
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-    "name" : "QuotedElement",
+    "name" : "PlaceholderElement",
     "interface" : true,
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",

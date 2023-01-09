@@ -69,7 +69,7 @@ data class KReferenceExpr(var symbol: String) : KExpression()
 data class KStringLiteral(var value: String) : KExpression()
 data class KIntLiteral(var value: Int) : KExpression()
 
-data class KQuotedExpr(var name: String? = null) : KExpression()
+data class KPlaceholderExpr(var name: String? = null) : KExpression()
 
 data class KUniIsExpression(var ktype: KType) : KExpression()
 
