@@ -278,7 +278,7 @@ fun Node.transformChildren(operation: (Node) -> Node) {
                         property.setter.call(this, newValue)
                         newValue.parent = this
                     } else {
-                        throw ImmutablePropertyException(property, value)
+                        throw ImmutablePropertyException(property, this)
                     }
                 }
             }
