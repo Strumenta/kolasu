@@ -77,14 +77,17 @@ fun <T : Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: 
     }
 }
 
-fun <N:Node>assertASTsAreEqual(
+fun <N : Node> assertASTsAreEqual(
     expected: Node,
     actual: ParsingResult<N>,
     context: String = "<root>",
     considerPosition: Boolean = false
 ) {
     assertEquals(0, actual.issues.size, actual.issues.toString())
-    assertASTsAreEqual(expected=expected, actual=actual.root!!, context=context, considerPosition=considerPosition)
+    assertASTsAreEqual(
+        expected = expected, actual = actual.root!!, context = context,
+        considerPosition = considerPosition
+    )
 }
 
 fun assertASTsAreEqual(
