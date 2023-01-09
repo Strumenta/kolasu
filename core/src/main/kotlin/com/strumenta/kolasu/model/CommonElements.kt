@@ -12,6 +12,21 @@ interface Expression
 @NodeType
 interface EntityDeclaration
 
+/**
+ * QuotedElements can be used to represent elements in code matchers templates and code templates. They represent
+ * variable elements in ASTs.
+ *
+ * Code matchers recognize portions of ASTs, while code templates generates portions of ATS.
+ * For example, in a code matcher we could use a QuotedElement to indicate that a certain part of an AST could vary
+ * and that we want to recognize that value. We could have an AST of this type:
+ * SumExpr(QuotedElement("left"), IntLiteral(1)). A code matcher could recognize all of these expressions as matching:
+ * SumExpr(IntLiteral(2), IntLiteral(1)), SumExpr(ReferenceExpression("foo"), IntLiteral(1)), or
+ * SumExpr(MultiplicationExpr(IntLiteral(2), IntLiteral(3)), IntLiteral(1)).
+ * What would vary among these cases would be the value recognized for the QuotedElement.
+ *
+ * Conversely, in a code template the QuotedElement indicates where to insert parameters provided to populate the
+ * template.
+ */
 @NodeType
 interface QuotedElement {
     var placeholderName: String?
