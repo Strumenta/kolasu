@@ -48,6 +48,9 @@ class PrinterOutput(
     }
 
     fun print(text: String) {
+        if (text.isEmpty()) {
+            return
+        }
         var text = text
         val needPrintln = text.endsWith("\n")
         if (needPrintln) {
