@@ -93,7 +93,8 @@ class PrinterOutput(
             return
         }
         print(prefix)
-        val printer = nodePrinterOverrider(ast) ?: nodePrinters[ast::class] ?: throw java.lang.IllegalArgumentException("Unable to print $ast")
+        val printer = nodePrinterOverrider(ast) ?: nodePrinters[ast::class]
+            ?: throw java.lang.IllegalArgumentException("Unable to print $ast")
         associate(ast) {
             printer.print(this, ast)
         }

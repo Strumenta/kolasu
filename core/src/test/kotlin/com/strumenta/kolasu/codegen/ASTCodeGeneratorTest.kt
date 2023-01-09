@@ -55,7 +55,7 @@ class ASTCodeGeneratorTest {
                     else -> null
                 }
             }
-        } .printToString(ex)
+        }.printToString(ex)
         assertEquals("""this.myMethod(YYY, XXX, YYY)""", codeWithNodePrinterOverrider)
     }
 }
