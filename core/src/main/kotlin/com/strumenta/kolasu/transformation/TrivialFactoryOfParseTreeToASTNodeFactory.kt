@@ -94,7 +94,7 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
             } catch (e: java.lang.IllegalArgumentException) {
                 throw java.lang.RuntimeException(
                     "Failure while invoking constructor $constructor with args: " +
-                            args.joinToString(",") { "$it (${it?.javaClass})" },
+                        args.joinToString(",") { "$it (${it?.javaClass})" },
                     e
                 )
             }
