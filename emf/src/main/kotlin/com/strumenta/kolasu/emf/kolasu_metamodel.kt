@@ -147,6 +147,15 @@ private fun createStarlasuMetamodel(): EPackage {
         this.eStructuralFeatures.add(rootContainment)
     }
 
+    val errorNode = ePackage.createEClass("ErrorNode").apply {
+        isInterface = true
+        addAttribute("message", stringDT, 1, 1)
+    }
+    ePackage.createEClass("GenericErrorNode").apply {
+        eSuperTypes.add(astNode)
+        eSuperTypes.add(errorNode)
+    }
+
     val result = ePackage.createEClass("Result").apply {
         val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
             this.name = "CU"
