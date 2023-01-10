@@ -59,7 +59,7 @@ open class Node() : Origin, Destination {
         get() = try {
             nodeProperties.map { PropertyDescription.buildFor(it, this) }
         } catch (e: Throwable) {
-            throw RuntimeException("Issue while getting properties of $this (${this.javaClass})", e)
+            throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
         }
 
     /**
