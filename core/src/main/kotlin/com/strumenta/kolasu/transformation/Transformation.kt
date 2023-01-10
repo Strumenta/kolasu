@@ -23,7 +23,8 @@ annotation class Mapped(val path: String = "")
 class NodeFactory<Source, Output : Node>(
     val constructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output?,
     val children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
-    var finalizer: (Output) -> Unit = {}
+    var finalizer: (Output) -> Unit = {},
+    var skipChildren: Boolean = false
 ) {
 
     fun withChild(
@@ -62,8 +63,14 @@ class NodeFactory<Source, Output : Node>(
         return this
     }
 
-    fun withFinalizer(finalizer: (Output) -> Unit) {
+    fun withFinalizer(finalizer: (Output) -> Unit): NodeFactory<Source, Output> {
         this.finalizer = finalizer
+        return this
+    }
+
+    fun skipChildren(skip: Boolean = true): NodeFactory<Source, Output> {
+        this.skipChildren = skip
+        return this
     }
 
     fun getter(path: String) = { src: Source ->
@@ -156,30 +163,8 @@ open class ASTTransformer(
             if (node == null) {
                 return null
             }
-            node::class.processProperties { pd ->
-                val childKey = node::class.qualifiedName + "#" + pd.name
-                var childNodeFactory = factory.children[childKey]
-                if (childNodeFactory == null) {
-                    childNodeFactory = factory.children[pd.name]
-                }
-                if (childNodeFactory != null) {
-                    if (childNodeFactory != NO_CHILD_NODE) {
-                        setChild(childNodeFactory, source, node, pd)
-                    }
-                } else {
-                    val targetProp = node::class.memberProperties.find { it.name == pd.name }
-                    val mapped = targetProp?.findAnnotation<Mapped>()
-                    if (targetProp is KMutableProperty1 && mapped != null) {
-                        val path = (mapped.path.ifEmpty { targetProp.name })
-                        childNodeFactory = ChildNodeFactory(
-                            childKey, factory.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set
-                        )
-                        factory.children[childKey] = childNodeFactory
-                        setChild(childNodeFactory, source, node, pd)
-                    } else {
-                        factory.children[childKey] = NO_CHILD_NODE
-                    }
-                }
+            if (!factory.skipChildren) {
+                setChildren(factory, source, node)
             }
             factory.finalizer(node)
             node.parent = parent
@@ -199,6 +184,38 @@ open class ASTTransformer(
             }
         }
         return node
+    }
+
+    private fun setChildren(
+        factory: NodeFactory<Any, Node>,
+        source: Any,
+        node: Node
+    ) {
+        node::class.processProperties { pd ->
+            val childKey = node::class.qualifiedName + "#" + pd.name
+            var childNodeFactory = factory.children[childKey]
+            if (childNodeFactory == null) {
+                childNodeFactory = factory.children[pd.name]
+            }
+            if (childNodeFactory != null) {
+                if (childNodeFactory != NO_CHILD_NODE) {
+                    setChild(childNodeFactory, source, node, pd)
+                }
+            } else {
+                val targetProp = node::class.memberProperties.find { it.name == pd.name }
+                val mapped = targetProp?.findAnnotation<Mapped>()
+                if (targetProp is KMutableProperty1 && mapped != null) {
+                    val path = (mapped.path.ifEmpty { targetProp.name })
+                    childNodeFactory = ChildNodeFactory(
+                        childKey, factory.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set
+                    )
+                    factory.children[childKey] = childNodeFactory
+                    setChild(childNodeFactory, source, node, pd)
+                } else {
+                    factory.children[childKey] = NO_CHILD_NODE
+                }
+            }
+        }
     }
 
     protected open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
