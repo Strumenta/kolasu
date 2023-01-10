@@ -90,6 +90,11 @@ val PlaceholderElementHandler = KolasuClassHandler(
         .getEClass("PlaceholderElement")
 )
 
+val ErrorNodeHandler = KolasuClassHandler(ErrorNode::class, STARLASU_METAMODEL.getEClass("ErrorNode"))
+val GenericErrorNodeHandler = KolasuClassHandler(
+    GenericErrorNode::class, STARLASU_METAMODEL.getEClass("GenericErrorNode")
+)
+
 val StringHandler = KolasuDataTypeHandler(String::class, EcorePackage.eINSTANCE.eString)
 val CharHandler = KolasuDataTypeHandler(Char::class, EcorePackage.eINSTANCE.eChar)
 val BooleanHandler = KolasuDataTypeHandler(Boolean::class, EcorePackage.eINSTANCE.eBoolean)
@@ -112,7 +117,7 @@ val Class<*>.eClassifierName: String
     }
 
 class ResourceClassTypeHandler(val resource: Resource, val ownPackage: EPackage) : EClassTypeHandler {
-    override fun canHandle(klass: KClass<*>): Boolean = getPackage(packageName(klass)) != null
+    override fun canHandle(kclass: KClass<*>): Boolean = getPackage(packageName(kclass)) != null
 
     private fun getPackage(packageName: String): EPackage? =
         resource.contents.find { it is EPackage && it != ownPackage && it.name == packageName } as EPackage?
