@@ -182,7 +182,7 @@ private fun createStarlasuMetamodel(): EPackage {
     return ePackage
 }
 
-fun main(args: Array<String>) {
+fun main() {
     STARLASU_METAMODEL.saveEcore(File("kolasu-2.0.ecore"))
     STARLASU_METAMODEL.saveEcore(File("kolasu-2.0.xmi"))
     STARLASU_METAMODEL.saveAsJson(File("kolasu-2.0.json"))
