@@ -23,7 +23,8 @@ annotation class Mapped(val path: String = "")
 class NodeFactory<Source, Output : Node>(
     val constructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output?,
     val children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
-    var finalizer: (Output) -> Unit = {}
+    var finalizer: (Output) -> Unit = {},
+    var skipChildren: Boolean = false
 ) {
 
     fun withChild(
@@ -62,8 +63,29 @@ class NodeFactory<Source, Output : Node>(
         return this
     }
 
-    fun withFinalizer(finalizer: (Output) -> Unit) {
+    fun withFinalizer(finalizer: (Output) -> Unit): NodeFactory<Source, Output> {
         this.finalizer = finalizer
+        return this
+    }
+
+    /**
+     * Tells the transformer whether this factory already takes care of the node's children and no further computation
+     * is desired on that subtree. E.g., when we're mapping an ANTLR parse tree, and we have a context that is only a
+     * wrapper over several alternatives, and for some reason those are not labeled alternatives in ANTLR (subclasses),
+     * we may configure the transformer as follows:
+     *
+     * ```kotlin
+     * transformer.registerNodeFactory(XYZContext::class) { ctx -> transformer.transform(ctx.children[0]) }
+     * ```
+     *
+     * However, if the result of `transformer.transform(ctx.children[0])` is an instance of a Node with a child
+     * annotated with `@Mapped("someProperty")`, the transformer will think that it has to populate that child,
+     * according to the configuration determined by reflection. When it tries to do so, the "source" of the node will
+     * be an instance of `XYZContext` that does not have a child named `someProperty`, and the transformation will fail.
+     */
+    fun skipChildren(skip: Boolean = true): NodeFactory<Source, Output> {
+        this.skipChildren = skip
+        return this
     }
 
     fun getter(path: String) = { src: Source ->
@@ -156,30 +178,8 @@ open class ASTTransformer(
             if (node == null) {
                 return null
             }
-            node::class.processProperties { pd ->
-                val childKey = node::class.qualifiedName + "#" + pd.name
-                var childNodeFactory = factory.children[childKey]
-                if (childNodeFactory == null) {
-                    childNodeFactory = factory.children[pd.name]
-                }
-                if (childNodeFactory != null) {
-                    if (childNodeFactory != NO_CHILD_NODE) {
-                        setChild(childNodeFactory, source, node, pd)
-                    }
-                } else {
-                    val targetProp = node::class.memberProperties.find { it.name == pd.name }
-                    val mapped = targetProp?.findAnnotation<Mapped>()
-                    if (targetProp is KMutableProperty1 && mapped != null) {
-                        val path = (mapped.path.ifEmpty { targetProp.name })
-                        childNodeFactory = ChildNodeFactory(
-                            childKey, factory.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set
-                        )
-                        factory.children[childKey] = childNodeFactory
-                        setChild(childNodeFactory, source, node, pd)
-                    } else {
-                        factory.children[childKey] = NO_CHILD_NODE
-                    }
-                }
+            if (!factory.skipChildren) {
+                setChildren(factory, source, node)
             }
             factory.finalizer(node)
             node.parent = parent
@@ -199,6 +199,38 @@ open class ASTTransformer(
             }
         }
         return node
+    }
+
+    private fun setChildren(
+        factory: NodeFactory<Any, Node>,
+        source: Any,
+        node: Node
+    ) {
+        node::class.processProperties { pd ->
+            val childKey = node::class.qualifiedName + "#" + pd.name
+            var childNodeFactory = factory.children[childKey]
+            if (childNodeFactory == null) {
+                childNodeFactory = factory.children[pd.name]
+            }
+            if (childNodeFactory != null) {
+                if (childNodeFactory != NO_CHILD_NODE) {
+                    setChild(childNodeFactory, source, node, pd)
+                }
+            } else {
+                val targetProp = node::class.memberProperties.find { it.name == pd.name }
+                val mapped = targetProp?.findAnnotation<Mapped>()
+                if (targetProp is KMutableProperty1 && mapped != null) {
+                    val path = (mapped.path.ifEmpty { targetProp.name })
+                    childNodeFactory = ChildNodeFactory(
+                        childKey, factory.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set
+                    )
+                    factory.children[childKey] = childNodeFactory
+                    setChild(childNodeFactory, source, node, pd)
+                } else {
+                    factory.children[childKey] = NO_CHILD_NODE
+                }
+            }
+        }
     }
 
     protected open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
@@ -290,7 +322,7 @@ open class ASTTransformer(
     }
 
     fun <T : Node> registerIdentityTransformation(nodeClass: KClass<T>) =
-        registerNodeFactory(nodeClass) { node -> node }
+        registerNodeFactory(nodeClass) { node -> node }.skipChildren()
 
     private fun registerKnownClass(target: KClass<*>) {
         val qualifiedName = target.qualifiedName
