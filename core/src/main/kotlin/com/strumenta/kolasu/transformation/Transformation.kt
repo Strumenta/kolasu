@@ -68,6 +68,21 @@ class NodeFactory<Source, Output : Node>(
         return this
     }
 
+    /**
+     * Tells the transformer whether this factory already takes care of the node's children and no further computation
+     * is desired on that subtree. E.g., when we're mapping an ANTLR parse tree, and we have a context that is only a
+     * wrapper over several alternatives, and for some reason those are not labeled alternatives in ANTLR (subclasses),
+     * we may configure the transformer as follows:
+     *
+     * ```kotlin
+     * transformer.registerNodeFactory(XYZContext::class) { ctx -> transformer.transform(ctx.children[0]) }
+     * ```
+     *
+     * However, if the result of `transformer.transform(ctx.children[0])` is an instance of a Node with a child
+     * annotated with `@Mapped("someProperty")`, the transformer will think that it has to populate that child,
+     * according to the configuration determined by reflection. When it tries to do so, the "source" of the node will
+     * be an instance of `XYZContext` that does not have a child named `someProperty`, and the transformation will fail.
+     */
     fun skipChildren(skip: Boolean = true): NodeFactory<Source, Output> {
         this.skipChildren = skip
         return this
@@ -307,7 +322,7 @@ open class ASTTransformer(
     }
 
     fun <T : Node> registerIdentityTransformation(nodeClass: KClass<T>) =
-        registerNodeFactory(nodeClass) { node -> node }
+        registerNodeFactory(nodeClass) { node -> node }.skipChildren()
 
     private fun registerKnownClass(target: KClass<*>) {
         val qualifiedName = target.qualifiedName
