@@ -1,6 +1,9 @@
 package com.strumenta.kolasu.playground
 
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import com.google.gson.internal.Streams
+import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.emf.EMFEnabledParser
 import com.strumenta.kolasu.emf.createResource
 import com.strumenta.kolasu.emf.saveAsJsonObject
@@ -9,10 +12,7 @@ import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
-import java.io.File
-import java.io.FileOutputStream
-import java.io.FileWriter
-import java.io.Writer
+import java.io.*
 
 class PlaygroundExampleGenerator(
     val parser: EMFEnabledParser<*, *, *>,
@@ -57,7 +57,8 @@ class ExampleGenerationFailure(val result: ParsingResult<*>, message: String) : 
 fun ParsingResult<*>.saveForPlayground(
     metamodel: Resource,
     writer: Writer,
-    name: String
+    name: String,
+    indent: String? = null
 ) {
     val simplifiedResult = Result(issues, root)
     val eObject = simplifiedResult.toEObject(metamodel)
@@ -71,8 +72,12 @@ fun ParsingResult<*>.saveForPlayground(
         if (firstStage != null) {
             jsonObject.addProperty("parsingTime", firstStage!!.time)
         }
-        jsonObject.addProperty("astBuildingTime", time)
-        writer.write(jsonObject.toString())
+        if (time != null) {
+            jsonObject.addProperty("astBuildingTime", time)
+        }
+        val jsonWriter = JsonWriter(writer).apply { setIndent(indent) }
+        jsonWriter.isLenient = true
+        Streams.write(jsonObject, jsonWriter)
     } finally {
         metamodel.contents.remove(eObject)
     }

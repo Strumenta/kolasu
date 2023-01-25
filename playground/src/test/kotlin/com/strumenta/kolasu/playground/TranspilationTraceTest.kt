@@ -10,8 +10,6 @@ import com.strumenta.kolasu.validation.Result
 import org.junit.Test
 import kotlin.test.assertEquals
 
-data class ANode(override val name: String, val value: Int) : Node(), Named
-
 class TranspilationTraceTest {
 
     val mm = MetamodelBuilder(
