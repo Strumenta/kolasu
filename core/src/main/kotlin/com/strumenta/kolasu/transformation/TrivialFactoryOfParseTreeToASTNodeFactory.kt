@@ -72,7 +72,10 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
                 val searchedName = nameConversions.find { it.second == parameterName }?.first ?: parameterName
                 val parseTreeMember = parseTreeNode.javaClass.kotlin.memberProperties.find { it.name == searchedName }
                 if (parseTreeMember == null) {
-                    val method = parseTreeNode.javaClass.kotlin.memberFunctions.find { it.name == searchedName }
+                    val method =
+                        parseTreeNode.javaClass.kotlin.memberFunctions.find {
+                            it.name == searchedName && it.parameters.size == 1
+                        }
                     if (method == null) {
                         TODO(
                             "Unable to convert $parameterName (looking for $searchedName in " +
