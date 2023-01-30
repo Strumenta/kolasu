@@ -1,9 +1,7 @@
 package com.strumenta.kolasu.traversing
 
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.model.assignParents
-import com.strumenta.kolasu.model.pos
+import com.strumenta.kolasu.model.*
+import kotlin.system.measureTimeMillis
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -81,5 +79,48 @@ internal class TraversingStructurallyTest {
         val item4 = ((testCase.contents[2] as Box).contents[0] as Box).contents[1]
         val result: String = printSequence(item4.walkAncestors())
         assertEquals("small, big, root", result)
+    }
+
+
+    fun getRandomString(length: Int) : String {
+        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+        return (1..length)
+            .map { allowedChars.random() }
+            .joinToString("")
+    }
+    @Test
+    fun performanceTest() {
+        val boxes = mutableListOf<Box>()
+        val numberOfChildren = 100000
+        var nodes : Int = numberOfChildren + 2
+        val numberOfGrandChildren = 10
+        for (i in 0..numberOfChildren) {
+            val nChildren = (0..numberOfGrandChildren).random()
+            val children = mutableListOf<Node>()
+            for (b in 0..nChildren) {
+                children.add(Item(getRandomString(8)))
+            }
+            nodes += nChildren + 1
+            boxes.add(Box(getRandomString(8), children))
+        }
+        val root = Box("root", boxes)
+        root.assignParents()
+        val walkTime = measureTimeMillis {
+            var countedNodes = 0
+            root.walk().forEach { countedNodes++ }
+            println("Node found when unfrozen ${countedNodes}")
+        }
+        val freezingTime = measureTimeMillis {
+            root.freeze()
+        }
+        val walkTimeFrozen = measureTimeMillis {
+            var countedNodes = 0
+            root.walk().forEach { countedNodes++ }
+            println("Node found when frozen ${countedNodes}")
+        }
+        println("Nodes: ${nodes}")
+        println("Walk time: ${walkTime}")
+        println("Walk time frozen: ${walkTimeFrozen}")
+        println("Freezing time: ${freezingTime}")
     }
 }
