@@ -135,8 +135,8 @@ fun <T> Node.findAncestorOfType(klass: Class<T>): T? {
  */
 val Node.children: List<Node>
     get() {
-        if(Node.Freezer.childrenMap.containsKey(this))
-            return Node.Freezer.childrenMap[this]!!
+        if (Node.childrenMap.containsKey(this))
+            return Node.childrenMap[this]!!
 
         return walkChildren().toList()
     }
@@ -159,15 +159,12 @@ fun <T> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<No
 
 fun Node.freeze() {
     walkLeavesFirst().forEach {
-        if(!Node.Freezer.childrenMap.containsKey(it)) {
-            Node.Freezer.childrenMap.put(it, it.children)
-        }
+        Node.childrenMap.putIfAbsent(it, it.children)
     }
 }
 
 fun Node.unfreeze() {
     walk().forEach {
-        if(Node.Freezer.childrenMap.containsKey(it))
-            Node.Freezer.childrenMap.remove(it)
+        Node.childrenMap.remove(it)
     }
 }

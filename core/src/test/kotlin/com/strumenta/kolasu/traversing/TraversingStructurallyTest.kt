@@ -81,8 +81,7 @@ internal class TraversingStructurallyTest {
         assertEquals("small, big, root", result)
     }
 
-
-    fun getRandomString(length: Int) : String {
+    fun getRandomString(length: Int): String {
         val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
         return (1..length)
             .map { allowedChars.random() }
@@ -92,7 +91,7 @@ internal class TraversingStructurallyTest {
     fun performanceTest() {
         val boxes = mutableListOf<Box>()
         val numberOfChildren = 100000
-        var nodes : Int = numberOfChildren + 2
+        var nodes: Int = numberOfChildren + 2
         val numberOfGrandChildren = 10
         for (i in 0..numberOfChildren) {
             val nChildren = (0..numberOfGrandChildren).random()
@@ -108,7 +107,7 @@ internal class TraversingStructurallyTest {
         val walkTime = measureTimeMillis {
             var countedNodes = 0
             root.walk().forEach { countedNodes++ }
-            println("Node found when unfrozen ${countedNodes}")
+            println("Node found when unfrozen $countedNodes")
         }
         val freezingTime = measureTimeMillis {
             root.freeze()
@@ -116,11 +115,15 @@ internal class TraversingStructurallyTest {
         val walkTimeFrozen = measureTimeMillis {
             var countedNodes = 0
             root.walk().forEach { countedNodes++ }
-            println("Node found when frozen ${countedNodes}")
+            println("Node found when frozen $countedNodes")
         }
-        println("Nodes: ${nodes}")
-        println("Walk time: ${walkTime}")
-        println("Walk time frozen: ${walkTimeFrozen}")
-        println("Freezing time: ${freezingTime}")
+        val unfreezingTime = measureTimeMillis {
+            root.unfreeze()
+        }
+        println("Nodes: $nodes")
+        println("Walk time: $walkTime")
+        println("Walk time frozen: $walkTimeFrozen")
+        println("Freezing time: $freezingTime")
+        println("Unfreezing time: $unfreezingTime")
     }
 }
