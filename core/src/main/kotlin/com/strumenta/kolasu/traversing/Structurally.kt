@@ -15,8 +15,7 @@ fun Node.walk(): Sequence<Node> {
     return sequence {
         yield(this@walk)
         this@walk.walkChildren().forEach {
-            yield(it)
-            yieldAll(it.walkChildren())
+            yieldAll(it.walk())
         }
     }
 }
