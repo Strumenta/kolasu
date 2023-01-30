@@ -12,14 +12,10 @@ import kotlin.reflect.KFunction1
  * @return a Sequence representing the Nodes encountered.
  */
 fun Node.walk(): Sequence<Node> {
-    val stack: Stack<Node> = mutableStackOf(this)
-    return generateSequence {
-        if (stack.isEmpty()) {
-            null
-        } else {
-            val next: Node = stack.pop()
-            stack.pushAll(next.children)
-            next
+    return sequence {
+        yield(this@walk)
+        this@walk.walkChildren().forEach {
+            yieldAll(it.walk())
         }
     }
 }
