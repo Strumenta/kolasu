@@ -461,7 +461,7 @@ class CLITest {
         <decls name="EntityFoo" type="MyEntityDecl"/>
     </root>
 </result>
-""",
+""".replace("\n", System.lineSeparator()),
             outMyFile1.readText()
         )
         assertEquals(
@@ -472,7 +472,7 @@ class CLITest {
         <decls name="EntityBar" type="MyEntityDecl"/>
     </root>
 </result>
-""",
+""".replace("\n", System.lineSeparator()),
             outMyFile2.readText()
         )
         assert(outMyFile2.exists())
