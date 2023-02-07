@@ -2,6 +2,7 @@
 package com.strumenta.kolasu.traversing
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PropertyDescription
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
@@ -12,10 +13,14 @@ import kotlin.reflect.KFunction1
  * @return a Sequence representing the Nodes encountered.
  */
 fun Node.walk(): Sequence<Node> {
-    return sequence {
-        yield(this@walk)
-        this@walk.walkChildren().forEach {
-            yieldAll(it.walk())
+    val stack: Stack<Node> = mutableStackOf(this)
+    return generateSequence {
+        if (stack.isEmpty()) {
+            null
+        } else {
+            val next: Node = stack.pop()
+            stack.pushAll(next.children)
+            next
         }
     }
 }
@@ -100,6 +105,17 @@ fun Node.walkChildren(): Sequence<Node> {
     }
 }
 
+fun Node.walkChildrenProperties(): Sequence<PropertyDescription> {
+    return sequence {
+        this@walkChildrenProperties.properties.forEach { property ->
+            when (val value = property.value) {
+                is Node -> yield(property)
+                is Collection<*> -> value.forEach { if (it is Node) yield(property) }
+            }
+        }
+    }
+}
+
 /**
  * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method.
  * For post-order traversal, take "walkLeavesFirst"
@@ -131,9 +147,6 @@ fun <T> Node.findAncestorOfType(klass: Class<T>): T? {
  */
 val Node.children: List<Node>
     get() {
-        if (Node.childrenMap.containsKey(this))
-            return Node.childrenMap[this]!!
-
         return walkChildren().toList()
     }
 
@@ -153,14 +166,29 @@ fun <T> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<No
     return walker.invoke(this).filterIsInstance(klass).toList()
 }
 
-fun Node.freeze() {
-    walkLeavesFirst().forEach {
-        Node.childrenMap.putIfAbsent(it, it.children)
+class FastWalker(val node: Node) {
+    internal companion object Freezer {
+        val childrenMap: WeakHashMap<Node, List<Node>> = WeakHashMap<Node, List<Node>>()
     }
-}
 
-fun Node.unfreeze() {
-    walk().forEach {
-        Node.childrenMap.remove(it)
+    private fun getChildren(child: Node): List<Node> {
+        return if (childrenMap.containsKey(child)) {
+            childrenMap[child]!!
+        } else {
+            childrenMap.put(child, child.walkChildren().toList())
+            childrenMap[child]!!
+        }
+    }
+    fun walk(root: Node = node): Sequence<Node> {
+        val stack: Stack<Node> = mutableStackOf(root)
+        return generateSequence {
+            if (stack.isEmpty()) {
+                null
+            } else {
+                val next: Node = stack.pop()
+                stack.pushAll(getChildren(next))
+                next
+            }
+        }
     }
 }

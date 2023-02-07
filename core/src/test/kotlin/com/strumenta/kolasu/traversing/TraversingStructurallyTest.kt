@@ -87,43 +87,63 @@ internal class TraversingStructurallyTest {
             .map { allowedChars.random() }
             .joinToString("")
     }
+
     @Test
     fun performanceTest() {
         val boxes = mutableListOf<Box>()
-        val numberOfChildren = 100000
-        var nodes: Int = numberOfChildren + 2
+        val numberOfChildren = 10000
+        var nodes: Int = 1
         val numberOfGrandChildren = 10
         for (i in 0..numberOfChildren) {
             val nChildren = (0..numberOfGrandChildren).random()
             val children = mutableListOf<Node>()
             for (b in 0..nChildren) {
-                children.add(Item(getRandomString(8)))
+                val grandChildren = mutableListOf<Node>()
+                for (c in 0..(0..numberOfGrandChildren).random()) {
+                    grandChildren.add(Item(getRandomString(8)))
+                    nodes += 1
+                }
+                children.add(Box(getRandomString(8), grandChildren))
+                nodes += 1
             }
-            nodes += nChildren + 1
+            nodes += 1
             boxes.add(Box(getRandomString(8), children))
         }
         val root = Box("root", boxes)
         root.assignParents()
+
+        val countedNodesList : MutableList<Int> = mutableListOf()
         val walkTime = measureTimeMillis {
             var countedNodes = 0
             root.walk().forEach { countedNodes++ }
-            println("Node found when unfrozen $countedNodes")
+            countedNodesList.add(countedNodes)
         }
-        val freezingTime = measureTimeMillis {
-            root.freeze()
-        }
-        val walkTimeFrozen = measureTimeMillis {
+        val walkTimeTwo = measureTimeMillis {
             var countedNodes = 0
             root.walk().forEach { countedNodes++ }
-            println("Node found when frozen $countedNodes")
+            countedNodesList.add(countedNodes)
         }
-        val unfreezingTime = measureTimeMillis {
-            root.unfreeze()
+        val fw = FastWalker(root)
+        val walkTimeFast = measureTimeMillis {
+            var countedNodes = 0
+            fw.walk().forEach { countedNodes++ }
+            countedNodesList.add(countedNodes)
         }
-        println("Nodes: $nodes")
-        println("Walk time: $walkTime")
-        println("Walk time frozen: $walkTimeFrozen")
-        println("Freezing time: $freezingTime")
-        println("Unfreezing time: $unfreezingTime")
+        val walkTimeFastTwo = measureTimeMillis {
+            var countedNodes = 0
+            fw.walk().forEach { countedNodes++ }
+            countedNodesList.add(countedNodes)
+        }
+        val walkTimeFastThree = measureTimeMillis {
+            var countedNodes = 0
+            fw.walk().forEach { countedNodes++ }
+            countedNodesList.add(countedNodes)
+        }
+        countedNodesList.forEach {
+            assertEquals(nodes, it)
+        }
+        assert(walkTimeFast > walkTime )
+        assert(walkTimeFastTwo < walkTime)
+        assert(walkTimeFastThree < walkTime)
     }
 }
