@@ -166,10 +166,13 @@ fun <T> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<No
     return walker.invoke(this).filterIsInstance(klass).toList()
 }
 
+/**
+ * The FastWalker is a walker that implements a cache to speed up subsequent walks.
+ * The first walk will take the same time of a normal walk.
+ * This walker will ignore any change to the nodes.
+ */
 class FastWalker(val node: Node) {
-    internal companion object Freezer {
-        val childrenMap: WeakHashMap<Node, List<Node>> = WeakHashMap<Node, List<Node>>()
-    }
+    private val childrenMap: WeakHashMap<Node, List<Node>> = WeakHashMap<Node, List<Node>>()
 
     private fun getChildren(child: Node): List<Node> {
         return if (childrenMap.containsKey(child)) {
