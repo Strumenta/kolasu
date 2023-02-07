@@ -240,7 +240,7 @@ fun Resource.findEClass(klass: KClass<*>): EClass? {
                 return c
             }
         }
-        return null
+        return STARLASU_METAMODEL.findEClass(klass)
     } else {
         return eClass
     }
@@ -273,6 +273,7 @@ class KolasuToEMFMapping {
     fun associate(node: Node, eo: EObject) {
         nodeToEObjects[node] = eo
     }
+
     fun getAssociatedEObject(node: Node): EObject? {
         return nodeToEObjects[node]
     }

@@ -155,6 +155,9 @@ private fun createStarlasuMetamodel(): EPackage {
         eSuperTypes.add(astNode)
         eSuperTypes.add(errorNode)
     }
+    ePackage.createEClass("GenericNode").apply {
+        eSuperTypes.add(astNode)
+    }
 
     val result = ePackage.createEClass("Result").apply {
         val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {

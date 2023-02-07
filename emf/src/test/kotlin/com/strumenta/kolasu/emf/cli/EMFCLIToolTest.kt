@@ -606,6 +606,13 @@ class EMFCLIToolTest {
     } ]
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "GenericNode",
+    "eSuperTypes" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+      "${'$'}ref" : "/0/ASTNode"
+    } ]
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
     "name" : "Result",
     "eTypeParameters" : [ {
       "name" : "CU",
