@@ -1,9 +1,6 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.NodeType
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.*
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
@@ -41,6 +38,8 @@ data class NodeWithForwardReference(
     val myChildren: MutableList<NodeWithForwardReference> = mutableListOf(),
     var pointer: ReferenceByName<NodeWithForwardReference>? = null
 ) : Node(), Named
+
+data class NodeWithMap(val map: LinkedHashMap<String, StringLiteral> = linkedMapOf()) : Node()
 
 class MetamodelTest {
 
@@ -161,5 +160,104 @@ class MetamodelTest {
 
         val pointers = nodeWithReference.eStructuralFeatures.find { it.name == "pointers" } as EReference
         assertEquals(true, pointers.isContainment)
+    }
+
+    @Test
+    fun maps() {
+        NodeWithMap::class.processProperties { prop ->
+            assertTrue(prop.multiple)
+            assertTrue(prop.provideNodes)
+        }
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
+        metamodelBuilder.provideClass(NodeWithMap::class)
+        val ePackage = metamodelBuilder.generate()
+        assertEquals("""{
+  "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
+  "name" : "com.strumenta.kolasu.emf",
+  "nsURI" : "https://strumenta.com/simplemm",
+  "nsPrefix" : "simplemm",
+  "eClassifiers" : [ {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "Expression",
+    "abstract" : true,
+    "eSuperTypes" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+      "${'$'}ref" : "https://strumenta.com/starlasu/v2#//ASTNode"
+    } ]
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "LocalDateTimeLiteral",
+    "eSuperTypes" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+      "${'$'}ref" : "//Expression"
+    } ],
+    "eStructuralFeatures" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
+      "name" : "value",
+      "eType" : {
+        "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+        "${'$'}ref" : "https://strumenta.com/starlasu/v2#//LocalDateTime"
+      },
+      "containment" : true
+    } ]
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "StringLiteral",
+    "eSuperTypes" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+      "${'$'}ref" : "//Expression"
+    } ],
+    "eStructuralFeatures" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
+      "name" : "value",
+      "lowerBound" : 1,
+      "eType" : {
+        "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
+        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
+      }
+    } ]
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "StringToStringLiteralMap",
+    "instanceClassName" : "java.util.Map${'$'}Entry",
+    "eStructuralFeatures" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
+      "name" : "key",
+      "lowerBound" : 1,
+      "eType" : {
+        "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
+        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
+      }
+    }, {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
+      "name" : "value",
+      "lowerBound" : 1,
+      "eType" : {
+        "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+        "${'$'}ref" : "//StringLiteral"
+      }
+    } ]
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "NodeWithMap",
+    "eSuperTypes" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+      "${'$'}ref" : "https://strumenta.com/starlasu/v2#//ASTNode"
+    } ],
+    "eStructuralFeatures" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
+      "name" : "map",
+      "upperBound" : -1,
+      "eType" : {
+        "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+        "${'$'}ref" : "//StringToStringLiteralMap"
+      },
+      "containment" : true
+    } ]
+  } ]
+}""", ePackage.saveAsJson())
     }
 }

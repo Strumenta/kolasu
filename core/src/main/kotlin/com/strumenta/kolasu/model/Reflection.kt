@@ -142,17 +142,26 @@ data class PropertyTypeDescription(
     val name: String,
     val provideNodes: Boolean,
     val multiple: Boolean,
-    val valueType: KType
+    val valueType: KType,
+    val keyType: KType?
 ) {
     companion object {
         fun buildFor(property: KProperty1<*, *>): PropertyTypeDescription {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
-            val multiple = (classifier?.isSubclassOf(Collection::class) == true)
+            val multiple = classifier != null &&
+                    (classifier.isSubclassOf(Collection::class) || classifier.isSubclassOf(Map::class))
+            var keyType: KType? = null
             val valueType: KType
             val provideNodes = if (multiple) {
-                valueType = propertyType.arguments[0].type!!
-                providesNodes(propertyType.arguments[0])
+                val kTypeProjection = if (propertyType.arguments.size == 2) {
+                    keyType = propertyType.arguments[0].type
+                    propertyType.arguments[1]
+                } else {
+                    propertyType.arguments[0]
+                }
+                valueType = kTypeProjection.type!!
+                providesNodes(kTypeProjection)
             } else {
                 valueType = propertyType
                 providesNodes(classifier)
@@ -161,7 +170,8 @@ data class PropertyTypeDescription(
                 name = property.name,
                 provideNodes = provideNodes,
                 multiple = multiple,
-                valueType = valueType
+                valueType = valueType,
+                keyType = keyType
             )
         }
     }

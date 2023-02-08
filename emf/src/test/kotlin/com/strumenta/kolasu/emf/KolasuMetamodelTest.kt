@@ -39,13 +39,7 @@ class KolasuMetamodelTest {
         val jsonFile = temporaryFile("metamodel.json")
         val mmuri = URI.createFileURI(jsonFile.absolutePath)
 
-        val resourceSet: ResourceSet = ResourceSetImpl()
-        resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
-        resourceSet.resourceFactoryRegistry.extensionToFactoryMap["xmi"] = XMIResourceFactoryImpl()
-        resourceSet.resourceFactoryRegistry.extensionToFactoryMap["ecore"] = EcoreResourceFactoryImpl()
-        val resource =
-            resourceSet.createResource(mmuri)
-                ?: throw IOException("Unsupported destination: $mmuri")
+        val resource = createResource(mmuri) ?: throw IOException("Unsupported destination: $mmuri")
 
         val javaIOMetamodelBuilder = MetamodelBuilder(
             "java.io", "https://strumenta.com/javaio", "javaio",
