@@ -150,7 +150,7 @@ data class PropertyTypeDescription(
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             val multiple = classifier != null &&
-                    (classifier.isSubclassOf(Collection::class) || classifier.isSubclassOf(Map::class))
+                (classifier.isSubclassOf(Collection::class) || classifier.isSubclassOf(Map::class))
             var keyType: KType? = null
             val valueType: KType
             val provideNodes = if (multiple) {

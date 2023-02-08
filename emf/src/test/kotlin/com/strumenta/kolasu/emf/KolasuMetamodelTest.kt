@@ -2,11 +2,6 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.Node
 import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
-import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import org.junit.Test
 import java.io.File
 import java.io.IOException
