@@ -58,7 +58,7 @@ fun ParsingResult<*>.saveForPlayground(
     metamodel: Resource,
     writer: Writer,
     name: String,
-    indent: String? = null
+    indent: String = ""
 ) {
     val simplifiedResult = Result(issues, root)
     val eObject = simplifiedResult.toEObject(metamodel)
