@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.playground
 
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.internal.Streams
 import com.google.gson.stream.JsonWriter
@@ -12,7 +11,10 @@ import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
-import java.io.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.FileWriter
+import java.io.Writer
 
 class PlaygroundExampleGenerator(
     val parser: EMFEnabledParser<*, *, *>,
@@ -58,7 +60,7 @@ fun ParsingResult<*>.saveForPlayground(
     metamodel: Resource,
     writer: Writer,
     name: String,
-    indent: String? = null
+    indent: String = ""
 ) {
     val simplifiedResult = Result(issues, root)
     val eObject = simplifiedResult.toEObject(metamodel)

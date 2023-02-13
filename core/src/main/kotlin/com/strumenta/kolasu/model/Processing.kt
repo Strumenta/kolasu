@@ -311,8 +311,7 @@ fun Node.transformChildren(operation: (Node) -> Node) {
 fun Node.mapChildren(operation: (Node) -> Node): Node {
     val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { property ->
-        val value = property.get(this)
-        when (value) {
+        when (val value = property.get(this)) {
             is Node -> {
                 val newValue = operation(value)
                 if (newValue != value) {
