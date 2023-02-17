@@ -108,16 +108,22 @@ fun assertASTsAreEqual(
                     if (expectedPropValue is IgnoreChildren<*>) {
                         // Nothing to do
                     } else {
-                        val actualPropValueCollection = actualPropValue as Collection<Node>
-                        val expectedPropValueCollection = expectedPropValue as Collection<Node>
+                        val actualPropValueCollection = actualPropValue?.let { it as Collection<Node> }
+                        val expectedPropValueCollection = expectedPropValue?.let { it as Collection<Node> }
                         assertEquals(
-                            expectedPropValueCollection.size, actualPropValueCollection.size,
-                            "$context.${expectedProperty.name} length"
+                            actualPropValueCollection == null, expectedPropValueCollection == null,
+                            "$context.${expectedProperty.name} nullness"
                         )
-                        val expectedIt = expectedPropValueCollection.iterator()
-                        val actualIt = actualPropValueCollection.iterator()
-                        for (i in expectedPropValueCollection.indices) {
-                            assertASTsAreEqual(expectedIt.next(), actualIt.next(), "$context[$i]")
+                        if (actualPropValueCollection != null && expectedPropValueCollection != null) {
+                            assertEquals(
+                                expectedPropValueCollection?.size, actualPropValueCollection?.size,
+                                "$context.${expectedProperty.name} length"
+                            )
+                            val expectedIt = expectedPropValueCollection.iterator()
+                            val actualIt = actualPropValueCollection.iterator()
+                            for (i in expectedPropValueCollection.indices) {
+                                assertASTsAreEqual(expectedIt.next(), actualIt.next(), "$context[$i]")
+                            }
                         }
                     }
                 } else {
