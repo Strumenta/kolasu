@@ -72,6 +72,14 @@ Kolasu is used in several internal and commercial projects developed at [Strumen
 
 ## Publishing a new release
 
+If you do not have gpg keys:
+
+1. Install gpg (`brew install gnupg` on mac)
+2. Generate the key (`gpg --gen-key`, no passphrase needed)
+3. Publish the key
+
+Instructions available here: https://selectfrom.dev/publishing-your-first-open-source-library-with-gradle-50bd0b1cd3af
+
 To publish releases you need to set the environment variables GPR_USER and GPR_API_KEY.
 
 New release can be made by running:
