@@ -182,14 +182,15 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                     // skip
                 } else {
                     // do not process inherited properties
+                    val valueType = prop.valueType
                     if (prop.provideNodes) {
-                        registerReference(prop, eClass)
+                        registerReference(prop, valueType, eClass)
                     } else {
                         val nullable = prop.valueType.isMarkedNullable
                         val dataType = provideDataType(prop.valueType.withNullability(false))
                         if (dataType == null) {
                             // We can treat it like a class
-                            registerReference(prop, eClass)
+                            registerReference(prop, valueType, eClass)
                         } else {
                             val ea = EcoreFactory.eINSTANCE.createEAttribute()
                             ea.name = prop.name
@@ -212,7 +213,11 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         return eClass
     }
 
-    private fun registerReference(prop: PropertyTypeDescription, eClass: EClass) {
+    private fun registerReference(
+        prop: PropertyTypeDescription,
+        valueType: KType,
+        eClass: EClass
+    ) {
         val ec = EcoreFactory.eINSTANCE.createEReference()
         ec.name = prop.name
         if (prop.multiple) {
@@ -227,12 +232,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         // on the class should be visible. We are not expecting containing classes to expose
         // type parameters
         val visibleTypeParameters = eClass.eTypeParameters.associateBy { it.name }
-        if (prop.keyType == null) {
-            setType(ec, prop.valueType, visibleTypeParameters)
-        } else {
-            // This is a map
-            ec.eType = mapEntryType(prop)
-        }
+        setType(ec, valueType, visibleTypeParameters)
         eClass.eStructuralFeatures.add(ec)
     }
 
@@ -292,31 +292,6 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                 }
             }
             else -> throw Error("Not a valid classifier: $classifier")
-        }
-    }
-
-    /**
-     * Constructs a type representing a map entry for the given property.
-     * See https://wiki.eclipse.org/EMF/FAQ#How_do_I_create_a_Map_in_EMF.3F
-     */
-    private fun mapEntryType(prop: PropertyTypeDescription): EClassifier {
-        val keyClass = prop.keyType!!.classifier as KClass<*>
-        val valueClass = prop.valueType.classifier as KClass<*>
-        val className = "${keyClass.simpleName}To${valueClass.simpleName}Map"
-        return if (ePackage.hasClassifierNamed(className)) {
-            ePackage.classifierByName(className)
-        } else {
-            val eClass = EcoreFactory.eINSTANCE.createEClass()
-            eClass.name = className
-            eClass.instanceClass = Map.Entry::class.java
-            eClass.addAttribute("key", provideDataType(prop.keyType!!.withNullability(false))!!, 1, 1)
-            if (prop.provideNodes) {
-                eClass.addReference("value", provideClass(valueClass), 1, 1)
-            } else {
-                eClass.addAttribute("value", provideDataType(prop.valueType.withNullability(false))!!, 1, 1)
-            }
-            ePackage.eClassifiers.add(eClass)
-            eClass
         }
     }
 
