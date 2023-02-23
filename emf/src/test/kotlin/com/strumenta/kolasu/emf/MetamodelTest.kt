@@ -174,8 +174,7 @@ class MetamodelTest {
         )
         metamodelBuilder.provideClass(NodeWithMap::class)
         val ePackage = metamodelBuilder.generate()
-        assertEquals(
-            """{
+        assertEquals("""{
   "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
   "name" : "com.strumenta.kolasu.emf",
   "nsURI" : "https://strumenta.com/simplemm",
@@ -259,8 +258,6 @@ class MetamodelTest {
       "containment" : true
     } ]
   } ]
-}""",
-            ePackage.saveAsJson()
-        )
+}""", ePackage.saveAsJson())
     }
 }
