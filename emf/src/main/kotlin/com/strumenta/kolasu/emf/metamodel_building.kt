@@ -45,7 +45,7 @@ fun EClass.addReference(name: String, type: EClass, min: Int, max: Int): ERefere
     return eReference
 }
 
-fun EClass.addAttribute(name: String, type: EDataType, min: Int, max: Int): EAttribute {
+fun EClass.addAttribute(name: String, type: EClassifier, min: Int, max: Int): EAttribute {
     val eAttribute = EcoreFactory.eINSTANCE.createEAttribute()
     eAttribute.name = name
     eAttribute.eType = type
