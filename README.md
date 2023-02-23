@@ -80,7 +80,9 @@ If you do not have gpg keys:
 
 Instructions available here: https://selectfrom.dev/publishing-your-first-open-source-library-with-gradle-50bd0b1cd3af
 
-To publish releases you need to set the environment variables GPR_USER and GPR_API_KEY.
+Please note that you may have to export the keys (`gpg --keyring secring.gpg --export-secret-keys > ~/.gnupg/secring.gpg`)
+
+You will need to store in ~/.gradle/gradle.properties your sonatype credentials under ossrhUsername and ossrhPassword
 
 New release can be made by running:
 
