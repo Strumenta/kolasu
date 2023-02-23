@@ -3,6 +3,7 @@ package com.strumenta.kolasu.traversing
 import com.strumenta.kolasu.model.*
 import kotlin.system.measureTimeMillis
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
@@ -81,7 +82,7 @@ internal class TraversingStructurallyTest {
         val result: String = printSequence(item4.walkAncestors())
         assertEquals("small, big, root", result)
     }
-    
+
     fun getRandomString(length: Int): String {
         val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
         return (1..length)
@@ -143,7 +144,10 @@ internal class TraversingStructurallyTest {
         countedNodesList.forEach {
             assertEquals(nodes, it)
         }
-        assert(walkTimeFast > walkTime)
+        // we are testing that walkTimeFast is taking more or less the same time as walkTime
+        assertContains(walkTime * 0.8..walkTime * 1.2, walkTimeFast.toDouble())
+        println(walkTime)
+        println(walkTimeFastTwo)
         assert(walkTimeFastTwo < walkTime)
         assert(walkTimeFastThree < walkTime)
     }

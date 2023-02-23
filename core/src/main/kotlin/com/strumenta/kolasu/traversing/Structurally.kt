@@ -2,7 +2,6 @@
 package com.strumenta.kolasu.traversing
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.PropertyDescription
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
@@ -105,17 +104,6 @@ fun Node.walkChildren(): Sequence<Node> {
     }
 }
 
-fun Node.walkChildrenProperties(): Sequence<PropertyDescription> {
-    return sequence {
-        this@walkChildrenProperties.properties.forEach { property ->
-            when (val value = property.value) {
-                is Node -> yield(property)
-                is Collection<*> -> value.forEach { if (it is Node) yield(property) }
-            }
-        }
-    }
-}
-
 /**
  * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method.
  * For post-order traversal, take "walkLeavesFirst"
@@ -182,6 +170,7 @@ class FastWalker(val node: Node) {
             childrenMap[child]!!
         }
     }
+
     fun walk(root: Node = node): Sequence<Node> {
         val stack: Stack<Node> = mutableStackOf(root)
         return generateSequence {

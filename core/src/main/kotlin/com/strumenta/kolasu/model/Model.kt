@@ -141,10 +141,6 @@ open class Node() : Origin, Destination {
     final override fun toString(): String {
         return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
     }
-
-    internal companion object Freezer {
-        val childrenMap: MutableMap<Node, List<Node>> = mutableMapOf()
-    }
 }
 
 fun <N : Node> N.withPosition(position: Position?): N {
