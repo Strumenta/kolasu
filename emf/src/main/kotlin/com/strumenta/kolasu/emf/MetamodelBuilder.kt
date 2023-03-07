@@ -74,6 +74,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
 
         eclassTypeHandlers.add(ErrorNodeHandler)
         eclassTypeHandlers.add(GenericErrorNodeHandler)
+        eclassTypeHandlers.add(GenericNodeHandler)
     }
 
     /**

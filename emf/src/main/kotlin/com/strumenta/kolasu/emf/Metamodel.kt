@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.transformation.GenericNode
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
@@ -93,6 +94,9 @@ val PlaceholderElementHandler = KolasuClassHandler(
 val ErrorNodeHandler = KolasuClassHandler(ErrorNode::class, STARLASU_METAMODEL.getEClass("ErrorNode"))
 val GenericErrorNodeHandler = KolasuClassHandler(
     GenericErrorNode::class, STARLASU_METAMODEL.getEClass("GenericErrorNode")
+)
+val GenericNodeHandler = KolasuClassHandler(
+    GenericNode::class, STARLASU_METAMODEL.getEClass("GenericNode")
 )
 
 val StringHandler = KolasuDataTypeHandler(String::class, EcorePackage.eINSTANCE.eString)
