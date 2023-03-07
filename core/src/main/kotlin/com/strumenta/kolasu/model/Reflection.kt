@@ -35,12 +35,20 @@ fun <T : Any> KClass<T>.processProperties(
     }
 }
 
+enum class PropertyType {
+    ATTRIBUTE,
+    CONTAINMENT,
+    REFERENCE
+}
+
 data class PropertyDescription(
     val name: String,
     val provideNodes: Boolean,
     val multiplicity: Multiplicity,
-    val value: Any?
+    val value: Any?,
+    val propertyType: PropertyType
 ) {
+
     fun valueToString(): String {
         if (value == null) {
             return "null"
@@ -101,11 +109,19 @@ data class PropertyDescription(
                 name = property.name,
                 provideNodes = provideNodes,
                 multiplicity = multiplicity,
-                value = property.get(node)
+                value = property.get(node),
+                when {
+                    property.isReference -> PropertyType.REFERENCE
+                    provideNodes -> PropertyType.CONTAINMENT
+                    else -> PropertyType.ATTRIBUTE
+                }
             )
         }
     }
 }
+
+private val KProperty1<in Node, *>.isReference: Boolean get() =
+    ((this.returnType as? KType)?.classifier as? KClass<*>) == ReferenceByName::class
 
 private fun providesNodes(classifier: KClassifier?): Boolean {
     if (classifier == null) {
