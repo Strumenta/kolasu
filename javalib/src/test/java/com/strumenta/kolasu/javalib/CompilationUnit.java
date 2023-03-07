@@ -1,9 +1,6 @@
 package com.strumenta.kolasu.javalib;
 
-import com.strumenta.kolasu.model.Internal;
-import com.strumenta.kolasu.model.Multiplicity;
-import com.strumenta.kolasu.model.Node;
-import com.strumenta.kolasu.model.PropertyDescription;
+import com.strumenta.kolasu.model.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -23,7 +20,7 @@ public class CompilationUnit extends Node {
         @Override
         @Internal
         public List<PropertyDescription> getProperties() {
-            return Arrays.asList(new PropertyDescription("bs", true, Multiplicity.MANY, getBs()));
+            return Arrays.asList(new PropertyDescription("bs", true, Multiplicity.MANY, getBs(), PropertyType.CONTAINMENT));
         }
     }
 
@@ -41,6 +38,6 @@ public class CompilationUnit extends Node {
     @Override
     @Internal
     public List<PropertyDescription> getProperties() {
-        return Arrays.asList(new PropertyDescription("as", true, Multiplicity.MANY, getAs()));
+        return Arrays.asList(new PropertyDescription("as", true, Multiplicity.MANY, getAs(), PropertyType.CONTAINMENT));
     }
 }
