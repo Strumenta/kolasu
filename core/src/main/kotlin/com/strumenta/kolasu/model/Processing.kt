@@ -202,6 +202,31 @@ val Node.previousSamePropertySibling: Node?
         return null
     }
 
+fun Node.containingProperty(): PropertyDescription? {
+    if (this.parent == null) {
+        return null
+    }
+    return this.parent!!.properties.find { p ->
+        val v = p.value
+        when (v) {
+            is Collection<*> -> v.contains(this)
+            this -> true
+            else -> false
+        }
+    } ?: throw IllegalStateException("No containing property for $this with parent ${this.parent}")
+}
+
+fun Node.indexInContainingProperty(): Int? {
+    val p = this.containingProperty()
+    return if (p == null) {
+        null
+    } else if (p.value is Collection<*>) {
+        (p.value as Collection<*>).indexOf(this)
+    } else {
+        0
+    }
+}
+
 /**
  * @return the next sibling of the specified type. Notice that children of a sibling collection are considered siblings
  * and not the collection itself.
