@@ -202,6 +202,9 @@ val Node.previousSamePropertySibling: Node?
         return null
     }
 
+/**
+ * Return the property containing this Node, if any. Null should be returned for root nodes.
+ */
 fun Node.containingProperty(): PropertyDescription? {
     if (this.parent == null) {
         return null
@@ -216,6 +219,10 @@ fun Node.containingProperty(): PropertyDescription? {
     } ?: throw IllegalStateException("No containing property for $this with parent ${this.parent}")
 }
 
+/**
+ * Return the index of this Node within the containing property. The return value is null for root nodes.
+ * The index is always 0 for Nodes in singular containment properties.
+ */
 fun Node.indexInContainingProperty(): Int? {
     val p = this.containingProperty()
     return if (p == null) {
