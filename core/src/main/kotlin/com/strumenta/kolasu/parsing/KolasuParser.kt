@@ -19,7 +19,7 @@ import kotlin.system.measureTimeMillis
  *
  * You should extend this class to implement the parts that are specific to your language.
  */
-abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTParser<R> {
+abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTParser<R>, KolasuLexer {
 
     /**
      * Creates the lexer.
@@ -60,26 +60,10 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
         issues: MutableList<Issue>
     ): R?
 
-    /**
-     * Performs "lexing" on the given code string, i.e., it breaks it into tokens.
-     */
-    @JvmOverloads
-    fun lex(code: String, onlyFromDefaultChannel: Boolean = true): LexingResult {
-        val charset = Charsets.UTF_8
-        return lex(code.byteInputStream(charset), charset, onlyFromDefaultChannel)
-    }
-
-    /**
-     * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.
-     */
-    @JvmOverloads
-    fun lex(
-        inputStream: InputStream,
-        charset: Charset = Charsets.UTF_8,
-        onlyFromDefaultChannel: Boolean = true
-    ): LexingResult {
+    override fun lex(inputStream: InputStream, charset: Charset, onlyFromDefaultChannel: Boolean): LexingResult {
         val issues = LinkedList<Issue>()
-        val tokens = LinkedList<Token>()
+        val tokens = LinkedList<KolasuToken>()
+        var last: Token? = null
         val time = measureTimeMillis {
             val lexer = createANTLRLexer(inputStream, charset)
             attachListeners(lexer, issues)
@@ -89,19 +73,22 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
                     break
                 } else {
                     if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
-                        tokens.add(t)
+                        tokens.add(KolasuANTLRToken(categoryOf(t), t.position, t))
+                        last = t
                     }
                 }
             } while (t.type != Token.EOF)
 
-            if (tokens.last.type != Token.EOF) {
+            if (last != null && last!!.type != Token.EOF) {
                 val message = "The parser didn't consume the entire input"
-                issues.add(Issue(IssueType.SYNTACTIC, message, position = tokens.last!!.endPoint.asPosition))
+                issues.add(Issue(IssueType.SYNTACTIC, message, position = last!!.endPoint.asPosition))
             }
         }
 
         return LexingResult(issues, tokens, null, time)
     }
+
+    protected open fun categoryOf(t: Token): TokenCategory = TokenCategory.PLAIN_TEXT
 
     protected open fun attachListeners(lexer: Lexer, issues: MutableList<Issue>) {
         lexer.injectErrorCollectorInLexer(issues)
@@ -114,7 +101,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
     /**
      * Creates the first-stage lexer and parser.
      */
-    protected fun createParser(inputStream: CharStream, issues: MutableList<Issue>): P {
+    protected open fun createParser(inputStream: CharStream, issues: MutableList<Issue>): P {
         val lexer = createANTLRLexer(inputStream)
         attachListeners(lexer, issues)
         val tokenStream = createTokenStream(lexer)
