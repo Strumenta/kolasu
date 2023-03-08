@@ -48,7 +48,7 @@ data class TokenCategory(val type: String) {
 
 open class KolasuToken(open val category: TokenCategory, open val position: Position)
 
-data class KolasuANTLRToken(override val category: TokenCategory, val token: Token):
+data class KolasuANTLRToken(override val category: TokenCategory, val token: Token) :
     KolasuToken(category, token.position)
 
 class LexingResult(
