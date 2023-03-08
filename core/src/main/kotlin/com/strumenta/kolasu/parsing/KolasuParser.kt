@@ -73,7 +73,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
                     break
                 } else {
                     if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
-                        tokens.add(KolasuANTLRToken(categoryOf(t), t.position, t))
+                        tokens.add(KolasuANTLRToken(categoryOf(t), t))
                         last = t
                     }
                 }
