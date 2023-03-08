@@ -6,6 +6,8 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.misc.Interval
+import org.antlr.v4.runtime.tree.ParseTree
+import org.antlr.v4.runtime.tree.TerminalNode
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -14,13 +16,7 @@ import java.util.*
 import kotlin.reflect.full.memberFunctions
 import kotlin.system.measureTimeMillis
 
-/**
- * A complete description of a multi-stage ANTLR-based parser, from source code to AST.
- *
- * You should extend this class to implement the parts that are specific to your language.
- */
-abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTParser<R>, KolasuLexer {
-
+abstract class KolasuANTLRLexer : KolasuLexer {
     /**
      * Creates the lexer.
      */
@@ -33,32 +29,6 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
      * Creates the lexer.
      */
     protected abstract fun createANTLRLexer(charStream: CharStream): Lexer
-
-    /**
-     * Creates the first-stage parser.
-     */
-    protected abstract fun createANTLRParser(tokenStream: TokenStream): P
-
-    /**
-     * Invokes the parser's root rule, i.e., the method which is responsible of parsing the entire input.
-     * Usually this is the topmost rule, the one with index 0 (as also assumed by other libraries such as antlr4-c3),
-     * so this method invokes that rule. If your grammar/parser is structured differently, or if you're using this to
-     * parse only a portion of the input or a subset of the language, you have to override this method to invoke the
-     * correct entry point.
-     */
-    protected open fun invokeRootRule(parser: P): C? {
-        val entryPoint = parser::class.memberFunctions.find { it.name == parser.ruleNames[0] }
-        return entryPoint!!.call(parser) as C
-    }
-
-    /**
-     * Transforms a parse tree into an AST (second parsing stage).
-     */
-    protected abstract fun parseTreeToAst(
-        parseTreeRoot: C,
-        considerPosition: Boolean = true,
-        issues: MutableList<Issue>
-    ): R?
 
     override fun lex(inputStream: InputStream, charset: Charset, onlyFromDefaultChannel: Boolean): LexingResult {
         val issues = LinkedList<Issue>()
@@ -92,6 +62,60 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
 
     protected open fun attachListeners(lexer: Lexer, issues: MutableList<Issue>) {
         lexer.injectErrorCollectorInLexer(issues)
+    }
+}
+
+/**
+ * A complete description of a multi-stage ANTLR-based parser, from source code to AST.
+ *
+ * You should extend this class to implement the parts that are specific to your language.
+ */
+abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : KolasuANTLRLexer(), ASTParser<R> {
+
+    /**
+     * Creates the first-stage parser.
+     */
+    protected abstract fun createANTLRParser(tokenStream: TokenStream): P
+
+    /**
+     * Invokes the parser's root rule, i.e., the method which is responsible of parsing the entire input.
+     * Usually this is the topmost rule, the one with index 0 (as also assumed by other libraries such as antlr4-c3),
+     * so this method invokes that rule. If your grammar/parser is structured differently, or if you're using this to
+     * parse only a portion of the input or a subset of the language, you have to override this method to invoke the
+     * correct entry point.
+     */
+    protected open fun invokeRootRule(parser: P): C? {
+        val entryPoint = parser::class.memberFunctions.find { it.name == parser.ruleNames[0] }
+        return entryPoint!!.call(parser) as C
+    }
+
+    /**
+     * Transforms a parse tree into an AST (second parsing stage).
+     */
+    protected abstract fun parseTreeToAst(
+        parseTreeRoot: C,
+        considerPosition: Boolean = true,
+        issues: MutableList<Issue>
+    ): R?
+
+    open fun extractTokens(result: ParsingResult<R>): LexingResult? {
+        val tokens = mutableListOf<KolasuANTLRToken>()
+        fun extractTokensFromParseTree(pt: ParseTree?) {
+            if (pt is TerminalNode) {
+                tokens.add(KolasuANTLRToken(categoryOf(pt.symbol), pt.symbol))
+            } else if (pt != null) {
+                for (i in 0..pt.childCount) {
+                    extractTokensFromParseTree(pt.getChild(i))
+                }
+            }
+        }
+
+        val ptRoot = result.firstStage?.root
+        return if (ptRoot != null) {
+            extractTokensFromParseTree(ptRoot)
+            tokens.sortBy { it.token.tokenIndex }
+            LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime)
+        } else null
     }
 
     protected open fun attachListeners(parser: P, issues: MutableList<Issue>) {

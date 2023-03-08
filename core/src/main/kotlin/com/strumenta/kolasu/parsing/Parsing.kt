@@ -1,12 +1,17 @@
 package com.strumenta.kolasu.parsing
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
 import org.antlr.v4.runtime.*
-import java.io.*
+import java.io.ByteArrayInputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
 import java.nio.charset.Charset
 
 open class CodeProcessingResult<D>(
@@ -46,11 +51,21 @@ data class TokenCategory(val type: String) {
     }
 }
 
+/**
+ * A token is a portion of text that has been assigned a category.
+ */
 open class KolasuToken(open val category: TokenCategory, open val position: Position)
 
+/**
+ * A [KolasuToken] generated from a [Token]. The [token] contains additional information that is specific to ANTLR,
+ * such as type and channel.
+ */
 data class KolasuANTLRToken(override val category: TokenCategory, val token: Token) :
     KolasuToken(category, token.position)
 
+/**
+ * The result of lexing (tokenizing) a stream.
+ */
 class LexingResult(
     issues: List<Issue>,
     val tokens: List<KolasuToken>,
