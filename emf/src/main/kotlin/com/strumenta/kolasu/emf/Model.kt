@@ -332,6 +332,13 @@ private fun setOrigin(
             // The ParseTreeOrigin is not saved in EMF as we do not want to replicate the whole parse-tree
             eo.eSet(originSF, null)
         }
+        is SimpleOrigin -> {
+            val simpleOriginClass = STARLASU_METAMODEL.getEClass("SimpleOrigin")
+            val simpleOrigin = simpleOriginClass.instantiate()
+            simpleOrigin.eSet(simpleOriginClass.getEStructuralFeature("position"), origin.position?.toEObject())
+            simpleOrigin.eSet(simpleOriginClass.getEStructuralFeature("sourceText"), origin.sourceText)
+            eo.eSet(originSF, simpleOrigin)
+        }
         else -> {
             throw IllegalStateException("Only origins representing Nodes or ParseTreeOrigins are currently supported")
         }
