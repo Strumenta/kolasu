@@ -37,10 +37,76 @@ class LionWebTest {
     }
 
     @Test
-    fun getConceptMySimpleNode() {
-        val c = MySimpleNode(false, emptyList()).concept
-        assertEquals(1, c.allProperties().size)
-        assertEquals(1, c.allContainments().size)
+    fun getConceptMyOtherNodeStatically() {
+        val c = MyOtherNode::class.concept
+        assertEquals("MyOtherNode", c.simpleName)
+
+        assertEquals(2, c.allProperties().size)
+
+        val iProperty = c.getPropertyByName("i")!!
+        assertEquals("i", iProperty.simpleName)
+        assertEquals(LionCoreBuiltins.getInteger(), iProperty.type)
+        assertEquals(false, iProperty.isDerived)
+        assertEquals(false, iProperty.isOptional)
+        assertEquals(true, iProperty.isRequired)
+
+        val sProperty = c.getPropertyByName("s")!!
+        assertEquals("s", sProperty.simpleName)
+        assertEquals(LionCoreBuiltins.getString(), sProperty.type)
+        assertEquals(false, sProperty.isDerived)
+        assertEquals(false, sProperty.isOptional)
+        assertEquals(true, sProperty.isRequired)
+
+        assertEquals(0, c.allContainments().size)
+
         assertEquals(0, c.allReferences().size)
+    }
+
+    @Test
+    fun getConceptMySimpleNode() {
+        val node = MySimpleNode(false, emptyList())
+        val c = node.concept
+
+        assertEquals("MySimpleNode", c.simpleName)
+
+        assertEquals(1, c.allProperties().size)
+
+        val bProperty = c.getPropertyByName("b")!!
+        assertEquals("b", bProperty.simpleName)
+        assertEquals(LionCoreBuiltins.getBoolean(), bProperty.type)
+        assertEquals(false, bProperty.isDerived)
+        assertEquals(false, bProperty.isOptional)
+        assertEquals(true, bProperty.isRequired)
+
+        assertEquals(1, c.allContainments().size)
+        val othersContainment = c.getContainmentByName("others")!!
+        assertEquals("others", othersContainment.simpleName)
+        assertEquals("MyOtherNode", othersContainment.type!!.simpleName)
+        assertEquals(false, othersContainment.isDerived)
+        assertEquals(false, othersContainment.isOptional)
+        assertEquals(true, othersContainment.isMultiple)
+        assertEquals(true, othersContainment.isRequired)
+
+        assertEquals(0, c.allReferences().size)
+    }
+
+    @Test
+    fun getPropertyValue() {
+        val concept1 = MySimpleNode::class.concept
+        val concept2 = MyOtherNode::class.concept
+
+        val node1 = MySimpleNode(false, emptyList())
+        assertEquals(false, node1.getPropertyValue(concept1.getPropertyByName("b")!!))
+
+        val node2 = MySimpleNode(true, emptyList())
+        assertEquals(true, node2.getPropertyValue(concept1.getPropertyByName("b")!!))
+
+        val node3 = MyOtherNode(79, "Foo")
+        assertEquals(79, node3.getPropertyValue(concept2.getPropertyByName("i")!!))
+        assertEquals("Foo", node3.getPropertyValue(concept2.getPropertyByName("s")!!))
+
+        val node4 = MyOtherNode(-12, "Bar")
+        assertEquals(-12, node4.getPropertyValue(concept2.getPropertyByName("i")!!))
+        assertEquals("Bar", node4.getPropertyValue(concept2.getPropertyByName("s")!!))
     }
 }

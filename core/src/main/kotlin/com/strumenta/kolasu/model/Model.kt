@@ -9,6 +9,8 @@ import org.lionweb.lioncore.java.model.AnnotationInstance
 import org.lionweb.lioncore.java.model.Model
 import org.lionweb.lioncore.java.model.Node
 import org.lionweb.lioncore.java.model.ReferenceValue
+import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
@@ -151,8 +153,12 @@ open class ASTNode() : Node, Origin, Destination {
         return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
     }
 
-    override fun getPropertyValue(property: Property): Any {
-        TODO("Not yet implemented")
+    override fun getPropertyValue(property: Property): Any? {
+        if (!this.concept.allProperties().contains(property)) {
+            throw IllegalArgumentException("Invalid property $property")
+        }
+        val memberProperty = this::class.memberProperties.find { it.name == property.simpleName } ?: throw IllegalStateException()
+        return (memberProperty as KProperty1<ASTNode, *>).get(this)
     }
 
     override fun setPropertyValue(property: Property, value: Any?) {
@@ -204,7 +210,7 @@ open class ASTNode() : Node, Origin, Destination {
     }
 
     override fun getConcept(): Concept {
-        TODO("Not yet implemented")
+        return this::class.concept
     }
 
     override fun getAnnotations(): MutableList<AnnotationInstance> {
