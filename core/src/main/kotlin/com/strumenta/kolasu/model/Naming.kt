@@ -31,7 +31,7 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) where N :
 
     var referred: N? = null
         set(value) {
-            require(value is Node || value == null) {
+            require(value is ASTNode || value == null) {
                 "We cannot enforce it statically but only Node should be referred to. Instead $value was assigned " +
                     "(class: ${value?.javaClass})"
             }

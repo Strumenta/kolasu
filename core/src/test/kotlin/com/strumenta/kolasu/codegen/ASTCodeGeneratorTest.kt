@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.codegen
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.ReferenceByName
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -48,7 +48,7 @@ class ASTCodeGeneratorTest {
         assertEquals("""this.myMethod("abc", 123, "qer")""", code)
 
         val codeWithNodePrinterOverrider = KotlinPrinter().also {
-            it.nodePrinterOverrider = { n: Node ->
+            it.nodePrinterOverrider = { n: ASTNode ->
                 when (n) {
                     is KStringLiteral -> NodePrinter { output, ast -> output.print("YYY") }
                     is KIntLiteral -> NodePrinter { output, ast -> output.print("XXX") }

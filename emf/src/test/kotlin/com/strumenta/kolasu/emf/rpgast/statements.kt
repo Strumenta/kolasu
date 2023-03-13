@@ -21,7 +21,7 @@ enum class AssignmentOperator(val text: String) {
     EXP_ASSIGNMENT("**=");
 }
 
-abstract class Statement(specifiedPosition: Position? = null) : Node(specifiedPosition) {
+abstract class Statement(specifiedPosition: Position? = null) : ASTNode(specifiedPosition) {
     open fun simpleDescription() = "Issue executing ${javaClass.simpleName} at line ${startLine()}."
 }
 
@@ -64,7 +64,7 @@ data class SelectStmt(
 }
 
 data class SelectOtherClause(override val body: List<Statement>, val specifiedPosition: Position? = null) :
-    Node(
+    ASTNode(
         specifiedPosition
     ),
     CompositeStatement
@@ -73,7 +73,7 @@ data class SelectCase(
     val condition: Expression,
     override val body: List<Statement>,
     val specifiedPosition: Position? = null
-) : Node(specifiedPosition), CompositeStatement
+) : ASTNode(specifiedPosition), CompositeStatement
 
 data class EvalFlags(
     val halfAdjust: Boolean = false,
@@ -309,7 +309,7 @@ data class IfStmt(
 ) : Statement(specifiedPosition), CompositeStatement
 
 data class ElseClause(override val body: List<Statement>, val specifiedPosition: Position? = null) :
-    Node(
+    ASTNode(
         specifiedPosition
     ),
     CompositeStatement
@@ -318,7 +318,7 @@ data class ElseIfClause(
     val condition: Expression,
     override val body: List<Statement>,
     val specifiedPosition: Position? = null
-) : Node(specifiedPosition), CompositeStatement
+) : ASTNode(specifiedPosition), CompositeStatement
 
 data class SetStmt(
     val valueSet: ValueSet,
@@ -359,7 +359,7 @@ data class PlistParam(
     val param: ReferenceByName<AbstractDataDefinition>,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
     val specifiedPosition: Position? = null
-) : Node(specifiedPosition)
+) : ASTNode(specifiedPosition)
 
 data class ClearStmt(
     val value: Expression,

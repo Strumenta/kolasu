@@ -2,7 +2,7 @@ package com.strumenta.kolasu.serialization
 
 import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.model.ExtNode
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.NodeOverridingName
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
@@ -17,14 +17,14 @@ import kotlin.test.assertEquals
 data class NodeWithReference(
     override val name: String? = null,
     val reference: ReferenceByName<NodeWithReference>? = null,
-    val children: MutableList<Node> = mutableListOf()
-) : Node(), PossiblyNamed
+    val children: MutableList<ASTNode> = mutableListOf()
+) : ASTNode(), PossiblyNamed
 
 class JsonGenerationTest {
 
     @Test
     fun generateJsonOfResultWithIssues() {
-        val result: Result<Node> = Result(
+        val result: Result<ASTNode> = Result(
             listOf(
                 Issue(IssueType.SYNTACTIC, "An error"),
                 Issue(IssueType.LEXICAL, "A warning", severity = IssueSeverity.WARNING),

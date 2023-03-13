@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.transformation
 
 import com.strumenta.kolasu.mapping.ParseTreeToASTTransformer
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.children
@@ -54,7 +54,7 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
         }
     }
 
-    inline fun <S : RuleContext, reified T : Node> trivialFactory(vararg nameConversions: Pair<String, String>): (
+    inline fun <S : RuleContext, reified T : ASTNode> trivialFactory(vararg nameConversions: Pair<String, String>): (
         S,
         ASTTransformer
     ) -> T? {
@@ -105,7 +105,7 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
     }
 }
 
-inline fun <reified S : RuleContext, reified T : Node> ASTTransformer.registerTrivialPTtoASTConversion(
+inline fun <reified S : RuleContext, reified T : ASTNode> ASTTransformer.registerTrivialPTtoASTConversion(
     vararg nameConversions: Pair<String, String>
 ) {
     this.registerNodeFactory(
@@ -114,7 +114,7 @@ inline fun <reified S : RuleContext, reified T : Node> ASTTransformer.registerTr
     )
 }
 
-inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer.registerTrivialPTtoASTConversion(
+inline fun <reified S : RuleContext, reified T : ASTNode> ParseTreeToASTTransformer.registerTrivialPTtoASTConversion(
     vararg nameConversions: Pair<KCallable<*>, KCallable<*>>
 ) {
     return this.registerTrivialPTtoASTConversion<S, T>(
@@ -123,7 +123,7 @@ inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer
     )
 }
 
-inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer.unwrap(wrappingMember: KCallable<*>) {
+inline fun <reified S : RuleContext, reified T : ASTNode> ParseTreeToASTTransformer.unwrap(wrappingMember: KCallable<*>) {
     this.registerNodeFactory(S::class) { parseTreeNode, astTransformer ->
         val wrapped = wrappingMember.call(parseTreeNode)
         astTransformer.transform(wrapped) as T?

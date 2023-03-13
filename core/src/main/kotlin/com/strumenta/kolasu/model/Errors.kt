@@ -13,7 +13,7 @@ interface ErrorNode {
 /**
  * Generic implementation of [ErrorNode].
  */
-class GenericErrorNode(error: Exception? = null, message: String? = null) : Node(), ErrorNode {
+class GenericErrorNode(error: Exception? = null, message: String? = null) : ASTNode(), ErrorNode {
     override val message: String
     init {
         if (message != null) {
@@ -27,6 +27,6 @@ class GenericErrorNode(error: Exception? = null, message: String? = null) : Node
     }
 }
 
-fun Node.errors(): Sequence<ErrorNode> = this.walkDescendants(ErrorNode::class)
+fun ASTNode.errors(): Sequence<ErrorNode> = this.walkDescendants(ErrorNode::class)
 
-fun Node.findError(): ErrorNode? = this.errors().firstOrNull()
+fun ASTNode.findError(): ErrorNode? = this.errors().firstOrNull()

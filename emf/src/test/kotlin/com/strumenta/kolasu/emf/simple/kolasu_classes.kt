@@ -3,7 +3,7 @@ package com.strumenta.kolasu.emf.simple
 import com.strumenta.kolasu.model.*
 import java.math.BigDecimal
 
-abstract class Expression(specifiedPosition: Position? = null) : Node(specifiedPosition) {
+abstract class Expression(specifiedPosition: Position? = null) : ASTNode(specifiedPosition) {
     open fun render(): String = this.javaClass.simpleName
 }
 
@@ -67,7 +67,7 @@ abstract class AbstractDataDefinition(
     specifiedPosition: Position? = null,
     private val hashCode: Int = name.hashCode()
 
-) : Node(specifiedPosition), Named
+) : ASTNode(specifiedPosition), Named
 
 sealed class Type {
     @Derived

@@ -3,7 +3,7 @@ package com.strumenta.kolasu.model
 import kotlin.test.assertEquals
 import org.junit.Test as test
 
-abstract class Expr : Node()
+abstract class Expr : ASTNode()
 class Number(val value: Int) : Expr()
 class Add(val left: Expr, val right: Expr) : Expr()
 class Sub(private val left: Expr, private val right: Expr) : Expr()

@@ -13,7 +13,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.junit.Test as test
 
-data class MySetStatement(val specifiedPosition: Position? = null) : Node(specifiedPosition)
+data class MySetStatement(val specifiedPosition: Position? = null) : ASTNode(specifiedPosition)
 
 class PositionTest {
 
@@ -138,9 +138,9 @@ class PositionTest {
 
     @test
     fun containsNode() {
-        val before = Node(Position(Point(1, 0), Point(1, 10)))
-        val inside = Node(Position(Point(2, 3), Point(2, 8)))
-        val after = Node(Position(Point(3, 0), Point(3, 10)))
+        val before = ASTNode(Position(Point(1, 0), Point(1, 10)))
+        val inside = ASTNode(Position(Point(2, 3), Point(2, 8)))
+        val after = ASTNode(Position(Point(3, 0), Point(3, 10)))
         val position = Position(Point(2, 0), Point(2, 10))
 
         assertFalse("contains should return false with node before") { position.contains(before) }

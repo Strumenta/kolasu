@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.transformation
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.testing.assertASTsAreEqual
@@ -10,27 +10,27 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-data class CU(val specifiedPosition: Position? = null, var statements: List<Node> = listOf()) : Node(specifiedPosition)
-data class DisplayIntStatement(val specifiedPosition: Position? = null, val value: Int) : Node(specifiedPosition)
+data class CU(val specifiedPosition: Position? = null, var statements: List<ASTNode> = listOf()) : ASTNode(specifiedPosition)
+data class DisplayIntStatement(val specifiedPosition: Position? = null, val value: Int) : ASTNode(specifiedPosition)
 data class SetStatement(val specifiedPosition: Position? = null, var variable: String = "", val value: Int = 0) :
-    Node(specifiedPosition)
+    ASTNode(specifiedPosition)
 
 enum class Operator {
     PLUS, MULT
 }
 
-sealed class Expression : Node()
+sealed class Expression : ASTNode()
 data class IntLiteral(val value: Int) : Expression()
-data class GenericBinaryExpression(val operator: Operator, val left: Expression, val right: Expression) : Node()
-data class Mult(val left: Expression, val right: Expression) : Node()
-data class Sum(val left: Expression, val right: Expression) : Node()
+data class GenericBinaryExpression(val operator: Operator, val left: Expression, val right: Expression) : ASTNode()
+data class Mult(val left: Expression, val right: Expression) : ASTNode()
+data class Sum(val left: Expression, val right: Expression) : ASTNode()
 
-sealed class ALangExpression : Node()
+sealed class ALangExpression : ASTNode()
 data class ALangIntLiteral(val value: Int) : ALangExpression()
 data class ALangSum(val left: ALangExpression, val right: ALangExpression) : ALangExpression()
 data class ALangMult(val left: ALangExpression, val right: ALangExpression) : ALangExpression()
 
-sealed class BLangExpression : Node()
+sealed class BLangExpression : ASTNode()
 data class BLangIntLiteral(val value: Int) : BLangExpression()
 data class BLangSum(val left: BLangExpression, val right: BLangExpression) : BLangExpression()
 data class BLangMult(val left: BLangExpression, val right: BLangExpression) : BLangExpression()
@@ -39,7 +39,7 @@ enum class Type {
     INT, STR
 }
 
-sealed class TypedExpression(open var type: Type? = null) : Node()
+sealed class TypedExpression(open var type: Type? = null) : ASTNode()
 data class TypedLiteral(var value: String, override var type: Type?) : TypedExpression(type)
 data class TypedSum(
     var left: TypedExpression,

@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.codegen
 
 import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.ReferenceByName
 
 // This file contains the AST definition for the Kotlin language
@@ -12,13 +12,13 @@ data class KCompilationUnit(
     var packageDecl: KPackageDecl? = null,
     val imports: MutableList<KImport> = mutableListOf(),
     val elements: MutableList<KTopLevelDeclaration> = mutableListOf()
-) : Node()
+) : ASTNode()
 
-data class KImport(val imported: String) : Node()
+data class KImport(val imported: String) : ASTNode()
 
-data class KPackageDecl(val name: String) : Node()
+data class KPackageDecl(val name: String) : ASTNode()
 
-sealed class KTopLevelDeclaration : Node()
+sealed class KTopLevelDeclaration : ASTNode()
 
 data class KClassDeclaration(
     override val name: String,
@@ -44,7 +44,7 @@ data class KExtensionMethod(
     val body: MutableList<KStatement> = mutableListOf()
 ) : KTopLevelDeclaration(), Named
 
-sealed class KStatement : Node()
+sealed class KStatement : ASTNode()
 data class KExpressionStatement(val expression: KExpression) : KStatement()
 
 data class KReturnStatement(val value: KExpression? = null) : KStatement()
@@ -55,12 +55,12 @@ data class KWhenStatement(
     var elseClause: KElseClause? = null
 ) : KExpression()
 
-data class KWhenClause(var condition: KExpression, var body: KStatement) : Node()
-data class KElseClause(var body: KStatement) : Node()
+data class KWhenClause(var condition: KExpression, var body: KStatement) : ASTNode()
+data class KElseClause(var body: KStatement) : ASTNode()
 
 data class KThrowStatement(var exception: KExpression) : KStatement()
 
-sealed class KExpression : Node()
+sealed class KExpression : ASTNode()
 
 class KThisExpression : KExpression()
 
@@ -86,8 +86,8 @@ data class KLambda(
     val params: MutableList<KLambdaParamDecl> = mutableListOf(),
     val body: MutableList<KStatement> = mutableListOf()
 ) : KExpression()
-data class KLambdaParamDecl(override val name: String) : Node(), Named
-data class KParameterValue(val value: KExpression, val name: String? = null) : Node()
+data class KLambdaParamDecl(override val name: String) : ASTNode(), Named
+data class KParameterValue(val value: KExpression, val name: String? = null) : ASTNode()
 
 data class KInstantiationExpression(
     var type: KType,
@@ -101,7 +101,7 @@ data class KFunctionCall(
     val args: MutableList<KParameterValue> = mutableListOf()
 ) : KExpression()
 
-sealed class KName : Node() {
+sealed class KName : ASTNode() {
     companion object {
         fun fromParts(firstPart: String, vararg otherParts: String): KName {
             fun helper(parts: List<String>): KName {
@@ -121,7 +121,7 @@ data class KQualifiedName(val container: KName, val name: String) : KName()
 
 data class KPrimaryConstructor(
     val params: MutableList<KParameterDeclaration> = mutableListOf()
-) : Node()
+) : ASTNode()
 
 enum class KPersistence {
     VAL,
@@ -133,18 +133,18 @@ data class KParameterDeclaration(
     override val name: String,
     override val type: KType,
     val persistemce: KPersistence = KPersistence.NONE,
-) : Node(), Named, KTyped
+) : ASTNode(), Named, KTyped
 
 interface KTyped {
     val type: KType
 }
 
-sealed class KType : Node()
+sealed class KType : ASTNode()
 data class KRefType(val name: String, val args: MutableList<KType> = mutableListOf<KType>()) : KType()
 
 data class KOptionalType(val base: KType) : KType()
 
-data class KSuperTypeInvocation(val name: String) : Node()
+data class KSuperTypeInvocation(val name: String) : ASTNode()
 
 data class KObjectDeclaration(override val name: String) : KTopLevelDeclaration(), Named
 data class KFunctionDeclaration(override val name: String) : KTopLevelDeclaration(), Named

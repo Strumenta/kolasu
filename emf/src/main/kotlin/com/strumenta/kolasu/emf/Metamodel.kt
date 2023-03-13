@@ -71,7 +71,7 @@ val LocalDateHandler = KolasuClassHandler(LocalDate::class, STARLASU_METAMODEL.g
 val LocalTimeHandler = KolasuClassHandler(LocalTime::class, STARLASU_METAMODEL.getEClass("LocalTime"))
 val LocalDateTimeHandler = KolasuClassHandler(LocalDateTime::class, STARLASU_METAMODEL.getEClass("LocalDateTime"))
 
-val NodeHandler = KolasuClassHandler(Node::class, STARLASU_METAMODEL.getEClass("ASTNode"))
+val NodeHandler = KolasuClassHandler(ASTNode::class, STARLASU_METAMODEL.getEClass("ASTNode"))
 val NamedHandler = KolasuClassHandler(Named::class, STARLASU_METAMODEL.getEClass("Named"))
 val PositionHandler = KolasuClassHandler(Position::class, STARLASU_METAMODEL.getEClass("Position"))
 val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, STARLASU_METAMODEL.getEClass("PossiblyNamed"))

@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.parsing
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.validation.Issue
@@ -94,7 +94,7 @@ class FirstStageParsingResult<C : ParserRuleContext>(
     issues: List<Issue>,
     val root: C?,
     code: String? = null,
-    val incompleteNode: Node? = null,
+    val incompleteNode: ASTNode? = null,
     val time: Long? = null,
     val lexingTime: Long? = null,
 ) : CodeProcessingResult<C>(issues, root, code) {
@@ -117,11 +117,11 @@ class FirstStageParsingResult<C : ParserRuleContext>(
     }
 }
 
-class ParsingResult<RootNode : Node>(
+class ParsingResult<RootNode : ASTNode>(
     issues: List<Issue>,
     val root: RootNode?,
     code: String? = null,
-    val incompleteNode: Node? = null,
+    val incompleteNode: ASTNode? = null,
     val firstStage: FirstStageParsingResult<*>? = null,
     val time: Long? = null
 ) : CodeProcessingResult<RootNode>(issues, root, code) {

@@ -3,12 +3,12 @@ package com.smeup.rpgparser.parsing.ast
 import com.strumenta.kolasu.emf.rpgast.AbstractDataDefinition
 import com.strumenta.kolasu.emf.rpgast.FieldDefinition
 import com.strumenta.kolasu.emf.rpgast.atLine
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.ReferenceByName
 import java.math.BigDecimal
 
-abstract class Expression(specifiedPosition: Position? = null) : Node(specifiedPosition) {
+abstract class Expression(specifiedPosition: Position? = null) : ASTNode(specifiedPosition) {
     open fun render(): String = this.javaClass.simpleName
 }
 

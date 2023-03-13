@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.mapping
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.parsing.withParseTreeNode
@@ -20,7 +20,7 @@ open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf(
      * it also assigns the parseTreeNode to the AST node so that it can keep track of its position.
      * However, a node factory can override the parseTreeNode of the nodes it creates (but not the parent).
      */
-    override fun transform(source: Any?, parent: Node?): Node? {
+    override fun transform(source: Any?, parent: ASTNode?): ASTNode? {
         val node = super.transform(source, parent)
         if (node != null && node.origin == null && source is ParserRuleContext) {
             node.withParseTreeNode(source)
@@ -28,7 +28,7 @@ open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf(
         return node
     }
 
-    override fun getSource(node: Node, source: Any): Any {
+    override fun getSource(node: ASTNode, source: Any): Any {
         val origin = node.origin
         return if (origin is ParseTreeOrigin) origin.parseTree else source
     }

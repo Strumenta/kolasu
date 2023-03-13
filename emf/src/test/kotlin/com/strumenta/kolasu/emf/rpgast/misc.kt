@@ -10,7 +10,7 @@ data class ToAstConfiguration(
     val considerPosition: Boolean = true
 )
 
-fun List<Node>.position(): Position? {
+fun List<ASTNode>.position(): Position? {
     val start = this.asSequence().map { it.position?.start }.filterNotNull().sorted().toList()
     val end = this.asSequence().map { it.position?.end }.filterNotNull().sorted().toList()
     return if (start.isEmpty() || end.isEmpty()) {

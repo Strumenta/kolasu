@@ -10,13 +10,13 @@ import com.strumenta.kolasu.cli.ASTProcessingCommand
 import com.strumenta.kolasu.cli.ParserInstantiator
 import com.strumenta.kolasu.cli.changeExtension
 import com.strumenta.kolasu.emf.*
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import java.io.File
 
-class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
+class EMFModelCommand<R : ASTNode, P>(parserInstantiator: ParserInstantiator<P>) :
     ASTProcessingCommand<R, P>(
         parserInstantiator,
         help = "Parses a file and exports the AST to an EMF (XMI) file.",

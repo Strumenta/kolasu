@@ -4,7 +4,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.output.CliktConsole
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.parsing.ASTParser
 
 /**
@@ -35,7 +35,7 @@ import com.strumenta.kolasu.parsing.ASTParser
  *   }
  * ```
  */
-class CLITool<R : Node, P : ASTParser<R>>(
+class CLITool<R : ASTNode, P : ASTParser<R>>(
     parserInstantiator: ParserInstantiator<P>,
     replacedConsole: CliktConsole? = null
 ) : CliktCommand(invokeWithoutSubcommand = false) {

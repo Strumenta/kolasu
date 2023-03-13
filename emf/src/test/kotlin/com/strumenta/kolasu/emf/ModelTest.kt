@@ -23,10 +23,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-data class NodeFoo(val name: String) : Node()
-class MyRoot(val foo: Int) : Node(), Statement
+data class NodeFoo(val name: String) : ASTNode()
+class MyRoot(val foo: Int) : ASTNode(), Statement
 
-class MySimpleLangCu() : Node()
+class MySimpleLangCu() : ASTNode()
 
 class ModelTest {
 

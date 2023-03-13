@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.language
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.parsing.withParseTreeNode
 import com.strumenta.simplelang.SimpleLangLexer
@@ -10,10 +10,10 @@ import org.antlr.v4.runtime.CommonTokenStream
 import org.junit.Test
 import kotlin.test.assertEquals
 
-data class CU(val specifiedPosition: Position? = null, var statements: List<Node> = listOf()) : Node(specifiedPosition)
-data class DisplayIntStatement(val specifiedPosition: Position? = null, val value: Int) : Node(specifiedPosition)
+data class CU(val specifiedPosition: Position? = null, var statements: List<ASTNode> = listOf()) : ASTNode(specifiedPosition)
+data class DisplayIntStatement(val specifiedPosition: Position? = null, val value: Int) : ASTNode(specifiedPosition)
 data class SetStatement(val specifiedPosition: Position? = null, var variable: String = "", val value: Int = 0) :
-    Node(specifiedPosition)
+    ASTNode(specifiedPosition)
 
 class UnparserTest {
 

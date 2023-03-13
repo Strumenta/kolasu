@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.testing
 
 import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import org.junit.ComparisonFailure
 import org.junit.Test
 
@@ -9,11 +9,11 @@ data class MyBigNode(
     override val name: String,
     val foo: MySmallNode? = null,
     val bars: List<MyOtherNode> = emptyList()
-) : Node(), Named
+) : ASTNode(), Named
 
-data class MySmallNode(val value: Long) : Node()
+data class MySmallNode(val value: Long) : ASTNode()
 
-data class MyOtherNode(val flag: Boolean, val s: String) : Node()
+data class MyOtherNode(val flag: Boolean, val s: String) : ASTNode()
 
 class AssertionsTest {
 

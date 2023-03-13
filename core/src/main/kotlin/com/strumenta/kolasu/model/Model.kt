@@ -32,7 +32,7 @@ data class TextFileDestination(val position: Position?) : Destination
  * It implements Origin as it could be the source of a AST-to-AST transformation, so the node itself can be
  * the Origin of another node.
  */
-open class Node() : Origin, Destination {
+open class ASTNode() : Origin, Destination {
 
     @Internal
     protected var positionOverride: Position? = null
@@ -72,7 +72,7 @@ open class Node() : Origin, Destination {
      * The parent node, if any.
      */
     @property:Internal
-    var parent: Node? = null
+    var parent: ASTNode? = null
 
     /**
      * The position of this node in the source text.
@@ -101,7 +101,7 @@ open class Node() : Origin, Destination {
             } else {
                 this.origin = null
             }
-            if (existingOrigin is Node && existingOrigin.destination == this) {
+            if (existingOrigin is ASTNode && existingOrigin.destination == this) {
                 existingOrigin.destination = null
             }
         }
@@ -143,12 +143,12 @@ open class Node() : Origin, Destination {
     }
 }
 
-fun <N : Node> N.withPosition(position: Position?): N {
+fun <N : ASTNode> N.withPosition(position: Position?): N {
     this.position = position
     return this
 }
 
-fun <N : Node> N.withOrigin(origin: Origin?): N {
+fun <N : ASTNode> N.withOrigin(origin: Origin?): N {
     this.origin = if (origin == this) { null } else { origin }
     return this
 }
@@ -166,7 +166,7 @@ val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
 /**
  * @return all properties of this node that are considered AST properties.
  */
-val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
+val <T : ASTNode> T.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.nodeProperties
 
 /**

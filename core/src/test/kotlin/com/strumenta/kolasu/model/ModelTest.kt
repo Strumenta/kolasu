@@ -6,7 +6,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.Test as test
 
-class MyNode(override val name: String) : Node(), Named
+class MyNode(override val name: String) : ASTNode(), Named
 
 data class ASymbol(override val name: String, val index: Int = 0) : Symbol
 data class BSymbol(override val name: String, val index: Int = 0) : Symbol
@@ -14,9 +14,9 @@ data class USymbol(override val name: String? = null) : Symbol
 
 data class NodeOverridingName(
     override var name: String
-) : Node(), Named
+) : ASTNode(), Named
 
-open class BaseNode(open var attr1: Int) : Node()
+open class BaseNode(open var attr1: Int) : ASTNode()
 data class ExtNode(override var attr1: Int) : BaseNode(attr1)
 
 class ModelTest {

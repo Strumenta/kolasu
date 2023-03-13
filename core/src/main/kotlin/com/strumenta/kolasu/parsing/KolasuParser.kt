@@ -70,7 +70,7 @@ abstract class KolasuANTLRLexer : KolasuLexer {
  *
  * You should extend this class to implement the parts that are specific to your language.
  */
-abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : KolasuANTLRLexer(), ASTParser<R> {
+abstract class KolasuParser<R : ASTNode, P : Parser, C : ParserRuleContext> : KolasuANTLRLexer(), ASTParser<R> {
 
     /**
      * Creates the first-stage parser.
@@ -248,11 +248,11 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : Kolas
         parse(FileInputStream(file), charset, considerPosition)
 
     // For convenient use from Java
-    fun walk(node: Node) = node.walk()
+    fun walk(node: ASTNode) = node.walk()
 
     @JvmOverloads
     fun processProperties(
-        node: Node,
+        node: ASTNode,
         propertyOperation: (PropertyDescription) -> Unit,
         propertiesToIgnore: Set<String> = emptySet()
     ) = node.processProperties(propertiesToIgnore, propertyOperation)

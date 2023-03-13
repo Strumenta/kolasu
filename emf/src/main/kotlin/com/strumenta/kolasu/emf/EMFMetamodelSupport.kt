@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.parsing.KolasuParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
@@ -65,10 +65,10 @@ fun ParsingResult<*>.saveModel(
 /**
  * A Kolasu parser that supports exporting AST's to EMF/Ecore.
  *
- * In particular, this parser can generate the metamodel. We can then use [Node.toEObject] to translate a tree into
+ * In particular, this parser can generate the metamodel. We can then use [ASTNode.toEObject] to translate a tree into
  * its EMF representation.
  */
-abstract class EMFEnabledParser<R : Node, P : Parser, C : ParserRuleContext> :
+abstract class EMFEnabledParser<R : ASTNode, P : Parser, C : ParserRuleContext> :
     KolasuParser<R, P, C>(), EMFMetamodelSupport {
 
     /**

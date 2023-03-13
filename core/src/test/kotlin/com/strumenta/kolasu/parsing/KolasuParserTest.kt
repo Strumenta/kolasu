@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.parsing
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
@@ -11,7 +11,7 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class SimpleLangKolasuParser : KolasuParser<Node, SimpleLangParser, SimpleLangParser.CompilationUnitContext>() {
+class SimpleLangKolasuParser : KolasuParser<ASTNode, SimpleLangParser, SimpleLangParser.CompilationUnitContext>() {
     override fun createANTLRLexer(charStream: CharStream): Lexer {
         return SimpleLangLexer(charStream)
     }
@@ -24,7 +24,7 @@ class SimpleLangKolasuParser : KolasuParser<Node, SimpleLangParser, SimpleLangPa
         parseTreeRoot: SimpleLangParser.CompilationUnitContext,
         considerPosition: Boolean,
         issues: MutableList<Issue>
-    ): Node? = null
+    ): ASTNode? = null
 }
 
 class KolasuParserTest {

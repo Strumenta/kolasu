@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.playground
 
 import com.strumenta.kolasu.emf.*
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
@@ -40,7 +40,7 @@ private fun createTranspilationMetamodel(): EPackage {
 /**
  * A transpilation trace can be visualized to demonstrate how the transpiler work.
  */
-class TranspilationTrace<S : Node, T : Node>(
+class TranspilationTrace<S : ASTNode, T : ASTNode>(
     val originalCode: String,
     val generatedCode: String,
     val sourceResult: Result<S>,
@@ -59,13 +59,13 @@ class TranspilationTrace<S : Node, T : Node>(
     )
 }
 
-private fun <S : Node, T : Node> makeTranspilationTraceEObject(transpilationTrace: TranspilationTrace<S, T>): EObject {
+private fun <S : ASTNode, T : ASTNode> makeTranspilationTraceEObject(transpilationTrace: TranspilationTrace<S, T>): EObject {
     val transpilationTraceEC = TRANSPILATION_METAMODEL.getEClass(TranspilationTrace::class.java)
     val transpilationTraceEO = TRANSPILATION_METAMODEL.eFactoryInstance.create(transpilationTraceEC)
     return transpilationTraceEO
 }
 
-fun <S : Node, T : Node> TranspilationTrace<S, T>.toEObject(resource: Resource): EObject {
+fun <S : ASTNode, T : ASTNode> TranspilationTrace<S, T>.toEObject(resource: Resource): EObject {
     val transpilationTraceEO = makeTranspilationTraceEObject(this)
     transpilationTraceEO.setStringAttribute("originalCode", this.originalCode)
     val mapping = KolasuToEMFMapping()
@@ -76,7 +76,7 @@ fun <S : Node, T : Node> TranspilationTrace<S, T>.toEObject(resource: Resource):
     return transpilationTraceEO
 }
 
-fun <S : Node, T : Node> TranspilationTrace<S, T>.saveAsJson(name: String, vararg ePackages: EPackage): String {
+fun <S : ASTNode, T : ASTNode> TranspilationTrace<S, T>.saveAsJson(name: String, vararg ePackages: EPackage): String {
     val resourceSet = createResourceSet()
     val resource = resourceSet.createResource(URI.createURI(name))
     ePackages.forEach {

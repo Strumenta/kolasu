@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.serialization
 
 import com.google.gson.*
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.parsing.ParsingResult
@@ -35,10 +35,10 @@ class JsonDeserializer {
         if (typeToDeserialize.classifier is KClass<*>) {
             val rawClass: Class<*> = (typeToDeserialize.classifier as KClass<*>).java
             when {
-                Node::class.java.isAssignableFrom(rawClass) -> {
+                ASTNode::class.java.isAssignableFrom(rawClass) -> {
                     val className = json.asJsonObject[JSON_TYPE_KEY].asString
                     val actualClass = Class.forName(className)
-                    return deserialize(actualClass.asSubclass(Node::class.java), json.asJsonObject)
+                    return deserialize(actualClass.asSubclass(ASTNode::class.java), json.asJsonObject)
                 }
                 Collection::class.java.isAssignableFrom(rawClass) -> {
                     require(typeToDeserialize.arguments.size == 1)
@@ -75,12 +75,12 @@ class JsonDeserializer {
         }
         TODO()
     }
-    fun <T : Node> deserialize(clazz: Class<T>, json: String): T {
+    fun <T : ASTNode> deserialize(clazz: Class<T>, json: String): T {
         val jo = JsonParser().parse(json).asJsonObject
         return deserialize(clazz, jo)
     }
 
-    fun <T : Node> deserialize(clazz: Class<T>, jo: JsonObject): T {
+    fun <T : ASTNode> deserialize(clazz: Class<T>, jo: JsonObject): T {
         val instance: T?
         val primaryConstructor = clazz.kotlin.primaryConstructor
         if (primaryConstructor != null) {
@@ -115,7 +115,7 @@ class JsonDeserializer {
         return instance ?: throw UnsupportedOperationException()
     }
 
-    fun <T : Node> deserializeResult(rootClass: Class<T>, json: String): Result<T> {
+    fun <T : ASTNode> deserializeResult(rootClass: Class<T>, json: String): Result<T> {
         val jo = JsonParser().parse(json).asJsonObject
         val errors = jo["issues"].asJsonArray.map { it.asJsonObject }.map {
             val type = IssueType.valueOf(it["type"].asString)
@@ -133,7 +133,7 @@ class JsonDeserializer {
         return Result(errors, root)
     }
 
-    fun <T : Node> deserializeParsingResult(rootClass: Class<T>, json: String): ParsingResult<T> {
+    fun <T : ASTNode> deserializeParsingResult(rootClass: Class<T>, json: String): ParsingResult<T> {
         val jo = JsonParser().parse(json).asJsonObject
         val issues = jo["issues"].asJsonArray.map { it.asJsonObject }.map {
             val type = IssueType.valueOf(it["type"].asString)

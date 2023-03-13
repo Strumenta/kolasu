@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.NodeType
 import com.strumenta.kolasu.model.ReferenceByName
 import org.eclipse.emf.common.util.URI
@@ -16,31 +16,31 @@ import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-sealed class Statement : Node()
-sealed class Expression : Node()
+sealed class Statement : ASTNode()
+sealed class Expression : ASTNode()
 enum class Visibility {
     PUBLIC, PRIVATE
 }
 class VarDeclaration(var visibility: Visibility, var name: String, var initialValue: Expression) : Statement()
 class StringLiteral(var value: String) : Expression()
 class LocalDateTimeLiteral(var value: LocalDateTime) : Expression()
-data class CompilationUnit(val statements: List<Statement>?) : Node()
+data class CompilationUnit(val statements: List<Statement>?) : ASTNode()
 
 @NodeType
 interface SomeInterface
-data class AltCompilationUnit(val elements: List<SomeInterface>) : Node()
+data class AltCompilationUnit(val elements: List<SomeInterface>) : ASTNode()
 
 data class NodeWithReference(
     override val name: String,
     val singlePointer: ReferenceByName<NodeWithReference>,
     val pointers: MutableList<ReferenceByName<NodeWithReference>>
-) : Node(), Named
+) : ASTNode(), Named
 
 data class NodeWithForwardReference(
     override val name: String,
     val myChildren: MutableList<NodeWithForwardReference> = mutableListOf(),
     var pointer: ReferenceByName<NodeWithForwardReference>? = null
-) : Node(), Named
+) : ASTNode(), Named
 
 class MetamodelTest {
 

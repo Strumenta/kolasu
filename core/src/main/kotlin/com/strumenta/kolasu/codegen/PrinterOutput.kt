@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.codegen
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.START_POINT
 import com.strumenta.kolasu.model.TextFileDestination
@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
  * Know how to print a single node type.
  */
 fun interface NodePrinter {
-    fun print(output: PrinterOutput, ast: Node)
+    fun print(output: PrinterOutput, ast: ASTNode)
 }
 
 /**
@@ -19,7 +19,7 @@ fun interface NodePrinter {
  */
 class PrinterOutput(
     private val nodePrinters: Map<KClass<*>, NodePrinter>,
-    private var nodePrinterOverrider: (node: Node) -> NodePrinter? = { _ -> null }
+    private var nodePrinterOverrider: (node: ASTNode) -> NodePrinter? = { _ -> null }
 ) {
     private val sb = StringBuilder()
     private var currentPoint = START_POINT
@@ -91,7 +91,7 @@ class PrinterOutput(
         print(postfix)
     }
 
-    fun print(ast: Node?, prefix: String = "", postfix: String = "") {
+    fun print(ast: ASTNode?, prefix: String = "", postfix: String = "") {
         if (ast == null) {
             return
         }
@@ -104,7 +104,7 @@ class PrinterOutput(
         print(postfix)
     }
 
-    fun println(ast: Node?, prefix: String = "", postfix: String = "") {
+    fun println(ast: ASTNode?, prefix: String = "", postfix: String = "") {
         print(ast, prefix, postfix + "\n")
     }
 
@@ -121,7 +121,7 @@ class PrinterOutput(
         indentationLevel--
     }
 
-    fun associate(ast: Node, generation: PrinterOutput.() -> Unit) {
+    fun associate(ast: ASTNode, generation: PrinterOutput.() -> Unit) {
         val startPoint = currentPoint
         generation()
         val endPoint = currentPoint
@@ -129,7 +129,7 @@ class PrinterOutput(
         ast.destination = TextFileDestination(position = nodePositionInGeneratedCode)
     }
 
-    fun <T : Node> printList(elements: List<T>, separator: String = ", ") {
+    fun <T : ASTNode> printList(elements: List<T>, separator: String = ", ") {
         var i = 0
         while (i < elements.size) {
             if (i != 0) {
@@ -140,7 +140,7 @@ class PrinterOutput(
         }
     }
 
-    fun <T : Node> printList(
+    fun <T : ASTNode> printList(
         prefix: String,
         elements: List<T>,
         postfix: String,

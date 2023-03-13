@@ -10,7 +10,7 @@ abstract class AbstractDataDefinition(
     open val type: Type,
     specifiedPosition: Position? = null,
     private val hashCode: Int = name.hashCode()
-) : Node(specifiedPosition), Named {
+) : ASTNode(specifiedPosition), Named {
     fun numberOfElements() = type.numberOfElements()
     open fun elementSize() = type.elementSize()
 
@@ -25,7 +25,7 @@ abstract class AbstractDataDefinition(
 }
 
 data class FileDefinition private constructor(override val name: String, val specifiedPosition: Position?) :
-    Node(
+    ASTNode(
         specifiedPosition
     ),
     Named {

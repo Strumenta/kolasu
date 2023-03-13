@@ -1,9 +1,9 @@
 package com.smeup.rpgparser.parsing.ast
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Position
 
-abstract class Directive(specifiedPosition: Position? = null) : Node(specifiedPosition)
+abstract class Directive(specifiedPosition: Position? = null) : ASTNode(specifiedPosition)
 
 data class DeceditDirective(val format: String, val specifiedPosition: Position? = null) : Directive(
     specifiedPosition

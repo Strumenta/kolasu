@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import org.eclipse.emf.common.util.URI
 import org.junit.Test
 import java.io.File
@@ -9,12 +9,12 @@ import kotlin.reflect.full.createType
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-data class ARoot(val nodes: List<ANodeWithAPair>) : Node()
+data class ARoot(val nodes: List<ANodeWithAPair>) : ASTNode()
 
 data class ANodeWithAPair(
     val p: Pair<String, Integer>,
     /*val fieldLocation: Pair<Int, Int>? = Pair(0, 0),*/
-) : Node()
+) : ASTNode()
 
 class KolasuMetamodelTest {
 

@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.serialization
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.processProperties
@@ -23,7 +23,7 @@ import javax.xml.transform.stream.StreamResult
  */
 class XMLGenerator {
 
-    fun generateXML(root: Node): Document {
+    fun generateXML(root: ASTNode): Document {
         val documentFactory = DocumentBuilderFactory.newInstance()
         val documentBuilder = documentFactory.newDocumentBuilder()
         val document = documentBuilder.newDocument()
@@ -31,7 +31,7 @@ class XMLGenerator {
         return document
     }
 
-    fun generateXML(result: Result<out Node>): Document {
+    fun generateXML(result: Result<out ASTNode>): Document {
         val documentFactory = DocumentBuilderFactory.newInstance()
         val documentBuilder = documentFactory.newDocumentBuilder()
         val document = documentBuilder.newDocument()
@@ -42,7 +42,7 @@ class XMLGenerator {
         return document
     }
 
-    fun generateString(root: Node): String {
+    fun generateString(root: ASTNode): String {
         val document = generateXML(root)
         return document.toXmlString()
     }
@@ -61,21 +61,21 @@ class XMLGenerator {
         return xmlString
     }
 
-    fun generateString(result: Result<out Node>): String {
+    fun generateString(result: Result<out ASTNode>): String {
         val document = generateXML(result)
         return document.toXmlString()
     }
 
-    fun generateFile(root: Node, file: File) {
+    fun generateFile(root: ASTNode, file: File) {
         File(file.toURI()).writeText(generateString(root))
     }
 
-    fun generateFile(result: Result<out Node>, file: File) {
+    fun generateFile(result: Result<out ASTNode>, file: File) {
         File(file.toURI()).writeText(generateString(result))
     }
 }
 
-private fun Element.addChildPossiblyEmpty(role: String, node: Node?, document: Document) {
+private fun Element.addChildPossiblyEmpty(role: String, node: ASTNode?, document: Document) {
     if (node == null) {
         this.addNullChild(role, document)
     } else {
@@ -83,7 +83,7 @@ private fun Element.addChildPossiblyEmpty(role: String, node: Node?, document: D
     }
 }
 
-private fun Element.addListOfNodes(listName: String, elements: Iterable<Node>, document: Document) {
+private fun Element.addListOfNodes(listName: String, elements: Iterable<ASTNode>, document: Document) {
     elements.forEach {
         addChild(it.toXML(listName, document))
     }
@@ -106,7 +106,7 @@ private fun Element.addNullChild(role: String, document: Document) {
     this.appendChild(element)
 }
 
-private fun Node.toXML(role: String, document: Document): Element {
+private fun ASTNode.toXML(role: String, document: Document): Element {
     val element = document.createElement(role)
     element.setAttribute("type", this.javaClass.simpleName)
     this.position?.let {
@@ -117,13 +117,13 @@ private fun Node.toXML(role: String, document: Document): Element {
             element.addNullChild(it.name, document)
         } else if (it.multiple) {
             if (it.provideNodes) {
-                element.addListOfNodes(it.name, (it.value as Collection<*>).map { it as Node }, document)
+                element.addListOfNodes(it.name, (it.value as Collection<*>).map { it as ASTNode }, document)
             } else {
                 element.addAttributesList(it.name, it.value as Collection<*>, document)
             }
         } else {
             if (it.provideNodes) {
-                element.addChild((it.value as Node).toXML(it.name, document))
+                element.addChild((it.value as ASTNode).toXML(it.name, document))
             } else {
                 element.addAttribute(it.name, it.value)
             }

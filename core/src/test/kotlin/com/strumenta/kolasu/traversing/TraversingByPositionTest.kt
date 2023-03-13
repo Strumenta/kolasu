@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.traversing
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.pos
 import kotlin.test.Test
@@ -11,12 +11,12 @@ import kotlin.test.fail
 internal class TraversingByPositionTest {
     class Box(
         val name: String,
-        val contents: List<Node>,
+        val contents: List<ASTNode>,
         specifiedPosition: Position? = null
-    ) : Node(specifiedPosition)
-    class Item(val name: String, specifiedPosition: Position? = null) : Node(specifiedPosition)
+    ) : ASTNode(specifiedPosition)
+    class Item(val name: String, specifiedPosition: Position? = null) : ASTNode(specifiedPosition)
 
-    private fun printSequence(sequence: Sequence<Node>): String {
+    private fun printSequence(sequence: Sequence<ASTNode>): String {
         return sequence.map {
             when (it) {
                 is Box -> it.name

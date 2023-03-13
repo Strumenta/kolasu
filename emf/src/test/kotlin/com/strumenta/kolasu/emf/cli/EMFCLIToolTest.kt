@@ -5,7 +5,7 @@ import com.github.ajalt.clikt.output.CliktConsole
 import com.strumenta.kolasu.emf.EMFEnabledParser
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.runtime.CharStream
@@ -22,9 +22,9 @@ import kotlin.io.path.pathString
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-data class MyCompilationUnit(val decls: List<MyEntityDecl>) : Node()
-data class MyEntityDecl(override var name: String, val fields: List<MyFieldDecl>) : Node(), Named
-data class MyFieldDecl(override var name: String) : Node(), Named
+data class MyCompilationUnit(val decls: List<MyEntityDecl>) : ASTNode()
+data class MyEntityDecl(override var name: String, val fields: List<MyFieldDecl>) : ASTNode(), Named
+data class MyFieldDecl(override var name: String) : ASTNode(), Named
 
 class MyDummyParser : EMFEnabledParser<MyCompilationUnit, Parser, ParserRuleContext>() {
     override fun doGenerateMetamodel(resource: Resource) {

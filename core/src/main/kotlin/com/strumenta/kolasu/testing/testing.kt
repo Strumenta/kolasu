@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.testing
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.parsing.toParseTreeModel
 import org.antlr.v4.runtime.ParserRuleContext
@@ -21,7 +21,7 @@ fun assertParseTreeStr(
     assertEquals(expectedMultiLineStr.trim(), actualParseTree.trim())
 }
 
-class IgnoreChildren<N : Node> : List<N> {
+class IgnoreChildren<N : ASTNode> : List<N> {
     override val size: Int
         get() = TODO("Not yet implemented")
 
@@ -69,7 +69,7 @@ class IgnoreChildren<N : Node> : List<N> {
 class ASTDifferenceException(val context: String, val expected: Any, val actual: Any) :
     Exception("$context: expecting $expected, actual $actual")
 
-fun <T : Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: ParsingResult<T>) {
+fun <T : ASTNode> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: ParsingResult<T>) {
     assertEquals(expected.issues, actual.issues)
     assertEquals(expected.root != null, actual.root != null)
     if (expected.root != null) {
@@ -77,8 +77,8 @@ fun <T : Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: 
     }
 }
 
-fun <N : Node> assertASTsAreEqual(
-    expected: Node,
+fun <N : ASTNode> assertASTsAreEqual(
+    expected: ASTNode,
     actual: ParsingResult<N>,
     context: String = "<root>",
     considerPosition: Boolean = false
@@ -91,8 +91,8 @@ fun <N : Node> assertASTsAreEqual(
 }
 
 fun assertASTsAreEqual(
-    expected: Node,
-    actual: Node,
+    expected: ASTNode,
+    actual: ASTNode,
     context: String = "<root>",
     considerPosition: Boolean = false
 ) {
@@ -108,8 +108,8 @@ fun assertASTsAreEqual(
                     if (expectedPropValue is IgnoreChildren<*>) {
                         // Nothing to do
                     } else {
-                        val actualPropValueCollection = actualPropValue?.let { it as Collection<Node> }
-                        val expectedPropValueCollection = expectedPropValue?.let { it as Collection<Node> }
+                        val actualPropValueCollection = actualPropValue?.let { it as Collection<ASTNode> }
+                        val expectedPropValueCollection = expectedPropValue?.let { it as Collection<ASTNode> }
                         assertEquals(
                             actualPropValueCollection == null, expectedPropValueCollection == null,
                             "$context.${expectedProperty.name} nullness"
@@ -141,7 +141,7 @@ fun assertASTsAreEqual(
                         // that is ok
                     } else {
                         assertASTsAreEqual(
-                            expectedPropValue as Node, actualPropValue as Node,
+                            expectedPropValue as ASTNode, actualPropValue as ASTNode,
                             context = "$context.${expectedProperty.name}"
                         )
                     }

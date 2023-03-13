@@ -4,10 +4,10 @@ import org.junit.Test
 import java.util.*
 import kotlin.test.assertEquals
 
-data class Foo1(val name: String) : Node()
-data class Foo2(val names: List<String>) : Node()
-data class Foo3(val foo: Foo1) : Node()
-data class Foo4(val foos: List<Foo1>?) : Node()
+data class Foo1(val name: String) : ASTNode()
+data class Foo2(val names: List<String>) : ASTNode()
+data class Foo3(val foo: Foo1) : ASTNode()
+data class Foo4(val foos: List<Foo1>?) : ASTNode()
 
 class PropertyDescriptionTest {
 

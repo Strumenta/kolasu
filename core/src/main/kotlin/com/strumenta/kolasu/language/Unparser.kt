@@ -1,11 +1,11 @@
 package com.strumenta.kolasu.language
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.traversing.walkChildren
 
 // TODO Alessio this is a work in progress
 class Unparser {
-    fun unparse(root: Node): String? {
+    fun unparse(root: ASTNode): String? {
         val sourceText = root.sourceText
         return if (sourceText != null) {
             var template: String = sourceText

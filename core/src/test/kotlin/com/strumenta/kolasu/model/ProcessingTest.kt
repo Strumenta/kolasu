@@ -6,24 +6,24 @@ import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import org.junit.Test as test
 
-data class A(val s: String) : Node()
-data class B(val a: A, val manyAs: List<A>) : Node()
+data class A(val s: String) : ASTNode()
+data class B(val a: A, val manyAs: List<A>) : ASTNode()
 
-data class AW(var s: String) : Node()
-data class BW(var a: AW, val manyAs: MutableList<AW>) : Node()
-data class CW(var a: AW, val manyAs: MutableSet<AW>) : Node()
-data class DW(var a: BW, val manyAs: MutableList<AW>) : Node()
+data class AW(var s: String) : ASTNode()
+data class BW(var a: AW, val manyAs: MutableList<AW>) : ASTNode()
+data class CW(var a: AW, val manyAs: MutableSet<AW>) : ASTNode()
+data class DW(var a: BW, val manyAs: MutableList<AW>) : ASTNode()
 
 @NodeType
 interface FooNodeType
 
 interface BarNotNodeType
 
-data class MiniCalcFile(val elements: List<MCStatement>) : Node()
+data class MiniCalcFile(val elements: List<MCStatement>) : ASTNode()
 data class VarDeclaration(override val name: String, val value: MCExpression) : MCStatement(), Named
-sealed class MCExpression : Node()
+sealed class MCExpression : ASTNode()
 data class IntLit(val value: String) : MCExpression()
-sealed class MCStatement : Node()
+sealed class MCStatement : ASTNode()
 data class Assignment(val ref: ReferenceByName<VarDeclaration>, val value: MCExpression) : MCStatement()
 data class Print(val value: MCExpression) : MCStatement()
 data class ValueReference(val ref: ReferenceByName<VarDeclaration>) : MCExpression()
@@ -190,7 +190,7 @@ class ProcessingTest {
             )
         )
 
-        val nodesProcessed = HashSet<Node>()
+        val nodesProcessed = HashSet<ASTNode>()
 
         assertEquals(
             expectedTransformedTree,

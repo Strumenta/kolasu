@@ -6,7 +6,7 @@ import com.strumenta.kolasu.emf.rpgast.FileDefinition
 import com.strumenta.kolasu.emf.rpgast.InStatementDataDefinition
 import com.strumenta.kolasu.model.Derived
 import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Position
 // This file contains the AST nodes at the highest level:
 // from the CompilationUnit (which represents the whole file)
@@ -20,7 +20,7 @@ data class CompilationUnit(
     val compileTimeArrays: List<CompileTimeArray>,
     val directives: List<Directive>,
     val specifiedPosition: Position??
-) : Node(specifiedPosition) {
+) : ASTNode(specifiedPosition) {
 
     companion object {
         fun empty() = CompilationUnit(
@@ -105,7 +105,7 @@ data class CompilationUnit(
     fun getFileDefinition(name: String) = fileDefinitions.first { it.name.equals(name, ignoreCase = true) }
 }
 
-data class MainBody(val stmts: List<Statement>, val specifiedPosition: Position? = null) : Node(
+data class MainBody(val stmts: List<Statement>, val specifiedPosition: Position? = null) : ASTNode(
     specifiedPosition
 )
 
@@ -114,9 +114,9 @@ data class Subroutine(
     val stmts: List<Statement>,
     val tag: String? = null,
     val specifiedPosition: Position? = null
-) : Named, Node(specifiedPosition)
+) : Named, ASTNode(specifiedPosition)
 
-data class Function(override val name: String, val specifiedPosition: Position? = null) : Named, Node(
+data class Function(override val name: String, val specifiedPosition: Position? = null) : Named, ASTNode(
     specifiedPosition
 )
 
@@ -124,7 +124,7 @@ data class CompileTimeArray(
     override val name: String,
     val lines: List<String>,
     val specifiedPosition: Position? = null
-) : Named, Node(specifiedPosition)
+) : Named, ASTNode(specifiedPosition)
 
 enum class DataWrapUpChoice {
     LR,
