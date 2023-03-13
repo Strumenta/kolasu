@@ -120,7 +120,7 @@ data class PropertyDescription(
     }
 }
 
-private val KProperty1<in ASTNode, *>.isReference: Boolean get() =
+val KProperty1<in ASTNode, *>.isReference: Boolean get() =
     ((this.returnType as? KType)?.classifier as? KClass<*>) == ReferenceByName::class
 
 private fun providesNodes(classifier: KClassifier?): Boolean {

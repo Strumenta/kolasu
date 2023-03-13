@@ -1,5 +1,14 @@
 package com.strumenta.kolasu.model
 
+import org.lionweb.lioncore.java.metamodel.Annotation
+import org.lionweb.lioncore.java.metamodel.Concept
+import org.lionweb.lioncore.java.metamodel.Containment
+import org.lionweb.lioncore.java.metamodel.Property
+import org.lionweb.lioncore.java.metamodel.Reference
+import org.lionweb.lioncore.java.model.AnnotationInstance
+import org.lionweb.lioncore.java.model.Model
+import org.lionweb.lioncore.java.model.Node
+import org.lionweb.lioncore.java.model.ReferenceValue
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
@@ -32,7 +41,7 @@ data class TextFileDestination(val position: Position?) : Destination
  * It implements Origin as it could be the source of a AST-to-AST transformation, so the node itself can be
  * the Origin of another node.
  */
-open class ASTNode() : Origin, Destination {
+open class ASTNode() : Node, Origin, Destination {
 
     @Internal
     protected var positionOverride: Position? = null
@@ -140,6 +149,78 @@ open class ASTNode() : Origin, Destination {
      */
     final override fun toString(): String {
         return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
+    }
+
+    override fun getPropertyValue(property: Property): Any {
+        TODO("Not yet implemented")
+    }
+
+    override fun setPropertyValue(property: Property, value: Any?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getChildren(): MutableList<ASTNode> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getChildren(p0: Containment?): MutableList<ASTNode> {
+        TODO("Not yet implemented")
+    }
+
+    override fun addChild(p0: Containment?, p1: Node?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun removeChild(p0: Node?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getReferredNodes(p0: Reference): MutableList<Node> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getReferenceValues(p0: Reference): MutableList<ReferenceValue> {
+        TODO("Not yet implemented")
+    }
+
+    override fun addReferenceValue(p0: Reference, p1: ReferenceValue?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getID(): String? {
+        TODO("Not yet implemented")
+    }
+
+    override fun getModel(): Model {
+        TODO("Not yet implemented")
+    }
+
+    override fun getRoot(): Node {
+        TODO("Not yet implemented")
+    }
+
+    override fun getParent(): Node {
+        TODO("Not yet implemented")
+    }
+
+    override fun getConcept(): Concept {
+        TODO("Not yet implemented")
+    }
+
+    override fun getAnnotations(): MutableList<AnnotationInstance> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getAnnotations(p0: Annotation?): MutableList<AnnotationInstance> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getContainmentFeature(): Containment {
+        TODO("Not yet implemented")
+    }
+
+    override fun addAnnotation(p0: AnnotationInstance?) {
+        TODO("Not yet implemented")
     }
 }
 

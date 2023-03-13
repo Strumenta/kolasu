@@ -17,7 +17,7 @@ import kotlin.test.assertEquals
 data class NodeWithReference(
     override val name: String? = null,
     val reference: ReferenceByName<NodeWithReference>? = null,
-    val children: MutableList<ASTNode> = mutableListOf()
+    val childrenCont: MutableList<ASTNode> = mutableListOf()
 ) : ASTNode(), PossiblyNamed
 
 class JsonGenerationTest {
