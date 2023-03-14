@@ -114,12 +114,28 @@ fun linePosition(lineNumber: Int, lineCode: String, source: Source? = null): Pos
     return Position(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length), source)
 }
 
-abstract class Source
+abstract class Source {
+    abstract val id: String?
+}
+
 class SourceSet(val name: String, val root: Path)
-class SourceSetElement(val sourceSet: SourceSet, val relativePath: Path) : Source()
-class FileSource(val file: File) : Source()
-class StringSource(val code: String? = null) : Source()
-class URLSource(val url: URL) : Source()
+class SourceSetElement(val sourceSet: SourceSet, val relativePath: Path) : Source() {
+    override val id: String?
+        get() = "sourceset_${sourceSet.name}-${relativePath}"
+
+}
+class FileSource(val file: File) : Source() {
+    override val id: String?
+        get() = "file_${file.path}"
+}
+class StringSource(val code: String? = null) : Source() {
+    override val id: String?
+        get() = "sourcecode_${code.hashCode()}"
+}
+class URLSource(val url: URL) : Source() {
+    override val id: String?
+        get() = "url_${url}"
+}
 
 /**
  * This source is intended to be used for nodes that are "calculated".
@@ -129,7 +145,10 @@ class URLSource(val url: URL) : Source()
  * @param description this is a description of the source. It is used to describe the process that calculated the node.
  *                    Examples of values could be "type inference".
  */
-data class SyntheticSource(val description: String) : Source()
+data class SyntheticSource(val description: String) : Source() {
+    override val id: String?
+        get() = "synthetic_${description}"
+}
 
 /**
  * An area in a source file, from start to end.

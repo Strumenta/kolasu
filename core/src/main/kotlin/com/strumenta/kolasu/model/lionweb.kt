@@ -22,12 +22,17 @@ fun <A:ASTNode>calculateConcept(kClass: KClass<A>) : Concept {
     concept.simpleName = kClass.simpleName
 
     val superclasses = kClass.superclasses.toMutableList()
-    require(superclasses.contains(ASTNode::class))
+    //require(superclasses.contains(ASTNode::class))
     superclasses.remove(ASTNode::class)
-    if (superclasses.isEmpty()) {
+    superclasses.forEach { superclass ->
+        if (superclass.java.isInterface) {
+            // TODO consider
+        } else {
+            concept.extendedConcept = (superclass as KClass<out ASTNode>).concept
+        }
+    }
+    if (concept.extendedConcept == null) {
         concept.extendedConcept = StarLasuMetamodel.astNode
-    } else {
-        TODO()
     }
 
     val metamodelQName = kClass.qualifiedName!!.removeSuffix(".${kClass.simpleName}") + ".Metamodel"
@@ -53,7 +58,7 @@ fun <A:ASTNode>calculateConcept(kClass: KClass<A>) : Concept {
                         property.type = LionCoreBuiltins.getInteger()
                     }
                     else -> {
-                        TODO()
+                        TODO("Return type: ${it.returnType}")
                     }
                 }
                 concept.addFeature(property)

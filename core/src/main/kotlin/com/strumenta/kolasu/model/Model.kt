@@ -196,7 +196,19 @@ open class ASTNode() : Node, Origin, Destination {
     }
 
     override fun getID(): String? {
-        TODO("Not yet implemented")
+        return "${sourceID(source)}-${pathID(this)}"
+    }
+
+    private fun sourceID(source: Source?) : String {
+        return source?.id ?: "_UNSPECIFIED_";
+    }
+
+    private fun pathID(node: ASTNode) : String {
+        return if (node.parent == null) {
+            ""
+        } else {
+            "${pathID(node.parent!!)}-${node.containmentFeature.simpleName}${node.indexInContainingProperty()}"
+        }
     }
 
     override fun getModel(): Model {
