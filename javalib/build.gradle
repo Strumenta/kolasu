@@ -15,6 +15,7 @@ java {
 
 dependencies {
     implementation project(":core")
+    implementation "org.lionweb.lioncore-java:core:$lioncore_java_version"
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 }
