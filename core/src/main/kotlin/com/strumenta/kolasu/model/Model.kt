@@ -59,6 +59,7 @@ open class ASTNode() : Node, Origin, Destination {
     }
 
     @Internal
+    @Deprecated("Use Concept")
     open val nodeType: String
         get() = this::class.qualifiedName!!
 
@@ -66,6 +67,7 @@ open class ASTNode() : Node, Origin, Destination {
      * The properties of this AST nodes, including attributes, children, and references.
      */
     @property:Internal
+    @Deprecated("Use Concept")
     open val properties: List<PropertyDescription>
         get() = try {
             nodeProperties.map { PropertyDescription.buildFor(it, this) }

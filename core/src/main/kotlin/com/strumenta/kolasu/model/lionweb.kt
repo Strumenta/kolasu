@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.metamodel.StarLasuMetamodel
 import org.lionweb.lioncore.java.metamodel.Concept
 import org.lionweb.lioncore.java.metamodel.Containment
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
@@ -9,6 +10,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
+import kotlin.reflect.full.superclasses
 
 private val conceptsMemory = HashMap<KClass<out ASTNode>, Concept>()
 
@@ -18,6 +20,15 @@ val <A:ASTNode>KClass<A>.concept : Concept
 fun <A:ASTNode>calculateConcept(kClass: KClass<A>) : Concept {
     val concept = Concept()
     concept.simpleName = kClass.simpleName
+
+    val superclasses = kClass.superclasses.toMutableList()
+    require(superclasses.contains(ASTNode::class))
+    superclasses.remove(ASTNode::class)
+    if (superclasses.isEmpty()) {
+        concept.extendedConcept = StarLasuMetamodel.astNode
+    } else {
+        TODO()
+    }
 
     val metamodelQName = kClass.qualifiedName!!.removeSuffix(".${kClass.simpleName}") + ".Metamodel"
     val metamodelKClass = kClass.java.classLoader.loadClass(metamodelQName).kotlin
