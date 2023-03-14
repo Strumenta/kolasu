@@ -84,8 +84,8 @@ open class ASTNode() : Node, Origin, Destination {
     /**
      * The parent node, if any.
      */
-    @property:Internal
-    var parent: ASTNode? = null
+    //@property:Internal
+    private var _parent: ASTNode? = null
 
     /**
      * The position of this node in the source text.
@@ -168,11 +168,28 @@ open class ASTNode() : Node, Origin, Destination {
     }
 
     override fun getChildren(): MutableList<ASTNode> {
-        TODO("Not yet implemented")
+        return this.concept.allContainments().map { getChildren(it) }.flatten().toMutableList()
     }
 
-    override fun getChildren(p0: Containment?): MutableList<ASTNode> {
-        TODO("Not yet implemented")
+    override fun getChildren(containment: Containment): MutableList<ASTNode> {
+        if (!this.concept.allContainments().contains(containment)) {
+            throw IllegalArgumentException("Invalid containment $containment")
+        }
+        val memberProperty = this::class.memberProperties.find { it.name == containment.simpleName } ?: throw IllegalStateException()
+        val value = (memberProperty as KProperty1<ASTNode, *>).get(this)
+        return when (value) {
+            is Collection<*> -> {
+                value.toMutableList() as MutableList<ASTNode>
+            }
+
+            null -> {
+                mutableListOf()
+            }
+
+            else -> {
+                mutableListOf(value as ASTNode)
+            }
+        }
     }
 
     override fun addChild(p0: Containment?, p1: Node?) {
@@ -207,7 +224,7 @@ open class ASTNode() : Node, Origin, Destination {
         return if (node.parent == null) {
             ""
         } else {
-            "${pathID(node.parent!!)}-${node.containmentFeature.simpleName}${node.indexInContainingProperty()}"
+            "${pathID(node.parent!!)}-${node.containmentFeature!!.simpleName}${node.indexInContainingProperty()}"
         }
     }
 
@@ -219,8 +236,12 @@ open class ASTNode() : Node, Origin, Destination {
         TODO("Not yet implemented")
     }
 
-    override fun getParent(): Node {
-        TODO("Not yet implemented")
+    override fun getParent(): ASTNode? {
+        return _parent
+    }
+
+    fun setParent(parent: ASTNode?) {
+        this._parent = parent
     }
 
     override fun getConcept(): Concept {
@@ -235,8 +256,16 @@ open class ASTNode() : Node, Origin, Destination {
         TODO("Not yet implemented")
     }
 
-    override fun getContainmentFeature(): Containment {
-        TODO("Not yet implemented")
+    override fun getContainmentFeature(): Containment? {
+        if (this.parent == null) {
+            return null
+        }
+        this.parent!!.concept.allContainments().forEach { containment ->
+            if (this.parent!!.getChildren(containment).contains(this)) {
+                return containment
+            }
+        }
+        throw IllegalStateException()
     }
 
     override fun addAnnotation(p0: AnnotationInstance?) {

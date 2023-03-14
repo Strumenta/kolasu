@@ -6,10 +6,12 @@ import org.lionweb.lioncore.java.metamodel.Containment
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
 import org.lionweb.lioncore.java.metamodel.Metamodel
 import org.lionweb.lioncore.java.metamodel.Property
+import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
 import kotlin.reflect.full.allSuperclasses
+import kotlin.reflect.full.allSupertypes
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.superclasses
 
@@ -20,8 +22,12 @@ val <A:ASTNode>KClass<A>.concept : Concept
 
 fun <A:ASTNode>calculateConcept(kClass: KClass<A>) : Concept {
     try {
+        require(kClass.allSuperclasses.contains(ASTNode::class)) {
+            "KClass ${kClass} is not a subclass of ASTNode"
+        }
         val concept = Concept()
         concept.simpleName = kClass.simpleName
+        concept.id = kClass.simpleName
 
         val superclasses = kClass.superclasses.toMutableList()
         //require(superclasses.contains(ASTNode::class))
@@ -38,7 +44,8 @@ fun <A:ASTNode>calculateConcept(kClass: KClass<A>) : Concept {
         }
 
         val metamodelQName = kClass.qualifiedName!!.removeSuffix(".${kClass.simpleName}") + ".Metamodel"
-        val metamodelKClass = kClass.java.classLoader.loadClass(metamodelQName).kotlin
+        val classLoader = kClass.java.classLoader ?: throw IllegalStateException("No class loader for ${kClass.java}")
+        val metamodelKClass = classLoader.loadClass(metamodelQName).kotlin
         val metamodelInstance = metamodelKClass.objectInstance as Metamodel
         metamodelInstance.addElement(concept)
 
@@ -49,6 +56,7 @@ fun <A:ASTNode>calculateConcept(kClass: KClass<A>) : Concept {
                 !provideNodes -> {
                     val property = Property()
                     property.simpleName = it.name
+                    property.id = it.name
                     when (it.returnType.classifier) {
                         Boolean::class -> {
                             property.type = LionCoreBuiltins.getBoolean()
@@ -74,7 +82,8 @@ fun <A:ASTNode>calculateConcept(kClass: KClass<A>) : Concept {
                 provideNodes && !ref -> {
                     val containment = Containment()
                     containment.simpleName = it.name
-                    if ((it.returnType.classifier as KClass<*>) == List::class) {
+                    containment.id = it.name
+                    if ((it.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }.contains(Collection::class)) {
                         containment.isMultiple = true
                         containment.type = (it.returnType.arguments[0].type!!.classifier as KClass<out ASTNode>).concept
                     } else {
