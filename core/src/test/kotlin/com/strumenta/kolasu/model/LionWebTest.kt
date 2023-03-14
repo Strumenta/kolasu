@@ -1,8 +1,16 @@
 package com.strumenta.kolasu.model
 
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
+import org.lionweb.lioncore.java.metamodel.Metamodel
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
+object Metamodel : Metamodel() {
+    init {
+        id = "MyMetamodelID"
+        name = "MyMetamodel"
+    }
+}
 
 class MySimpleNode(val b: Boolean, val others: List<MyOtherNode>) : ASTNode()
 
@@ -14,6 +22,8 @@ class LionWebTest {
     fun getConceptMySimpleNodeStatically() {
         val c = MySimpleNode::class.concept
         assertEquals("MySimpleNode", c.simpleName)
+        assertEquals("MyMetamodel", c.metamodel?.name)
+        assertEquals("MyMetamodelID", c.metamodel?.id)
 
         assertEquals(1, c.allProperties().size)
 
@@ -40,6 +50,9 @@ class LionWebTest {
     fun getConceptMyOtherNodeStatically() {
         val c = MyOtherNode::class.concept
         assertEquals("MyOtherNode", c.simpleName)
+        assertEquals("MySimpleNode", c.simpleName)
+        assertEquals("MyMetamodel", c.metamodel?.name)
+        assertEquals("MyMetamodelID", c.metamodel?.id)
 
         assertEquals(2, c.allProperties().size)
 

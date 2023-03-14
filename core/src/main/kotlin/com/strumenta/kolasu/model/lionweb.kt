@@ -3,6 +3,7 @@ package com.strumenta.kolasu.model
 import org.lionweb.lioncore.java.metamodel.Concept
 import org.lionweb.lioncore.java.metamodel.Containment
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
+import org.lionweb.lioncore.java.metamodel.Metamodel
 import org.lionweb.lioncore.java.metamodel.Property
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -17,6 +18,12 @@ val <A:ASTNode>KClass<A>.concept : Concept
 fun <A:ASTNode>calculateConcept(kClass: KClass<A>) : Concept {
     val concept = Concept()
     concept.simpleName = kClass.simpleName
+
+    val metamodelQName = kClass.qualifiedName!!.removeSuffix(".${kClass.simpleName}") + ".Metamodel"
+    val metamodelKClass = kClass.java.classLoader.loadClass(metamodelQName).kotlin
+    val metamodelInstance = metamodelKClass.objectInstance as Metamodel
+    metamodelInstance.addElement(concept)
+
     kClass.nodeProperties.forEach {
         val provideNodes = PropertyDescription.providesNodes(it as KProperty1<in ASTNode, *>)
         val ref = (it as KProperty1<in ASTNode, *>).isReference
@@ -24,14 +31,19 @@ fun <A:ASTNode>calculateConcept(kClass: KClass<A>) : Concept {
             !provideNodes -> {
                 val property = Property()
                 property.simpleName = it.name
-                if (it.returnType == Boolean::class.createType()) {
-                    property.type = LionCoreBuiltins.getBoolean()
-                } else if (it.returnType == String::class.createType()) {
-                    property.type = LionCoreBuiltins.getString()
-                } else if (it.returnType == Int::class.createType()) {
-                    property.type = LionCoreBuiltins.getInteger()
-                } else {
-                    TODO()
+                when (it.returnType) {
+                    Boolean::class.createType() -> {
+                        property.type = LionCoreBuiltins.getBoolean()
+                    }
+                    String::class.createType() -> {
+                        property.type = LionCoreBuiltins.getString()
+                    }
+                    Int::class.createType() -> {
+                        property.type = LionCoreBuiltins.getInteger()
+                    }
+                    else -> {
+                        TODO()
+                    }
                 }
                 concept.addFeature(property)
             }
