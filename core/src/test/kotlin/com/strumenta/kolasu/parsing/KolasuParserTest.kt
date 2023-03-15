@@ -42,7 +42,7 @@ class KolasuParserTest {
         val lexingResult = parser.extractTokens(result)
         assertNotNull(lexingResult)
         assertEquals(11, lexingResult.tokens.size)
-        val text = lexingResult.tokens.map { (it as KolasuANTLRToken).token.text }
+        val text = lexingResult.tokens.map { it.text }
         assertEquals(listOf("set", "a", "=", "10", "set", "b", "=", "\"\"", "display", "c", "<EOF>"), text)
     }
 }

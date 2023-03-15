@@ -54,14 +54,14 @@ data class TokenCategory(val type: String) {
 /**
  * A token is a portion of text that has been assigned a category.
  */
-open class KolasuToken(open val category: TokenCategory, open val position: Position)
+open class KolasuToken(open val category: TokenCategory, open val position: Position, open val text: String)
 
 /**
  * A [KolasuToken] generated from a [Token]. The [token] contains additional information that is specific to ANTLR,
  * such as type and channel.
  */
 data class KolasuANTLRToken(override val category: TokenCategory, val token: Token) :
-    KolasuToken(category, token.position)
+    KolasuToken(category, token.position, token.text)
 
 /**
  * The result of lexing (tokenizing) a stream.
