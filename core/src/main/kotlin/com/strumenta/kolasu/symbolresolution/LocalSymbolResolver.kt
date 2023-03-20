@@ -12,5 +12,5 @@ abstract class LocalSymbolResolver {
      * This will resolve symbols on the given AST. It will set the links in the ReferenceByName found.
      * It will return a list of issues encountered during symbol resolution.
      */
-    abstract fun resolveSymbols(root: Node) : List<Issue>
+    abstract fun resolveSymbols(root: Node): List<Issue>
 }
