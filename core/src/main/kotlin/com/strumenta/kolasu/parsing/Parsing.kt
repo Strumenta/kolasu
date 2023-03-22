@@ -8,6 +8,7 @@ import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
 import org.antlr.v4.runtime.*
+import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -184,7 +185,7 @@ interface KolasuLexer {
     /**
      * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.
      */
-    fun lex(file: File): LexingResult = lex(FileInputStream(file))
+    fun lex(file: File): LexingResult = BufferedInputStream(FileInputStream(file)).use { lex(it) }
 }
 
 fun Lexer.injectErrorCollectorInLexer(issues: MutableList<Issue>) {
