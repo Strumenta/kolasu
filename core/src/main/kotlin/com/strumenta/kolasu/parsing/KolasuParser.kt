@@ -31,8 +31,10 @@ abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
     protected abstract fun createANTLRLexer(charStream: CharStream): Lexer
 
     override fun lex(
-        inputStream: InputStream, charset: Charset, onlyFromDefaultChannel: Boolean
-    ): LexingResult<KolasuANTLRToken>{
+        inputStream: InputStream,
+        charset: Charset,
+        onlyFromDefaultChannel: Boolean
+    ): LexingResult<KolasuANTLRToken> {
         val issues = LinkedList<Issue>()
         val tokens = LinkedList<KolasuANTLRToken>()
         var last: Token? = null
