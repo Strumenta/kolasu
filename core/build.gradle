@@ -26,7 +26,7 @@ dependencies {
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
     implementation 'org.redundent:kotlin-xml-builder:1.7.3'
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.4.0")
-    implementation "org.lionweb.lioncore-java:core:$lioncore_java_version"
+    implementation "io.lionweb.lioncore-java:lioncore-java-core:$lioncore_java_version"
 
     cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
 
