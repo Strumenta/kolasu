@@ -4,12 +4,14 @@ import com.strumenta.kolasu.metamodel.StarLasuMetamodel
 import org.lionweb.lioncore.java.metamodel.Concept
 import org.lionweb.lioncore.java.metamodel.ConceptInterface
 import org.lionweb.lioncore.java.metamodel.Containment
+import org.lionweb.lioncore.java.metamodel.FeaturesContainer
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
 import org.lionweb.lioncore.java.metamodel.Metamodel
 import org.lionweb.lioncore.java.metamodel.Property
 import org.lionweb.lioncore.java.metamodel.Reference
 import java.lang.IllegalStateException
 import kotlin.reflect.KClass
+import kotlin.reflect.KClassifier
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.jvmName
@@ -71,6 +73,14 @@ fun <A : Any> calculateConceptInterface(
     return conceptInterface
 }
 
+private fun KClassifier.asFeaturesContainer(): FeaturesContainer<*> {
+    return if ((this as KClass<*>).java.isInterface) {
+        (this as KClass<out Any>).conceptInterface
+    } else {
+        (this as KClass<out ASTNode>).concept
+    }
+}
+
 fun <A : ASTNode> calculateConcept(
     kClass: KClass<A>,
     conceptsMemory: HashMap<KClass<out ASTNode>, Concept>,
@@ -121,10 +131,8 @@ fun <A : ASTNode> calculateConcept(
                         val reference = Reference()
                         reference.simpleName = it.name
                         reference.id = it.name
-                        reference.type = (
-                            it.returnType.arguments[0].type!!
-                                .classifier as KClass<out ASTNode>
-                            ).concept
+                        reference.type = it.returnType.arguments[0].type!!
+                                .classifier!!.asFeaturesContainer()
                         concept.addFeature(reference)
                     } else {
                         val property = Property()
@@ -177,17 +185,11 @@ fun <A : ASTNode> calculateConcept(
                         .contains(Collection::class)
                     ) {
                         containment.isMultiple = true
-                        containment.type = (
-                            it.returnType.arguments[0].type!!
-                                .classifier as KClass<out ASTNode>
-                            ).concept
+                        containment.type = it.returnType.arguments[0].type!!
+                                .classifier!!.asFeaturesContainer()
                     } else {
                         val classifier = it.returnType.classifier
-                        if ((classifier as KClass<*>).java.isInterface) {
-                            containment.type = (it.returnType.classifier as KClass<out Any>).conceptInterface
-                        } else {
-                            containment.type = (it.returnType.classifier as KClass<out ASTNode>).concept
-                        }
+                        containment.type = classifier!!.asFeaturesContainer()
                     }
                     concept.addFeature(containment)
                 }
