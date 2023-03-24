@@ -7,8 +7,11 @@ import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import org.junit.Test
+import org.lionweb.lioncore.java.metamodel.Metamodel
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+
+object Metamodel : Metamodel()
 
 data class CU(
     val specifiedPosition: Position? = null,

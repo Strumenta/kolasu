@@ -50,7 +50,7 @@ class LionWebTest {
     fun getConceptMyOtherNodeStatically() {
         val c = MyOtherNode::class.concept
         assertEquals("MyOtherNode", c.simpleName)
-        assertEquals("MySimpleNode", c.simpleName)
+        assertEquals("MyMetamodel.MyOtherNode", c.qualifiedName())
         assertEquals("MyMetamodel", c.metamodel?.name)
         assertEquals("MyMetamodelID", c.metamodel?.id)
 

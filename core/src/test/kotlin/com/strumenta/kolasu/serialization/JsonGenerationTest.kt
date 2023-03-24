@@ -3,6 +3,7 @@ package com.strumenta.kolasu.serialization
 import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.ExtNode
+import com.strumenta.kolasu.model.Metamodel
 import com.strumenta.kolasu.model.NodeOverridingName
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
@@ -13,6 +14,8 @@ import com.strumenta.kolasu.validation.Result
 import org.junit.Test
 import java.io.StringWriter
 import kotlin.test.assertEquals
+
+object Metamodel: org.lionweb.lioncore.java.metamodel.Metamodel()
 
 data class NodeWithReference(
     override val name: String? = null,
@@ -158,7 +161,7 @@ class JsonGenerationTest {
             """
             {
               "#type": "com.strumenta.kolasu.serialization.NodeWithReference",
-              "children": [],
+              "childrenCont": [],
               "name": "nodeWithReference",
               "reference": {
                 "name": "self"
@@ -180,7 +183,7 @@ class JsonGenerationTest {
             {
               "#type": "com.strumenta.kolasu.serialization.NodeWithReference",
               "#id": "0",
-              "children": [],
+              "childrenCont": [],
               "name": "nodeWithReference",
               "reference": {
                 "name": "self",

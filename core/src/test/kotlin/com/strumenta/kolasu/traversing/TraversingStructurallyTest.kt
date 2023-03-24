@@ -5,6 +5,7 @@ import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.pos
+import org.lionweb.lioncore.java.metamodel.Metamodel
 import kotlin.system.measureTimeMillis
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -12,6 +13,8 @@ import kotlin.test.assertEquals
 import kotlin.test.fail
 
 internal class TraversingStructurallyTest {
+    object Metamodel : org.lionweb.lioncore.java.metamodel.Metamodel()
+
     class Box(
         val name: String,
         val contents: List<ASTNode> = listOf(),

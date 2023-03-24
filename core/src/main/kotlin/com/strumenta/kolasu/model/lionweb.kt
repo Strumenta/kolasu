@@ -6,20 +6,25 @@ import org.lionweb.lioncore.java.metamodel.Containment
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
 import org.lionweb.lioncore.java.metamodel.Metamodel
 import org.lionweb.lioncore.java.metamodel.Property
+import org.lionweb.lioncore.java.metamodel.Reference
 import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.allSupertypes
 import kotlin.reflect.full.superclasses
+import kotlin.reflect.jvm.jvmName
 
 private val conceptsMemory = HashMap<KClass<out ASTNode>, Concept>()
 
 val <A : ASTNode>KClass<A>.concept: Concept
-    get() = conceptsMemory.getOrPut(this) { calculateConcept(this) }
+    get() = conceptsMemory.getOrElse(this) { calculateConcept(this, conceptsMemory) }
 
-fun <A : ASTNode> calculateConcept(kClass: KClass<A>): Concept {
+fun <A : ASTNode> calculateConcept(kClass: KClass<A>, conceptsMemory: HashMap<KClass<out ASTNode>, Concept>): Concept {
     try {
+        if (kClass == ASTNode::class) {
+            return StarLasuMetamodel.astNode
+        }
         require(kClass.allSuperclasses.contains(ASTNode::class)) {
             "KClass $kClass is not a subclass of ASTNode"
         }
@@ -41,42 +46,73 @@ fun <A : ASTNode> calculateConcept(kClass: KClass<A>): Concept {
             concept.extendedConcept = StarLasuMetamodel.astNode
         }
 
-        val metamodelQName = kClass.qualifiedName!!.removeSuffix(".${kClass.simpleName}") + ".Metamodel"
-        val classLoader = kClass.java.classLoader ?: throw IllegalStateException("No class loader for ${kClass.java}")
-        val metamodelKClass = classLoader.loadClass(metamodelQName).kotlin
-        val metamodelInstance = metamodelKClass.objectInstance as Metamodel
+        val metamodelInstance : Metamodel = if (kClass.jvmName.contains("$")) {
+            val outerClass = kClass.java.declaringClass.kotlin
+            val metamodelKClass = outerClass.nestedClasses.find { it.simpleName == "Metamodel" } ?: throw RuntimeException("No Metamodel object in ${outerClass}")
+            metamodelKClass!!.objectInstance as Metamodel
+        } else {
+            val metamodelQName = kClass.qualifiedName!!.removeSuffix(".${kClass.simpleName}") + ".Metamodel"
+            val classLoader = kClass.java.classLoader ?: throw IllegalStateException("No class loader for ${kClass.java}")
+            val metamodelKClass = try {
+                classLoader.loadClass(metamodelQName).kotlin
+            } catch (e: ClassNotFoundException) {
+                throw RuntimeException("Unable to find the metamodel for Kotlin class $kClass")
+            }
+            metamodelKClass.objectInstance as Metamodel
+        }
         metamodelInstance.addElement(concept)
+
+        // We need to add it right away because of nodes referring to themselves
+        conceptsMemory[kClass] = concept
 
         kClass.nodeProperties.forEach {
             val provideNodes = PropertyDescription.providesNodes(it as KProperty1<in ASTNode, *>)
             val ref = (it as KProperty1<in ASTNode, *>).isReference
             when {
                 !provideNodes -> {
-                    val property = Property()
-                    property.simpleName = it.name
-                    property.id = it.name
-                    when (it.returnType.classifier) {
-                        Boolean::class -> {
-                            property.type = LionCoreBuiltins.getBoolean()
-                        }
-                        String::class -> {
-                            property.type = LionCoreBuiltins.getString()
-                        }
-                        Int::class -> {
-                            property.type = LionCoreBuiltins.getInteger()
-                        }
-                        else -> {
-                            if ((it.returnType.classifier as? KClass<*>)?.allSuperclasses?.contains(Enum::class)
-                                ?: false
-                            ) {
-                                // TODO add support for enums
+                    if (it.returnType.classifier == ReferenceByName::class) {
+                        val reference = Reference()
+                        reference.simpleName = it.name
+                        reference.id = it.name
+                        reference.type = (
+                                it.returnType.arguments[0].type!!
+                                    .classifier as KClass<out ASTNode>
+                                ).concept
+                        concept.addFeature(reference)
+                    } else {
+                        val property = Property()
+                        property.simpleName = it.name
+                        property.id = it.name
+                        when (it.returnType.classifier) {
+                            Boolean::class -> {
+                                property.type = LionCoreBuiltins.getBoolean()
+                            }
+
+                            String::class -> {
                                 property.type = LionCoreBuiltins.getString()
-                            } else {
-                                TODO("Return type: ${it.returnType.classifier} (${it.returnType.classifier?.javaClass}")
+                            }
+
+                            Int::class -> {
+                                property.type = LionCoreBuiltins.getInteger()
+                            }
+
+                            Position::class -> {
+                                property.type = StarLasuMetamodel.position
+                            }
+
+                            else -> {
+                                if ((it.returnType.classifier as? KClass<*>)?.allSuperclasses?.contains(Enum::class)
+                                        ?: false
+                                ) {
+                                    // TODO add support for enums
+                                    property.type = LionCoreBuiltins.getString()
+                                } else {
+                                    TODO("Return type: ${it.returnType.classifier} (${it.returnType.classifier?.javaClass} for property ${it}")
+                                }
                             }
                         }
+                        concept.addFeature(property)
                     }
-                    concept.addFeature(property)
                 }
                 provideNodes && ref -> TODO()
                 provideNodes && !ref -> {

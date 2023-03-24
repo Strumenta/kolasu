@@ -88,10 +88,10 @@ class IndexingTest {
         parent.reference!!.referred = parent
         val firstChild = NodeWithReference(name = "child", reference = ReferenceByName(name = "parent"))
         firstChild.reference!!.referred = parent
-        parent.children.add(firstChild)
+        parent.childrenCont.add(firstChild)
         val secondChild = NodeWithReference(name = "child", reference = ReferenceByName(name = "previous"))
         secondChild.reference!!.referred = firstChild
-        parent.children.add(secondChild)
+        parent.childrenCont.add(secondChild)
         val ids = parent.computeIdsForReferencedNodes()
         assertEquals(2, ids.size)
         assertEquals(ids[parent], "0")
@@ -104,10 +104,10 @@ class IndexingTest {
         parent.reference!!.referred = parent
         val firstChild = NodeWithReference(name = "child", reference = ReferenceByName(name = "parent"))
         firstChild.reference!!.referred = parent
-        parent.children.add(firstChild)
+        parent.childrenCont.add(firstChild)
         val secondChild = NodeWithReference(name = "child", reference = ReferenceByName(name = "previous"))
         secondChild.reference!!.referred = firstChild
-        parent.children.add(secondChild)
+        parent.childrenCont.add(secondChild)
         val ids = parent.computeIdsForReferencedNodes(walker = ASTNode::walkLeavesFirst)
         assertEquals(2, ids.size)
         assertEquals(ids[parent], "1")

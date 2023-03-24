@@ -46,6 +46,7 @@ fun ASTNode.walkLeavesFirst(): Sequence<ASTNode> {
             if (childNodes.isEmpty()) {
                 break
             }
+            require(childNodes != null)
             nodesStack.push(childNodes)
             cursorStack.push(0)
             currentNode = childNodes[0]
@@ -56,22 +57,29 @@ fun ASTNode.walkLeavesFirst(): Sequence<ASTNode> {
         if (done) {
             null
         } else {
-            val nodes: List<ASTNode> = nodesStack.peek()
+            //require(nodesStack.isNotEmpty())
+            val nodes: List<ASTNode>? = nodesStack.peek()
             val cursor = cursorStack.peek()
-            val levelHasNext = cursor < nodes.size
-            if (levelHasNext) {
-                val node: ASTNode = nodes[cursor]
-                fillStackToLeaf(node)
-                nextFromLevel()
+            if (nodes == null) {
+                require(cursor==null)
+                done = true
+                this
             } else {
-                nodesStack.pop()
-                cursorStack.pop()
-                val hasNext = !nodesStack.isEmpty()
-                if (hasNext) {
+                val levelHasNext = cursor < nodes!!.size
+                if (levelHasNext) {
+                    val node: ASTNode = nodes!![cursor]
+                    fillStackToLeaf(node)
                     nextFromLevel()
                 } else {
-                    done = true
-                    this
+                    nodesStack.pop()
+                    cursorStack.pop()
+                    val hasNext = !nodesStack.isEmpty()
+                    if (hasNext) {
+                        nextFromLevel()
+                    } else {
+                        done = true
+                        this
+                    }
                 }
             }
         }

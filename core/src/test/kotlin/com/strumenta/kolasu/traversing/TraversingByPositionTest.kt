@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.traversing
 
 import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.Metamodel
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.pos
 import kotlin.test.Test
@@ -8,7 +9,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.fail
 
+
 internal class TraversingByPositionTest {
+    object Metamodel: org.lionweb.lioncore.java.metamodel.Metamodel()
     class Box(
         val name: String,
         val contents: List<ASTNode>,
