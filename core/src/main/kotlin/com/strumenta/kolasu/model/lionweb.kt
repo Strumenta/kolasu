@@ -69,6 +69,7 @@ fun <A : ASTNode> calculateConcept(kClass: KClass<A>, conceptsMemory: HashMap<KC
 
         val metamodelInstance: Metamodel = metamodelFor(kClass)
             ?: throw RuntimeException("No Metamodel object for $kClass")
+        metamodelInstance.addElement(concept)
 
         // We need to add it right away because of nodes referring to themselves
         conceptsMemory[kClass] = concept

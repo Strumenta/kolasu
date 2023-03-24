@@ -179,19 +179,28 @@ open class ASTNode() : Node, Origin, Destination {
         }
         val memberProperty = this::class.memberProperties.find { it.name == containment.simpleName }
             ?: throw IllegalStateException()
-        val value = (memberProperty as KProperty1<ASTNode, *>).get(this)
-        return when (value) {
-            is Collection<*> -> {
-                value.toMutableList() as MutableList<ASTNode>
+        try {
+            val value = if (memberProperty.visibility == KVisibility.PRIVATE) {
+                val getter = this::class.functions.find { it.name == "get${containment.simpleName!!.capitalize()}" }!!
+                getter.call(this) as MutableList<ASTNode>
+            } else {
+                (memberProperty as KProperty1<ASTNode, *>).get(this)
             }
+            return when (value) {
+                is Collection<*> -> {
+                    value.toMutableList() as MutableList<ASTNode>
+                }
 
-            null -> {
-                mutableListOf()
-            }
+                null -> {
+                    mutableListOf()
+                }
 
-            else -> {
-                mutableListOf(value as ASTNode)
+                else -> {
+                    mutableListOf(value as ASTNode)
+                }
             }
+        } catch (e: Throwable) {
+            throw RuntimeException("Unable to access containment $containment", e)
         }
     }
 
