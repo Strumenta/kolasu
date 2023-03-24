@@ -150,21 +150,23 @@ totalErrors,0
 
         val parserInstantiator = { file: File ->
             MyDummyParser().apply {
-                expectedResults[myFile.toFile()] = ParsingResult(
-                    emptyList(),
-                    MyCompilationUnit(
-                        mutableListOf(
-                            MyEntityDecl("Entity1", mutableListOf()),
-                            MyEntityDecl(
-                                "Entity2",
-                                mutableListOf(
-                                    MyFieldDecl("f1"),
-                                    MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
-                                )
+                val root = MyCompilationUnit(
+                    mutableListOf(
+                        MyEntityDecl("Entity1", mutableListOf()),
+                        MyEntityDecl(
+                            "Entity2",
+                            mutableListOf(
+                                MyFieldDecl("f1"),
+                                MyFieldDecl("f2"),
+                                MyFieldDecl("f3"),
                             )
                         )
                     )
+                )
+                assertEquals(2, root.children.size)
+                expectedResults[myFile.toFile()] = ParsingResult(
+                    emptyList(),
+                    root
                 )
             }
         }

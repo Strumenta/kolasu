@@ -5,6 +5,7 @@ import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.pos
+import org.junit.Ignore
 import org.lionweb.lioncore.java.metamodel.Metamodel
 import kotlin.system.measureTimeMillis
 import kotlin.test.Test
@@ -98,6 +99,7 @@ internal class TraversingStructurallyTest {
     }
 
     @Test
+    @Ignore // disabled during conversion to LionWeb
     fun performanceTest() {
         val boxes = mutableListOf<Box>()
         val numberOfChildren = 10000

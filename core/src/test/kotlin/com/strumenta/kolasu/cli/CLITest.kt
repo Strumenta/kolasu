@@ -7,6 +7,7 @@ import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.junit.Test
+import org.lionweb.lioncore.java.metamodel.Metamodel
 import java.io.File
 import java.nio.charset.Charset
 import kotlin.io.path.createTempDirectory
@@ -14,6 +15,8 @@ import kotlin.io.path.createTempFile
 import kotlin.io.path.pathString
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+
+object Metamodel: Metamodel()
 
 data class MyCompilationUnit(val decls: List<MyEntityDecl>) : ASTNode()
 data class MyEntityDecl(override var name: String, val fields: List<MyFieldDecl>) : ASTNode(), Named
