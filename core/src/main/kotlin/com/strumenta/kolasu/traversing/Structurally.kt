@@ -153,3 +153,34 @@ fun <T> ASTNode.searchByType(
 fun <T> ASTNode.collectByType(klass: Class<T>, walker: KFunction1<ASTNode, Sequence<ASTNode>> = ASTNode::walk): List<T> {
     return walker.invoke(this).filterIsInstance(klass).toList()
 }
+
+/**
+ * The FastWalker is a walker that implements a cache to speed up subsequent walks.
+ * The first walk will take the same time of a normal walk.
+ * This walker will ignore any change to the nodes.
+ */
+class FastWalker(val node: Node) {
+    private val childrenMap: WeakHashMap<Node, List<Node>> = WeakHashMap<Node, List<Node>>()
+
+    private fun getChildren(child: Node): List<Node> {
+        return if (childrenMap.containsKey(child)) {
+            childrenMap[child]!!
+        } else {
+            childrenMap.put(child, child.walkChildren().toList())
+            childrenMap[child]!!
+        }
+    }
+
+    fun walk(root: Node = node): Sequence<Node> {
+        val stack: Stack<Node> = mutableStackOf(root)
+        return generateSequence {
+            if (stack.isEmpty()) {
+                null
+            } else {
+                val next: Node = stack.pop()
+                stack.pushAll(getChildren(next))
+                next
+            }
+        }
+    }
+}

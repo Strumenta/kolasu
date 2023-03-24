@@ -8,6 +8,7 @@ import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
 import org.antlr.v4.runtime.*
+import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -54,28 +55,28 @@ data class TokenCategory(val type: String) {
 /**
  * A token is a portion of text that has been assigned a category.
  */
-open class KolasuToken(open val category: TokenCategory, open val position: Position)
+open class KolasuToken(open val category: TokenCategory, open val position: Position, open val text: String)
 
 /**
  * A [KolasuToken] generated from a [Token]. The [token] contains additional information that is specific to ANTLR,
  * such as type and channel.
  */
 data class KolasuANTLRToken(override val category: TokenCategory, val token: Token) :
-    KolasuToken(category, token.position)
+    KolasuToken(category, token.position, token.text)
 
 /**
  * The result of lexing (tokenizing) a stream.
  */
-class LexingResult(
+class LexingResult<T : KolasuToken>(
     issues: List<Issue>,
-    val tokens: List<KolasuToken>,
+    val tokens: List<T>,
     code: String? = null,
     val time: Long? = null
-) : CodeProcessingResult<List<KolasuToken>>(issues, tokens, code) {
+) : CodeProcessingResult<List<T>>(issues, tokens, code) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is LexingResult) return false
+        if (other !is LexingResult<*>) return false
         if (!super.equals(other)) return false
 
         if (tokens != other.tokens) return false
@@ -149,7 +150,7 @@ class ParsingResult<RootNode : ASTNode>(
 
 fun String.toStream(charset: Charset = Charsets.UTF_8) = ByteArrayInputStream(toByteArray(charset))
 
-interface KolasuLexer {
+interface KolasuLexer<T : KolasuToken> {
 
     /**
      * Performs "lexing" on the given code string, i.e., it breaks it into tokens.
@@ -169,7 +170,7 @@ interface KolasuLexer {
         inputStream: InputStream,
         charset: Charset = Charsets.UTF_8,
         onlyFromDefaultChannel: Boolean = true
-    ): LexingResult
+    ): LexingResult<T>
 
     /**
      * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.
@@ -184,7 +185,7 @@ interface KolasuLexer {
     /**
      * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.
      */
-    fun lex(file: File): LexingResult = lex(FileInputStream(file))
+    fun lex(file: File): LexingResult<T> = BufferedInputStream(FileInputStream(file)).use { lex(it) }
 }
 
 fun Lexer.injectErrorCollectorInLexer(issues: MutableList<Issue>) {

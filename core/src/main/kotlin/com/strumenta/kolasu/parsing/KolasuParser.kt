@@ -16,7 +16,7 @@ import java.util.*
 import kotlin.reflect.full.memberFunctions
 import kotlin.system.measureTimeMillis
 
-abstract class KolasuANTLRLexer : KolasuLexer {
+abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
     /**
      * Creates the lexer.
      */
@@ -30,9 +30,13 @@ abstract class KolasuANTLRLexer : KolasuLexer {
      */
     protected abstract fun createANTLRLexer(charStream: CharStream): Lexer
 
-    override fun lex(inputStream: InputStream, charset: Charset, onlyFromDefaultChannel: Boolean): LexingResult {
+    override fun lex(
+        inputStream: InputStream,
+        charset: Charset,
+        onlyFromDefaultChannel: Boolean
+    ): LexingResult<KolasuANTLRToken> {
         val issues = LinkedList<Issue>()
-        val tokens = LinkedList<KolasuToken>()
+        val tokens = LinkedList<KolasuANTLRToken>()
         var last: Token? = null
         val time = measureTimeMillis {
             val lexer = createANTLRLexer(inputStream, charset)
@@ -78,7 +82,7 @@ abstract class KolasuParser<R : ASTNode, P : Parser, C : ParserRuleContext> : Ko
     protected abstract fun createANTLRParser(tokenStream: TokenStream): P
 
     /**
-     * Invokes the parser's root rule, i.e., the method which is responsible of parsing the entire input.
+     * Invokes the parser's root rule, i.e., the method which is responsible for parsing the entire input.
      * Usually this is the topmost rule, the one with index 0 (as also assumed by other libraries such as antlr4-c3),
      * so this method invokes that rule. If your grammar/parser is structured differently, or if you're using this to
      * parse only a portion of the input or a subset of the language, you have to override this method to invoke the
@@ -98,7 +102,7 @@ abstract class KolasuParser<R : ASTNode, P : Parser, C : ParserRuleContext> : Ko
         issues: MutableList<Issue>
     ): R?
 
-    open fun extractTokens(result: ParsingResult<R>): LexingResult? {
+    open fun extractTokens(result: ParsingResult<R>): LexingResult<KolasuANTLRToken>? {
         val tokens = mutableListOf<KolasuANTLRToken>()
         fun extractTokensFromParseTree(pt: ParseTree?) {
             if (pt is TerminalNode) {
