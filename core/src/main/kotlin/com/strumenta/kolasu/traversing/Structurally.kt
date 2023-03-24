@@ -115,7 +115,8 @@ fun ASTNode.walkDescendants(walker: (ASTNode) -> Sequence<ASTNode> = ASTNode::wa
 }
 
 @JvmOverloads
-fun <N : Any> ASTNode.walkDescendants(type: KClass<N>, walker: (ASTNode) -> Sequence<ASTNode> = ASTNode::walk): Sequence<N> {
+fun <N : Any> ASTNode.walkDescendants(type: KClass<N>, walker: (ASTNode) -> Sequence<ASTNode> = ASTNode::walk):
+    Sequence<N> {
     return walkDescendants(walker).filterIsInstance(type.java)
 }
 
@@ -150,7 +151,11 @@ fun <T> ASTNode.searchByType(
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  * @return all nodes in this AST (sub)tree that are instances of, or extend [klass].
  */
-fun <T> ASTNode.collectByType(klass: Class<T>, walker: KFunction1<ASTNode, Sequence<ASTNode>> = ASTNode::walk): List<T> {
+fun <T> ASTNode.collectByType(
+    klass: Class<T>,
+    walker: KFunction1<ASTNode, Sequence<ASTNode>> =
+        ASTNode::walk
+): List<T> {
     return walker.invoke(this).filterIsInstance(klass).toList()
 }
 
@@ -159,10 +164,10 @@ fun <T> ASTNode.collectByType(klass: Class<T>, walker: KFunction1<ASTNode, Seque
  * The first walk will take the same time of a normal walk.
  * This walker will ignore any change to the nodes.
  */
-class FastWalker(val node: Node) {
-    private val childrenMap: WeakHashMap<Node, List<Node>> = WeakHashMap<Node, List<Node>>()
+class FastWalker(val node: ASTNode) {
+    private val childrenMap: WeakHashMap<ASTNode, List<ASTNode>> = WeakHashMap<ASTNode, List<ASTNode>>()
 
-    private fun getChildren(child: Node): List<Node> {
+    private fun getChildren(child: ASTNode): List<ASTNode> {
         return if (childrenMap.containsKey(child)) {
             childrenMap[child]!!
         } else {
@@ -171,13 +176,13 @@ class FastWalker(val node: Node) {
         }
     }
 
-    fun walk(root: Node = node): Sequence<Node> {
-        val stack: Stack<Node> = mutableStackOf(root)
+    fun walk(root: ASTNode = node): Sequence<ASTNode> {
+        val stack: Stack<ASTNode> = mutableStackOf(root)
         return generateSequence {
             if (stack.isEmpty()) {
                 null
             } else {
-                val next: Node = stack.pop()
+                val next: ASTNode = stack.pop()
                 stack.pushAll(getChildren(next))
                 next
             }
