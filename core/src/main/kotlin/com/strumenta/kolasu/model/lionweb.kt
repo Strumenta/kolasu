@@ -2,6 +2,7 @@ package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.metamodel.StarLasuMetamodel
 import org.lionweb.lioncore.java.metamodel.Concept
+import org.lionweb.lioncore.java.metamodel.ConceptInterface
 import org.lionweb.lioncore.java.metamodel.Containment
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
 import org.lionweb.lioncore.java.metamodel.Metamodel
@@ -14,11 +15,19 @@ import kotlin.reflect.full.*
 import kotlin.reflect.jvm.jvmName
 
 private val conceptsMemory = HashMap<KClass<out ASTNode>, Concept>()
+private val conceptInterfacesMemory = HashMap<KClass<out Any>, ConceptInterface>()
 
 val <A : ASTNode>KClass<A>.concept: Concept
-    get() = conceptsMemory.getOrElse(this) { calculateConcept(this, conceptsMemory) }
+    get() = conceptsMemory.getOrElse(this) {
+        calculateConcept(this, conceptsMemory, conceptInterfacesMemory)
+    }
 
-private fun metamodelFor(kClass: KClass<out ASTNode>): Metamodel? {
+val <A : Any>KClass<A>.conceptInterface: ConceptInterface
+    get() = conceptInterfacesMemory.getOrElse(this) {
+        calculateConceptInterface(this, conceptsMemory, conceptInterfacesMemory)
+    }
+
+private fun metamodelFor(kClass: KClass<out Any>): Metamodel? {
     val metamodelInstance: Metamodel? = if (kClass.jvmName.contains("$")) {
         val outerClass = kClass.java.declaringClass.kotlin
         val metamodelKClass = outerClass.nestedClasses.find { it.simpleName == "Metamodel" }
@@ -41,12 +50,41 @@ private fun metamodelFor(kClass: KClass<out ASTNode>): Metamodel? {
     return metamodelInstance
 }
 
-fun <A : ASTNode> calculateConcept(kClass: KClass<A>, conceptsMemory: HashMap<KClass<out ASTNode>, Concept>): Concept {
+fun <A : Any> calculateConceptInterface(
+    kClass: KClass<A>,
+    conceptsMemory: HashMap<KClass<out ASTNode>, Concept>,
+    conceptInterfacesMemory: HashMap<KClass<out Any>, ConceptInterface>
+): ConceptInterface {
+
+    require(kClass.java.isInterface)
+
+    val conceptInterface = ConceptInterface()
+    conceptInterface.simpleName = kClass.simpleName
+    conceptInterface.id = kClass.simpleName
+
+    val metamodelInstance: Metamodel = metamodelFor(kClass)
+        ?: throw RuntimeException("No Metamodel object for $kClass")
+    metamodelInstance.addElement(conceptInterface)
+
+    // We need to add it right away because of nodes referring to themselves
+    conceptInterfacesMemory[kClass] = conceptInterface
+    return conceptInterface
+}
+
+fun <A : ASTNode> calculateConcept(
+    kClass: KClass<A>,
+    conceptsMemory: HashMap<KClass<out ASTNode>, Concept>,
+    conceptInterfacesMemory: HashMap<KClass<out Any>, ConceptInterface>
+): Concept {
     try {
+        require(!kClass.java.isInterface)
         if (kClass == ASTNode::class) {
             return StarLasuMetamodel.astNode
         }
-        require(kClass.allSuperclasses.contains(ASTNode::class)) {
+        require(
+            kClass.allSuperclasses.contains(ASTNode::class) || kClass.findAnnotation<NodeType>() != null ||
+                kClass.allSuperclasses.any { it.findAnnotation<NodeType>() != null }
+        ) {
             "KClass $kClass is not a subclass of ASTNode"
         }
         val concept = Concept()
@@ -140,7 +178,12 @@ fun <A : ASTNode> calculateConcept(kClass: KClass<A>, conceptsMemory: HashMap<KC
                                 .classifier as KClass<out ASTNode>
                             ).concept
                     } else {
-                        containment.type = (it.returnType.classifier as KClass<out ASTNode>).concept
+                        val classifier = it.returnType.classifier
+                        if ((classifier as KClass<*>).java.isInterface) {
+                            containment.type = (it.returnType.classifier as KClass<out Any>).conceptInterface
+                        } else {
+                            containment.type = (it.returnType.classifier as KClass<out ASTNode>).concept
+                        }
                     }
                     concept.addFeature(containment)
                 }
