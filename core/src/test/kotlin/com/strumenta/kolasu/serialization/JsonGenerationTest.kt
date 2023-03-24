@@ -15,7 +15,7 @@ import org.junit.Test
 import java.io.StringWriter
 import kotlin.test.assertEquals
 
-object Metamodel: org.lionweb.lioncore.java.metamodel.Metamodel()
+object Metamodel : org.lionweb.lioncore.java.metamodel.Metamodel()
 
 data class NodeWithReference(
     override val name: String? = null,

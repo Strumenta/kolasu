@@ -290,8 +290,10 @@ val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.kotlin.nodeProperties
 val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() = memberProperties.asSequence()
-        .filter { it.visibility == KVisibility.PUBLIC ||
-                (this.functions.find { f -> f.name == "get${it.name.capitalize()}" }?.visibility == KVisibility.PUBLIC) }
+        .filter {
+            it.visibility == KVisibility.PUBLIC ||
+                (this.functions.find { f -> f.name == "get${it.name.capitalize()}" }?.visibility == KVisibility.PUBLIC)
+        }
         .filter { it.findAnnotation<Derived>() == null }
         .filter { it.getter.findAnnotation<Internal>() == null }
         .filter { it.findAnnotation<Internal>() == null }

@@ -57,11 +57,11 @@ fun ASTNode.walkLeavesFirst(): Sequence<ASTNode> {
         if (done) {
             null
         } else {
-            //require(nodesStack.isNotEmpty())
+            // require(nodesStack.isNotEmpty())
             val nodes: List<ASTNode>? = nodesStack.peek()
             val cursor = cursorStack.peek()
             if (nodes == null) {
-                require(cursor==null)
+                require(cursor == null)
                 done = true
                 this
             } else {

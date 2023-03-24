@@ -9,9 +9,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.fail
 
-
 internal class TraversingByPositionTest {
-    object Metamodel: org.lionweb.lioncore.java.metamodel.Metamodel()
+    object Metamodel : org.lionweb.lioncore.java.metamodel.Metamodel()
     class Box(
         val name: String,
         val contents: List<ASTNode>,

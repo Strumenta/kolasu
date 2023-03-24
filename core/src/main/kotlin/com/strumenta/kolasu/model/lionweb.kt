@@ -18,9 +18,8 @@ private val conceptsMemory = HashMap<KClass<out ASTNode>, Concept>()
 val <A : ASTNode>KClass<A>.concept: Concept
     get() = conceptsMemory.getOrElse(this) { calculateConcept(this, conceptsMemory) }
 
-
-private fun metamodelFor(kClass: KClass<out ASTNode>) : Metamodel? {
-    val metamodelInstance : Metamodel? = if (kClass.jvmName.contains("$")) {
+private fun metamodelFor(kClass: KClass<out ASTNode>): Metamodel? {
+    val metamodelInstance: Metamodel? = if (kClass.jvmName.contains("$")) {
         val outerClass = kClass.java.declaringClass.kotlin
         val metamodelKClass = outerClass.nestedClasses.find { it.simpleName == "Metamodel" }
         if (metamodelKClass == null) {
@@ -35,7 +34,7 @@ private fun metamodelFor(kClass: KClass<out ASTNode>) : Metamodel? {
         } catch (e: ClassNotFoundException) {
             throw RuntimeException("Unable to find the metamodel for Kotlin class $kClass")
         }
-        metamodelKClass.staticProperties.find { it.name == "INSTANCE"}?.let { instance ->
+        metamodelKClass.staticProperties.find { it.name == "INSTANCE" }?.let { instance ->
             instance.get() as Metamodel
         } ?: metamodelKClass.objectInstance as Metamodel
     }
@@ -68,7 +67,8 @@ fun <A : ASTNode> calculateConcept(kClass: KClass<A>, conceptsMemory: HashMap<KC
             concept.extendedConcept = StarLasuMetamodel.astNode
         }
 
-        val metamodelInstance : Metamodel = metamodelFor(kClass) ?: throw RuntimeException("No Metamodel object for ${kClass}")
+        val metamodelInstance: Metamodel = metamodelFor(kClass)
+            ?: throw RuntimeException("No Metamodel object for $kClass")
 
         // We need to add it right away because of nodes referring to themselves
         conceptsMemory[kClass] = concept
@@ -83,9 +83,9 @@ fun <A : ASTNode> calculateConcept(kClass: KClass<A>, conceptsMemory: HashMap<KC
                         reference.simpleName = it.name
                         reference.id = it.name
                         reference.type = (
-                                it.returnType.arguments[0].type!!
-                                    .classifier as KClass<out ASTNode>
-                                ).concept
+                            it.returnType.arguments[0].type!!
+                                .classifier as KClass<out ASTNode>
+                            ).concept
                         concept.addFeature(reference)
                     } else {
                         val property = Property()
@@ -110,12 +110,15 @@ fun <A : ASTNode> calculateConcept(kClass: KClass<A>, conceptsMemory: HashMap<KC
 
                             else -> {
                                 if ((it.returnType.classifier as? KClass<*>)?.allSuperclasses?.contains(Enum::class)
-                                        ?: false
+                                    ?: false
                                 ) {
                                     // TODO add support for enums
                                     property.type = LionCoreBuiltins.getString()
                                 } else {
-                                    TODO("Return type: ${it.returnType.classifier} (${it.returnType.classifier?.javaClass} for property ${it}")
+                                    TODO(
+                                        "Return type: ${it.returnType.classifier} " +
+                                            "(${it.returnType.classifier?.javaClass} for property $it"
+                                    )
                                 }
                             }
                         }
