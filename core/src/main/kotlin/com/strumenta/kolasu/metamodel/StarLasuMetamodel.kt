@@ -7,8 +7,10 @@ import org.lionweb.lioncore.java.metamodel.PrimitiveType
 object StarLasuMetamodel : Metamodel() {
     val astNode: Concept
     val position: PrimitiveType
+    val char: PrimitiveType
     init {
         astNode = Concept(this, "ASTNode", "StarLasu-ASTNode")
         position = PrimitiveType(this, "Position", "StarLasu-Position")
+        char = PrimitiveType(this, "Char", "StarLasu-Char")
     }
 }

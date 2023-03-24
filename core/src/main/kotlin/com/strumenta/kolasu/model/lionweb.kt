@@ -147,6 +147,10 @@ fun <A : ASTNode> calculateConcept(
                                 property.type = StarLasuMetamodel.position
                             }
 
+                            Char::class -> {
+                                property.type = StarLasuMetamodel.char
+                            }
+
                             else -> {
                                 if ((it.returnType.classifier as? KClass<*>)?.allSuperclasses?.contains(Enum::class)
                                     ?: false
