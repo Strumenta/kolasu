@@ -14,7 +14,7 @@ object Metamodel : Metamodel() {
 
 class MySimpleNode(val b: Boolean, val others: List<MyOtherNode>) : ASTNode()
 
-class MyOtherNode(val i: Int, val s: String): ASTNode()
+class MyOtherNode(val i: Int, val s: String) : ASTNode()
 
 class LionWebTest {
 

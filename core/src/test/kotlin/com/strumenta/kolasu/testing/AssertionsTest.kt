@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.testing
 
-import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.Named
 import org.junit.ComparisonFailure
 import org.junit.Test
 

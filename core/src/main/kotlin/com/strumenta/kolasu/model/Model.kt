@@ -84,7 +84,7 @@ open class ASTNode() : Node, Origin, Destination {
     /**
      * The parent node, if any.
      */
-    //@property:Internal
+    // @property:Internal
     private var _parent: ASTNode? = null
 
     /**
@@ -159,7 +159,8 @@ open class ASTNode() : Node, Origin, Destination {
         if (!this.concept.allProperties().contains(property)) {
             throw IllegalArgumentException("Invalid property $property")
         }
-        val memberProperty = this::class.memberProperties.find { it.name == property.simpleName } ?: throw IllegalStateException()
+        val memberProperty = this::class.memberProperties.find { it.name == property.simpleName }
+            ?: throw IllegalStateException()
         return (memberProperty as KProperty1<ASTNode, *>).get(this)
     }
 
@@ -175,7 +176,8 @@ open class ASTNode() : Node, Origin, Destination {
         if (!this.concept.allContainments().contains(containment)) {
             throw IllegalArgumentException("Invalid containment $containment")
         }
-        val memberProperty = this::class.memberProperties.find { it.name == containment.simpleName } ?: throw IllegalStateException()
+        val memberProperty = this::class.memberProperties.find { it.name == containment.simpleName }
+            ?: throw IllegalStateException()
         val value = (memberProperty as KProperty1<ASTNode, *>).get(this)
         return when (value) {
             is Collection<*> -> {
@@ -216,11 +218,11 @@ open class ASTNode() : Node, Origin, Destination {
         return "${sourceID(source)}-${pathID(this)}"
     }
 
-    private fun sourceID(source: Source?) : String {
-        return source?.id ?: "_UNSPECIFIED_";
+    private fun sourceID(source: Source?): String {
+        return source?.id ?: "_UNSPECIFIED_"
     }
 
-    private fun pathID(node: ASTNode) : String {
+    private fun pathID(node: ASTNode): String {
         return if (node.parent == null) {
             ""
         } else {

@@ -14,7 +14,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-data class CU(val specifiedPosition: Position? = null, var statements: List<ASTNode> = listOf()) : ASTNode(specifiedPosition)
+data class CU(
+    val specifiedPosition: Position? = null,
+    var statements: List<ASTNode> =
+        listOf()
+) : ASTNode(specifiedPosition)
 data class DisplayIntStatement(val specifiedPosition: Position? = null, val value: Int) : ASTNode(specifiedPosition)
 data class SetStatement(val specifiedPosition: Position? = null, var variable: String = "", val value: Int = 0) :
     ASTNode(specifiedPosition)

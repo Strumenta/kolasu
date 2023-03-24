@@ -4,8 +4,8 @@ import com.github.ajalt.clikt.core.PrintHelpMessage
 import com.github.ajalt.clikt.output.CliktConsole
 import com.strumenta.kolasu.emf.EMFEnabledParser
 import com.strumenta.kolasu.emf.MetamodelBuilder
-import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.runtime.CharStream

@@ -9,28 +9,26 @@ import org.lionweb.lioncore.java.metamodel.Property
 import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
-import kotlin.reflect.KType
 import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.allSupertypes
-import kotlin.reflect.full.createType
 import kotlin.reflect.full.superclasses
 
 private val conceptsMemory = HashMap<KClass<out ASTNode>, Concept>()
 
-val <A:ASTNode>KClass<A>.concept : Concept
+val <A : ASTNode>KClass<A>.concept: Concept
     get() = conceptsMemory.getOrPut(this) { calculateConcept(this) }
 
-fun <A:ASTNode>calculateConcept(kClass: KClass<A>) : Concept {
+fun <A : ASTNode> calculateConcept(kClass: KClass<A>): Concept {
     try {
         require(kClass.allSuperclasses.contains(ASTNode::class)) {
-            "KClass ${kClass} is not a subclass of ASTNode"
+            "KClass $kClass is not a subclass of ASTNode"
         }
         val concept = Concept()
         concept.simpleName = kClass.simpleName
         concept.id = kClass.simpleName
 
         val superclasses = kClass.superclasses.toMutableList()
-        //require(superclasses.contains(ASTNode::class))
+        // require(superclasses.contains(ASTNode::class))
         superclasses.remove(ASTNode::class)
         superclasses.forEach { superclass ->
             if (superclass.java.isInterface) {
@@ -68,7 +66,9 @@ fun <A:ASTNode>calculateConcept(kClass: KClass<A>) : Concept {
                             property.type = LionCoreBuiltins.getInteger()
                         }
                         else -> {
-                            if ((it.returnType.classifier as? KClass<*>)?.allSuperclasses?.contains(Enum::class) ?: false) {
+                            if ((it.returnType.classifier as? KClass<*>)?.allSuperclasses?.contains(Enum::class)
+                                ?: false
+                            ) {
                                 // TODO add support for enums
                                 property.type = LionCoreBuiltins.getString()
                             } else {
@@ -83,9 +83,14 @@ fun <A:ASTNode>calculateConcept(kClass: KClass<A>) : Concept {
                     val containment = Containment()
                     containment.simpleName = it.name
                     containment.id = it.name
-                    if ((it.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }.contains(Collection::class)) {
+                    if ((it.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }
+                        .contains(Collection::class)
+                    ) {
                         containment.isMultiple = true
-                        containment.type = (it.returnType.arguments[0].type!!.classifier as KClass<out ASTNode>).concept
+                        containment.type = (
+                            it.returnType.arguments[0].type!!
+                                .classifier as KClass<out ASTNode>
+                            ).concept
                     } else {
                         containment.type = (it.returnType.classifier as KClass<out ASTNode>).concept
                     }

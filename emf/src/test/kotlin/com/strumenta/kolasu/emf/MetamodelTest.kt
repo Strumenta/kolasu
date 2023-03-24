@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.NodeType
 import com.strumenta.kolasu.model.ReferenceByName
 import org.eclipse.emf.common.util.URI

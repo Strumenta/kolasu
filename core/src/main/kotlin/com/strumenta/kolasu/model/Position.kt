@@ -121,8 +121,7 @@ abstract class Source {
 class SourceSet(val name: String, val root: Path)
 class SourceSetElement(val sourceSet: SourceSet, val relativePath: Path) : Source() {
     override val id: String?
-        get() = "sourceset_${sourceSet.name}-${relativePath}"
-
+        get() = "sourceset_${sourceSet.name}-$relativePath"
 }
 class FileSource(val file: File) : Source() {
     override val id: String?
@@ -134,7 +133,7 @@ class StringSource(val code: String? = null) : Source() {
 }
 class URLSource(val url: URL) : Source() {
     override val id: String?
-        get() = "url_${url}"
+        get() = "url_$url"
 }
 
 /**
@@ -147,7 +146,7 @@ class URLSource(val url: URL) : Source() {
  */
 data class SyntheticSource(val description: String) : Source() {
     override val id: String?
-        get() = "synthetic_${description}"
+        get() = "synthetic_$description"
 }
 
 /**

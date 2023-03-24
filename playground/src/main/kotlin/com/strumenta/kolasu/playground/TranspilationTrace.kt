@@ -59,7 +59,8 @@ class TranspilationTrace<S : ASTNode, T : ASTNode>(
     )
 }
 
-private fun <S : ASTNode, T : ASTNode> makeTranspilationTraceEObject(transpilationTrace: TranspilationTrace<S, T>): EObject {
+private fun <S : ASTNode, T : ASTNode> makeTranspilationTraceEObject(transpilationTrace: TranspilationTrace<S, T>):
+    EObject {
     val transpilationTraceEC = TRANSPILATION_METAMODEL.getEClass(TranspilationTrace::class.java)
     val transpilationTraceEO = TRANSPILATION_METAMODEL.eFactoryInstance.create(transpilationTraceEC)
     return transpilationTraceEO

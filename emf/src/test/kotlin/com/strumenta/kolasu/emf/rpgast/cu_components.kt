@@ -4,9 +4,9 @@ import com.strumenta.kolasu.emf.rpgast.AbstractDataDefinition
 import com.strumenta.kolasu.emf.rpgast.DataDefinition
 import com.strumenta.kolasu.emf.rpgast.FileDefinition
 import com.strumenta.kolasu.emf.rpgast.InStatementDataDefinition
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Derived
 import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Position
 // This file contains the AST nodes at the highest level:
 // from the CompilationUnit (which represents the whole file)

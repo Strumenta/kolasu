@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.transformation
 
 import com.strumenta.kolasu.mapping.ParseTreeToASTTransformer
-import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.testing.assertASTsAreEqual

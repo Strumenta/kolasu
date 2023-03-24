@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.codegen
 
-import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.ReferenceByName
 
 // This file contains the AST definition for the Kotlin language

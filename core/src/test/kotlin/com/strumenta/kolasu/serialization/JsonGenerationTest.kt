@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.serialization
 
 import com.google.gson.stream.JsonWriter
-import com.strumenta.kolasu.model.ExtNode
 import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.ExtNode
 import com.strumenta.kolasu.model.NodeOverridingName
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName

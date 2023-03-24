@@ -1,10 +1,10 @@
 package com.strumenta.kolasu.traversing
 
+import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.pos
-import com.strumenta.kolasu.model.*
 import kotlin.system.measureTimeMillis
 import kotlin.test.Test
 import kotlin.test.assertContains
