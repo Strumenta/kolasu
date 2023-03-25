@@ -4,6 +4,8 @@ import com.strumenta.kolasu.metamodel.StarLasuMetamodel
 import org.lionweb.lioncore.java.metamodel.Concept
 import org.lionweb.lioncore.java.metamodel.ConceptInterface
 import org.lionweb.lioncore.java.metamodel.Containment
+import org.lionweb.lioncore.java.metamodel.Enumeration
+import org.lionweb.lioncore.java.metamodel.EnumerationLiteral
 import org.lionweb.lioncore.java.metamodel.FeaturesContainer
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
 import org.lionweb.lioncore.java.metamodel.Metamodel
@@ -17,7 +19,13 @@ import kotlin.reflect.full.*
 import kotlin.reflect.jvm.jvmName
 
 private val conceptsMemory = HashMap<KClass<out ASTNode>, Concept>()
+private val enumsMemory = HashMap<KClass<out Enum<*>>, Enumeration>()
 private val conceptInterfacesMemory = HashMap<KClass<out Any>, ConceptInterface>()
+
+val <E : Enum<*>>KClass<E>.enumeration: Enumeration
+    get() = enumsMemory.getOrPut(this) {
+        calculateEnum(this)
+    }
 
 val <A : ASTNode>KClass<A>.concept: Concept
     get() = conceptsMemory.getOrElse(this) {
@@ -28,6 +36,21 @@ val <A : Any>KClass<A>.conceptInterface: ConceptInterface
     get() = conceptInterfacesMemory.getOrElse(this) {
         calculateConceptInterface(this, conceptsMemory, conceptInterfacesMemory)
     }
+
+private fun <E : Enum<*>>calculateEnum(enum: KClass<E>) : Enumeration {
+    val enumeration = Enumeration()
+    enumeration.simpleName = enum.simpleName
+    enumeration.id = enum.simpleName
+
+    enum.java.enumConstants.forEach {
+        val literal = EnumerationLiteral()
+        literal.id = enum.simpleName + "-" + it.name
+        literal.simpleName = enum.simpleName
+        enumeration.addLiteral(literal)
+    }
+
+    return enumeration
+}
 
 private fun metamodelFor(kClass: KClass<out Any>): Metamodel? {
     val metamodelInstance: Metamodel? = if (kClass.jvmName.contains("$")) {
@@ -163,8 +186,8 @@ fun <A : ASTNode> calculateConcept(
                                 if ((it.returnType.classifier as? KClass<*>)?.allSuperclasses?.contains(Enum::class)
                                     ?: false
                                 ) {
-                                    // TODO add support for enums
-                                    property.type = LionCoreBuiltins.getString()
+                                    val enum : KClass<out Enum<*>> = it.returnType.classifier as KClass<out Enum<*>>
+                                    property.type = enum.enumeration
                                 } else {
                                     TODO(
                                         "Return type: ${it.returnType.classifier} " +
