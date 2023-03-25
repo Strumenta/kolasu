@@ -216,8 +216,37 @@ open class ASTNode() : Node, Origin, Destination {
         TODO("Not yet implemented")
     }
 
-    override fun getReferenceValues(p0: Reference): MutableList<ReferenceValue> {
-        TODO("Not yet implemented")
+    override fun getReferenceValues(reference: Reference): List<ReferenceValue> {
+        if (!this.concept.allReferences().contains(reference)) {
+            throw IllegalArgumentException("Invalid reference $reference")
+        }
+        val memberProperty = this::class.memberProperties.find { it.name == reference.simpleName }
+            ?: throw IllegalStateException()
+        try {
+            val value = if (memberProperty.visibility == KVisibility.PRIVATE) {
+                val getter = this::class.functions.find { it.name == "get${reference.simpleName!!.capitalize()}" }!!
+                getter.call(this) as MutableList<ASTNode>
+            } else {
+                (memberProperty as KProperty1<ASTNode, *>).get(this)
+            }
+            return when (value) {
+                is Collection<*> -> {
+                    (value.toList() as MutableList<ReferenceByName<*>>).map {
+                        ReferenceValue(it.referred as? Node , it.name)
+                    }
+                }
+
+                null -> {
+                    mutableListOf()
+                }
+
+                else -> {
+                    mutableListOf((value as ReferenceByName<*>).let { ReferenceValue(it.referred as? Node , it.name) })
+                }
+            }
+        } catch (e: Throwable) {
+            throw RuntimeException("Unable to access reference $reference", e)
+        }
     }
 
     override fun addReferenceValue(p0: Reference, p1: ReferenceValue?) {
