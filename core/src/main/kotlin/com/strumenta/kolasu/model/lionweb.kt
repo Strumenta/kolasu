@@ -51,11 +51,14 @@ open class ReflectionBasedMetamodel(vararg classes: KClass<*>) : Metamodel() {
 
     protected fun considerClass(kClass: KClass<*>) {
         try {
-            if (consideredClasses.contains(kClass) || kClass == ASTNode::class) {
+            if (consideredClasses.contains(kClass) || kClass == ASTNode::class || kClass == Any::class) {
                 return
             }
             if (kClass.allSuperclasses.contains(Enum::class)) {
                 enumClasses.add(kClass as KClass<out Enum<*>>)
+                kClass.enumeration
+                consideredClasses.add(kClass)
+                return
             }
             consideredClasses.add(kClass)
             kClass.nodeProperties.forEach {
@@ -109,6 +112,11 @@ open class ReflectionBasedMetamodel(vararg classes: KClass<*>) : Metamodel() {
             }
             kClass.superclasses.forEach { considerClass(it) }
             kClass.sealedSubclasses.forEach { considerClass(it) }
+            if (kClass.java.isInterface) {
+                kClass.conceptInterface
+            } else {
+                (kClass as? KClass<out ASTNode>)?.concept
+            }
         } catch (e: Throwable){
             System.err.println("Issue considering $kClass")
             e.printStackTrace()
