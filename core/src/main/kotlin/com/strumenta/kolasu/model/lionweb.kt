@@ -178,9 +178,25 @@ private fun metamodelFor(kClass: KClass<out Any>): Metamodel? {
         } catch (e: ClassNotFoundException) {
             throw RuntimeException("Unable to find the metamodel for Kotlin class $kClass")
         }
-        metamodelKClass.staticProperties.find { it.name == "INSTANCE" }?.let { instance ->
-            instance.get() as Metamodel
-        } ?: metamodelKClass.objectInstance as Metamodel
+        if (metamodelKClass == null) {
+            throw IllegalStateException("Metamodel class not found")
+        }
+        val metamolInstanceRaw = metamodelKClass.staticProperties.find { it.name == "INSTANCE" }?.let { instance ->
+            val instanceRaw = instance.get()
+            if (instanceRaw !is Metamodel) {
+                throw IllegalStateException("value of INSTANCE field for $metamodelKClass is not a Metamodel but it is $instanceRaw")
+            }
+            instanceRaw as Metamodel
+        } ?: try {
+            metamodelKClass.objectInstance
+        } catch (e: Throwable) {
+            IL PROBLEMA E' CHE STIAMO COSTRUENDO L'OGGETTO, PROBABILMENTE
+            throw java.lang.RuntimeException("Unable to get object instance for $metamodelKClass", e)
+        }
+        if (metamolInstanceRaw !is Metamodel) {
+            throw IllegalStateException("Object instance for $metamodelKClass is not a Metamodel but it is $metamolInstanceRaw")
+        }
+        metamolInstanceRaw as Metamodel
     }
     return metamodelInstance
 }

@@ -5,13 +5,19 @@ import org.lionweb.lioncore.java.metamodel.Metamodel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-object Metamodel : ReflectionBasedMetamodel("MyMetamodelID", "MyMetamodel")
+object Metamodel : ReflectionBasedMetamodel("MyMetamodelID", "MyMetamodel", MySimpleNode::class)
 
 class MySimpleNode(val b: Boolean, val others: List<MyOtherNode>) : ASTNode()
 
 class MyOtherNode(val i: Int, val s: String) : ASTNode()
 
 class LionWebTest {
+
+    @Test
+    fun metamodelElements() {
+        val mm = MySimpleNode::class.concept.metamodel!!
+        assertEquals(2, mm.elements.size)
+    }
 
     @Test
     fun getConceptMySimpleNodeStatically() {
