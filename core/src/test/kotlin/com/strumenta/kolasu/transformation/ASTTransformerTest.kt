@@ -2,6 +2,7 @@ package com.strumenta.kolasu.transformation
 
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.ReflectionBasedMetamodel
 import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.validation.Issue
@@ -11,7 +12,7 @@ import org.lionweb.lioncore.java.metamodel.Metamodel
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-object Metamodel : Metamodel()
+object Metamodel : ReflectionBasedMetamodel()
 
 data class CU(
     val specifiedPosition: Position? = null,

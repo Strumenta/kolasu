@@ -5,12 +5,7 @@ import org.lionweb.lioncore.java.metamodel.Metamodel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-object Metamodel : Metamodel() {
-    init {
-        id = "MyMetamodelID"
-        name = "MyMetamodel"
-    }
-}
+object Metamodel : ReflectionBasedMetamodel("MyMetamodelID", "MyMetamodel")
 
 class MySimpleNode(val b: Boolean, val others: List<MyOtherNode>) : ASTNode()
 

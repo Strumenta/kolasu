@@ -22,6 +22,72 @@ private val conceptsMemory = HashMap<KClass<out ASTNode>, Concept>()
 private val enumsMemory = HashMap<KClass<out Enum<*>>, Enumeration>()
 private val conceptInterfacesMemory = HashMap<KClass<out Any>, ConceptInterface>()
 
+open class ReflectionBasedMetamodel() : Metamodel() {
+    private val consideredClasses = mutableSetOf<KClass<*>>()
+    private val enumClasses = mutableSetOf<KClass<out Enum<*>>>()
+
+    constructor(id: String, name: String) : this() {
+        setID(id)
+        setName(name)
+    }
+
+    protected fun considerClass(kClass: KClass<*>) {
+        if (consideredClasses.contains(kClass)) {
+            return
+        }
+        if (kClass.allSuperclasses.contains(Enum::class)) {
+            enumClasses.add(kClass as KClass<out Enum<*>>)
+        }
+        consideredClasses.add(kClass)
+        kClass.nodeProperties.forEach {
+            val provideNodes = PropertyDescription.providesNodes(it as KProperty1<in ASTNode, *>)
+            val ref = (it as KProperty1<in ASTNode, *>).isReference
+            when {
+                !provideNodes -> {
+                    if (it.returnType.classifier == ReferenceByName::class) {
+                        considerClass(it.returnType.arguments[0].type!!
+                            .classifier as KClass<*>)
+                    } else {
+                        when (it.returnType.classifier) {
+                            Boolean::class, String::class,Int::class,Position::class,Char::class -> Unit // nothing to do
+                            else -> {
+                                if ((it.returnType.classifier as? KClass<*>)?.allSuperclasses?.contains(Enum::class)
+                                        ?: false
+                                ) {
+                                    val enum : KClass<out Enum<*>> = it.returnType.classifier as KClass<out Enum<*>>
+                                    considerClass(enum)
+                                } else {
+                                    TODO(
+                                        "Return type: ${it.returnType.classifier} " +
+                                                "(${it.returnType.classifier?.javaClass} for property $it"
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                provideNodes && ref -> TODO()
+                provideNodes && !ref -> {
+                    val containment = Containment()
+                    containment.simpleName = it.name
+                    containment.id = it.name
+                    if ((it.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }
+                            .contains(Collection::class)
+                    ) {
+                        considerClass(it.returnType.arguments[0].type!!
+                            .classifier as KClass<*>)
+                    } else {
+                        val classifier = it.returnType.classifier
+                        considerClass(classifier as KClass<*>)
+                    }
+                }
+            }
+        }
+        kClass.superclasses.forEach { considerClass(it) }
+        kClass.sealedSubclasses.forEach { considerClass(it) }
+    }
+}
+
 val <E : Enum<*>>KClass<E>.enumeration: Enumeration
     get() = enumsMemory.getOrPut(this) {
         calculateEnum(this)

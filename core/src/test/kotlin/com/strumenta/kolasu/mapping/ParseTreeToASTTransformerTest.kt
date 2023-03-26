@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-object Metamodel : Metamodel()
+object Metamodel : ReflectionBasedMetamodel()
 
 data class CU(
     val specifiedPosition: Position? = null,

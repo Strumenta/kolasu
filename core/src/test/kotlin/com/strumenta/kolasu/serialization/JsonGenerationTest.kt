@@ -1,12 +1,8 @@
 package com.strumenta.kolasu.serialization
 
 import com.google.gson.stream.JsonWriter
-import com.strumenta.kolasu.model.ASTNode
-import com.strumenta.kolasu.model.ExtNode
+import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.model.Metamodel
-import com.strumenta.kolasu.model.NodeOverridingName
-import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
@@ -15,7 +11,7 @@ import org.junit.Test
 import java.io.StringWriter
 import kotlin.test.assertEquals
 
-object Metamodel : org.lionweb.lioncore.java.metamodel.Metamodel()
+object Metamodel : ReflectionBasedMetamodel()
 
 data class NodeWithReference(
     override val name: String? = null,

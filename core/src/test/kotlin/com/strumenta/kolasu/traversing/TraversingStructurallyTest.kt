@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.fail
 
 internal class TraversingStructurallyTest {
-    object Metamodel : org.lionweb.lioncore.java.metamodel.Metamodel()
+    object Metamodel : ReflectionBasedMetamodel()
 
     class Box(
         val name: String,
