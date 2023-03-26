@@ -30,6 +30,7 @@ open class ReflectionBasedMetamodel(vararg classes: KClass<*>) : Metamodel() {
 
     constructor(id: String, name: String, version: Int, vararg classes: KClass<*>) : this(*classes) {
         setID(id)
+        setKey(id)
         setName(name)
         setVersion(Integer.toString(version))
     }
@@ -134,7 +135,14 @@ val <A : Any>KClass<A>.conceptInterface: ConceptInterface
 private fun <E : Enum<*>>calculateEnum(enum: KClass<E>) : Enumeration {
     val enumeration = Enumeration()
     enumeration.simpleName = enum.simpleName
-    enumeration.id = enum.simpleName
+
+    val metamodelInstance: Metamodel = metamodelFor(enum)
+        ?: throw RuntimeException("No Metamodel object for $enum")
+
+    enumeration.id = metamodelInstance.key + "-" + enum.simpleName
+    enumeration.key = metamodelInstance.key + "-" + enum.simpleName
+
+    metamodelInstance.addElement(enumeration)
 
     enum.java.enumConstants.forEach {
         val literal = EnumerationLiteral()
@@ -179,10 +187,13 @@ fun <A : Any> calculateConceptInterface(
 
     val conceptInterface = ConceptInterface()
     conceptInterface.simpleName = kClass.simpleName
-    conceptInterface.id = kClass.simpleName
 
     val metamodelInstance: Metamodel = metamodelFor(kClass)
         ?: throw RuntimeException("No Metamodel object for $kClass")
+
+    conceptInterface.id = metamodelInstance.key + "-" + kClass.simpleName
+    conceptInterface.key = metamodelInstance.key + "-" + kClass.simpleName
+
     metamodelInstance.addElement(conceptInterface)
 
     // We need to add it right away because of nodes referring to themselves
@@ -216,7 +227,6 @@ fun <A : ASTNode> calculateConcept(
         }
         val concept = Concept()
         concept.simpleName = kClass.simpleName
-        concept.id = kClass.simpleName
 
         val superclasses = kClass.superclasses.toMutableList()
         // require(superclasses.contains(ASTNode::class))
@@ -235,6 +245,9 @@ fun <A : ASTNode> calculateConcept(
         val metamodelInstance: Metamodel = metamodelFor(kClass)
             ?: throw RuntimeException("No Metamodel object for $kClass")
         metamodelInstance.addElement(concept)
+
+        concept.id = metamodelInstance.key + "-" + kClass.simpleName
+        concept.key = metamodelInstance.key + "-" + kClass.simpleName
 
         // We need to add it right away because of nodes referring to themselves
         conceptsMemory[kClass] = concept
