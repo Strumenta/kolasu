@@ -45,10 +45,12 @@ val exampleScopeProvider = declarativeScopeProvider {
 
     scopeFor(VariableAssignment::variable) { context: VariableAssignment ->
         println("VariableAssignment::variable(VariableAssignment)")
-        Scope(symbols = mutableMapOf("example" to mutableListOf(VariableSymbol(name = "Example"))))
+        context.findAncestorOfType(FunctionDeclaration::class.java)
+            ?.let { getScope(it, VariableAssignment::variable) }
     }
 
     scopeFor(VariableAssignment::variable) { context: FunctionDeclaration ->
+        println("VariableAssignment::variable(FunctionDeclaration)")
         val parentScope = context.findAncestorOfType(FunctionDeclaration::class.java)
             ?.let { getScope(it, VariableAssignment::variable) }
         val scope = Scope(parent = parentScope)
@@ -78,7 +80,11 @@ class SymbolResolutionTest {
 
         functionDeclaration.assignParents()
 
-        val scope = exampleScopeProvider.getScope(variableReference.parent!!, VariableAssignment::variable)
+        val scope = exampleScopeProvider.getScope(variableReference, VariableAssignment::variable)
+
+        exampleScopeProvider.getScope(variableReference.parent!!.parent!!, VariableAssignment::variable)
+        exampleScopeProvider.getScope(variableReference.parent!!, VariableAssignment::variable)
+        exampleScopeProvider.getScope(variableReference, VariableAssignment::variable)
 
         println(scope)
     }

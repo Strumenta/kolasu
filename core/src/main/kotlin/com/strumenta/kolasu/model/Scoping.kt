@@ -1,13 +1,13 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.utils.memoize
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSuperclassOf
 
-data class ScopeDefinition(
-    val contextType: KClass<*>,
-    val scopeFunction: ScopeFunction<Node>,
-)
+class ScopeDefinition(val contextType: KClass<*>, scopeFunction: ScopeFunction<Node>) {
+    val scopeFunction: ScopeFunction<Node> = scopeFunction.memoize()
+}
 
 typealias ScopeFunction<N> = (N) -> Scope?
 typealias PropertyTypeScopeDefinitions = MutableMap<KClass<*>, MutableList<ScopeDefinition>>
