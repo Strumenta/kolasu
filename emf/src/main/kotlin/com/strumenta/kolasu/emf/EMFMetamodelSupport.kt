@@ -68,7 +68,7 @@ fun ParsingResult<*>.saveModel(
  * In particular, this parser can generate the metamodel. We can then use [ASTNode.toEObject] to translate a tree into
  * its EMF representation.
  */
-abstract class EMFEnabledParser<R : ASTNode, P : Parser, C : ParserRuleContext> :
+abstract class EcoreEnabledParser<R : ASTNode, P : Parser, C : ParserRuleContext> :
     KolasuParser<R, P, C>(), EMFMetamodelSupport {
 
     /**
