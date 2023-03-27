@@ -232,7 +232,7 @@ open class ASTNode() : Node, Origin, Destination {
             return when (value) {
                 is Collection<*> -> {
                     (value.toList() as MutableList<ReferenceByName<*>>).map {
-                        ReferenceValue(it.referred as? Node , it.name)
+                        ReferenceValue(it.referred as? Node, it.name)
                     }
                 }
 
@@ -241,7 +241,7 @@ open class ASTNode() : Node, Origin, Destination {
                 }
 
                 else -> {
-                    mutableListOf((value as ReferenceByName<*>).let { ReferenceValue(it.referred as? Node , it.name) })
+                    mutableListOf((value as ReferenceByName<*>).let { ReferenceValue(it.referred as? Node, it.name) })
                 }
             }
         } catch (e: Throwable) {

@@ -10,7 +10,6 @@ import com.strumenta.simplelang.SimpleLangParser
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.junit.Test
-import org.lionweb.lioncore.java.metamodel.Metamodel
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue

@@ -6,7 +6,6 @@ import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.pos
 import org.junit.Ignore
-import org.lionweb.lioncore.java.metamodel.Metamodel
 import kotlin.system.measureTimeMillis
 import kotlin.test.Test
 import kotlin.test.assertContains

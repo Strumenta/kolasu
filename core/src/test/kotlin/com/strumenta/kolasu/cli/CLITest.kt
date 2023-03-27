@@ -8,7 +8,6 @@ import com.strumenta.kolasu.model.ReflectionBasedMetamodel
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.junit.Test
-import org.lionweb.lioncore.java.metamodel.Metamodel
 import java.io.File
 import java.nio.charset.Charset
 import kotlin.io.path.createTempDirectory

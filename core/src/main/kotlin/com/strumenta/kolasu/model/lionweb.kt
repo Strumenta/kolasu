@@ -190,7 +190,7 @@ private fun metamodelFor(kClass: KClass<out Any>): Metamodel? {
         } ?: try {
             metamodelKClass.objectInstance
         } catch (e: Throwable) {
-            IL PROBLEMA E' CHE STIAMO COSTRUENDO L'OGGETTO, PROBABILMENTE
+
             throw java.lang.RuntimeException("Unable to get object instance for $metamodelKClass", e)
         }
         if (metamolInstanceRaw !is Metamodel) {

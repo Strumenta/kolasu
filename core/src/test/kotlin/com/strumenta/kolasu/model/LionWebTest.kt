@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.model
 
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
-import org.lionweb.lioncore.java.metamodel.Metamodel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
