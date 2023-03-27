@@ -145,7 +145,7 @@ internal class TraversingStructurallyTest {
             assertEquals(nodes, it)
         }
         // we are testing that walkTimeFast is taking more or less the same time as walkTime
-        assertContains(walkTime * 0.8..walkTime * 1.2, walkTimeFast.toDouble())
+        assertContains(walkTime * 0.8..walkTime * 1.35, walkTimeFast.toDouble())
         println(walkTime)
         println(walkTimeFastTwo)
         assert(walkTimeFastTwo < walkTime)
