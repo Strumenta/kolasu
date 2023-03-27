@@ -32,30 +32,21 @@ class DeclarativeScopeProvider : ScopeProvider {
             ?: this.tryGetScopeForPropertyType(context, reference)
     }
 
-    private fun tryGetScopeForProperty(context: Node, reference: ReferenceByNameProperty<*>): Scope? {
-        return this.tryGetScope(
-            this.propertyScopeDefinitions[reference],
-            this::tryGetScopeForProperty,
-            context,
-            reference,
-        )
+    private tailrec fun tryGetScopeForProperty(context: Node, reference: ReferenceByNameProperty<*>): Scope? {
+        return this.tryGetScope(this.propertyScopeDefinitions[reference], context)
+            ?: if (context.parent == null) { null } else {
+                return tryGetScopeForProperty(context.parent!!, reference)
+            }
     }
 
-    private fun tryGetScopeForPropertyType(context: Node, reference: ReferenceByNameProperty<*>): Scope? {
-        return this.tryGetScope(
-            this.propertyTypeScopeDefinitions[reference.returnType.classifier],
-            this::tryGetScopeForPropertyType,
-            context,
-            reference,
-        )
+    private tailrec fun tryGetScopeForPropertyType(context: Node, reference: ReferenceByNameProperty<*>): Scope? {
+        return tryGetScope(propertyTypeScopeDefinitions[reference.returnType.classifier], context)
+            ?: if (context.parent == null) { null } else {
+                return tryGetScopeForPropertyType(context.parent!!, reference)
+            }
     }
 
-    private fun tryGetScope(
-        scopeDefinitions: List<ScopeDefinition>?,
-        parentScopeGetter: (Node, ReferenceByNameProperty<*>) -> Scope?,
-        context: Node,
-        reference: ReferenceByNameProperty<*>,
-    ): Scope? {
+    private fun tryGetScope(scopeDefinitions: List<ScopeDefinition>?, context: Node): Scope? {
         return scopeDefinitions
             ?.filter { scopeDefinition -> scopeDefinition.contextType.isSuperclassOf(context::class) }
             ?.sortedWith { left, right ->
@@ -64,8 +55,7 @@ class DeclarativeScopeProvider : ScopeProvider {
                     right.contextType.isSuperclassOf(left.contextType) -> -1
                     else -> 0
                 }
-            }?.firstOrNull()
-            ?.scopeFunction?.invoke(context) ?: context.parent?.let { parentScopeGetter.invoke(it, reference) }
+            }?.firstOrNull()?.scopeFunction?.invoke(context)
     }
 
     inline fun <reified ContextType : Node> scopeFor(
