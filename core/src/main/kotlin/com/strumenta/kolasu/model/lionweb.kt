@@ -24,22 +24,34 @@ private val conceptsMemory = HashMap<KClass<out ASTNode>, Concept>()
 private val enumsMemory = HashMap<KClass<out Enum<*>>, Enumeration>()
 private val conceptInterfacesMemory = HashMap<KClass<out Any>, ConceptInterface>()
 
-open class ReflectionBasedMetamodel(vararg classes: KClass<*>) : Metamodel() {
+open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vararg val classes: KClass<*>) : Metamodel() {
     private val consideredClasses = mutableSetOf<KClass<*>>()
     private val enumClasses = mutableSetOf<KClass<out Enum<*>>>()
 
-    constructor(id: String, name: String, version: Int, vararg classes: KClass<*>) : this(*classes) {
+    constructor(vararg classes: KClass<*>) : this("TEMP", "TEMP", *classes) {
+        setID(this.javaClass.canonicalName)
+        setKey(this.javaClass.canonicalName)
+        setName(this.javaClass.canonicalName)
+    }
+
+    init {
         setID(id)
         setKey(id)
         setName(name)
         setVersion(Integer.toString(version))
     }
 
-    constructor(id: String, name: String, vararg classes: KClass<*>) : this(id, name, 1, *classes)
+    private var initDone = false
 
-    init {
+    fun ensureInit() {
+        if (initDone) {
+            return
+        }
         classes.forEach { considerClass(it) }
+        initDone = true
     }
+
+    constructor(id: String, name: String, vararg classes: KClass<*>) : this(id, name, 1, *classes)
 
     fun prepareSerialization(jsonSerialization: JsonSerialization) {
         enumClasses.forEach { enumClass ->
@@ -131,8 +143,21 @@ val <E : Enum<*>>KClass<E>.enumeration: Enumeration
     }
 
 val <A : ASTNode>KClass<A>.concept: Concept
-    get() = conceptsMemory.getOrElse(this) {
-        calculateConcept(this, conceptsMemory, conceptInterfacesMemory)
+    get() = conceptsMemory.getOrPut(this) {
+        val metamodelInstance = metamodelFor(this)
+        if (metamodelInstance == null) {
+            throw IllegalStateException("no valid metamodel found for class $this")
+        } else {
+            (metamodelInstance as ReflectionBasedMetamodel).ensureInit()
+            return calculateConcept(this, conceptsMemory, conceptInterfacesMemory)
+//            if (conceptsMemory.containsKey(this)) {
+//                return conceptsMemory[this]!!
+//            } else {
+//                throw IllegalStateException()
+//            }
+        }
+        //calculateConcept(this, conceptsMemory, conceptInterfacesMemory)
+        //throw IllegalStateException("We should ensure that the metamodel has been loaded and the concept has been inserted here")
     }
 
 val <A : Any>KClass<A>.conceptInterface: ConceptInterface
@@ -176,12 +201,12 @@ private fun metamodelFor(kClass: KClass<out Any>): Metamodel? {
         val metamodelKClass = try {
             classLoader.loadClass(metamodelQName).kotlin
         } catch (e: ClassNotFoundException) {
-            throw RuntimeException("Unable to find the metamodel for Kotlin class $kClass")
+            throw RuntimeException("Unable to find the metamodel for Kotlin class $kClass. We looked for Java class $metamodelQName", e)
         }
         if (metamodelKClass == null) {
             throw IllegalStateException("Metamodel class not found")
         }
-        val metamolInstanceRaw = metamodelKClass.staticProperties.find { it.name == "INSTANCE" }?.let { instance ->
+        val metamodelInstanceRaw = metamodelKClass.staticProperties.find { it.name == "INSTANCE" }?.let { instance ->
             val instanceRaw = instance.get()
             if (instanceRaw !is Metamodel) {
                 throw IllegalStateException("value of INSTANCE field for $metamodelKClass is not a Metamodel but it is $instanceRaw")
@@ -190,13 +215,12 @@ private fun metamodelFor(kClass: KClass<out Any>): Metamodel? {
         } ?: try {
             metamodelKClass.objectInstance
         } catch (e: Throwable) {
-
             throw java.lang.RuntimeException("Unable to get object instance for $metamodelKClass", e)
         }
-        if (metamolInstanceRaw !is Metamodel) {
-            throw IllegalStateException("Object instance for $metamodelKClass is not a Metamodel but it is $metamolInstanceRaw")
+        if (metamodelInstanceRaw !is Metamodel) {
+            throw IllegalStateException("Object instance for $metamodelKClass is not a Metamodel but it is $metamodelInstanceRaw")
         }
-        metamolInstanceRaw as Metamodel
+        metamodelInstanceRaw as Metamodel
     }
     return metamodelInstance
 }
@@ -238,6 +262,9 @@ fun <A : ASTNode> calculateConcept(
     conceptsMemory: HashMap<KClass<out ASTNode>, Concept>,
     conceptInterfacesMemory: HashMap<KClass<out Any>, ConceptInterface>
 ): Concept {
+    if (conceptsMemory.containsKey(kClass)) {
+        return conceptsMemory[kClass]!!
+    }
     try {
         require(!kClass.java.isInterface)
         if (kClass == ASTNode::class) {
@@ -268,6 +295,9 @@ fun <A : ASTNode> calculateConcept(
 
         val metamodelInstance: Metamodel = metamodelFor(kClass)
             ?: throw RuntimeException("No Metamodel object for $kClass")
+        if (conceptsMemory.containsKey(kClass)) {
+            throw IllegalStateException("This should not happen")
+        }
         metamodelInstance.addElement(concept)
 
         concept.id = metamodelInstance.key + "-" + kClass.simpleName
@@ -285,6 +315,7 @@ fun <A : ASTNode> calculateConcept(
                         val reference = Reference()
                         reference.simpleName = it.name
                         reference.id = it.name
+                        reference.key = "${concept.key}-${it.name}"
                         reference.type = it.returnType.arguments[0].type!!
                                 .classifier!!.asFeaturesContainer()
                         concept.addFeature(reference)
@@ -292,6 +323,7 @@ fun <A : ASTNode> calculateConcept(
                         val property = Property()
                         property.simpleName = it.name
                         property.id = it.name
+                        property.key = "${concept.key}-${it.name}"
                         when (it.returnType.classifier) {
                             Boolean::class -> {
                                 property.type = LionCoreBuiltins.getBoolean()
@@ -335,6 +367,7 @@ fun <A : ASTNode> calculateConcept(
                     val containment = Containment()
                     containment.simpleName = it.name
                     containment.id = it.name
+                    containment.key = "${concept.key}-${it.name}"
                     if ((it.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }
                         .contains(Collection::class)
                     ) {

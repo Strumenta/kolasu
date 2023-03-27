@@ -1,5 +1,11 @@
 package com.strumenta.kolasu.model
 
+import java.sql.Ref
+import javax.swing.plaf.nimbus.State
+
+object Metamodel : ReflectionBasedMetamodel("StarLasu-common-elements", "StarLasu common elements",
+    Statement::class, Expression::class, EntityDeclaration::class, PlaceholderElement::class)
+
 @NodeType
 interface Statement
 

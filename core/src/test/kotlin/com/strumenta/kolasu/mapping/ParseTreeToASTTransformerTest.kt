@@ -14,7 +14,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-object Metamodel : ReflectionBasedMetamodel()
+val mm by lazy {
+
+}
+
+object Metamodel : ReflectionBasedMetamodel(CU::class)
 
 data class CU(
     val specifiedPosition: Position? = null,
