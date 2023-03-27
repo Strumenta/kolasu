@@ -1,71 +1,100 @@
 package com.strumenta.kolasu.model
 
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.createType
-import kotlin.reflect.full.functions
-import kotlin.reflect.full.isSupertypeOf
+import kotlin.reflect.full.isSuperclassOf
 
-interface ScopeProvider {
+data class ScopeDefinition(
+    val contextType: KClass<*>,
+    val scopeFunction: ScopeFunction<Node>,
+)
 
-    fun <N : Node, C : N> scopeFor(context: C, reference: KProperty1<N, ReferenceByName<*>>): Scope {
-        return this.tryPropertyScopeFor(context, reference)
-            ?: this.tryTypeScopeFor(context, reference)
-            ?: Scope() // delegate
-    }
+typealias ScopeFunction<N> = (N) -> Scope?
+typealias PropertyTypeScopeDefinitions = MutableMap<KClass<*>, MutableList<ScopeDefinition>>
+typealias PropertyScopeDefinitions = MutableMap<ReferenceByNameProperty<*>, MutableList<ScopeDefinition>>
+typealias ReferenceByNameProperty<ContainerType> = KProperty1<ContainerType, ReferenceByName<*>>
 
-    private fun <N : Node, C : Node> tryPropertyScopeFor(
-        context: C,
-        reference: KProperty1<N, ReferenceByName<*>>,
-    ): Scope? {
-        return this.tryScopeFor(context, reference, this::propertyScopeFunctionName)
-    }
-
-    private fun <N : Node, C : Node> tryTypeScopeFor(context: C, reference: KProperty1<N, ReferenceByName<*>>): Scope? {
-        return this.tryScopeFor(context, reference, this::typeScopeFunctionName)
-    }
-
-    private fun <N : Node, C : Node> tryScopeFor(
-        context: C,
-        reference: KProperty1<N, ReferenceByName<*>>,
-        scopeFunctionName: (KProperty1<N, ReferenceByName<*>>) -> String,
-    ): Scope? {
-        return this.tryScopeFor(context, scopeFunctionName(reference))?.call(this, context)
-            ?: context.parent?.let { this.tryScopeFor(it, scopeFunctionName(reference))?.call(this, it) }
-    }
-
-    @Suppress("unchecked_cast")
-    private fun <C : Node> tryScopeFor(context: C, name: String): KFunction<Scope>? {
-        return this::class.functions.asSequence()
-            .filter { function -> function.name == name }
-            .filter { function -> function.returnType.classifier == Scope::class }
-            .filter { function -> function.parameters.size > 1 }
-            .filter { function -> function.parameters[1].type.isSupertypeOf(context::class.createType()) }
-            .sortedWith { left, right ->
-                when {
-                    left.parameters[1].type.isSupertypeOf(right.parameters[1].type) -> 1
-                    right.parameters[1].type.isSupertypeOf(left.parameters[1].type) -> -1
-                    else -> 0
-                }
-            }.firstOrNull() as KFunction<Scope>?
-    }
-
-    private fun <N : Node> propertyScopeFunctionName(property: KProperty1<N, ReferenceByName<*>>): String {
-        val kClass: KClass<*> = property.parameters.first().type.classifier as KClass<*>
-        return "scopeFor_${kClass.simpleName}_${property.name}"
-    }
-
-    private fun <N : Node> typeScopeFunctionName(property: KProperty1<N, ReferenceByName<*>>): String {
-        val kClass: KClass<*> = property.returnType.classifier as KClass<*>
-        return "scopeFor_${kClass.simpleName}"
-    }
+fun declarativeScopeProvider(init: DeclarativeScopeProvider.() -> Unit): DeclarativeScopeProvider {
+    return DeclarativeScopeProvider().apply(init)
 }
 
-@Suppress("unused")
-open class DefaultScopeProvider : ScopeProvider {
-    fun scopeFor_Node(context: Node): Scope {
-        println("scopeFor_Node")
-        return Scope()
+interface ScopeProvider {
+    fun getScope(context: Node, reference: ReferenceByNameProperty<*>): Scope?
+}
+
+class DeclarativeScopeProvider : ScopeProvider {
+
+    val propertyScopeDefinitions: PropertyScopeDefinitions = mutableMapOf()
+    val propertyTypeScopeDefinitions: PropertyTypeScopeDefinitions = mutableMapOf()
+
+    override fun getScope(context: Node, reference: ReferenceByNameProperty<*>): Scope? {
+        return this.tryGetScopeForProperty(context, reference)
+            ?: this.tryGetScopeForPropertyType(context, reference)
+    }
+
+    private fun tryGetScopeForProperty(context: Node, reference: ReferenceByNameProperty<*>): Scope? {
+        return this.tryGetScope(
+            this.propertyScopeDefinitions[reference],
+            this::tryGetScopeForProperty,
+            context,
+            reference,
+        )
+    }
+
+    private fun tryGetScopeForPropertyType(context: Node, reference: ReferenceByNameProperty<*>): Scope? {
+        return this.tryGetScope(
+            this.propertyTypeScopeDefinitions[reference.returnType.classifier],
+            this::tryGetScopeForPropertyType,
+            context,
+            reference,
+        )
+    }
+
+    private fun tryGetScope(
+        scopeDefinitions: List<ScopeDefinition>?,
+        parentScopeGetter: (Node, ReferenceByNameProperty<*>) -> Scope?,
+        context: Node,
+        reference: ReferenceByNameProperty<*>,
+    ): Scope? {
+        return scopeDefinitions
+            ?.filter { scopeDefinition -> scopeDefinition.contextType.isSuperclassOf(context::class) }
+            ?.sortedWith { left, right ->
+                when {
+                    left.contextType.isSuperclassOf(right.contextType) -> 1
+                    right.contextType.isSuperclassOf(left.contextType) -> -1
+                    else -> 0
+                }
+            }?.firstOrNull()
+            ?.scopeFunction?.invoke(context) ?: context.parent?.let { parentScopeGetter.invoke(it, reference) }
+    }
+
+    inline fun <reified ContextType : Node> scopeFor(
+        nodeType: KClass<*>,
+        crossinline scopeFunction: ScopeFunction<ContextType>,
+    ) {
+        this.propertyTypeScopeDefinitions.computeIfAbsent(nodeType) { mutableListOf() }
+            .add(
+                ScopeDefinition(
+                    contextType = ContextType::class,
+                    scopeFunction = { context: Node ->
+                        if (context is ContextType) scopeFunction(context) else null
+                    },
+                ),
+            )
+    }
+
+    inline fun <ContainerType : Node, reified ContextType : Node> scopeFor(
+        reference: ReferenceByNameProperty<ContainerType>,
+        crossinline scopeDefinition: ScopeFunction<ContextType>,
+    ) {
+        this.propertyScopeDefinitions.computeIfAbsent(reference) { mutableListOf() }
+            .add(
+                ScopeDefinition(
+                    contextType = ContextType::class,
+                    scopeFunction = { context: Node ->
+                        if (context is ContextType) scopeDefinition(context) else null
+                    },
+                ),
+            )
     }
 }

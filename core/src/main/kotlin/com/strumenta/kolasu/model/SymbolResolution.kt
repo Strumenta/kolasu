@@ -4,29 +4,60 @@ import kotlin.reflect.KClass
 
 interface Symbol : PossiblyNamed
 
-class Scope private constructor(
-    private val symbols: MutableMap<String, MutableList<Symbol>> = mutableMapOf(),
-    private val parent: Scope? = null,
+/**
+ * A scope containing symbols
+ **/
+data class Scope(
+    var parent: Scope? = null,
+    val symbols: MutableMap<String, MutableList<Symbol>> = mutableMapOf(),
 ) {
-    constructor(vararg symbols: Symbol, parent: Scope? = null) : this(symbols = listOf(*symbols), parent = parent)
-
-    constructor(symbols: List<Symbol> = emptyList(), parent: Scope? = null) : this(
-        symbols = symbols.groupBy { it.name ?: throw IllegalArgumentException("All given symbols must have a name") }
-            .mapValues { it.value.toMutableList() }.toMutableMap(),
-        parent = parent
-    )
-
-    fun add(symbol: Symbol) {
-        val symbolName: String = symbol.name ?: throw IllegalArgumentException("The given symbol must have a name")
-        this.symbols.computeIfAbsent(symbolName) { mutableListOf() }.add(symbol)
+    fun define(symbol: Symbol) {
+        val name: String = symbol.name ?: throw IllegalArgumentException("The given symbol must have a name")
+        this.symbols.computeIfAbsent(name) { mutableListOf() }.add(symbol)
     }
 
-    fun lookup(symbolName: String, symbolType: KClass<*> = Symbol::class): Symbol? {
-        return this.symbols.getOrDefault(symbolName, mutableListOf()).find { symbolType.isInstance(it) }
-            ?: this.parent?.lookup(symbolName, symbolType)
+    fun resolve(name: String, type: KClass<*> = Symbol::class): Symbol? {
+        return this.symbols.getOrDefault(name, mutableListOf()).find { type.isInstance(it) }
+            ?: this.parent?.resolve(name, type)
     }
+}
 
-    fun getSymbols(): Map<String, List<Symbol>> {
-        return this.symbols
-    }
+/**
+ * A node that defines a symbol
+ **/
+interface SymbolProvider {
+    val symbols: List<Symbol>
+}
+
+// fun Node.resolveSymbols() {
+//    val referenceByNames = this.properties
+//        .mapNotNull { property -> if (property.value is ReferenceByName<*>) property.value else null }
+//    if (referenceByNames.isNotEmpty()) {
+//        val activeScope: Scope? =
+//            if (this is DeclarativeScopeProvider) {
+//                this.scope
+//            } else {
+//                this.findAncestorOfType(DeclarativeScopeProvider::class.java)?.scope
+//            }
+//        referenceByNames.forEach {
+//            tryCast<ReferenceByName<Symbol>>(it) {
+//                this.tryToResolve(activeScope?.resolve(it.name))
+//                // scopeProvider.scopeFor(this, property) -> List<Node>
+//                // kClass della property
+//                // VariableAssignment::variable
+//                // scopeFor_VariableAssignment_variable(context: N < Variable)
+//                // this.tryToResolve()
+//
+//                // NamedElement::name
+//                // scopeFor_NamedElement_name(NamedElement)
+//                // VariableAssignment::variable -> VariableSymbol
+//                //
+//            }
+//        }
+//    }
+//    this.walkChildren().forEach { it.resolveSymbols() }
+// }
+
+inline fun <reified T> tryCast(instance: Any?, block: T.() -> Unit) {
+    if (instance is T) { block(instance) }
 }

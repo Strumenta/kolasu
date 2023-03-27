@@ -13,7 +13,7 @@ data class BSymbol(override val name: String, val index: Int = 0) : Symbol
 data class USymbol(override val name: String? = null) : Symbol
 
 data class NodeOverridingName(
-    override var name: String
+    override var name: String,
 ) : Node(), Named
 
 open class BaseNode(open var attr1: Int) : Node()
@@ -64,78 +64,86 @@ class ModelTest {
     @test
     fun scopeAddSymbols() {
         val scope = Scope()
-        assertTrue { scope.getSymbols().isEmpty() }
+        assertTrue { scope.symbols.isEmpty() }
 
-        scope.add(ASymbol(name = "a", index = 0))
-        assertEquals(1, scope.getSymbols().size)
-        assertEquals(1, scope.getSymbols().getOrElse("a") { emptyList() }.size)
-        assertContains(scope.getSymbols().getOrElse("a") { emptyList() }, ASymbol(name = "a", index = 0))
+        scope.define(ASymbol(name = "a", index = 0))
+        assertEquals(1, scope.symbols.size)
+        assertEquals(1, scope.symbols.getOrElse("a") { emptyList() }.size)
+        assertContains(scope.symbols.getOrElse("a") { emptyList() }, ASymbol(name = "a", index = 0))
 
-        scope.add(BSymbol(name = "b", index = 0))
-        assertEquals(2, scope.getSymbols().size)
-        assertEquals(1, scope.getSymbols().getOrElse("b") { emptyList() }.size)
-        assertContains(scope.getSymbols().getOrElse("b") { emptyList() }, BSymbol(name = "b", index = 0))
+        scope.define(BSymbol(name = "b", index = 0))
+        assertEquals(2, scope.symbols.size)
+        assertEquals(1, scope.symbols.getOrElse("b") { emptyList() }.size)
+        assertContains(scope.symbols.getOrElse("b") { emptyList() }, BSymbol(name = "b", index = 0))
 
-        scope.add(ASymbol(name = "b", index = 1))
-        assertEquals(2, scope.getSymbols().size)
-        assertEquals(2, scope.getSymbols().getOrElse("b") { emptyList() }.size)
-        assertContains(scope.getSymbols().getOrElse("b") { emptyList() }, BSymbol(name = "b", index = 0))
-        assertContains(scope.getSymbols().getOrElse("b") { emptyList() }, ASymbol(name = "b", index = 1))
+        scope.define(ASymbol(name = "b", index = 1))
+        assertEquals(2, scope.symbols.size)
+        assertEquals(2, scope.symbols.getOrElse("b") { emptyList() }.size)
+        assertContains(scope.symbols.getOrElse("b") { emptyList() }, BSymbol(name = "b", index = 0))
+        assertContains(scope.symbols.getOrElse("b") { emptyList() }, ASymbol(name = "b", index = 1))
     }
 
     @test(expected = IllegalArgumentException::class)
     fun scopeAddSymbolWithoutNameError() {
-        Scope().add(USymbol(name = null))
+        Scope().define(USymbol(name = null))
     }
 
     @test
     fun lookupSymbolByNameInLocal() {
-        val scope = Scope(ASymbol(name = "a"), parent = Scope(ASymbol(name = "b")))
+        val scope = Scope(
+            parent = Scope().apply { define(ASymbol(name = "b")) },
+        ).apply { this.define(ASymbol(name = "a")) }
         val expected = ASymbol(name = "a")
-        val actual = scope.lookup(symbolName = "a")
+        val actual = scope.resolve(name = "a")
         assertEquals(expected, actual)
     }
 
     @test
     fun lookupSymbolByNameInParent() {
-        val scope = Scope(ASymbol(name = "a"), parent = Scope(ASymbol(name = "b")))
+        val scope = Scope(
+            parent = Scope().apply { define(ASymbol(name = "b")) },
+        ).apply { define(ASymbol(name = "a")) }
         val expected = ASymbol(name = "b")
-        val actual = scope.lookup(symbolName = "b")
+        val actual = scope.resolve(name = "b")
         assertEquals(expected, actual)
     }
 
     @test
     fun lookupSymbolByNameNotFound() {
-        val scope = Scope(ASymbol(name = "b"))
-        assertNull(scope.lookup(symbolName = "a"))
+        val scope = Scope().apply { define(ASymbol(name = "b")) }
+        assertNull(scope.resolve(name = "a"))
     }
 
     @test
     fun lookupSymbolByNameAndTypeInLocal() {
-        val scope = Scope(ASymbol(name = "a"), parent = Scope(BSymbol(name = "a")))
+        val scope = Scope(
+            parent = Scope().apply { define(BSymbol(name = "a")) },
+        ).apply { define(ASymbol(name = "a")) }
         val expected = ASymbol(name = "a")
-        val actual = scope.lookup(symbolName = "a", symbolType = ASymbol::class)
+        val actual = scope.resolve(name = "a", type = ASymbol::class)
         assertEquals(expected, actual)
     }
 
     @test
     fun lookupSymbolByNameAndTypeInParent() {
-        val scope = Scope(ASymbol(name = "a"), parent = Scope(BSymbol(name = "a")))
+        val scope = Scope(
+            parent = Scope().apply { define(BSymbol(name = "a")) },
+        ).apply { define(ASymbol(name = "a")) }
         val expected = BSymbol(name = "a")
-        val actual = scope.lookup("a", BSymbol::class)
+        val actual = scope.resolve(name = "a", type = BSymbol::class)
         assertEquals(expected, actual)
     }
 
     @test
     fun lookupSymbolByNameAndTypeNotFoundDifferentName() {
-        val scope = Scope(ASymbol(name = "a"))
-        assertNull(scope.lookup(symbolName = "b", symbolType = ASymbol::class))
+        val scope = Scope().apply { define(ASymbol(name = "a")) }
+        assertNull(scope.resolve(name = "b", type = ASymbol::class))
     }
 
     @test
     fun lookupSymbolByNameAndTypeNotFoundDifferentType() {
-        val scope = Scope(ASymbol(name = "a"))
-        assertNull(scope.lookup(symbolName = "a", symbolType = BSymbol::class))
+        val scope = Scope().apply { define(ASymbol(name = "a")) }
+        assertNull(scope.resolve(name = "a", type = BSymbol::class))
     }
 
     @test

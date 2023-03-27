@@ -16,9 +16,9 @@ class XmlGenerationTest {
         val myRoot = MyRoot(
             mainSection = Section(
                 "Section1",
-                emptyList()
+                emptyList(),
             ),
-            otherSections = listOf()
+            otherSections = listOf(),
         )
         val xml = XMLGenerator().generateString(myRoot)
         assertEquals(
@@ -27,7 +27,7 @@ class XmlGenerationTest {
     <mainSection name="Section1" type="Section"/>
 </root>
 """.replace("\n", System.lineSeparator()),
-            xml
+            xml,
         )
     }
 
@@ -38,10 +38,10 @@ class XmlGenerationTest {
                 "Section1",
                 listOf(
                     Content(1, null),
-                    Content(2, Content(3, Content(4, null)))
-                )
+                    Content(2, Content(3, Content(4, null))),
+                ),
             ),
-            otherSections = listOf()
+            otherSections = listOf(),
         )
         val xml = XMLGenerator().generateString(myRoot)
         assertEquals(
@@ -61,7 +61,7 @@ class XmlGenerationTest {
     </mainSection>
 </root>
 """.replace("\n", System.lineSeparator()),
-            xml
+            xml,
         )
     }
 
@@ -73,10 +73,10 @@ class XmlGenerationTest {
                 listOf(
                     Content(1, null),
                     OtherContent(listOf(1, 2, 3, 100, -122)),
-                    Content(2, Content(3, Content(4, null)))
-                )
+                    Content(2, Content(3, Content(4, null))),
+                ),
             ),
-            otherSections = listOf()
+            otherSections = listOf(),
         )
         val xml = XMLGenerator().generateString(myRoot)
         assertEquals(
@@ -103,7 +103,7 @@ class XmlGenerationTest {
     </mainSection>
 </root>
 """.replace("\n", System.lineSeparator()),
-            xml
+            xml,
         )
     }
 
@@ -114,18 +114,18 @@ class XmlGenerationTest {
             Issue.semantic(
                 "semantic problem",
                 severity = IssueSeverity.ERROR,
-                position = Position(Point(10, 1), Point(12, 3))
+                position = Position(Point(10, 1), Point(12, 3)),
             ),
             Issue.semantic(
                 "semantic warning",
                 severity = IssueSeverity.WARNING,
-                position = Position(Point(10, 1), Point(12, 3))
+                position = Position(Point(10, 1), Point(12, 3)),
             ),
             Issue.semantic(
                 "semantic info",
                 severity = IssueSeverity.INFO,
-                position = Position(Point(10, 1), Point(12, 3))
-            )
+                position = Position(Point(10, 1), Point(12, 3)),
+            ),
         )
         val result = Result<Node>(issues, null)
         val serialized = XMLGenerator().generateString(result)
@@ -155,7 +155,7 @@ class XmlGenerationTest {
     </issues>
     <root/>
 </result>""".replace("\n", System.lineSeparator()),
-            serialized.trim()
+            serialized.trim(),
         )
     }
 }
