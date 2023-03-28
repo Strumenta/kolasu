@@ -52,6 +52,9 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         if (kClass == ASTNode::class) {
             return StarLasuMetamodel.astNode
         }
+//        if (kClass == GenericErrorNode::class) {
+//            return StarLasuMetamodel.genericError
+//        }
         return mappedConcepts[kClass]
             ?: throw IllegalStateException("No Concept mapped to KClass $kClass in Metamodel $this")
     }
@@ -88,7 +91,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         if (mappedConcepts.containsKey(kClass) ||
             mappedConceptInterfaces.containsKey(kClass) ||
             mappedEnumerations.containsKey(kClass) ||
-            kClass == ASTNode::class || kClass == Named::class || kClass == Any::class
+            kClass == ASTNode::class || kClass == Named::class || kClass == PossiblyNamed::class || kClass == Any::class
         ) {
             return
         }
