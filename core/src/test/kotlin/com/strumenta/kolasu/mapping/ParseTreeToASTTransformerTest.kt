@@ -16,7 +16,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 val mm by lazy {
-
 }
 
 object Metamodel : ReflectionBasedMetamodel(CU::class)

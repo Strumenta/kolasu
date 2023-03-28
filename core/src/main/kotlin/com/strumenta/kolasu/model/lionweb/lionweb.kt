@@ -5,6 +5,7 @@ import com.strumenta.kolasu.model.*
 import org.lionweb.lioncore.java.metamodel.*
 import org.lionweb.lioncore.java.metamodel.Metamodel
 import org.lionweb.lioncore.java.serialization.JsonSerialization
+import org.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization
 import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
@@ -13,11 +14,11 @@ import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.allSupertypes
 import kotlin.reflect.full.superclasses
 
-
-open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vararg val classes: KClass<*>) : Metamodel() {
+open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vararg val classes: KClass<*>) :
+    Metamodel() {
     private val mappedConcepts = mutableMapOf<KClass<out ASTNode>, Concept>()
     private val mappedConceptInterfaces = mutableMapOf<KClass<*>, ConceptInterface>()
-    private val mappedEnums = mutableMapOf<KClass<out Enum<*>>, Enum<*>>()
+    private val mappedEnumerations = mutableMapOf<KClass<out Enum<*>>, Enumeration>()
     private val populated = mutableSetOf<KClass<*>>()
     companion object {
         // This is used as replacement for the object singleton, as it is not assigned
@@ -25,8 +26,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         val INSTANCES = HashMap<KClass<*>, ReflectionBasedMetamodel>()
     }
 
-//    MAYBE WE COULD FIRST SCAN CLASSES AND JUST CREATE CONCEPTS WITH THEIR NAMES BUT NO FEATURES,
-//    THEN WE COULD RE-PROCESS CLASSES AND THIS TIME SET FEATURES
+    constructor(id: String, name: String, vararg classes: KClass<*>) : this(id, name, 1, *classes)
 
     constructor(vararg classes: KClass<*>) : this("TEMP", "TEMP", *classes) {
         setID(this.javaClass.canonicalName)
@@ -44,49 +44,73 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         populateModelElements()
     }
 
+    // /
+    // / Public methods
+    // /
+
+    fun requireConceptFor(kClass: KClass<*>): Concept {
+        return mappedConcepts[kClass]
+            ?: throw IllegalStateException("No Concept mapped to KClass $kClass in Metamodel $this")
+    }
+
+    fun requireConceptInterfaceFor(kClass: KClass<*>): ConceptInterface {
+        return mappedConceptInterfaces[kClass]
+            ?: throw IllegalStateException("No ConceptInterface mapped to KClass $kClass in Metamodel $this")
+    }
+
+    fun requireEnumerationFor(kClass: KClass<*>): Enumeration {
+        return mappedEnumerations[kClass]
+            ?: throw IllegalStateException("No Enumeration mapped to KClass $kClass in Metamodel $this")
+    }
+
+    fun prepareSerialization(jsonSerialization: JsonSerialization) {
+        mappedEnumerations.forEach { entry ->
+            val enumeration = entry.value
+            jsonSerialization.primitiveValuesSerialization.registerSerializer(
+                enumeration.id,
+                PrimitiveValuesSerialization.PrimitiveSerializer<Enum<*>> { enum -> enum.name }
+            )
+        }
+    }
+
+    // /
+    // / Instantiating
+    // /
+
     private fun instantiateModelElements() {
         classes.forEach { scanAndInstantiate(it) }
     }
 
-    private fun populateModelElements() {
-        classes.forEach { scanAndPopulate(it) }
-    }
-
-    constructor(id: String, name: String, vararg classes: KClass<*>) : this(id, name, 1, *classes)
-
-    fun prepareSerialization(jsonSerialization: JsonSerialization) {
-//        enumClasses.forEach { enumClass ->
-//            val enumDeclaration = enumClass.enumeration
-//            jsonSerialization.primitiveValuesSerialization.registerSerializer(enumDeclaration.id,
-//                PrimitiveSerializer<Enum<*>> { it.name })
-//        }
-        TODO()
-    }
-
     private fun scanAndInstantiate(kClass: KClass<*>) {
-        if (mappedConcepts.containsKey(kClass)
-            || mappedConceptInterfaces.containsKey(kClass)
-            || mappedEnums.containsKey(kClass)
-            || kClass == ASTNode::class || kClass == Any::class
+        if (mappedConcepts.containsKey(kClass) ||
+            mappedConceptInterfaces.containsKey(kClass) ||
+            mappedEnumerations.containsKey(kClass) ||
+            kClass == ASTNode::class || kClass == Any::class
         ) {
             return
         }
         when {
             kClass.isEnum -> {
-                // Process the enum
-                // add to mapped enums
-                TODO()
+                if (this == requireMetamodelFor(kClass)) {
+                    scanAndInstantiateEnumeration(kClass as KClass<out Enum<*>>)
+                } else {
+                    throw IllegalStateException("Not supporting external metamodels")
+                }
             }
 
             kClass.isInterface -> {
-                TODO()
+                if (this == requireMetamodelFor(kClass)) {
+                    scanAndInstantiateConceptInterface(kClass)
+                } else {
+                    throw IllegalStateException("Not supporting external metamodels")
+                }
             }
 
             kClass.isASTNode -> {
                 if (this == requireMetamodelFor(kClass)) {
                     scanAndInstantiateConcept(kClass as KClass<out ASTNode>)
                 } else {
-                    TODO()
+                    throw IllegalStateException("Not supporting external metamodels")
                 }
             }
 
@@ -97,37 +121,134 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         }
     }
 
+    private fun scanAndInstantiateConcept(kClass: KClass<out ASTNode>) {
+        val concept = Concept()
+        scanAndInstantiateMetamodelElement(concept, kClass) {
+            mappedConcepts[kClass] = concept
+        }
+    }
+
+    private fun scanAndInstantiateConceptInterface(kClass: KClass<*>) {
+        val conceptInterface = ConceptInterface()
+        scanAndInstantiateMetamodelElement(concept, kClass) {
+            mappedConceptInterfaces[kClass] = conceptInterface
+        }
+    }
+
+    private fun scanAndInstantiateEnumeration(kClass: KClass<out Enum<*>>) {
+        val enumeration = Enumeration()
+        scanAndInstantiateMetamodelElement(concept, kClass) {
+            mappedEnumerations[kClass] = enumeration
+        }
+    }
+
+    private fun <ME : MetamodelElement<*>> scanAndInstantiateMetamodelElement(
+        metamodelElement: ME,
+        kClass: KClass<*>,
+        mapper: (metamodelElement: ME) -> Unit
+    ) {
+        metamodelElement.simpleName = kClass.simpleName
+        metamodelElement.id = this.key + "-" + kClass.simpleName
+        metamodelElement.key = this.key + "-" + kClass.simpleName
+
+        addElement(metamodelElement)
+        mapper(metamodelElement)
+
+        kClass.nodeProperties.forEach(::scanKotlinProperty)
+        kClass.superclasses.forEach { scanAndInstantiate(it) }
+        kClass.sealedSubclasses.forEach { scanAndInstantiate(it) }
+    }
+
+    private fun scanKotlinProperty(kotlinProperty: KProperty1<*, *>) {
+        val provideNodes = PropertyDescription.providesNodes(kotlinProperty as KProperty1<in ASTNode, *>)
+        val isReference = kotlinProperty.isReference
+        when {
+            !provideNodes -> {
+                if (isReference) {
+                    val referenceTargetType = kotlinProperty.returnType.arguments[0].type!!.classifier as KClass<*>
+                    scanAndInstantiate(referenceTargetType)
+                } else {
+                    if ((kotlinProperty.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }
+                        .contains(Collection::class)
+                    ) {
+                        scanAndInstantiate(
+                            kotlinProperty.returnType.arguments[0].type!!
+                                .classifier as KClass<*>
+                        )
+                    } else {
+                        val classifier = kotlinProperty.returnType.classifier
+                        scanAndInstantiate(classifier as KClass<*>)
+                    }
+                }
+            }
+            provideNodes && isReference -> {
+                throw IllegalStateException()
+            }
+            provideNodes && !isReference -> {
+                if ((kotlinProperty.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }
+                    .contains(Collection::class)
+                ) {
+                    scanAndInstantiate(
+                        kotlinProperty.returnType.arguments[0].type!!
+                            .classifier as KClass<*>
+                    )
+                } else {
+                    val classifier = kotlinProperty.returnType.classifier
+                    scanAndInstantiate(classifier as KClass<*>)
+                }
+            }
+        }
+    }
+
+    // /
+    // / Populating
+    // /
+
+    private fun populateModelElements() {
+        classes.forEach { scanAndPopulate(it) }
+    }
+
     private fun scanAndPopulate(kClass: KClass<*>) {
         if (populated.contains(kClass)) {
             return
         }
         populated.add(kClass)
         if (kClass.isEnum) {
-            TODO()
+            val enumeration = mappedEnumerations[kClass]!!
+            kClass.java.enumConstants.forEach { enumConstant ->
+                val literal = EnumerationLiteral()
+                literal.id = kClass.simpleName + "-" + enumConstant.toString()
+                literal.simpleName = kClass.simpleName
+                enumeration.addLiteral(literal)
+            }
         } else if (kClass.isInterface) {
-            TODO()
+            val conceptInterface = mappedConceptInterfaces[kClass]!!
+            kClass.nodeProperties.forEach { kotlinProperty ->
+                populateKotlinProperty(conceptInterface, kotlinProperty)
+            }
         } else {
             val concept = mappedConcepts[kClass]!!
             kClass.nodeProperties.forEach { kotlinProperty ->
-                val provideNodes = PropertyDescription.providesNodes(kotlinProperty as KProperty1<in ASTNode, *>)
-                val isReference = (kotlinProperty as KProperty1<in ASTNode, *>).isReference
-                when {
-                    !provideNodes -> {
-                        if (isReference) {
-                            //                        considerClass(kotlinProperty.returnType.arguments[0].type!!
-                            //                            .classifier as KClass<*>)
-                            TODO()
-                        } else {
-                            populateProperty(concept, kotlinProperty)
-                        }
-                    }
+                populateKotlinProperty(concept, kotlinProperty)
+            }
+        }
+    }
 
-                    provideNodes && isReference -> TODO()
-                    provideNodes && !isReference -> {
-//                        processContainment(concept, kotlinProperty)
-                        populateContainment(concept, kotlinProperty)
-                    }
+    private fun populateKotlinProperty(featuresContainer: FeaturesContainer<*>, kotlinProperty: KProperty1<*, *>) {
+        val provideNodes = PropertyDescription.providesNodes(kotlinProperty as KProperty1<in ASTNode, *>)
+        val isReference = (kotlinProperty as KProperty1<in ASTNode, *>).isReference
+        when {
+            !provideNodes -> {
+                if (isReference) {
+                    populateReference(featuresContainer, kotlinProperty)
+                } else {
+                    populateProperty(featuresContainer, kotlinProperty)
                 }
+            }
+
+            provideNodes && isReference -> throw IllegalStateException()
+            provideNodes && !isReference -> {
+                populateContainment(featuresContainer, kotlinProperty)
             }
         }
     }
@@ -161,7 +282,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
             else -> {
                 if ((kotlinProperty.returnType.classifier as? KClass<*>)?.allSuperclasses?.contains(Enum::class) == true
                 ) {
-                    val enum : KClass<out Enum<*>> = kotlinProperty.returnType.classifier as KClass<out Enum<*>>
+                    val enum: KClass<out Enum<*>> = kotlinProperty.returnType.classifier as KClass<out Enum<*>>
                     property.type = enum.enumeration
                 } else {
                     TODO(
@@ -174,17 +295,20 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         featuresContainer.addFeature(property)
     }
 
-    private fun populateContainment(featuresContainer: FeaturesContainer<*>, kotlinProperty: KProperty1<in ASTNode, *>) {
+    private fun populateContainment(
+        featuresContainer: FeaturesContainer<*>,
+        kotlinProperty: KProperty1<in ASTNode, *>
+    ) {
         val containment = Containment()
         containment.simpleName = kotlinProperty.name
         containment.id = kotlinProperty.name
-          containment.key = "${featuresContainer.key}-${kotlinProperty.name}"
+        containment.key = "${featuresContainer.key}-${kotlinProperty.name}"
         if ((kotlinProperty.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }
-                .contains(Collection::class)
+            .contains(Collection::class)
         ) {
             containment.isMultiple = true
             containment.type = kotlinProperty.returnType.arguments[0].type!!
-                    .classifier!!.asFeaturesContainer()
+                .classifier!!.asFeaturesContainer()
         } else {
             val classifier = kotlinProperty.returnType.classifier
             containment.type = classifier!!.asFeaturesContainer()
@@ -193,241 +317,26 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         featuresContainer.addFeature(containment)
     }
 
-//    private fun processConcept(kClass: KClass<out ASTNode>) {
-//        val concept = Concept()
-//        concept.simpleName = kClass.simpleName
-//        concept.id = this.key + "-" + kClass.simpleName
-//        concept.key = this.key + "-" + kClass.simpleName
-//
-//        addElement(concept)
-//        mappedConcepts[kClass] = concept
-//
-//
-//        kClass.nodeProperties.forEach { kotlinProperty ->
-//            val provideNodes = PropertyDescription.providesNodes(kotlinProperty as KProperty1<in ASTNode, *>)
-//            val isReference = (kotlinProperty as KProperty1<in ASTNode, *>).isReference
-//            when {
-//                !provideNodes -> {
-//                    if (isReference) {
-////                        considerClass(kotlinProperty.returnType.arguments[0].type!!
-////                            .classifier as KClass<*>)
-//                        TODO()
-//                    } else {
-//                        processProperty(concept, kotlinProperty)
-//                    }
-//                }
-//                provideNodes && isReference -> TODO()
-//                provideNodes && !isReference -> {
-//                    processContainment(concept, kotlinProperty)
-//                }
-//            }
-//        }
-////            kClass.superclasses.forEach { considerClass(it) }
-////            kClass.sealedSubclasses.forEach { considerClass(it) }
-////            if (kClass.java.isInterface) {
-////                kClass.conceptInterface
-////            } else {
-////                (kClass as? KClass<out ASTNode>)?.concept
-////            }
-//    }
-
-    private fun scanAndInstantiateConcept(kClass: KClass<out ASTNode>) {
-        val concept = Concept()
-        concept.simpleName = kClass.simpleName
-        concept.id = this.key + "-" + kClass.simpleName
-        concept.key = this.key + "-" + kClass.simpleName
-
-        addElement(concept)
-        mappedConcepts[kClass] = concept
-
-
-        kClass.nodeProperties.forEach { kotlinProperty ->
-            val provideNodes = PropertyDescription.providesNodes(kotlinProperty as KProperty1<in ASTNode, *>)
-            val isReference = (kotlinProperty as KProperty1<in ASTNode, *>).isReference
-            when {
-                !provideNodes -> {
-                    if (isReference) {
-//                        considerClass(kotlinProperty.returnType.arguments[0].type!!
-//                            .classifier as KClass<*>)
-                        TODO()
-                    } else {
-                        if ((kotlinProperty.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }
-                                .contains(Collection::class)
-                        ) {
-                            scanAndInstantiate(kotlinProperty.returnType.arguments[0].type!!
-                                .classifier as KClass<*>)
-                        } else {
-                            val classifier = kotlinProperty.returnType.classifier
-                            scanAndInstantiate(classifier as KClass<*>)
-                        }
-                    }
-                }
-                provideNodes && isReference -> TODO()
-                provideNodes && !isReference -> {
-                    if ((kotlinProperty.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }
-                            .contains(Collection::class)
-                    ) {
-                        scanAndInstantiate(kotlinProperty.returnType.arguments[0].type!!
-                            .classifier as KClass<*>)
-                    } else {
-                        val classifier = kotlinProperty.returnType.classifier
-                        scanAndInstantiate(classifier as KClass<*>)
-                    }
-                }
-            }
+    private fun populateReference(featuresContainer: FeaturesContainer<*>, kotlinProperty: KProperty1<*, *>) {
+        val reference = Reference()
+        reference.simpleName = kotlinProperty.name
+        reference.id = kotlinProperty.name
+        reference.key = "${featuresContainer.key}-${kotlinProperty.name}"
+        val referenceTargetType = kotlinProperty.returnType.arguments[0].type!!
+        val referenceTargetTypeClassifier = referenceTargetType.classifier as KClass<*>
+        if (referenceTargetTypeClassifier.allSupertypes.map { it.classifier }
+            .contains(Collection::class)
+        ) {
+            reference.isMultiple = true
+            reference.type = referenceTargetType.arguments[0].type!!
+                .classifier!!.asFeaturesContainer()
+        } else {
+            val classifier = referenceTargetTypeClassifier
+            reference.type = classifier!!.asFeaturesContainer()
         }
-        kClass.superclasses.forEach { scanAndInstantiate(it) }
-        kClass.sealedSubclasses.forEach { scanAndInstantiate(it) }
+
+        featuresContainer.addFeature(reference)
     }
-
-    private fun considerClass(kClass: KClass<*>) {
-        try {
-            if (mappedConcepts.containsKey(kClass)
-                || mappedConceptInterfaces.containsKey(kClass)
-                || mappedEnums.containsKey(kClass)
-                || kClass == ASTNode::class || kClass == Any::class) {
-                return
-            }
-            when {
-                kClass.isEnum -> {
-                    // Process the enum
-                    // add to mapped enums
-                    TODO()
-                }
-                kClass.isInterface -> {
-                    TODO()
-                }
-                kClass.isASTNode -> {
-                    if (this == requireMetamodelFor(kClass)) {
-                        //processConcept(kClass as KClass<out ASTNode>)
-                        TODO()
-                    } else {
-                        TODO()
-                    }
-                }
-                else -> {
-                    // The class is irrelevant for us
-                    return
-                }
-            }
-//            consideredClasses.add(kClass)
-//            kClass.nodeProperties.forEach {
-//                val provideNodes = PropertyDescription.providesNodes(it as KProperty1<in ASTNode, *>)
-//                val ref = (it as KProperty1<in ASTNode, *>).isReference
-//                when {
-//                    !provideNodes -> {
-//                        if (it.returnType.classifier == ReferenceByName::class) {
-//                            considerClass(it.returnType.arguments[0].type!!
-//                                .classifier as KClass<*>)
-//                        } else {
-//                            when (it.returnType.classifier) {
-//                                Boolean::class, String::class,Int::class,Position::class,Char::class -> Unit // nothing to do
-//                                else -> {
-//                                    if ((it.returnType.classifier as? KClass<*>)?.allSuperclasses?.contains(Enum::class)
-//                                            ?: false
-//                                    ) {
-//                                        val enum : KClass<out Enum<*>> = it.returnType.classifier as KClass<out Enum<*>>
-//                                        considerClass(enum)
-//                                    } else {
-//                                        if ((it.returnType.classifier as? KClass<*>)?.allSuperclasses?.contains(java.util.List::class)
-//                                                ?: false) {
-//                                            throw RuntimeException("Illegal property of lists at $it")
-//                                        } else {
-//                                            TODO(
-//                                                "Return type: ${it.returnType.classifier} " +
-//                                                        "(${it.returnType.classifier?.javaClass} for property $it"
-//                                            )
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                    provideNodes && ref -> TODO()
-//                    provideNodes && !ref -> {
-//                        val containment = Containment()
-//                        containment.simpleName = it.name
-//                        containment.id = it.name
-//                        if ((it.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }
-//                                .contains(Collection::class)
-//                        ) {
-//                            considerClass(it.returnType.arguments[0].type!!
-//                                .classifier as KClass<*>)
-//                        } else {
-//                            val classifier = it.returnType.classifier
-//                            considerClass(classifier as KClass<*>)
-//                        }
-//                    }
-//                }
-//            }
-//            kClass.superclasses.forEach { considerClass(it) }
-//            kClass.sealedSubclasses.forEach { considerClass(it) }
-//            if (kClass.java.isInterface) {
-//                kClass.conceptInterface
-//            } else {
-//                (kClass as? KClass<out ASTNode>)?.concept
-//            }
-        } catch (e: Throwable){
-            System.err.println("Issue considering $kClass")
-            e.printStackTrace()
-            throw java.lang.RuntimeException("Issue considering $kClass", e)
-        }
-    }
-
-    fun requireConceptFor(kClass: KClass<*>): Concept {
-        return mappedConcepts[kClass]
-            ?: throw IllegalStateException("No concept mapped to KClass $kClass in Metamodel $this")
-    }
-}
-
-
-
-private fun <E : Enum<*>>calculateEnum(enum: KClass<E>) : Enumeration {
-    val enumeration = Enumeration()
-    enumeration.simpleName = enum.simpleName
-
-    val metamodelInstance: Metamodel = metamodelFor(enum)
-        ?: throw RuntimeException("No Metamodel object for $enum")
-
-    enumeration.id = metamodelInstance.key + "-" + enum.simpleName
-    enumeration.key = metamodelInstance.key + "-" + enum.simpleName
-
-    metamodelInstance.addElement(enumeration)
-
-    enum.java.enumConstants.forEach {
-        val literal = EnumerationLiteral()
-        literal.id = enum.simpleName + "-" + it.name
-        literal.simpleName = enum.simpleName
-        enumeration.addLiteral(literal)
-    }
-
-    return enumeration
-}
-
-
-
-fun <A : Any> calculateConceptInterface(
-    kClass: KClass<A>,
-    conceptsMemory: HashMap<KClass<out ASTNode>, Concept>,
-    conceptInterfacesMemory: HashMap<KClass<out Any>, ConceptInterface>
-): ConceptInterface {
-
-    require(kClass.java.isInterface)
-
-    val conceptInterface = ConceptInterface()
-    conceptInterface.simpleName = kClass.simpleName
-
-    val metamodelInstance: Metamodel = metamodelFor(kClass)
-        ?: throw RuntimeException("No Metamodel object for $kClass")
-
-    conceptInterface.id = metamodelInstance.key + "-" + kClass.simpleName
-    conceptInterface.key = metamodelInstance.key + "-" + kClass.simpleName
-
-    metamodelInstance.addElement(conceptInterface)
-
-    // We need to add it right away because of nodes referring to themselves
-    conceptInterfacesMemory[kClass] = conceptInterface
-    return conceptInterface
 }
 
 private fun KClassifier.asFeaturesContainer(): FeaturesContainer<*> {
@@ -436,136 +345,4 @@ private fun KClassifier.asFeaturesContainer(): FeaturesContainer<*> {
     } else {
         (this as KClass<out ASTNode>).concept
     }
-}
-
-fun <A : ASTNode> calculateConcept(
-    kClass: KClass<A>,
-    conceptsMemory: HashMap<KClass<out ASTNode>, Concept>,
-    conceptInterfacesMemory: HashMap<KClass<out Any>, ConceptInterface>
-): Concept {
-//    if (conceptsMemory.containsKey(kClass)) {
-//        return conceptsMemory[kClass]!!
-//    }
-//    try {
-//        require(!kClass.java.isInterface)
-//        if (kClass == ASTNode::class) {
-//            return StarLasuMetamodel.astNode
-//        }
-//        require(
-//            kClass.allSuperclasses.contains(ASTNode::class) || kClass.findAnnotation<NodeType>() != null ||
-//                kClass.allSuperclasses.any { it.findAnnotation<NodeType>() != null }
-//        ) {
-//            "KClass $kClass is not a subclass of ASTNode"
-//        }
-//        val concept = Concept()
-//        concept.simpleName = kClass.simpleName
-//
-//        val superclasses = kClass.superclasses.toMutableList()
-//        // require(superclasses.contains(ASTNode::class))
-//        superclasses.remove(ASTNode::class)
-//        superclasses.forEach { superclass ->
-//            if (superclass.java.isInterface) {
-//                // TODO consider
-//            } else {
-//                concept.extendedConcept = (superclass as KClass<out ASTNode>).concept
-//            }
-//        }
-//        if (concept.extendedConcept == null) {
-//            concept.extendedConcept = StarLasuMetamodel.astNode
-//        }
-//
-//        val metamodelInstance: Metamodel = metamodelFor(kClass)
-//            ?: throw RuntimeException("No Metamodel object for $kClass")
-//        if (conceptsMemory.containsKey(kClass)) {
-//            throw IllegalStateException("This should not happen")
-//        }
-//        metamodelInstance.addElement(concept)
-//
-//        concept.id = metamodelInstance.key + "-" + kClass.simpleName
-//        concept.key = metamodelInstance.key + "-" + kClass.simpleName
-//
-//        // We need to add it right away because of nodes referring to themselves
-//        conceptsMemory[kClass] = concept
-//
-//        kClass.nodeProperties.forEach {
-//            val provideNodes = PropertyDescription.providesNodes(it as KProperty1<in ASTNode, *>)
-//            val ref = (it as KProperty1<in ASTNode, *>).isReference
-//            when {
-//                !provideNodes -> {
-//                    if (it.returnType.classifier == ReferenceByName::class) {
-//                        val reference = Reference()
-//                        reference.simpleName = it.name
-//                        reference.id = it.name
-//                        reference.key = "${concept.key}-${it.name}"
-//                        reference.type = it.returnType.arguments[0].type!!
-//                                .classifier!!.asFeaturesContainer()
-//                        concept.addFeature(reference)
-//                    } else {
-//                        val property = Property()
-//                        property.simpleName = it.name
-//                        property.id = it.name
-//                        property.key = "${concept.key}-${it.name}"
-//                        when (it.returnType.classifier) {
-//                            Boolean::class -> {
-//                                property.type = LionCoreBuiltins.getBoolean()
-//                            }
-//
-//                            String::class -> {
-//                                property.type = LionCoreBuiltins.getString()
-//                            }
-//
-//                            Int::class -> {
-//                                property.type = LionCoreBuiltins.getInteger()
-//                            }
-//
-//                            Position::class -> {
-//                                property.type = StarLasuMetamodel.position
-//                            }
-//
-//                            Char::class -> {
-//                                property.type = StarLasuMetamodel.char
-//                            }
-//
-//                            else -> {
-//                                if ((it.returnType.classifier as? KClass<*>)?.allSuperclasses?.contains(Enum::class)
-//                                    ?: false
-//                                ) {
-//                                    val enum : KClass<out Enum<*>> = it.returnType.classifier as KClass<out Enum<*>>
-//                                    property.type = enum.enumeration
-//                                } else {
-//                                    TODO(
-//                                        "Return type: ${it.returnType.classifier} " +
-//                                            "(${it.returnType.classifier?.javaClass} for property $it"
-//                                    )
-//                                }
-//                            }
-//                        }
-//                        concept.addFeature(property)
-//                    }
-//                }
-//                provideNodes && ref -> TODO()
-//                provideNodes && !ref -> {
-//                    val containment = Containment()
-//                    containment.simpleName = it.name
-//                    containment.id = it.name
-//                    containment.key = "${concept.key}-${it.name}"
-//                    if ((it.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }
-//                        .contains(Collection::class)
-//                    ) {
-//                        containment.isMultiple = true
-//                        containment.type = it.returnType.arguments[0].type!!
-//                                .classifier!!.asFeaturesContainer()
-//                    } else {
-//                        val classifier = it.returnType.classifier
-//                        containment.type = classifier!!.asFeaturesContainer()
-//                    }
-//                    concept.addFeature(containment)
-//                }
-//            }
-//        }
-//        return concept
-    TODO()
-//    } catch (e: Throwable) {
-//        throw RuntimeException("Unable to calculate concept for $kClass", e)
-//    }
 }

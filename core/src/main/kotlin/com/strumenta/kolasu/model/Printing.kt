@@ -53,7 +53,10 @@ fun <N : ASTNode> ParsingResult<N>.debugPrint(
 }
 
 @JvmOverloads
-fun ASTNode.debugPrint(indent: String = "", configuration: DebugPrintConfiguration = DebugPrintConfiguration()): String {
+fun ASTNode.debugPrint(
+    indent: String = "",
+    configuration: DebugPrintConfiguration = DebugPrintConfiguration()
+): String {
     val indentBlock = configuration.indentBlock
     val sb = StringBuilder()
     if (this.relevantMemberProperties(withPosition = configuration.forceShowPosition).isEmpty()) {

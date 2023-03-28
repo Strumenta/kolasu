@@ -25,7 +25,7 @@ class LionWebTest {
 
     @Test
     fun getConceptMySimpleNodeStatically() {
-        //val mm = Metamodel
+        // val mm = Metamodel
         val c = MySimpleNode::class.concept
         assertEquals("MySimpleNode", c.simpleName)
         assertEquals("MyMetamodelFoo", c.metamodel?.name)

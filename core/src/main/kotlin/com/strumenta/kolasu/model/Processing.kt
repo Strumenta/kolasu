@@ -85,7 +85,10 @@ fun <T : Any> Class<T>.processProperties(
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  * @return the first node in the AST for which the [predicate] is true. Null if none are found.
  */
-fun ASTNode.find(predicate: (ASTNode) -> Boolean, walker: KFunction1<ASTNode, Sequence<ASTNode>> = ASTNode::walk): ASTNode? {
+fun ASTNode.find(
+    predicate: (ASTNode) -> Boolean,
+    walker: KFunction1<ASTNode, Sequence<ASTNode>> = ASTNode::walk
+): ASTNode? {
     return walker.invoke(this).find(predicate)
 }
 

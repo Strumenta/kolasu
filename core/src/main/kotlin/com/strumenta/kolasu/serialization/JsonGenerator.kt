@@ -133,7 +133,11 @@ class JsonGenerator {
         File(file.toURI()).writeText(generateString(result, withIds))
     }
 
-    fun generateFile(result: ParsingResult<out ASTNode>, file: File, withIds: IdentityHashMap<ASTNode, String>? = null) {
+    fun generateFile(
+        result: ParsingResult<out ASTNode>,
+        file: File,
+        withIds: IdentityHashMap<ASTNode, String>? = null
+    ) {
         File(file.toURI()).writeText(generateString(result, withIds))
     }
 

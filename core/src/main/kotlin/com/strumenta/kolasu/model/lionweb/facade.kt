@@ -17,20 +17,18 @@ val <A : ASTNode>KClass<A>.concept: Concept
         return metamodelInstance.requireConceptFor(this)
     }
 
-val <E : Enum<*>>KClass<E>.enumeration: Enumeration
-    get() = enumsMemory.getOrPut(this) {
-        // calculateEnum(this)
-        TODO()
-    }
-
-
 val <A : Any>KClass<A>.conceptInterface: ConceptInterface
     get() = conceptInterfacesMemory.getOrElse(this) {
-        //calculateConceptInterface(this, conceptsMemory, conceptInterfacesMemory)
-        TODO()
+        val metamodelInstance = requireMetamodelFor(this)
+        return metamodelInstance.requireConceptInterfaceFor(this)
     }
 
+val <E : Enum<*>>KClass<E>.enumeration: Enumeration
+    get() = enumsMemory.getOrPut(this) {
+        val metamodelInstance = requireMetamodelFor(this)
+        return metamodelInstance.requireEnumerationFor(this)
+    }
 
 private val conceptsMemory = HashMap<KClass<out ASTNode>, Concept>()
-private val enumsMemory = HashMap<KClass<out Enum<*>>, Enumeration>()
 private val conceptInterfacesMemory = HashMap<KClass<out Any>, ConceptInterface>()
+private val enumsMemory = HashMap<KClass<out Enum<*>>, Enumeration>()

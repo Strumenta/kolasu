@@ -26,7 +26,11 @@ internal fun metamodelFor(kClass: KClass<out Any>): ReflectionBasedMetamodel? {
         val metamodelKClass = try {
             classLoader.loadClass(metamodelQName).kotlin
         } catch (e: ClassNotFoundException) {
-            throw RuntimeException("Unable to find the metamodel for Kotlin class $kClass. We looked for Java class $metamodelQName", e)
+            throw RuntimeException(
+                "Unable to find the metamodel for Kotlin class $kClass. " +
+                    "We looked for Java class $metamodelQName",
+                e
+            )
         }
         if (metamodelKClass == null) {
             throw IllegalStateException("Metamodel class not found")
@@ -34,15 +38,23 @@ internal fun metamodelFor(kClass: KClass<out Any>): ReflectionBasedMetamodel? {
         val metamodelInstanceRaw = metamodelKClass.staticProperties.find { it.name == "INSTANCE" }?.let { instance ->
             val instanceRaw = instance.get()
             if (instanceRaw !is Metamodel) {
-                throw IllegalStateException("value of INSTANCE field for $metamodelKClass is not a Metamodel but it is $instanceRaw")
+                throw IllegalStateException(
+                    "value of INSTANCE field for $metamodelKClass is not a " +
+                        "Metamodel but it is $instanceRaw"
+                )
             }
             instanceRaw as ReflectionBasedMetamodel
         } ?: metamodelKClass.java.fields.find { it.name == "INSTANCE" }?.get(null)
-            ?: ReflectionBasedMetamodel.INSTANCES[metamodelKClass] ?: throw java.lang.RuntimeException("Unable to get metamodel instance for $metamodelKClass")
+            ?: ReflectionBasedMetamodel.INSTANCES[metamodelKClass] ?: throw java.lang.RuntimeException(
+            "Unable to get metamodel instance for $metamodelKClass"
+        )
         if (metamodelInstanceRaw !is ReflectionBasedMetamodel) {
-            throw IllegalStateException("Object instance for $metamodelKClass is not a ReflectionBasedMetamodel but it is $metamodelInstanceRaw")
+            throw IllegalStateException(
+                "Object instance for $metamodelKClass is not a ReflectionBasedMetamodel" +
+                    " but it is $metamodelInstanceRaw"
+            )
         }
-        metamodelInstanceRaw as ReflectionBasedMetamodel
+        metamodelInstanceRaw
     }
     return metamodelInstance
 }
