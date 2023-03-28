@@ -2,6 +2,7 @@ package com.strumenta.kolasu.serialization
 
 import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType

@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.mapping
 
 import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import com.strumenta.kolasu.parsing.withParseTreeNode
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.transformation.ASTTransformer

@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import java.sql.Ref
 import javax.swing.plaf.nimbus.State
 

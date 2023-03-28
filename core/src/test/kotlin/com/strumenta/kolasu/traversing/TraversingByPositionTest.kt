@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.traversing
 
 import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

@@ -4,7 +4,7 @@ import com.github.ajalt.clikt.core.PrintHelpMessage
 import com.github.ajalt.clikt.output.CliktConsole
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.ReflectionBasedMetamodel
+import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.junit.Test

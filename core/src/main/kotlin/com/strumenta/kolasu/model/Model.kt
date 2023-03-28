@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.model.lionweb.concept
 import org.lionweb.lioncore.java.metamodel.Annotation
 import org.lionweb.lioncore.java.metamodel.Concept
 import org.lionweb.lioncore.java.metamodel.Containment

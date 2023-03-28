@@ -1,5 +1,8 @@
-package com.strumenta.kolasu.model
+package com.strumenta.kolasu.model.tests
 
+import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
+import com.strumenta.kolasu.model.lionweb.concept
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -22,6 +25,7 @@ class LionWebTest {
 
     @Test
     fun getConceptMySimpleNodeStatically() {
+        //val mm = Metamodel
         val c = MySimpleNode::class.concept
         assertEquals("MySimpleNode", c.simpleName)
         assertEquals("MyMetamodelFoo", c.metamodel?.name)

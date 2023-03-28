@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import com.strumenta.kolasu.model.pos
 import org.junit.Ignore
 import kotlin.system.measureTimeMillis
