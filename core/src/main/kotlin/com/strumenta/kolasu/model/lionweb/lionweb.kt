@@ -23,6 +23,9 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         val INSTANCES = HashMap<KClass<*>, ReflectionBasedMetamodel>()
     }
 
+    MAYBE WE COULD FIRST SCAN CLASSES AND JUST CREATE CONCEPTS WITH THEIR NAMES BUT NO FEATURES,
+    THEN WE COULD RE-PROCESS CLASSES AND THIS TIME SET FEATURES
+
     constructor(vararg classes: KClass<*>) : this("TEMP", "TEMP", *classes) {
         setID(this.javaClass.canonicalName)
         setKey(this.javaClass.canonicalName)
