@@ -49,6 +49,9 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     // /
 
     fun requireConceptFor(kClass: KClass<*>): Concept {
+        if (kClass == ASTNode::class) {
+            return StarLasuMetamodel.astNode
+        }
         return mappedConcepts[kClass]
             ?: throw IllegalStateException("No Concept mapped to KClass $kClass in Metamodel $this")
     }
@@ -85,13 +88,14 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         if (mappedConcepts.containsKey(kClass) ||
             mappedConceptInterfaces.containsKey(kClass) ||
             mappedEnumerations.containsKey(kClass) ||
-            kClass == ASTNode::class || kClass == Any::class
+            kClass == ASTNode::class || kClass == Named::class || kClass == Any::class
         ) {
             return
         }
         when {
             kClass.isEnum -> {
-                if (this == requireMetamodelFor(kClass)) {
+                val mm = requireMetamodelFor(kClass)
+                if (this == mm) {
                     scanAndInstantiateEnumeration(kClass as KClass<out Enum<*>>)
                 } else {
                     throw IllegalStateException("Not supporting external metamodels")
@@ -99,15 +103,18 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
             }
 
             kClass.isInterface -> {
-                if (this == requireMetamodelFor(kClass)) {
+                val mm = requireMetamodelFor(kClass)
+                if (this == mm) {
                     scanAndInstantiateConceptInterface(kClass)
                 } else {
-                    throw IllegalStateException("Not supporting external metamodels")
+                    throw IllegalStateException("Not supporting external metamodels: " +
+                            "referring to $mm while processing $this. Processing $kClass")
                 }
             }
 
             kClass.isASTNode -> {
-                if (this == requireMetamodelFor(kClass)) {
+                val mm = requireMetamodelFor(kClass)
+                if (this == mm) {
                     scanAndInstantiateConcept(kClass as KClass<out ASTNode>)
                 } else {
                     throw IllegalStateException("Not supporting external metamodels")
@@ -130,14 +137,14 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
 
     private fun scanAndInstantiateConceptInterface(kClass: KClass<*>) {
         val conceptInterface = ConceptInterface()
-        scanAndInstantiateMetamodelElement(concept, kClass) {
+        scanAndInstantiateMetamodelElement(conceptInterface, kClass) {
             mappedConceptInterfaces[kClass] = conceptInterface
         }
     }
 
     private fun scanAndInstantiateEnumeration(kClass: KClass<out Enum<*>>) {
         val enumeration = Enumeration()
-        scanAndInstantiateMetamodelElement(concept, kClass) {
+        scanAndInstantiateMetamodelElement(enumeration, kClass) {
             mappedEnumerations[kClass] = enumeration
         }
     }

@@ -19,7 +19,7 @@ internal fun metamodelFor(kClass: KClass<out Any>): ReflectionBasedMetamodel? {
         if (metamodelKClass == null) {
             return metamodelFor(outerClass as KClass<out ASTNode>)
         }
-        metamodelKClass?.objectInstance as? ReflectionBasedMetamodel
+        ReflectionBasedMetamodel.INSTANCES[metamodelKClass] ?: metamodelKClass?.objectInstance as? ReflectionBasedMetamodel
     } else {
         val metamodelQName = kClass.qualifiedName!!.removeSuffix(".${kClass.simpleName}") + ".Metamodel"
         val classLoader = kClass.java.classLoader ?: throw IllegalStateException("No class loader for ${kClass.java}")

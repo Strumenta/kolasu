@@ -11,7 +11,7 @@ import org.junit.Test
 import java.io.StringWriter
 import kotlin.test.assertEquals
 
-object Metamodel : ReflectionBasedMetamodel()
+object Metamodel : ReflectionBasedMetamodel(NodeWithReference::class)
 
 data class NodeWithReference(
     override val name: String? = null,

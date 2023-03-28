@@ -8,7 +8,7 @@ import kotlin.test.assertNull
 import kotlin.test.fail
 
 internal class TraversingByPositionTest {
-    object Metamodel : ReflectionBasedMetamodel()
+    object Metamodel : ReflectionBasedMetamodel(Box::class, Item::class)
     class Box(
         val name: String,
         val contents: List<ASTNode>,

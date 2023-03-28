@@ -5,6 +5,7 @@ import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.children
+import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.simplelang.AntlrEntityLexer
