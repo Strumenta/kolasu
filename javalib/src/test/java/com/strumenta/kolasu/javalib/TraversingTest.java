@@ -39,6 +39,7 @@ public class TraversingTest {
 
     @Test
     public void testWalk() {
+        org.lionweb.lioncore.java.metamodel.Metamodel mm = Metamodel.INSTANCE;
         List<ASTNode> nodes = Traversing.walk(cu).collect(Collectors.toList());
         assertEquals(Arrays.asList(cu, a1, b1, b2, a2, b3), nodes);
     }

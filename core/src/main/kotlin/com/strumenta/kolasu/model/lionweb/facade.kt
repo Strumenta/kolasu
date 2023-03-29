@@ -32,3 +32,10 @@ val <E : Enum<*>>KClass<E>.enumeration: Enumeration
 private val conceptsMemory = HashMap<KClass<out ASTNode>, Concept>()
 private val conceptInterfacesMemory = HashMap<KClass<out Any>, ConceptInterface>()
 private val enumsMemory = HashMap<KClass<out Enum<*>>, Enumeration>()
+
+/**
+ * Intended to be used from Java.
+ */
+fun recordConceptForClass(clazz: Class<*>, concept: Concept) {
+    conceptsMemory[clazz.kotlin as KClass<out ASTNode>] = concept
+}
