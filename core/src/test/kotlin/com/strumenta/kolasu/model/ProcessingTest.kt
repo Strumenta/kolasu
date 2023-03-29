@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.model.Metamodel.A
-import com.strumenta.kolasu.model.Metamodel.B
 import com.strumenta.kolasu.model.Metamodel.AW
+import com.strumenta.kolasu.model.Metamodel.B
 import com.strumenta.kolasu.model.Metamodel.BW
 import com.strumenta.kolasu.model.Metamodel.CW
 import com.strumenta.kolasu.model.Metamodel.DW
@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import org.junit.Test as test
 
-object Metamodel : ReflectionBasedMetamodel(B::class, BW::class, CW::class, DW::class){
+object Metamodel : ReflectionBasedMetamodel(B::class, BW::class, CW::class, DW::class) {
     data class A(val s: String) : ASTNode()
     data class B(val a: A, val manyAs: List<A>) : ASTNode()
 
@@ -22,8 +22,6 @@ object Metamodel : ReflectionBasedMetamodel(B::class, BW::class, CW::class, DW::
     data class CW(var a: AW, val manyAs: MutableSet<AW>) : ASTNode()
     data class DW(var a: BW, val manyAs: MutableList<AW>) : ASTNode()
 }
-
-
 
 @NodeType
 interface FooNodeType

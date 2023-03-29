@@ -110,8 +110,10 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
                 if (this == mm) {
                     scanAndInstantiateConceptInterface(kClass)
                 } else {
-                    throw IllegalStateException("Not supporting external metamodels: " +
-                            "referring to $mm while processing $this. Processing $kClass")
+                    throw IllegalStateException(
+                        "Not supporting external metamodels: " +
+                            "referring to $mm while processing $this. Processing $kClass"
+                    )
                 }
             }
 

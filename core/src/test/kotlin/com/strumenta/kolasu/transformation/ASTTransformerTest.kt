@@ -11,7 +11,10 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-object Metamodel : ReflectionBasedMetamodel(SScript::class, EModule::class, CU::class, DisplayIntStatement::class, SetStatement::class)
+object Metamodel : ReflectionBasedMetamodel(
+    SScript::class, EModule::class, CU::class,
+    DisplayIntStatement::class, SetStatement::class
+)
 
 data class CU(
     val specifiedPosition: Position? = null,
