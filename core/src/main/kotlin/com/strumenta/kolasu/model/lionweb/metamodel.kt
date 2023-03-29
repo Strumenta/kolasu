@@ -5,6 +5,7 @@ import org.lionweb.lioncore.java.metamodel.Metamodel
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import kotlin.reflect.KClass
+import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.staticProperties
 import kotlin.reflect.jvm.jvmName
 
@@ -15,7 +16,12 @@ internal fun requireMetamodelFor(kClass: KClass<out Any>): ReflectionBasedMetamo
 internal fun metamodelFor(kClass: KClass<out Any>): ReflectionBasedMetamodel? {
     val metamodelInstance: ReflectionBasedMetamodel? = if (kClass.jvmName.contains("$")) {
         val outerClass = kClass.java.declaringClass.kotlin
-        val metamodelKClass = outerClass.nestedClasses.find { it.simpleName == "Metamodel" }
+        var metamodelKClass: KClass<*>? = null
+        if (outerClass.allSuperclasses?.contains(Metamodel::class) == true) {
+            metamodelKClass = outerClass
+        } else {
+            metamodelKClass = outerClass.nestedClasses.find { it.simpleName == "Metamodel" }
+        }
         if (metamodelKClass == null) {
             return metamodelFor(outerClass as KClass<out ASTNode>)
         }

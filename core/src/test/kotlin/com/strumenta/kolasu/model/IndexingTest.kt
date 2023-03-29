@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.model.Metamodel.A
-import com.strumenta.kolasu.model.Metamodel.B
+import com.strumenta.kolasu.model.MyMetamodel.A
+import com.strumenta.kolasu.model.MyMetamodel.B
 import com.strumenta.kolasu.serialization.IdProvider
 import com.strumenta.kolasu.serialization.NodeWithReference
 import com.strumenta.kolasu.serialization.computeIds

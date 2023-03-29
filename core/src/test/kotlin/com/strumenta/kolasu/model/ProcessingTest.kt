@@ -1,11 +1,11 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.model.Metamodel.A
-import com.strumenta.kolasu.model.Metamodel.AW
-import com.strumenta.kolasu.model.Metamodel.B
-import com.strumenta.kolasu.model.Metamodel.BW
-import com.strumenta.kolasu.model.Metamodel.CW
-import com.strumenta.kolasu.model.Metamodel.DW
+import com.strumenta.kolasu.model.MyMetamodel.A
+import com.strumenta.kolasu.model.MyMetamodel.AW
+import com.strumenta.kolasu.model.MyMetamodel.B
+import com.strumenta.kolasu.model.MyMetamodel.BW
+import com.strumenta.kolasu.model.MyMetamodel.CW
+import com.strumenta.kolasu.model.MyMetamodel.DW
 import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import java.lang.UnsupportedOperationException
 import java.util.LinkedList
@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import org.junit.Test as test
 
-object Metamodel : ReflectionBasedMetamodel(B::class, BW::class, CW::class, DW::class) {
+object MyMetamodel : ReflectionBasedMetamodel(B::class, BW::class, CW::class, DW::class) {
     data class A(val s: String) : ASTNode()
     data class B(val a: A, val manyAs: List<A>) : ASTNode()
 

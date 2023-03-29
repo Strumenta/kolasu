@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model.lionweb
 
+import com.strumenta.kolasu.metamodel.StarLasuMetamodel
 import com.strumenta.kolasu.model.ASTNode
 import org.lionweb.lioncore.java.metamodel.Concept
 import org.lionweb.lioncore.java.metamodel.ConceptInterface
@@ -34,8 +35,30 @@ private val conceptInterfacesMemory = HashMap<KClass<out Any>, ConceptInterface>
 private val enumsMemory = HashMap<KClass<out Enum<*>>, Enumeration>()
 
 /**
- * Intended to be used from Java.
+ * Intended to be used from Java and for built-in classes.
  */
 fun recordConceptForClass(clazz: Class<*>, concept: Concept) {
     conceptsMemory[clazz.kotlin as KClass<out ASTNode>] = concept
+}
+
+/**
+ * Intended to be used from Java and for built-in classes.
+ */
+fun recordConceptInterfaceForClass(clazz: Class<*>, conceptInterface: ConceptInterface) {
+    conceptInterfacesMemory[clazz.kotlin] = conceptInterface
+}
+
+fun getRecordedConceptInterface(kClass: KClass<out Any>): ConceptInterface? {
+    val mm = StarLasuMetamodel.astNode
+    return conceptInterfacesMemory[kClass]
+}
+
+fun getRecordedConcept(kClass: KClass<out ASTNode>): Concept? {
+    val mm = StarLasuMetamodel.astNode
+    return conceptsMemory[kClass]
+}
+
+fun getRecordedEnum(kClass: KClass<out Enum<*>>): Enumeration? {
+    val mm = StarLasuMetamodel.astNode
+    return enumsMemory[kClass]
 }
