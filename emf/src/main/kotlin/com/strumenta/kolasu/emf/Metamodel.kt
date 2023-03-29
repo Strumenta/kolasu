@@ -1,6 +1,10 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.commonelements.EntityDeclaration
+import com.strumenta.kolasu.model.commonelements.Expression
+import com.strumenta.kolasu.model.commonelements.PlaceholderElement
+import com.strumenta.kolasu.model.commonelements.Statement
 import com.strumenta.kolasu.transformation.GenericNode
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.ecore.*

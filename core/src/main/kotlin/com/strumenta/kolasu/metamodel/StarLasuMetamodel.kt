@@ -5,8 +5,11 @@ import com.strumenta.kolasu.model.lionweb.recordConceptForClass
 import com.strumenta.kolasu.model.lionweb.recordConceptInterfaceForClass
 import org.lionweb.lioncore.java.metamodel.Concept
 import org.lionweb.lioncore.java.metamodel.ConceptInterface
+import org.lionweb.lioncore.java.metamodel.Feature
+import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
 import org.lionweb.lioncore.java.metamodel.Metamodel
 import org.lionweb.lioncore.java.metamodel.PrimitiveType
+import org.lionweb.lioncore.java.metamodel.Property
 
 object StarLasuMetamodel : Metamodel() {
     val astNode: Concept
@@ -24,6 +27,7 @@ object StarLasuMetamodel : Metamodel() {
         char = PrimitiveType(this, "Char", "StarLasu-Char")
 
         named.addExtendedInterface(possiblyNamed)
+        possiblyNamed.addFeature(Property.createOptional("name", LionCoreBuiltins.getString()))
 
         recordConceptForClass(ASTNode::class.java, astNode)
         recordConceptForClass(GenericErrorNode::class.java, genericErrorNode)

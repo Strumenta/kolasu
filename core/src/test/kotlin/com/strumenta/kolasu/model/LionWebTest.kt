@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.model.tests
 
 import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import com.strumenta.kolasu.model.lionweb.concept
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
@@ -8,19 +9,21 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-object Metamodel : ReflectionBasedMetamodel("MyMetamodelID", "MyMetamodelFoo", MySimpleNode::class)
+object Metamodel : ReflectionBasedMetamodel("MyMetamodelID", "MyMetamodelFoo", MySimpleNode::class,
+    MyDummyNamedThing::class)
 
 class MySimpleNode(val b: Boolean, val others: List<MyOtherNode>) : ASTNode()
 
 class MyOtherNode(val i: Int, val s: String) : ASTNode()
 
+data class MyDummyNamedThing(override val name: String) : ASTNode(), Named
+
 class LionWebTest {
 
     @Test
-    @Ignore
     fun metamodelElements() {
         val mm = MySimpleNode::class.concept.metamodel!!
-        assertEquals(2, mm.elements.size, mm.elements.joinToString(", ") { it.qualifiedName() })
+        assertEquals(3, mm.elements.size, mm.elements.joinToString(", ") { it.qualifiedName() })
     }
 
     @Test
@@ -126,5 +129,12 @@ class LionWebTest {
         val node4 = MyOtherNode(-12, "Bar")
         assertEquals(-12, node4.getPropertyValue(concept2.getPropertyByName("i")!!))
         assertEquals("Bar", node4.getPropertyValue(concept2.getPropertyByName("s")!!))
+    }
+
+    @Test
+    fun overridingFeatures() {
+        val c = MyDummyNamedThing::class.concept
+        assertEquals(0, c.features.size)
+        assertEquals(1, c.allProperties().size)
     }
 }

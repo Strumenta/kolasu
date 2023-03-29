@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
-import com.strumenta.kolasu.model.Statement
+import com.strumenta.kolasu.model.commonelements.Statement
 import com.strumenta.kolasu.parsing.withParseTreeNode
 import com.strumenta.kolasu.transformation.GenericNode
 import com.strumenta.simplelang.SimpleLangLexer

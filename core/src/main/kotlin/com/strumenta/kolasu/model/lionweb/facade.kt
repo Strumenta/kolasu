@@ -15,8 +15,12 @@ import kotlin.reflect.KClass
 
 val <A : ASTNode>KClass<A>.concept: Concept
     get() = conceptsMemory.getOrPut(this) {
-        val metamodelInstance = requireMetamodelFor(this)
-        return metamodelInstance.requireConceptFor(this)
+        try {
+            val metamodelInstance = requireMetamodelFor(this)
+            return metamodelInstance.requireConceptFor(this)
+        } catch (t: Throwable) {
+            throw RuntimeException("Issue obtaining concept for $this", t)
+        }
     }
 
 val <A : Any>KClass<A>.conceptInterface: ConceptInterface
@@ -49,10 +53,22 @@ fun recordConceptInterfaceForClass(clazz: Class<*>, conceptInterface: ConceptInt
     conceptInterfacesMemory[clazz.kotlin] = conceptInterface
 }
 
+fun recordEnumerationForClass(clazz: Class<*>, enumeration: Enumeration) {
+    enumsMemory[clazz.kotlin as KClass<out Enum<*>>] = enumeration
+}
+
 fun getRecordedConceptInterface(kClass: KClass<out Any>): ConceptInterface? {
     val sl = StarLasuMetamodel.astNode
     val cm = Metamodel?.elements
     return conceptInterfacesMemory[kClass]
+}
+
+fun getKnownClassesForConceptInterfaces(): Set<KClass<*>> {
+    return conceptInterfacesMemory.keys
+}
+
+fun getKnownClassesForEnumerations(): Set<KClass<*>> {
+    return enumsMemory.keys
 }
 
 fun getRecordedConcept(kClass: KClass<out ASTNode>): Concept? {

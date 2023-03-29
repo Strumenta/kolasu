@@ -42,6 +42,9 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         INSTANCES[this.javaClass.kotlin] = this
         instantiateModelElements()
         populateModelElements()
+        mappedConcepts.forEach { recordConceptForClass(it.key.java, it.value) }
+        mappedConceptInterfaces.forEach { recordConceptInterfaceForClass(it.key.java, it.value) }
+        mappedEnumerations.forEach { recordEnumerationForClass(it.key.java, it.value) }
     }
 
     // /
@@ -72,8 +75,11 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
                 ?: throw IllegalStateException("No ConceptInterface mapped to KClass $kClass in Metamodel $this")
         } else {
             throw IllegalStateException(
-                "Not supporting external metamodels: " +
-                    "referring to $mm while processing $this. Processing $kClass"
+                "Unable to find concept interface for $kClass, which is referring to external metamodel $mm. " +
+                    "We are processing metamodel $this. Known classes: " +
+                    "${getKnownClassesForConceptInterfaces().joinToString(", ") {
+                        it.qualifiedName ?: it.toString()
+                    }}"
             )
         }
     }
@@ -86,8 +92,11 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
                 ?: throw IllegalStateException("No Enumeration mapped to KClass $kClass in Metamodel $this")
         } else {
             throw IllegalStateException(
-                "Not supporting external metamodels: " +
-                    "referring to $mm while processing $this. Processing $kClass"
+                "Unable to find enumeration for $kClass, which is referring to external metamodel $mm. " +
+                        "We are processing metamodel $this. Known classes: " +
+                        "${getKnownClassesForEnumerations().joinToString(", ") {
+                            it.qualifiedName ?: it.toString()
+                        }}"
             )
         }
     }
@@ -168,6 +177,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         val enumeration = Enumeration()
         scanAndInstantiateMetamodelElement(enumeration, kClass) {
             mappedEnumerations[kClass] = enumeration
+            recordEnumerationForClass(kClass.java, enumeration)
         }
     }
 
@@ -259,9 +269,6 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
             }
         } else {
             val concept = mappedConcepts[kClass]!!
-            kClass.nodeProperties.forEach { kotlinProperty ->
-                populateKotlinProperty(concept, kotlinProperty)
-            }
             kClass.superclasses.forEach {
                 if (it.isInterface) {
                     concept.addImplementedInterface(requireConceptInterfaceFor(it))
@@ -269,10 +276,17 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
                     concept.extendedConcept = requireConceptFor(it)
                 }
             }
+            kClass.nodeProperties.forEach { kotlinProperty ->
+                populateKotlinProperty(concept, kotlinProperty)
+            }
         }
     }
 
     private fun populateKotlinProperty(featuresContainer: FeaturesContainer<*>, kotlinProperty: KProperty1<*, *>) {
+        if (featuresContainer.allFeatures().any { it.simpleName == kotlinProperty.name }) {
+            // we are overriding an existing property, ignoring
+            return
+        }
         val provideNodes = PropertyDescription.providesNodes(kotlinProperty as KProperty1<in ASTNode, *>)
         val isReference = (kotlinProperty as KProperty1<in ASTNode, *>).isReference
         when {
@@ -321,7 +335,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
                 if ((kotlinProperty.returnType.classifier as? KClass<*>)?.allSuperclasses?.contains(Enum::class) == true
                 ) {
                     val enum: KClass<out Enum<*>> = kotlinProperty.returnType.classifier as KClass<out Enum<*>>
-                    property.type = enum.enumeration
+                    property.type = requireEnumerationFor(enum)
                 } else {
                     TODO(
                         "Return type: ${kotlinProperty.returnType.classifier} " +
