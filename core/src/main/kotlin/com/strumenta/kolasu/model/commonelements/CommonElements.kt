@@ -1,5 +1,8 @@
-package com.strumenta.kolasu.model
+package com.strumenta.kolasu.model.commonelements
 
+import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.Internal
+import com.strumenta.kolasu.model.NodeType
 import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 
 object Metamodel : ReflectionBasedMetamodel(

@@ -49,12 +49,15 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     // /
 
     fun requireConceptFor(kClass: KClass<*>): Concept {
+        getRecordedConcept(kClass as KClass<out ASTNode>)?.let {
+            return it
+        }
         val mm = requireMetamodelFor(kClass)
         return if (this == mm) {
             mappedConcepts[kClass]
                 ?: throw IllegalStateException("No Concept mapped to KClass $kClass in Metamodel $this")
         } else {
-            getRecordedConcept(kClass as KClass<out ASTNode>) ?: throw IllegalStateException(
+            throw IllegalStateException(
                 "Not supporting external metamodels: " +
                     "referring to $mm while processing $this. Processing $kClass"
             )
@@ -62,12 +65,13 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     }
 
     fun requireConceptInterfaceFor(kClass: KClass<*>): ConceptInterface {
+        getRecordedConceptInterface(kClass)?.let { return it }
         val mm = requireMetamodelFor(kClass)
         return if (this == mm) {
             mappedConceptInterfaces[kClass]
                 ?: throw IllegalStateException("No ConceptInterface mapped to KClass $kClass in Metamodel $this")
         } else {
-            getRecordedConceptInterface(kClass) ?: throw IllegalStateException(
+            throw IllegalStateException(
                 "Not supporting external metamodels: " +
                     "referring to $mm while processing $this. Processing $kClass"
             )
@@ -75,12 +79,13 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     }
 
     fun requireEnumerationFor(kClass: KClass<*>): Enumeration {
+        getRecordedEnum(kClass as KClass<out Enum<*>>)?.let { return it }
         val mm = requireMetamodelFor(kClass)
         return if (this == mm) {
             mappedEnumerations[kClass]
                 ?: throw IllegalStateException("No Enumeration mapped to KClass $kClass in Metamodel $this")
         } else {
-            getRecordedEnum(kClass as KClass<out Enum<*>>) ?: throw IllegalStateException(
+            throw IllegalStateException(
                 "Not supporting external metamodels: " +
                     "referring to $mm while processing $this. Processing $kClass"
             )
@@ -111,6 +116,9 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
             mappedEnumerations.containsKey(kClass) ||
             kClass == Any::class
         ) {
+            return
+        }
+        if (isRecorded(kClass)) {
             return
         }
         when {
