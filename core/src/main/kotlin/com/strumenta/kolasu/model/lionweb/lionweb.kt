@@ -244,9 +244,9 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     // /
 
     private fun populateModelElements() {
-        mappedConcepts.keys.forEach { populate(it) }
-        mappedConceptInterfaces.keys.forEach { populate(it) }
-        mappedEnumerations.keys.forEach { populate(it) }
+        // we need to process classes starting from the ancestors
+        val classes = mappedConcepts.keys + mappedConceptInterfaces.keys + mappedEnumerations.keys
+        classes.sortedBy {it.allSupertypes.size }.reversed().forEach { populate(it) }
     }
 
     private fun populate(kClass: KClass<*>) {
@@ -264,6 +264,11 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
             }
         } else if (kClass.isInterface) {
             val conceptInterface = mappedConceptInterfaces[kClass]!!
+            kClass.superclasses.forEach {
+                if (it.isInterface) {
+                    conceptInterface.addExtendedInterface(requireConceptInterfaceFor(it))
+                }
+            }
             kClass.nodeProperties.forEach { kotlinProperty ->
                 populateKotlinProperty(conceptInterface, kotlinProperty)
             }
@@ -288,7 +293,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
             return
         }
         val provideNodes = PropertyDescription.providesNodes(kotlinProperty as KProperty1<in ASTNode, *>)
-        val isReference = (kotlinProperty as KProperty1<in ASTNode, *>).isReference
+        val isReference = kotlinProperty.isReference
         when {
             !provideNodes -> {
                 if (isReference) {
