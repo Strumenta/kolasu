@@ -16,7 +16,7 @@ import kotlin.io.path.pathString
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-object Metamodel : ReflectionBasedMetamodel()
+object Metamodel : ReflectionBasedMetamodel(MyCompilationUnit::class)
 
 data class MyCompilationUnit(val decls: List<MyEntityDecl>) : ASTNode()
 data class MyEntityDecl(override var name: String, val fields: List<MyFieldDecl>) : ASTNode(), Named

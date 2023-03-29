@@ -52,14 +52,20 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         if (kClass == ASTNode::class) {
             return StarLasuMetamodel.astNode
         }
-//        if (kClass == GenericErrorNode::class) {
-//            return StarLasuMetamodel.genericError
-//        }
+        if (kClass == GenericErrorNode::class) {
+            return StarLasuMetamodel.genericErrorNode
+        }
         return mappedConcepts[kClass]
             ?: throw IllegalStateException("No Concept mapped to KClass $kClass in Metamodel $this")
     }
 
     fun requireConceptInterfaceFor(kClass: KClass<*>): ConceptInterface {
+        if (kClass == Named::class) {
+            return StarLasuMetamodel.named
+        }
+        if (kClass == PossiblyNamed::class) {
+            return StarLasuMetamodel.possiblyNamed
+        }
         return mappedConceptInterfaces[kClass]
             ?: throw IllegalStateException("No ConceptInterface mapped to KClass $kClass in Metamodel $this")
     }
@@ -217,10 +223,12 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     // /
 
     private fun populateModelElements() {
-        classes.forEach { scanAndPopulate(it) }
+        mappedConcepts.keys.forEach { populate(it) }
+        mappedConceptInterfaces.keys.forEach { populate(it) }
+        mappedEnumerations.keys.forEach { populate(it) }
     }
 
-    private fun scanAndPopulate(kClass: KClass<*>) {
+    private fun populate(kClass: KClass<*>) {
         if (populated.contains(kClass)) {
             return
         }
@@ -242,6 +250,13 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
             val concept = mappedConcepts[kClass]!!
             kClass.nodeProperties.forEach { kotlinProperty ->
                 populateKotlinProperty(concept, kotlinProperty)
+            }
+            kClass.superclasses.forEach {
+                if (it.isInterface) {
+                    concept.addImplementedInterface(requireConceptInterfaceFor(it))
+                } else {
+                    concept.extendedConcept = requireConceptFor(it)
+                }
             }
         }
     }
