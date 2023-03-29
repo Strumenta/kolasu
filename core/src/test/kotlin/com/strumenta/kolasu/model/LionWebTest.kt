@@ -5,12 +5,13 @@ import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import com.strumenta.kolasu.model.lionweb.concept
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-object Metamodel : ReflectionBasedMetamodel("MyMetamodelID", "MyMetamodelFoo", MySimpleNode::class,
-    MyDummyNamedThing::class)
+object Metamodel : ReflectionBasedMetamodel(
+    "MyMetamodelID", "MyMetamodelFoo", MySimpleNode::class,
+    MyDummyNamedThing::class
+)
 
 class MySimpleNode(val b: Boolean, val others: List<MyOtherNode>) : ASTNode()
 

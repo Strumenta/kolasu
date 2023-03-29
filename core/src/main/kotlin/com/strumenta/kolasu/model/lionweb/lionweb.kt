@@ -93,10 +93,10 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         } else {
             throw IllegalStateException(
                 "Unable to find enumeration for $kClass, which is referring to external metamodel $mm. " +
-                        "We are processing metamodel $this. Known classes: " +
-                        "${getKnownClassesForEnumerations().joinToString(", ") {
-                            it.qualifiedName ?: it.toString()
-                        }}"
+                    "We are processing metamodel $this. Known classes: " +
+                    "${getKnownClassesForEnumerations().joinToString(", ") {
+                        it.qualifiedName ?: it.toString()
+                    }}"
             )
         }
     }
@@ -246,7 +246,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     private fun populateModelElements() {
         // we need to process classes starting from the ancestors
         val classes = mappedConcepts.keys + mappedConceptInterfaces.keys + mappedEnumerations.keys
-        classes.sortedBy {it.allSupertypes.size }.reversed().forEach { populate(it) }
+        classes.sortedBy { it.allSupertypes.size }.reversed().forEach { populate(it) }
     }
 
     private fun populate(kClass: KClass<*>) {

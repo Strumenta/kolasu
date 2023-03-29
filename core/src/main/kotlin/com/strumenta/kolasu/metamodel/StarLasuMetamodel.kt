@@ -5,7 +5,6 @@ import com.strumenta.kolasu.model.lionweb.recordConceptForClass
 import com.strumenta.kolasu.model.lionweb.recordConceptInterfaceForClass
 import org.lionweb.lioncore.java.metamodel.Concept
 import org.lionweb.lioncore.java.metamodel.ConceptInterface
-import org.lionweb.lioncore.java.metamodel.Feature
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
 import org.lionweb.lioncore.java.metamodel.Metamodel
 import org.lionweb.lioncore.java.metamodel.PrimitiveType
