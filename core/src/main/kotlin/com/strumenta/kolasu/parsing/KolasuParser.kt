@@ -16,7 +16,7 @@ import java.util.*
 import kotlin.reflect.full.memberFunctions
 import kotlin.system.measureTimeMillis
 
-abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
+abstract class KolasuANTLRLexer<T : KolasuToken> : KolasuLexer<T> {
     /**
      * Creates the lexer.
      */
@@ -30,13 +30,15 @@ abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
      */
     protected abstract fun createANTLRLexer(charStream: CharStream): Lexer
 
+    protected abstract fun tokenInstantiator(t: Token): T
+
     override fun lex(
         inputStream: InputStream,
         charset: Charset,
         onlyFromDefaultChannel: Boolean
-    ): LexingResult<KolasuANTLRToken> {
+    ): LexingResult<T> {
         val issues = LinkedList<Issue>()
-        val tokens = LinkedList<KolasuANTLRToken>()
+        val tokens = LinkedList<T>()
         var last: Token? = null
         val time = measureTimeMillis {
             val lexer = createANTLRLexer(inputStream, charset)
@@ -47,7 +49,7 @@ abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
                     break
                 } else {
                     if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
-                        tokens.add(KolasuANTLRToken(categoryOf(t), t))
+                        tokens.add(tokenInstantiator(t))
                         last = t
                     }
                 }
@@ -74,7 +76,8 @@ abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
  *
  * You should extend this class to implement the parts that are specific to your language.
  */
-abstract class KolasuParser<R : ASTNode, P : Parser, C : ParserRuleContext> : KolasuANTLRLexer(), ASTParser<R> {
+abstract class KolasuParser<R : ASTNode, P : Parser, C : ParserRuleContext, T : KolasuToken> :
+    KolasuANTLRLexer<T>(), ASTParser<R> {
 
     /**
      * Creates the first-stage parser.

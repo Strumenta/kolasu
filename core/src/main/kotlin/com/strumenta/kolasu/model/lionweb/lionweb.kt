@@ -246,7 +246,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     private fun populateModelElements() {
         // we need to process classes starting from the ancestors
         val classes = mappedConcepts.keys + mappedConceptInterfaces.keys + mappedEnumerations.keys
-        classes.sortedBy { it.allSupertypes.size }.reversed().forEach { populate(it) }
+        classes.sortedBy { it.allSupertypes.size }.forEach { populate(it) }
     }
 
     private fun populate(kClass: KClass<*>) {

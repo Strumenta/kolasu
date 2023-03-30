@@ -6,14 +6,20 @@ import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.Lexer
+import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.TokenStream
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class SimpleLangKolasuParser : KolasuParser<ASTNode, SimpleLangParser, SimpleLangParser.CompilationUnitContext>() {
+class SimpleLangKolasuParser : KolasuParser<ASTNode, SimpleLangParser,
+    SimpleLangParser.CompilationUnitContext, KolasuANTLRToken>() {
     override fun createANTLRLexer(charStream: CharStream): Lexer {
         return SimpleLangLexer(charStream)
+    }
+
+    override fun tokenInstantiator(t: Token): KolasuANTLRToken {
+        return KolasuANTLRToken(categoryOf(t), t)
     }
 
     override fun createANTLRParser(tokenStream: TokenStream): SimpleLangParser {
