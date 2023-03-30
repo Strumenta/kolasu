@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.model.lionweb.concept
+import com.strumenta.kolasu.parsing.ParseTreeOrigin
+import com.strumenta.kolasu.traversing.walk
 import org.lionweb.lioncore.java.metamodel.Annotation
 import org.lionweb.lioncore.java.metamodel.Concept
 import org.lionweb.lioncore.java.metamodel.Containment
@@ -370,3 +372,24 @@ annotation class Link
  * Use this to mark something that does not inherit from Node as a node, so it will be included in the AST.
  */
 annotation class NodeType
+
+/**
+ * Assign the given source to all nodes without a source
+ */
+fun assignSourceToTree(root: ASTNode, source: Source, sourceText: String) {
+    root.walk().forEach {
+        if (it.origin == null) {
+            it.position?.let { position ->
+                if (position.source == null) {
+                    position.source = source
+                }
+            }
+            it.origin = SimpleOrigin(position = it.position, sourceText)
+        } else if (it.origin is ParseTreeOrigin) {
+            val pto = it.origin as ParseTreeOrigin
+            if (pto.source == null){
+                pto.source = source
+            }
+        }
+    }
+}
