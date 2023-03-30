@@ -83,7 +83,7 @@ ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 release {
     buildTasks = ['publish']
     git {
-        requireBranch.set('master')
+        requireBranch.set('')
         pushToRemote.set('origin')
     }
 }
