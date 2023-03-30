@@ -6,13 +6,10 @@ import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.parsing.KolasuANTLRToken
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
-import org.antlr.v4.runtime.CharStream
-import org.antlr.v4.runtime.Lexer
-import org.antlr.v4.runtime.Parser
-import org.antlr.v4.runtime.ParserRuleContext
-import org.antlr.v4.runtime.TokenStream
+import org.antlr.v4.runtime.*
 import org.eclipse.emf.ecore.resource.Resource
 import org.junit.Test
 import java.io.File
@@ -26,7 +23,7 @@ data class MyCompilationUnit(val decls: List<MyEntityDecl>) : ASTNode()
 data class MyEntityDecl(override var name: String, val fields: List<MyFieldDecl>) : ASTNode(), Named
 data class MyFieldDecl(override var name: String) : ASTNode(), Named
 
-class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleContext>() {
+class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleContext, KolasuANTLRToken>() {
     override fun doGenerateMetamodel(resource: Resource) {
         val mmbuilder = MetamodelBuilder("com.strumenta.kolasu.emf.cli", "https://dummy.com/mm", "dm")
         mmbuilder.provideClass(MyCompilationUnit::class)
@@ -35,6 +32,10 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
     }
 
     override fun createANTLRLexer(charStream: CharStream): Lexer {
+        TODO("Not yet implemented")
+    }
+
+    override fun tokenInstantiator(t: Token): KolasuANTLRToken {
         TODO("Not yet implemented")
     }
 

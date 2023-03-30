@@ -86,7 +86,7 @@ open class ASTNode() : Node, Origin, Destination {
     /**
      * The parent node, if any.
      */
-    // @property:Internal
+    @property:Internal
     private var _parent: ASTNode? = null
 
     /**

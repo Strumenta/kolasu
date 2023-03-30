@@ -2,6 +2,7 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.parsing.KolasuParser
+import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
 import org.antlr.v4.runtime.Parser
@@ -68,8 +69,8 @@ fun ParsingResult<*>.saveModel(
  * In particular, this parser can generate the metamodel. We can then use [ASTNode.toEObject] to translate a tree into
  * its EMF representation.
  */
-abstract class EcoreEnabledParser<R : ASTNode, P : Parser, C : ParserRuleContext> :
-    KolasuParser<R, P, C>(), EMFMetamodelSupport {
+abstract class EcoreEnabledParser<R : ASTNode, P : Parser, C : ParserRuleContext, T : KolasuToken> :
+    KolasuParser<R, P, C, T>(), EMFMetamodelSupport {
 
     /**
      * Generates the metamodel. The standard Kolasu metamodel [EPackage][org.eclipse.emf.ecore.EPackage] is included.
