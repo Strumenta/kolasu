@@ -24,6 +24,7 @@ fun <T : ASTNode> T.relevantMemberProperties(withPosition: Boolean = false, with
  * @param propertiesToIgnore which properties to ignore
  * @param propertyTypeOperation the operation to perform on each property.
  */
+@Deprecated("Use LionWeb based reflection instead")
 fun <T : Any> KClass<T>.processProperties(
     propertiesToIgnore: Set<String> = emptySet(),
     propertyTypeOperation: (PropertyTypeDescription) -> Unit
@@ -41,6 +42,7 @@ enum class PropertyType {
     REFERENCE
 }
 
+@Deprecated("Use LionWeb based reflection instead")
 data class PropertyDescription(
     val name: String,
     val provideNodes: Boolean,
@@ -154,6 +156,7 @@ fun KClass<*>.isMarkedAsNodeType(): Boolean {
     return this.annotations.any { it.annotationClass == NodeType::class }
 }
 
+@Deprecated("Use LionWeb based reflection instead")
 data class PropertyTypeDescription(
     val name: String,
     val provideNodes: Boolean,
