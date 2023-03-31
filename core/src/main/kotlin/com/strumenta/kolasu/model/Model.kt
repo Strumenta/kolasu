@@ -387,7 +387,7 @@ fun assignSourceToTree(root: ASTNode, source: Source, sourceText: String) {
             it.origin = SimpleOrigin(position = it.position, sourceText)
         } else if (it.origin is ParseTreeOrigin) {
             val pto = it.origin as ParseTreeOrigin
-            if (pto.source == null){
+            if (pto.source == null) {
                 pto.source = source
             }
         }
