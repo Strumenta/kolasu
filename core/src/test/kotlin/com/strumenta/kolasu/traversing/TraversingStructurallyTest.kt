@@ -1,10 +1,9 @@
 package com.strumenta.kolasu.traversing
 
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.model.assignParents
-import com.strumenta.kolasu.model.pos
+import com.strumenta.kolasu.model.*
+import kotlin.system.measureTimeMillis
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
@@ -82,6 +81,75 @@ internal class TraversingStructurallyTest {
         val item4 = ((testCase.contents[2] as Box).contents[0] as Box).contents[1]
         val result: String = printSequence(item4.walkAncestors())
         assertEquals("small, big, root", result)
+    }
+
+    fun getRandomString(length: Int): String {
+        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+        return (1..length)
+            .map { allowedChars.random() }
+            .joinToString("")
+    }
+
+    @Test
+    fun performanceTest() {
+        val boxes = mutableListOf<Box>()
+        val numberOfChildren = 10000
+        var nodes: Int = 1
+        val numberOfGrandChildren = 10
+        for (i in 0..numberOfChildren) {
+            val nChildren = (0..numberOfGrandChildren).random()
+            val children = mutableListOf<Node>()
+            for (b in 0..nChildren) {
+                val grandChildren = mutableListOf<Node>()
+                for (c in 0..(0..numberOfGrandChildren).random()) {
+                    grandChildren.add(Item(getRandomString(8)))
+                    nodes += 1
+                }
+                children.add(Box(getRandomString(8), grandChildren))
+                nodes += 1
+            }
+            nodes += 1
+            boxes.add(Box(getRandomString(8), children))
+        }
+        val root = Box("root", boxes)
+        root.assignParents()
+
+        val countedNodesList: MutableList<Int> = mutableListOf()
+        val walkTime = measureTimeMillis {
+            var countedNodes = 0
+            root.walk().forEach { countedNodes++ }
+            countedNodesList.add(countedNodes)
+        }
+        val walkTimeTwo = measureTimeMillis {
+            var countedNodes = 0
+            root.walk().forEach { countedNodes++ }
+            countedNodesList.add(countedNodes)
+        }
+        val fw = FastWalker(root)
+        val walkTimeFast = measureTimeMillis {
+            var countedNodes = 0
+            fw.walk().forEach { countedNodes++ }
+            countedNodesList.add(countedNodes)
+        }
+        val walkTimeFastTwo = measureTimeMillis {
+            var countedNodes = 0
+            fw.walk().forEach { countedNodes++ }
+            countedNodesList.add(countedNodes)
+        }
+        val walkTimeFastThree = measureTimeMillis {
+            var countedNodes = 0
+            fw.walk().forEach { countedNodes++ }
+            countedNodesList.add(countedNodes)
+        }
+        countedNodesList.forEach {
+            assertEquals(nodes, it)
+        }
+        // we are testing that walkTimeFast is taking more or less the same time as walkTime
+        assertContains(walkTime * 0.8..walkTime * 1.35, walkTimeFast.toDouble())
+        println(walkTime)
+        println(walkTimeFastTwo)
+        assert(walkTimeFastTwo < walkTime)
+        assert(walkTimeFastThree < walkTime)
     }
 
     @Test

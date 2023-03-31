@@ -2,7 +2,7 @@ package com.strumenta.kolasu.emf.cli
 
 import com.github.ajalt.clikt.core.PrintHelpMessage
 import com.github.ajalt.clikt.output.CliktConsole
-import com.strumenta.kolasu.emf.EMFEnabledParser
+import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
@@ -26,7 +26,7 @@ data class MyCompilationUnit(val decls: List<MyEntityDecl>) : Node()
 data class MyEntityDecl(override var name: String, val fields: List<MyFieldDecl>) : Node(), Named
 data class MyFieldDecl(override var name: String) : Node(), Named
 
-class MyDummyParser : EMFEnabledParser<MyCompilationUnit, Parser, ParserRuleContext>() {
+class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleContext>() {
     override fun doGenerateMetamodel(resource: Resource) {
         val mmbuilder = MetamodelBuilder("com.strumenta.kolasu.emf.cli", "https://dummy.com/mm", "dm")
         mmbuilder.provideClass(MyCompilationUnit::class)
