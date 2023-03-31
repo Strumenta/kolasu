@@ -13,19 +13,25 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.xmi.XMIResource
 import java.io.IOException
 
+@Deprecated("Deprecating everything EMF related")
 interface EMFMetamodelSupport {
     fun generateMetamodel(resource: Resource, includingKolasuMetamodel: Boolean = true)
 }
 
+@Deprecated("Deprecating everything EMF related")
 val INCLUDE_KOLASU = EMFMetamodelSupport::class.qualifiedName + ".includeKolasu"
+
+@Deprecated("Deprecating everything EMF related")
 val RESET_URI = EMFMetamodelSupport::class.qualifiedName + ".resetURI"
 
+@Deprecated("Deprecating everything EMF related")
 val DEFAULT_OPTIONS_FOR_METAMODEL = mapOf(
     Pair(XMIResource.OPTION_SCHEMA_LOCATION, true),
     Pair(INCLUDE_KOLASU, false),
     Pair(RESET_URI, true)
 )
 
+@Deprecated("Deprecating everything EMF related")
 fun EMFMetamodelSupport.saveMetamodel(
     target: URI,
     options: Map<String, Boolean> = DEFAULT_OPTIONS_FOR_METAMODEL
@@ -41,6 +47,7 @@ fun EMFMetamodelSupport.saveMetamodel(
     return resource
 }
 
+@Deprecated("Deprecating everything EMF related")
 fun ParsingResult<*>.saveModel(
     metamodelResource: Resource,
     target: URI,
@@ -69,6 +76,7 @@ fun ParsingResult<*>.saveModel(
  * In particular, this parser can generate the metamodel. We can then use [ASTNode.toEObject] to translate a tree into
  * its EMF representation.
  */
+@Deprecated("Deprecating everything EMF related")
 abstract class EcoreEnabledParser<R : ASTNode, P : Parser, C : ParserRuleContext, T : KolasuToken> :
     KolasuParser<R, P, C, T>(), EMFMetamodelSupport {
 

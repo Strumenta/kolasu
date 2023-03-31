@@ -6,6 +6,7 @@ import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.ecore.EPackage
 
+@Deprecated("Deprecating everything EMF related")
 class JsonGenerator {
     fun generateEMFString(result: Result<out ASTNode>, astPackage: EPackage): String {
         return result.toEObject(astPackage).saveAsJson()

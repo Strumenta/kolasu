@@ -8,7 +8,9 @@ import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.EcorePackage
 import java.io.File
 
+@Deprecated("Deprecating everything EMF related")
 val STARLASU_METAMODEL by lazy { createStarlasuMetamodel() }
+@Deprecated("Deprecating everything EMF related")
 val ASTNODE_ECLASS by lazy { STARLASU_METAMODEL.eClassifiers.find { it.name == "ASTNode" }!! as EClass }
 
 private fun createStarlasuMetamodel(): EPackage {

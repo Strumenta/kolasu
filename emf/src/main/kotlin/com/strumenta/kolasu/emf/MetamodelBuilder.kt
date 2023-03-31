@@ -24,6 +24,7 @@ private val KClass<*>.packageName: String?
 /**
  * When building multiple related EPackages use MetamodelsBuilder instead.
  */
+@Deprecated("Deprecating everything EMF related")
 class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, resource: Resource? = null) :
     ClassifiersProvider {
 

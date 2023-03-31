@@ -10,6 +10,7 @@ import kotlin.reflect.KClass
  * This class is a composite around MetamodelBuilder which permits to build EPackages from Kotlin packages of classes
  * which has relations among them.
  */
+@Deprecated("Deprecating everything EMF related")
 class MetamodelsBuilder(val resource: Resource? = null) {
     internal val singleMetamodelsBuilders = LinkedList<MetamodelBuilder>()
 

@@ -114,9 +114,11 @@ val BigIntegerHandler = KolasuDataTypeHandler(BigInteger::class, EcorePackage.eI
 val BigDecimalHandler = KolasuDataTypeHandler(BigDecimal::class, EcorePackage.eINSTANCE.eBigDecimal)
 val LongHandler = KolasuDataTypeHandler(Long::class, EcorePackage.eINSTANCE.eLong)
 
+@Deprecated("Deprecating everything EMF related")
 val KClass<*>.eClassifierName: String
     get() = this.java.eClassifierName
 
+@Deprecated("Deprecating everything EMF related")
 val Class<*>.eClassifierName: String
     get() = if (this.enclosingClass != null) {
         "${this.enclosingClass.simpleName}${this.simpleName}"
@@ -124,6 +126,7 @@ val Class<*>.eClassifierName: String
         this.simpleName
     }
 
+@Deprecated("Deprecating everything EMF related")
 class ResourceClassTypeHandler(val resource: Resource, val ownPackage: EPackage) : EClassTypeHandler {
     override fun canHandle(kclass: KClass<*>): Boolean = getPackage(packageName(kclass)) != null
 

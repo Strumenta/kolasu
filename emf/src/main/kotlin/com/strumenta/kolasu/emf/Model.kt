@@ -21,24 +21,29 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 
+@Deprecated("Deprecating everything EMF related")
 fun EPackage.getEClass(javaClass: Class<*>): EClass {
     return this.getEClass(javaClass.eClassifierName)
 }
 
+@Deprecated("Deprecating everything EMF related")
 fun EPackage.getEClass(klass: KClass<*>): EClass {
     return this.getEClass(klass.eClassifierName)
 }
 
+@Deprecated("Deprecating everything EMF related")
 fun EPackage.getEClass(name: String): EClass {
     return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("EClass not found: $name"))
         as EClass
 }
 
+@Deprecated("Deprecating everything EMF related")
 fun EPackage.getEDataType(name: String): EDataType {
     return (this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException("EDataType not found: $name"))
         as EDataType
 }
 
+@Deprecated("Deprecating everything EMF related")
 fun EPackage.getEEnum(javaClass: Class<*>): EEnum {
     return (
         this.eClassifiers.find { it.name == javaClass.eClassifierName } ?: throw IllegalArgumentException(
@@ -47,6 +52,7 @@ fun EPackage.getEEnum(javaClass: Class<*>): EEnum {
         ) as EEnum
 }
 
+@Deprecated("Deprecating everything EMF related")
 fun Any.dataToEObject(ePackage: EPackage): EObject {
     val ec = ePackage.getEClass(this::class)
     val eo = ePackage.eFactoryInstance.create(ec)
@@ -62,6 +68,7 @@ fun Any.dataToEObject(ePackage: EPackage): EObject {
     return eo
 }
 
+@Deprecated("Deprecating everything EMF related")
 fun Point.toEObject(): EObject {
     val ec = STARLASU_METAMODEL.getEClass("Point")
     val eo = STARLASU_METAMODEL.eFactoryInstance.create(ec)
@@ -70,6 +77,7 @@ fun Point.toEObject(): EObject {
     return eo
 }
 
+@Deprecated("Deprecating everything EMF related")
 fun Position.toEObject(): EObject {
     val ec = STARLASU_METAMODEL.getEClass("Position")
     val eo = STARLASU_METAMODEL.eFactoryInstance.create(ec)
@@ -78,6 +86,7 @@ fun Position.toEObject(): EObject {
     return eo
 }
 
+@Deprecated("Deprecating everything EMF related")
 fun <T : ASTNode> Result<T>.toEObject(astPackage: EPackage): EObject {
     val resultEO = makeResultEObject(this)
     val rootSF = resultEO.eClass().eAllStructuralFeatures.find { it.name == "root" }!!
@@ -98,6 +107,7 @@ private fun makeResultEObject(result: Result<*>): EObject {
     return resultEO
 }
 
+@Deprecated("Deprecating everything EMF related")
 fun <T : ASTNode> Result<T>.toEObject(
     resource: Resource,
     kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping()
@@ -110,6 +120,7 @@ fun <T : ASTNode> Result<T>.toEObject(
     return resultEO
 }
 
+@Deprecated("Deprecating everything EMF related")
 fun Issue.toEObject(): EObject {
     val ec = STARLASU_METAMODEL.getEClass(Issue::class.java)
     val eo = STARLASU_METAMODEL.eFactoryInstance.create(ec)
@@ -267,6 +278,7 @@ fun EClass.instantiate(): EObject {
     return this.ePackage.eFactoryInstance.create(this)
 }
 
+@Deprecated("Deprecating everything EMF related")
 class KolasuToEMFMapping {
     private val nodeToEObjects = IdentityHashMap<ASTNode, EObject>()
 
