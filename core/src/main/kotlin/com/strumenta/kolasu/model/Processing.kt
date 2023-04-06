@@ -143,7 +143,7 @@ val Node.nextSibling: Node?
         if (this.parent != null) {
             val siblings = this.parent!!.children
             val index = siblings.indexOf(this)
-            return if (index == children.size - 1) null else siblings[index + 1]
+            return if (index == siblings.size - 1) null else siblings[index + 1]
         }
         return null
     }
