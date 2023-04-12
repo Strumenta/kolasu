@@ -21,7 +21,7 @@ class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
         parserInstantiator,
         help = "Parses a file and exports the AST to an EMF (XMI) file.",
         name = "model"
-    ) where P : EcoreEnabledParser<R, *, *> {
+    ) where P : EcoreEnabledParser<R, *, *, *> {
     val metamodel by option("--metamodel")
     val outputDirectory by option("--output", "-o")
         .file()

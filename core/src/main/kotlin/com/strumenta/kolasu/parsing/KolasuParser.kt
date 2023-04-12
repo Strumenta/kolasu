@@ -74,7 +74,9 @@ abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
  *
  * You should extend this class to implement the parts that are specific to your language.
  */
-abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : KolasuANTLRLexer(), ASTParser<R> {
+abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken> :
+    KolasuLexer<T>,
+    ASTParser<R> {
 
     /**
      * Creates the first-stage parser.
@@ -102,11 +104,13 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : Kolas
         issues: MutableList<Issue>
     ): R?
 
-    open fun extractTokens(result: ParsingResult<R>): LexingResult<KolasuANTLRToken>? {
-        val tokens = mutableListOf<KolasuANTLRToken>()
+    protected abstract fun convertToken(terminalNode: TerminalNode): T
+
+    open fun extractTokens(result: ParsingResult<R>): LexingResult<T>? {
+        val antlrTerminals = mutableListOf<TerminalNode>()
         fun extractTokensFromParseTree(pt: ParseTree?) {
             if (pt is TerminalNode) {
-                tokens.add(KolasuANTLRToken(categoryOf(pt.symbol), pt.symbol))
+                antlrTerminals.add(pt)
             } else if (pt != null) {
                 for (i in 0..pt.childCount) {
                     extractTokensFromParseTree(pt.getChild(i))
@@ -117,7 +121,8 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : Kolas
         val ptRoot = result.firstStage?.root
         return if (ptRoot != null) {
             extractTokensFromParseTree(ptRoot)
-            tokens.sortBy { it.token.tokenIndex }
+            antlrTerminals.sortBy { it.symbol.tokenIndex }
+            val tokens = antlrTerminals.map { convertToken(it) }.toMutableList()
             LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime)
         } else null
     }
@@ -125,6 +130,12 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : Kolas
     protected open fun attachListeners(parser: P, issues: MutableList<Issue>) {
         parser.injectErrorCollectorInParser(issues)
     }
+
+    protected open fun attachListeners(lexer: Lexer, issues: MutableList<Issue>) {
+        lexer.injectErrorCollectorInLexer(issues)
+    }
+
+    protected abstract fun createANTLRLexer(inputStream: CharStream): Lexer
 
     /**
      * Creates the first-stage lexer and parser.
