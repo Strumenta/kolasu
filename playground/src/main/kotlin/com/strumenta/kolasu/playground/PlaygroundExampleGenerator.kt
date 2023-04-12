@@ -17,7 +17,7 @@ import java.io.FileWriter
 import java.io.Writer
 
 class PlaygroundExampleGenerator(
-    val parser: EcoreEnabledParser<*, *, *>,
+    val parser: EcoreEnabledParser<*, *, *, *>,
     val directory: File,
     val failOnError: Boolean = true,
     resourceURI: URI = URI.createURI("")
