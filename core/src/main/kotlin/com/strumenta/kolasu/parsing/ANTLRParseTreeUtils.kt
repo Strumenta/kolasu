@@ -61,6 +61,8 @@ fun Node.getText(code: String): String? = position?.text(code)
 /**
  * An Origin corresponding to a ParseTreeNode. This is used to indicate that an AST Node has been obtained
  * by mapping an original ParseTreeNode.
+ *
+ * Note that this is NOT serializable as ParseTree elements are not Serializable.
  */
 class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = null) : Origin {
     override val position: Position?
