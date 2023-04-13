@@ -1,12 +1,13 @@
 package com.strumenta.kolasu.model
 
+import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 
-interface Origin {
+interface Origin : Serializable {
     val position: Position?
     val sourceText: String?
     val source: Source?
@@ -21,7 +22,7 @@ data class CompositeOrigin(
     override val sourceText: String?
 ) : Origin
 
-interface Destination
+interface Destination : Serializable
 
 data class CompositeDestination(val elements: List<Destination>) : Destination
 data class TextFileDestination(val position: Position?) : Destination
@@ -32,7 +33,7 @@ data class TextFileDestination(val position: Position?) : Destination
  * It implements Origin as it could be the source of a AST-to-AST transformation, so the node itself can be
  * the Origin of another node.
  */
-open class Node() : Origin, Destination {
+open class Node() : Origin, Destination, Serializable {
 
     @Internal
     protected var positionOverride: Position? = null

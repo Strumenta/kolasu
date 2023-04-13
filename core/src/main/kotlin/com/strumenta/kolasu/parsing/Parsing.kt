@@ -13,13 +13,14 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
+import java.io.Serializable
 import java.nio.charset.Charset
 
 open class CodeProcessingResult<D>(
     val issues: List<Issue>,
     val data: D?,
     val code: String? = null
-) {
+) : Serializable {
     val correct: Boolean
         get() = issues.none { it.severity != IssueSeverity.INFO }
 
