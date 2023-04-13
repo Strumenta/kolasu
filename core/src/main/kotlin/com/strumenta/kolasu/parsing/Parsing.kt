@@ -56,7 +56,7 @@ data class TokenCategory(val type: String) {
 /**
  * A token is a portion of text that has been assigned a category.
  */
-open class KolasuToken(open val category: TokenCategory, open val position: Position, open val text: String)
+open class KolasuToken(open val category: TokenCategory, open val position: Position, open val text: String) : Serializable
 
 /**
  * A [KolasuToken] generated from a [Token]. The [token] contains additional information that is specific to ANTLR,
@@ -151,7 +151,7 @@ class ParsingResult<RootNode : Node>(
 
 fun String.toStream(charset: Charset = Charsets.UTF_8) = ByteArrayInputStream(toByteArray(charset))
 
-interface KolasuLexer<T : KolasuToken> {
+interface KolasuLexer<T : KolasuToken> : Serializable {
 
     /**
      * Performs "lexing" on the given code string, i.e., it breaks it into tokens.
