@@ -13,6 +13,7 @@ import kotlin.reflect.KCallable
 import kotlin.reflect.KType
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
 
 object TrivialFactoryOfParseTreeToASTNodeFactory {
 
@@ -60,13 +61,18 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
     ) -> T? {
         return { parseTreeNode, astTransformer ->
             val constructors = T::class.constructors
-            if (constructors.size != 1) {
-                throw java.lang.RuntimeException(
-                    "Trivial Factory supports only classes with exactly one constructor. " +
-                        "Class ${T::class.qualifiedName} has ${constructors.size}"
-                )
+            val constructor = if (constructors.size != 1) {
+                if (T::class.primaryConstructor != null) {
+                    T::class.primaryConstructor!!
+                } else {
+                    throw java.lang.RuntimeException(
+                        "Trivial Factory supports only classes with exactly one constructor or a primary constructor. " +
+                                "Class ${T::class.qualifiedName} has ${constructors.size}"
+                    )
+                }
+            } else {
+                constructors.first()
             }
-            val constructor = constructors.first()
             val args: Array<Any?> = constructor.parameters.map {
                 val parameterName = it.name
                 val searchedName = nameConversions.find { it.second == parameterName }?.first ?: parameterName
