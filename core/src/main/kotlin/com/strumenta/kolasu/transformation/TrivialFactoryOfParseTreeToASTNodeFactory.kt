@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.TerminalNode
 import kotlin.reflect.KCallable
 import kotlin.reflect.KType
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
@@ -43,6 +44,9 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
                 return value.map { convert(it, astTransformer, expectedType.arguments[0].type!!) }
             }
             is ParserRuleContext -> {
+                if (expectedType == String::class.createType()) {
+                    return value.text
+                }
                 return astTransformer.transform(value)
             }
             null -> {
