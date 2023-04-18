@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class SimpleLangKolasuParser : KolasuParser<Node, SimpleLangParser, SimpleLangParser.CompilationUnitContext,
-    KolasuANTLRToken>(DefaultTokenFactory()) {
+    KolasuANTLRToken>(ANTLRTokenFactory()) {
     override fun createANTLRLexer(charStream: CharStream): Lexer {
         return SimpleLangLexer(charStream)
     }

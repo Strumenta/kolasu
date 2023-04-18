@@ -45,7 +45,7 @@ interface TokenFactory<T : KolasuToken> {
     }
 }
 
-class DefaultTokenFactory : TokenFactory<KolasuANTLRToken> {
+class ANTLRTokenFactory : TokenFactory<KolasuANTLRToken> {
     override fun convertToken(t: Token): KolasuANTLRToken = KolasuANTLRToken(categoryOf(t), t)
 }
 

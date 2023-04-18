@@ -6,7 +6,7 @@ import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.parsing.DefaultTokenFactory
+import com.strumenta.kolasu.parsing.ANTLRTokenFactory
 import com.strumenta.kolasu.parsing.KolasuANTLRToken
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
@@ -25,7 +25,7 @@ data class MyEntityDecl(override var name: String, val fields: List<MyFieldDecl>
 data class MyFieldDecl(override var name: String) : Node(), Named
 
 class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleContext, KolasuANTLRToken>(
-    DefaultTokenFactory()
+    ANTLRTokenFactory()
 ) {
     override fun doGenerateMetamodel(resource: Resource) {
         val mmbuilder = MetamodelBuilder("com.strumenta.kolasu.emf.cli", "https://dummy.com/mm", "dm")
