@@ -20,7 +20,7 @@ open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf(
     /**
      * Performs the transformation of a node and, recursively, its descendants. In addition to the overridden method,
      * it also assigns the parseTreeNode to the AST node so that it can keep track of its position.
-     * However, a node factory can override the parseTreeNode of the nodes it creates (but not the parent).
+     * However, a node transformer can override the parseTreeNode of the nodes it creates (but not the parent).
      */
     override fun transform(source: Any?, parent: Node?): Node? {
         val node = super.transform(source, parent)
@@ -39,9 +39,9 @@ open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf(
         return if (source is ParseTree) ParseTreeOrigin(source) else null
     }
 
-    inline fun <P : ParserRuleContext> registerNodeFactoryUnwrappingChild(
+    inline fun <P : ParserRuleContext> registerNodeTransformerUnwrappingChild(
         kclass: KClass<P>
-    ): NodeTransformer<P, Node> = registerNodeFactory(kclass) { source, transformer, _ ->
+    ): NodeTransformer<P, Node> = registerNodeTransformer(kclass) { source, transformer, _ ->
         val nodeChildren = source.children.filterIsInstance<ParserRuleContext>()
         require(nodeChildren.size == 1) {
             "Node $source (${source.javaClass}) has ${nodeChildren.size} " +
