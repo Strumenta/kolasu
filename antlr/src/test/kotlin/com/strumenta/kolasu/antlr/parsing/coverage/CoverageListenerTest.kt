@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.parsing.coverage
+package com.strumenta.kolasu.antlr.parsing.coverage
 
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser

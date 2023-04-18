@@ -1,6 +1,8 @@
-package com.strumenta.kolasu.parsing
+package com.strumenta.kolasu.antlr.parsing
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.parsing.LexingResult
+import com.strumenta.kolasu.parsing.TokenCategory
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser

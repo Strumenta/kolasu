@@ -1,6 +1,7 @@
-package com.strumenta.kolasu.parsing
+package com.strumenta.kolasu.antlr.parsing
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.parsing.CodeProcessingResult
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.runtime.ParserRuleContext
 

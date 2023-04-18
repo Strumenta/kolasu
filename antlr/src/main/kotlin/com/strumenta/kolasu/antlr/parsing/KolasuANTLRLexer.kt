@@ -1,6 +1,10 @@
-package com.strumenta.kolasu.parsing
+package com.strumenta.kolasu.antlr.parsing
 
 import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.parsing.KolasuLexer
+import com.strumenta.kolasu.parsing.KolasuToken
+import com.strumenta.kolasu.parsing.LexingResult
+import com.strumenta.kolasu.parsing.TokenCategory
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import org.antlr.v4.runtime.BaseErrorListener

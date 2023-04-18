@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.emf
 
+import com.strumenta.kolasu.antlr.parsing.KolasuANTLRParser
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.parsing.KolasuANTLRParser
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result

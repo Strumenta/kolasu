@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.playground
 
+import com.strumenta.kolasu.antlr.parsing.FirstStageParsingResult
+import com.strumenta.kolasu.antlr.parsing.ParsingResultWithFirstStage
 import com.strumenta.kolasu.emf.MetamodelsBuilder
-import com.strumenta.kolasu.parsing.FirstStageParsingResult
-import com.strumenta.kolasu.parsing.ParsingResultWithFirstStage
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType

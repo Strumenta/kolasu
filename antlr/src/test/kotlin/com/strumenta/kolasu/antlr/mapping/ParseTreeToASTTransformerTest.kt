@@ -1,7 +1,7 @@
-package com.strumenta.kolasu.mapping
+package com.strumenta.kolasu.antlr.mapping
 
+import com.strumenta.kolasu.antlr.parsing.withParseTreeNode
 import com.strumenta.kolasu.model.*
-import com.strumenta.kolasu.parsing.withParseTreeNode
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.transformation.ASTTransformer
 import com.strumenta.kolasu.transformation.GenericNode

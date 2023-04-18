@@ -1,10 +1,15 @@
-package com.strumenta.kolasu.parsing
+package com.strumenta.kolasu.antlr.parsing
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.PropertyDescription
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.processProperties
+import com.strumenta.kolasu.parsing.ASTParser
+import com.strumenta.kolasu.parsing.KolasuLexer
+import com.strumenta.kolasu.parsing.KolasuToken
+import com.strumenta.kolasu.parsing.LexingResult
+import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
