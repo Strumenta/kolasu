@@ -66,7 +66,7 @@ fun Node.getText(code: String): String? = range?.text(code)
  */
 class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = null) : Origin {
     override val range: Range?
-        get() = parseTree.toPosition(source = source)
+        get() = parseTree.toRange(source = source)
 
     override val sourceText: String?
         get() =
@@ -123,23 +123,23 @@ val ParserRuleContext.range: Range
  * Returns the position of the receiver parser rule context.
  * @param considerPosition if it's false, this method returns null.
  */
-fun ParserRuleContext.toPosition(considerPosition: Boolean = true, source: Source? = null): Range? {
+fun ParserRuleContext.toRange(considerPosition: Boolean = true, source: Source? = null): Range? {
     return if (considerPosition && start != null && stop != null) {
         val position = range
         if (source == null) position else Range(position.start, position.end, source)
     } else null
 }
 
-fun TerminalNode.toPosition(considerPosition: Boolean = true, source: Source? = null): Range? =
-    this.symbol.toPosition(considerPosition, source)
+fun TerminalNode.toRange(considerPosition: Boolean = true, source: Source? = null): Range? =
+    this.symbol.toRange(considerPosition, source)
 
-fun Token.toPosition(considerPosition: Boolean = true, source: Source? = null): Range? =
+fun Token.toRange(considerPosition: Boolean = true, source: Source? = null): Range? =
     if (considerPosition) Range(this.startPoint, this.endPoint, source) else null
 
-fun ParseTree.toPosition(considerPosition: Boolean = true, source: Source? = null): Range? {
+fun ParseTree.toRange(considerRange: Boolean = true, source: Source? = null): Range? {
     return when (this) {
-        is TerminalNode -> this.toPosition(considerPosition, source)
-        is ParserRuleContext -> this.toPosition(considerPosition, source)
+        is TerminalNode -> this.toRange(considerRange, source)
+        is ParserRuleContext -> this.toRange(considerRange, source)
         else -> null
     }
 }

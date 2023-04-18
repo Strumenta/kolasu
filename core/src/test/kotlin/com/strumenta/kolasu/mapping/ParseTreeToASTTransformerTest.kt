@@ -38,9 +38,9 @@ class ParseTreeToASTTransformerTest {
             )
         ).withParseTreeNode(pt)
         val transformedCU = transformer.transform(pt)!!
-        assertASTsAreEqual(cu, transformedCU, considerPosition = true)
+        assertASTsAreEqual(cu, transformedCU, considerRange = true)
         assertTrue { transformedCU.hasValidParents() }
-        assertNull(transformedCU.invalidPositions().firstOrNull())
+        assertNull(transformedCU.invalidRanges().firstOrNull())
     }
 
     @Test
@@ -63,9 +63,9 @@ class ParseTreeToASTTransformerTest {
             )
         ).withParseTreeNode(pt)
         val transformedCU = transformer.transform(pt)!! as CU
-        assertASTsAreEqual(cu, transformedCU, considerPosition = true)
+        assertASTsAreEqual(cu, transformedCU, considerRange = true)
         assertTrue { transformedCU.hasValidParents() }
-        assertNull(transformedCU.invalidPositions().firstOrNull())
+        assertNull(transformedCU.invalidRanges().firstOrNull())
     }
 
     @Test
@@ -98,7 +98,7 @@ class ParseTreeToASTTransformerTest {
             )
         )
         val transformedCU = transformer.transform(pt)!!
-        assertASTsAreEqual(cu, transformedCU, considerPosition = true)
+        assertASTsAreEqual(cu, transformedCU, considerRange = true)
         assertTrue { transformedCU.hasValidParents() }
     }
 

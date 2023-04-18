@@ -70,7 +70,7 @@ class ASTTransformerTest {
             )
         )
         val transformedCU = transformer.transform(cu)!!
-        assertASTsAreEqual(cu, transformedCU, considerPosition = true)
+        assertASTsAreEqual(cu, transformedCU, considerRange = true)
         assertTrue { transformedCU.hasValidParents() }
         assertEquals(transformedCU.origin, cu)
     }

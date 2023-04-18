@@ -3,7 +3,6 @@ package com.strumenta.kolasu.emf.rpgast
 import com.smeup.rpgparser.parsing.ast.Expression
 import com.strumenta.kolasu.model.*
 import java.math.BigDecimal
-import java.util.*
 
 abstract class AbstractDataDefinition(
     override val name: String,

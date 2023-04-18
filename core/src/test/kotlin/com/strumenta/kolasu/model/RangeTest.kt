@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.parsing.toPosition
+import com.strumenta.kolasu.parsing.toRange
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
 import org.antlr.v4.runtime.CharStreams
@@ -155,7 +155,7 @@ class RangeTest {
         val parser = SimpleLangParser(CommonTokenStream(lexer))
         val cu = parser.compilationUnit()
         val setStmt = cu.statement(0) as SimpleLangParser.SetStmtContext
-        val pos = setStmt.toPosition()
+        val pos = setStmt.toRange()
         assertEquals(Range(Point(1, 0), Point(1, 13)), pos)
     }
 
@@ -185,7 +185,7 @@ class RangeTest {
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
         val cu: ParseTree = parser.compilationUnit()
-        val pos = cu.toPosition()
+        val pos = cu.toRange()
         assertEquals(Range(Point(1, 0), Point(1, 13)), pos)
     }
 

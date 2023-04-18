@@ -41,7 +41,7 @@ data class Point(val line: Int, val column: Int) : Comparable<Point>, Serializab
 
     override fun toString() = "Line $line, Column $column"
 
-    fun positionWithLength(length: Int): Range {
+    fun rangeWithLength(length: Int): Range {
         require(length >= 0)
         return Range(this, this.plus(length))
     }
@@ -110,7 +110,7 @@ data class Point(val line: Int, val column: Int) : Comparable<Point>, Serializab
         get() = Range(this, this)
 }
 
-fun linePosition(lineNumber: Int, lineCode: String, source: Source? = null): Range {
+fun lineRange(lineNumber: Int, lineCode: String, source: Source? = null): Range {
     require(lineNumber >= 1) { "Line numbers are expected to be equal or greater than 1" }
     return Range(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length), source)
 }
@@ -136,15 +136,15 @@ data class SyntheticSource(val description: String) : Source()
  * An area in a source file, from start to end.
  * The start point is the point right before the starting character.
  * The end point is the point right after the last character.
- * An empty position will have coinciding points.
+ * An empty range will have coinciding points.
  *
  * Consider a file with one line, containing text "HELLO".
- * The Position of such text will be Position(Point(1, 0), Point(1, 5)).
+ * The Range of such text will be Range(Point(1, 0), Point(1, 5)).
  */
 data class Range(val start: Point, val end: Point, var source: Source? = null) : Comparable<Range>, Serializable {
 
     override fun toString(): String {
-        return "Position(start=$start, end=$end${if (source == null) "" else ", source=$source"})"
+        return "Range(start=$start, end=$end${if (source == null) "" else ", source=$source"})"
     }
 
     override fun compareTo(other: Range): Int {
@@ -165,14 +165,14 @@ data class Range(val start: Point, val end: Point, var source: Source? = null) :
     }
 
     /**
-     * Given the whole code extract the portion of text corresponding to this position
+     * Given the whole code extract the portion of text corresponding to this range
      */
     fun text(wholeText: String): String {
         return wholeText.substring(start.offset(wholeText), end.offset(wholeText))
     }
 
     /**
-     * The length in characters of the text under this position in the provided source.
+     * The length in characters of the text under this range in the provided source.
      * @param code the source text.
      */
     fun length(code: String) = end.offset(code) - start.offset(code)
@@ -188,8 +188,8 @@ data class Range(val start: Point, val end: Point, var source: Source? = null) :
     }
 
     /**
-     * Tests whether the given position is contained in the interval represented by this object.
-     * @param range the position
+     * Tests whether the given range is contained in the interval represented by this object.
+     * @param range the range
      */
     fun contains(range: Range?): Boolean {
         return (range != null) &&
@@ -206,8 +206,8 @@ data class Range(val start: Point, val end: Point, var source: Source? = null) :
     }
 
     /**
-     * Tests whether the given position overlaps the interval represented by this object.
-     * @param range the position
+     * Tests whether the given range overlaps the interval represented by this object.
+     * @param range the range
      */
     fun overlaps(range: Range?): Boolean {
         return (range != null) && (
@@ -220,9 +220,9 @@ data class Range(val start: Point, val end: Point, var source: Source? = null) :
 }
 
 /**
- * Utility function to create a Position
+ * Utility function to create a Range
  */
-fun pos(startLine: Int, startCol: Int, endLine: Int, endCol: Int) = Range(
+fun range(startLine: Int, startCol: Int, endLine: Int, endCol: Int) = Range(
     Point(startLine, startCol),
     Point(endLine, endCol)
 )

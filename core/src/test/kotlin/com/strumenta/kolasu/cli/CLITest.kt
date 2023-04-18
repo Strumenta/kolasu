@@ -30,7 +30,7 @@ class MyDummyParser : ASTParser<MyCompilationUnit> {
 
     val expectedResults = HashMap<File, ParsingResult<MyCompilationUnit>>()
 
-    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<MyCompilationUnit> {
+    override fun parse(file: File, charset: Charset, considerRange: Boolean): ParsingResult<MyCompilationUnit> {
         return expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
     }
 }

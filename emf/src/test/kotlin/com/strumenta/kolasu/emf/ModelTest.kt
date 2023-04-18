@@ -38,7 +38,7 @@ class ModelTest {
                 VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar")),
                 VarDeclaration(Visibility.PRIVATE, "c", LocalDateTimeLiteral(LocalDateTime.now())),
             )
-        ).withPosition(Range(Point(1, 0), Point(1, 1)))
+        ).withRange(Range(Point(1, 0), Point(1, 1)))
         val nsURI = "https://strumenta.com/simplemm"
         val metamodelBuilder = MetamodelBuilder(packageName(CompilationUnit::class), nsURI, "simplemm")
         metamodelBuilder.provideClass(CompilationUnit::class)
@@ -144,13 +144,13 @@ class ModelTest {
         assertEquals(true, eo2Destination is EObject)
         val eo2DestinationEO = eo2Destination as EObject
         assertEquals("TextFileDestination", eo2DestinationEO.eClass().name)
-        val textFileDestinationPosition = eo2DestinationEO.eGet("position") as EObject
-        assertEquals("Position", textFileDestinationPosition.eClass().name)
+        val textFileDestinationRange = eo2DestinationEO.eGet("range") as EObject
+        assertEquals("Range", textFileDestinationRange.eClass().name)
 
-        assertEquals(true, textFileDestinationPosition.eGet("start") is EObject)
-        val startEO = textFileDestinationPosition.eGet("start") as EObject
-        assertEquals(true, textFileDestinationPosition.eGet("end") is EObject)
-        val endEO = textFileDestinationPosition.eGet("end") as EObject
+        assertEquals(true, textFileDestinationRange.eGet("start") is EObject)
+        val startEO = textFileDestinationRange.eGet("start") as EObject
+        assertEquals(true, textFileDestinationRange.eGet("end") is EObject)
+        val endEO = textFileDestinationRange.eGet("end") as EObject
         assertEquals(1, startEO.eGet("line"))
         assertEquals(8, startEO.eGet("column"))
         assertEquals(7, endEO.eGet("line"))
@@ -365,7 +365,7 @@ class ModelTest {
 
     @Test
     fun saveToJSONWithParseTreeOrigin() {
-        // We verify the ParseTreeOrigin is not saved, but the position is
+        // We verify the ParseTreeOrigin is not saved, but the range is
         val pt = SimpleLangParser(CommonTokenStream(SimpleLangLexer(CharStreams.fromString("input A is string"))))
             .compilationUnit()
         val ast = MySimpleLangCu().withParseTreeNode(pt)
@@ -382,7 +382,7 @@ class ModelTest {
         assertEquals(
             """{
   "eClass" : "#//MySimpleLangCu",
-  "position" : {
+  "range" : {
     "start" : {
       "line" : 1
     },

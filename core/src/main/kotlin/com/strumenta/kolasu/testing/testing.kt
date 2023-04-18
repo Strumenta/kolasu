@@ -81,12 +81,12 @@ fun <N : Node> assertASTsAreEqual(
     expected: Node,
     actual: ParsingResult<N>,
     context: String = "<root>",
-    considerPosition: Boolean = false
+    considerRange: Boolean = false
 ) {
     assertEquals(0, actual.issues.size, actual.issues.toString())
     assertASTsAreEqual(
         expected = expected, actual = actual.root!!, context = context,
-        considerPosition = considerPosition
+        considerRange = considerRange
     )
 }
 
@@ -94,11 +94,11 @@ fun assertASTsAreEqual(
     expected: Node,
     actual: Node,
     context: String = "<root>",
-    considerPosition: Boolean = false
+    considerRange: Boolean = false
 ) {
     if (expected::class == actual::class) {
-        if (considerPosition) {
-            assertEquals(expected.range, actual.range, "$context.position")
+        if (considerRange) {
+            assertEquals(expected.range, actual.range, "$context.range")
         }
         expected.properties.forEach { expectedProperty ->
             val actualPropValue = actual.properties.find { it.name == expectedProperty.name }!!.value

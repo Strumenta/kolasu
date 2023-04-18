@@ -100,7 +100,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
      */
     protected abstract fun parseTreeToAst(
         parseTreeRoot: C,
-        considerPosition: Boolean = true,
+        considerRange: Boolean = true,
         issues: MutableList<Issue>
     ): R?
 
@@ -170,12 +170,12 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
             {
                 if (it.exception != null) {
                     val message = "Recognition exception: ${it.exception.message}"
-                    issues.add(Issue.syntactic(message, range = it.toPosition()))
+                    issues.add(Issue.syntactic(message, range = it.toRange()))
                 }
             },
             {
                 val message = "Error node found (token: ${it.symbol?.text})"
-                issues.add(Issue.syntactic(message, range = it.toPosition()))
+                issues.add(Issue.syntactic(message, range = it.toRange()))
             }
         )
     }
@@ -259,8 +259,8 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         )
     }
 
-    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<R> =
-        parse(FileInputStream(file), charset, considerPosition)
+    override fun parse(file: File, charset: Charset, considerRange: Boolean): ParsingResult<R> =
+        parse(FileInputStream(file), charset, considerRange)
 
     // For convenient use from Java
     fun walk(node: Node) = node.walk()

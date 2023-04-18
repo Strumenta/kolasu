@@ -33,15 +33,15 @@ fun Node.processNodes(operation: (Node) -> Unit, walker: KFunction1<Node, Sequen
     walker.invoke(this).forEach(operation)
 }
 
-fun Node.invalidPositions(): Sequence<Node> = this.walk().filter {
+fun Node.invalidRanges(): Sequence<Node> = this.walk().filter {
     it.range == null || run {
         val parentPos = it.parent?.range
-        // If the parent position is null, we can't say anything about this node's position
+        // If the parent range is null, we can't say anything about this node's range
         (parentPos != null && !(parentPos.contains(it.range!!.start) && parentPos.contains(it.range!!.end)))
     }
 }
 
-fun Node.findInvalidPosition(): Node? = this.invalidPositions().firstOrNull()
+fun Node.findInvalidRange(): Node? = this.invalidRanges().firstOrNull()
 
 fun Node.hasValidParents(parent: Node? = this.parent): Boolean {
     return this.parent == parent && this.children.all { it.hasValidParents(this) }

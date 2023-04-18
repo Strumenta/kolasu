@@ -76,27 +76,27 @@ open class Node() : Origin, Destination, Serializable {
     var parent: Node? = null
 
     /**
-     * The position of this node in the source text.
-     * If a position has been provided when creating this node, it is returned.
-     * Otherwise, the value of this property is the position of the origin, if any.
+     * The range of this node in the source text.
+     * If a range has been provided when creating this node, it is returned.
+     * Otherwise, the value of this property is the range of the origin, if any.
      */
     @property:Internal
     override var range: Range?
         get() = rangeOverride ?: origin?.range
-        set(position) {
-            this.rangeOverride = position
+        set(range) {
+            this.rangeOverride = range
         }
 
     @property:Internal
     override val source: Source?
         get() = origin?.source
 
-    fun detach(keepPosition: Boolean = true, keepSourceText: Boolean = false) {
+    fun detach(keepRange: Boolean = true, keepSourceText: Boolean = false) {
         val existingOrigin = origin
         if (existingOrigin != null) {
-            if (keepPosition || keepSourceText) {
+            if (keepRange || keepSourceText) {
                 this.origin = SimpleOrigin(
-                    if (keepPosition) existingOrigin.range else null,
+                    if (keepRange) existingOrigin.range else null,
                     if (keepSourceText) existingOrigin.sourceText else null
                 )
             } else {
@@ -109,16 +109,16 @@ open class Node() : Origin, Destination, Serializable {
     }
 
     /**
-     * Tests whether the given position is contained in the interval represented by this object.
-     * @param range the position
+     * Tests whether the given range is contained in the interval represented by this object.
+     * @param range the range
      */
     fun contains(range: Range?): Boolean {
         return this.range?.contains(range) ?: false
     }
 
     /**
-     * Tests whether the given position overlaps the interval represented by this object.
-     * @param range the position
+     * Tests whether the given range overlaps the interval represented by this object.
+     * @param range the range
      */
     fun overlaps(range: Range?): Boolean {
         return this.range?.overlaps(range) ?: false
@@ -144,7 +144,7 @@ open class Node() : Origin, Destination, Serializable {
     }
 }
 
-fun <N : Node> N.withPosition(range: Range?): N {
+fun <N : Node> N.withRange(range: Range?): N {
     this.range = range
     return this
 }

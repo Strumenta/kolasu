@@ -25,7 +25,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
 
 const val JSON_TYPE_KEY = "#type"
-const val JSON_POSITION_KEY = "#position"
+const val JSON_RANGE_KEY = "#range"
 const val JSON_ORIGIN_KEY = "#origin"
 const val JSON_ID_KEY = "#id"
 const val JSON_DESTINATION_KEY = "#destination"
@@ -189,7 +189,7 @@ class JsonGenerator {
         JsonElement {
         val jsonObject = jsonObject(
             JSON_TYPE_KEY to if (shortClassNames) node.javaClass.simpleName else node.javaClass.canonicalName,
-            JSON_POSITION_KEY to node.range?.toJson()
+            JSON_RANGE_KEY to node.range?.toJson()
         )
         if (withIds != null) {
             val id = withIds[node]
@@ -258,7 +258,7 @@ private fun Node.toJsonStreaming(writer: JsonWriter, shortClassNames: Boolean = 
     writer.name(JSON_TYPE_KEY)
     writer.value(if (shortClassNames) this.javaClass.simpleName else this.javaClass.canonicalName)
     if (this.range != null) {
-        writer.name(JSON_POSITION_KEY)
+        writer.name(JSON_RANGE_KEY)
         this.range!!.toJsonStreaming(writer)
     }
     this.processProperties {
@@ -323,7 +323,7 @@ private fun Issue.toJson(): JsonElement {
         "type" to this.type.name,
         "message" to this.message,
         "severity" to this.severity.name,
-        "position" to this.range?.toJson()
+        "range" to this.range?.toJson()
     )
 }
 
@@ -333,7 +333,7 @@ private fun Issue.toJsonStreaming(writer: JsonWriter) {
     writer.value(this.type.name)
     writer.name("message")
     writer.value(this.message)
-    writer.name("position")
+    writer.name("range")
     if (this.range == null) {
         writer.nullValue()
     } else {

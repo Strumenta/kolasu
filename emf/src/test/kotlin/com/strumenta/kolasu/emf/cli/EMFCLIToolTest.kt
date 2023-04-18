@@ -52,7 +52,7 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
 
     override fun parseTreeToAst(
         parseTreeRoot: ParserRuleContext,
-        considerPosition: Boolean,
+        considerRange: Boolean,
         issues: MutableList<Issue>
     ): MyCompilationUnit? {
         TODO("Not yet implemented")
@@ -68,7 +68,7 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
 
     val expectedResults = HashMap<File, ParsingResult<MyCompilationUnit>>()
 
-    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<MyCompilationUnit> {
+    override fun parse(file: File, charset: Charset, considerRange: Boolean): ParsingResult<MyCompilationUnit> {
         return expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
     }
 

@@ -1,16 +1,12 @@
 package com.strumenta.kolasu.emf.rpgast
 
-import com.smeup.rpgparser.parsing.*
-import com.smeup.rpgparser.parsing.ast.*
-import com.smeup.rpgparser.parsing.ast.AssignmentOperator.*
 import com.strumenta.kolasu.model.*
-import java.util.*
 
 data class ToAstConfiguration(
-    val considerPosition: Boolean = true
+    val considerRange: Boolean = true
 )
 
-fun List<Node>.position(): Range? {
+fun List<Node>.range(): Range? {
     val start = this.asSequence().map { it.range?.start }.filterNotNull().sorted().toList()
     val end = this.asSequence().map { it.range?.end }.filterNotNull().sorted().toList()
     return if (start.isEmpty() || end.isEmpty()) {
