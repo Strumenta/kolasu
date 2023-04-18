@@ -417,7 +417,7 @@ class ModelTest {
             """{
   "eClass" : "#//MySimpleLangCu",
   "origin" : {
-    "eClass" : "https://strumenta.com/starlasu/v2#//NodeOrigin",
+    "eClass" : "https://strumenta.com/starlasu/v3#//NodeOrigin",
     "node" : {
       "eClass" : "#//MyRoot",
       "${'$'}ref" : "#//"
@@ -441,7 +441,7 @@ class ModelTest {
         val gn = GenericNode().toEObject(res, mapping)
         assertEquals(
             """{
-  "eClass" : "https://strumenta.com/starlasu/v2#//GenericNode"
+  "eClass" : "https://strumenta.com/starlasu/v3#//GenericNode"
 }""",
             gn.saveAsJson()
         )

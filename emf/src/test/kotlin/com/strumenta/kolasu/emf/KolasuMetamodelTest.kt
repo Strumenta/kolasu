@@ -40,7 +40,6 @@ class KolasuMetamodelTest {
             "java.io", "https://strumenta.com/javaio", "javaio",
             resource
         )
-        javaIOMetamodelBuilder.provideClass(java.io.Serializable::class)
         javaIOMetamodelBuilder.generate()
 
         val dependencyMetamodelBuilder = MetamodelBuilder(
@@ -66,7 +65,7 @@ class KolasuMetamodelTest {
   "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
   "name" : "java.io",
   "nsURI" : "https://strumenta.com/javaio",
-  "nsPrefix" : "javaio",
+  "nsPrefix" : "javaio"
 }, {
   "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
   "name" : "kotlin",
@@ -112,7 +111,7 @@ class KolasuMetamodelTest {
     "name" : "ANodeWithAPair",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "https://strumenta.com/starlasu/v2#//ASTNode"
+      "${'$'}ref" : "https://strumenta.com/starlasu/v3#//ASTNode"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
