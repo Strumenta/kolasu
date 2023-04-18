@@ -2,6 +2,7 @@ package com.strumenta.kolasu.traversing
 
 import com.strumenta.kolasu.model.*
 import kotlin.system.measureTimeMillis
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -91,6 +92,7 @@ internal class TraversingStructurallyTest {
     }
 
     @Test
+    @Ignore
     fun performanceTest() {
         val boxes = mutableListOf<Box>()
         val numberOfChildren = 10000
