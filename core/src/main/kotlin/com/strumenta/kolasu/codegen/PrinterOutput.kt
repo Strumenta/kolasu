@@ -17,7 +17,10 @@ fun interface NodePrinter {
  * This provides a mechanism to generate code tracking indentation, handling lists, and providing other facilities.
  * This is used in the implementation of NodePrinter and in ASTCodeGenerator.
  */
-class PrinterOutput(private val nodePrinters: Map<KClass<*>, NodePrinter>) {
+class PrinterOutput(
+    private val nodePrinters: Map<KClass<*>, NodePrinter>,
+    private var nodePrinterOverrider: (node: Node) -> NodePrinter? = { _ -> null }
+) {
     private val sb = StringBuilder()
     private var currentPoint = START_POINT
     private var indentationLevel = 0
@@ -45,6 +48,9 @@ class PrinterOutput(private val nodePrinters: Map<KClass<*>, NodePrinter>) {
     }
 
     fun print(text: String) {
+        if (text.isEmpty()) {
+            return
+        }
         var text = text
         val needPrintln = text.endsWith("\n")
         if (needPrintln) {
@@ -85,34 +91,42 @@ class PrinterOutput(private val nodePrinters: Map<KClass<*>, NodePrinter>) {
         print(postfix)
     }
 
-    fun print(ast: Node?, prefix: String? = null, postfix: String? = null) {
+    fun print(ast: Node?, prefix: String = "", postfix: String = "") {
         if (ast == null) {
             return
         }
-        prefix?.let { print(it) }
-        val printer = nodePrinters[ast::class] ?: throw java.lang.IllegalArgumentException("Unable to print $ast")
+        print(prefix)
+        val printer = nodePrinterOverrider(ast) ?: nodePrinters[ast::class]
+            ?: throw java.lang.IllegalArgumentException("Unable to print $ast")
         associate(ast) {
             printer.print(this, ast)
         }
-        postfix?.let { print(it) }
+        print(postfix)
     }
 
     fun println(ast: Node?, prefix: String = "", postfix: String = "") {
         print(ast, prefix, postfix + "\n")
     }
 
+    fun printEmptyLine() {
+        println()
+        println()
+    }
+
     fun indent() {
         indentationLevel++
     }
+
     fun dedent() {
         indentationLevel--
     }
+
     fun associate(ast: Node, generation: PrinterOutput.() -> Unit) {
         val startPoint = currentPoint
         generation()
         val endPoint = currentPoint
         val nodePositionInGeneratedCode = Position(startPoint, endPoint)
-        ast.destination = TextFileDestination(nodePositionInGeneratedCode)
+        ast.destination = TextFileDestination(position = nodePositionInGeneratedCode)
     }
 
     fun <T : Node> printList(elements: List<T>, separator: String = ", ") {

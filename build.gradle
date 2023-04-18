@@ -6,7 +6,7 @@ plugins {
     id("maven-publish")
     id("idea")
     id("signing")
-    id("org.jetbrains.dokka") version "${kotlin_version}"
+    id("org.jetbrains.dokka") version "${dokka_version}"
     id 'java-library'
     id 'net.researchgate.release' version '3.0.2'
 }
@@ -55,7 +55,7 @@ subprojects {
     }
 
     ktlint {
-        version = "0.41.0"
+        version = "0.48.1"
         verbose = true
         outputToConsole = true
         enableExperimentalRules = true

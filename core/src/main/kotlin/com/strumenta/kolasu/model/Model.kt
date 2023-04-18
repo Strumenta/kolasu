@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
@@ -13,18 +14,18 @@ interface Origin {
         get() = position?.source
 }
 
-class SimpleOrigin(override val position: Position?, override val sourceText: String?) : Origin
+class SimpleOrigin(override val position: Position?, override val sourceText: String?) : Origin, Serializable
 
 data class CompositeOrigin(
     val elements: List<Origin>,
     override val position: Position?,
     override val sourceText: String?
-) : Origin
+) : Origin, Serializable
 
 interface Destination
 
-data class CompositeDestination(val elements: List<Destination>) : Destination
-data class TextFileDestination(val position: Position?) : Destination
+data class CompositeDestination(val elements: List<Destination>) : Destination, Serializable
+data class TextFileDestination(val position: Position?) : Destination, Serializable
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
@@ -32,7 +33,7 @@ data class TextFileDestination(val position: Position?) : Destination
  * It implements Origin as it could be the source of a AST-to-AST transformation, so the node itself can be
  * the Origin of another node.
  */
-open class Node() : Origin, Destination {
+open class Node() : Origin, Destination, Serializable {
 
     @Internal
     protected var positionOverride: Position? = null
@@ -59,7 +60,7 @@ open class Node() : Origin, Destination {
         get() = try {
             nodeProperties.map { PropertyDescription.buildFor(it, this) }
         } catch (e: Throwable) {
-            throw RuntimeException("Issue while getting properties of $this (${this.javaClass})", e)
+            throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
         }
 
     /**

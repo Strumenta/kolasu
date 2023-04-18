@@ -6,6 +6,8 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.misc.Interval
+import org.antlr.v4.runtime.tree.ParseTree
+import org.antlr.v4.runtime.tree.TerminalNode
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -14,13 +16,7 @@ import java.util.*
 import kotlin.reflect.full.memberFunctions
 import kotlin.system.measureTimeMillis
 
-/**
- * A complete description of a multi-stage ANTLR-based parser, from source code to AST.
- *
- * You should extend this class to implement the parts that are specific to your language.
- */
-abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTParser<R> {
-
+abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
     /**
      * Creates the lexer.
      */
@@ -34,13 +30,61 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
      */
     protected abstract fun createANTLRLexer(charStream: CharStream): Lexer
 
+    override fun lex(
+        inputStream: InputStream,
+        charset: Charset,
+        onlyFromDefaultChannel: Boolean
+    ): LexingResult<KolasuANTLRToken> {
+        val issues = LinkedList<Issue>()
+        val tokens = LinkedList<KolasuANTLRToken>()
+        var last: Token? = null
+        val time = measureTimeMillis {
+            val lexer = createANTLRLexer(inputStream, charset)
+            attachListeners(lexer, issues)
+            do {
+                val t = lexer.nextToken()
+                if (t == null) {
+                    break
+                } else {
+                    if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
+                        tokens.add(KolasuANTLRToken(categoryOf(t), t))
+                        last = t
+                    }
+                }
+            } while (t.type != Token.EOF)
+
+            if (last != null && last!!.type != Token.EOF) {
+                val message = "The parser didn't consume the entire input"
+                issues.add(Issue(IssueType.SYNTACTIC, message, position = last!!.endPoint.asPosition))
+            }
+        }
+
+        return LexingResult(issues, tokens, null, time)
+    }
+
+    protected open fun categoryOf(t: Token): TokenCategory = TokenCategory.PLAIN_TEXT
+
+    protected open fun attachListeners(lexer: Lexer, issues: MutableList<Issue>) {
+        lexer.injectErrorCollectorInLexer(issues)
+    }
+}
+
+/**
+ * A complete description of a multi-stage ANTLR-based parser, from source code to AST.
+ *
+ * You should extend this class to implement the parts that are specific to your language.
+ */
+abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken> :
+    KolasuLexer<T>,
+    ASTParser<R> {
+
     /**
      * Creates the first-stage parser.
      */
     protected abstract fun createANTLRParser(tokenStream: TokenStream): P
 
     /**
-     * Invokes the parser's root rule, i.e., the method which is responsible of parsing the entire input.
+     * Invokes the parser's root rule, i.e., the method which is responsible for parsing the entire input.
      * Usually this is the topmost rule, the one with index 0 (as also assumed by other libraries such as antlr4-c3),
      * so this method invokes that rule. If your grammar/parser is structured differently, or if you're using this to
      * parse only a portion of the input or a subset of the language, you have to override this method to invoke the
@@ -60,61 +104,43 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext> : ASTPa
         issues: MutableList<Issue>
     ): R?
 
-    /**
-     * Performs "lexing" on the given code string, i.e., it breaks it into tokens.
-     */
-    @JvmOverloads
-    fun lex(code: String, onlyFromDefaultChannel: Boolean = true): LexingResult {
-        val charset = Charsets.UTF_8
-        return lex(code.byteInputStream(charset), charset, onlyFromDefaultChannel)
-    }
+    protected abstract fun convertToken(terminalNode: TerminalNode): T
 
-    /**
-     * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.
-     */
-    @JvmOverloads
-    fun lex(
-        inputStream: InputStream,
-        charset: Charset = Charsets.UTF_8,
-        onlyFromDefaultChannel: Boolean = true
-    ): LexingResult {
-        val issues = LinkedList<Issue>()
-        val tokens = LinkedList<Token>()
-        val time = measureTimeMillis {
-            val lexer = createANTLRLexer(inputStream, charset)
-            attachListeners(lexer, issues)
-            do {
-                val t = lexer.nextToken()
-                if (t == null) {
-                    break
-                } else {
-                    if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
-                        tokens.add(t)
-                    }
+    open fun extractTokens(result: ParsingResult<R>): LexingResult<T>? {
+        val antlrTerminals = mutableListOf<TerminalNode>()
+        fun extractTokensFromParseTree(pt: ParseTree?) {
+            if (pt is TerminalNode) {
+                antlrTerminals.add(pt)
+            } else if (pt != null) {
+                for (i in 0..pt.childCount) {
+                    extractTokensFromParseTree(pt.getChild(i))
                 }
-            } while (t.type != Token.EOF)
-
-            if (tokens.last.type != Token.EOF) {
-                val message = "The parser didn't consume the entire input"
-                issues.add(Issue(IssueType.SYNTACTIC, message, position = tokens.last!!.endPoint.asPosition))
             }
         }
 
-        return LexingResult(issues, tokens, null, time)
-    }
-
-    protected open fun attachListeners(lexer: Lexer, issues: MutableList<Issue>) {
-        lexer.injectErrorCollectorInLexer(issues)
+        val ptRoot = result.firstStage?.root
+        return if (ptRoot != null) {
+            extractTokensFromParseTree(ptRoot)
+            antlrTerminals.sortBy { it.symbol.tokenIndex }
+            val tokens = antlrTerminals.map { convertToken(it) }.toMutableList()
+            LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime)
+        } else null
     }
 
     protected open fun attachListeners(parser: P, issues: MutableList<Issue>) {
         parser.injectErrorCollectorInParser(issues)
     }
 
+    protected open fun attachListeners(lexer: Lexer, issues: MutableList<Issue>) {
+        lexer.injectErrorCollectorInLexer(issues)
+    }
+
+    protected abstract fun createANTLRLexer(inputStream: CharStream): Lexer
+
     /**
      * Creates the first-stage lexer and parser.
      */
-    protected fun createParser(inputStream: CharStream, issues: MutableList<Issue>): P {
+    protected open fun createParser(inputStream: CharStream, issues: MutableList<Issue>): P {
         val lexer = createANTLRLexer(inputStream)
         attachListeners(lexer, issues)
         val tokenStream = createTokenStream(lexer)

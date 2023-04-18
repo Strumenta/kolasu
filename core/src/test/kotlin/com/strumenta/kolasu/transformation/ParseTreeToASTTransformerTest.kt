@@ -106,7 +106,7 @@ class ParseTreeToASTTransformerTest {
         }
     }
 
-    private fun parseEntities(code: String): AntlrEntityParser.ModuleContext {
+    private fun parseEntities(code: String): ModuleContext {
         val errorListener = MyErrorListener()
 
         val lexer = AntlrEntityLexer(CharStreams.fromString(code))
@@ -118,7 +118,7 @@ class ParseTreeToASTTransformerTest {
         return parser.module()
     }
 
-    private fun parseScript(code: String): AntlrScriptParser.ScriptContext {
+    private fun parseScript(code: String): ScriptContext {
         val errorListener = MyErrorListener()
 
         val lexer = AntlrScriptLexer(CharStreams.fromString(code))
@@ -215,30 +215,30 @@ class ParseTreeToASTTransformerTest {
         transformer.registerTrivialPTtoASTConversion<Int_literal_expressionContext, SIntegerLiteral>(
             Int_literal_expressionContext::INT_VALUE to SIntegerLiteral::value
         )
-        transformer.registerNodeFactory(String_literal_expressionContext::class) { pt, t ->
+        transformer.registerNodeTransformer(String_literal_expressionContext::class) { pt, t ->
             SStringLiteral(pt.text.removePrefix("'").removeSuffix("'"))
         }
-        transformer.registerNodeFactory(Div_mult_expressionContext::class) { pt, t ->
+        transformer.registerNodeTransformer(Div_mult_expressionContext::class) { pt, t ->
             when (pt.op.text) {
                 "/" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
+                    TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         Div_mult_expressionContext, SDivision>()(pt, t)
                 }
                 "*" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
+                    TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         Div_mult_expressionContext, SMultiplication>()(pt, t)
                 }
                 else -> TODO()
             }
         }
-        transformer.registerNodeFactory(Sum_sub_expressionContext::class) { pt, t ->
+        transformer.registerNodeTransformer(Sum_sub_expressionContext::class) { pt, t ->
             when (pt.op.text) {
                 "+" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
+                    TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         Sum_sub_expressionContext, SSum>()(pt, t)
                 }
                 "-" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
+                    TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         Sum_sub_expressionContext, SSubtraction>()(pt, t)
                 }
                 else -> TODO()

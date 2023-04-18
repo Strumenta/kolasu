@@ -58,7 +58,7 @@ class ASTTransformerTest {
     @Test
     fun testIdentitiyTransformer() {
         val transformer = ASTTransformer()
-        transformer.registerNodeFactory(CU::class, CU::class)
+        transformer.registerNodeTransformer(CU::class, CU::class)
             .withChild(CU::statements, CU::statements)
         transformer.registerIdentityTransformation(DisplayIntStatement::class)
         transformer.registerIdentityTransformation(SetStatement::class)
@@ -81,7 +81,7 @@ class ASTTransformerTest {
     @Test
     fun translateBinaryExpression() {
         val myTransformer = ASTTransformer(allowGenericNode = false).apply {
-            registerNodeFactory(GenericBinaryExpression::class) { source: GenericBinaryExpression ->
+            registerNodeTransformer(GenericBinaryExpression::class) { source: GenericBinaryExpression ->
                 when (source.operator) {
                     Operator.MULT -> Mult(transform(source.left) as Expression, transform(source.right) as Expression)
                     Operator.PLUS -> Sum(transform(source.left) as Expression, transform(source.right) as Expression)
@@ -105,11 +105,11 @@ class ASTTransformerTest {
     @Test
     fun translateAcrossLanguages() {
         val myTransformer = ASTTransformer(allowGenericNode = false).apply {
-            registerNodeFactory(ALangIntLiteral::class) { source: ALangIntLiteral -> BLangIntLiteral(source.value) }
-            registerNodeFactory(ALangSum::class) { source: ALangSum ->
+            registerNodeTransformer(ALangIntLiteral::class) { source: ALangIntLiteral -> BLangIntLiteral(source.value) }
+            registerNodeTransformer(ALangSum::class) { source: ALangSum ->
                 BLangSum(transform(source.left) as BLangExpression, transform(source.right) as BLangExpression)
             }
-            registerNodeFactory(ALangMult::class) { source: ALangMult ->
+            registerNodeTransformer(ALangMult::class) { source: ALangMult ->
                 BLangMult(transform(source.left) as BLangExpression, transform(source.right) as BLangExpression)
             }
         }
@@ -242,9 +242,9 @@ class ASTTransformerTest {
     @Test
     fun testDroppingNodes() {
         val transformer = ASTTransformer()
-        transformer.registerNodeFactory(CU::class, CU::class)
+        transformer.registerNodeTransformer(CU::class, CU::class)
             .withChild(CU::statements, CU::statements)
-        transformer.registerNodeFactory(DisplayIntStatement::class) { _ -> null }
+        transformer.registerNodeTransformer(DisplayIntStatement::class) { _ -> null }
         transformer.registerIdentityTransformation(SetStatement::class)
 
         val cu = CU(

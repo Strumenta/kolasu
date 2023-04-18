@@ -77,6 +77,19 @@ fun <T : Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: 
     }
 }
 
+fun <N : Node> assertASTsAreEqual(
+    expected: Node,
+    actual: ParsingResult<N>,
+    context: String = "<root>",
+    considerPosition: Boolean = false
+) {
+    assertEquals(0, actual.issues.size, actual.issues.toString())
+    assertASTsAreEqual(
+        expected = expected, actual = actual.root!!, context = context,
+        considerPosition = considerPosition
+    )
+}
+
 fun assertASTsAreEqual(
     expected: Node,
     actual: Node,
@@ -95,16 +108,22 @@ fun assertASTsAreEqual(
                     if (expectedPropValue is IgnoreChildren<*>) {
                         // Nothing to do
                     } else {
-                        val actualPropValueCollection = actualPropValue as Collection<Node>
-                        val expectedPropValueCollection = expectedPropValue as Collection<Node>
+                        val actualPropValueCollection = actualPropValue?.let { it as Collection<Node> }
+                        val expectedPropValueCollection = expectedPropValue?.let { it as Collection<Node> }
                         assertEquals(
-                            expectedPropValueCollection.size, actualPropValueCollection.size,
-                            "$context.${expectedProperty.name} length"
+                            actualPropValueCollection == null, expectedPropValueCollection == null,
+                            "$context.${expectedProperty.name} nullness"
                         )
-                        val expectedIt = expectedPropValueCollection.iterator()
-                        val actualIt = actualPropValueCollection.iterator()
-                        for (i in expectedPropValueCollection.indices) {
-                            assertASTsAreEqual(expectedIt.next(), actualIt.next(), "$context[$i]")
+                        if (actualPropValueCollection != null && expectedPropValueCollection != null) {
+                            assertEquals(
+                                expectedPropValueCollection?.size, actualPropValueCollection?.size,
+                                "$context.${expectedProperty.name} length"
+                            )
+                            val expectedIt = expectedPropValueCollection.iterator()
+                            val actualIt = actualPropValueCollection.iterator()
+                            for (i in expectedPropValueCollection.indices) {
+                                assertASTsAreEqual(expectedIt.next(), actualIt.next(), "$context[$i]")
+                            }
                         }
                     }
                 } else {

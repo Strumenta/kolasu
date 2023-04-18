@@ -70,6 +70,11 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         eclassTypeHandlers.add(StatementHandler)
         eclassTypeHandlers.add(ExpressionHandler)
         eclassTypeHandlers.add(EntityDeclarationHandler)
+        eclassTypeHandlers.add(PlaceholderElementHandler)
+
+        eclassTypeHandlers.add(ErrorNodeHandler)
+        eclassTypeHandlers.add(GenericErrorNodeHandler)
+        eclassTypeHandlers.add(GenericNodeHandler)
     }
 
     /**

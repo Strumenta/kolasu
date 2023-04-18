@@ -72,7 +72,17 @@ Kolasu is used in several internal and commercial projects developed at [Strumen
 
 ## Publishing a new release
 
-To publish releases you need to set the environment variables GPR_USER and GPR_API_KEY.
+If you do not have gpg keys:
+
+1. Install gpg (`brew install gnupg` on mac)
+2. Generate the key (`gpg --gen-key`, no passphrase needed)
+3. Publish the key
+
+Instructions available here: https://selectfrom.dev/publishing-your-first-open-source-library-with-gradle-50bd0b1cd3af
+
+Please note that you may have to export the keys (`gpg --keyring secring.gpg --export-secret-keys > ~/.gnupg/secring.gpg`)
+
+You will need to store in ~/.gradle/gradle.properties your sonatype credentials under ossrhUsername and ossrhPassword
 
 New release can be made by running:
 

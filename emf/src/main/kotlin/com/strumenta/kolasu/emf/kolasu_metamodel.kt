@@ -78,6 +78,13 @@ private fun createStarlasuMetamodel(): EPackage {
         addReference("node", astNode, 1, 1)
     }
 
+    val simpleOrigin = ePackage.createEClass("SimpleOrigin").apply {
+        this.isAbstract = false
+        this.eSuperTypes.add(origin)
+        addAttribute("sourceText", stringDT, 0, 1)
+        addContainment("position", position, 0, 1)
+    }
+
     ePackage.createEClass("Statement").apply {
         this.isInterface = true
     }
@@ -86,6 +93,10 @@ private fun createStarlasuMetamodel(): EPackage {
     }
     ePackage.createEClass("EntityDeclaration").apply {
         this.isInterface = true
+    }
+    ePackage.createEClass("PlaceholderElement").apply {
+        this.isInterface = true
+        addAttribute("placeholderName", stringDT, 0, 1)
     }
 
     val issueType = EcoreFactory.eINSTANCE.createEEnum()
@@ -143,6 +154,18 @@ private fun createStarlasuMetamodel(): EPackage {
         this.eStructuralFeatures.add(rootContainment)
     }
 
+    val errorNode = ePackage.createEClass("ErrorNode").apply {
+        isInterface = true
+        addAttribute("message", stringDT, 1, 1)
+    }
+    ePackage.createEClass("GenericErrorNode").apply {
+        eSuperTypes.add(astNode)
+        eSuperTypes.add(errorNode)
+    }
+    ePackage.createEClass("GenericNode").apply {
+        eSuperTypes.add(astNode)
+    }
+
     val result = ePackage.createEClass("Result").apply {
         val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
             this.name = "CU"
@@ -169,7 +192,7 @@ private fun createStarlasuMetamodel(): EPackage {
     return ePackage
 }
 
-fun main(args: Array<String>) {
+fun main() {
     STARLASU_METAMODEL.saveEcore(File("kolasu-2.0.ecore"))
     STARLASU_METAMODEL.saveEcore(File("kolasu-2.0.xmi"))
     STARLASU_METAMODEL.saveAsJson(File("kolasu-2.0.json"))

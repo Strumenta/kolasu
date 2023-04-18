@@ -18,19 +18,20 @@ import kotlin.reflect.full.superclasses
 annotation class Mapped(val path: String = "")
 
 /**
- * Factory that, given a tree node, will instantiate the corresponding transformed node.
+ * Transformer that, given a tree node, will instantiate the corresponding transformed node.
  */
-class NodeFactory<Source, Output : Node>(
-    val constructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output?,
-    val children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
-    var finalizer: (Output) -> Unit = {}
+class NodeTransformer<Source, Output : Node>(
+    val constructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> Output?,
+    val children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
+    var finalizer: (Output) -> Unit = {},
+    var skipChildren: Boolean = false
 ) {
 
     fun withChild(
         sourceProperty: KProperty1<Source, *>,
         property: KMutableProperty1<*, *>,
         type: KClass<*>? = null
-    ): NodeFactory<Source, Output> = withChild(
+    ): NodeTransformer<Source, Output> = withChild(
         (sourceProperty as KProperty1<Source, Any>)::get,
         (property as KMutableProperty1<Any, Any?>)::set,
         property.name,
@@ -41,14 +42,14 @@ class NodeFactory<Source, Output : Node>(
         path: String,
         property: KMutableProperty1<Target, *>,
         scopedToType: KClass<Target>? = null
-    ): NodeFactory<Source, Output> =
+    ): NodeTransformer<Source, Output> =
         withChild(getter(path), (property as KMutableProperty1<Any, Any?>)::set, property.name, scopedToType)
 
     fun <Target : Any> withChild(
         get: (Source) -> Any?,
         property: KMutableProperty1<in Target, *>,
         scopedToType: KClass<Target>? = null
-    ): NodeFactory<Source, Output> =
+    ): NodeTransformer<Source, Output> =
         withChild(get, (property as KMutableProperty1<Target, Any?>)::set, property.name, scopedToType)
 
     fun <Target : Any, Child : Any> withChild(
@@ -56,14 +57,35 @@ class NodeFactory<Source, Output : Node>(
         set: (Target, Child?) -> Unit,
         name: String,
         type: KClass<*>? = null
-    ): NodeFactory<Source, Output> {
+    ): NodeTransformer<Source, Output> {
         val prefix = if (type != null) type.qualifiedName + "#" else ""
-        children[prefix + name] = ChildNodeFactory(prefix + name, get, set)
+        children[prefix + name] = ChildNodeTransformer(prefix + name, get, set)
         return this
     }
 
-    fun withFinalizer(finalizer: (Output) -> Unit) {
+    fun withFinalizer(finalizer: (Output) -> Unit): NodeTransformer<Source, Output> {
         this.finalizer = finalizer
+        return this
+    }
+
+    /**
+     * Tells the ASTTransformer whether this NodeTransformer already takes care of the node's children and no further computation
+     * is desired on that subtree. E.g., when we're mapping an ANTLR parse tree, and we have a context that is only a
+     * wrapper over several alternatives, and for some reason those are not labeled alternatives in ANTLR (subclasses),
+     * we may configure the transformer as follows:
+     *
+     * ```kotlin
+     * transformer.registerNodTransformer(XYZContext::class) { ctx -> transformer.transform(ctx.children[0]) }
+     * ```
+     *
+     * However, if the result of `transformer.transform(ctx.children[0])` is an instance of a Node with a child
+     * annotated with `@Mapped("someProperty")`, the transformer will think that it has to populate that child,
+     * according to the configuration determined by reflection. When it tries to do so, the "source" of the node will
+     * be an instance of `XYZContext` that does not have a child named `someProperty`, and the transformation will fail.
+     */
+    fun skipChildren(skip: Boolean = true): NodeTransformer<Source, Output> {
+        this.skipChildren = skip
+        return this
     }
 
     fun getter(path: String) = { src: Source ->
@@ -97,7 +119,7 @@ class NodeFactory<Source, Output : Node>(
 /**
  * Information on how to retrieve a child node.
  */
-data class ChildNodeFactory<Source, Target, Child>(
+data class ChildNodeTransformer<Source, Target, Child>(
     val name: String,
     val get: (Source) -> Any?,
     val setter: (Target, Child?) -> Unit
@@ -114,14 +136,14 @@ data class ChildNodeFactory<Source, Target, Child>(
 /**
  * Sentinel value used to represent the information that a given property is not a child node.
  */
-private val NO_CHILD_NODE = ChildNodeFactory<Any, Any, Any>("", { x -> x }, { _, _ -> })
+private val NO_CHILD_NODE = ChildNodeTransformer<Any, Any, Any>("", { x -> x }, { _, _ -> })
 
 /**
- * Implementation of a tree-to-tree transformation. For each source node type, we can register a factory that knows how
- * to create a transformed node. Then, this transformer can read metadata in the transformed node to recursively
+ * Implementation of a tree-to-tree transformation. For each source node type, we can register a transformer that knows
+ * how to produce a transformed node. Then, this transformer can read metadata in the transformed node to recursively
  * transform and assign children.
- * If no factory is provided for a source node type, a GenericNode is created, and the processing of the subtree stops
- * there.
+ * If no node transformer is provided for a source node type, a GenericNode is created, and the processing of the
+ * subtree stops there.
  */
 open class ASTTransformer(
     /**
@@ -131,9 +153,9 @@ open class ASTTransformer(
     val allowGenericNode: Boolean = true
 ) {
     /**
-     * Factories that map from source tree node to target tree node.
+     * NodeTransformers that map from source tree node to target tree node.
      */
-    val factories = mutableMapOf<KClass<*>, NodeFactory<*, *>>()
+    private val nodeTransformers = mutableMapOf<KClass<*>, NodeTransformer<*, *>>()
 
     private val _knownClasses = mutableMapOf<String, MutableSet<KClass<*>>>()
     val knownClasses: Map<String, Set<KClass<*>>> = _knownClasses
@@ -149,39 +171,17 @@ open class ASTTransformer(
         if (source is Collection<*>) {
             throw Error("Mapping error: received collection when value was expected")
         }
-        val factory = getNodeFactory<Any, Node>(source::class as KClass<Any>)
+        val transformer = getNodeTransformer<Any, Node>(source::class as KClass<Any>)
         val node: Node?
-        if (factory != null) {
-            node = makeNode(factory, source, allowGenericNode = allowGenericNode)
+        if (transformer != null) {
+            node = makeNode(transformer, source, allowGenericNode = allowGenericNode)
             if (node == null) {
                 return null
             }
-            node::class.processProperties { pd ->
-                val childKey = node::class.qualifiedName + "#" + pd.name
-                var childNodeFactory = factory.children[childKey]
-                if (childNodeFactory == null) {
-                    childNodeFactory = factory.children[pd.name]
-                }
-                if (childNodeFactory != null) {
-                    if (childNodeFactory != NO_CHILD_NODE) {
-                        setChild(childNodeFactory, source, node, pd)
-                    }
-                } else {
-                    val targetProp = node::class.memberProperties.find { it.name == pd.name }
-                    val mapped = targetProp?.findAnnotation<Mapped>()
-                    if (targetProp is KMutableProperty1 && mapped != null) {
-                        val path = (mapped.path.ifEmpty { targetProp.name })
-                        childNodeFactory = ChildNodeFactory(
-                            childKey, factory.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set
-                        )
-                        factory.children[childKey] = childNodeFactory
-                        setChild(childNodeFactory, source, node, pd)
-                    } else {
-                        factory.children[childKey] = NO_CHILD_NODE
-                    }
-                }
+            if (!transformer.skipChildren) {
+                setChildren(transformer, source, node)
             }
-            factory.finalizer(node)
+            transformer.finalizer(node)
             node.parent = parent
         } else {
             if (allowGenericNode) {
@@ -201,24 +201,56 @@ open class ASTTransformer(
         return node
     }
 
+    private fun setChildren(
+        transformer: NodeTransformer<Any, Node>,
+        source: Any,
+        node: Node
+    ) {
+        node::class.processProperties { pd ->
+            val childKey = node::class.qualifiedName + "#" + pd.name
+            var childNodeTransformer = transformer.children[childKey]
+            if (childNodeTransformer == null) {
+                childNodeTransformer = transformer.children[pd.name]
+            }
+            if (childNodeTransformer != null) {
+                if (childNodeTransformer != NO_CHILD_NODE) {
+                    setChild(childNodeTransformer, source, node, pd)
+                }
+            } else {
+                val targetProp = node::class.memberProperties.find { it.name == pd.name }
+                val mapped = targetProp?.findAnnotation<Mapped>()
+                if (targetProp is KMutableProperty1 && mapped != null) {
+                    val path = (mapped.path.ifEmpty { targetProp.name })
+                    childNodeTransformer = ChildNodeTransformer(
+                        childKey, transformer.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set
+                    )
+                    transformer.children[childKey] = childNodeTransformer
+                    setChild(childNodeTransformer, source, node, pd)
+                } else {
+                    transformer.children[childKey] = NO_CHILD_NODE
+                }
+            }
+        }
+    }
+
     protected open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
 
     protected open fun setChild(
-        childNodeFactory: ChildNodeFactory<*, *, *>,
+        childNodeTransformer: ChildNodeTransformer<*, *, *>,
         source: Any,
         node: Node,
         pd: PropertyTypeDescription
     ) {
-        val src = (childNodeFactory as ChildNodeFactory<Any, Any, Any>).get(getSource(node, source))
+        val src = (childNodeTransformer as ChildNodeTransformer<Any, Any, Any>).get(getSource(node, source))
         val child: Any? = if (pd.multiple) {
             (src as Collection<*>?)?.mapNotNull { transform(it, node) } ?: listOf<Node?>()
         } else {
             transform(src, node)
         }
         try {
-            childNodeFactory.set(node, child)
+            childNodeTransformer.set(node, child)
         } catch (e: IllegalArgumentException) {
-            throw Error("Could not set child $childNodeFactory", e)
+            throw Error("Could not set child $childNodeTransformer", e)
         }
     }
 
@@ -227,12 +259,12 @@ open class ASTTransformer(
     }
 
     protected open fun <S : Any, T : Node> makeNode(
-        factory: NodeFactory<S, T>,
+        transformer: NodeTransformer<S, T>,
         source: S,
         allowGenericNode: Boolean = true
     ): Node? {
         return try {
-            factory.constructor(source, this, factory)
+            transformer.constructor(source, this, transformer)
         } catch (e: Exception) {
             if (allowGenericNode) {
                 GenericErrorNode(e)
@@ -242,55 +274,57 @@ open class ASTTransformer(
         }?.withOrigin(asOrigin(source))
     }
 
-    protected open fun <S : Any, T : Node> getNodeFactory(kClass: KClass<S>): NodeFactory<S, T>? {
-        val factory = factories[kClass]
-        if (factory != null) {
-            return factory as NodeFactory<S, T>
+    protected open fun <S : Any, T : Node> getNodeTransformer(kClass: KClass<S>): NodeTransformer<S, T>? {
+        val nodeTransformer = nodeTransformers[kClass]
+        if (nodeTransformer != null) {
+            return nodeTransformer as NodeTransformer<S, T>
         } else {
             if (kClass == Any::class) {
                 return null
             }
             for (superclass in kClass.superclasses) {
-                val nodeFactory = getNodeFactory<S, T>(superclass as KClass<S>)
-                if (nodeFactory != null) {
-                    return nodeFactory
+                val superClassNodeTransformer = getNodeTransformer<S, T>(superclass as KClass<S>)
+                if (superClassNodeTransformer != null) {
+                    return superClassNodeTransformer
                 }
             }
         }
         return null
     }
 
-    fun <S : Any, T : Node> registerNodeFactory(
+    fun <S : Any, T : Node> registerNodeTransformer(
         kclass: KClass<S>,
-        factory: (S, ASTTransformer, NodeFactory<S, T>) -> T?
-    ): NodeFactory<S, T> {
-        val nodeFactory = NodeFactory(factory)
-        factories[kclass] = nodeFactory
-        return nodeFactory
+        transformer: (S, ASTTransformer, NodeTransformer<S, T>) -> T?
+    ): NodeTransformer<S, T> {
+        val nodeTransformer = NodeTransformer(transformer)
+        nodeTransformers[kclass] = nodeTransformer
+        return nodeTransformer
     }
 
-    fun <S : Any, T : Node> registerNodeFactory(
+    fun <S : Any, T : Node> registerNodeTransformer(
         kclass: KClass<S>,
-        factory: (S, ASTTransformer) -> T?
-    ): NodeFactory<S, T> = registerNodeFactory(kclass) { source, transformer, _ -> factory(source, transformer) }
+        transformer: (S, ASTTransformer) -> T?
+    ): NodeTransformer<S, T> = registerNodeTransformer(kclass) { source, transformer, _ ->
+        transformer(source, transformer)
+    }
 
-    fun <S : Any, T : Node> registerNodeFactory(kclass: KClass<S>, factory: (S) -> T?): NodeFactory<S, T> =
-        registerNodeFactory(kclass) { input, _, _ -> factory(input) }
+    fun <S : Any, T : Node> registerNodeTransformer(kclass: KClass<S>, transformer: (S) -> T?): NodeTransformer<S, T> =
+        registerNodeTransformer(kclass) { input, _, _ -> transformer(input) }
 
-    fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeFactory<S, T> {
+    fun <S : Any, T : Node> registerNodeTransformer(source: KClass<S>, target: KClass<T>): NodeTransformer<S, T> {
         registerKnownClass(target)
-        val nodeFactory = NodeFactory<S, T>({ _, _, _ ->
+        val nodeTransformer = NodeTransformer<S, T>({ _, _, _ ->
             if (target.isSealed) {
                 throw IllegalStateException("Unable to instantiate sealed class $target")
             }
             target.createInstance()
         })
-        factories[source] = nodeFactory
-        return nodeFactory
+        nodeTransformers[source] = nodeTransformer
+        return nodeTransformer
     }
 
     fun <T : Node> registerIdentityTransformation(nodeClass: KClass<T>) =
-        registerNodeFactory(nodeClass) { node -> node }
+        registerNodeTransformer(nodeClass) { node -> node }.skipChildren()
 
     private fun registerKnownClass(target: KClass<*>) {
         val qualifiedName = target.qualifiedName

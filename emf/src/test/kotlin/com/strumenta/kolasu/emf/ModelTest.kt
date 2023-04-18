@@ -3,6 +3,7 @@ package com.strumenta.kolasu.emf
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.model.Statement
 import com.strumenta.kolasu.parsing.withParseTreeNode
+import com.strumenta.kolasu.transformation.GenericNode
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
 import org.antlr.v4.runtime.CharStreams
@@ -424,6 +425,25 @@ class ModelTest {
   }
 }""",
             eo2.saveAsJson()
+        )
+    }
+
+    @Test
+    fun handlesGenericNodes() {
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm", "simplemm"
+        )
+        val ePackage = metamodelBuilder.generate()
+        val res = ResourceImpl()
+        res.contents.add(ePackage)
+        val mapping = KolasuToEMFMapping()
+        val gn = GenericNode().toEObject(res, mapping)
+        assertEquals(
+            """{
+  "eClass" : "https://strumenta.com/starlasu/v2#//GenericNode"
+}""",
+            gn.saveAsJson()
         )
     }
 }

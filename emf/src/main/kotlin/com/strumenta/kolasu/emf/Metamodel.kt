@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.transformation.GenericNode
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
@@ -84,6 +85,19 @@ val EntityDeclarationHandler = KolasuClassHandler(
     STARLASU_METAMODEL
         .getEClass("EntityDeclaration")
 )
+val PlaceholderElementHandler = KolasuClassHandler(
+    PlaceholderElement::class,
+    STARLASU_METAMODEL
+        .getEClass("PlaceholderElement")
+)
+
+val ErrorNodeHandler = KolasuClassHandler(ErrorNode::class, STARLASU_METAMODEL.getEClass("ErrorNode"))
+val GenericErrorNodeHandler = KolasuClassHandler(
+    GenericErrorNode::class, STARLASU_METAMODEL.getEClass("GenericErrorNode")
+)
+val GenericNodeHandler = KolasuClassHandler(
+    GenericNode::class, STARLASU_METAMODEL.getEClass("GenericNode")
+)
 
 val StringHandler = KolasuDataTypeHandler(String::class, EcorePackage.eINSTANCE.eString)
 val CharHandler = KolasuDataTypeHandler(Char::class, EcorePackage.eINSTANCE.eChar)
@@ -107,7 +121,7 @@ val Class<*>.eClassifierName: String
     }
 
 class ResourceClassTypeHandler(val resource: Resource, val ownPackage: EPackage) : EClassTypeHandler {
-    override fun canHandle(klass: KClass<*>): Boolean = getPackage(packageName(klass)) != null
+    override fun canHandle(kclass: KClass<*>): Boolean = getPackage(packageName(kclass)) != null
 
     private fun getPackage(packageName: String): EPackage? =
         resource.contents.find { it is EPackage && it != ownPackage && it.name == packageName } as EPackage?

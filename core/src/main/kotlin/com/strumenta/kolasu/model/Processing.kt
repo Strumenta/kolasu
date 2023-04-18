@@ -143,7 +143,7 @@ val Node.nextSibling: Node?
         if (this.parent != null) {
             val siblings = this.parent!!.children
             val index = siblings.indexOf(this)
-            return if (index == children.size - 1) null else siblings[index + 1]
+            return if (index == siblings.size - 1) null else siblings[index + 1]
         }
         return null
     }
@@ -201,6 +201,38 @@ val Node.previousSamePropertySibling: Node?
         }
         return null
     }
+
+/**
+ * Return the property containing this Node, if any. Null should be returned for root nodes.
+ */
+fun Node.containingProperty(): PropertyDescription? {
+    if (this.parent == null) {
+        return null
+    }
+    return this.parent!!.properties.find { p ->
+        val v = p.value
+        when (v) {
+            is Collection<*> -> v.contains(this)
+            this -> true
+            else -> false
+        }
+    } ?: throw IllegalStateException("No containing property for $this with parent ${this.parent}")
+}
+
+/**
+ * Return the index of this Node within the containing property. The return value is null for root nodes.
+ * The index is always 0 for Nodes in singular containment properties.
+ */
+fun Node.indexInContainingProperty(): Int? {
+    val p = this.containingProperty()
+    return if (p == null) {
+        null
+    } else if (p.value is Collection<*>) {
+        p.value.indexOf(this)
+    } else {
+        0
+    }
+}
 
 /**
  * @return the next sibling of the specified type. Notice that children of a sibling collection are considered siblings
@@ -278,7 +310,7 @@ fun Node.transformChildren(operation: (Node) -> Node) {
                         property.setter.call(this, newValue)
                         newValue.parent = this
                     } else {
-                        throw ImmutablePropertyException(property, value)
+                        throw ImmutablePropertyException(property, this)
                     }
                 }
             }
@@ -311,8 +343,7 @@ fun Node.transformChildren(operation: (Node) -> Node) {
 fun Node.mapChildren(operation: (Node) -> Node): Node {
     val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { property ->
-        val value = property.get(this)
-        when (value) {
+        when (val value = property.get(this)) {
             is Node -> {
                 val newValue = operation(value)
                 if (newValue != value) {

@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.model
 
+import java.io.Serializable
+
 /**
  * An entity that can have a name
  */
@@ -27,7 +29,7 @@ interface Named : PossiblyNamed {
  * This is not statically enforced as we may want to use some interface, which cannot extend Node.
  * However, this is enforced dynamically.
  */
-class ReferenceByName<N>(val name: String, initialReferred: N? = null) where N : PossiblyNamed {
+class ReferenceByName<N>(val name: String, initialReferred: N? = null) : Serializable where N : PossiblyNamed {
 
     var referred: N? = null
         set(value) {

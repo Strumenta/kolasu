@@ -1,16 +1,12 @@
 package com.strumenta.kolasu.playground
 
 import com.strumenta.kolasu.emf.MetamodelBuilder
-import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
 import org.junit.Test
 import kotlin.test.assertEquals
-
-data class ANode(override val name: String, val value: Int) : Node(), Named
 
 class TranspilationTraceTest {
 
