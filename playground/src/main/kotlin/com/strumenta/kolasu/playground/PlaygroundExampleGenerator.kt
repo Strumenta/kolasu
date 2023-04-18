@@ -72,7 +72,7 @@ fun ParsingResultWithFirstStage<*, *>.saveForPlayground(
         jsonObject.addProperty("name", name)
         jsonObject.addProperty("code", code)
         jsonObject.add("ast", ast)
-        if (firstStage != null) {
+        if (firstStage.time != null) {
             jsonObject.addProperty("parsingTime", firstStage!!.time)
         }
         if (time != null) {
