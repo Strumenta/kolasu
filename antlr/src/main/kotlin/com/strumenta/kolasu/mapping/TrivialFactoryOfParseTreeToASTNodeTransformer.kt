@@ -1,9 +1,10 @@
-package com.strumenta.kolasu.transformation
+package com.strumenta.kolasu.mapping
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.children
+import com.strumenta.kolasu.transformation.ASTTransformer
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token
