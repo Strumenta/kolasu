@@ -140,7 +140,7 @@ class TranspilationTraceTest {
     "root" : {
       "eClass" : "http://mypackage.com#//ANode",
       "destination" : {
-        "eClass" : "https://strumenta.com/starlasu/v2#//NodeDestination",
+        "eClass" : "https://strumenta.com/starlasu/v3#//NodeDestination",
         "node" : {
           "eClass" : "http://mypackage.com#//ANode",
           "${'$'}ref" : "//@targetResult/@root"
@@ -154,7 +154,7 @@ class TranspilationTraceTest {
     "root" : {
       "eClass" : "http://mypackage.com#//ANode",
       "origin" : {
-        "eClass" : "https://strumenta.com/starlasu/v2#//NodeOrigin",
+        "eClass" : "https://strumenta.com/starlasu/v3#//NodeOrigin",
         "node" : {
           "eClass" : "http://mypackage.com#//ANode",
           "${'$'}ref" : "//@sourceResult/@root"

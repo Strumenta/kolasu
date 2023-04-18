@@ -40,7 +40,7 @@ class ParserTraceTest {
   "name": "foo.json",
   "code": "a:1",
   "ast": {
-    "eClass": "https://strumenta.com/starlasu/v2#//Result",
+    "eClass": "https://strumenta.com/starlasu/v3#//Result",
     "root": {
       "eClass": "mm.json#//ANode",
       "name": "a",
