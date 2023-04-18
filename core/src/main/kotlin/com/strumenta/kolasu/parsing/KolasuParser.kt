@@ -105,9 +105,9 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<
  *
  * You should extend this class to implement the parts that are specific to your language.
  */
-abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken>(tokenFactory: TokenFactory<T>) :
-    KolasuANTLRLexer<T>(tokenFactory),
-    ASTParser<R> {
+abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken>(
+    tokenFactory: TokenFactory<T>
+) : KolasuANTLRLexer<T>(tokenFactory), ASTParser<R> {
 
     /**
      * Creates the first-stage parser.
