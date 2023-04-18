@@ -1,11 +1,10 @@
-package com.strumenta.kolasu.linking
+package com.strumenta.kolasu.symbolresolution
 
 import com.strumenta.kolasu.model.Expression
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.Statement
 import com.strumenta.kolasu.model.assignParents
-import com.strumenta.kolasu.testing.assertAllReferencesResolved
 import com.strumenta.kolasu.traversing.findAncestorOfType
 import org.junit.Test
 
@@ -72,8 +71,6 @@ data class NewExpr(
 
 val symbolResolver = declarativeSymbolResolver {
 
-
-
     scopeFor(ClassDecl::superclass) { compilationUnit: CompilationUnit ->
         Scope().apply { compilationUnit.content.filterIsInstance<ClassDecl>().forEach { define(it) } }
     }
@@ -82,7 +79,6 @@ val symbolResolver = declarativeSymbolResolver {
         Scope().apply { compilationUnit.content.forEach { define(it) } }
     }
 
-    // operation_0().feature_0
     scopeFor(RefExpr::symbol) { refExpr: RefExpr ->
         var scope: Scope? = null
         if (refExpr.context != null) {
@@ -91,9 +87,6 @@ val symbolResolver = declarativeSymbolResolver {
         scope
     }
 
-    // function().<a|d>
-    // new Ciao().a
-    // (1 + 1).qualche
     scopeFor(RefExpr::symbol) { callExpr: CallExpr ->
         val scope = Scope()
         if (!callExpr.operation.resolved) {
@@ -174,7 +167,6 @@ class SymbolResolutionTest {
                                         ),
                                         symbol = ReferenceByName(name = "feature_0"),
                                     ),
-                                    // operation_0.feature_0 = operation_0.feature_0
                                     rhs = RefExpr(
                                         context = CallExpr(
                                             operation = ReferenceByName(name = "operation_0"),

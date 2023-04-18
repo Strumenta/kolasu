@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.symbolresolution.Scope
+import com.strumenta.kolasu.symbolresolution.Symbol
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -64,23 +66,23 @@ class ModelTest {
     @test
     fun scopeAddSymbols() {
         val scope = Scope()
-        assertTrue { scope.symbols.isEmpty() }
+        assertTrue { scope.symbolTable.isEmpty() }
 
         scope.define(ASymbol(name = "a", index = 0))
-        assertEquals(1, scope.symbols.size)
-        assertEquals(1, scope.symbols.getOrElse("a") { emptyList() }.size)
-        assertContains(scope.symbols.getOrElse("a") { emptyList() }, ASymbol(name = "a", index = 0))
+        assertEquals(1, scope.symbolTable.size)
+        assertEquals(1, scope.symbolTable.getOrElse("a") { emptyList() }.size)
+        assertContains(scope.symbolTable.getOrElse("a") { emptyList() }, ASymbol(name = "a", index = 0))
 
         scope.define(BSymbol(name = "b", index = 0))
-        assertEquals(2, scope.symbols.size)
-        assertEquals(1, scope.symbols.getOrElse("b") { emptyList() }.size)
-        assertContains(scope.symbols.getOrElse("b") { emptyList() }, BSymbol(name = "b", index = 0))
+        assertEquals(2, scope.symbolTable.size)
+        assertEquals(1, scope.symbolTable.getOrElse("b") { emptyList() }.size)
+        assertContains(scope.symbolTable.getOrElse("b") { emptyList() }, BSymbol(name = "b", index = 0))
 
         scope.define(ASymbol(name = "b", index = 1))
-        assertEquals(2, scope.symbols.size)
-        assertEquals(2, scope.symbols.getOrElse("b") { emptyList() }.size)
-        assertContains(scope.symbols.getOrElse("b") { emptyList() }, BSymbol(name = "b", index = 0))
-        assertContains(scope.symbols.getOrElse("b") { emptyList() }, ASymbol(name = "b", index = 1))
+        assertEquals(2, scope.symbolTable.size)
+        assertEquals(2, scope.symbolTable.getOrElse("b") { emptyList() }.size)
+        assertContains(scope.symbolTable.getOrElse("b") { emptyList() }, BSymbol(name = "b", index = 0))
+        assertContains(scope.symbolTable.getOrElse("b") { emptyList() }, ASymbol(name = "b", index = 1))
     }
 
     @test(expected = IllegalArgumentException::class)
