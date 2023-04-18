@@ -51,7 +51,7 @@ class IndexingTest {
                 override fun getId(node: Node): String? {
                     return "custom_${this.counter++}"
                 }
-            }
+            },
         )
         assertEquals(4, ids.size)
         assertEquals(ids[b1], "custom_0")
@@ -73,7 +73,7 @@ class IndexingTest {
                 override fun getId(node: Node): String? {
                     return "custom_${this.counter++}"
                 }
-            }
+            },
         )
         assertEquals(4, ids.size)
         assertEquals(ids[a1], "custom_0")

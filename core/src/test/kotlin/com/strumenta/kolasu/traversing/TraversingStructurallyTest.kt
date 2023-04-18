@@ -13,7 +13,7 @@ internal class TraversingStructurallyTest {
         val name: String,
         val contents: List<Node> = listOf(),
         val set: Set<Node> = setOf(),
-        specifiedPosition: Position? = null
+        specifiedPosition: Position? = null,
     ) : Node(specifiedPosition)
     class Item(val name: String, specifiedPosition: Position? = null) : Node(specifiedPosition)
 
@@ -33,9 +33,9 @@ internal class TraversingStructurallyTest {
             Box(
                 "first",
                 listOf(
-                    Item("1", specifiedPosition = pos(3, 6, 3, 12))
+                    Item("1", specifiedPosition = pos(3, 6, 3, 12)),
                 ),
-                specifiedPosition = pos(2, 3, 4, 3)
+                specifiedPosition = pos(2, 3, 4, 3),
             ),
             Item("2", specifiedPosition = pos(5, 3, 5, 9)),
             Box(
@@ -46,16 +46,16 @@ internal class TraversingStructurallyTest {
                         listOf(
                             Item("3", specifiedPosition = pos(8, 7, 8, 13)),
                             Item("4", specifiedPosition = pos(9, 7, 9, 13)),
-                            Item("5", specifiedPosition = pos(10, 7, 10, 13))
+                            Item("5", specifiedPosition = pos(10, 7, 10, 13)),
                         ),
-                        specifiedPosition = pos(7, 5, 11, 5)
-                    )
+                        specifiedPosition = pos(7, 5, 11, 5),
+                    ),
                 ),
-                specifiedPosition = pos(6, 3, 12, 3)
+                specifiedPosition = pos(6, 3, 12, 3),
             ),
-            Item("6", specifiedPosition = pos(13, 3, 13, 9))
+            Item("6", specifiedPosition = pos(13, 3, 13, 9)),
         ),
-        specifiedPosition = pos(1, 1, 14, 1)
+        specifiedPosition = pos(1, 1, 14, 1),
     )
 
     @Test
@@ -161,9 +161,9 @@ internal class TraversingStructurallyTest {
                 Box(
                     "first",
                     set = hashSetOf(
-                        Item("1", specifiedPosition = pos(3, 6, 3, 12))
+                        Item("1", specifiedPosition = pos(3, 6, 3, 12)),
                     ),
-                    specifiedPosition = pos(2, 3, 4, 3)
+                    specifiedPosition = pos(2, 3, 4, 3),
                 ),
                 Item("2", specifiedPosition = pos(5, 3, 5, 9)),
                 Box(
@@ -174,16 +174,16 @@ internal class TraversingStructurallyTest {
                             set = hashSetOf(
                                 Item("3", specifiedPosition = pos(8, 7, 8, 13)),
                                 Item("4", specifiedPosition = pos(9, 7, 9, 13)),
-                                Item("5", specifiedPosition = pos(10, 7, 10, 13))
+                                Item("5", specifiedPosition = pos(10, 7, 10, 13)),
                             ),
-                            specifiedPosition = pos(7, 5, 11, 5)
-                        )
+                            specifiedPosition = pos(7, 5, 11, 5),
+                        ),
                     ),
-                    specifiedPosition = pos(6, 3, 12, 3)
+                    specifiedPosition = pos(6, 3, 12, 3),
                 ),
-                Item("6", specifiedPosition = pos(13, 3, 13, 9))
+                Item("6", specifiedPosition = pos(13, 3, 13, 9)),
             ),
-            specifiedPosition = pos(1, 1, 14, 1)
+            specifiedPosition = pos(1, 1, 14, 1),
         )
         val set = mutableSetOf<String>()
         testCase.walk().map {
