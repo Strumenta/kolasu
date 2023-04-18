@@ -134,7 +134,7 @@ inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer
     }
 }
 
-inline fun <T: Any> KClass<T>.preferredConstructor() : KFunction<T> {
+inline fun <T : Any> KClass<T>.preferredConstructor(): KFunction<T> {
     val constructors = this.constructors
     return if (constructors.size != 1) {
         if (this.primaryConstructor != null) {
@@ -142,7 +142,7 @@ inline fun <T: Any> KClass<T>.preferredConstructor() : KFunction<T> {
         } else {
             throw RuntimeException(
                 "Node Factories support only classes with exactly one constructor or a " +
-                        "primary constructor. Class ${this.qualifiedName} has ${constructors.size}"
+                    "primary constructor. Class ${this.qualifiedName} has ${constructors.size}"
             )
         }
     } else {

@@ -35,7 +35,12 @@ class NodeFactory<Source, Output : Node>(
         property: KMutableProperty1<*, *>,
         type: KClass<*>? = null
     ): NodeFactory<Source, Output> = withChild(
-        { source:Source -> ((sourceProperty as KProperty1<Source, Collection<out Any>>)::get.invoke(source) as List<out Any>)[index] },
+        { source: Source ->
+            (
+                (sourceProperty as KProperty1<Source, Collection<out Any>>)::get.invoke(source)
+                    as List<out Any>
+                )[index]
+        },
         (property as KMutableProperty1<Any, Any?>)::set,
         property.name,
         type
@@ -239,7 +244,7 @@ open class ASTTransformer(
     ) {
         node::class.processProperties { pd ->
             val childKey = node::class.qualifiedName + "#" + pd.name
-            var childNodeFactory = factory.getChildNodeFactory<Node,Any,Any>(node::class, pd.name)
+            var childNodeFactory = factory.getChildNodeFactory<Node, Any, Any>(node::class, pd.name)
             if (childNodeFactory != null) {
                 if (childNodeFactory != NO_CHILD_NODE) {
                     setChild(childNodeFactory, source, node, pd)
@@ -340,14 +345,17 @@ open class ASTTransformer(
     fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeFactory<S, T> {
         registerKnownClass(target)
         val emptyConstructor = target.constructors.find { it.parameters.isEmpty() }
-        val nodeFactory = NodeFactory<S, T>({ source:S, _, f ->
+        val nodeFactory = NodeFactory<S, T>({ source: S, _, f ->
             if (target.isSealed) {
                 throw IllegalStateException("Unable to instantiate sealed class $target")
             }
-            fun getConstructorParameterValue(kParameter: KParameter) : Any? {
+            fun getConstructorParameterValue(kParameter: KParameter): Any? {
                 var childNodeFactory = f.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!)
                 if (childNodeFactory == null) {
-                    throw java.lang.IllegalStateException("We do not know how to produce parameter ${kParameter.name!!} for $target")
+                    throw java.lang.IllegalStateException(
+                        "We do not know how to produce " +
+                            "parameter ${kParameter.name!!} for $target"
+                    )
                 } else {
                     val childSource = childNodeFactory.get.invoke(source)
                     return transform(childSource)
@@ -387,7 +395,10 @@ open class ASTTransformer(
     }
 }
 
-fun <Source: Any, Target, Child>NodeFactory<*, *>.getChildNodeFactory(nodeClass: KClass<out Source>, parameterName: String) : ChildNodeFactory<Source, Target, Child>? {
+fun <Source : Any, Target, Child> NodeFactory<*, *>.getChildNodeFactory(
+    nodeClass: KClass<out Source>,
+    parameterName: String
+): ChildNodeFactory<Source, Target, Child>? {
     val childKey = nodeClass.qualifiedName + "#" + parameterName
     var childNodeFactory = this.children[childKey]
     if (childNodeFactory == null) {
