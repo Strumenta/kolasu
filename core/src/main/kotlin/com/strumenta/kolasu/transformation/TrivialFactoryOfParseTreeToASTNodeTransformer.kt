@@ -16,7 +16,7 @@ import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
-object TrivialFactoryOfParseTreeToASTNodeFactory {
+object TrivialFactoryOfParseTreeToASTNodeTransformer {
 
     fun convertString(text: String, astTransformer: ASTTransformer, expectedType: KType): Any? {
         return when (expectedType.classifier) {
@@ -63,7 +63,7 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
         }
     }
 
-    inline fun <S : RuleContext, reified T : Node> trivialFactory(vararg nameConversions: Pair<String, String>): (
+    inline fun <S : RuleContext, reified T : Node> trivialTransformer(vararg nameConversions: Pair<String, String>): (
         S,
         ASTTransformer
     ) -> T? {
@@ -122,9 +122,9 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
 inline fun <reified S : RuleContext, reified T : Node> ASTTransformer.registerTrivialPTtoASTConversion(
     vararg nameConversions: Pair<String, String>
 ) {
-    this.registerNodeFactory(
+    this.registerNodeTransformer(
         S::class,
-        TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<S, T>(*nameConversions)
+        TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<S, T>(*nameConversions)
     )
 }
 
@@ -138,7 +138,7 @@ inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer
 }
 
 inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer.unwrap(wrappingMember: KCallable<*>) {
-    this.registerNodeFactory(S::class) { parseTreeNode, astTransformer ->
+    this.registerNodeTransformer(S::class) { parseTreeNode, astTransformer ->
         val wrapped = wrappingMember.call(parseTreeNode)
         astTransformer.transform(wrapped) as T?
     }
