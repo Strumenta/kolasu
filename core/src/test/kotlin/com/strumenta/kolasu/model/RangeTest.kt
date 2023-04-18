@@ -1,12 +1,5 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.parsing.toRange
-import com.strumenta.simplelang.SimpleLangLexer
-import com.strumenta.simplelang.SimpleLangParser
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
-import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.test.assertFalse
@@ -148,29 +141,6 @@ class RangeTest {
         assertFalse("contains should return false with node after") { range.contains(after) }
     }
 
-    @test
-    fun parserRuleContextPosition() {
-        val code = "set foo = 123"
-        val lexer = SimpleLangLexer(CharStreams.fromString(code))
-        val parser = SimpleLangParser(CommonTokenStream(lexer))
-        val cu = parser.compilationUnit()
-        val setStmt = cu.statement(0) as SimpleLangParser.SetStmtContext
-        val pos = setStmt.toRange()
-        assertEquals(Range(Point(1, 0), Point(1, 13)), pos)
-    }
-
-    @test
-    fun positionDerivedFromParseTreeNode() {
-        val code = "set foo = 123"
-        val lexer = SimpleLangLexer(CharStreams.fromString(code))
-        val parser = SimpleLangParser(CommonTokenStream(lexer))
-        val cu = parser.compilationUnit()
-        val setStmt = cu.statement(0) as SimpleLangParser.SetStmtContext
-        val mySetStatement = MySetStatement()
-        mySetStatement.origin = ParseTreeOrigin(setStmt)
-        assertEquals(Range(Point(1, 0), Point(1, 13)), mySetStatement.range)
-    }
-
     @test fun illegalPositionAccepted() {
         Range(Point(10, 1), Point(5, 2), validate = false)
     }
@@ -180,16 +150,4 @@ class RangeTest {
         Range(Point(10, 1), Point(5, 2), validate = true)
     }
 
-    @test fun parserTreePosition() {
-        val code = "set foo = 123"
-        val lexer = SimpleLangLexer(CharStreams.fromString(code))
-        val parser = SimpleLangParser(CommonTokenStream(lexer))
-        val cu: ParseTree = parser.compilationUnit()
-        val pos = cu.toRange()
-        assertEquals(Range(Point(1, 0), Point(1, 13)), pos)
-    }
-
-//    @test(expected = Exception::class) fun illegalPositionNotAcceptedByDefault() {
-//        val p = Position(Point(10, 1), Point(5, 2))
-//    }
 }

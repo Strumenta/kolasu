@@ -2,24 +2,8 @@ package com.strumenta.kolasu.testing
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.ParsingResult
-import com.strumenta.kolasu.parsing.toParseTreeModel
-import org.antlr.v4.runtime.ParserRuleContext
-import org.antlr.v4.runtime.Vocabulary
 import kotlin.test.assertEquals
 import kotlin.test.fail
-
-fun assertParseTreeStr(
-    expectedMultiLineStr: String,
-    root: ParserRuleContext,
-    vocabulary: Vocabulary,
-    printParseTree: Boolean = true
-) {
-    val actualParseTree = toParseTreeModel(root, vocabulary).multiLineString()
-    if (printParseTree) {
-        println("parse tree:\n\n${actualParseTree}\n")
-    }
-    assertEquals(expectedMultiLineStr.trim(), actualParseTree.trim())
-}
 
 class IgnoreChildren<N : Node> : List<N> {
     override val size: Int
