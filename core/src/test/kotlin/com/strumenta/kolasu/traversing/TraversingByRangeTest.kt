@@ -58,41 +58,41 @@ internal class TraversingByRangeTest {
     )
 
     @Test
-    fun walkWithinWithOutsidePosition() {
+    fun walkWithinWithOutsideRange() {
         val range: Range = range(15, 1, 15, 1)
         val result: String = printSequence(testCase.walkWithin(range))
         assertEquals("", result)
     }
 
     @Test
-    fun walkWithinWithRootPosition() {
+    fun walkWithinWithRootRange() {
         val range: Range = range(1, 1, 14, 1)
         val result: String = printSequence(testCase.walkWithin(range))
         assertEquals("root, first, 1, 2, big, small, 3, 4, 5, 6", result)
     }
 
     @Test
-    fun walkWithinWithLeafPosition() {
+    fun walkWithinWithLeafRange() {
         val range: Range = range(13, 3, 13, 9)
         val result: String = printSequence(testCase.walkWithin(range))
         assertEquals("6", result)
     }
 
     @Test
-    fun walkWithinPointInLeafPosition() {
+    fun walkWithinPointInLeafRange() {
         val range: Range = range(13, 4, 13, 5)
         assertEquals("", printSequence(testCase.walkWithin(range)))
     }
 
     @Test
-    fun walkWithinWithSubTreePosition() {
+    fun walkWithinWithSubTreeRange() {
         val range: Range = range(7, 5, 11, 5)
         val result: String = printSequence(testCase.walkWithin(range))
         assertEquals("small, 3, 4, 5", result)
     }
 
     @Test
-    fun findByPosition() {
+    fun findByRange() {
         val leaf1: Range = range(13, 4, 13, 5)
         assertEquals("root, 6", printSequence(testCase.searchByRange(leaf1, true)))
         assertEquals("6", printSequence(sequenceOf(testCase.findByRange(leaf1, true)!!)))

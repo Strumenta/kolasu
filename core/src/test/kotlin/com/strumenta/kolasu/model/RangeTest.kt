@@ -117,16 +117,16 @@ class RangeTest {
     }
 
     @test
-    fun containsPosition() {
+    fun containsRange() {
         val before = Range(Point(1, 0), Point(1, 10))
         val inside = Range(Point(2, 3), Point(2, 8))
         val after = Range(Point(3, 0), Point(3, 10))
         val range = Range(Point(2, 0), Point(2, 10))
 
-        assertFalse("contains should return false with position before") { range.contains(before) }
-        assertTrue("contains should return true with same position") { range.contains(range) }
-        assertTrue("contains should return true with position inside") { range.contains(inside) }
-        assertFalse("contains should return false with position after") { range.contains(after) }
+        assertFalse("contains should return false with range before") { range.contains(before) }
+        assertTrue("contains should return true with same range") { range.contains(range) }
+        assertTrue("contains should return true with range inside") { range.contains(inside) }
+        assertFalse("contains should return false with range after") { range.contains(after) }
     }
 
     @test
@@ -141,13 +141,12 @@ class RangeTest {
         assertFalse("contains should return false with node after") { range.contains(after) }
     }
 
-    @test fun illegalPositionAccepted() {
+    @test fun illegalRangeAccepted() {
         Range(Point(10, 1), Point(5, 2), validate = false)
     }
 
     @test(expected = Exception::class)
-    fun illegalPositionNotAccepted() {
+    fun illegalRangeNotAccepted() {
         Range(Point(10, 1), Point(5, 2), validate = true)
     }
-
 }

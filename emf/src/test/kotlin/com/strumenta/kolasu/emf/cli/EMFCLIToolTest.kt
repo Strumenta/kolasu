@@ -41,7 +41,7 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
 
     override fun parse(
         code: String,
-        considerPosition: Boolean,
+        considerRange: Boolean,
         measureLexingTime: Boolean
     ): ParsingResultWithFirstStage<MyCompilationUnit, ParserRuleContext> {
         TODO("Not yet implemented")
@@ -49,7 +49,7 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
 
     val expectedResults = HashMap<File, ParsingResult<MyCompilationUnit>>()
 
-    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<MyCompilationUnit> {
+    override fun parse(file: File, charset: Charset, considerRange: Boolean): ParsingResult<MyCompilationUnit> {
         return expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
     }
 
@@ -59,7 +59,7 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
 
     override fun parseTreeToAst(
         parseTreeRoot: ParserRuleContext,
-        considerPosition: Boolean,
+        considerRange: Boolean,
         issues: MutableList<Issue>
     ): MyCompilationUnit? {
         TODO("Not yet implemented")
@@ -331,7 +331,7 @@ class EMFCLIToolTest {
     } ]
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-    "name" : "Position",
+    "name" : "Range",
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
       "name" : "start",
@@ -384,10 +384,10 @@ class EMFCLIToolTest {
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
-      "name" : "position",
+      "name" : "range",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${"\$ref"}" : "/0/Position"
+        "${"\$ref"}" : "/0/Range"
       },
       "containment" : true
     } ]
@@ -401,10 +401,10 @@ class EMFCLIToolTest {
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
-      "name" : "position",
+      "name" : "range",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${"\$ref"}" : "/0/Position"
+        "${"\$ref"}" : "/0/Range"
       },
       "containment" : true
     }, {
@@ -433,10 +433,10 @@ class EMFCLIToolTest {
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
-      "name" : "position",
+      "name" : "range",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${"\$ref"}" : "/0/Position"
+        "${"\$ref"}" : "/0/Range"
       },
       "containment" : true
     } ]
@@ -472,10 +472,10 @@ class EMFCLIToolTest {
       }
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
-      "name" : "position",
+      "name" : "range",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${"\$ref"}" : "/0/Position"
+        "${"\$ref"}" : "/0/Range"
       },
       "containment" : true
     } ]
@@ -555,10 +555,10 @@ class EMFCLIToolTest {
       }
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
-      "name" : "position",
+      "name" : "range",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${"\$ref"}" : "/0/Position"
+        "${"\$ref"}" : "/0/Range"
       },
       "containment" : true
     } ]

@@ -66,7 +66,7 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
      */
     protected abstract fun parseTreeToAst(
         parseTreeRoot: C,
-        considerPosition: Boolean = true,
+        considerRange: Boolean = true,
         issues: MutableList<Issue>
     ): R?
 
@@ -199,27 +199,27 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
 
     override fun parse(
         code: String,
-        considerPosition: Boolean,
+        considerRange: Boolean,
         measureLexingTime: Boolean
     ): ParsingResultWithFirstStage<R, C> {
         val inputStream = CharStreams.fromString(code)
-        return parse(inputStream, considerPosition, measureLexingTime)
+        return parse(inputStream, considerRange, measureLexingTime)
     }
 
     @JvmOverloads
     fun parse(
         inputStream: CharStream,
-        considerPosition: Boolean = true,
+        considerRange: Boolean = true,
         measureLexingTime: Boolean = false
     ): ParsingResultWithFirstStage<R, C> {
         val start = System.currentTimeMillis()
         val firstStage = parseFirstStage(inputStream, measureLexingTime)
         val myIssues = firstStage.issues.toMutableList()
-        var ast = parseTreeToAst(firstStage.root!!, considerPosition, myIssues)
+        var ast = parseTreeToAst(firstStage.root!!, considerRange, myIssues)
         assignParents(ast)
         ast = if (ast == null) null else postProcessAst(ast, myIssues)
-        if (ast != null && !considerPosition) {
-            // Remove parseTreeNodes because they cause the position to be computed
+        if (ast != null && !considerRange) {
+            // Remove parseTreeNodes because they cause the range to be computed
             ast.walk().forEach { it.origin = null }
         }
         val now = System.currentTimeMillis()
@@ -229,8 +229,8 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
         )
     }
 
-    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<R> =
-        parse(FileInputStream(file), charset, considerPosition)
+    override fun parse(file: File, charset: Charset, considerRange: Boolean): ParsingResult<R> =
+        parse(FileInputStream(file), charset, considerRange)
 
     // For convenient use from Java
     fun walk(node: Node) = node.walk()

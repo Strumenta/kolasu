@@ -135,22 +135,22 @@ class XmlGenerationTest {
     <issues>
         <Issue message="lexical problem" severity="ERROR" type="LEXICAL"/>
         <Issue message="semantic problem" severity="ERROR" type="SEMANTIC">
-            <position description="Position(start=Line 10, Column 1, end=Line 12, Column 3)">
+            <range description="Range(start=Line 10, Column 1, end=Line 12, Column 3)">
                 <start column="1" line="10"/>
                 <end column="3" line="12"/>
-            </position>
+            </range>
         </Issue>
         <Issue message="semantic warning" severity="WARNING" type="SEMANTIC">
-            <position description="Position(start=Line 10, Column 1, end=Line 12, Column 3)">
+            <range description="Range(start=Line 10, Column 1, end=Line 12, Column 3)">
                 <start column="1" line="10"/>
                 <end column="3" line="12"/>
-            </position>
+            </range>
         </Issue>
         <Issue message="semantic info" severity="INFO" type="SEMANTIC">
-            <position description="Position(start=Line 10, Column 1, end=Line 12, Column 3)">
+            <range description="Range(start=Line 10, Column 1, end=Line 12, Column 3)">
                 <start column="1" line="10"/>
                 <end column="3" line="12"/>
-            </position>
+            </range>
         </Issue>
     </issues>
     <root/>

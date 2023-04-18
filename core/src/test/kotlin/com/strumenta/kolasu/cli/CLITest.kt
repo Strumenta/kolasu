@@ -22,7 +22,7 @@ data class MyFieldDecl(override var name: String) : Node(), Named
 class MyDummyParser : ASTParser<MyCompilationUnit> {
     override fun parse(
         code: String,
-        considerPosition: Boolean,
+        considerRange: Boolean,
         measureLexingTime: Boolean
     ): ParsingResult<MyCompilationUnit> {
         TODO("Not yet implemented")

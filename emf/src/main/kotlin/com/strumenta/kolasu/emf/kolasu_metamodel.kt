@@ -13,7 +13,7 @@ val ASTNODE_ECLASS by lazy { STARLASU_METAMODEL.eClassifiers.find { it.name == "
 
 private fun createStarlasuMetamodel(): EPackage {
     val ePackage = EcoreFactory.eINSTANCE.createEPackage()
-    val nsUri = "https://strumenta.com/starlasu/v2"
+    val nsUri = "https://strumenta.com/starlasu/v3"
     ePackage.setResourceURI(nsUri)
     ePackage.name = "StrumentaLanguageSupport"
     ePackage.nsURI = nsUri
@@ -41,7 +41,7 @@ private fun createStarlasuMetamodel(): EPackage {
         addAttribute("line", intDT, 1, 1)
         addAttribute("column", intDT, 1, 1)
     }
-    val position = ePackage.createEClass("Position").apply {
+    val range = ePackage.createEClass("Range").apply {
         addContainment("start", point, 1, 1)
         addContainment("end", point, 1, 1)
     }
@@ -52,12 +52,12 @@ private fun createStarlasuMetamodel(): EPackage {
     }
     val textFileDestination = ePackage.createEClass("TextFileDestination").apply {
         eSuperTypes.add(destination)
-        addContainment("position", position, 0, 1)
+        addContainment("range", range, 0, 1)
     }
     val astNode = ePackage.createEClass("ASTNode").apply {
         this.isAbstract = true
         this.eSuperTypes.add(origin)
-        addContainment("position", position, 0, 1)
+        addContainment("range", range, 0, 1)
         addContainment("origin", origin, 0, 1)
         addContainment("destination", destination, 0, 1)
     }
@@ -67,7 +67,7 @@ private fun createStarlasuMetamodel(): EPackage {
     val parseTreeOrigin = ePackage.createEClass("ParseTreeOrigin").apply {
         this.isAbstract = false
         this.eSuperTypes.add(origin)
-        addContainment("position", position, 0, 1)
+        addContainment("range", range, 0, 1)
     }
     // We need this as a wrapper around the Node, as the ASTNode.Origin link is a containment link
     // (otherwise parseTreeOrigin would be orphan), but we want to use a reference, so we use a containment link
@@ -82,7 +82,7 @@ private fun createStarlasuMetamodel(): EPackage {
         this.isAbstract = false
         this.eSuperTypes.add(origin)
         addAttribute("sourceText", stringDT, 0, 1)
-        addContainment("position", position, 0, 1)
+        addContainment("range", range, 0, 1)
     }
 
     ePackage.createEClass("Statement").apply {
@@ -117,7 +117,7 @@ private fun createStarlasuMetamodel(): EPackage {
         addAttribute("type", issueType, 1, 1)
         addAttribute("message", stringDT, 1, 1)
         addAttribute("severity", issueSeverity, 0, 1)
-        addContainment("position", position, 0, 1)
+        addContainment("range", range, 0, 1)
     }
 
     val possiblyNamed = ePackage.createEClass("PossiblyNamed").apply {

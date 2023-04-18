@@ -155,7 +155,7 @@ private fun Issue.toXML(document: Document): Element {
     return element
 }
 
-private fun Range.toXML(role: String = "position", document: Document): Element {
+private fun Range.toXML(role: String = "range", document: Document): Element {
     val xmlNode = document.createElement(role)
     xmlNode.setAttribute("description", this.toString())
     xmlNode.addChild(this.start.toXML("start", document))

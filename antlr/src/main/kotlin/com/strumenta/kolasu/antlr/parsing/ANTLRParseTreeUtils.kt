@@ -114,27 +114,27 @@ val Token.range: Range
     get() = Range(startPoint, endPoint)
 
 /**
- * Returns the position of the receiver parser rule context.
+ * Returns the range of the receiver parser rule context.
  */
 val ParserRuleContext.range: Range
     get() = Range(start.startPoint, stop.endPoint)
 
 /**
- * Returns the position of the receiver parser rule context.
- * @param considerPosition if it's false, this method returns null.
+ * Returns the range of the receiver parser rule context.
+ * @param considerRange if it's false, this method returns null.
  */
-fun ParserRuleContext.toRange(considerPosition: Boolean = true, source: Source? = null): Range? {
-    return if (considerPosition && start != null && stop != null) {
-        val position = range
-        if (source == null) position else Range(position.start, position.end, source)
+fun ParserRuleContext.toRange(considerRange: Boolean = true, source: Source? = null): Range? {
+    return if (considerRange && start != null && stop != null) {
+        val range = range
+        if (source == null) range else Range(range.start, range.end, source)
     } else null
 }
 
-fun TerminalNode.toRange(considerPosition: Boolean = true, source: Source? = null): Range? =
-    this.symbol.toRange(considerPosition, source)
+fun TerminalNode.toRange(considerRange: Boolean = true, source: Source? = null): Range? =
+    this.symbol.toRange(considerRange, source)
 
-fun Token.toRange(considerPosition: Boolean = true, source: Source? = null): Range? =
-    if (considerPosition) Range(this.startPoint, this.endPoint, source) else null
+fun Token.toRange(considerRange: Boolean = true, source: Source? = null): Range? =
+    if (considerRange) Range(this.startPoint, this.endPoint, source) else null
 
 fun ParseTree.toRange(considerRange: Boolean = true, source: Source? = null): Range? {
     return when (this) {
