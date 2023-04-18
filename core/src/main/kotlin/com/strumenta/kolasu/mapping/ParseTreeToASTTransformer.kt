@@ -5,7 +5,7 @@ import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.parsing.withParseTreeNode
 import com.strumenta.kolasu.transformation.ASTTransformer
-import com.strumenta.kolasu.transformation.NodeFactory
+import com.strumenta.kolasu.transformation.NodeTransformer
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ParseTree
@@ -41,7 +41,7 @@ open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf(
 
     inline fun <P : ParserRuleContext> registerNodeFactoryUnwrappingChild(
         kclass: KClass<P>
-    ): NodeFactory<P, Node> = registerNodeFactory(kclass) { source, transformer, _ ->
+    ): NodeTransformer<P, Node> = registerNodeFactory(kclass) { source, transformer, _ ->
         val nodeChildren = source.children.filterIsInstance<ParserRuleContext>()
         require(nodeChildren.size == 1) {
             "Node $source (${source.javaClass}) has ${nodeChildren.size} " +

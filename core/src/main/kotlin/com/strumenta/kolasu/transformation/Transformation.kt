@@ -20,8 +20,8 @@ annotation class Mapped(val path: String = "")
 /**
  * Factory that, given a tree node, will instantiate the corresponding transformed node.
  */
-class NodeFactory<Source, Output : Node>(
-    val constructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output?,
+class NodeTransformer<Source, Output : Node>(
+    val constructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> Output?,
     val children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
     var finalizer: (Output) -> Unit = {},
     var skipChildren: Boolean = false
@@ -31,7 +31,7 @@ class NodeFactory<Source, Output : Node>(
         sourceProperty: KProperty1<Source, *>,
         property: KMutableProperty1<*, *>,
         type: KClass<*>? = null
-    ): NodeFactory<Source, Output> = withChild(
+    ): NodeTransformer<Source, Output> = withChild(
         (sourceProperty as KProperty1<Source, Any>)::get,
         (property as KMutableProperty1<Any, Any?>)::set,
         property.name,
@@ -42,14 +42,14 @@ class NodeFactory<Source, Output : Node>(
         path: String,
         property: KMutableProperty1<Target, *>,
         scopedToType: KClass<Target>? = null
-    ): NodeFactory<Source, Output> =
+    ): NodeTransformer<Source, Output> =
         withChild(getter(path), (property as KMutableProperty1<Any, Any?>)::set, property.name, scopedToType)
 
     fun <Target : Any> withChild(
         get: (Source) -> Any?,
         property: KMutableProperty1<in Target, *>,
         scopedToType: KClass<Target>? = null
-    ): NodeFactory<Source, Output> =
+    ): NodeTransformer<Source, Output> =
         withChild(get, (property as KMutableProperty1<Target, Any?>)::set, property.name, scopedToType)
 
     fun <Target : Any, Child : Any> withChild(
@@ -57,13 +57,13 @@ class NodeFactory<Source, Output : Node>(
         set: (Target, Child?) -> Unit,
         name: String,
         type: KClass<*>? = null
-    ): NodeFactory<Source, Output> {
+    ): NodeTransformer<Source, Output> {
         val prefix = if (type != null) type.qualifiedName + "#" else ""
         children[prefix + name] = ChildNodeFactory(prefix + name, get, set)
         return this
     }
 
-    fun withFinalizer(finalizer: (Output) -> Unit): NodeFactory<Source, Output> {
+    fun withFinalizer(finalizer: (Output) -> Unit): NodeTransformer<Source, Output> {
         this.finalizer = finalizer
         return this
     }
@@ -83,7 +83,7 @@ class NodeFactory<Source, Output : Node>(
      * according to the configuration determined by reflection. When it tries to do so, the "source" of the node will
      * be an instance of `XYZContext` that does not have a child named `someProperty`, and the transformation will fail.
      */
-    fun skipChildren(skip: Boolean = true): NodeFactory<Source, Output> {
+    fun skipChildren(skip: Boolean = true): NodeTransformer<Source, Output> {
         this.skipChildren = skip
         return this
     }
@@ -155,7 +155,7 @@ open class ASTTransformer(
     /**
      * Factories that map from source tree node to target tree node.
      */
-    val factories = mutableMapOf<KClass<*>, NodeFactory<*, *>>()
+    val factories = mutableMapOf<KClass<*>, NodeTransformer<*, *>>()
 
     private val _knownClasses = mutableMapOf<String, MutableSet<KClass<*>>>()
     val knownClasses: Map<String, Set<KClass<*>>> = _knownClasses
@@ -202,7 +202,7 @@ open class ASTTransformer(
     }
 
     private fun setChildren(
-        factory: NodeFactory<Any, Node>,
+        factory: NodeTransformer<Any, Node>,
         source: Any,
         node: Node
     ) {
@@ -259,7 +259,7 @@ open class ASTTransformer(
     }
 
     protected open fun <S : Any, T : Node> makeNode(
-        factory: NodeFactory<S, T>,
+        factory: NodeTransformer<S, T>,
         source: S,
         allowGenericNode: Boolean = true
     ): Node? {
@@ -274,10 +274,10 @@ open class ASTTransformer(
         }?.withOrigin(asOrigin(source))
     }
 
-    protected open fun <S : Any, T : Node> getNodeFactory(kClass: KClass<S>): NodeFactory<S, T>? {
+    protected open fun <S : Any, T : Node> getNodeFactory(kClass: KClass<S>): NodeTransformer<S, T>? {
         val factory = factories[kClass]
         if (factory != null) {
-            return factory as NodeFactory<S, T>
+            return factory as NodeTransformer<S, T>
         } else {
             if (kClass == Any::class) {
                 return null
@@ -294,31 +294,31 @@ open class ASTTransformer(
 
     fun <S : Any, T : Node> registerNodeFactory(
         kclass: KClass<S>,
-        factory: (S, ASTTransformer, NodeFactory<S, T>) -> T?
-    ): NodeFactory<S, T> {
-        val nodeFactory = NodeFactory(factory)
-        factories[kclass] = nodeFactory
-        return nodeFactory
+        factory: (S, ASTTransformer, NodeTransformer<S, T>) -> T?
+    ): NodeTransformer<S, T> {
+        val nodeTransformer = NodeTransformer(factory)
+        factories[kclass] = nodeTransformer
+        return nodeTransformer
     }
 
     fun <S : Any, T : Node> registerNodeFactory(
         kclass: KClass<S>,
         factory: (S, ASTTransformer) -> T?
-    ): NodeFactory<S, T> = registerNodeFactory(kclass) { source, transformer, _ -> factory(source, transformer) }
+    ): NodeTransformer<S, T> = registerNodeFactory(kclass) { source, transformer, _ -> factory(source, transformer) }
 
-    fun <S : Any, T : Node> registerNodeFactory(kclass: KClass<S>, factory: (S) -> T?): NodeFactory<S, T> =
+    fun <S : Any, T : Node> registerNodeFactory(kclass: KClass<S>, factory: (S) -> T?): NodeTransformer<S, T> =
         registerNodeFactory(kclass) { input, _, _ -> factory(input) }
 
-    fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeFactory<S, T> {
+    fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeTransformer<S, T> {
         registerKnownClass(target)
-        val nodeFactory = NodeFactory<S, T>({ _, _, _ ->
+        val nodeTransformer = NodeTransformer<S, T>({ _, _, _ ->
             if (target.isSealed) {
                 throw IllegalStateException("Unable to instantiate sealed class $target")
             }
             target.createInstance()
         })
-        factories[source] = nodeFactory
-        return nodeFactory
+        factories[source] = nodeTransformer
+        return nodeTransformer
     }
 
     fun <T : Node> registerIdentityTransformation(nodeClass: KClass<T>) =
