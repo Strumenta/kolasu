@@ -86,10 +86,6 @@ class KolasuMetamodelTest {
     }, {
       "name" : "B"
     } ],
-    "eSuperTypes" : [ {
-      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/Serializable"
-    } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
       "name" : "first",

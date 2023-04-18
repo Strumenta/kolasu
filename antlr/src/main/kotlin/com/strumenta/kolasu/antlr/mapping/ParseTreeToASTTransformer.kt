@@ -1,9 +1,9 @@
-package com.strumenta.kolasu.mapping
+package com.strumenta.kolasu.antlr.mapping
 
+import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
+import com.strumenta.kolasu.antlr.parsing.withParseTreeNode
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Origin
-import com.strumenta.kolasu.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.parsing.withParseTreeNode
 import com.strumenta.kolasu.transformation.ASTTransformer
 import com.strumenta.kolasu.transformation.NodeTransformer
 import com.strumenta.kolasu.validation.Issue

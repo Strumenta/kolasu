@@ -2,8 +2,8 @@ package com.strumenta.kolasu.emf
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.model.*
-import com.strumenta.kolasu.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.EList

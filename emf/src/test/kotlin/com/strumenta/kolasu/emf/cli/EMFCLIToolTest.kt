@@ -2,11 +2,12 @@ package com.strumenta.kolasu.emf.cli
 
 import com.github.ajalt.clikt.core.PrintHelpMessage
 import com.github.ajalt.clikt.output.CliktConsole
+import com.strumenta.kolasu.antlr.parsing.KolasuANTLRToken
+import com.strumenta.kolasu.antlr.parsing.ParsingResultWithFirstStage
 import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.parsing.KolasuANTLRToken
 import com.strumenta.kolasu.parsing.LexingResult
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
@@ -38,15 +39,21 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
         resource.contents.add(mm)
     }
 
-    override fun createANTLRLexer(charStream: CharStream): Lexer {
+    override fun parse(
+        code: String,
+        considerPosition: Boolean,
+        measureLexingTime: Boolean
+    ): ParsingResultWithFirstStage<MyCompilationUnit, ParserRuleContext> {
         TODO("Not yet implemented")
+    }
+
+    val expectedResults = HashMap<File, ParsingResult<MyCompilationUnit>>()
+
+    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<MyCompilationUnit> {
+        return expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
     }
 
     override fun createANTLRParser(tokenStream: TokenStream): Parser {
-        TODO("Not yet implemented")
-    }
-
-    override fun convertToken(terminalNode: TerminalNode): KolasuANTLRToken {
         TODO("Not yet implemented")
     }
 
@@ -58,18 +65,12 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
         TODO("Not yet implemented")
     }
 
-    override fun parse(
-        code: String,
-        considerPosition: Boolean,
-        measureLexingTime: Boolean
-    ): ParsingResult<MyCompilationUnit> {
+    override fun convertToken(terminalNode: TerminalNode): KolasuANTLRToken {
         TODO("Not yet implemented")
     }
 
-    val expectedResults = HashMap<File, ParsingResult<MyCompilationUnit>>()
-
-    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<MyCompilationUnit> {
-        return expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
+    override fun createANTLRLexer(inputStream: CharStream): Lexer {
+        TODO("Not yet implemented")
     }
 
     override fun lex(

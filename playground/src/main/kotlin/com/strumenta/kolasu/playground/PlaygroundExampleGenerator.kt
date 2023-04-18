@@ -3,6 +3,7 @@ package com.strumenta.kolasu.playground
 import com.google.gson.JsonObject
 import com.google.gson.internal.Streams
 import com.google.gson.stream.JsonWriter
+import com.strumenta.kolasu.antlr.parsing.ParsingResultWithFirstStage
 import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.createResource
 import com.strumenta.kolasu.emf.saveAsJsonObject
@@ -56,7 +57,7 @@ class PlaygroundExampleGenerator(
 
 class ExampleGenerationFailure(val result: ParsingResult<*>, message: String) : RuntimeException(message)
 
-fun ParsingResult<*>.saveForPlayground(
+fun ParsingResultWithFirstStage<*, *>.saveForPlayground(
     metamodel: Resource,
     writer: Writer,
     name: String,
@@ -71,7 +72,7 @@ fun ParsingResult<*>.saveForPlayground(
         jsonObject.addProperty("name", name)
         jsonObject.addProperty("code", code)
         jsonObject.add("ast", ast)
-        if (firstStage != null) {
+        if (firstStage.time != null) {
             jsonObject.addProperty("parsingTime", firstStage!!.time)
         }
         if (time != null) {

@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.parsing
+package com.strumenta.kolasu.antlr.parsing
 
 import com.strumenta.kolasu.model.*
 import org.antlr.v4.runtime.*
