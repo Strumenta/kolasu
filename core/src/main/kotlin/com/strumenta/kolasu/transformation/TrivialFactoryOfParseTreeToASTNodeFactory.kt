@@ -44,10 +44,17 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
                 return value.map { convert(it, astTransformer, expectedType.arguments[0].type!!) }
             }
             is ParserRuleContext -> {
-                if (expectedType == String::class.createType()) {
-                    return value.text
+                return when (expectedType) {
+                    String::class.createType() -> {
+                        value.text
+                    }
+                    String::class.createType(nullable = true) -> {
+                        value?.text
+                    }
+                    else -> {
+                        astTransformer.transform(value)
+                    }
                 }
-                return astTransformer.transform(value)
             }
             null -> {
                 return null
