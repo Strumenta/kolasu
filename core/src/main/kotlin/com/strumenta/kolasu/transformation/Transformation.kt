@@ -5,6 +5,7 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
@@ -24,7 +25,8 @@ class NodeFactory<Source, Output : Node>(
     val constructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output?,
     val children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
     var finalizer: (Output) -> Unit = {},
-    var skipChildren: Boolean = false
+    var skipChildren: Boolean = false,
+    var childrenSetAtConstruction: Boolean = false
 ) {
 
     fun withChild(
@@ -178,7 +180,7 @@ open class ASTTransformer(
             if (node == null) {
                 return null
             }
-            if (!factory.skipChildren) {
+            if (!factory.skipChildren && !factory.childrenSetAtConstruction) {
                 setChildren(factory, source, node)
             }
             factory.finalizer(node)
@@ -208,10 +210,7 @@ open class ASTTransformer(
     ) {
         node::class.processProperties { pd ->
             val childKey = node::class.qualifiedName + "#" + pd.name
-            var childNodeFactory = factory.children[childKey]
-            if (childNodeFactory == null) {
-                childNodeFactory = factory.children[pd.name]
-            }
+            var childNodeFactory = factory.getChildNodeFactory(node::class, pd.name)
             if (childNodeFactory != null) {
                 if (childNodeFactory != NO_CHILD_NODE) {
                     setChild(childNodeFactory, source, node, pd)
@@ -311,12 +310,27 @@ open class ASTTransformer(
 
     fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeFactory<S, T> {
         registerKnownClass(target)
-        val nodeFactory = NodeFactory<S, T>({ _, _, _ ->
+        val emptyConstructor = target.constructors.find { it.parameters.isEmpty() }
+        val nodeFactory = NodeFactory<S, T>({ _, _, f ->
             if (target.isSealed) {
                 throw IllegalStateException("Unable to instantiate sealed class $target")
             }
-            target.createInstance()
-        })
+            fun getConstructorParameterValue(kParameter: KParameter) : Any? {
+                var childNodeFactory = f.getChildNodeFactory<T>(target, kParameter.name!!)
+                if (childNodeFactory == null) {
+                    throw java.lang.IllegalStateException("We do not know how to produce parameter ${kParameter.name!!} for $target")
+                } else {
+                    childNodeFactory.
+                    TODO("Unable to use childNodeFactory $childNodeFactory")
+                }
+            }
+            if (emptyConstructor == null) {
+                val constructor = target.preferredConstructor()
+                constructor.call(constructor.parameters.map { getConstructorParameterValue(it) })
+            } else {
+                target.createInstance()
+            }
+        }, childrenSetAtConstruction = emptyConstructor == null)
         factories[source] = nodeFactory
         return nodeFactory
     }
@@ -341,4 +355,13 @@ open class ASTTransformer(
         issues.add(issue)
         return issue
     }
+}
+
+fun <N : Node>NodeFactory<*, *>.getChildNodeFactory(nodeClass: KClass<N>, parameterName: String) : ChildNodeFactory<*, *, *>? {
+    val childKey = nodeClass.qualifiedName + "#" + parameterName
+    var childNodeFactory = this.children[childKey]
+    if (childNodeFactory == null) {
+        childNodeFactory = this.children[parameterName]
+    }
+    return childNodeFactory
 }
