@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.transformation
+package com.strumenta.kolasu.mapping
 
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
@@ -63,7 +63,7 @@ data class SConcat(val left: SExpression, val right: SExpression) : SExpression(
 data class SFeatureAccess(val feature: ReferenceByName<EFeature>, val container: SExpression) : SExpression()
 data class SInstanceById(val entity: ReferenceByName<EEntity>, val index: SExpression) : SExpression()
 
-class ParseTreeToASTTransformerTest {
+class ParseTreeToASTTransformerAnotherTest {
 
     class MyErrorListener : ANTLRErrorListener {
         override fun syntaxError(

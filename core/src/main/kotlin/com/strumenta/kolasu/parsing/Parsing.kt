@@ -1,11 +1,9 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
-import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
@@ -156,4 +154,3 @@ interface KolasuLexer<T : KolasuToken> : Serializable {
      */
     fun lex(file: File): LexingResult<T> = BufferedInputStream(FileInputStream(file)).use { lex(it) }
 }
-

@@ -14,7 +14,7 @@ import java.nio.charset.Charset
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class SimpleLangKolasuParser : KolasuParser<Node, SimpleLangParser, SimpleLangParser.CompilationUnitContext,
+class SimpleLangKolasuParser : KolasuANTLRParser<Node, SimpleLangParser, SimpleLangParser.CompilationUnitContext,
     KolasuANTLRToken>() {
     override fun createANTLRLexer(charStream: CharStream): Lexer {
         return SimpleLangLexer(charStream)

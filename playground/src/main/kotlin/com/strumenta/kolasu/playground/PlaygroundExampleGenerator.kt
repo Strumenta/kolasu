@@ -8,6 +8,7 @@ import com.strumenta.kolasu.emf.createResource
 import com.strumenta.kolasu.emf.saveAsJsonObject
 import com.strumenta.kolasu.emf.toEObject
 import com.strumenta.kolasu.parsing.ParsingResult
+import com.strumenta.kolasu.parsing.ParsingResultWithFirstStage
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
@@ -56,7 +57,7 @@ class PlaygroundExampleGenerator(
 
 class ExampleGenerationFailure(val result: ParsingResult<*>, message: String) : RuntimeException(message)
 
-fun ParsingResult<*>.saveForPlayground(
+fun ParsingResultWithFirstStage<*, *>.saveForPlayground(
     metamodel: Resource,
     writer: Writer,
     name: String,

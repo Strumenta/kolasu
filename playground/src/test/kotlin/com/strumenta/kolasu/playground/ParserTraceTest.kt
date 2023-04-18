@@ -1,7 +1,8 @@
 package com.strumenta.kolasu.playground
 
 import com.strumenta.kolasu.emf.MetamodelsBuilder
-import com.strumenta.kolasu.parsing.ParsingResult
+import com.strumenta.kolasu.parsing.FirstStageParsingResult
+import com.strumenta.kolasu.parsing.ParsingResultWithFirstStage
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
@@ -25,10 +26,11 @@ class ParserTraceTest {
 
     @Test
     fun serializeIssues() {
-        val tt = ParsingResult(
+        val tt = ParsingResultWithFirstStage(
             listOf(Issue(IssueType.TRANSLATION, "some issue", IssueSeverity.WARNING)),
             ANode("a", 1),
-            "a:1"
+            "a:1",
+            firstStage = FirstStageParsingResult(emptyList(), null)
         )
         val writer = StringWriter()
         tt.saveForPlayground(mm.resource!!, writer, "foo.json", "  ")

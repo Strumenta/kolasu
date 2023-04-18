@@ -185,14 +185,18 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
 
     @JvmOverloads
     fun parseFirstStage(file: File, charset: Charset = Charsets.UTF_8, measureLexingTime: Boolean = false):
-            FirstStageParsingResult<C> =
+        FirstStageParsingResult<C> =
         parseFirstStage(FileInputStream(file), charset, measureLexingTime)
 
     protected open fun postProcessAst(ast: R, issues: MutableList<Issue>): R {
         return ast
     }
 
-    override fun parse(code: String, considerPosition: Boolean, measureLexingTime: Boolean): ParsingResult<R> {
+    override fun parse(
+        code: String,
+        considerPosition: Boolean,
+        measureLexingTime: Boolean
+    ): ParsingResultWithFirstStage<R, C> {
         val inputStream = CharStreams.fromString(code)
         return parse(inputStream, considerPosition, measureLexingTime)
     }
@@ -202,7 +206,7 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
         inputStream: CharStream,
         considerPosition: Boolean = true,
         measureLexingTime: Boolean = false
-    ): ParsingResult<R> {
+    ): ParsingResultWithFirstStage<R, C> {
         val start = System.currentTimeMillis()
         val firstStage = parseFirstStage(inputStream, measureLexingTime)
         val myIssues = firstStage.issues.toMutableList()
@@ -216,7 +220,7 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
         val now = System.currentTimeMillis()
         return ParsingResultWithFirstStage(
             myIssues, ast, inputStream.getText(Interval(0, inputStream.index() + 1)),
-            null,  now - start, firstStage
+            null, now - start, firstStage
         )
     }
 
@@ -244,8 +248,6 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
     }
 }
 
-
-
 fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
     this.removeErrorListeners()
     this.addErrorListener(object : BaseErrorListener() {
@@ -268,7 +270,7 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
     })
 }
 
-class ParsingResultWithFirstStage<RootNode : Node, P: ParserRuleContext>(
+class ParsingResultWithFirstStage<RootNode : Node, P : ParserRuleContext>(
     issues: List<Issue>,
     root: RootNode?,
     code: String? = null,
