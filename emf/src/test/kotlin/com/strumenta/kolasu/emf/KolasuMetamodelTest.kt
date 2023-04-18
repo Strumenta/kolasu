@@ -67,12 +67,6 @@ class KolasuMetamodelTest {
   "name" : "java.io",
   "nsURI" : "https://strumenta.com/javaio",
   "nsPrefix" : "javaio",
-  "eClassifiers" : [ {
-    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-    "name" : "Serializable",
-    "abstract" : true,
-    "interface" : true
-  } ]
 }, {
   "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
   "name" : "kotlin",
