@@ -74,8 +74,8 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
                     T::class.primaryConstructor!!
                 } else {
                     throw java.lang.RuntimeException(
-                        "Trivial Factory supports only classes with exactly one constructor or a primary constructor. " +
-                                "Class ${T::class.qualifiedName} has ${constructors.size}"
+                        "Trivial Factory supports only classes with exactly one constructor or a " +
+                            "primary constructor. Class ${T::class.qualifiedName} has ${constructors.size}"
                     )
                 }
             } else {
