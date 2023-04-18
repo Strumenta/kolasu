@@ -1,6 +1,6 @@
 package com.smeup.rpgparser.parsing.ast
 
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 
 // %LOOKUP
 // To be supported:
@@ -12,8 +12,8 @@ import com.strumenta.kolasu.model.Position
 data class LookupExpr(
     var searchedValued: Expression,
     val array: Expression,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition)
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange)
 
 // %SCAN
 
@@ -21,8 +21,8 @@ data class ScanExpr(
     var value: Expression,
     val src: Expression,
     val start: Expression? = null,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition)
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange)
 
 // %XLATE
 
@@ -31,16 +31,16 @@ data class TranslateExpr(
     var to: Expression,
     var string: Expression,
     val startPos: Expression,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition)
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange)
 
 // %TRIM
 
 data class TrimExpr(
     var value: Expression,
     val charactersToTrim: Expression? = null,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition) {
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange) {
     override fun render(): String {
         val toTrim = if (this.charactersToTrim != null) ": ${this.charactersToTrim.render()}" else ""
         return "%TRIM(${this.value.render()} $toTrim)"
@@ -52,8 +52,8 @@ data class TrimExpr(
 data class TrimrExpr(
     var value: Expression,
     val charactersToTrim: Expression? = null,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition) {
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange) {
 
     override fun render(): String {
         val toTrim = if (this.charactersToTrim != null) ": ${this.charactersToTrim.render()}" else ""
@@ -66,8 +66,8 @@ data class TrimrExpr(
 data class TrimlExpr(
     var value: Expression,
     val charactersToTrim: Expression? = null,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition) {
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange) {
 
     override fun render(): String {
         val toTrim = if (this.charactersToTrim != null) ": ${this.charactersToTrim.render()}" else ""
@@ -81,9 +81,9 @@ data class SubstExpr(
     var string: Expression,
     val start: Expression,
     val length: Expression? = null,
-    val specifiedPosition: Position? = null
+    val specifiedRange: Range? = null
 ) :
-    AssignableExpression(specifiedPosition) {
+    AssignableExpression(specifiedRange) {
     override fun render(): String {
         val len = if (length != null) ": ${length.render()}" else ""
         return "%SUBST(${this.string.render()} : ${start.render()} $len)"
@@ -95,8 +95,8 @@ data class SubstExpr(
 
 // %LEN
 
-data class LenExpr(var value: Expression, val specifiedPosition: Position? = null) :
-    Expression(specifiedPosition) {
+data class LenExpr(var value: Expression, val specifiedRange: Range? = null) :
+    Expression(specifiedRange) {
     override fun render(): String {
         return "%LEN(${this.value.render()})"
     }
@@ -107,8 +107,8 @@ data class LenExpr(var value: Expression, val specifiedPosition: Position? = nul
 data class RemExpr(
     val dividend: Expression,
     val divisor: Expression,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition)
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange)
 
 // %DEC
 
@@ -116,8 +116,8 @@ data class DecExpr(
     var value: Expression,
     var intDigits: Expression,
     val decDigits: Expression,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition) {
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange) {
     override fun render(): String {
         return "${this.value.render()}"
     }
@@ -127,9 +127,9 @@ data class DecExpr(
 
 data class IntExpr(
     var value: Expression,
-    val specifiedPosition: Position? = null
+    val specifiedRange: Range? = null
 ) :
-    Expression(specifiedPosition) {
+    Expression(specifiedRange) {
     override fun render(): String {
         return "${this.value.render()}"
     }
@@ -137,8 +137,8 @@ data class IntExpr(
 
 // %SQRT
 
-data class SqrtExpr(var value: Expression, val specifiedPosition: Position? = null) :
-    Expression(specifiedPosition) {
+data class SqrtExpr(var value: Expression, val specifiedRange: Range? = null) :
+    Expression(specifiedRange) {
     override fun render(): String {
         return "${this.value.render()}"
     }
@@ -150,8 +150,8 @@ data class SqrtExpr(var value: Expression, val specifiedPosition: Position? = nu
 data class EditcExpr(
     var value: Expression,
     val format: Expression,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition)
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange)
 
 // %EDITW
 // TODO add other parameters
@@ -159,41 +159,41 @@ data class EditcExpr(
 data class EditwExpr(
     var value: Expression,
     val format: Expression,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition)
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange)
 
 // %FOUND
 
 data class FoundExpr(
     var name: String? = null,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition)
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange)
 
 // %EOF
 
 data class EofExpr(
     var name: String? = null,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition)
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange)
 
 // %EQUAL
 
 data class EqualExpr(
     var name: String? = null,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition)
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange)
 
 // %ABS
 
 data class AbsExpr(
     var value: Expression,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition)
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange)
 
 // %CHAR
 
-data class CharExpr(var value: Expression, val format: String?, val specifiedPosition: Position? = null) :
-    Expression(specifiedPosition) {
+data class CharExpr(var value: Expression, val format: String?, val specifiedRange: Range? = null) :
+    Expression(specifiedRange) {
     override fun render(): String {
         return "%CHAR(${value.render()})"
     }
@@ -201,8 +201,8 @@ data class CharExpr(var value: Expression, val format: String?, val specifiedPos
 
 // %TIMESTAMP
 
-data class TimeStampExpr(val value: Expression?, val specifiedPosition: Position? = null) :
-    Expression(specifiedPosition)
+data class TimeStampExpr(val value: Expression?, val specifiedRange: Range? = null) :
+    Expression(specifiedRange)
 
 // %DIFF
 
@@ -210,9 +210,9 @@ data class DiffExpr(
     var value1: Expression,
     var value2: Expression,
     val durationCode: DurationCode,
-    val specifiedPosition: Position? = null
+    val specifiedRange: Range? = null
 ) :
-    Expression(specifiedPosition)
+    Expression(specifiedRange)
 
 // %REPLACE
 
@@ -221,9 +221,9 @@ data class ReplaceExpr(
     val src: Expression,
     val start: Expression? = null,
     val length: Expression? = null,
-    val specifiedPosition: Position? = null
+    val specifiedRange: Range? = null
 ) :
-    Expression(specifiedPosition)
+    Expression(specifiedRange)
 
 // TODO Move and handle different types of duration
 // TODO document what a duration code is

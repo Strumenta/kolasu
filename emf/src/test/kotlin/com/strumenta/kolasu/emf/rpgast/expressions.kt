@@ -4,11 +4,11 @@ import com.strumenta.kolasu.emf.rpgast.AbstractDataDefinition
 import com.strumenta.kolasu.emf.rpgast.FieldDefinition
 import com.strumenta.kolasu.emf.rpgast.atLine
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
 import java.math.BigDecimal
 
-abstract class Expression(specifiedPosition: Position? = null) : Node(specifiedPosition) {
+abstract class Expression(specifiedRange: Range? = null) : Node(specifiedRange) {
     open fun render(): String = this.javaClass.simpleName
 }
 
@@ -16,7 +16,7 @@ abstract class Expression(specifiedPosition: Position? = null) : Node(specifiedP
 // / Literals
 // /
 
-abstract class NumberLiteral(specifiedPosition: Position? = null) : Expression(specifiedPosition)
+abstract class NumberLiteral(specifiedRange: Range? = null) : Expression(specifiedRange)
 
 data class IntLiteral(val value: Long) : NumberLiteral() {
     override fun render() = value.toString()
@@ -34,19 +34,19 @@ data class StringLiteral(val value: String) : Expression() {
 // / Figurative constants
 // /
 
-abstract class FigurativeConstantRef(specifiedPosition: Position? = null) : Expression(specifiedPosition)
+abstract class FigurativeConstantRef(specifiedRange: Range? = null) : Expression(specifiedRange)
 
-data class BlanksRefExpr(val specifiedPosition: Position? = null) : FigurativeConstantRef(specifiedPosition)
+data class BlanksRefExpr(val specifiedRange: Range? = null) : FigurativeConstantRef(specifiedRange)
 
-data class OnRefExpr(val specifiedPosition: Position? = null) : FigurativeConstantRef(specifiedPosition)
+data class OnRefExpr(val specifiedRange: Range? = null) : FigurativeConstantRef(specifiedRange)
 
-data class OffRefExpr(val specifiedPosition: Position? = null) : FigurativeConstantRef(specifiedPosition)
+data class OffRefExpr(val specifiedRange: Range? = null) : FigurativeConstantRef(specifiedRange)
 
-data class HiValExpr(val specifiedPosition: Position? = null) : FigurativeConstantRef(specifiedPosition)
+data class HiValExpr(val specifiedRange: Range? = null) : FigurativeConstantRef(specifiedRange)
 
-data class LowValExpr(val specifiedPosition: Position? = null) : FigurativeConstantRef(specifiedPosition)
+data class LowValExpr(val specifiedRange: Range? = null) : FigurativeConstantRef(specifiedRange)
 
-data class ZeroExpr(val specifiedPosition: Position? = null) : FigurativeConstantRef(specifiedPosition)
+data class ZeroExpr(val specifiedRange: Range? = null) : FigurativeConstantRef(specifiedRange)
 
 data class AllExpr(val charsToRepeat: StringLiteral) :
     FigurativeConstantRef()
@@ -70,9 +70,9 @@ data class GreaterThanExpr(var left: Expression, var right: Expression) : Expres
 data class GreaterEqualThanExpr(
     var left: Expression,
     var right: Expression,
-    val specifiedPosition: Position? = null
+    val specifiedRange: Range? = null
 ) :
-    Expression(specifiedPosition) {
+    Expression(specifiedRange) {
     override fun render() = "${left.render()} >= ${right.render()}"
 }
 
@@ -83,18 +83,18 @@ data class LessThanExpr(var left: Expression, var right: Expression) : Expressio
 data class LessEqualThanExpr(
     var left: Expression,
     var right: Expression,
-    val specifiedPosition: Position? = null
+    val specifiedRange: Range? = null
 ) :
-    Expression(specifiedPosition) {
+    Expression(specifiedRange) {
     override fun render() = "${left.render()} <= ${right.render()}"
 }
 
 data class DifferentThanExpr(
     var left: Expression,
     var right: Expression,
-    val specifiedPosition: Position? = null
+    val specifiedRange: Range? = null
 ) :
-    Expression(specifiedPosition) {
+    Expression(specifiedRange) {
     override fun render() = "${left.render()} <> ${right.render()}"
 }
 
@@ -107,18 +107,18 @@ data class NotExpr(val base: Expression) : Expression()
 data class LogicalOrExpr(
     var left: Expression,
     var right: Expression,
-    val specifiedPosition: Position? = null
+    val specifiedRange: Range? = null
 ) :
-    Expression(specifiedPosition) {
+    Expression(specifiedRange) {
     override fun render() = "${left.render()} || ${right.render()}"
 }
 
 data class LogicalAndExpr(
     var left: Expression,
     var right: Expression,
-    val specifiedPosition: Position? = null
+    val specifiedRange: Range? = null
 ) :
-    Expression(specifiedPosition) {
+    Expression(specifiedRange) {
     override fun render() = "${left.render()} && ${right.render()}"
 }
 
@@ -150,32 +150,32 @@ data class ExpExpr(var left: Expression, var right: Expression) : Expression() {
 // / Misc
 // /
 
-abstract class AssignableExpression(specifiedPosition: Position? = null) : Expression(specifiedPosition) {
+abstract class AssignableExpression(specifiedRange: Range? = null) : Expression(specifiedRange) {
     abstract fun size(): Int
 }
 
 data class DataRefExpr(
     val variable: ReferenceByName<AbstractDataDefinition>,
-    val specifiedPosition: Position? = null
+    val specifiedRange: Range? = null
 ) :
-    AssignableExpression(specifiedPosition) {
+    AssignableExpression(specifiedRange) {
 
     init {
         require(!variable.name.startsWith("*")) {
-            "This is not a valid variable name: '${variable.name}' - ${specifiedPosition.atLine()}"
+            "This is not a valid variable name: '${variable.name}' - ${specifiedRange.atLine()}"
         }
         require(variable.name.isNotBlank()) {
-            "The variable name should not blank - ${specifiedPosition.atLine()}"
+            "The variable name should not blank - ${specifiedRange.atLine()}"
         }
         require(variable.name.trim() == variable.name) {
             "The variable name should not starts or ends with whitespace: " +
-                "$variable.name - ${specifiedPosition.atLine()}"
+                "$variable.name - ${specifiedRange.atLine()}"
         }
         require(!variable.name.contains(".")) {
-            "The variable name should not contain any dot: <${variable.name}> - ${specifiedPosition.atLine()}"
+            "The variable name should not contain any dot: <${variable.name}> - ${specifiedRange.atLine()}"
         }
         require(!variable.name.contains("(") && !variable.name.contains(")")) {
-            "The variable name should not contain any parenthesis: $variable.name - ${specifiedPosition.atLine()}"
+            "The variable name should not contain any parenthesis: $variable.name - ${specifiedRange.atLine()}"
         }
     }
 
@@ -189,9 +189,9 @@ data class DataRefExpr(
 data class QualifiedAccessExpr(
     val container: Expression,
     val field: ReferenceByName<FieldDefinition>,
-    val specifiedPosition: Position? = null
+    val specifiedRange: Range? = null
 ) :
-    AssignableExpression(specifiedPosition) {
+    AssignableExpression(specifiedRange) {
 
     init {
         require(field.name.isNotBlank()) { "The field name should not blank" }
@@ -210,9 +210,9 @@ data class QualifiedAccessExpr(
 data class ArrayAccessExpr(
     val array: Expression,
     val index: Expression,
-    val specifiedPosition: Position? = null
+    val specifiedRange: Range? = null
 ) :
-    AssignableExpression(specifiedPosition) {
+    AssignableExpression(specifiedRange) {
     override fun render(): String {
         return "${this.array.render()}(${index.render()}))"
     }
@@ -227,8 +227,8 @@ data class ArrayAccessExpr(
 data class FunctionCall(
     val function: ReferenceByName<Function>,
     val args: List<Expression>,
-    val specifiedPosition: Position? = null
-) : Expression(specifiedPosition)
+    val specifiedRange: Range? = null
+) : Expression(specifiedRange)
 
 fun dataRefTo(dataDefinition: AbstractDataDefinition) =
     DataRefExpr(ReferenceByName(dataDefinition.name, dataDefinition))

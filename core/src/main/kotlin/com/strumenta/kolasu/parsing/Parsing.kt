@@ -2,7 +2,7 @@ package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
@@ -58,7 +58,7 @@ data class TokenCategory(val type: String) {
  */
 open class KolasuToken(
     open val category: TokenCategory,
-    open val position: Position,
+    open val range: Range,
     open val text: String
 ) : Serializable
 
@@ -67,7 +67,7 @@ open class KolasuToken(
  * such as type and channel.
  */
 data class KolasuANTLRToken(override val category: TokenCategory, val token: Token) :
-    KolasuToken(category, token.position, token.text)
+    KolasuToken(category, token.range, token.text)
 
 /**
  * The result of lexing (tokenizing) a stream.
@@ -208,7 +208,7 @@ fun Lexer.injectErrorCollectorInLexer(issues: MutableList<Issue>) {
                 Issue(
                     IssueType.LEXICAL,
                     errorMessage ?: "unspecified",
-                    position = Point(line, charPositionInLine).asPosition
+                    range = Point(line, charPositionInLine).asRange
                 )
             )
         }
@@ -230,7 +230,7 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
                 Issue(
                     IssueType.SYNTACTIC,
                     errorMessage ?: "unspecified",
-                    position = Point(line, charPositionInLine).asPosition
+                    range = Point(line, charPositionInLine).asRange
                 )
             )
         }

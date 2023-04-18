@@ -55,7 +55,7 @@ abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
 
             if (last != null && last!!.type != Token.EOF) {
                 val message = "The parser didn't consume the entire input"
-                issues.add(Issue(IssueType.SYNTACTIC, message, position = last!!.endPoint.asPosition))
+                issues.add(Issue(IssueType.SYNTACTIC, message, range = last!!.endPoint.asRange))
             }
         }
 
@@ -161,7 +161,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
             issues.add(
                 Issue(
                     IssueType.SYNTACTIC, "The whole input was not consumed",
-                    position = lastToken!!.endPoint.asPosition
+                    range = lastToken!!.endPoint.asRange
                 )
             )
         }
@@ -170,12 +170,12 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
             {
                 if (it.exception != null) {
                     val message = "Recognition exception: ${it.exception.message}"
-                    issues.add(Issue.syntactic(message, position = it.toPosition()))
+                    issues.add(Issue.syntactic(message, range = it.toPosition()))
                 }
             },
             {
                 val message = "Error node found (token: ${it.symbol?.text})"
-                issues.add(Issue.syntactic(message, position = it.toPosition()))
+                issues.add(Issue.syntactic(message, range = it.toPosition()))
             }
         )
     }

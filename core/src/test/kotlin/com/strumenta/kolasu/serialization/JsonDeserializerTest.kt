@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.serialization
 
 import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
@@ -51,7 +51,7 @@ class JsonDeserializerTest {
             listOf(
                 Issue(
                     IssueType.LEXICAL, "foo",
-                    position = Position(Point(1, 10), Point(4, 540))
+                    range = Range(Point(1, 10), Point(4, 540))
                 )
             ),
             null

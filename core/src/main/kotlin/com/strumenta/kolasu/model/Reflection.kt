@@ -11,7 +11,7 @@ fun <T : Node> T.relevantMemberProperties(withPosition: Boolean = false, withNod
     List<KProperty1<T, *>> {
     val list = this::class.nodeProperties.map { it as KProperty1<T, *> }.toMutableList()
     if (withPosition) {
-        list.add(Node::position as KProperty1<T, *>)
+        list.add(Node::range as KProperty1<T, *>)
     }
     if (withNodeType) {
         list.add(Node::nodeType as KProperty1<T, *>)

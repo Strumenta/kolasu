@@ -2,7 +2,7 @@ package com.strumenta.kolasu.serialization
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.Result
@@ -114,17 +114,17 @@ class XmlGenerationTest {
             Issue.semantic(
                 "semantic problem",
                 severity = IssueSeverity.ERROR,
-                position = Position(Point(10, 1), Point(12, 3))
+                range = Range(Point(10, 1), Point(12, 3))
             ),
             Issue.semantic(
                 "semantic warning",
                 severity = IssueSeverity.WARNING,
-                position = Position(Point(10, 1), Point(12, 3))
+                range = Range(Point(10, 1), Point(12, 3))
             ),
             Issue.semantic(
                 "semantic info",
                 severity = IssueSeverity.INFO,
-                position = Position(Point(10, 1), Point(12, 3))
+                range = Range(Point(10, 1), Point(12, 3))
             )
         )
         val result = Result<Node>(issues, null)

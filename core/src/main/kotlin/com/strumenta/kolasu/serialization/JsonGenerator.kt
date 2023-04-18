@@ -10,7 +10,7 @@ import com.google.gson.JsonPrimitive
 import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.parsing.ParsingResult
@@ -189,7 +189,7 @@ class JsonGenerator {
         JsonElement {
         val jsonObject = jsonObject(
             JSON_TYPE_KEY to if (shortClassNames) node.javaClass.simpleName else node.javaClass.canonicalName,
-            JSON_POSITION_KEY to node.position?.toJson()
+            JSON_POSITION_KEY to node.range?.toJson()
         )
         if (withIds != null) {
             val id = withIds[node]
@@ -257,9 +257,9 @@ private fun Node.toJsonStreaming(writer: JsonWriter, shortClassNames: Boolean = 
     writer.beginObject()
     writer.name(JSON_TYPE_KEY)
     writer.value(if (shortClassNames) this.javaClass.simpleName else this.javaClass.canonicalName)
-    if (this.position != null) {
+    if (this.range != null) {
         writer.name(JSON_POSITION_KEY)
-        this.position!!.toJsonStreaming(writer)
+        this.range!!.toJsonStreaming(writer)
     }
     this.processProperties {
         writer.name(it.name)
@@ -323,7 +323,7 @@ private fun Issue.toJson(): JsonElement {
         "type" to this.type.name,
         "message" to this.message,
         "severity" to this.severity.name,
-        "position" to this.position?.toJson()
+        "position" to this.range?.toJson()
     )
 }
 
@@ -334,15 +334,15 @@ private fun Issue.toJsonStreaming(writer: JsonWriter) {
     writer.name("message")
     writer.value(this.message)
     writer.name("position")
-    if (this.position == null) {
+    if (this.range == null) {
         writer.nullValue()
     } else {
-        this.position.toJsonStreaming(writer)
+        this.range.toJsonStreaming(writer)
     }
     writer.endObject()
 }
 
-private fun Position.toJson(): JsonElement {
+private fun Range.toJson(): JsonElement {
     return jsonObject(
         "description" to this.toString(),
         "start" to this.start.toJson(),
@@ -350,7 +350,7 @@ private fun Position.toJson(): JsonElement {
     )
 }
 
-private fun Position.toJsonStreaming(writer: JsonWriter) {
+private fun Range.toJsonStreaming(writer: JsonWriter) {
     writer.beginObject()
     writer.name("description")
     writer.value(this.toString())

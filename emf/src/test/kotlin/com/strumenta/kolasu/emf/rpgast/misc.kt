@@ -10,13 +10,13 @@ data class ToAstConfiguration(
     val considerPosition: Boolean = true
 )
 
-fun List<Node>.position(): Position? {
-    val start = this.asSequence().map { it.position?.start }.filterNotNull().sorted().toList()
-    val end = this.asSequence().map { it.position?.end }.filterNotNull().sorted().toList()
+fun List<Node>.position(): Range? {
+    val start = this.asSequence().map { it.range?.start }.filterNotNull().sorted().toList()
+    val end = this.asSequence().map { it.range?.end }.filterNotNull().sorted().toList()
     return if (start.isEmpty() || end.isEmpty()) {
         null
     } else {
-        Position(start.first(), end.last())
+        Range(start.first(), end.last())
     }
 }
 

@@ -98,7 +98,7 @@ fun assertASTsAreEqual(
 ) {
     if (expected::class == actual::class) {
         if (considerPosition) {
-            assertEquals(expected.position, actual.position, "$context.position")
+            assertEquals(expected.range, actual.range, "$context.position")
         }
         expected.properties.forEach { expectedProperty ->
             val actualPropValue = actual.properties.find { it.name == expectedProperty.name }!!.value

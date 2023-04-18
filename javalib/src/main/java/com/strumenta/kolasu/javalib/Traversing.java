@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.javalib;
 
 import com.strumenta.kolasu.model.Node;
-import com.strumenta.kolasu.model.Position;
+import com.strumenta.kolasu.model.Range;
 import com.strumenta.kolasu.traversing.ProcessingByPosition;
 import com.strumenta.kolasu.traversing.ProcessingStructurally;
 import kotlin.jvm.internal.Reflection;
@@ -95,10 +95,10 @@ public class Traversing {
      * and returns the result as sequence to consume.
      *
      * @param node     the node from which the walk should start
-     * @param position the position within which the walk should remain
+     * @param range the position within which the walk should remain
      */
-    public static <N> void walkWithin(Node node, Position position, Consumer<Node> consumer) {
-        consumeSequence(ProcessingByPosition.walkWithin(node, position), consumer);
+    public static <N> void walkWithin(Node node, Range range, Consumer<Node> consumer) {
+        consumeSequence(ProcessingByPosition.walkWithin(node, range), consumer);
     }
 
     /**
@@ -106,10 +106,10 @@ public class Traversing {
      * and concatenates all results in a single sequence to consume.
      *
      * @param nodes    the nodes from which the walk should start
-     * @param position the position within which the walk should remain
+     * @param range the position within which the walk should remain
      */
-    public static <N> void walkWithin(List<Node> nodes, Position position, Consumer<Node> consumer) {
-        consumeSequence(ProcessingByPosition.walkWithin(nodes, position), consumer);
+    public static <N> void walkWithin(List<Node> nodes, Range range, Consumer<Node> consumer) {
+        consumeSequence(ProcessingByPosition.walkWithin(nodes, range), consumer);
     }
 
     public static <T> T findAncestorOfType(Node node, Class<T> clazz) {

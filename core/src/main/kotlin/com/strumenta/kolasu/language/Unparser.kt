@@ -10,14 +10,14 @@ class Unparser {
         return if (sourceText != null) {
             var template: String = sourceText
             root.walkChildren()
-                .filter { it.position != null }
-                .sortedByDescending { it.position }
+                .filter { it.range != null }
+                .sortedByDescending { it.range }
                 .forEach {
                     val replacement = unparse(it)
                     if (replacement != null) {
                         template = template.replaceRange(
-                            it.position!!.start.offset(template),
-                            it.position!!.end.offset(template),
+                            it.range!!.start.offset(template),
+                            it.range!!.end.offset(template),
                             replacement
                         )
                     }
