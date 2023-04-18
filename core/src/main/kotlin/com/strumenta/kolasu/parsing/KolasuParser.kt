@@ -16,7 +16,40 @@ import java.util.*
 import kotlin.reflect.full.memberFunctions
 import kotlin.system.measureTimeMillis
 
-abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
+interface TokenFactory<T : KolasuToken> {
+    fun categoryOf(t: Token): TokenCategory = TokenCategory.PLAIN_TEXT
+
+    fun convertToken(t: Token): T
+
+    private fun convertToken(terminalNode: TerminalNode): T = convertToken(terminalNode.symbol)
+
+    fun extractTokens(result: ParsingResult<*>): LexingResult<T>? {
+        val antlrTerminals = mutableListOf<TerminalNode>()
+        fun extractTokensFromParseTree(pt: ParseTree?) {
+            if (pt is TerminalNode) {
+                antlrTerminals.add(pt)
+            } else if (pt != null) {
+                for (i in 0..pt.childCount) {
+                    extractTokensFromParseTree(pt.getChild(i))
+                }
+            }
+        }
+
+        val ptRoot = result.firstStage?.root
+        return if (ptRoot != null) {
+            extractTokensFromParseTree(ptRoot)
+            antlrTerminals.sortBy { it.symbol.tokenIndex }
+            val tokens = antlrTerminals.map { convertToken(it) }.toMutableList()
+            LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime)
+        } else null
+    }
+}
+
+class DefaultTokenFactory : TokenFactory<KolasuANTLRToken> {
+    override fun convertToken(t: Token): KolasuANTLRToken = KolasuANTLRToken(categoryOf(t), t)
+}
+
+abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<T>) : KolasuLexer<T> {
     /**
      * Creates the lexer.
      */
@@ -34,9 +67,9 @@ abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
         inputStream: InputStream,
         charset: Charset,
         onlyFromDefaultChannel: Boolean
-    ): LexingResult<KolasuANTLRToken> {
-        val issues = LinkedList<Issue>()
-        val tokens = LinkedList<KolasuANTLRToken>()
+    ): LexingResult<T> {
+        val issues = mutableListOf<Issue>()
+        val tokens = mutableListOf<T>()
         var last: Token? = null
         val time = measureTimeMillis {
             val lexer = createANTLRLexer(inputStream, charset)
@@ -47,7 +80,7 @@ abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
                     break
                 } else {
                     if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
-                        tokens.add(KolasuANTLRToken(categoryOf(t), t))
+                        tokens.add(tokenFactory.convertToken(t))
                         last = t
                     }
                 }
@@ -62,8 +95,6 @@ abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
         return LexingResult(issues, tokens, null, time)
     }
 
-    protected open fun categoryOf(t: Token): TokenCategory = TokenCategory.PLAIN_TEXT
-
     protected open fun attachListeners(lexer: Lexer, issues: MutableList<Issue>) {
         lexer.injectErrorCollectorInLexer(issues)
     }
@@ -74,8 +105,8 @@ abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
  *
  * You should extend this class to implement the parts that are specific to your language.
  */
-abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken> :
-    KolasuLexer<T>,
+abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken>(tokenFactory: TokenFactory<T>) :
+    KolasuANTLRLexer<T>(tokenFactory),
     ASTParser<R> {
 
     /**
@@ -104,41 +135,12 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         issues: MutableList<Issue>
     ): R?
 
-    protected abstract fun convertToken(terminalNode: TerminalNode): T
-
-    open fun extractTokens(result: ParsingResult<R>): LexingResult<T>? {
-        val antlrTerminals = mutableListOf<TerminalNode>()
-        fun extractTokensFromParseTree(pt: ParseTree?) {
-            if (pt is TerminalNode) {
-                antlrTerminals.add(pt)
-            } else if (pt != null) {
-                for (i in 0..pt.childCount) {
-                    extractTokensFromParseTree(pt.getChild(i))
-                }
-            }
-        }
-
-        val ptRoot = result.firstStage?.root
-        return if (ptRoot != null) {
-            extractTokensFromParseTree(ptRoot)
-            antlrTerminals.sortBy { it.symbol.tokenIndex }
-            val tokens = antlrTerminals.map { convertToken(it) }.toMutableList()
-            LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime)
-        } else null
-    }
-
     protected open fun attachListeners(parser: P, issues: MutableList<Issue>) {
         parser.injectErrorCollectorInParser(issues)
     }
 
-    protected open fun attachListeners(lexer: Lexer, issues: MutableList<Issue>) {
-        lexer.injectErrorCollectorInLexer(issues)
-    }
-
-    protected abstract fun createANTLRLexer(inputStream: CharStream): Lexer
-
     /**
-     * Creates the first-stage lexer and parser.
+     * Creates the first-stage parser.
      */
     protected open fun createParser(inputStream: CharStream, issues: MutableList<Issue>): P {
         val lexer = createANTLRLexer(inputStream)
