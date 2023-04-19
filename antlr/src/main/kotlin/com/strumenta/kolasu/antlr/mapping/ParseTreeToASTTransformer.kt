@@ -39,7 +39,7 @@ open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf(
         return if (source is ParseTree) ParseTreeOrigin(source) else null
     }
 
-    inline fun <P : ParserRuleContext> registerNodeTransformerUnwrappingChild(
+    fun <P : ParserRuleContext> registerNodeTransformerUnwrappingChild(
         kclass: KClass<P>
     ): NodeTransformer<P, Node> = registerNodeTransformer(kclass) { source, transformer, _ ->
         val nodeChildren = source.children.filterIsInstance<ParserRuleContext>()

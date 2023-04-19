@@ -40,9 +40,9 @@ import kotlin.system.measureTimeMillis
  *
  * You should extend this class to implement the parts that are specific to your language.
  */
-abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken> :
-    KolasuLexer<T>,
-    ASTParser<R> {
+abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken>(
+    tokenFactory: TokenFactory<T>
+) : KolasuANTLRLexer<T>(tokenFactory), ASTParser<R> {
 
     /**
      * Creates the first-stage parser.
@@ -70,41 +70,12 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
         issues: MutableList<Issue>
     ): R?
 
-    protected abstract fun convertToken(terminalNode: TerminalNode): T
-
-    open fun extractTokens(result: ParsingResultWithFirstStage<R, C>): LexingResult<T>? {
-        val antlrTerminals = mutableListOf<TerminalNode>()
-        fun extractTokensFromParseTree(pt: ParseTree?) {
-            if (pt is TerminalNode) {
-                antlrTerminals.add(pt)
-            } else if (pt != null) {
-                for (i in 0..pt.childCount) {
-                    extractTokensFromParseTree(pt.getChild(i))
-                }
-            }
-        }
-
-        val ptRoot = result.firstStage?.root
-        return if (ptRoot != null) {
-            extractTokensFromParseTree(ptRoot)
-            antlrTerminals.sortBy { it.symbol.tokenIndex }
-            val tokens = antlrTerminals.map { convertToken(it) }.toMutableList()
-            LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime)
-        } else null
-    }
-
     protected open fun attachListeners(parser: P, issues: MutableList<Issue>) {
         parser.injectErrorCollectorInParser(issues)
     }
 
-    protected open fun attachListeners(lexer: Lexer, issues: MutableList<Issue>) {
-        lexer.injectErrorCollectorInLexer(issues)
-    }
-
-    protected abstract fun createANTLRLexer(inputStream: CharStream): Lexer
-
     /**
-     * Creates the first-stage lexer and parser.
+     * Creates the first-stage parser.
      */
     protected open fun createParser(inputStream: CharStream, issues: MutableList<Issue>): P {
         val lexer = createANTLRLexer(inputStream)
