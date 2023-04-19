@@ -27,6 +27,9 @@ class NodeFactory<Source, Output : Node>(
 ) {
 
     /**
+     * Specify how to convert a child. The value obtained from the conversion could either be used
+     * as a constructor parameter when instantiating the parent, or be used to set the value after
+     * the parent has been instantiated.
      *
      * Example using the scopedToType parameter:
      * ```
@@ -41,11 +44,14 @@ class NodeFactory<Source, Output : Node>(
      *         .withChild(SASParser.DatasetOptionContext::variableList, InDatasetOption::variables, InDatasetOption::class)
      *         .withChild("indexDatasetOption.variables", IndexDatasetOption::variables, IndexDatasetOption::class)
      *  ```
+     *
+     *  Please note that we cannot merge this method with the variant without the type (making the type optional),
+     *  as it would not permit to specify the lambda outside the list of method parameters.
      */
     fun withChild(
         targetProperty: KMutableProperty1<*, *>,
         sourceAccessor: Source.() -> Any?,
-        scopedToType: KClass<*>? = null
+        scopedToType: KClass<*>
     ): NodeFactory<Source, Output> = withChild(
         get = { source -> source.sourceAccessor() },
         set = (targetProperty as KMutableProperty1<Any, Any?>)::set,
@@ -53,6 +59,26 @@ class NodeFactory<Source, Output : Node>(
         scopedToType
     )
 
+    /**
+      * Specify how to convert a child. The value obtained from the conversion could either be used
+      * as a constructor parameter when instantiating the parent, or be used to set the value after
+      * the parent has been instantiated.
+      */
+    fun withChild(
+        targetProperty: KMutableProperty1<*, *>,
+        sourceAccessor: Source.() -> Any?,
+    ): NodeFactory<Source, Output> = withChild(
+        get = { source -> source.sourceAccessor() },
+        set = (targetProperty as KMutableProperty1<Any, Any?>)::set,
+        targetProperty.name,
+        null
+    )
+
+    /**
+     * Specify how to convert a child. The value obtained from the conversion can only be used
+     * as a constructor parameter when instantiating the parent. It cannot be used to set the value after
+     * the parent has been instantiated, because the property is not mutable.
+     */
     fun withChild(
         targetProperty: KProperty1<*, *>,
         sourceAccessor: Source.() -> Any?,
@@ -64,6 +90,11 @@ class NodeFactory<Source, Output : Node>(
         scopedToType
     )
 
+    /**
+     * Specify how to convert a child. The value obtained from the conversion could either be used
+     * as a constructor parameter when instantiating the parent, or be used to set the value after
+     * the parent has been instantiated.
+     */
     fun <Target : Any, Child : Any> withChild(
         get: (Source) -> Any?,
         set: ((Target, Child?) -> Unit)?,
@@ -134,6 +165,9 @@ class NodeFactory<Source, Output : Node>(
 
 /**
  * Information on how to retrieve a child node.
+ *
+ * The setter could be null, if the property is not mutable. In that case the value
+ * must necessarily be passed when constructing the parent.
  */
 data class ChildNodeFactory<Source, Target, Child>(
     val name: String,
@@ -354,8 +388,7 @@ open class ASTTransformer(
                                 "parameter ${kParameter.name!!} for $target"
                         )
                     } else {
-                        val childSource = childNodeFactory.get.invoke(source)
-                        return when (childSource) {
+                        return when (val childSource = childNodeFactory.get.invoke(source)) {
                             null -> {
                                 AbsentParameterValue
                             }
@@ -429,7 +462,7 @@ open class ASTTransformer(
     }
 }
 
-fun <Source : Any, Target, Child> NodeFactory<*, *>.getChildNodeFactory(
+private fun <Source : Any, Target, Child> NodeFactory<*, *>.getChildNodeFactory(
     nodeClass: KClass<out Source>,
     parameterName: String
 ): ChildNodeFactory<Source, Target, Child>? {

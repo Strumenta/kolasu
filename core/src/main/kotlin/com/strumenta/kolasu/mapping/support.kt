@@ -63,6 +63,10 @@ fun <T> ParseTreeToASTTransformer.translateOnlyChild(parent: ParserRuleContext):
     return translateCasted(parent.onlyChild)
 }
 
+/**
+ * It returns the only child (of type ParseRuleContext). If there is no children or more than
+ * one child, an exception is thrown.
+ */
 val ParserRuleContext.onlyChild: ParserRuleContext
     get() {
         val nodeChildren = children.filterIsInstance<ParserRuleContext>()
