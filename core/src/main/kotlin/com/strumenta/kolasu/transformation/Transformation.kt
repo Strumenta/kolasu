@@ -60,10 +60,10 @@ class NodeFactory<Source, Output : Node>(
     )
 
     /**
-      * Specify how to convert a child. The value obtained from the conversion could either be used
-      * as a constructor parameter when instantiating the parent, or be used to set the value after
-      * the parent has been instantiated.
-      */
+     * Specify how to convert a child. The value obtained from the conversion could either be used
+     * as a constructor parameter when instantiating the parent, or be used to set the value after
+     * the parent has been instantiated.
+     */
     fun withChild(
         targetProperty: KMutableProperty1<*, *>,
         sourceAccessor: Source.() -> Any?,
