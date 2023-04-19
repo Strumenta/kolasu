@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.symbolresolution
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.nodeProperties
@@ -11,7 +11,7 @@ import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.test.assertTrue
 
-fun Node.assertAllReferencesResolved() {
+fun ASTNode.assertAllReferencesResolved() {
     this.walk().forEach {
         it.nodeProperties
             .filter { property ->

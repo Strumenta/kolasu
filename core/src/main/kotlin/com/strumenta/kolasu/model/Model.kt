@@ -163,7 +163,7 @@ open class ASTNode() : Node, Origin, Destination, Serializable {
         if (!this.concept.allProperties().contains(property)) {
             throw IllegalArgumentException("Invalid property $property")
         }
-        val memberProperty = this::class.memberProperties.find { it.name == property.simpleName }
+        val memberProperty = this::class.memberProperties.find { it.name == property.name }
             ?: throw IllegalStateException()
         return (memberProperty as KProperty1<ASTNode, *>).get(this)
     }
@@ -180,11 +180,11 @@ open class ASTNode() : Node, Origin, Destination, Serializable {
         if (!this.concept.allContainments().contains(containment)) {
             throw IllegalArgumentException("Invalid containment $containment")
         }
-        val memberProperty = this::class.memberProperties.find { it.name == containment.simpleName }
+        val memberProperty = this::class.memberProperties.find { it.name == containment.name }
             ?: throw IllegalStateException()
         try {
             val value = if (memberProperty.visibility == KVisibility.PRIVATE) {
-                val getter = this::class.functions.find { it.name == "get${containment.simpleName!!.capitalize()}" }!!
+                val getter = this::class.functions.find { it.name == "get${containment.name!!.capitalize()}" }!!
                 getter.call(this) as MutableList<ASTNode>
             } else {
                 (memberProperty as KProperty1<ASTNode, *>).get(this)
@@ -223,11 +223,11 @@ open class ASTNode() : Node, Origin, Destination, Serializable {
         if (!this.concept.allReferences().contains(reference)) {
             throw IllegalArgumentException("Invalid reference $reference")
         }
-        val memberProperty = this::class.memberProperties.find { it.name == reference.simpleName }
+        val memberProperty = this::class.memberProperties.find { it.name == reference.name }
             ?: throw IllegalStateException()
         try {
             val value = if (memberProperty.visibility == KVisibility.PRIVATE) {
-                val getter = this::class.functions.find { it.name == "get${reference.simpleName!!.capitalize()}" }!!
+                val getter = this::class.functions.find { it.name == "get${reference.name!!.capitalize()}" }!!
                 getter.call(this) as MutableList<ASTNode>
             } else {
                 (memberProperty as KProperty1<ASTNode, *>).get(this)
@@ -268,7 +268,7 @@ open class ASTNode() : Node, Origin, Destination, Serializable {
         return if (node.parent == null) {
             ""
         } else {
-            "${pathID(node.parent!!)}-${node.containmentFeature!!.simpleName}${node.indexInContainingProperty()}"
+            "${pathID(node.parent!!)}-${node.containmentFeature!!.name}${node.indexInContainingProperty()}"
         }
     }
 

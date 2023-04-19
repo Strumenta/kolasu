@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.symbolresolution
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.traversing.walkChildren
 import com.strumenta.kolasu.validation.Issue
@@ -12,33 +12,33 @@ data class DeclarativeSymbolResolver(val issues: MutableList<Issue> = mutableLis
     val classScopeDefinitions: ClassScopeDefinitions = mutableMapOf()
     val propertyScopeDefinitions: PropertyScopeDefinitions = mutableMapOf()
 
-    override fun resolveSymbols(root: Node): List<Issue> {
+    override fun resolveSymbols(root: ASTNode): List<Issue> {
         this.resolveNode(node = root, children = true)
         return this.issues
     }
 
-    fun resolveNode(node: Node, children: Boolean = false) {
+    fun resolveNode(node: ASTNode, children: Boolean = false) {
         node.referenceByNameProperties().forEach { resolveProperty(it, node) }
         if (children) { node.walkChildren().forEach { resolveNode(it, true) } }
     }
 
     @Suppress("unchecked_cast")
-    fun resolveProperty(property: ReferenceByNameProperty, context: Node) {
+    fun resolveProperty(property: ReferenceByNameProperty, context: ASTNode) {
         (context.properties.find { it.name == property.name }!!.value as ReferenceByName<Symbol>?)
             ?.apply { this.referred = getScope(property, context)?.resolve(this.name, property.getReferredType()) }
     }
 
-    fun getScope(property: ReferenceByNameProperty, context: Node): Scope? =
+    fun getScope(property: ReferenceByNameProperty, context: ASTNode): Scope? =
         this.tryGetScopeForProperty(property, context) ?: this.tryGetScopeForPropertyType(property, context)
 
-    private tailrec fun tryGetScopeForProperty(reference: ReferenceByNameProperty, context: Node): Scope? {
+    private tailrec fun tryGetScopeForProperty(reference: ReferenceByNameProperty, context: ASTNode): Scope? {
         return this.tryGetScope(this.propertyScopeDefinitions[reference], context)
             ?: if (context.parent == null) { null } else {
                 return tryGetScopeForProperty(reference, context.parent!!)
             }
     }
 
-    private tailrec fun tryGetScopeForPropertyType(reference: ReferenceByNameProperty, context: Node): Scope? {
+    private tailrec fun tryGetScopeForPropertyType(reference: ReferenceByNameProperty, context: ASTNode): Scope? {
         val referenceType = reference.returnType.arguments[0].type!!.classifier!!
         return tryGetScope(classScopeDefinitions[referenceType], context)
             ?: if (context.parent == null) { null } else {
@@ -46,7 +46,7 @@ data class DeclarativeSymbolResolver(val issues: MutableList<Issue> = mutableLis
             }
     }
 
-    private fun tryGetScope(scopeDefinitions: List<ScopeDefinition>?, context: Node): Scope? {
+    private fun tryGetScope(scopeDefinitions: List<ScopeDefinition>?, context: ASTNode): Scope? {
         return scopeDefinitions
             ?.filter { scopeDefinition -> scopeDefinition.contextType.isSuperclassOf(context::class) }
             ?.sortedWith { left, right ->
@@ -58,7 +58,7 @@ data class DeclarativeSymbolResolver(val issues: MutableList<Issue> = mutableLis
             }?.firstOrNull()?.scopeFunction?.invoke(context)
     }
 
-    inline fun <reified ContextType : Node> scopeFor(
+    inline fun <reified ContextType : ASTNode> scopeFor(
         nodeType: KClass<*>,
         crossinline scopeFunction: (ContextType) -> Scope?,
     ) {
@@ -66,14 +66,14 @@ data class DeclarativeSymbolResolver(val issues: MutableList<Issue> = mutableLis
             .add(
                 ScopeDefinition(
                     contextType = ContextType::class,
-                    scopeFunction = { context: Node ->
+                    scopeFunction = { context: ASTNode ->
                         if (context is ContextType) scopeFunction(context) else null
                     },
                 ),
             )
     }
 
-    inline fun <reified ContextType : Node> scopeFor(
+    inline fun <reified ContextType : ASTNode> scopeFor(
         reference: ReferenceByNameProperty,
         crossinline scopeDefinition: (ContextType) -> Scope?,
     ) {
@@ -81,7 +81,7 @@ data class DeclarativeSymbolResolver(val issues: MutableList<Issue> = mutableLis
             .add(
                 ScopeDefinition(
                     contextType = ContextType::class,
-                    scopeFunction = { context: Node ->
+                    scopeFunction = { context: ASTNode ->
                         if (context is ContextType) scopeDefinition(context) else null
                     },
                 ),

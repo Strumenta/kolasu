@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.symbolresolution
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.nodeProperties
 import com.strumenta.kolasu.utils.memoize
@@ -26,8 +26,8 @@ data class Scope(var parent: Scope? = null, var symbolTable: SymbolTable = mutab
     }
 }
 
-class ScopeDefinition(val contextType: KClass<out Node>, scopeFunction: (Node) -> Scope?) {
-    val scopeFunction: (Node) -> Scope? = scopeFunction.memoize()
+class ScopeDefinition(val contextType: KClass<out ASTNode>, scopeFunction: (ASTNode) -> Scope?) {
+    val scopeFunction: (ASTNode) -> Scope? = scopeFunction.memoize()
 }
 
 typealias ClassScopeDefinitions = MutableMap<KClass<*>, MutableList<ScopeDefinition>>
@@ -35,7 +35,7 @@ typealias PropertyScopeDefinitions = MutableMap<ReferenceByNameProperty, Mutable
 
 // ReferenceByNameProperty
 
-typealias ReferenceByNameProperty = KProperty1<out Node, ReferenceByName<out Symbol>?>
+typealias ReferenceByNameProperty = KProperty1<out ASTNode, ReferenceByName<out Symbol>?>
 
 @Suppress("unchecked_cast")
 fun ReferenceByNameProperty.getReferredType(): KClass<out Symbol> {
@@ -43,7 +43,7 @@ fun ReferenceByNameProperty.getReferredType(): KClass<out Symbol> {
 }
 
 @Suppress("unchecked_cast")
-fun Node.referenceByNameProperties(): Collection<ReferenceByNameProperty> {
+fun ASTNode.referenceByNameProperties(): Collection<ReferenceByNameProperty> {
     return this.nodeProperties
         .filter {
             it.returnType
