@@ -356,6 +356,9 @@ open class ASTTransformer(
             if (target.isSealed) {
                 throw IllegalStateException("Unable to instantiate sealed class $target")
             }
+            fun hasConstructorParameterValue(kParameter: KParameter): Boolean {
+                return f.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!) != null || !kParameter.isOptional
+            }
             fun getConstructorParameterValue(kParameter: KParameter): Any? {
                 try {
                     val childNodeFactory = f.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!)
@@ -366,10 +369,18 @@ open class ASTTransformer(
                         )
                     } else {
                         val childSource = childNodeFactory.get.invoke(source)
-                        return if (childSource is List<*>) {
-                            childSource.map { transform(it) }.toMutableList()
-                        } else {
-                            transform(childSource)
+                        return when (childSource) {
+                            is List<*> -> {
+                                childSource.map { transform(it) }.toMutableList()
+                            }
+
+                            is String -> {
+                                childSource
+                            }
+
+                            else -> {
+                                transform(childSource)
+                            }
                         }
                     }
                 } catch (t: Throwable) {
@@ -378,7 +389,7 @@ open class ASTTransformer(
             }
             if (emptyConstructor == null) {
                 val constructor = target.preferredConstructor()
-                val constructorParamValues = constructor.parameters.associateWith { getConstructorParameterValue(it) }
+                val constructorParamValues = constructor.parameters.filter { hasConstructorParameterValue(it) }.associateWith { getConstructorParameterValue(it) }
                 constructor.callBy(constructorParamValues)
             } else {
                 target.createInstance()
