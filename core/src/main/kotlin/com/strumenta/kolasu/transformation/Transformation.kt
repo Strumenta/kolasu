@@ -3,15 +3,13 @@ package com.strumenta.kolasu.transformation
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
+import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.createInstance
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.memberFunctions
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.full.superclasses
+import kotlin.reflect.full.*
 
 /**
  * A child of an AST node that is automatically populated from a source tree.
@@ -64,6 +62,44 @@ class NodeFactory<Source, Output : Node>(
         type
     )
 
+    /**
+     * ```
+     *     on.registerNodeFactory(SASParser.DatasetOptionContext::class) { ctx ->
+     *         when {
+     *             ctx.DROP() != null -> DropDatasetOption()
+     *             ctx.EXTENDOBSCOUNTER() != null -> ExtendObsCounterDatasetOption(ctx.YES() != null)
+     *             ctx.gennum() != null -> GenNumDatasetOption(translateGennum(ctx.gennum()))
+     *             ctx.LABEL() != null -> LabelDatasetOption(ctx.stringLiteral().asString())
+     *             ctx.KEEP_VARS() != null -> KeepDatasetOption()
+     *             ctx.indexDatasetOption() != null ->
+     *                 IndexDatasetOption(ctx.indexDatasetOption().name?.text)
+     *             ctx.IN_VARS() != null -> InDatasetOption()
+     *             ctx.RENAME_VARS() != null -> RenameDatasetOption(ctx.datasetRename().map {
+     *                 Rename(it.identifier(0).text, it.identifier(1).text).withParseTreeNode(it)
+     *             })
+     *             ctx.WHERE() != null -> WhereDatasetOption()
+     *             ctx.macroStatementStrict() != null -> ComputedDatasetOption()
+     *             ctx.macroFunctionCall() != null -> {
+     *                 val option = ComputedDatasetOption()
+     *                 option.computedWith = ExpressionStatement(on.transform(ctx.macroFunctionCall(), option) as Expression)
+     *                 option
+     *             }
+     *             ctx.MACRO_VARIABLE() != null -> {
+     *                 val option = ComputedDatasetOption()
+     *                 option.computedWith = ExpressionStatement(VariableExpression(ctx.MACRO_VARIABLE().text.substring(1)))
+     *                 option
+     *             }
+     *             //TODO refine macroLiteral
+     *             else -> GenericDatasetOption(ctx.name.text, ctx.macroLiteral()?.text ?: ctx.identifier(1)?.text)
+     *         }
+     *     }
+     *         .withChild(SASParser.DatasetOptionContext::macroStatementStrict, ComputedDatasetOption::computedWith, ComputedDatasetOption::class)
+     *         .withChild(SASParser.DatasetOptionContext::variableList, DropDatasetOption::variables, DropDatasetOption::class)
+     *         .withChild(SASParser.DatasetOptionContext::variableList, KeepDatasetOption::variables, KeepDatasetOption::class)
+     *         .withChild(SASParser.DatasetOptionContext::variableList, InDatasetOption::variables, InDatasetOption::class)
+     *         .withChild("indexDatasetOption.variables", IndexDatasetOption::variables, IndexDatasetOption::class)
+     *  ```
+     */
     fun <Target : Any> withChild(
         path: String,
         property: KMutableProperty1<Target, *>,
@@ -379,7 +415,11 @@ open class ASTTransformer(
                             }
 
                             else -> {
-                                transform(childSource)
+                                if (kParameter.type == String::class.createType() && childSource is ParseTree) {
+                                    childSource.text
+                                } else {
+                                    transform(childSource)
+                                }
                             }
                         }
                     }
