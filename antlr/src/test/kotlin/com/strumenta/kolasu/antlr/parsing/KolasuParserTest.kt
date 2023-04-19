@@ -6,7 +6,6 @@ import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.Lexer
-import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.TokenStream
 import org.junit.Test
 import kotlin.test.assertEquals

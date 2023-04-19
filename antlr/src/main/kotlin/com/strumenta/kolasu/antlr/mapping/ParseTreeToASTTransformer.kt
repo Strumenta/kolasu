@@ -1,14 +1,11 @@
 package com.strumenta.kolasu.antlr.mapping
 
-import com.strumenta.kolasu.model.ASTNode
-import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.antlr.parsing.withParseTreeNode
-import com.strumenta.kolasu.model.Origin
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.transformation.ASTTransformer
 import com.strumenta.kolasu.transformation.NodeTransformer
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.runtime.ParserRuleContext
-import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.reflect.KClass
 
 /**

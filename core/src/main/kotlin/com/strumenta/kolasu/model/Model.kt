@@ -11,9 +11,9 @@ import org.lionweb.lioncore.java.model.AnnotationInstance
 import org.lionweb.lioncore.java.model.Model
 import org.lionweb.lioncore.java.model.Node
 import org.lionweb.lioncore.java.model.ReferenceValue
+import java.io.Serializable
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
-import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
@@ -385,7 +385,7 @@ fun assignSourceToTree(root: ASTNode, source: Source, sourceText: String) {
                 }
             }
             it.origin = SimpleOrigin(position = it.position, sourceText)
-        }/* TODO  else if (it.origin is ParseTreeOrigin) {
+        } /* TODO  else if (it.origin is ParseTreeOrigin) {
             val pto = it.origin as ParseTreeOrigin
             if (pto.source == null) {
                 pto.source = source

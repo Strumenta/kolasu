@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.transformation
 
-import antlr.collections.AST
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
@@ -309,7 +308,10 @@ open class ASTTransformer(
         transformer(source, transformer)
     }
 
-    fun <S : Any, T : ASTNode> registerNodeTransformer(kclass: KClass<S>, transformer: (S) -> T?): NodeTransformer<S, T> =
+    fun <S : Any, T : ASTNode> registerNodeTransformer(
+        kclass: KClass<S>,
+        transformer: (S) -> T?
+    ): NodeTransformer<S, T> =
         registerNodeTransformer(kclass) { input, _, _ -> transformer(input) }
 
     fun <S : Any, T : ASTNode> registerNodeTransformer(source: KClass<S>, target: KClass<T>): NodeTransformer<S, T> {

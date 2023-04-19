@@ -27,7 +27,6 @@ import java.util.LinkedList
 import kotlin.reflect.full.memberFunctions
 import kotlin.system.measureTimeMillis
 
-
 /**
  * A complete description of a multi-stage ANTLR-based parser, from source code to AST.
  *

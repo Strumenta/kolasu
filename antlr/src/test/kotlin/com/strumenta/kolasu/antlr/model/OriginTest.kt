@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.antlr.model
 
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.pos

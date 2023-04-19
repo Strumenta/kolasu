@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.antlr.parsing.KolasuANTLRParser
 import com.strumenta.kolasu.antlr.parsing.TokenFactory
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
@@ -78,7 +78,9 @@ fun ParsingResult<*>.saveModel(
  * its EMF representation.
  */
 @Deprecated("Deprecating everything EMF related")
-abstract class EcoreEnabledParser<R : ASTNode, P : Parser, C : ParserRuleContext, T : KolasuToken>(tokenFactory: TokenFactory<T>) :
+abstract class EcoreEnabledParser<R : ASTNode, P : Parser, C : ParserRuleContext, T : KolasuToken>(
+    tokenFactory: TokenFactory<T>
+) :
     KolasuANTLRParser<R, P, C, T>(tokenFactory), EMFMetamodelSupport {
 
     /**

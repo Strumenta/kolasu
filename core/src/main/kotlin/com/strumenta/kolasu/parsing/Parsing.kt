@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.ASTNode
-import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
@@ -86,7 +85,6 @@ class LexingResult<T : KolasuToken>(
         return result
     }
 }
-
 
 open class ParsingResult<RootNode : ASTNode>(
     issues: List<Issue>,
