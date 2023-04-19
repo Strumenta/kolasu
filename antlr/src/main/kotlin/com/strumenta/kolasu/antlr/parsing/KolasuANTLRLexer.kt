@@ -14,12 +14,47 @@ import org.antlr.v4.runtime.Lexer
 import org.antlr.v4.runtime.RecognitionException
 import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.Token
+import org.antlr.v4.runtime.tree.ParseTree
+import org.antlr.v4.runtime.tree.TerminalNode
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.util.LinkedList
 import kotlin.system.measureTimeMillis
 
-abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
+interface TokenFactory<T : KolasuToken> {
+    fun categoryOf(t: Token): TokenCategory = TokenCategory.PLAIN_TEXT
+
+    fun convertToken(t: Token): T
+
+    private fun convertToken(terminalNode: TerminalNode): T = convertToken(terminalNode.symbol)
+
+    fun extractTokens(result: ParsingResultWithFirstStage<*, *>): LexingResult<T>? {
+        val antlrTerminals = mutableListOf<TerminalNode>()
+        fun extractTokensFromParseTree(pt: ParseTree?) {
+            if (pt is TerminalNode) {
+                antlrTerminals.add(pt)
+            } else if (pt != null) {
+                for (i in 0..pt.childCount) {
+                    extractTokensFromParseTree(pt.getChild(i))
+                }
+            }
+        }
+
+        val ptRoot = result.firstStage?.root
+        return if (ptRoot != null) {
+            extractTokensFromParseTree(ptRoot)
+            antlrTerminals.sortBy { it.symbol.tokenIndex }
+            val tokens = antlrTerminals.map { convertToken(it) }.toMutableList()
+            LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime)
+        } else null
+    }
+}
+
+class ANTLRTokenFactory : TokenFactory<KolasuANTLRToken> {
+    override fun convertToken(t: Token): KolasuANTLRToken = KolasuANTLRToken(categoryOf(t), t)
+}
+
+abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<T>) : KolasuLexer<T> {
     /**
      * Creates the lexer.
      */
@@ -37,9 +72,9 @@ abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
         inputStream: InputStream,
         charset: Charset,
         onlyFromDefaultChannel: Boolean
-    ): LexingResult<KolasuANTLRToken> {
-        val issues = LinkedList<Issue>()
-        val tokens = LinkedList<KolasuANTLRToken>()
+    ): LexingResult<T> {
+        val issues = mutableListOf<Issue>()
+        val tokens = mutableListOf<T>()
         var last: Token? = null
         val time = measureTimeMillis {
             val lexer = createANTLRLexer(inputStream, charset)
@@ -50,7 +85,7 @@ abstract class KolasuANTLRLexer : KolasuLexer<KolasuANTLRToken> {
                     break
                 } else {
                     if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
-                        tokens.add(KolasuANTLRToken(categoryOf(t), t))
+                        tokens.add(tokenFactory.convertToken(t))
                         last = t
                     }
                 }

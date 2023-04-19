@@ -8,9 +8,7 @@ import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.parsing.LexingResult
-import com.strumenta.kolasu.parsing.ANTLRTokenFactory
-import com.strumenta.kolasu.parsing.KolasuANTLRToken
+import com.strumenta.kolasu.antlr.parsing.ANTLRTokenFactory
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.runtime.*
@@ -45,12 +43,6 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
         TODO("Not yet implemented")
     }
 
-    val expectedResults = HashMap<File, ParsingResult<MyCompilationUnit>>()
-
-    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<MyCompilationUnit> {
-        return expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
-    }
-
     override fun createANTLRParser(tokenStream: TokenStream): Parser {
         TODO("Not yet implemented")
     }
@@ -60,10 +52,6 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
         considerPosition: Boolean,
         issues: MutableList<Issue>
     ): MyCompilationUnit? {
-        TODO("Not yet implemented")
-    }
-
-    override fun convertToken(terminalNode: TerminalNode): KolasuANTLRToken {
         TODO("Not yet implemented")
     }
 
