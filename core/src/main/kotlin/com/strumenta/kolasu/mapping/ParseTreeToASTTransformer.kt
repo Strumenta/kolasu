@@ -39,6 +39,10 @@ open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf(
         return if (source is ParseTree) ParseTreeOrigin(source) else null
     }
 
+    /**
+     * Often in ANTLR grammar we have rules which wraps other rules and act as
+     * wrapper
+     */
     fun <P : ParserRuleContext> registerNodeFactoryUnwrappingChild(
         kclass: KClass<P>
     ): NodeFactory<P, Node> = registerNodeFactory(kclass) { source, transformer, _ ->
@@ -49,6 +53,7 @@ open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf(
         }
         transformer.transform(nodeChildren[0]) as Node
     }
+
 
     inline fun <reified P : ParserRuleContext> registerNodeFactoryUnwrappingChild(
     ): NodeFactory<P, Node> = registerNodeFactoryUnwrappingChild(P::class)
