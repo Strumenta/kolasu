@@ -82,7 +82,25 @@ class NodeFactory<Source, Output : Node>(
     fun withChild(
         targetProperty: KProperty1<*, *>,
         sourceAccessor: Source.() -> Any?,
-        scopedToType: KClass<*>? = null
+    ): NodeFactory<Source, Output> = withChild<Any, Any>(
+        get = { source -> source.sourceAccessor() },
+        null,
+        targetProperty.name,
+        null
+    )
+
+    /**
+     * Specify how to convert a child. The value obtained from the conversion can only be used
+     * as a constructor parameter when instantiating the parent. It cannot be used to set the value after
+     * the parent has been instantiated, because the property is not mutable.
+     *
+     * Please note that we cannot merge this method with the variant without the type (making the type optional),
+     * as it would not permit to specify the lambda outside the list of method parameters.
+     */
+    fun withChild(
+        targetProperty: KProperty1<*, *>,
+        sourceAccessor: Source.() -> Any?,
+        scopedToType: KClass<*>
     ): NodeFactory<Source, Output> = withChild<Any, Any>(
         get = { source -> source.sourceAccessor() },
         null,
