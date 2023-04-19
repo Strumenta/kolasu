@@ -85,6 +85,10 @@ class NodeFactory<Source, Output : Node>(
         type: KClass<*>? = null
     ): NodeFactory<Source, Output> {
         val prefix = if (type != null) type.qualifiedName + "#" else ""
+        if (set == null) {
+            // given we have no setter we MUST set the children at construction
+            childrenSetAtConstruction = true
+        }
         children[prefix + name] = ChildNodeFactory(prefix + name, get, set)
         return this
     }
@@ -152,7 +156,7 @@ data class ChildNodeFactory<Source, Target, Child>(
 ) {
     fun set(node: Target, child: Child?) {
         if (setter == null) {
-            throw java.lang.IllegalStateException("Unable to set value")
+            throw java.lang.IllegalStateException("Unable to set value $name in  $node")
         }
         try {
             setter!!(node, child)
