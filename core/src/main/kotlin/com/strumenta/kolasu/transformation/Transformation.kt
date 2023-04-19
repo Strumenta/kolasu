@@ -29,14 +29,26 @@ class NodeFactory<Source, Output : Node>(
     var childrenSetAtConstruction: Boolean = false
 ) {
 
-    fun withChild(
+    fun withChildFrom(
+        property: KMutableProperty1<*, *>,
         sourceAccessor: Source.() -> Any?,
-        property: KMutableProperty1<*, *>
     ): NodeFactory<Source, Output> = withChild(
         { source: Source ->
             source.sourceAccessor()
         },
         (property as KMutableProperty1<Any, Any?>)::set,
+        property.name,
+        null
+    )
+
+    fun withChildFrom(
+        property: KProperty1<*, *>,
+        sourceAccessor: Source.() -> Any?,
+    ): NodeFactory<Source, Output> = withChild<Any, Any>(
+        { source: Source ->
+            source.sourceAccessor()
+        },
+        null,
         property.name,
         null
     )
@@ -68,7 +80,7 @@ class NodeFactory<Source, Output : Node>(
 
     fun <Target : Any, Child : Any> withChild(
         get: (Source) -> Any?,
-        set: (Target, Child?) -> Unit,
+        set: ((Target, Child?) -> Unit)?,
         name: String,
         type: KClass<*>? = null
     ): NodeFactory<Source, Output> {
@@ -136,11 +148,14 @@ class NodeFactory<Source, Output : Node>(
 data class ChildNodeFactory<Source, Target, Child>(
     val name: String,
     val get: (Source) -> Any?,
-    val setter: (Target, Child?) -> Unit
+    val setter: ((Target, Child?) -> Unit)?
 ) {
     fun set(node: Target, child: Child?) {
+        if (setter == null) {
+            throw java.lang.IllegalStateException("Unable to set value")
+        }
         try {
-            setter(node, child)
+            setter!!(node, child)
         } catch (e: Exception) {
             throw Exception("$name could not set child $child of $node using $setter", e)
         }
@@ -317,8 +332,16 @@ open class ASTTransformer(
         factory: (S, ASTTransformer) -> T?
     ): NodeFactory<S, T> = registerNodeFactory(kclass) { source, transformer, _ -> factory(source, transformer) }
 
+    inline fun <reified S : Any, T : Node> registerNodeFactory(
+        crossinline factory: S.(ASTTransformer) -> T?
+    ): NodeFactory<S, T> = registerNodeFactory(S::class) { source, transformer, _ -> source.factory(transformer) }
+
     fun <S : Any, T : Node> registerNodeFactory(kclass: KClass<S>, factory: (S) -> T?): NodeFactory<S, T> =
         registerNodeFactory(kclass) { input, _, _ -> factory(input) }
+
+    inline fun <reified S : Any, reified T : Node> registerNodeFactory(): NodeFactory<S, T> {
+        return registerNodeFactory(S::class, T::class)
+    }
 
     fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeFactory<S, T> {
         registerKnownClass(target)
@@ -330,15 +353,23 @@ open class ASTTransformer(
                 throw IllegalStateException("Unable to instantiate sealed class $target")
             }
             fun getConstructorParameterValue(kParameter: KParameter): Any? {
-                val childNodeFactory = f.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!)
-                if (childNodeFactory == null) {
-                    throw java.lang.IllegalStateException(
-                        "We do not know how to produce " +
-                            "parameter ${kParameter.name!!} for $target"
-                    )
-                } else {
-                    val childSource = childNodeFactory.get.invoke(source)
-                    return transform(childSource)
+                try {
+                    val childNodeFactory = f.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!)
+                    if (childNodeFactory == null) {
+                        throw java.lang.IllegalStateException(
+                            "We do not know how to produce " +
+                                    "parameter ${kParameter.name!!} for $target"
+                        )
+                    } else {
+                        val childSource = childNodeFactory.get.invoke(source)
+                        return if (childSource is List<*>) {
+                            childSource.map { transform(it) }.toMutableList()
+                        } else {
+                            transform(childSource)
+                        }
+                    }
+                } catch (t: Throwable) {
+                    throw RuntimeException("Issue while populating parameter ${kParameter.name} in constructor ${target.qualifiedName}.${target.preferredConstructor()}", t)
                 }
             }
             if (emptyConstructor == null) {

@@ -49,4 +49,7 @@ open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf(
         }
         transformer.transform(nodeChildren[0]) as Node
     }
+
+    inline fun <reified P : ParserRuleContext> registerNodeFactoryUnwrappingChild(
+    ): NodeFactory<P, Node> = registerNodeFactoryUnwrappingChild(P::class)
 }
