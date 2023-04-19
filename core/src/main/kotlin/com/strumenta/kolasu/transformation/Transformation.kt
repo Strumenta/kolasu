@@ -44,27 +44,10 @@ class NodeFactory<Source, Output : Node>(
 
     fun withChild(
         sourceProperty: KProperty1<Source, *>,
-        index: Int,
         property: KMutableProperty1<*, *>,
         type: KClass<*>? = null
     ): NodeFactory<Source, Output> = withChild(
-        { source: Source ->
-            (
-                (sourceProperty as KProperty1<Source, Collection<out Any>>)::get.invoke(source)
-                    as List<out Any>
-                )[index]
-        },
-        (property as KMutableProperty1<Any, Any?>)::set,
-        property.name,
-        type
-    )
-
-    fun withChild(
-        sourceProperty: KProperty1<Source, *>,
-        property: KMutableProperty1<*, *>,
-        type: KClass<*>? = null
-    ): NodeFactory<Source, Output> = withChild(
-        (sourceProperty as KProperty1<Source, Collection<out Any>>)::get,
+        (sourceProperty as KProperty1<Source, Any>)::get,
         (property as KMutableProperty1<Any, Any?>)::set,
         property.name,
         type
@@ -76,14 +59,6 @@ class NodeFactory<Source, Output : Node>(
         scopedToType: KClass<Target>? = null
     ): NodeFactory<Source, Output> =
         withChild(getter(path), (property as KMutableProperty1<Any, Any?>)::set, property.name, scopedToType)
-
-    fun <Target : Any> withChild(
-        path: String,
-        index: Int,
-        property: KMutableProperty1<Target, *>,
-        scopedToType: KClass<Target>? = null
-    ): NodeFactory<Source, Output> =
-        withChild(getter(path, index), (property as KMutableProperty1<Any, Any?>)::set, property.name, scopedToType)
 
     fun <Target : Any> withChild(
         get: (Source) -> Any?,
@@ -137,15 +112,6 @@ class NodeFactory<Source, Output : Node>(
             sub = getSubExpression(sub, elem)
         }
         sub
-    }
-
-    fun getter(path: String, index: Int) = { src: Source ->
-        val collection = getter(path).invoke(src) as List<out Any>
-        if (collection.size > index) {
-            collection[index]
-        } else {
-            null
-        }
     }
 
     private fun getSubExpression(src: Any, elem: String): Any? {
@@ -357,13 +323,15 @@ open class ASTTransformer(
 
     fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeFactory<S, T> {
         registerKnownClass(target)
-        val emptyConstructor = target.constructors.find { it.parameters.isEmpty() }
-        val nodeFactory = NodeFactory<S, T>({ source: S, _, f ->
+        // We are looking for any constructor with does not take parameters or have default
+        // values for all its parameters
+        val emptyConstructor = target.constructors.find { it.parameters.all { param -> param.isOptional } }
+        val nodeFactory = NodeFactory({ source: S, _, f ->
             if (target.isSealed) {
                 throw IllegalStateException("Unable to instantiate sealed class $target")
             }
             fun getConstructorParameterValue(kParameter: KParameter): Any? {
-                var childNodeFactory = f.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!)
+                val childNodeFactory = f.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!)
                 if (childNodeFactory == null) {
                     throw java.lang.IllegalStateException(
                         "We do not know how to produce " +
