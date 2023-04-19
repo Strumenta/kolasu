@@ -57,14 +57,6 @@ class KolasuMetamodelTest {
         assertEquals(
             """[ {
   "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
-<<<<<<< HEAD
-  "name" : "java.io",
-  "nsURI" : "https://strumenta.com/javaio",
-  "nsPrefix" : "javaio"
-}, {
-  "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
-=======
->>>>>>> future/16
   "name" : "kotlin",
   "nsURI" : "https://strumenta.com/kotlin",
   "nsPrefix" : "kotlin",
@@ -108,7 +100,7 @@ class KolasuMetamodelTest {
     "name" : "ANodeWithAPair",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "https://strumenta.com/starlasu/v3#//ASTNode"
+      "${'$'}ref" : "https://strumenta.com/starlasu/v2#//ASTNode"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",

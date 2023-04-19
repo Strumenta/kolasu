@@ -144,13 +144,13 @@ class ModelTest {
         assertEquals(true, eo2Destination is EObject)
         val eo2DestinationEO = eo2Destination as EObject
         assertEquals("TextFileDestination", eo2DestinationEO.eClass().name)
-        val textFileDestinationRange = eo2DestinationEO.eGet("range") as EObject
-        assertEquals("Range", textFileDestinationRange.eClass().name)
+        val textFileDestinationPosition = eo2DestinationEO.eGet("position") as EObject
+        assertEquals("Position", textFileDestinationPosition.eClass().name)
 
-        assertEquals(true, textFileDestinationRange.eGet("start") is EObject)
-        val startEO = textFileDestinationRange.eGet("start") as EObject
-        assertEquals(true, textFileDestinationRange.eGet("end") is EObject)
-        val endEO = textFileDestinationRange.eGet("end") as EObject
+        assertEquals(true, textFileDestinationPosition.eGet("start") is EObject)
+        val startEO = textFileDestinationPosition.eGet("start") as EObject
+        assertEquals(true, textFileDestinationPosition.eGet("end") is EObject)
+        val endEO = textFileDestinationPosition.eGet("end") as EObject
         assertEquals(1, startEO.eGet("line"))
         assertEquals(8, startEO.eGet("column"))
         assertEquals(7, endEO.eGet("line"))
@@ -382,7 +382,7 @@ class ModelTest {
         assertEquals(
             """{
   "eClass" : "#//MySimpleLangCu",
-  "range" : {
+  "position" : {
     "start" : {
       "line" : 1
     },
@@ -417,7 +417,7 @@ class ModelTest {
             """{
   "eClass" : "#//MySimpleLangCu",
   "origin" : {
-    "eClass" : "https://strumenta.com/starlasu/v3#//NodeOrigin",
+    "eClass" : "https://strumenta.com/starlasu/v2#//NodeOrigin",
     "node" : {
       "eClass" : "#//MyRoot",
       "${'$'}ref" : "#//"
@@ -441,7 +441,7 @@ class ModelTest {
         val gn = GenericNode().toEObject(res, mapping)
         assertEquals(
             """{
-  "eClass" : "https://strumenta.com/starlasu/v3#//GenericNode"
+  "eClass" : "https://strumenta.com/starlasu/v2#//GenericNode"
 }""",
             gn.saveAsJson()
         )

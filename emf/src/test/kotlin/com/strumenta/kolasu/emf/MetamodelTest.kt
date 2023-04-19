@@ -86,17 +86,17 @@ class MetamodelTest {
         assertEquals(setOf("ASTNode", "Origin"), cu.eAllGenericSuperTypes.map { it.eClassifier.name }.toSet())
         assertEquals(0, cu.eAllAttributes.size)
         assertEquals(
-            setOf("range", "destination", "statements", "origin"),
+            setOf("position", "destination", "statements", "origin"),
             cu.eAllContainments.map { it.name }.toSet()
         )
         assertEquals(
-            setOf("range", "destination", "origin", "statements"),
+            setOf("position", "destination", "origin", "statements"),
             cu.eAllReferences.map {
                 it.name
             }.toSet()
         )
         assertEquals(
-            setOf("range", "destination", "origin", "statements"),
+            setOf("position", "destination", "origin", "statements"),
             cu.eAllStructuralFeatures.map {
                 it.name
             }.toSet()
