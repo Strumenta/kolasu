@@ -365,7 +365,7 @@ open class ASTTransformer(
                     if (childNodeFactory == null) {
                         throw java.lang.IllegalStateException(
                             "We do not know how to produce " +
-                                    "parameter ${kParameter.name!!} for $target"
+                                "parameter ${kParameter.name!!} for $target"
                         )
                     } else {
                         val childSource = childNodeFactory.get.invoke(source)
@@ -384,12 +384,17 @@ open class ASTTransformer(
                         }
                     }
                 } catch (t: Throwable) {
-                    throw RuntimeException("Issue while populating parameter ${kParameter.name} in constructor ${target.qualifiedName}.${target.preferredConstructor()}", t)
+                    throw RuntimeException(
+                        "Issue while populating parameter ${kParameter.name} in " +
+                            "constructor ${target.qualifiedName}.${target.preferredConstructor()}",
+                        t
+                    )
                 }
             }
             if (emptyConstructor == null) {
                 val constructor = target.preferredConstructor()
-                val constructorParamValues = constructor.parameters.filter { hasConstructorParameterValue(it) }.associateWith { getConstructorParameterValue(it) }
+                val constructorParamValues = constructor.parameters.filter { hasConstructorParameterValue(it) }
+                    .associateWith { getConstructorParameterValue(it) }
                 constructor.callBy(constructorParamValues)
             } else {
                 target.createInstance()
