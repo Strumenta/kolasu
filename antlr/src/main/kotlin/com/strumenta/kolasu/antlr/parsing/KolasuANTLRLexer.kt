@@ -18,7 +18,6 @@ import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
 import java.io.InputStream
 import java.nio.charset.Charset
-import java.util.LinkedList
 import kotlin.system.measureTimeMillis
 
 interface TokenFactory<T : KolasuToken> {

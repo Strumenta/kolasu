@@ -6,9 +6,7 @@ import com.strumenta.kolasu.model.PropertyDescription
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.parsing.ASTParser
-import com.strumenta.kolasu.parsing.KolasuLexer
 import com.strumenta.kolasu.parsing.KolasuToken
-import com.strumenta.kolasu.parsing.LexingResult
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
@@ -25,8 +23,6 @@ import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.TokenStream
 import org.antlr.v4.runtime.misc.Interval
-import org.antlr.v4.runtime.tree.ParseTree
-import org.antlr.v4.runtime.tree.TerminalNode
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream

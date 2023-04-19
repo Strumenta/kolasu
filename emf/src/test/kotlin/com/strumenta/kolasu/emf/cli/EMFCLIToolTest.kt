@@ -2,13 +2,13 @@ package com.strumenta.kolasu.emf.cli
 
 import com.github.ajalt.clikt.core.PrintHelpMessage
 import com.github.ajalt.clikt.output.CliktConsole
+import com.strumenta.kolasu.antlr.parsing.ANTLRTokenFactory
 import com.strumenta.kolasu.antlr.parsing.KolasuANTLRToken
 import com.strumenta.kolasu.antlr.parsing.ParsingResultWithFirstStage
 import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.antlr.parsing.ANTLRTokenFactory
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.runtime.*
