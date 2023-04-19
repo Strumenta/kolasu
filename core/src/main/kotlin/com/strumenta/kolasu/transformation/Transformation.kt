@@ -26,70 +26,13 @@ class NodeFactory<Source, Output : Node>(
     var childrenSetAtConstruction: Boolean = false
 ) {
 
-    fun withChildFrom(
-        property: KMutableProperty1<*, *>,
-        sourceAccessor: Source.() -> Any?,
-    ): NodeFactory<Source, Output> = withChild(
-        { source: Source ->
-            source.sourceAccessor()
-        },
-        (property as KMutableProperty1<Any, Any?>)::set,
-        property.name,
-        null
-    )
-
-    fun withChildFrom(
-        property: KProperty1<*, *>,
-        sourceAccessor: Source.() -> Any?,
-    ): NodeFactory<Source, Output> = withChild<Any, Any>(
-        { source: Source ->
-            source.sourceAccessor()
-        },
-        null,
-        property.name,
-        null
-    )
-
-    fun withChild(
-        sourceProperty: KProperty1<Source, *>,
-        property: KMutableProperty1<*, *>,
-        type: KClass<*>? = null
-    ): NodeFactory<Source, Output> = withChild(
-        (sourceProperty as KProperty1<Source, Any>)::get,
-        (property as KMutableProperty1<Any, Any?>)::set,
-        property.name,
-        type
-    )
-
     /**
+     *
+     * Example using the scopedToType parameter:
      * ```
      *     on.registerNodeFactory(SASParser.DatasetOptionContext::class) { ctx ->
      *         when {
-     *             ctx.DROP() != null -> DropDatasetOption()
-     *             ctx.EXTENDOBSCOUNTER() != null -> ExtendObsCounterDatasetOption(ctx.YES() != null)
-     *             ctx.gennum() != null -> GenNumDatasetOption(translateGennum(ctx.gennum()))
-     *             ctx.LABEL() != null -> LabelDatasetOption(ctx.stringLiteral().asString())
-     *             ctx.KEEP_VARS() != null -> KeepDatasetOption()
-     *             ctx.indexDatasetOption() != null ->
-     *                 IndexDatasetOption(ctx.indexDatasetOption().name?.text)
-     *             ctx.IN_VARS() != null -> InDatasetOption()
-     *             ctx.RENAME_VARS() != null -> RenameDatasetOption(ctx.datasetRename().map {
-     *                 Rename(it.identifier(0).text, it.identifier(1).text).withParseTreeNode(it)
-     *             })
-     *             ctx.WHERE() != null -> WhereDatasetOption()
-     *             ctx.macroStatementStrict() != null -> ComputedDatasetOption()
-     *             ctx.macroFunctionCall() != null -> {
-     *                 val option = ComputedDatasetOption()
-     *                 option.computedWith = ExpressionStatement(on.transform(ctx.macroFunctionCall(), option) as Expression)
-     *                 option
-     *             }
-     *             ctx.MACRO_VARIABLE() != null -> {
-     *                 val option = ComputedDatasetOption()
-     *                 option.computedWith = ExpressionStatement(VariableExpression(ctx.MACRO_VARIABLE().text.substring(1)))
-     *                 option
-     *             }
-     *             //TODO refine macroLiteral
-     *             else -> GenericDatasetOption(ctx.name.text, ctx.macroLiteral()?.text ?: ctx.identifier(1)?.text)
+     *             ...
      *         }
      *     }
      *         .withChild(SASParser.DatasetOptionContext::macroStatementStrict, ComputedDatasetOption::computedWith, ComputedDatasetOption::class)
@@ -99,27 +42,35 @@ class NodeFactory<Source, Output : Node>(
      *         .withChild("indexDatasetOption.variables", IndexDatasetOption::variables, IndexDatasetOption::class)
      *  ```
      */
-    fun <Target : Any> withChild(
-        path: String,
-        property: KMutableProperty1<Target, *>,
-        scopedToType: KClass<Target>? = null
-    ): NodeFactory<Source, Output> =
-        withChild(getter(path), (property as KMutableProperty1<Any, Any?>)::set, property.name, scopedToType)
+    fun withChild(
+        targetProperty: KMutableProperty1<*, *>,
+        sourceAccessor: Source.() -> Any?,
+        scopedToType: KClass<*>? = null
+    ): NodeFactory<Source, Output> = withChild(
+        get = { source -> source.sourceAccessor() },
+        set = (targetProperty as KMutableProperty1<Any, Any?>)::set,
+        targetProperty.name,
+        scopedToType
+    )
 
-    fun <Target : Any> withChild(
-        get: (Source) -> Any?,
-        property: KMutableProperty1<in Target, *>,
-        scopedToType: KClass<Target>? = null
-    ): NodeFactory<Source, Output> =
-        withChild(get, (property as KMutableProperty1<Target, Any?>)::set, property.name, scopedToType)
+    fun withChild(
+        targetProperty: KProperty1<*, *>,
+        sourceAccessor: Source.() -> Any?,
+        scopedToType: KClass<*>? = null
+    ): NodeFactory<Source, Output> = withChild<Any, Any>(
+        get = { source -> source.sourceAccessor() },
+        null,
+        targetProperty.name,
+        scopedToType
+    )
 
     fun <Target : Any, Child : Any> withChild(
         get: (Source) -> Any?,
         set: ((Target, Child?) -> Unit)?,
         name: String,
-        type: KClass<*>? = null
+        scopedToType: KClass<*>? = null
     ): NodeFactory<Source, Output> {
-        val prefix = if (type != null) type.qualifiedName + "#" else ""
+        val prefix = if (scopedToType != null) scopedToType.qualifiedName + "#" else ""
         if (set == null) {
             // given we have no setter we MUST set the children at construction
             childrenSetAtConstruction = true
