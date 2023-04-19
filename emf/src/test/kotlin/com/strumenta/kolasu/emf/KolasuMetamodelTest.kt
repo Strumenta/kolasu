@@ -36,13 +36,6 @@ class KolasuMetamodelTest {
 
         val resource = createResource(mmuri) ?: throw IOException("Unsupported destination: $mmuri")
 
-        val javaIOMetamodelBuilder = MetamodelBuilder(
-            "java.io", "https://strumenta.com/javaio", "javaio",
-            resource
-        )
-        javaIOMetamodelBuilder.provideClass(java.io.Serializable::class)
-        javaIOMetamodelBuilder.generate()
-
         val dependencyMetamodelBuilder = MetamodelBuilder(
             "kotlin", "https://strumenta.com/kotlin", "kotlin",
             resource
@@ -64,17 +57,6 @@ class KolasuMetamodelTest {
         assertEquals(
             """[ {
   "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
-  "name" : "java.io",
-  "nsURI" : "https://strumenta.com/javaio",
-  "nsPrefix" : "javaio",
-  "eClassifiers" : [ {
-    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-    "name" : "Serializable",
-    "abstract" : true,
-    "interface" : true
-  } ]
-}, {
-  "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
   "name" : "kotlin",
   "nsURI" : "https://strumenta.com/kotlin",
   "nsPrefix" : "kotlin",
@@ -92,7 +74,7 @@ class KolasuMetamodelTest {
       "eGenericType" : {
         "eTypeParameter" : {
           "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//ETypeParameter",
-          "${'$'}ref" : "/1/Pair/A"
+          "${'$'}ref" : "/0/Pair/A"
         }
       },
       "containment" : true
@@ -102,7 +84,7 @@ class KolasuMetamodelTest {
       "eGenericType" : {
         "eTypeParameter" : {
           "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//ETypeParameter",
-          "${'$'}ref" : "/1/Pair/B"
+          "${'$'}ref" : "/0/Pair/B"
         }
       },
       "containment" : true
@@ -137,7 +119,7 @@ class KolasuMetamodelTest {
         } ],
         "eClassifier" : {
           "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-          "${'$'}ref" : "/1/Pair"
+          "${'$'}ref" : "/0/Pair"
         }
       },
       "containment" : true
