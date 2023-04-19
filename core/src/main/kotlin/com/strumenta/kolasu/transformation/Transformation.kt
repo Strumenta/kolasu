@@ -392,13 +392,13 @@ open class ASTTransformer(
             if (target.isSealed) {
                 throw IllegalStateException("Unable to instantiate sealed class $target")
             }
-            fun hasConstructorParameterValue(kParameter: KParameter): Boolean {
-                return f.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!) != null || !kParameter.isOptional
-            }
-            fun getConstructorParameterValue(kParameter: KParameter): Any? {
+            fun getConstructorParameterValue(kParameter: KParameter): ParameterValue {
                 try {
                     val childNodeFactory = f.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!)
                     if (childNodeFactory == null) {
+                        if (kParameter.isOptional) {
+                            return AbsentParameterValue
+                        }
                         throw java.lang.IllegalStateException(
                             "We do not know how to produce " +
                                 "parameter ${kParameter.name!!} for $target"
@@ -406,19 +406,22 @@ open class ASTTransformer(
                     } else {
                         val childSource = childNodeFactory.get.invoke(source)
                         return when (childSource) {
+                            null -> {
+                                AbsentParameterValue
+                            }
                             is List<*> -> {
-                                childSource.map { transform(it) }.toMutableList()
+                                PresentParameterValue(childSource.map { transform(it) }.toMutableList())
                             }
 
                             is String -> {
-                                childSource
+                                PresentParameterValue(childSource)
                             }
 
                             else -> {
                                 if (kParameter.type == String::class.createType() && childSource is ParseTree) {
-                                    childSource.text
+                                    PresentParameterValue(childSource.text)
                                 } else {
-                                    transform(childSource)
+                                    PresentParameterValue(transform(childSource))
                                 }
                             }
                         }
@@ -433,9 +436,14 @@ open class ASTTransformer(
             }
             if (emptyConstructor == null) {
                 val constructor = target.preferredConstructor()
-                val constructorParamValues = constructor.parameters.filter { hasConstructorParameterValue(it) }
-                    .associateWith { getConstructorParameterValue(it) }
-                constructor.callBy(constructorParamValues)
+                val constructorParamValues = constructor.parameters.map { it to getConstructorParameterValue(it) }
+                    .filter { it.second is PresentParameterValue }
+                    .associate { it.first to (it.second as PresentParameterValue).value }
+                try {
+                    constructor.callBy(constructorParamValues)
+                } catch (t: Throwable) {
+                    throw RuntimeException("Invocation of constructor $constructor failed. We passed: ${constructorParamValues.map { "${it.key.name}=${it.value}" }.joinToString(", ")}", t)
+                }
             } else {
                 target.createInstance()
             }
@@ -477,3 +485,7 @@ fun <Source : Any, Target, Child> NodeFactory<*, *>.getChildNodeFactory(
     }
     return childNodeFactory as ChildNodeFactory<Source, Target, Child>?
 }
+
+private sealed class ParameterValue
+private class PresentParameterValue(val value: Any?) : ParameterValue()
+private object AbsentParameterValue : ParameterValue()
