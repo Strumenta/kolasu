@@ -29,6 +29,19 @@ class NodeFactory<Source, Output : Node>(
     var childrenSetAtConstruction: Boolean = false
 ) {
 
+    fun withChildAccessor(
+        sourceAccessor: Source.() -> Any?,
+        property: KMutableProperty1<*, *>,
+        type: KClass<*>? = null
+    ): NodeFactory<Source, Output> = withChild(
+        { source: Source ->
+            source.sourceAccessor()
+        },
+        (property as KMutableProperty1<Any, Any?>)::set,
+        property.name,
+        type
+    )
+
     fun withChild(
         sourceProperty: KProperty1<Source, *>,
         index: Int,
