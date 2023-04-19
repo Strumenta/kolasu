@@ -1,9 +1,6 @@
 package com.strumenta.kolasu.mapping
 
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.transformation.NodeFactory
 import org.antlr.v4.runtime.ParserRuleContext
-import kotlin.reflect.KClass
 
 /**
  * Translate the given node and ensure a certain type will be obtained.
@@ -50,7 +47,6 @@ fun <T> ParseTreeToASTTransformer.translateList(original: Collection<out ParserR
 fun <T> ParseTreeToASTTransformer.translateOptional(original: ParserRuleContext?): T? {
     return original?.let { transform(it) as T }
 }
-
 
 /**
  * Translate the only child (of type ParseRuleContext) and ensure the resulting value

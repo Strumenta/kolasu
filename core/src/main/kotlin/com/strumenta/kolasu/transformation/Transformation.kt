@@ -3,7 +3,6 @@ package com.strumenta.kolasu.transformation
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
-import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
@@ -442,7 +441,12 @@ open class ASTTransformer(
                 try {
                     constructor.callBy(constructorParamValues)
                 } catch (t: Throwable) {
-                    throw RuntimeException("Invocation of constructor $constructor failed. We passed: ${constructorParamValues.map { "${it.key.name}=${it.value}" }.joinToString(", ")}", t)
+                    throw RuntimeException(
+                        "Invocation of constructor $constructor failed. " +
+                            "We passed: ${constructorParamValues.map { "${it.key.name}=${it.value}" }
+                                .joinToString(", ")}",
+                        t
+                    )
                 }
             } else {
                 target.createInstance()
