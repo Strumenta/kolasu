@@ -21,10 +21,13 @@ class PropertyDescriptionTest {
         assertEquals(1, list.size)
         assertEquals(
             PropertyDescription(
-                "name", false, Multiplicity.SINGULAR, "gino",
-                PropertyType.ATTRIBUTE
+                "name",
+                false,
+                Multiplicity.SINGULAR,
+                "gino",
+                PropertyType.ATTRIBUTE,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -38,10 +41,13 @@ class PropertyDescriptionTest {
         assertEquals(1, list.size)
         assertEquals(
             PropertyDescription(
-                "names", false, Multiplicity.MANY, listOf("gino", "pino"),
-                PropertyType.ATTRIBUTE
+                "names",
+                false,
+                Multiplicity.MANY,
+                listOf("gino", "pino"),
+                PropertyType.ATTRIBUTE,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -55,10 +61,13 @@ class PropertyDescriptionTest {
         assertEquals(1, list.size)
         assertEquals(
             PropertyDescription(
-                "foo", true, Multiplicity.SINGULAR, Foo1("gino"),
-                PropertyType.CONTAINMENT
+                "foo",
+                true,
+                Multiplicity.SINGULAR,
+                Foo1("gino"),
+                PropertyType.CONTAINMENT,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -72,10 +81,13 @@ class PropertyDescriptionTest {
         assertEquals(1, list.size)
         assertEquals(
             PropertyDescription(
-                "foos", true, Multiplicity.MANY, listOf(Foo1("gino")),
-                PropertyType.CONTAINMENT
+                "foos",
+                true,
+                Multiplicity.MANY,
+                listOf(Foo1("gino")),
+                PropertyType.CONTAINMENT,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -89,10 +101,13 @@ class PropertyDescriptionTest {
         assertEquals(1, list.size)
         assertEquals(
             PropertyDescription(
-                "foos", true, Multiplicity.MANY, emptyList<Foo1>(),
-                PropertyType.CONTAINMENT
+                "foos",
+                true,
+                Multiplicity.MANY,
+                emptyList<Foo1>(),
+                PropertyType.CONTAINMENT,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -106,10 +121,13 @@ class PropertyDescriptionTest {
         assertEquals(1, list.size)
         assertEquals(
             PropertyDescription(
-                "foos", true, Multiplicity.MANY, null,
-                PropertyType.CONTAINMENT
+                "foos",
+                true,
+                Multiplicity.MANY,
+                null,
+                PropertyType.CONTAINMENT,
             ),
-            list[0]
+            list[0],
         )
     }
 }

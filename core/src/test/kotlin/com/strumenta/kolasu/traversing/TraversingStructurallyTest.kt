@@ -6,8 +6,8 @@ import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import com.strumenta.kolasu.model.pos
-import org.junit.Ignore
 import kotlin.system.measureTimeMillis
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -40,9 +40,9 @@ internal class TraversingStructurallyTest {
             Box(
                 "first",
                 listOf(
-                    Item("1", specifiedPosition = pos(3, 6, 3, 12))
+                    Item("1", specifiedPosition = pos(3, 6, 3, 12)),
                 ),
-                specifiedPosition = pos(2, 3, 4, 3)
+                specifiedPosition = pos(2, 3, 4, 3),
             ),
             Item("2", specifiedPosition = pos(5, 3, 5, 9)),
             Box(
@@ -53,16 +53,16 @@ internal class TraversingStructurallyTest {
                         listOf(
                             Item("3", specifiedPosition = pos(8, 7, 8, 13)),
                             Item("4", specifiedPosition = pos(9, 7, 9, 13)),
-                            Item("5", specifiedPosition = pos(10, 7, 10, 13))
+                            Item("5", specifiedPosition = pos(10, 7, 10, 13)),
                         ),
-                        specifiedPosition = pos(7, 5, 11, 5)
-                    )
+                        specifiedPosition = pos(7, 5, 11, 5),
+                    ),
                 ),
-                specifiedPosition = pos(6, 3, 12, 3)
+                specifiedPosition = pos(6, 3, 12, 3),
             ),
-            Item("6", specifiedPosition = pos(13, 3, 13, 9))
+            Item("6", specifiedPosition = pos(13, 3, 13, 9)),
         ),
-        specifiedPosition = pos(1, 1, 14, 1)
+        specifiedPosition = pos(1, 1, 14, 1),
     )
 
     @Test
@@ -155,8 +155,6 @@ internal class TraversingStructurallyTest {
         }
         // we are testing that walkTimeFast is taking more or less the same time as walkTime
         assertContains(walkTime * 0.8..walkTime * 1.35, walkTimeFast.toDouble())
-        println(walkTime)
-        println(walkTimeFastTwo)
         assert(walkTimeFastTwo < walkTime)
         assert(walkTimeFastThree < walkTime)
     }
@@ -170,9 +168,9 @@ internal class TraversingStructurallyTest {
                 Box(
                     "first",
                     set = hashSetOf(
-                        Item("1", specifiedPosition = pos(3, 6, 3, 12))
+                        Item("1", specifiedPosition = pos(3, 6, 3, 12)),
                     ),
-                    specifiedPosition = pos(2, 3, 4, 3)
+                    specifiedPosition = pos(2, 3, 4, 3),
                 ),
                 Item("2", specifiedPosition = pos(5, 3, 5, 9)),
                 Box(
@@ -183,16 +181,16 @@ internal class TraversingStructurallyTest {
                             set = hashSetOf(
                                 Item("3", specifiedPosition = pos(8, 7, 8, 13)),
                                 Item("4", specifiedPosition = pos(9, 7, 9, 13)),
-                                Item("5", specifiedPosition = pos(10, 7, 10, 13))
+                                Item("5", specifiedPosition = pos(10, 7, 10, 13)),
                             ),
-                            specifiedPosition = pos(7, 5, 11, 5)
-                        )
+                            specifiedPosition = pos(7, 5, 11, 5),
+                        ),
                     ),
-                    specifiedPosition = pos(6, 3, 12, 3)
+                    specifiedPosition = pos(6, 3, 12, 3),
                 ),
-                Item("6", specifiedPosition = pos(13, 3, 13, 9))
+                Item("6", specifiedPosition = pos(13, 3, 13, 9)),
             ),
-            specifiedPosition = pos(1, 1, 14, 1)
+            specifiedPosition = pos(1, 1, 14, 1),
         )
         val set = mutableSetOf<String>()
         testCase.walk().map {

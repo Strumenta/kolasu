@@ -1,8 +1,8 @@
-package com.strumenta.kolasu.mapping
+package com.strumenta.kolasu.antlr.mapping
 
+import com.strumenta.kolasu.antlr.parsing.withParseTreeNode
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
-import com.strumenta.kolasu.parsing.withParseTreeNode
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.transformation.ASTTransformer
 import com.strumenta.kolasu.transformation.GenericNode
@@ -113,16 +113,16 @@ class ParseTreeToASTTransformerTest {
     }
 
     private fun configure(transformer: ASTTransformer) {
-        transformer.registerNodeFactory(SimpleLangParser.CompilationUnitContext::class, CU::class)
+        transformer.registerNodeTransformer(SimpleLangParser.CompilationUnitContext::class, CU::class)
             .withChild(SimpleLangParser.CompilationUnitContext::statement, CU::statements)
-        transformer.registerNodeFactory(SimpleLangParser.DisplayStmtContext::class) { ctx ->
+        transformer.registerNodeTransformer(SimpleLangParser.DisplayStmtContext::class) { ctx ->
             if (ctx.exception != null || ctx.expression().exception != null) {
                 // We throw a custom error so that we can check that it's recorded in the AST
                 throw IllegalStateException("Parse error")
             }
             DisplayIntStatement(value = ctx.expression().INT_LIT().text.toInt())
         }
-        transformer.registerNodeFactory(SimpleLangParser.SetStmtContext::class) { ctx ->
+        transformer.registerNodeTransformer(SimpleLangParser.SetStmtContext::class) { ctx ->
             if (ctx.exception != null || ctx.expression().exception != null) {
                 // We throw a custom error so that we can check that it's recorded in the AST
                 throw IllegalStateException("Parse error")

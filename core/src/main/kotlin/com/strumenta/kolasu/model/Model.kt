@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.model.lionweb.concept
-import com.strumenta.kolasu.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.traversing.walk
 import org.lionweb.lioncore.java.metamodel.Annotation
 import org.lionweb.lioncore.java.metamodel.Concept
@@ -14,6 +13,7 @@ import org.lionweb.lioncore.java.model.Node
 import org.lionweb.lioncore.java.model.ReferenceValue
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
+import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
@@ -28,18 +28,18 @@ interface Origin {
         get() = position?.source
 }
 
-class SimpleOrigin(override val position: Position?, override val sourceText: String?) : Origin
+class SimpleOrigin(override val position: Position?, override val sourceText: String?) : Origin, Serializable
 
 data class CompositeOrigin(
     val elements: List<Origin>,
     override val position: Position?,
     override val sourceText: String?
-) : Origin
+) : Origin, Serializable
 
 interface Destination
 
-data class CompositeDestination(val elements: List<Destination>) : Destination
-data class TextFileDestination(val position: Position?) : Destination
+data class CompositeDestination(val elements: List<Destination>) : Destination, Serializable
+data class TextFileDestination(val position: Position?) : Destination, Serializable
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
@@ -47,7 +47,7 @@ data class TextFileDestination(val position: Position?) : Destination
  * It implements Origin as it could be the source of a AST-to-AST transformation, so the node itself can be
  * the Origin of another node.
  */
-open class ASTNode() : Node, Origin, Destination {
+open class ASTNode() : Node, Origin, Destination, Serializable {
 
     @Internal
     protected var positionOverride: Position? = null
@@ -385,11 +385,11 @@ fun assignSourceToTree(root: ASTNode, source: Source, sourceText: String) {
                 }
             }
             it.origin = SimpleOrigin(position = it.position, sourceText)
-        } else if (it.origin is ParseTreeOrigin) {
+        }/* TODO  else if (it.origin is ParseTreeOrigin) {
             val pto = it.origin as ParseTreeOrigin
             if (pto.source == null) {
                 pto.source = source
             }
-        }
+        }*/
     }
 }

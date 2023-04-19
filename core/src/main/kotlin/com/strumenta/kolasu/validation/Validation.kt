@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.validation
 
 import com.strumenta.kolasu.model.Position
+import java.io.Serializable
 
 enum class IssueType {
     LEXICAL,
@@ -20,7 +21,7 @@ data class Issue(
     val message: String,
     val severity: IssueSeverity = IssueSeverity.ERROR,
     val position: Position? = null
-) {
+) : Serializable {
 
     companion object {
         fun lexical(

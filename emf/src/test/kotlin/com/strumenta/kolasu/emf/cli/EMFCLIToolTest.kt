@@ -2,11 +2,13 @@ package com.strumenta.kolasu.emf.cli
 
 import com.github.ajalt.clikt.core.PrintHelpMessage
 import com.github.ajalt.clikt.output.CliktConsole
+import com.strumenta.kolasu.antlr.parsing.ANTLRTokenFactory
+import com.strumenta.kolasu.antlr.parsing.KolasuANTLRToken
+import com.strumenta.kolasu.antlr.parsing.ParsingResultWithFirstStage
 import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.parsing.KolasuANTLRToken
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.runtime.*
@@ -23,7 +25,9 @@ data class MyCompilationUnit(val decls: List<MyEntityDecl>) : ASTNode()
 data class MyEntityDecl(override var name: String, val fields: List<MyFieldDecl>) : ASTNode(), Named
 data class MyFieldDecl(override var name: String) : ASTNode(), Named
 
-class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleContext, KolasuANTLRToken>() {
+class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleContext, KolasuANTLRToken>(
+    ANTLRTokenFactory()
+) {
     override fun doGenerateMetamodel(resource: Resource) {
         val mmbuilder = MetamodelBuilder("com.strumenta.kolasu.emf.cli", "https://dummy.com/mm", "dm")
         mmbuilder.provideClass(MyCompilationUnit::class)
@@ -31,11 +35,11 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
         resource.contents.add(mm)
     }
 
-    override fun createANTLRLexer(charStream: CharStream): Lexer {
-        TODO("Not yet implemented")
-    }
-
-    override fun tokenInstantiator(t: Token): KolasuANTLRToken {
+    override fun parse(
+        code: String,
+        considerPosition: Boolean,
+        measureLexingTime: Boolean
+    ): ParsingResultWithFirstStage<MyCompilationUnit, ParserRuleContext> {
         TODO("Not yet implemented")
     }
 
@@ -51,11 +55,7 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
         TODO("Not yet implemented")
     }
 
-    override fun parse(
-        code: String,
-        considerPosition: Boolean,
-        measureLexingTime: Boolean
-    ): ParsingResult<MyCompilationUnit> {
+    override fun createANTLRLexer(inputStream: CharStream): Lexer {
         TODO("Not yet implemented")
     }
 
@@ -216,7 +216,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
       }
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
@@ -224,7 +224,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
       }
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
@@ -232,7 +232,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
       }
     } ]
   }, {
@@ -244,7 +244,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
       }
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
@@ -252,7 +252,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
       }
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
@@ -260,7 +260,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
       }
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
@@ -268,7 +268,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
       }
     } ]
   }, {
@@ -280,7 +280,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/0/LocalDate"
+        "${"\$ref"}" : "/0/LocalDate"
       },
       "containment" : true
     }, {
@@ -289,7 +289,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/0/LocalTime"
+        "${"\$ref"}" : "/0/LocalTime"
       },
       "containment" : true
     } ]
@@ -302,7 +302,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
       }
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
@@ -310,7 +310,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EInt"
       }
     } ]
   }, {
@@ -322,7 +322,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/0/Point"
+        "${"\$ref"}" : "/0/Point"
       },
       "containment" : true
     }, {
@@ -331,7 +331,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/0/Point"
+        "${"\$ref"}" : "/0/Point"
       },
       "containment" : true
     } ]
@@ -348,7 +348,7 @@ class EMFCLIToolTest {
     "name" : "NodeDestination",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/Destination"
+      "${"\$ref"}" : "/0/Destination"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
@@ -356,7 +356,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/0/ASTNode"
+        "${"\$ref"}" : "/0/ASTNode"
       }
     } ]
   }, {
@@ -364,14 +364,14 @@ class EMFCLIToolTest {
     "name" : "TextFileDestination",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/Destination"
+      "${"\$ref"}" : "/0/Destination"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
       "name" : "position",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/0/Position"
+        "${"\$ref"}" : "/0/Position"
       },
       "containment" : true
     } ]
@@ -381,14 +381,14 @@ class EMFCLIToolTest {
     "abstract" : true,
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/Origin"
+      "${"\$ref"}" : "/0/Origin"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
       "name" : "position",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/0/Position"
+        "${"\$ref"}" : "/0/Position"
       },
       "containment" : true
     }, {
@@ -396,7 +396,7 @@ class EMFCLIToolTest {
       "name" : "origin",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/0/Origin"
+        "${"\$ref"}" : "/0/Origin"
       },
       "containment" : true
     }, {
@@ -404,7 +404,7 @@ class EMFCLIToolTest {
       "name" : "destination",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/0/Destination"
+        "${"\$ref"}" : "/0/Destination"
       },
       "containment" : true
     } ]
@@ -413,14 +413,14 @@ class EMFCLIToolTest {
     "name" : "ParseTreeOrigin",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/Origin"
+      "${"\$ref"}" : "/0/Origin"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
       "name" : "position",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/0/Position"
+        "${"\$ref"}" : "/0/Position"
       },
       "containment" : true
     } ]
@@ -429,7 +429,7 @@ class EMFCLIToolTest {
     "name" : "NodeOrigin",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/Origin"
+      "${"\$ref"}" : "/0/Origin"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
@@ -437,8 +437,31 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/0/ASTNode"
+        "${"\$ref"}" : "/0/ASTNode"
       }
+    } ]
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "SimpleOrigin",
+    "eSuperTypes" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+      "${"\$ref"}" : "/0/Origin"
+    } ],
+    "eStructuralFeatures" : [ {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
+      "name" : "sourceText",
+      "eType" : {
+        "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
+      }
+    }, {
+      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
+      "name" : "position",
+      "eType" : {
+        "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+        "${"\$ref"}" : "/0/Position"
+      },
+      "containment" : true
     } ]
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
@@ -461,7 +484,7 @@ class EMFCLIToolTest {
       "name" : "placeholderName",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
       }
     } ]
   }, {
@@ -497,7 +520,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EEnum",
-        "${'$'}ref" : "/0/IssueType"
+        "${"\$ref"}" : "/0/IssueType"
       }
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
@@ -505,21 +528,21 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
       }
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
       "name" : "severity",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EEnum",
-        "${'$'}ref" : "/0/IssueSeverity"
+        "${"\$ref"}" : "/0/IssueSeverity"
       }
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
       "name" : "position",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/0/Position"
+        "${"\$ref"}" : "/0/Position"
       },
       "containment" : true
     } ]
@@ -532,7 +555,7 @@ class EMFCLIToolTest {
       "name" : "name",
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
       }
     } ]
   }, {
@@ -541,7 +564,7 @@ class EMFCLIToolTest {
     "interface" : true,
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/PossiblyNamed"
+      "${"\$ref"}" : "/0/PossiblyNamed"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
@@ -549,7 +572,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
       }
     } ]
   }, {
@@ -560,7 +583,7 @@ class EMFCLIToolTest {
       "eBounds" : [ {
         "eClassifier" : {
           "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-          "${'$'}ref" : "/0/ASTNode"
+          "${"\$ref"}" : "/0/ASTNode"
         }
       } ]
     } ],
@@ -570,7 +593,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
       }
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
@@ -578,7 +601,7 @@ class EMFCLIToolTest {
       "eGenericType" : {
         "eTypeParameter" : {
           "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//ETypeParameter",
-          "${'$'}ref" : "/0/ReferenceByName/N"
+          "${"\$ref"}" : "/0/ReferenceByName/N"
         }
       }
     } ]
@@ -592,7 +615,7 @@ class EMFCLIToolTest {
       "lowerBound" : 1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${'$'}ref" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
+        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
       }
     } ]
   }, {
@@ -600,17 +623,17 @@ class EMFCLIToolTest {
     "name" : "GenericErrorNode",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/ASTNode"
+      "${"\$ref"}" : "/0/ASTNode"
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/ErrorNode"
+      "${"\$ref"}" : "/0/ErrorNode"
     } ]
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
     "name" : "GenericNode",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/ASTNode"
+      "${"\$ref"}" : "/0/ASTNode"
     } ]
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
@@ -620,7 +643,7 @@ class EMFCLIToolTest {
       "eBounds" : [ {
         "eClassifier" : {
           "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-          "${'$'}ref" : "/0/ASTNode"
+          "${"\$ref"}" : "/0/ASTNode"
         }
       } ]
     } ],
@@ -630,7 +653,7 @@ class EMFCLIToolTest {
       "eGenericType" : {
         "eTypeParameter" : {
           "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//ETypeParameter",
-          "${'$'}ref" : "/0/Result/CU"
+          "${"\$ref"}" : "/0/Result/CU"
         }
       },
       "containment" : true
@@ -640,7 +663,7 @@ class EMFCLIToolTest {
       "upperBound" : -1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/0/Issue"
+        "${"\$ref"}" : "/0/Issue"
       },
       "containment" : true
     } ]
@@ -655,20 +678,20 @@ class EMFCLIToolTest {
     "name" : "MyFieldDecl",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/ASTNode"
+      "${"\$ref"}" : "/0/ASTNode"
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/Named"
+      "${"\$ref"}" : "/0/Named"
     } ]
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
     "name" : "MyEntityDecl",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/ASTNode"
+      "${"\$ref"}" : "/0/ASTNode"
     }, {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/Named"
+      "${"\$ref"}" : "/0/Named"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
@@ -676,7 +699,7 @@ class EMFCLIToolTest {
       "upperBound" : -1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/1/MyFieldDecl"
+        "${"\$ref"}" : "/1/MyFieldDecl"
       },
       "containment" : true
     } ]
@@ -685,7 +708,7 @@ class EMFCLIToolTest {
     "name" : "MyCompilationUnit",
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-      "${'$'}ref" : "/0/ASTNode"
+      "${"\$ref"}" : "/0/ASTNode"
     } ],
     "eStructuralFeatures" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EReference",
@@ -693,7 +716,7 @@ class EMFCLIToolTest {
       "upperBound" : -1,
       "eType" : {
         "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
-        "${'$'}ref" : "/1/MyEntityDecl"
+        "${"\$ref"}" : "/1/MyEntityDecl"
       },
       "containment" : true
     } ]

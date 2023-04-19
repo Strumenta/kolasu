@@ -1,6 +1,12 @@
-package com.strumenta.kolasu.model
+package com.strumenta.kolasu.antlr.model
 
-import com.strumenta.kolasu.parsing.ParseTreeOrigin
+import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.pos
+import com.strumenta.kolasu.model.withOrigin
+import com.strumenta.kolasu.model.withPosition
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
 import org.antlr.v4.runtime.CharStreams
@@ -14,7 +20,8 @@ class OriginTest {
     @test fun parseTreeOriginPosition() {
         val code = """set a = 1 + 2
             |input c is string
-            |display 2 * 3""".trimMargin()
+            |display 2 * 3
+        """.trimMargin()
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
         val parseTreeRoot = parser.compilationUnit()
@@ -48,7 +55,8 @@ class OriginTest {
     @test fun parseTreeOriginsSourceText() {
         val code = """set a = 1 + 2
             |input c is string
-            |display 2 * 3""".trimMargin()
+            |display 2 * 3
+        """.trimMargin()
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
         val parseTreeRoot = parser.compilationUnit()

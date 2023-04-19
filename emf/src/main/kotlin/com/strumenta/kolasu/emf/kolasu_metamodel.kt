@@ -80,6 +80,13 @@ private fun createStarlasuMetamodel(): EPackage {
         addReference("node", astNode, 1, 1)
     }
 
+    val simpleOrigin = ePackage.createEClass("SimpleOrigin").apply {
+        this.isAbstract = false
+        this.eSuperTypes.add(origin)
+        addAttribute("sourceText", stringDT, 0, 1)
+        addContainment("position", position, 0, 1)
+    }
+
     ePackage.createEClass("Statement").apply {
         this.isInterface = true
     }

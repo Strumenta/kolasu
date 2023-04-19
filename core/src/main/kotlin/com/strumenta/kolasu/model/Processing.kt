@@ -146,7 +146,7 @@ val ASTNode.nextSibling: ASTNode?
         if (this.parent != null) {
             val siblings = this.parent!!.children
             val index = siblings.indexOf(this)
-            return if (index == children.size - 1) null else siblings[index + 1]
+            return if (index == siblings.size - 1) null else siblings[index + 1]
         }
         return null
     }
@@ -231,7 +231,7 @@ fun ASTNode.indexInContainingProperty(): Int? {
     return if (p == null) {
         null
     } else if (p.value is Collection<*>) {
-        (p.value as Collection<*>).indexOf(this)
+        p.value.indexOf(this)
     } else {
         0
     }

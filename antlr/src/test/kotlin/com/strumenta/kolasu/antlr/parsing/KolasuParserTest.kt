@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.parsing
+package com.strumenta.kolasu.antlr.parsing
 
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.validation.Issue
@@ -12,15 +12,15 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class SimpleLangKolasuParser : KolasuParser<ASTNode, SimpleLangParser,
-    SimpleLangParser.CompilationUnitContext, KolasuANTLRToken>() {
+class SimpleLangKolasuParser : KolasuANTLRParser<ASTNode, SimpleLangParser, SimpleLangParser.CompilationUnitContext,
+    KolasuANTLRToken>(ANTLRTokenFactory()) {
     override fun createANTLRLexer(charStream: CharStream): Lexer {
         return SimpleLangLexer(charStream)
     }
 
-    override fun tokenInstantiator(t: Token): KolasuANTLRToken {
-        return KolasuANTLRToken(categoryOf(t), t)
-    }
+//    override fun tokenInstantiator(t: Token): KolasuANTLRToken {
+//        return KolasuANTLRToken(categoryOf(t), t)
+//    }
 
     override fun createANTLRParser(tokenStream: TokenStream): SimpleLangParser {
         return SimpleLangParser(tokenStream)
@@ -45,7 +45,7 @@ class KolasuParserTest {
         """.trimMargin()
         )
         assertNotNull(result)
-        val lexingResult = parser.extractTokens(result)
+        val lexingResult = parser.tokenFactory.extractTokens(result)
         assertNotNull(lexingResult)
         assertEquals(11, lexingResult.tokens.size)
         val text = lexingResult.tokens.map { it.text }

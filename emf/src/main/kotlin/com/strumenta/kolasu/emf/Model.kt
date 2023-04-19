@@ -2,8 +2,8 @@ package com.strumenta.kolasu.emf
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.model.*
-import com.strumenta.kolasu.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.EList
@@ -343,6 +343,13 @@ private fun setOrigin(
         is ParseTreeOrigin -> {
             // The ParseTreeOrigin is not saved in EMF as we do not want to replicate the whole parse-tree
             eo.eSet(originSF, null)
+        }
+        is SimpleOrigin -> {
+            val simpleOriginClass = STARLASU_METAMODEL.getEClass("SimpleOrigin")
+            val simpleOrigin = simpleOriginClass.instantiate()
+            simpleOrigin.eSet(simpleOriginClass.getEStructuralFeature("position"), origin.position?.toEObject())
+            simpleOrigin.eSet(simpleOriginClass.getEStructuralFeature("sourceText"), origin.sourceText)
+            eo.eSet(originSF, simpleOrigin)
         }
         else -> {
             throw IllegalStateException("Only origins representing Nodes or ParseTreeOrigins are currently supported")

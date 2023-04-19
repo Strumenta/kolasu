@@ -2,26 +2,11 @@ package com.strumenta.kolasu.testing
 
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.parsing.ParsingResult
-import com.strumenta.kolasu.parsing.toParseTreeModel
-import org.antlr.v4.runtime.ParserRuleContext
-import org.antlr.v4.runtime.Vocabulary
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
-fun assertParseTreeStr(
-    expectedMultiLineStr: String,
-    root: ParserRuleContext,
-    vocabulary: Vocabulary,
-    printParseTree: Boolean = true
-) {
-    val actualParseTree = toParseTreeModel(root, vocabulary).multiLineString()
-    if (printParseTree) {
-        println("parse tree:\n\n${actualParseTree}\n")
-    }
-    assertEquals(expectedMultiLineStr.trim(), actualParseTree.trim())
-}
-
 class IgnoreChildren<N : ASTNode> : List<N> {
+
     override val size: Int
         get() = TODO("Not yet implemented")
 
@@ -81,12 +66,14 @@ fun <N : ASTNode> assertASTsAreEqual(
     expected: ASTNode,
     actual: ParsingResult<N>,
     context: String = "<root>",
-    considerPosition: Boolean = false
+    considerPosition: Boolean = false,
 ) {
     assertEquals(0, actual.issues.size, actual.issues.toString())
     assertASTsAreEqual(
-        expected = expected, actual = actual.root!!, context = context,
-        considerPosition = considerPosition
+        expected = expected,
+        actual = actual.root!!,
+        context = context,
+        considerPosition = considerPosition,
     )
 }
 
@@ -94,7 +81,7 @@ fun assertASTsAreEqual(
     expected: ASTNode,
     actual: ASTNode,
     context: String = "<root>",
-    considerPosition: Boolean = false
+    considerPosition: Boolean = false,
 ) {
     if (expected::class == actual::class) {
         if (considerPosition) {
@@ -111,13 +98,15 @@ fun assertASTsAreEqual(
                         val actualPropValueCollection = actualPropValue?.let { it as Collection<ASTNode> }
                         val expectedPropValueCollection = expectedPropValue?.let { it as Collection<ASTNode> }
                         assertEquals(
-                            actualPropValueCollection == null, expectedPropValueCollection == null,
-                            "$context.${expectedProperty.name} nullness"
+                            actualPropValueCollection == null,
+                            expectedPropValueCollection == null,
+                            "$context.${expectedProperty.name} nullness",
                         )
                         if (actualPropValueCollection != null && expectedPropValueCollection != null) {
                             assertEquals(
-                                expectedPropValueCollection?.size, actualPropValueCollection?.size,
-                                "$context.${expectedProperty.name} length"
+                                expectedPropValueCollection?.size,
+                                actualPropValueCollection?.size,
+                                "$context.${expectedProperty.name} length",
                             )
                             val expectedIt = expectedPropValueCollection.iterator()
                             val actualIt = actualPropValueCollection.iterator()
@@ -129,13 +118,15 @@ fun assertASTsAreEqual(
                 } else {
                     if (expectedPropValue == null && actualPropValue != null) {
                         assertEquals<Any?>(
-                            expectedPropValue, actualPropValue,
-                            "$context.${expectedProperty.name}"
+                            expectedPropValue,
+                            actualPropValue,
+                            "$context.${expectedProperty.name}",
                         )
                     } else if (expectedPropValue != null && actualPropValue == null) {
                         assertEquals<Any?>(
-                            expectedPropValue, actualPropValue,
-                            "$context.${expectedProperty.name}"
+                            expectedPropValue,
+                            actualPropValue,
+                            "$context.${expectedProperty.name}",
                         )
                     } else if (expectedPropValue == null && actualPropValue == null) {
                         // that is ok
@@ -148,15 +139,16 @@ fun assertASTsAreEqual(
                 }
             } else {
                 assertEquals(
-                    expectedPropValue, actualPropValue,
-                    "$context, comparing property ${expectedProperty.name}"
+                    expectedPropValue,
+                    actualPropValue,
+                    "$context, comparing property ${expectedProperty.name}",
                 )
             }
         }
     } else {
         fail(
             "$context: expected node of type ${expected::class.qualifiedName}, " +
-                "but found ${actual::class.qualifiedName}"
+                "but found ${actual::class.qualifiedName}",
         )
     }
 }

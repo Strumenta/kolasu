@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.model
 
 import java.io.File
+import java.io.Serializable
 import java.net.URL
 import java.nio.file.Path
 
@@ -16,7 +17,7 @@ val START_POINT = Point(START_LINE, START_COLUMN)
  * - the point before the first character will be Point(1, 0)
  * - the point at the end of the first line, after the letter "O" will be Point(1, 5)
  */
-data class Point(val line: Int, val column: Int) : Comparable<Point> {
+data class Point(val line: Int, val column: Int) : Comparable<Point>, Serializable {
     override fun compareTo(other: Point): Int {
         if (line == other.line) {
             return this.column - other.column
@@ -114,7 +115,7 @@ fun linePosition(lineNumber: Int, lineCode: String, source: Source? = null): Pos
     return Position(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length), source)
 }
 
-abstract class Source {
+abstract class Source : Serializable {
     abstract val id: String?
 }
 
@@ -158,7 +159,7 @@ data class SyntheticSource(val description: String) : Source() {
  * Consider a file with one line, containing text "HELLO".
  * The Position of such text will be Position(Point(1, 0), Point(1, 5)).
  */
-data class Position(val start: Point, val end: Point, var source: Source? = null) : Comparable<Position> {
+data class Position(val start: Point, val end: Point, var source: Source? = null) : Comparable<Position>, Serializable {
 
     override fun toString(): String {
         return "Position(start=$start, end=$end${if (source == null) "" else ", source=$source"})"

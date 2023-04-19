@@ -5,21 +5,20 @@ import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
-import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
-import org.antlr.v4.runtime.*
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
+import java.io.Serializable
 import java.nio.charset.Charset
 
 open class CodeProcessingResult<D>(
     val issues: List<Issue>,
     val data: D?,
     val code: String? = null
-) {
+) : Serializable {
     val correct: Boolean
         get() = issues.none { it.severity != IssueSeverity.INFO }
 
@@ -55,14 +54,11 @@ data class TokenCategory(val type: String) {
 /**
  * A token is a portion of text that has been assigned a category.
  */
-open class KolasuToken(open val category: TokenCategory, open val position: Position, open val text: String)
-
-/**
- * A [KolasuToken] generated from a [Token]. The [token] contains additional information that is specific to ANTLR,
- * such as type and channel.
- */
-data class KolasuANTLRToken(override val category: TokenCategory, val token: Token) :
-    KolasuToken(category, token.position, token.text)
+open class KolasuToken(
+    open val category: TokenCategory,
+    open val position: Position,
+    open val text: String
+) : Serializable
 
 /**
  * The result of lexing (tokenizing) a stream.
@@ -91,39 +87,12 @@ class LexingResult<T : KolasuToken>(
     }
 }
 
-class FirstStageParsingResult<C : ParserRuleContext>(
-    issues: List<Issue>,
-    val root: C?,
-    code: String? = null,
-    val incompleteNode: ASTNode? = null,
-    val time: Long? = null,
-    val lexingTime: Long? = null,
-) : CodeProcessingResult<C>(issues, root, code) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is FirstStageParsingResult<*>) return false
-        if (!super.equals(other)) return false
 
-        if (root != other.root) return false
-        if (incompleteNode != other.incompleteNode) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + (root?.hashCode() ?: 0)
-        result = 31 * result + (incompleteNode?.hashCode() ?: 0)
-        return result
-    }
-}
-
-class ParsingResult<RootNode : ASTNode>(
+open class ParsingResult<RootNode : ASTNode>(
     issues: List<Issue>,
     val root: RootNode?,
     code: String? = null,
     val incompleteNode: ASTNode? = null,
-    val firstStage: FirstStageParsingResult<*>? = null,
     val time: Long? = null
 ) : CodeProcessingResult<RootNode>(issues, root, code) {
 
@@ -150,7 +119,7 @@ class ParsingResult<RootNode : ASTNode>(
 
 fun String.toStream(charset: Charset = Charsets.UTF_8) = ByteArrayInputStream(toByteArray(charset))
 
-interface KolasuLexer<T : KolasuToken> {
+interface KolasuLexer<T : KolasuToken> : Serializable {
 
     /**
      * Performs "lexing" on the given code string, i.e., it breaks it into tokens.
@@ -186,48 +155,4 @@ interface KolasuLexer<T : KolasuToken> {
      * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.
      */
     fun lex(file: File): LexingResult<T> = BufferedInputStream(FileInputStream(file)).use { lex(it) }
-}
-
-fun Lexer.injectErrorCollectorInLexer(issues: MutableList<Issue>) {
-    this.removeErrorListeners()
-    this.addErrorListener(object : BaseErrorListener() {
-        override fun syntaxError(
-            p0: Recognizer<*, *>?,
-            p1: Any?,
-            line: Int,
-            charPositionInLine: Int,
-            errorMessage: String?,
-            p5: RecognitionException?
-        ) {
-            issues.add(
-                Issue(
-                    IssueType.LEXICAL,
-                    errorMessage ?: "unspecified",
-                    position = Point(line, charPositionInLine).asPosition
-                )
-            )
-        }
-    })
-}
-
-fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
-    this.removeErrorListeners()
-    this.addErrorListener(object : BaseErrorListener() {
-        override fun syntaxError(
-            p0: Recognizer<*, *>?,
-            p1: Any?,
-            line: Int,
-            charPositionInLine: Int,
-            errorMessage: String?,
-            p5: RecognitionException?
-        ) {
-            issues.add(
-                Issue(
-                    IssueType.SYNTACTIC,
-                    errorMessage ?: "unspecified",
-                    position = Point(line, charPositionInLine).asPosition
-                )
-            )
-        }
-    })
 }

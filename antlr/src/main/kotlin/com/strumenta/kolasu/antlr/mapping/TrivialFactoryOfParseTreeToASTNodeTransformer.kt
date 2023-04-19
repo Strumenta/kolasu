@@ -1,20 +1,22 @@
-package com.strumenta.kolasu.transformation
+package com.strumenta.kolasu.antlr.mapping
 
-import com.strumenta.kolasu.mapping.ParseTreeToASTTransformer
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.children
+import com.strumenta.kolasu.transformation.ASTTransformer
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.TerminalNode
 import kotlin.reflect.KCallable
 import kotlin.reflect.KType
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
 
-object TrivialFactoryOfParseTreeToASTNodeFactory {
+object TrivialFactoryOfParseTreeToASTNodeTransformer {
 
     fun convertString(text: String, astTransformer: ASTTransformer, expectedType: KType): Any? {
         return when (expectedType.classifier) {
@@ -42,7 +44,14 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
                 return value.map { convert(it, astTransformer, expectedType.arguments[0].type!!) }
             }
             is ParserRuleContext -> {
-                return astTransformer.transform(value)
+                return when (expectedType) {
+                    String::class.createType(), String::class.createType(nullable = true) -> {
+                        value.text
+                    }
+                    else -> {
+                        astTransformer.transform(value)
+                    }
+                }
             }
             null -> {
                 return null
@@ -54,19 +63,24 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
         }
     }
 
-    inline fun <S : RuleContext, reified T : ASTNode> trivialFactory(vararg nameConversions: Pair<String, String>): (
+    inline fun <S : RuleContext, reified T : ASTNode> trivialTransformer(vararg nameConversions: Pair<String, String>): (
         S,
         ASTTransformer
     ) -> T? {
         return { parseTreeNode, astTransformer ->
             val constructors = T::class.constructors
-            if (constructors.size != 1) {
-                throw java.lang.RuntimeException(
-                    "Trivial Factory supports only classes with exactly one constructor. " +
-                        "Class ${T::class.qualifiedName} has ${constructors.size}"
-                )
+            val constructor = if (constructors.size != 1) {
+                if (T::class.primaryConstructor != null) {
+                    T::class.primaryConstructor!!
+                } else {
+                    throw java.lang.RuntimeException(
+                        "Trivial Factory supports only classes with exactly one constructor or a " +
+                            "primary constructor. Class ${T::class.qualifiedName} has ${constructors.size}"
+                    )
+                }
+            } else {
+                constructors.first()
             }
-            val constructor = constructors.first()
             val args: Array<Any?> = constructor.parameters.map {
                 val parameterName = it.name
                 val searchedName = nameConversions.find { it.second == parameterName }?.first ?: parameterName
@@ -108,9 +122,9 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
 inline fun <reified S : RuleContext, reified T : ASTNode> ASTTransformer.registerTrivialPTtoASTConversion(
     vararg nameConversions: Pair<String, String>
 ) {
-    this.registerNodeFactory(
+    this.registerNodeTransformer(
         S::class,
-        TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<S, T>(*nameConversions)
+        TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<S, T>(*nameConversions)
     )
 }
 
@@ -123,9 +137,8 @@ inline fun <reified S : RuleContext, reified T : ASTNode> ParseTreeToASTTransfor
     )
 }
 
-inline fun <reified S : RuleContext,
-    reified T : ASTNode> ParseTreeToASTTransformer.unwrap(wrappingMember: KCallable<*>) {
-    this.registerNodeFactory(S::class) { parseTreeNode, astTransformer ->
+inline fun <reified S : RuleContext, reified T : ASTNode> ParseTreeToASTTransformer.unwrap(wrappingMember: KCallable<*>) {
+    this.registerNodeTransformer(S::class) { parseTreeNode, astTransformer ->
         val wrapped = wrappingMember.call(parseTreeNode)
         astTransformer.transform(wrapped) as T?
     }

@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.PropertyTypeDescription
 import com.strumenta.kolasu.model.processProperties
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
+import java.io.Serializable
 import java.util.*
 import kotlin.reflect.*
 import kotlin.reflect.full.isSubclassOf
@@ -158,7 +159,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         registerKClassForEClass(kClass, eClass)
 
         kClass.superclasses.forEach {
-            if (it != Any::class) {
+            if (it != Any::class && it != Serializable::class) {
                 eClass.eSuperTypes.add(provideClass(it))
             }
         }

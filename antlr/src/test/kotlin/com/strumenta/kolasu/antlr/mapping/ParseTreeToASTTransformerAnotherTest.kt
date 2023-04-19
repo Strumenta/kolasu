@@ -1,34 +1,19 @@
-package com.strumenta.kolasu.transformation
+package com.strumenta.kolasu.antlr.mapping
 
-import com.strumenta.kolasu.mapping.ParseTreeToASTTransformer
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.simplelang.AntlrEntityLexer
 import com.strumenta.simplelang.AntlrEntityParser
+import com.strumenta.simplelang.AntlrEntityParser.*
 import com.strumenta.simplelang.AntlrEntityParser.Boolean_typeContext
-import com.strumenta.simplelang.AntlrEntityParser.EntityContext
 import com.strumenta.simplelang.AntlrEntityParser.Entity_typeContext
-import com.strumenta.simplelang.AntlrEntityParser.FeatureContext
-import com.strumenta.simplelang.AntlrEntityParser.ModuleContext
 import com.strumenta.simplelang.AntlrEntityParser.String_typeContext
 import com.strumenta.simplelang.AntlrScriptLexer
 import com.strumenta.simplelang.AntlrScriptParser
-import com.strumenta.simplelang.AntlrScriptParser.Concat_expressionContext
-import com.strumenta.simplelang.AntlrScriptParser.Create_statementContext
-import com.strumenta.simplelang.AntlrScriptParser.Div_mult_expressionContext
-import com.strumenta.simplelang.AntlrScriptParser.Entity_by_id_expressionContext
-import com.strumenta.simplelang.AntlrScriptParser.Feature_access_expressionContext
-import com.strumenta.simplelang.AntlrScriptParser.Int_literal_expressionContext
-import com.strumenta.simplelang.AntlrScriptParser.Parens_expressionContext
-import com.strumenta.simplelang.AntlrScriptParser.Print_statementContext
-import com.strumenta.simplelang.AntlrScriptParser.ScriptContext
-import com.strumenta.simplelang.AntlrScriptParser.Set_statementContext
-import com.strumenta.simplelang.AntlrScriptParser.String_literal_expressionContext
-import com.strumenta.simplelang.AntlrScriptParser.Sum_sub_expressionContext
+import com.strumenta.simplelang.AntlrScriptParser.*
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
@@ -64,7 +49,7 @@ data class SConcat(val left: SExpression, val right: SExpression) : SExpression(
 data class SFeatureAccess(val feature: ReferenceByName<EFeature>, val container: SExpression) : SExpression()
 data class SInstanceById(val entity: ReferenceByName<EEntity>, val index: SExpression) : SExpression()
 
-class ParseTreeToASTTransformerTest {
+class ParseTreeToASTTransformerAnotherTest {
 
     class MyErrorListener : ANTLRErrorListener {
         override fun syntaxError(
@@ -215,30 +200,30 @@ class ParseTreeToASTTransformerTest {
         transformer.registerTrivialPTtoASTConversion<Int_literal_expressionContext, SIntegerLiteral>(
             Int_literal_expressionContext::INT_VALUE to SIntegerLiteral::value
         )
-        transformer.registerNodeFactory(String_literal_expressionContext::class) { pt, t ->
+        transformer.registerNodeTransformer(String_literal_expressionContext::class) { pt, t ->
             SStringLiteral(pt.text.removePrefix("'").removeSuffix("'"))
         }
-        transformer.registerNodeFactory(Div_mult_expressionContext::class) { pt, t ->
+        transformer.registerNodeTransformer(Div_mult_expressionContext::class) { pt, t ->
             when (pt.op.text) {
                 "/" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
+                    TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         Div_mult_expressionContext, SDivision>()(pt, t)
                 }
                 "*" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
+                    TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         Div_mult_expressionContext, SMultiplication>()(pt, t)
                 }
                 else -> TODO()
             }
         }
-        transformer.registerNodeFactory(Sum_sub_expressionContext::class) { pt, t ->
+        transformer.registerNodeTransformer(Sum_sub_expressionContext::class) { pt, t ->
             when (pt.op.text) {
                 "+" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
+                    TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         Sum_sub_expressionContext, SSum>()(pt, t)
                 }
                 "-" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
+                    TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         Sum_sub_expressionContext, SSubtraction>()(pt, t)
                 }
                 else -> TODO()
