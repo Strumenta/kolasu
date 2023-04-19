@@ -2,25 +2,19 @@ package com.strumenta.kolasu.emf.cli
 
 import com.github.ajalt.clikt.core.PrintHelpMessage
 import com.github.ajalt.clikt.output.CliktConsole
+import com.strumenta.kolasu.antlr.parsing.ANTLRTokenFactory
 import com.strumenta.kolasu.antlr.parsing.KolasuANTLRToken
 import com.strumenta.kolasu.antlr.parsing.ParsingResultWithFirstStage
 import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.parsing.LexingResult
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
-import org.antlr.v4.runtime.CharStream
-import org.antlr.v4.runtime.Lexer
-import org.antlr.v4.runtime.Parser
-import org.antlr.v4.runtime.ParserRuleContext
-import org.antlr.v4.runtime.TokenStream
-import org.antlr.v4.runtime.tree.TerminalNode
+import org.antlr.v4.runtime.*
 import org.eclipse.emf.ecore.resource.Resource
 import org.junit.Test
 import java.io.File
-import java.io.InputStream
 import java.nio.charset.Charset
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.pathString
@@ -31,7 +25,9 @@ data class MyCompilationUnit(val decls: List<MyEntityDecl>) : Node()
 data class MyEntityDecl(override var name: String, val fields: List<MyFieldDecl>) : Node(), Named
 data class MyFieldDecl(override var name: String) : Node(), Named
 
-class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleContext, KolasuANTLRToken>() {
+class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleContext, KolasuANTLRToken>(
+    ANTLRTokenFactory()
+) {
     override fun doGenerateMetamodel(resource: Resource) {
         val mmbuilder = MetamodelBuilder("com.strumenta.kolasu.emf.cli", "https://dummy.com/mm", "dm")
         mmbuilder.provideClass(MyCompilationUnit::class)
@@ -47,12 +43,6 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
         TODO("Not yet implemented")
     }
 
-    val expectedResults = HashMap<File, ParsingResult<MyCompilationUnit>>()
-
-    override fun parse(file: File, charset: Charset, considerRange: Boolean): ParsingResult<MyCompilationUnit> {
-        return expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
-    }
-
     override fun createANTLRParser(tokenStream: TokenStream): Parser {
         TODO("Not yet implemented")
     }
@@ -65,20 +55,14 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
         TODO("Not yet implemented")
     }
 
-    override fun convertToken(terminalNode: TerminalNode): KolasuANTLRToken {
-        TODO("Not yet implemented")
-    }
-
     override fun createANTLRLexer(inputStream: CharStream): Lexer {
         TODO("Not yet implemented")
     }
 
-    override fun lex(
-        inputStream: InputStream,
-        charset: Charset,
-        onlyFromDefaultChannel: Boolean
-    ): LexingResult<KolasuANTLRToken> {
-        TODO("Not yet implemented")
+    val expectedResults = HashMap<File, ParsingResult<MyCompilationUnit>>()
+
+    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<MyCompilationUnit> {
+        return expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
     }
 }
 
