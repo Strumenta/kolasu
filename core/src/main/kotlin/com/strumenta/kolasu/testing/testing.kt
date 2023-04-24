@@ -129,9 +129,11 @@ fun assertASTsAreEqual(
                             val expectedIt = expectedPropValueCollection.iterator()
                             val actualIt = actualPropValueCollection.iterator()
                             for (i in expectedPropValueCollection.indices) {
-                                assertASTsAreEqual(expectedIt.next(), actualIt.next(), "$context[$i]",
+                                assertASTsAreEqual(
+                                    expectedIt.next(), actualIt.next(), "$context[$i]",
                                     considerPosition = considerPosition,
-                                    useLightweightAttributeEquality = useLightweightAttributeEquality)
+                                    useLightweightAttributeEquality = useLightweightAttributeEquality
+                                )
                             }
                         }
                     }
