@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
  * all the StarLasu platforms
  */
 abstract class ASTCodeGenerator<R : Node> {
-    protected val nodePrinters: MutableMap<KClass<*>, NodePrinter> = HashMap<KClass<*>, NodePrinter>()
+    protected val nodePrinters: MutableMap<KClass<*>, NodePrinter> = HashMap()
     var nodePrinterOverrider: (node: Node) -> NodePrinter? = { _ -> null }
 
     protected abstract fun registerRecordPrinters()
