@@ -97,13 +97,16 @@ fun assertASTsAreEqual(
     actual: Node,
     context: String = "<root>",
     considerPosition: Boolean = false,
+    useLightweightAttributeEquality: Boolean = false
 ) {
-    if (expected::class == actual::class) {
+    if (expected.nodeType == actual.nodeType) {
         if (considerPosition) {
             assertEquals(expected.position, actual.position, "$context.position")
         }
         expected.properties.forEach { expectedProperty ->
-            val actualPropValue = actual.properties.find { it.name == expectedProperty.name }!!.value
+            val actualProperty = actual.properties.find { it.name == expectedProperty.name }
+                ?: fail("No property ${expectedProperty.name} found at $context")
+            val actualPropValue = actualProperty.value
             val expectedPropValue = expectedProperty.value
             if (expectedProperty.provideNodes) {
                 if (expectedProperty.multiple) {
@@ -126,7 +129,11 @@ fun assertASTsAreEqual(
                             val expectedIt = expectedPropValueCollection.iterator()
                             val actualIt = actualPropValueCollection.iterator()
                             for (i in expectedPropValueCollection.indices) {
-                                assertASTsAreEqual(expectedIt.next(), actualIt.next(), "$context[$i]")
+                                assertASTsAreEqual(
+                                    expectedIt.next(), actualIt.next(), "$context[$i]",
+                                    considerPosition = considerPosition,
+                                    useLightweightAttributeEquality = useLightweightAttributeEquality
+                                )
                             }
                         }
                     }
@@ -150,21 +157,31 @@ fun assertASTsAreEqual(
                             expectedPropValue as Node,
                             actualPropValue as Node,
                             context = "$context.${expectedProperty.name}",
+                            considerPosition = considerPosition,
+                            useLightweightAttributeEquality = useLightweightAttributeEquality
                         )
                     }
                 }
             } else {
-                assertEquals(
-                    expectedPropValue,
-                    actualPropValue,
-                    "$context, comparing property ${expectedProperty.name}",
-                )
+                if (useLightweightAttributeEquality) {
+                    assertEquals(
+                        expectedPropValue?.toString(),
+                        actualPropValue?.toString(),
+                        "$context, comparing property ${expectedProperty.name}",
+                    )
+                } else {
+                    assertEquals(
+                        expectedPropValue,
+                        actualPropValue,
+                        "$context, comparing property ${expectedProperty.name}",
+                    )
+                }
             }
         }
     } else {
         fail(
-            "$context: expected node of type ${expected::class.qualifiedName}, " +
-                "but found ${actual::class.qualifiedName}",
+            "$context: expected node of type ${expected.nodeType}, " +
+                "but found ${actual.nodeType}",
         )
     }
 }
