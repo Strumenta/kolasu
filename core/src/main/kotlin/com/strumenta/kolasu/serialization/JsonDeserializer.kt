@@ -151,7 +151,7 @@ class JsonDeserializer {
     }
 }
 
-private fun JsonObject.decodeAsPosition(): Position {
+fun JsonObject.decodeAsPosition(): Position {
     val start = this["start"]!!.asJsonObject.decodeAsPoint()
     val end = this["end"]!!.asJsonObject.decodeAsPoint()
     return Position(start, end)
