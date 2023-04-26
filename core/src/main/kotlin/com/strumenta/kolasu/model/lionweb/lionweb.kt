@@ -186,7 +186,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         kClass: KClass<*>,
         mapper: (metamodelElement: ME) -> Unit
     ) {
-        metamodelElement.simpleName = kClass.simpleName
+        metamodelElement.name = kClass.simpleName
         metamodelElement.id = this.key + "-" + kClass.simpleName
         metamodelElement.key = this.key + "-" + kClass.simpleName
 
@@ -259,7 +259,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
             kClass.java.enumConstants.forEach { enumConstant ->
                 val literal = EnumerationLiteral()
                 literal.id = kClass.simpleName + "-" + enumConstant.toString()
-                literal.simpleName = kClass.simpleName
+                literal.name = kClass.simpleName
                 enumeration.addLiteral(literal)
             }
         } else if (kClass.isInterface) {
@@ -288,7 +288,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     }
 
     private fun populateKotlinProperty(featuresContainer: FeaturesContainer<*>, kotlinProperty: KProperty1<*, *>) {
-        if (featuresContainer.allFeatures().any { it.simpleName == kotlinProperty.name }) {
+        if (featuresContainer.allFeatures().any { it.name == kotlinProperty.name }) {
             // we are overriding an existing property, ignoring
             return
         }
@@ -312,7 +312,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
 
     private fun populateProperty(featuresContainer: FeaturesContainer<*>, kotlinProperty: KProperty1<in ASTNode, *>) {
         val property = Property()
-        property.simpleName = kotlinProperty.name
+        property.name = kotlinProperty.name
         property.id = kotlinProperty.name
         property.key = "${featuresContainer.key}-${kotlinProperty.name}"
         when (kotlinProperty.returnType.classifier) {
@@ -357,7 +357,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         kotlinProperty: KProperty1<in ASTNode, *>
     ) {
         val containment = Containment()
-        containment.simpleName = kotlinProperty.name
+        containment.name = kotlinProperty.name
         containment.id = kotlinProperty.name
         containment.key = "${featuresContainer.key}-${kotlinProperty.name}"
         if ((kotlinProperty.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }
@@ -376,7 +376,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
 
     private fun populateReference(featuresContainer: FeaturesContainer<*>, kotlinProperty: KProperty1<*, *>) {
         val reference = Reference()
-        reference.simpleName = kotlinProperty.name
+        reference.name = kotlinProperty.name
         reference.id = kotlinProperty.name
         reference.key = "${featuresContainer.key}-${kotlinProperty.name}"
         val referenceTargetType = kotlinProperty.returnType.arguments[0].type!!
