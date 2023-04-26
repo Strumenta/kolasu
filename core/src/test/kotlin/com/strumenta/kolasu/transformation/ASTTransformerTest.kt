@@ -1,8 +1,6 @@
 package com.strumenta.kolasu.transformation
 
-import com.strumenta.kolasu.model.ASTNode
-import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.model.hasValidParents
+import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.validation.Issue
@@ -11,9 +9,37 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+data class EModule(override val name: String, val entities: MutableList<EEntity>) : ASTNode(), Named
+data class EEntity(override val name: String, val features: MutableList<EFeature>) : ASTNode(), Named
+
+data class EFeature(override val name: String, val type: EType) : ASTNode(), Named
+
+sealed class EType : ASTNode()
+class EStringType : EType()
+class EBooleanType : EType()
+data class EEntityRefType(val entity: ReferenceByName<EEntity>) : EType()
+
+data class SScript(val statements: MutableList<SStatement>) : ASTNode()
+sealed class SStatement : ASTNode()
+data class SCreateStatement(val entity: ReferenceByName<EEntity>, val name: String? = null) : SStatement()
+data class SSetStatement(val feature: ReferenceByName<EFeature>, val instance: SExpression, val value: SExpression) :
+    SStatement()
+data class SPrintStatement(val message: SExpression) : SStatement()
+
+sealed class SExpression : ASTNode()
+data class SStringLiteral(val value: String) : SExpression()
+data class SIntegerLiteral(val value: Int) : SExpression()
+data class SDivision(val left: SExpression, val right: SExpression) : SExpression()
+data class SSubtraction(val left: SExpression, val right: SExpression) : SExpression()
+data class SMultiplication(val left: SExpression, val right: SExpression) : SExpression()
+data class SSum(val left: SExpression, val right: SExpression) : SExpression()
+data class SConcat(val left: SExpression, val right: SExpression) : SExpression()
+data class SFeatureAccess(val feature: ReferenceByName<EFeature>, val container: SExpression) : SExpression()
+data class SInstanceById(val entity: ReferenceByName<EEntity>, val index: SExpression) : SExpression()
+
 object Metamodel : ReflectionBasedMetamodel(
     SScript::class, EModule::class, CU::class,
-    DisplayIntStatement::class, SetStatement::class
+    DisplayIntStatement::class, SetStatement::class, SStatement::class
 )
 
 data class CU(

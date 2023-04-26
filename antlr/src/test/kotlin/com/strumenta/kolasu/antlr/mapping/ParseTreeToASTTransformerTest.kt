@@ -18,7 +18,11 @@ import kotlin.test.assertTrue
 val mm by lazy {
 }
 
-object Metamodel : ReflectionBasedMetamodel(CU::class, SetStatement::class, DisplayIntStatement::class)
+object Metamodel : ReflectionBasedMetamodel(
+    CU::class, SetStatement::class, DisplayIntStatement::class,
+    EEntity::class, EModule::class,
+    SStatement::class, SScript::class
+)
 
 data class CU(
     val specifiedPosition: Position? = null,

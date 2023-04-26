@@ -3,6 +3,7 @@ package com.strumenta.kolasu.symbolresolution
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.model.commonelements.Expression
 import com.strumenta.kolasu.model.commonelements.Statement
+import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import com.strumenta.kolasu.traversing.findAncestorOfType
 import org.junit.Test
 
@@ -138,6 +139,8 @@ val symbolResolver = declarativeSymbolResolver {
         Scope().apply { compilationUnit.content.forEach { this.define(it) } }
     }
 }
+
+object Metamodel : ReflectionBasedMetamodel(CompilationUnit::class, ClassDecl::class)
 
 class SymbolResolutionTest {
 
