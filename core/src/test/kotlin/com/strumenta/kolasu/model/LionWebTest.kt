@@ -7,6 +7,7 @@ import com.strumenta.kolasu.model.lionweb.concept
 import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertSame
 
 object Metamodel : ReflectionBasedMetamodel(
     "MyMetamodelID", "MyMetamodelFoo", MySimpleNode::class,
@@ -88,6 +89,8 @@ class LionWebTest {
     fun getConceptMySimpleNode() {
         val node = MySimpleNode(false, emptyList())
         val c = node.concept
+
+        assertSame(Metamodel, c.parent)
 
         assertEquals("MySimpleNode", c.name)
 
