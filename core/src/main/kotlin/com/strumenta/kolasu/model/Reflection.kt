@@ -186,6 +186,7 @@ data class PropertyTypeDescription(
     }
 }
 
+@Deprecated("Use LionWeb based reflection instead")
 enum class Multiplicity {
     OPTIONAL,
     SINGULAR,
