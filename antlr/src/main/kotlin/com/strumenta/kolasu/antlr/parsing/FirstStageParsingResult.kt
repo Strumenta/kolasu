@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.antlr.parsing
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.parsing.CodeProcessingResult
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.runtime.ParserRuleContext
@@ -9,7 +9,7 @@ class FirstStageParsingResult<C : ParserRuleContext>(
     issues: List<Issue>,
     val root: C?,
     code: String? = null,
-    val incompleteNode: Node? = null,
+    val incompleteNode: ASTNode? = null,
     val time: Long? = null,
     val lexingTime: Long? = null,
 ) : CodeProcessingResult<C>(issues, root, code) {

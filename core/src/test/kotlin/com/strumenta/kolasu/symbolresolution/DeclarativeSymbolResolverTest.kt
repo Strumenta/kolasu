@@ -1,20 +1,18 @@
 package com.strumenta.kolasu.symbolresolution
 
-import com.strumenta.kolasu.model.Expression
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.Statement
-import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.commonelements.Expression
+import com.strumenta.kolasu.model.commonelements.Statement
 import com.strumenta.kolasu.traversing.findAncestorOfType
 import org.junit.Test
 
 data class CompilationUnit(
     var content: MutableList<TypeDecl> = mutableListOf(),
-) : Node()
+) : ASTNode()
 
 open class TypeDecl(
     override val name: String,
-) : Node(), Symbol
+) : ASTNode(), Symbol
 
 data class ClassDecl(
     override val name: String,
@@ -26,21 +24,21 @@ data class ClassDecl(
 data class FeatureDecl(
     override val name: String,
     var type: ReferenceByName<TypeDecl>,
-) : Node(), Symbol
+) : ASTNode(), Symbol
 
 data class OperationDecl(
     override val name: String,
     var parameters: MutableList<ParameterDecl> = mutableListOf(),
     var statements: MutableList<StmtNode> = mutableListOf(),
     var returns: ReferenceByName<TypeDecl>? = null,
-) : Node(), Symbol
+) : ASTNode(), Symbol
 
 data class ParameterDecl(
     override val name: String,
     var type: ReferenceByName<TypeDecl>,
-) : Node(), Symbol
+) : ASTNode(), Symbol
 
-sealed class StmtNode : Node(), Statement
+sealed class StmtNode : ASTNode(), Statement
 
 data class DeclarationStmt(
     override val name: String,
@@ -52,7 +50,7 @@ data class AssignmentStmt(
     var rhs: ExprNode,
 ) : StmtNode()
 
-sealed class ExprNode : Node(), Expression
+sealed class ExprNode : ASTNode(), Expression
 
 // a.v.c.d
 data class RefExpr(

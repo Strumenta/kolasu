@@ -33,16 +33,16 @@ data class DeclarativeSymbolResolver(val issues: MutableList<Issue> = mutableLis
 
     private tailrec fun tryGetScopeForProperty(reference: ReferenceByNameProperty, context: ASTNode): Scope? {
         return this.tryGetScope(this.propertyScopeDefinitions[reference], context)
-            ?: if (context.parent == null) { null } else {
-                return tryGetScopeForProperty(reference, context.parent!!)
+            ?: if (context.getParent() == null) { null } else {
+                return tryGetScopeForProperty(reference, context.getParent()!!)
             }
     }
 
     private tailrec fun tryGetScopeForPropertyType(reference: ReferenceByNameProperty, context: ASTNode): Scope? {
         val referenceType = reference.returnType.arguments[0].type!!.classifier!!
         return tryGetScope(classScopeDefinitions[referenceType], context)
-            ?: if (context.parent == null) { null } else {
-                return tryGetScopeForPropertyType(reference, context.parent!!)
+            ?: if (context.getParent() == null) { null } else {
+                return tryGetScopeForPropertyType(reference, context.getParent()!!)
             }
     }
 

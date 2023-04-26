@@ -2,7 +2,7 @@ package com.strumenta.kolasu.antlr.model
 
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.antlr.parsing.toPosition
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.simplelang.SimpleLangLexer
@@ -13,7 +13,7 @@ import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.test.assertEquals
 import org.junit.Test as test
 
-data class MySetStatement(val specifiedPosition: Position? = null) : Node(specifiedPosition)
+data class MySetStatement(val specifiedPosition: Position? = null) : ASTNode(specifiedPosition)
 
 class PositionTest {
 
