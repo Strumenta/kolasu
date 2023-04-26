@@ -30,14 +30,14 @@ class LionWebTest {
     @Test
     fun getConceptMySimpleNodeStatically() {
         val c = MySimpleNode::class.concept
-        assertEquals("MySimpleNode", c.simpleName)
+        assertEquals("MySimpleNode", c.name)
         assertEquals("MyMetamodelFoo", c.metamodel?.name)
         assertEquals("MyMetamodelID", c.metamodel?.id)
 
         assertEquals(1, c.allProperties().size)
 
         val bProperty = c.getPropertyByName("b")!!
-        assertEquals("b", bProperty.simpleName)
+        assertEquals("b", bProperty.name)
         assertEquals(LionCoreBuiltins.getBoolean(), bProperty.type)
         assertEquals(false, bProperty.isDerived)
         assertEquals(false, bProperty.isOptional)
@@ -45,8 +45,8 @@ class LionWebTest {
 
         assertEquals(1, c.allContainments().size)
         val othersContainment = c.getContainmentByName("others")!!
-        assertEquals("others", othersContainment.simpleName)
-        assertEquals("MyOtherNode", othersContainment.type!!.simpleName)
+        assertEquals("others", othersContainment.name)
+        assertEquals("MyOtherNode", othersContainment.type!!.name)
         assertEquals(false, othersContainment.isDerived)
         assertEquals(false, othersContainment.isOptional)
         assertEquals(true, othersContainment.isMultiple)
@@ -58,7 +58,7 @@ class LionWebTest {
     @Test
     fun getConceptMyOtherNodeStatically() {
         val c = MyOtherNode::class.concept
-        assertEquals("MyOtherNode", c.simpleName)
+        assertEquals("MyOtherNode", c.name)
         assertEquals("MyMetamodelFoo.MyOtherNode", c.qualifiedName())
         assertEquals("MyMetamodelFoo", c.metamodel?.name)
         assertEquals("MyMetamodelID", c.metamodel?.id)
@@ -66,14 +66,14 @@ class LionWebTest {
         assertEquals(2, c.allProperties().size)
 
         val iProperty = c.getPropertyByName("i")!!
-        assertEquals("i", iProperty.simpleName)
+        assertEquals("i", iProperty.name)
         assertEquals(LionCoreBuiltins.getInteger(), iProperty.type)
         assertEquals(false, iProperty.isDerived)
         assertEquals(false, iProperty.isOptional)
         assertEquals(true, iProperty.isRequired)
 
         val sProperty = c.getPropertyByName("s")!!
-        assertEquals("s", sProperty.simpleName)
+        assertEquals("s", sProperty.name)
         assertEquals(LionCoreBuiltins.getString(), sProperty.type)
         assertEquals(false, sProperty.isDerived)
         assertEquals(false, sProperty.isOptional)
@@ -89,12 +89,12 @@ class LionWebTest {
         val node = MySimpleNode(false, emptyList())
         val c = node.concept
 
-        assertEquals("MySimpleNode", c.simpleName)
+        assertEquals("MySimpleNode", c.name)
 
         assertEquals(1, c.allProperties().size)
 
         val bProperty = c.getPropertyByName("b")!!
-        assertEquals("b", bProperty.simpleName)
+        assertEquals("b", bProperty.name)
         assertEquals(LionCoreBuiltins.getBoolean(), bProperty.type)
         assertEquals(false, bProperty.isDerived)
         assertEquals(false, bProperty.isOptional)
@@ -102,8 +102,8 @@ class LionWebTest {
 
         assertEquals(1, c.allContainments().size)
         val othersContainment = c.getContainmentByName("others")!!
-        assertEquals("others", othersContainment.simpleName)
-        assertEquals("MyOtherNode", othersContainment.type!!.simpleName)
+        assertEquals("others", othersContainment.name)
+        assertEquals("MyOtherNode", othersContainment.type!!.name)
         assertEquals(false, othersContainment.isDerived)
         assertEquals(false, othersContainment.isOptional)
         assertEquals(true, othersContainment.isMultiple)
