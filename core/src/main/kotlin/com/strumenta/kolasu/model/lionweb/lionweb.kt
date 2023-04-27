@@ -6,7 +6,8 @@ import org.lionweb.lioncore.java.metamodel.*
 import org.lionweb.lioncore.java.metamodel.Metamodel
 import org.lionweb.lioncore.java.serialization.JsonSerialization
 import org.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization
-import java.lang.IllegalStateException
+import org.lionweb.lioncore.java.utils.MetamodelValidator
+import kotlin.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KProperty1
@@ -45,6 +46,10 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         mappedConcepts.forEach { recordConceptForClass(it.key.java, it.value) }
         mappedConceptInterfaces.forEach { recordConceptInterfaceForClass(it.key.java, it.value) }
         mappedEnumerations.forEach { recordEnumerationForClass(it.key.java, it.value) }
+        val validationResult = MetamodelValidator().validate(this)
+        if (!validationResult.isSuccessful) {
+            throw IllegalStateException("The Metamodel obtained through reflection is invalid: $validationResult")
+        }
     }
 
     // /
