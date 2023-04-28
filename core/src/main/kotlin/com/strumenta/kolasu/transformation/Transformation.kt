@@ -389,14 +389,14 @@ open class ASTTransformer(
         registerKnownClass(target)
         // We are looking for any constructor with does not take parameters or have default
         // values for all its parameters
-        val emptyConstructor = target.constructors.find { it.parameters.all { param -> param.isOptional } }
-        val nodeFactory = NodeFactory({ source: S, _, f ->
+        val emptyLikeConstructor = target.constructors.find { it.parameters.all { param -> param.isOptional } }
+        val nodeFactory = NodeFactory({ source: S, _, thisFactory ->
             if (target.isSealed) {
                 throw IllegalStateException("Unable to instantiate sealed class $target")
             }
             fun getConstructorParameterValue(kParameter: KParameter): ParameterValue {
                 try {
-                    val childNodeFactory = f.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!)
+                    val childNodeFactory = thisFactory.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!)
                     if (childNodeFactory == null) {
                         if (kParameter.isOptional) {
                             return AbsentParameterValue
@@ -435,7 +435,11 @@ open class ASTTransformer(
                     )
                 }
             }
-            if (emptyConstructor == null) {
+            // We check `childrenSetAtConstruction` and not `emptyLikeConstructor` because, while we set this value
+            // initially based on `emptyLikeConstructor` being equal to null, this can be later changed in `withChild`,
+            // so we should really check the value that `childrenSetAtConstruction` time has when we actually invoke
+            // the factory.
+            if (thisFactory.childrenSetAtConstruction) {
                 val constructor = target.preferredConstructor()
                 val constructorParamValues = constructor.parameters.map { it to getConstructorParameterValue(it) }
                     .filter { it.second is PresentParameterValue }
@@ -451,9 +455,17 @@ open class ASTTransformer(
                     )
                 }
             } else {
+                if (emptyLikeConstructor == null) {
+                    throw RuntimeException("childrenSetAtConstruction is set but there is no empty like " +
+                            "constructor for $target")
+                }
                 target.createInstance()
             }
-        }, childrenSetAtConstruction = emptyConstructor == null)
+        },
+            // If I do not have an emptyLikeConstructor, then I am forced to invoke a constructor with parameters and
+            // therefore setting the children at construction time.
+            // Note that we are assuming that either we set no children at construction time or we set all of them
+            childrenSetAtConstruction = emptyLikeConstructor == null)
         factories[source] = nodeFactory
         return nodeFactory
     }
