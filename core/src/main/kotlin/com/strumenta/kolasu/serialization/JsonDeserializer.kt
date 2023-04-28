@@ -151,7 +151,7 @@ class JsonDeserializer {
     }
 }
 
-private fun JsonObject.decodeAsRange(): Range {
+fun JsonObject.decodeAsRange(): Range {
     val start = this["start"]!!.asJsonObject.decodeAsPoint()
     val end = this["end"]!!.asJsonObject.decodeAsPoint()
     return Range(start, end)

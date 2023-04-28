@@ -5,6 +5,8 @@ import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
+import java.lang.IllegalStateException
+import kotlin.reflect.KClass
 
 /**
  * Navigate the parse tree performing the specified operations on the nodes, either real nodes or nodes
@@ -141,5 +143,25 @@ fun ParseTree.toRange(considerRange: Boolean = true, source: Source? = null): Ra
         is TerminalNode -> this.toRange(considerRange, source)
         is ParserRuleContext -> this.toRange(considerRange, source)
         else -> null
+    }
+}
+
+/**
+ * Find the ancestor of the given element with the given class.
+ */
+inline fun <reified T : RuleContext> RuleContext.ancestor(): T {
+    return this.ancestor(T::class)
+}
+
+/**
+ * Find the ancestor of the given element with the given class.
+ */
+fun <T : RuleContext> RuleContext.ancestor(kclass: KClass<T>): T {
+    return if (this.parent == null) {
+        throw IllegalStateException("Cannot find ancestor of type $kclass")
+    } else if (kclass.isInstance(this.parent)) {
+        this.parent as T
+    } else {
+        this.parent.ancestor(kclass)
     }
 }

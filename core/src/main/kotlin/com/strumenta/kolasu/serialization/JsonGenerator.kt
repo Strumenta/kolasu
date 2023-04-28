@@ -318,7 +318,7 @@ private fun Any?.toJsonStreaming(writer: JsonWriter) {
     }
 }
 
-private fun Issue.toJson(): JsonElement {
+fun Issue.toJson(): JsonElement {
     return jsonObject(
         "type" to this.type.name,
         "message" to this.message,
@@ -342,7 +342,7 @@ private fun Issue.toJsonStreaming(writer: JsonWriter) {
     writer.endObject()
 }
 
-private fun Range.toJson(): JsonElement {
+fun Range.toJson(): JsonElement {
     return jsonObject(
         "description" to this.toString(),
         "start" to this.start.toJson(),

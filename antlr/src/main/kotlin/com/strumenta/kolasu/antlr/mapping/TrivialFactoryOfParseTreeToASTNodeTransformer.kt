@@ -5,6 +5,7 @@ import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.transformation.ASTTransformer
+import com.strumenta.kolasu.transformation.preferredConstructor
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token
@@ -14,7 +15,6 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
-import kotlin.reflect.full.primaryConstructor
 
 object TrivialFactoryOfParseTreeToASTNodeTransformer {
 
@@ -68,19 +68,7 @@ object TrivialFactoryOfParseTreeToASTNodeTransformer {
         ASTTransformer
     ) -> T? {
         return { parseTreeNode, astTransformer ->
-            val constructors = T::class.constructors
-            val constructor = if (constructors.size != 1) {
-                if (T::class.primaryConstructor != null) {
-                    T::class.primaryConstructor!!
-                } else {
-                    throw java.lang.RuntimeException(
-                        "Trivial Factory supports only classes with exactly one constructor or a " +
-                            "primary constructor. Class ${T::class.qualifiedName} has ${constructors.size}"
-                    )
-                }
-            } else {
-                constructors.first()
-            }
+            val constructor = T::class.preferredConstructor()
             val args: Array<Any?> = constructor.parameters.map {
                 val parameterName = it.name
                 val searchedName = nameConversions.find { it.second == parameterName }?.first ?: parameterName
