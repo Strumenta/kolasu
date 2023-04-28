@@ -445,7 +445,9 @@ open class ASTTransformer(
                     .filter { it.second is PresentParameterValue }
                     .associate { it.first to (it.second as PresentParameterValue).value }
                 try {
-                    constructor.callBy(constructorParamValues)
+                    val instance = constructor.callBy(constructorParamValues)
+                    instance.children.forEach { child -> child.parent = instance }
+                    instance
                 } catch (t: Throwable) {
                     throw RuntimeException(
                         "Invocation of constructor $constructor failed. " +
