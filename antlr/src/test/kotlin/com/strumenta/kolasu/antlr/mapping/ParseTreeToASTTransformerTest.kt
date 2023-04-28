@@ -118,7 +118,7 @@ class ParseTreeToASTTransformerTest {
 
     private fun configure(transformer: ASTTransformer) {
         transformer.registerNodeTransformer(SimpleLangParser.CompilationUnitContext::class, CU::class)
-            .withChild(SimpleLangParser.CompilationUnitContext::statement, CU::statements)
+            .withChild(CU::statements, SimpleLangParser.CompilationUnitContext::statement)
         transformer.registerNodeTransformer(SimpleLangParser.DisplayStmtContext::class) { ctx ->
             if (ctx.exception != null || ctx.expression().exception != null) {
                 // We throw a custom error so that we can check that it's recorded in the AST
