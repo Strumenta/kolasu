@@ -1,7 +1,11 @@
 package com.strumenta.kolasu.mapping
 
 import com.strumenta.kolasu.antlr.mapping.ParseTreeToASTTransformer
+import com.strumenta.kolasu.transformation.ParameterConverter
 import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.tree.ParseTree
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.createType
 
 /**
  * Translate the given node and ensure a certain type will be obtained.
@@ -75,3 +79,15 @@ val ParserRuleContext.onlyChild: ParserRuleContext
         require(nodeChildren[0] is ParserRuleContext)
         return nodeChildren[0]
     }
+
+
+object ParseTreeToStringParameterConverter : ParameterConverter {
+    override fun isApplicable(kParameter: KParameter, value: Any?): Boolean {
+        return kParameter.type == String::class.createType() && value is ParseTree
+    }
+
+    override fun convert(kParameter: KParameter, value: Any?): Any? {
+        return (value as ParseTree).text
+    }
+
+}

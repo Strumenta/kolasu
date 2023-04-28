@@ -3,11 +3,7 @@ package com.strumenta.kolasu.transformation
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
-import org.antlr.v4.runtime.tree.ParseTree
-import kotlin.reflect.KClass
-import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.KParameter
-import kotlin.reflect.KProperty1
+import kotlin.reflect.*
 import kotlin.reflect.full.*
 
 /**
@@ -385,7 +381,9 @@ open class ASTTransformer(
         return registerNodeTransformer(S::class, T::class)
     }
 
-    fun <S : Any, T : Node> registerNodeTransformer(source: KClass<S>, target: KClass<T>): NodeTransformer<S, T> {
+    fun <S : Any, T : Node> registerNodeTransformer(source: KClass<S>, target: KClass<T>,
+                                                    parameterConverters : List<ParameterConverter> = emptyList())
+    : NodeTransformer<S, T> {
         registerKnownClass(target)
         // We are looking for any constructor with does not take parameters or have default
         // values for all its parameters
@@ -420,8 +418,9 @@ open class ASTTransformer(
                                 }
 
                                 else -> {
-                                    if (kParameter.type == String::class.createType() && childSource is ParseTree) {
-                                        PresentParameterValue(childSource.text)
+                                    val paramConverter = parameterConverters.find { it.isApplicable(kParameter, childSource) }
+                                    if (paramConverter != null) {
+                                        PresentParameterValue(paramConverter.convert(kParameter, childSource))
                                     } else {
                                         PresentParameterValue(transform(childSource))
                                     }
@@ -513,3 +512,24 @@ private fun <Source : Any, Target, Child> NodeTransformer<*, *>.getChildNodeTran
 private sealed class ParameterValue
 private class PresentParameterValue(val value: Any?) : ParameterValue()
 private object AbsentParameterValue : ParameterValue()
+
+inline fun <T : Any> KClass<T>.preferredConstructor(): KFunction<T> {
+    val constructors = this.constructors
+    return if (constructors.size != 1) {
+        if (this.primaryConstructor != null) {
+            this.primaryConstructor!!
+        } else {
+            throw RuntimeException(
+                "Node Factories support only classes with exactly one constructor or a " +
+                        "primary constructor. Class ${this.qualifiedName} has ${constructors.size}"
+            )
+        }
+    } else {
+        constructors.first()
+    }
+}
+
+interface ParameterConverter {
+    fun isApplicable(kParameter: KParameter, value: Any?) : Boolean
+    fun convert(kParameter: KParameter, value: Any?) : Any?
+}

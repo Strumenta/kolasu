@@ -5,6 +5,7 @@ import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.transformation.ASTTransformer
+import com.strumenta.kolasu.transformation.preferredConstructor
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token
@@ -134,18 +135,3 @@ inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer
     }
 }
 
-inline fun <T : Any> KClass<T>.preferredConstructor(): KFunction<T> {
-    val constructors = this.constructors
-    return if (constructors.size != 1) {
-        if (this.primaryConstructor != null) {
-            this.primaryConstructor!!
-        } else {
-            throw RuntimeException(
-                "Node Factories support only classes with exactly one constructor or a " +
-                    "primary constructor. Class ${this.qualifiedName} has ${constructors.size}"
-            )
-        }
-    } else {
-        constructors.first()
-    }
-}
