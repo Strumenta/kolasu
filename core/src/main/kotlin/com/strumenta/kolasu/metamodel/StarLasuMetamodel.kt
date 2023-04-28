@@ -10,7 +10,6 @@ import org.lionweb.lioncore.java.metamodel.LionCoreBuiltins
 import org.lionweb.lioncore.java.metamodel.Metamodel
 import org.lionweb.lioncore.java.metamodel.PrimitiveType
 import org.lionweb.lioncore.java.metamodel.Property
-import org.lionweb.lioncore.java.utils.MetamodelValidator
 
 object StarLasuMetamodel : Metamodel() {
     val astNode: Concept
@@ -48,11 +47,6 @@ object StarLasuMetamodel : Metamodel() {
                     f.key = f.id
                 }
             }
-        }
-
-        val result = MetamodelValidator().validate(this)
-        if (!result.isSuccessful) {
-            throw RuntimeException("The StarLasu Metamodel is not valid: $result")
         }
     }
 }

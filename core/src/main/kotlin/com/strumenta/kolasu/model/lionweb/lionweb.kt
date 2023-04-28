@@ -41,6 +41,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         setName(name)
         setVersion(Integer.toString(version))
         INSTANCES[this.javaClass.kotlin] = this
+        addDependency(StarLasuMetamodel)
         instantiateModelElements()
         populateModelElements()
         mappedConcepts.forEach { recordConceptForClass(it.key.java, it.value) }
