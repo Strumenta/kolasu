@@ -3,14 +3,12 @@ package com.strumenta.kolasu.transformation
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
+import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.createInstance
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.memberFunctions
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.full.superclasses
+import kotlin.reflect.full.*
 
 /**
  * A child of an AST node that is automatically populated from a source tree.
@@ -24,41 +22,108 @@ class NodeTransformer<Source, Output : Node>(
     val constructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> Output?,
     val children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
     var finalizer: (Output) -> Unit = {},
-    var skipChildren: Boolean = false
+    var skipChildren: Boolean = false,
+    var childrenSetAtConstruction: Boolean = false
 ) {
 
+    /**
+     * Specify how to convert a child. The value obtained from the conversion could either be used
+     * as a constructor parameter when instantiating the parent, or be used to set the value after
+     * the parent has been instantiated.
+     *
+     * Example using the scopedToType parameter:
+     * ```
+     *     on.registerNodeTransformer(SASParser.DatasetOptionContext::class) { ctx ->
+     *         when {
+     *             ...
+     *         }
+     *     }
+     *         .withChild(SASParser.DatasetOptionContext::macroStatementStrict, ComputedDatasetOption::computedWith, ComputedDatasetOption::class)
+     *         .withChild(SASParser.DatasetOptionContext::variableList, DropDatasetOption::variables, DropDatasetOption::class)
+     *         .withChild(SASParser.DatasetOptionContext::variableList, KeepDatasetOption::variables, KeepDatasetOption::class)
+     *         .withChild(SASParser.DatasetOptionContext::variableList, InDatasetOption::variables, InDatasetOption::class)
+     *         .withChild("indexDatasetOption.variables", IndexDatasetOption::variables, IndexDatasetOption::class)
+     *  ```
+     *
+     *  Please note that we cannot merge this method with the variant without the type (making the type optional),
+     *  as it would not permit to specify the lambda outside the list of method parameters.
+     */
     fun withChild(
-        sourceProperty: KProperty1<Source, *>,
-        property: KMutableProperty1<*, *>,
-        type: KClass<*>? = null
+        targetProperty: KMutableProperty1<*, *>,
+        sourceAccessor: Source.() -> Any?,
+        scopedToType: KClass<*>
     ): NodeTransformer<Source, Output> = withChild(
-        (sourceProperty as KProperty1<Source, Any>)::get,
-        (property as KMutableProperty1<Any, Any?>)::set,
-        property.name,
-        type
+        get = { source -> source.sourceAccessor() },
+        set = (targetProperty as KMutableProperty1<Any, Any?>)::set,
+        targetProperty.name,
+        scopedToType
     )
 
-    fun <Target : Any> withChild(
-        path: String,
-        property: KMutableProperty1<Target, *>,
-        scopedToType: KClass<Target>? = null
-    ): NodeTransformer<Source, Output> =
-        withChild(getter(path), (property as KMutableProperty1<Any, Any?>)::set, property.name, scopedToType)
+    /**
+     * Specify how to convert a child. The value obtained from the conversion could either be used
+     * as a constructor parameter when instantiating the parent, or be used to set the value after
+     * the parent has been instantiated.
+     */
+    fun withChild(
+        targetProperty: KMutableProperty1<*, *>,
+        sourceAccessor: Source.() -> Any?,
+    ): NodeTransformer<Source, Output> = withChild(
+        get = { source -> source.sourceAccessor() },
+        set = (targetProperty as KMutableProperty1<Any, Any?>)::set,
+        targetProperty.name,
+        null
+    )
 
-    fun <Target : Any> withChild(
-        get: (Source) -> Any?,
-        property: KMutableProperty1<in Target, *>,
-        scopedToType: KClass<Target>? = null
-    ): NodeTransformer<Source, Output> =
-        withChild(get, (property as KMutableProperty1<Target, Any?>)::set, property.name, scopedToType)
+    /**
+     * Specify how to convert a child. The value obtained from the conversion can only be used
+     * as a constructor parameter when instantiating the parent. It cannot be used to set the value after
+     * the parent has been instantiated, because the property is not mutable.
+     */
+    fun withChild(
+        targetProperty: KProperty1<*, *>,
+        sourceAccessor: Source.() -> Any?,
+    ): NodeTransformer<Source, Output> = withChild<Any, Any>(
+        get = { source -> source.sourceAccessor() },
+        null,
+        targetProperty.name,
+        null
+    )
 
+    /**
+     * Specify how to convert a child. The value obtained from the conversion can only be used
+     * as a constructor parameter when instantiating the parent. It cannot be used to set the value after
+     * the parent has been instantiated, because the property is not mutable.
+     *
+     * Please note that we cannot merge this method with the variant without the type (making the type optional),
+     * as it would not permit to specify the lambda outside the list of method parameters.
+     */
+    fun withChild(
+        targetProperty: KProperty1<*, *>,
+        sourceAccessor: Source.() -> Any?,
+        scopedToType: KClass<*>
+    ): NodeTransformer<Source, Output> = withChild<Any, Any>(
+        get = { source -> source.sourceAccessor() },
+        null,
+        targetProperty.name,
+        scopedToType
+    )
+
+    /**
+     * Specify how to convert a child. The value obtained from the conversion could either be used
+     * as a constructor parameter when instantiating the parent, or be used to set the value after
+     * the parent has been instantiated.
+     */
     fun <Target : Any, Child : Any> withChild(
         get: (Source) -> Any?,
-        set: (Target, Child?) -> Unit,
+        set: ((Target, Child?) -> Unit)?,
         name: String,
-        type: KClass<*>? = null
+        scopedToType: KClass<*>? = null
     ): NodeTransformer<Source, Output> {
-        val prefix = if (type != null) type.qualifiedName + "#" else ""
+        val prefix = if (scopedToType != null) scopedToType.qualifiedName + "#" else ""
+        if (set == null) {
+            // given we have no setter we MUST set the children at construction
+            childrenSetAtConstruction = true
+        }
         children[prefix + name] = ChildNodeTransformer(prefix + name, get, set)
         return this
     }
@@ -75,7 +140,7 @@ class NodeTransformer<Source, Output : Node>(
      * we may configure the transformer as follows:
      *
      * ```kotlin
-     * transformer.registerNodTransformer(XYZContext::class) { ctx -> transformer.transform(ctx.children[0]) }
+     * transformer.registerNodeTransformer(XYZContext::class) { ctx -> transformer.transform(ctx.children[0]) }
      * ```
      *
      * However, if the result of `transformer.transform(ctx.children[0])` is an instance of a Node with a child
@@ -118,15 +183,21 @@ class NodeTransformer<Source, Output : Node>(
 
 /**
  * Information on how to retrieve a child node.
+ *
+ * The setter could be null, if the property is not mutable. In that case the value
+ * must necessarily be passed when constructing the parent.
  */
 data class ChildNodeTransformer<Source, Target, Child>(
     val name: String,
     val get: (Source) -> Any?,
-    val setter: (Target, Child?) -> Unit
+    val setter: ((Target, Child?) -> Unit)?
 ) {
     fun set(node: Target, child: Child?) {
+        if (setter == null) {
+            throw java.lang.IllegalStateException("Unable to set value $name in  $node")
+        }
         try {
-            setter(node, child)
+            setter!!(node, child)
         } catch (e: Exception) {
             throw Exception("$name could not set child $child of $node using $setter", e)
         }
@@ -178,7 +249,7 @@ open class ASTTransformer(
             if (node == null) {
                 return null
             }
-            if (!transformer.skipChildren) {
+            if (!transformer.skipChildren && !transformer.childrenSetAtConstruction) {
                 setChildren(transformer, source, node)
             }
             transformer.finalizer(node)
@@ -208,10 +279,7 @@ open class ASTTransformer(
     ) {
         node::class.processProperties { pd ->
             val childKey = node::class.qualifiedName + "#" + pd.name
-            var childNodeTransformer = transformer.children[childKey]
-            if (childNodeTransformer == null) {
-                childNodeTransformer = transformer.children[pd.name]
-            }
+            var childNodeTransformer = transformer.getChildNodeTransformer<Node, Any, Any>(node::class, pd.name)
             if (childNodeTransformer != null) {
                 if (childNodeTransformer != NO_CHILD_NODE) {
                     setChild(childNodeTransformer, source, node, pd)
@@ -224,7 +292,7 @@ open class ASTTransformer(
                     childNodeTransformer = ChildNodeTransformer(
                         childKey, transformer.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set
                     )
-                    transformer.children[childKey] = childNodeTransformer
+                    transformer.children[childKey] = childNodeTransformer as ChildNodeTransformer<Any, *, *>
                     setChild(childNodeTransformer, source, node, pd)
                 } else {
                     transformer.children[childKey] = NO_CHILD_NODE
@@ -304,21 +372,106 @@ open class ASTTransformer(
     fun <S : Any, T : Node> registerNodeTransformer(
         kclass: KClass<S>,
         transformer: (S, ASTTransformer) -> T?
-    ): NodeTransformer<S, T> = registerNodeTransformer(kclass) { source, transformer, _ ->
-        transformer(source, transformer)
-    }
+    ): NodeTransformer<S, T> = registerNodeTransformer(kclass) { source, transformer, _ -> transformer(source, transformer) }
+
+    inline fun <reified S : Any, T : Node> registerNodeTransformer(
+        crossinline transformer: S.(ASTTransformer) -> T?
+    ): NodeTransformer<S, T> = registerNodeTransformer(S::class) { source, transformer, _ -> source.transformer(transformer) }
 
     fun <S : Any, T : Node> registerNodeTransformer(kclass: KClass<S>, transformer: (S) -> T?): NodeTransformer<S, T> =
         registerNodeTransformer(kclass) { input, _, _ -> transformer(input) }
 
+    inline fun <reified S : Any, reified T : Node> registerNodeTransformer(): NodeTransformer<S, T> {
+        return registerNodeTransformer(S::class, T::class)
+    }
+
     fun <S : Any, T : Node> registerNodeTransformer(source: KClass<S>, target: KClass<T>): NodeTransformer<S, T> {
         registerKnownClass(target)
-        val nodeTransformer = NodeTransformer<S, T>({ _, _, _ ->
-            if (target.isSealed) {
-                throw IllegalStateException("Unable to instantiate sealed class $target")
-            }
-            target.createInstance()
-        })
+        // We are looking for any constructor with does not take parameters or have default
+        // values for all its parameters
+        val emptyLikeConstructor = target.constructors.find { it.parameters.all { param -> param.isOptional } }
+        val nodeTransformer = NodeTransformer(
+            { source: S, _, thisTransformer ->
+                if (target.isSealed) {
+                    throw IllegalStateException("Unable to instantiate sealed class $target")
+                }
+                fun getConstructorParameterValue(kParameter: KParameter): ParameterValue {
+                    try {
+                        val childNodeTransformer = thisTransformer.getChildNodeTransformer<Any, T, Any>(target, kParameter.name!!)
+                        if (childNodeTransformer == null) {
+                            if (kParameter.isOptional) {
+                                return AbsentParameterValue
+                            }
+                            throw java.lang.IllegalStateException(
+                                "We do not know how to produce " +
+                                    "parameter ${kParameter.name!!} for $target"
+                            )
+                        } else {
+                            return when (val childSource = childNodeTransformer.get.invoke(source)) {
+                                null -> {
+                                    AbsentParameterValue
+                                }
+                                is List<*> -> {
+                                    PresentParameterValue(childSource.map { transform(it) }.toMutableList())
+                                }
+
+                                is String -> {
+                                    PresentParameterValue(childSource)
+                                }
+
+                                else -> {
+                                    if (kParameter.type == String::class.createType() && childSource is ParseTree) {
+                                        PresentParameterValue(childSource.text)
+                                    } else {
+                                        PresentParameterValue(transform(childSource))
+                                    }
+                                }
+                            }
+                        }
+                    } catch (t: Throwable) {
+                        throw RuntimeException(
+                            "Issue while populating parameter ${kParameter.name} in " +
+                                "constructor ${target.qualifiedName}.${target.preferredConstructor()}",
+                            t
+                        )
+                    }
+                }
+                // We check `childrenSetAtConstruction` and not `emptyLikeConstructor` because, while we set this value
+                // initially based on `emptyLikeConstructor` being equal to null, this can be later changed in `withChild`,
+                // so we should really check the value that `childrenSetAtConstruction` time has when we actually invoke
+                // the transformer.
+                if (thisTransformer.childrenSetAtConstruction) {
+                    val constructor = target.preferredConstructor()
+                    val constructorParamValues = constructor.parameters.map { it to getConstructorParameterValue(it) }
+                        .filter { it.second is PresentParameterValue }
+                        .associate { it.first to (it.second as PresentParameterValue).value }
+                    try {
+                        val instance = constructor.callBy(constructorParamValues)
+                        instance.children.forEach { child -> child.parent = instance }
+                        instance
+                    } catch (t: Throwable) {
+                        throw RuntimeException(
+                            "Invocation of constructor $constructor failed. " +
+                                "We passed: ${constructorParamValues.map { "${it.key.name}=${it.value}" }
+                                    .joinToString(", ")}",
+                            t
+                        )
+                    }
+                } else {
+                    if (emptyLikeConstructor == null) {
+                        throw RuntimeException(
+                            "childrenSetAtConstruction is set but there is no empty like " +
+                                "constructor for $target"
+                        )
+                    }
+                    target.createInstance()
+                }
+            },
+            // If I do not have an emptyLikeConstructor, then I am forced to invoke a constructor with parameters and
+            // therefore setting the children at construction time.
+            // Note that we are assuming that either we set no children at construction time or we set all of them
+            childrenSetAtConstruction = emptyLikeConstructor == null
+        )
         nodeTransformers[source] = nodeTransformer
         return nodeTransformer
     }
@@ -344,3 +497,19 @@ open class ASTTransformer(
         return issue
     }
 }
+
+private fun <Source : Any, Target, Child> NodeTransformer<*, *>.getChildNodeTransformer(
+    nodeClass: KClass<out Source>,
+    parameterName: String
+): ChildNodeTransformer<Source, Target, Child>? {
+    val childKey = nodeClass.qualifiedName + "#" + parameterName
+    var childNodeTransformer = this.children[childKey]
+    if (childNodeTransformer == null) {
+        childNodeTransformer = this.children[parameterName]
+    }
+    return childNodeTransformer as ChildNodeTransformer<Source, Target, Child>?
+}
+
+private sealed class ParameterValue
+private class PresentParameterValue(val value: Any?) : ParameterValue()
+private object AbsentParameterValue : ParameterValue()
