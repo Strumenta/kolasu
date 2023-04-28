@@ -319,7 +319,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     private fun populateProperty(featuresContainer: FeaturesContainer<*>, kotlinProperty: KProperty1<in ASTNode, *>) {
         val property = Property()
         property.name = kotlinProperty.name
-        property.id = kotlinProperty.name
+        property.id = "${featuresContainer.id}-${kotlinProperty.name}"
         property.key = "${featuresContainer.key}-${kotlinProperty.name}"
         when (kotlinProperty.returnType.classifier) {
             Boolean::class -> {
@@ -364,7 +364,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     ) {
         val containment = Containment()
         containment.name = kotlinProperty.name
-        containment.id = kotlinProperty.name
+        containment.id = "${featuresContainer.id}-${kotlinProperty.name}"
         containment.key = "${featuresContainer.key}-${kotlinProperty.name}"
         if ((kotlinProperty.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }
             .contains(Collection::class)
@@ -383,7 +383,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     private fun populateReference(featuresContainer: FeaturesContainer<*>, kotlinProperty: KProperty1<*, *>) {
         val reference = Reference()
         reference.name = kotlinProperty.name
-        reference.id = kotlinProperty.name
+        reference.id = "${featuresContainer.id}-${kotlinProperty.name}"
         reference.key = "${featuresContainer.key}-${kotlinProperty.name}"
         val referenceTargetType = kotlinProperty.returnType.arguments[0].type!!
         val referenceTargetTypeClassifier = referenceTargetType.classifier as KClass<*>
