@@ -368,11 +368,15 @@ open class ASTTransformer(
     fun <S : Any, T : Node> registerNodeTransformer(
         kclass: KClass<S>,
         transformer: (S, ASTTransformer) -> T?
-    ): NodeTransformer<S, T> = registerNodeTransformer(kclass) { source, transformer, _ -> transformer(source, transformer) }
+    ): NodeTransformer<S, T> = registerNodeTransformer(kclass) { source, transformer, _ ->
+        transformer(source, transformer)
+    }
 
     inline fun <reified S : Any, T : Node> registerNodeTransformer(
         crossinline transformer: S.(ASTTransformer) -> T?
-    ): NodeTransformer<S, T> = registerNodeTransformer(S::class) { source, transformer, _ -> source.transformer(transformer) }
+    ): NodeTransformer<S, T> = registerNodeTransformer(S::class) { source, transformer, _ ->
+        source.transformer(transformer)
+    }
 
     fun <S : Any, T : Node> registerNodeTransformer(kclass: KClass<S>, transformer: (S) -> T?): NodeTransformer<S, T> =
         registerNodeTransformer(kclass) { input, _, _ -> transformer(input) }
@@ -381,9 +385,11 @@ open class ASTTransformer(
         return registerNodeTransformer(S::class, T::class)
     }
 
-    fun <S : Any, T : Node> registerNodeTransformer(source: KClass<S>, target: KClass<T>,
-                                                    parameterConverters : List<ParameterConverter> = emptyList())
-    : NodeTransformer<S, T> {
+    fun <S : Any, T : Node> registerNodeTransformer(
+        source: KClass<S>,
+        target: KClass<T>,
+        parameterConverters: List<ParameterConverter> = emptyList()
+    ): NodeTransformer<S, T> {
         registerKnownClass(target)
         // We are looking for any constructor with does not take parameters or have default
         // values for all its parameters
@@ -395,7 +401,9 @@ open class ASTTransformer(
                 }
                 fun getConstructorParameterValue(kParameter: KParameter): ParameterValue {
                     try {
-                        val childNodeTransformer = thisTransformer.getChildNodeTransformer<Any, T, Any>(target, kParameter.name!!)
+                        val childNodeTransformer = thisTransformer.getChildNodeTransformer<Any, T, Any>(
+                            target, kParameter.name!!
+                        )
                         if (childNodeTransformer == null) {
                             if (kParameter.isOptional) {
                                 return AbsentParameterValue
@@ -418,7 +426,9 @@ open class ASTTransformer(
                                 }
 
                                 else -> {
-                                    val paramConverter = parameterConverters.find { it.isApplicable(kParameter, childSource) }
+                                    val paramConverter = parameterConverters.find {
+                                        it.isApplicable(kParameter, childSource)
+                                    }
                                     if (paramConverter != null) {
                                         PresentParameterValue(paramConverter.convert(kParameter, childSource))
                                     } else {
@@ -521,7 +531,7 @@ inline fun <T : Any> KClass<T>.preferredConstructor(): KFunction<T> {
         } else {
             throw RuntimeException(
                 "Node Factories support only classes with exactly one constructor or a " +
-                        "primary constructor. Class ${this.qualifiedName} has ${constructors.size}"
+                    "primary constructor. Class ${this.qualifiedName} has ${constructors.size}"
             )
         }
     } else {
@@ -530,6 +540,6 @@ inline fun <T : Any> KClass<T>.preferredConstructor(): KFunction<T> {
 }
 
 interface ParameterConverter {
-    fun isApplicable(kParameter: KParameter, value: Any?) : Boolean
-    fun convert(kParameter: KParameter, value: Any?) : Any?
+    fun isApplicable(kParameter: KParameter, value: Any?): Boolean
+    fun convert(kParameter: KParameter, value: Any?): Any?
 }

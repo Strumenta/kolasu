@@ -80,7 +80,6 @@ val ParserRuleContext.onlyChild: ParserRuleContext
         return nodeChildren[0]
     }
 
-
 object ParseTreeToStringParameterConverter : ParameterConverter {
     override fun isApplicable(kParameter: KParameter, value: Any?): Boolean {
         return kParameter.type == String::class.createType() && value is ParseTree
@@ -89,5 +88,4 @@ object ParseTreeToStringParameterConverter : ParameterConverter {
     override fun convert(kParameter: KParameter, value: Any?): Any? {
         return (value as ParseTree).text
     }
-
 }
