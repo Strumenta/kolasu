@@ -10,6 +10,8 @@ import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.TerminalNode
 import kotlin.reflect.KCallable
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.memberFunctions
@@ -68,19 +70,7 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
         ASTTransformer
     ) -> T? {
         return { parseTreeNode, astTransformer ->
-            val constructors = T::class.constructors
-            val constructor = if (constructors.size != 1) {
-                if (T::class.primaryConstructor != null) {
-                    T::class.primaryConstructor!!
-                } else {
-                    throw java.lang.RuntimeException(
-                        "Trivial Factory supports only classes with exactly one constructor or a " +
-                            "primary constructor. Class ${T::class.qualifiedName} has ${constructors.size}"
-                    )
-                }
-            } else {
-                constructors.first()
-            }
+            val constructor = T::class.preferredConstructor()
             val args: Array<Any?> = constructor.parameters.map {
                 val parameterName = it.name
                 val searchedName = nameConversions.find { it.second == parameterName }?.first ?: parameterName
@@ -141,5 +131,21 @@ inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer
     this.registerNodeFactory(S::class) { parseTreeNode, astTransformer ->
         val wrapped = wrappingMember.call(parseTreeNode)
         astTransformer.transform(wrapped) as T?
+    }
+}
+
+inline fun <T : Any> KClass<T>.preferredConstructor(): KFunction<T> {
+    val constructors = this.constructors
+    return if (constructors.size != 1) {
+        if (this.primaryConstructor != null) {
+            this.primaryConstructor!!
+        } else {
+            throw RuntimeException(
+                "Node Factories support only classes with exactly one constructor or a " +
+                    "primary constructor. Class ${this.qualifiedName} has ${constructors.size}"
+            )
+        }
+    } else {
+        constructors.first()
     }
 }
