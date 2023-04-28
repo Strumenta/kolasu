@@ -390,84 +390,88 @@ open class ASTTransformer(
         // We are looking for any constructor with does not take parameters or have default
         // values for all its parameters
         val emptyLikeConstructor = target.constructors.find { it.parameters.all { param -> param.isOptional } }
-        val nodeFactory = NodeFactory({ source: S, _, thisFactory ->
-            if (target.isSealed) {
-                throw IllegalStateException("Unable to instantiate sealed class $target")
-            }
-            fun getConstructorParameterValue(kParameter: KParameter): ParameterValue {
-                try {
-                    val childNodeFactory = thisFactory.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!)
-                    if (childNodeFactory == null) {
-                        if (kParameter.isOptional) {
-                            return AbsentParameterValue
-                        }
-                        throw java.lang.IllegalStateException(
-                            "We do not know how to produce " +
-                                "parameter ${kParameter.name!!} for $target"
-                        )
-                    } else {
-                        return when (val childSource = childNodeFactory.get.invoke(source)) {
-                            null -> {
-                                AbsentParameterValue
+        val nodeFactory = NodeFactory(
+            { source: S, _, thisFactory ->
+                if (target.isSealed) {
+                    throw IllegalStateException("Unable to instantiate sealed class $target")
+                }
+                fun getConstructorParameterValue(kParameter: KParameter): ParameterValue {
+                    try {
+                        val childNodeFactory = thisFactory.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!)
+                        if (childNodeFactory == null) {
+                            if (kParameter.isOptional) {
+                                return AbsentParameterValue
                             }
-                            is List<*> -> {
-                                PresentParameterValue(childSource.map { transform(it) }.toMutableList())
-                            }
+                            throw java.lang.IllegalStateException(
+                                "We do not know how to produce " +
+                                    "parameter ${kParameter.name!!} for $target"
+                            )
+                        } else {
+                            return when (val childSource = childNodeFactory.get.invoke(source)) {
+                                null -> {
+                                    AbsentParameterValue
+                                }
+                                is List<*> -> {
+                                    PresentParameterValue(childSource.map { transform(it) }.toMutableList())
+                                }
 
-                            is String -> {
-                                PresentParameterValue(childSource)
-                            }
+                                is String -> {
+                                    PresentParameterValue(childSource)
+                                }
 
-                            else -> {
-                                if (kParameter.type == String::class.createType() && childSource is ParseTree) {
-                                    PresentParameterValue(childSource.text)
-                                } else {
-                                    PresentParameterValue(transform(childSource))
+                                else -> {
+                                    if (kParameter.type == String::class.createType() && childSource is ParseTree) {
+                                        PresentParameterValue(childSource.text)
+                                    } else {
+                                        PresentParameterValue(transform(childSource))
+                                    }
                                 }
                             }
                         }
+                    } catch (t: Throwable) {
+                        throw RuntimeException(
+                            "Issue while populating parameter ${kParameter.name} in " +
+                                "constructor ${target.qualifiedName}.${target.preferredConstructor()}",
+                            t
+                        )
                     }
-                } catch (t: Throwable) {
-                    throw RuntimeException(
-                        "Issue while populating parameter ${kParameter.name} in " +
-                            "constructor ${target.qualifiedName}.${target.preferredConstructor()}",
-                        t
-                    )
                 }
-            }
-            // We check `childrenSetAtConstruction` and not `emptyLikeConstructor` because, while we set this value
-            // initially based on `emptyLikeConstructor` being equal to null, this can be later changed in `withChild`,
-            // so we should really check the value that `childrenSetAtConstruction` time has when we actually invoke
-            // the factory.
-            if (thisFactory.childrenSetAtConstruction) {
-                val constructor = target.preferredConstructor()
-                val constructorParamValues = constructor.parameters.map { it to getConstructorParameterValue(it) }
-                    .filter { it.second is PresentParameterValue }
-                    .associate { it.first to (it.second as PresentParameterValue).value }
-                try {
-                    val instance = constructor.callBy(constructorParamValues)
-                    instance.children.forEach { child -> child.parent = instance }
-                    instance
-                } catch (t: Throwable) {
-                    throw RuntimeException(
-                        "Invocation of constructor $constructor failed. " +
-                            "We passed: ${constructorParamValues.map { "${it.key.name}=${it.value}" }
-                                .joinToString(", ")}",
-                        t
-                    )
+                // We check `childrenSetAtConstruction` and not `emptyLikeConstructor` because, while we set this value
+                // initially based on `emptyLikeConstructor` being equal to null, this can be later changed in `withChild`,
+                // so we should really check the value that `childrenSetAtConstruction` time has when we actually invoke
+                // the factory.
+                if (thisFactory.childrenSetAtConstruction) {
+                    val constructor = target.preferredConstructor()
+                    val constructorParamValues = constructor.parameters.map { it to getConstructorParameterValue(it) }
+                        .filter { it.second is PresentParameterValue }
+                        .associate { it.first to (it.second as PresentParameterValue).value }
+                    try {
+                        val instance = constructor.callBy(constructorParamValues)
+                        instance.children.forEach { child -> child.parent = instance }
+                        instance
+                    } catch (t: Throwable) {
+                        throw RuntimeException(
+                            "Invocation of constructor $constructor failed. " +
+                                "We passed: ${constructorParamValues.map { "${it.key.name}=${it.value}" }
+                                    .joinToString(", ")}",
+                            t
+                        )
+                    }
+                } else {
+                    if (emptyLikeConstructor == null) {
+                        throw RuntimeException(
+                            "childrenSetAtConstruction is set but there is no empty like " +
+                                "constructor for $target"
+                        )
+                    }
+                    target.createInstance()
                 }
-            } else {
-                if (emptyLikeConstructor == null) {
-                    throw RuntimeException("childrenSetAtConstruction is set but there is no empty like " +
-                            "constructor for $target")
-                }
-                target.createInstance()
-            }
-        },
+            },
             // If I do not have an emptyLikeConstructor, then I am forced to invoke a constructor with parameters and
             // therefore setting the children at construction time.
             // Note that we are assuming that either we set no children at construction time or we set all of them
-            childrenSetAtConstruction = emptyLikeConstructor == null)
+            childrenSetAtConstruction = emptyLikeConstructor == null
+        )
         factories[source] = nodeFactory
         return nodeFactory
     }
