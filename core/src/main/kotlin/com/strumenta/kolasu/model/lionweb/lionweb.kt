@@ -6,12 +6,18 @@ import org.lionweb.lioncore.java.metamodel.*
 import org.lionweb.lioncore.java.metamodel.Metamodel
 import org.lionweb.lioncore.java.model.Node
 import org.lionweb.lioncore.java.serialization.JsonSerialization
-import org.lionweb.lioncore.java.serialization.NodeInstantiator
 import org.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization
 import org.lionweb.lioncore.java.serialization.data.SerializedNode
+import org.lionweb.lioncore.java.utils.MetamodelValidator
 import kotlin.IllegalStateException
 import kotlin.reflect.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KClassifier
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.*
+import kotlin.reflect.full.allSuperclasses
+import kotlin.reflect.full.allSupertypes
+import kotlin.reflect.full.superclasses
 
 open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vararg val classes: KClass<*>) :
     Metamodel() {
@@ -39,11 +45,16 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         setName(name)
         setVersion(Integer.toString(version))
         INSTANCES[this.javaClass.kotlin] = this
+        addDependency(StarLasuMetamodel)
         instantiateModelElements()
         populateModelElements()
         mappedConcepts.forEach { recordConceptForClass(it.key.java, it.value) }
         mappedConceptInterfaces.forEach { recordConceptInterfaceForClass(it.key.java, it.value) }
         mappedEnumerations.forEach { recordEnumerationForClass(it.key.java, it.value) }
+        val validationResult = MetamodelValidator().validate(this)
+        if (!validationResult.isSuccessful) {
+            throw IllegalStateException("The Metamodel obtained through reflection is invalid: $validationResult")
+        }
     }
 
     // /
@@ -100,8 +111,14 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         }
     }
 
-    private fun instantiate(constructor: KFunction<out ASTNode>, concept: Concept, serializedNode: SerializedNode,
-                            jsonSerialization: JsonSerialization, unserializedNodesByID: Map<String, Node>, propertiesValues: Map<Property, Any?>) : ASTNode {
+    private fun instantiate(
+        constructor: KFunction<out ASTNode>,
+        concept: Concept,
+        serializedNode: SerializedNode,
+        jsonSerialization: JsonSerialization,
+        unserializedNodesByID: Map<String, Node>,
+        propertiesValues: Map<Property, Any?>
+    ): ASTNode {
         println("Instantiating with serializedNode $serializedNode")
         val parameters = mutableMapOf<KParameter, Any?>()
         constructor.parameters.forEach { constructorParameter ->
@@ -113,13 +130,15 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
                 // We can then unserialize the feature and pass that value
                 val serializedPropertyValue = serializedNode.properties.find { it.metaPointer.key == feature.key }
                 if (serializedPropertyValue == null) {
-                    val serializedContainmentValue = serializedNode.containments.find { it.metaPointer.key == feature.key }
+                    val serializedContainmentValue = serializedNode.containments.find {
+                        it.metaPointer.key == feature.key
+                    }
                     if (serializedContainmentValue == null) {
                         TODO()
                     } else {
                         val containment = feature as Containment
                         val childrenIDs = serializedContainmentValue.value as List<String>
-                        val children : MutableList<out Node> = childrenIDs.map { childID ->
+                        val children: MutableList<out Node> = childrenIDs.map { childID ->
                             unserializedNodesByID[childID] ?: throw IllegalStateException()
                         }.toMutableList()
                         if (!containment.isMultiple) {
@@ -148,10 +167,10 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
 
     fun prepareSerialization(jsonSerialization: JsonSerialization) {
 //        val defaultValueGenerator : (KParameter)->Any?  = {
-////            when (val t = it.type){
-////                String::class.createType() -> "DUMMY"
-////                else -> TODO("Default value for ${it}")
-////            }
+// //            when (val t = it.type){
+// //                String::class.createType() -> "DUMMY"
+// //                else -> TODO("Default value for ${it}")
+// //            }
 //            TODO()
 //        }
 
@@ -159,26 +178,34 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         this.mappedConcepts.filter { !it.value.isAbstract }.forEach {
             val concept = it.value
             val kolasuClass = it.key
-        jsonSerialization.nodeInstantiator.registerCustomUnserializer(concept.id) { concept, serializedNode, unserializedNodesByID, propertiesValue ->
-            println("UNSERIALIZING ${concept!!.name}")
-            val primaryConstructor = kolasuClass.primaryConstructor
-            if (primaryConstructor == null) {
-                val emptyLikeConstructor = kolasuClass.constructors.any { it.parameters.all { it.isOptional } }
-                if (emptyLikeConstructor == null) {
-                    val firstConstructor = kolasuClass.constructors.first()
-                    if (firstConstructor == null) {
-                        TODO()
+            jsonSerialization.nodeInstantiator.registerCustomUnserializer(concept.id) {
+                concept, serializedNode,
+                unserializedNodesByID,
+                propertiesValue ->
+                val primaryConstructor = kolasuClass.primaryConstructor
+                if (primaryConstructor == null) {
+                    val emptyLikeConstructor = kolasuClass.constructors.any { it.parameters.all { it.isOptional } }
+                    if (emptyLikeConstructor == null) {
+                        val firstConstructor = kolasuClass.constructors.first()
+                        if (firstConstructor == null) {
+                            TODO()
+                        } else {
+                            instantiate(
+                                firstConstructor, concept!!, serializedNode!!, jsonSerialization,
+                                unserializedNodesByID, propertiesValue
+                            )
+                        }
                     } else {
-                        instantiate(firstConstructor, concept!!, serializedNode!!, jsonSerialization, unserializedNodesByID, propertiesValue)
+                        TODO()
                     }
                 } else {
-                    TODO()
+                    instantiate(
+                        primaryConstructor, concept!!, serializedNode!!,
+                        jsonSerialization, unserializedNodesByID, propertiesValue
+                    )
                 }
-            } else {
-                instantiate(primaryConstructor, concept!!, serializedNode!!, jsonSerialization, unserializedNodesByID, propertiesValue)
             }
         }
-    }
         mappedEnumerations.forEach { entry ->
             val enumeration = entry.value
             jsonSerialization.primitiveValuesSerialization.registerSerializer(
@@ -390,7 +417,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     private fun populateProperty(featuresContainer: FeaturesContainer<*>, kotlinProperty: KProperty1<in ASTNode, *>) {
         val property = Property()
         property.name = kotlinProperty.name
-        property.id = kotlinProperty.name
+        property.id = "${featuresContainer.id}-${kotlinProperty.name}"
         property.key = "${featuresContainer.key}-${kotlinProperty.name}"
         when (kotlinProperty.returnType.classifier) {
             Boolean::class -> {
@@ -435,7 +462,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     ) {
         val containment = Containment()
         containment.name = kotlinProperty.name
-        containment.id = kotlinProperty.name
+        containment.id = "${featuresContainer.id}-${kotlinProperty.name}"
         containment.key = "${featuresContainer.key}-${kotlinProperty.name}"
         if ((kotlinProperty.returnType.classifier as KClass<*>).allSupertypes.map { it.classifier }
             .contains(Collection::class)
@@ -454,7 +481,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
     private fun populateReference(featuresContainer: FeaturesContainer<*>, kotlinProperty: KProperty1<*, *>) {
         val reference = Reference()
         reference.name = kotlinProperty.name
-        reference.id = kotlinProperty.name
+        reference.id = "${featuresContainer.id}-${kotlinProperty.name}"
         reference.key = "${featuresContainer.key}-${kotlinProperty.name}"
         val referenceTargetType = kotlinProperty.returnType.arguments[0].type!!
         val referenceTargetTypeClassifier = referenceTargetType.classifier as KClass<*>

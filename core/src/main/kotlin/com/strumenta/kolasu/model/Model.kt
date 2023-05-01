@@ -261,7 +261,11 @@ open class ASTNode() : Node, Origin, Destination, Serializable {
     }
 
     private fun sourceID(source: Source?): String {
-        return source?.id ?: "_UNSPECIFIED_"
+        return source?.id?.let {
+            it.replace('/', '-')
+                .replace('.', '-')
+                .replace('\\', '-')
+        } ?: "_UNSPECIFIED_"
     }
 
     private fun pathID(node: ASTNode): String {
