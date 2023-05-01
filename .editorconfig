@@ -1,3 +1,4 @@
 [*.{kt,kts}]
 max_line_length=120
-disabled_rules=no-wildcard-imports,experimental:argument-list-wrapping
+ktlint_standard_no-wildcard-imports = disabled
+ktlint_no-wildcard-imports = disabled
