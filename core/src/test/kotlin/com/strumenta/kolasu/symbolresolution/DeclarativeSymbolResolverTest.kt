@@ -9,47 +9,47 @@ import com.strumenta.kolasu.traversing.findAncestorOfType
 import org.junit.Test
 
 data class CompilationUnit(
-    var content: MutableList<TypeDecl> = mutableListOf(),
+    var content: MutableList<TypeDecl> = mutableListOf()
 ) : Node()
 
 open class TypeDecl(
-    override val name: String,
+    override val name: String
 ) : Node(), Symbol
 
 data class ClassDecl(
     override val name: String,
     var superclass: ReferenceByName<ClassDecl>? = null,
     var features: MutableList<FeatureDecl> = mutableListOf(),
-    var operations: MutableList<OperationDecl> = mutableListOf(),
+    var operations: MutableList<OperationDecl> = mutableListOf()
 ) : TypeDecl(name)
 
 data class FeatureDecl(
     override val name: String,
-    var type: ReferenceByName<TypeDecl>,
+    var type: ReferenceByName<TypeDecl>
 ) : Node(), Symbol
 
 data class OperationDecl(
     override val name: String,
     var parameters: MutableList<ParameterDecl> = mutableListOf(),
     var statements: MutableList<StmtNode> = mutableListOf(),
-    var returns: ReferenceByName<TypeDecl>? = null,
+    var returns: ReferenceByName<TypeDecl>? = null
 ) : Node(), Symbol
 
 data class ParameterDecl(
     override val name: String,
-    var type: ReferenceByName<TypeDecl>,
+    var type: ReferenceByName<TypeDecl>
 ) : Node(), Symbol
 
 sealed class StmtNode : Node(), Statement
 
 data class DeclarationStmt(
     override val name: String,
-    var value: ExprNode? = null,
+    var value: ExprNode? = null
 ) : StmtNode(), Symbol
 
 data class AssignmentStmt(
     var lhs: ExprNode,
-    var rhs: ExprNode,
+    var rhs: ExprNode
 ) : StmtNode()
 
 sealed class ExprNode : Node(), Expression
@@ -57,16 +57,16 @@ sealed class ExprNode : Node(), Expression
 // a.v.c.d
 data class RefExpr(
     var context: ExprNode? = null,
-    var symbol: ReferenceByName<Symbol>,
+    var symbol: ReferenceByName<Symbol>
 ) : ExprNode()
 
 data class CallExpr(
     var operation: ReferenceByName<OperationDecl>,
-    var arguments: MutableList<ExprNode> = mutableListOf(),
+    var arguments: MutableList<ExprNode> = mutableListOf()
 ) : ExprNode()
 
 data class NewExpr(
-    var clazz: ReferenceByName<ClassDecl>,
+    var clazz: ReferenceByName<ClassDecl>
 ) : ExprNode()
 
 val symbolResolver = declarativeSymbolResolver {
@@ -152,8 +152,8 @@ class SymbolResolutionTest {
                     features = mutableListOf(
                         FeatureDecl(
                             name = "feature_0",
-                            type = ReferenceByName(name = "class_1"),
-                        ),
+                            type = ReferenceByName(name = "class_1")
+                        )
                     ),
                     operations = mutableListOf(
                         OperationDecl(
@@ -163,23 +163,23 @@ class SymbolResolutionTest {
                                 AssignmentStmt(
                                     lhs = RefExpr(
                                         context = CallExpr(
-                                            operation = ReferenceByName(name = "operation_0"),
+                                            operation = ReferenceByName(name = "operation_0")
                                         ),
-                                        symbol = ReferenceByName(name = "feature_0"),
+                                        symbol = ReferenceByName(name = "feature_0")
                                     ),
                                     rhs = RefExpr(
                                         context = CallExpr(
-                                            operation = ReferenceByName(name = "operation_0"),
+                                            operation = ReferenceByName(name = "operation_0")
                                         ),
-                                        symbol = ReferenceByName(name = "feature_0"),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
+                                        symbol = ReferenceByName(name = "feature_0")
+                                    )
+                                )
+                            )
+                        )
+                    )
                 ),
-                ClassDecl("class_1"),
-            ),
+                ClassDecl("class_1")
+            )
         ).apply { assignParents() }
 
         symbolResolver.resolveNode(compilationUnit, true)

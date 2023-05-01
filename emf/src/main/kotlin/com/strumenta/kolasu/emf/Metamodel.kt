@@ -93,10 +93,12 @@ val PlaceholderElementHandler = KolasuClassHandler(
 
 val ErrorNodeHandler = KolasuClassHandler(ErrorNode::class, STARLASU_METAMODEL.getEClass("ErrorNode"))
 val GenericErrorNodeHandler = KolasuClassHandler(
-    GenericErrorNode::class, STARLASU_METAMODEL.getEClass("GenericErrorNode")
+    GenericErrorNode::class,
+    STARLASU_METAMODEL.getEClass("GenericErrorNode")
 )
 val GenericNodeHandler = KolasuClassHandler(
-    GenericNode::class, STARLASU_METAMODEL.getEClass("GenericNode")
+    GenericNode::class,
+    STARLASU_METAMODEL.getEClass("GenericNode")
 )
 
 val StringHandler = KolasuDataTypeHandler(String::class, EcorePackage.eINSTANCE.eString)

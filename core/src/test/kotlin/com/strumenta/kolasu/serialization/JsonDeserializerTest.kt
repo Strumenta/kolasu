@@ -17,10 +17,10 @@ class JsonDeserializerTest {
                 "Section1",
                 listOf(
                     Content(1, null),
-                    Content(2, Content(3, Content(4, null))),
-                ),
+                    Content(2, Content(3, Content(4, null)))
+                )
             ),
-            otherSections = listOf(),
+            otherSections = listOf()
         )
         val json = JsonGenerator().generateString(myRoot)
         val deserialized = JsonDeserializer().deserialize(MyRoot::class.java, json)
@@ -34,10 +34,10 @@ class JsonDeserializerTest {
                 "Section1",
                 listOf(
                     Content(1, null),
-                    Content(2, Content(3, Content(4, null))),
-                ),
+                    Content(2, Content(3, Content(4, null)))
+                )
             ),
-            otherSections = listOf(),
+            otherSections = listOf()
         )
         val originalResult = Result(emptyList(), myRoot)
         val json = JsonGenerator().generateString(originalResult)
@@ -52,10 +52,10 @@ class JsonDeserializerTest {
                 Issue(
                     IssueType.LEXICAL,
                     "foo",
-                    position = Position(Point(1, 10), Point(4, 540)),
-                ),
+                    position = Position(Point(1, 10), Point(4, 540))
+                )
             ),
-            null,
+            null
         )
         val json = JsonGenerator().generateString(originalResult)
         val deserialized: Result<MyRoot> = JsonDeserializer().deserializeResult(MyRoot::class.java, json)

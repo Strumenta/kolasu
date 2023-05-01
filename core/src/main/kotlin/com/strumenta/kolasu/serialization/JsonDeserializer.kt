@@ -91,7 +91,8 @@ class JsonDeserializer {
                     args[p] = value
                 } catch (t: Throwable) {
                     throw RuntimeException(
-                        "Issue deserializing property ${p.name} of ${p.type}. JSON: ${jo.get(p.name)}", t
+                        "Issue deserializing property ${p.name} of ${p.type}. JSON: ${jo.get(p.name)}",
+                        t
                     )
                 }
             }

@@ -1,4 +1,5 @@
 @file:JvmName("ProcessingByPosition")
+
 package com.strumenta.kolasu.traversing
 
 import com.strumenta.kolasu.model.Node
@@ -58,7 +59,9 @@ fun Node.walkWithin(position: Position): Sequence<Node> {
         sequenceOf(this) + this.children.walkWithin(position)
     } else if (this.overlaps(position)) {
         this.children.walkWithin(position)
-    } else emptySequence()
+    } else {
+        emptySequence()
+    }
 }
 
 /**

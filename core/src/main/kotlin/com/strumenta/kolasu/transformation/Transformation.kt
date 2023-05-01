@@ -62,7 +62,7 @@ class NodeTransformer<Source, Output : Node>(
      */
     fun withChild(
         targetProperty: KMutableProperty1<*, *>,
-        sourceAccessor: Source.() -> Any?,
+        sourceAccessor: Source.() -> Any?
     ): NodeTransformer<Source, Output> = withChild(
         get = { source -> source.sourceAccessor() },
         set = (targetProperty as KMutableProperty1<Any, Any?>)::set,
@@ -77,7 +77,7 @@ class NodeTransformer<Source, Output : Node>(
      */
     fun withChild(
         targetProperty: KProperty1<*, *>,
-        sourceAccessor: Source.() -> Any?,
+        sourceAccessor: Source.() -> Any?
     ): NodeTransformer<Source, Output> = withChild<Any, Any>(
         get = { source -> source.sourceAccessor() },
         null,
@@ -286,7 +286,9 @@ open class ASTTransformer(
                 if (targetProp is KMutableProperty1 && mapped != null) {
                     val path = (mapped.path.ifEmpty { targetProp.name })
                     childNodeTransformer = ChildNodeTransformer(
-                        childKey, transformer.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set
+                        childKey,
+                        transformer.getter(path),
+                        (targetProp as KMutableProperty1<Any, Any?>)::set
                     )
                     transformer.children[childKey] = childNodeTransformer as ChildNodeTransformer<Any, *, *>
                     setChild(childNodeTransformer, source, node, pd)
@@ -402,7 +404,8 @@ open class ASTTransformer(
                 fun getConstructorParameterValue(kParameter: KParameter): ParameterValue {
                     try {
                         val childNodeTransformer = thisTransformer.getChildNodeTransformer<Any, T, Any>(
-                            target, kParameter.name!!
+                            target,
+                            kParameter.name!!
                         )
                         if (childNodeTransformer == null) {
                             if (kParameter.isOptional) {
@@ -494,8 +497,12 @@ open class ASTTransformer(
             val endIndex = qualifiedName.lastIndexOf('.')
             if (endIndex >= 0) {
                 qualifiedName.substring(0, endIndex)
-            } else ""
-        } else ""
+            } else {
+                ""
+            }
+        } else {
+            ""
+        }
         val set = _knownClasses.computeIfAbsent(packageName) { mutableSetOf() }
         set.add(target)
     }

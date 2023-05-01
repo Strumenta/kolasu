@@ -31,7 +31,8 @@ class ResultTest {
         val nsURI = "https://strumenta.com/simplemm"
         val metamodelBuilder = MetamodelBuilder(
             packageName(CompilationUnit::class),
-            nsURI, "simplemm"
+            nsURI,
+            "simplemm"
         )
         metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()

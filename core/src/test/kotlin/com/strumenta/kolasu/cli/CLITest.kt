@@ -99,7 +99,7 @@ class CLITest {
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -166,7 +166,7 @@ class CLITest {
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -233,7 +233,7 @@ class CLITest {
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -281,7 +281,7 @@ class CLITest {
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -349,7 +349,7 @@ class CLITest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityFoo", mutableListOf()),
+                            MyEntityDecl("EntityFoo", mutableListOf())
                         )
                     )
                 )
@@ -357,7 +357,7 @@ class CLITest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityBar", mutableListOf()),
+                            MyEntityDecl("EntityBar", mutableListOf())
                         )
                     )
                 )
@@ -430,7 +430,7 @@ class CLITest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityFoo", mutableListOf()),
+                            MyEntityDecl("EntityFoo", mutableListOf())
                         )
                     )
                 )
@@ -438,7 +438,7 @@ class CLITest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityBar", mutableListOf()),
+                            MyEntityDecl("EntityBar", mutableListOf())
                         )
                     )
                 )
@@ -501,7 +501,7 @@ class CLITest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityFoo", mutableListOf()),
+                            MyEntityDecl("EntityFoo", mutableListOf())
                         )
                     )
                 )
@@ -509,7 +509,7 @@ class CLITest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityBar", mutableListOf()),
+                            MyEntityDecl("EntityBar", mutableListOf())
                         )
                     )
                 )

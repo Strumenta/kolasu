@@ -50,10 +50,10 @@ fun Node.referenceByNameProperties(): Collection<ReferenceByNameProperty> {
                 .isSubtypeOf(
                     ReferenceByName::class.createType(
                         arguments = listOf(
-                            KTypeProjection(variance = KVariance.OUT, type = Symbol::class.createType()),
+                            KTypeProjection(variance = KVariance.OUT, type = Symbol::class.createType())
                         ),
-                        nullable = true,
-                    ),
+                        nullable = true
+                    )
                 )
         }.map { it as ReferenceByNameProperty }
 }

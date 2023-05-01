@@ -184,7 +184,9 @@ data class ReadEqualStmt(
     override val name: String,
     val specifiedPosition: Position? = null
 ) : AbstractReadEqualStmt(
-    searchArg = searchArg, name = name, specifiedPosition = specifiedPosition,
+    searchArg = searchArg,
+    name = name,
+    specifiedPosition = specifiedPosition,
     logPref = "READE"
 ) {
 
@@ -196,7 +198,9 @@ data class ReadPreviousEqualStmt(
     override val name: String,
     val specifiedPosition: Position? = null
 ) : AbstractReadEqualStmt(
-    searchArg = searchArg, name = name, specifiedPosition = specifiedPosition,
+    searchArg = searchArg,
+    name = name,
+    specifiedPosition = specifiedPosition,
     logPref = "READPE"
 ) {
 

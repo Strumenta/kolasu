@@ -170,7 +170,7 @@ class ParseTreeToASTTransformerAnotherTest {
                     "FOO",
                     mutableListOf(
                         EFeature("A", EStringType()),
-                        EFeature("B", EBooleanType()),
+                        EFeature("B", EBooleanType())
                     )
                 ),
                 EEntity(
@@ -178,7 +178,7 @@ class ParseTreeToASTTransformerAnotherTest {
                     mutableListOf(
                         EFeature("C", EEntityRefType(ReferenceByName("FOO")))
                     )
-                ),
+                )
             )
         )
         val actualAST = transformer.transform(

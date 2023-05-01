@@ -56,9 +56,11 @@ class JsonGenerator {
         withDestinationIds: IdentityHashMap<Node, String>? = null
     ): JsonElement {
         return nodeToJson(
-            root, shortClassNames,
+            root,
+            shortClassNames,
             withIds = withIds,
-            withOriginIds = withOriginIds, withDestinationIds = withDestinationIds
+            withOriginIds = withOriginIds,
+            withDestinationIds = withDestinationIds
         )
     }
 
@@ -235,7 +237,8 @@ class JsonGenerator {
                         jsonObject.add(
                             it.name,
                             nodeToJson(
-                                it.value as Node, shortClassNames,
+                                it.value as Node,
+                                shortClassNames,
                                 withIds = withIds,
                                 withOriginIds = withOriginIds,
                                 withDestinationIds = withDestinationIds
