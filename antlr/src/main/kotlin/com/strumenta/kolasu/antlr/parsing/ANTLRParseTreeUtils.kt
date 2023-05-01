@@ -1,11 +1,16 @@
 package com.strumenta.kolasu.antlr.parsing
 
-import com.strumenta.kolasu.model.*
-import org.antlr.v4.runtime.*
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Origin
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Source
+import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.RuleContext
+import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
-import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 
 /**
@@ -76,9 +81,11 @@ class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = n
                 is ParserRuleContext -> {
                     parseTree.getOriginalText()
                 }
+
                 is TerminalNode -> {
                     parseTree.text
                 }
+
                 else -> null
             }
 }
