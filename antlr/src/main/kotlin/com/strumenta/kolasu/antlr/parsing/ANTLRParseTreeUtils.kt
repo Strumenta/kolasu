@@ -129,7 +129,9 @@ fun ParserRuleContext.toPosition(considerPosition: Boolean = true, source: Sourc
     return if (considerPosition && start != null && stop != null) {
         val position = position
         if (source == null) position else Position(position.start, position.end, source)
-    } else null
+    } else {
+        null
+    }
 }
 
 fun TerminalNode.toPosition(considerPosition: Boolean = true, source: Source? = null): Position? =

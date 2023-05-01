@@ -93,7 +93,8 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
         if (lastToken.type != Token.EOF) {
             issues.add(
                 Issue(
-                    IssueType.SYNTACTIC, "The whole input was not consumed",
+                    IssueType.SYNTACTIC,
+                    "The whole input was not consumed",
                     position = lastToken!!.endPoint.asPosition
                 )
             )
@@ -191,8 +192,12 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
         }
         val now = System.currentTimeMillis()
         return ParsingResultWithFirstStage(
-            myIssues, ast, inputStream.getText(Interval(0, inputStream.index() + 1)),
-            null, now - start, firstStage
+            myIssues,
+            ast,
+            inputStream.getText(Interval(0, inputStream.index() + 1)),
+            null,
+            now - start,
+            firstStage
         )
     }
 

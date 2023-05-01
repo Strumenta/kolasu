@@ -45,7 +45,9 @@ interface TokenFactory<T : KolasuToken> {
             antlrTerminals.sortBy { it.symbol.tokenIndex }
             val tokens = antlrTerminals.map { convertToken(it) }.toMutableList()
             LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime)
-        } else null
+        } else {
+            null
+        }
     }
 }
 
