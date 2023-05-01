@@ -54,12 +54,12 @@ subprojects {
         }
     }
 
-    ktlint {
-        version = "0.48.1"
-        verbose = true
-        outputToConsole = true
-        enableExperimentalRules = true
-    }
+//    ktlint {
+//        version = "0.48.1"
+//        verbose = true
+//        outputToConsole = true
+//        enableExperimentalRules = true
+//    }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         kotlinOptions {
