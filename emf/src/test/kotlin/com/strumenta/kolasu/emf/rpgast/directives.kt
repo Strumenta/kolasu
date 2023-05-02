@@ -1,16 +1,16 @@
 package com.smeup.rpgparser.parsing.ast
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 
-abstract class Directive(specifiedPosition: Position? = null) : Node(specifiedPosition)
+abstract class Directive(specifiedRange: Range? = null) : Node(specifiedRange)
 
-data class DeceditDirective(val format: String, val specifiedPosition: Position? = null) : Directive(
-    specifiedPosition
+data class DeceditDirective(val format: String, val specifiedRange: Range? = null) : Directive(
+    specifiedRange
 )
 
-data class ActivationGroupDirective(val type: ActivationGroupType, val specifiedPosition: Position? = null) :
-    Directive(specifiedPosition)
+data class ActivationGroupDirective(val type: ActivationGroupType, val specifiedRange: Range? = null) :
+    Directive(specifiedRange)
 
 sealed class ActivationGroupType
 

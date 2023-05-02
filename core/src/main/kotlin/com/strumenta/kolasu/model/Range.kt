@@ -41,9 +41,9 @@ data class Point(val line: Int, val column: Int) : Comparable<Point>, Serializab
 
     override fun toString() = "Line $line, Column $column"
 
-    fun positionWithLength(length: Int): Position {
+    fun rangeWithLength(length: Int): Range {
         require(length >= 0)
-        return Position(this, this.plus(length))
+        return Range(this, this.plus(length))
     }
 
     /**
@@ -106,13 +106,13 @@ data class Point(val line: Int, val column: Int) : Comparable<Point>, Serializab
         return Point(line, column)
     }
 
-    val asPosition: Position
-        get() = Position(this, this)
+    val asRange: Range
+        get() = Range(this, this)
 }
 
-fun linePosition(lineNumber: Int, lineCode: String, source: Source? = null): Position {
+fun lineRange(lineNumber: Int, lineCode: String, source: Source? = null): Range {
     require(lineNumber >= 1) { "Line numbers are expected to be equal or greater than 1" }
-    return Position(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length), source)
+    return Range(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length), source)
 }
 
 abstract class Source : Serializable
@@ -136,18 +136,18 @@ data class SyntheticSource(val description: String) : Source()
  * An area in a source file, from start to end.
  * The start point is the point right before the starting character.
  * The end point is the point right after the last character.
- * An empty position will have coinciding points.
+ * An empty range will have coinciding points.
  *
  * Consider a file with one line, containing text "HELLO".
- * The Position of such text will be Position(Point(1, 0), Point(1, 5)).
+ * The Range of such text will be Range(Point(1, 0), Point(1, 5)).
  */
-data class Position(val start: Point, val end: Point, var source: Source? = null) : Comparable<Position>, Serializable {
+data class Range(val start: Point, val end: Point, var source: Source? = null) : Comparable<Range>, Serializable {
 
     override fun toString(): String {
-        return "Position(start=$start, end=$end${if (source == null) "" else ", source=$source"})"
+        return "Range(start=$start, end=$end${if (source == null) "" else ", source=$source"})"
     }
 
-    override fun compareTo(other: Position): Int {
+    override fun compareTo(other: Range): Int {
         val cmp = this.start.compareTo(other.start)
         return if (cmp == 0) {
             this.end.compareTo(other.end)
@@ -165,14 +165,14 @@ data class Position(val start: Point, val end: Point, var source: Source? = null
     }
 
     /**
-     * Given the whole code extract the portion of text corresponding to this position
+     * Given the whole code extract the portion of text corresponding to this range
      */
     fun text(wholeText: String): String {
         return wholeText.substring(start.offset(wholeText), end.offset(wholeText))
     }
 
     /**
-     * The length in characters of the text under this position in the provided source.
+     * The length in characters of the text under this range in the provided source.
      * @param code the source text.
      */
     fun length(code: String) = end.offset(code) - start.offset(code)
@@ -188,13 +188,13 @@ data class Position(val start: Point, val end: Point, var source: Source? = null
     }
 
     /**
-     * Tests whether the given position is contained in the interval represented by this object.
-     * @param position the position
+     * Tests whether the given range is contained in the interval represented by this object.
+     * @param range the range
      */
-    fun contains(position: Position?): Boolean {
-        return (position != null) &&
-            this.start.isSameOrBefore(position.start) &&
-            this.end.isSameOrAfter(position.end)
+    fun contains(range: Range?): Boolean {
+        return (range != null) &&
+            this.start.isSameOrBefore(range.start) &&
+            this.end.isSameOrAfter(range.end)
     }
 
     /**
@@ -202,35 +202,35 @@ data class Position(val start: Point, val end: Point, var source: Source? = null
      * @param node the node
      */
     fun contains(node: Node): Boolean {
-        return this.contains(node.position)
+        return this.contains(node.range)
     }
 
     /**
-     * Tests whether the given position overlaps the interval represented by this object.
-     * @param position the position
+     * Tests whether the given range overlaps the interval represented by this object.
+     * @param range the range
      */
-    fun overlaps(position: Position?): Boolean {
-        return (position != null) && (
-            (this.start.isSameOrAfter(position.start) && this.start.isSameOrBefore(position.end)) ||
-                (this.end.isSameOrAfter(position.start) && this.end.isSameOrBefore(position.end)) ||
-                (position.start.isSameOrAfter(this.start) && position.start.isSameOrBefore(this.end)) ||
-                (position.end.isSameOrAfter(this.start) && position.end.isSameOrBefore(this.end))
+    fun overlaps(range: Range?): Boolean {
+        return (range != null) && (
+            (this.start.isSameOrAfter(range.start) && this.start.isSameOrBefore(range.end)) ||
+                (this.end.isSameOrAfter(range.start) && this.end.isSameOrBefore(range.end)) ||
+                (range.start.isSameOrAfter(this.start) && range.start.isSameOrBefore(this.end)) ||
+                (range.end.isSameOrAfter(this.start) && range.end.isSameOrBefore(this.end))
             )
     }
 }
 
 /**
- * Utility function to create a Position
+ * Utility function to create a Range
  */
-fun pos(startLine: Int, startCol: Int, endLine: Int, endCol: Int) = Position(
+fun range(startLine: Int, startCol: Int, endLine: Int, endCol: Int) = Range(
     Point(startLine, startCol),
     Point(endLine, endCol)
 )
 
-fun Node.isBefore(other: Node): Boolean = position!!.start.isBefore(other.position!!.start)
+fun Node.isBefore(other: Node): Boolean = range!!.start.isBefore(other.range!!.start)
 
 val Node.startLine: Int?
-    get() = this.position?.start?.line
+    get() = this.range?.start?.line
 
 val Node.endLine: Int?
-    get() = this.position?.end?.line
+    get() = this.range?.end?.line

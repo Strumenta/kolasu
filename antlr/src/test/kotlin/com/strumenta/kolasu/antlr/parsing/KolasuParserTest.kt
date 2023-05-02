@@ -23,7 +23,7 @@ class SimpleLangKolasuParser : KolasuANTLRParser<Node, SimpleLangParser, SimpleL
 
     override fun parseTreeToAst(
         parseTreeRoot: SimpleLangParser.CompilationUnitContext,
-        considerPosition: Boolean,
+        considerRange: Boolean,
         issues: MutableList<Issue>
     ): Node? = null
 }

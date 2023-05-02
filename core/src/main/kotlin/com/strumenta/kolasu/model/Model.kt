@@ -8,24 +8,24 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 
 interface Origin {
-    val position: Position?
+    val range: Range?
     val sourceText: String?
     val source: Source?
-        get() = position?.source
+        get() = range?.source
 }
 
-class SimpleOrigin(override val position: Position?, override val sourceText: String?) : Origin, Serializable
+class SimpleOrigin(override val range: Range?, override val sourceText: String?) : Origin, Serializable
 
 data class CompositeOrigin(
     val elements: List<Origin>,
-    override val position: Position?,
+    override val range: Range?,
     override val sourceText: String?
 ) : Origin, Serializable
 
 interface Destination
 
 data class CompositeDestination(val elements: List<Destination>) : Destination, Serializable
-data class TextFileDestination(val position: Position?) : Destination, Serializable
+data class TextFileDestination(val range: Range?) : Destination, Serializable
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
@@ -36,10 +36,10 @@ data class TextFileDestination(val position: Position?) : Destination, Serializa
 open class Node() : Origin, Destination, Serializable {
 
     @Internal
-    protected var positionOverride: Position? = null
+    protected var rangeOverride: Range? = null
 
-    constructor(position: Position?) : this() {
-        this.position = position
+    constructor(range: Range?) : this() {
+        this.range = range
     }
 
     constructor(origin: Origin?) : this() {
@@ -76,27 +76,27 @@ open class Node() : Origin, Destination, Serializable {
     var parent: Node? = null
 
     /**
-     * The position of this node in the source text.
-     * If a position has been provided when creating this node, it is returned.
-     * Otherwise, the value of this property is the position of the origin, if any.
+     * The range of this node in the source text.
+     * If a range has been provided when creating this node, it is returned.
+     * Otherwise, the value of this property is the range of the origin, if any.
      */
     @property:Internal
-    override var position: Position?
-        get() = positionOverride ?: origin?.position
-        set(position) {
-            this.positionOverride = position
+    override var range: Range?
+        get() = rangeOverride ?: origin?.range
+        set(range) {
+            this.rangeOverride = range
         }
 
     @property:Internal
     override val source: Source?
         get() = origin?.source
 
-    fun detach(keepPosition: Boolean = true, keepSourceText: Boolean = false) {
+    fun detach(keepRange: Boolean = true, keepSourceText: Boolean = false) {
         val existingOrigin = origin
         if (existingOrigin != null) {
-            if (keepPosition || keepSourceText) {
+            if (keepRange || keepSourceText) {
                 this.origin = SimpleOrigin(
-                    if (keepPosition) existingOrigin.position else null,
+                    if (keepRange) existingOrigin.range else null,
                     if (keepSourceText) existingOrigin.sourceText else null
                 )
             } else {
@@ -109,19 +109,19 @@ open class Node() : Origin, Destination, Serializable {
     }
 
     /**
-     * Tests whether the given position is contained in the interval represented by this object.
-     * @param position the position
+     * Tests whether the given range is contained in the interval represented by this object.
+     * @param range the range
      */
-    fun contains(position: Position?): Boolean {
-        return this.position?.contains(position) ?: false
+    fun contains(range: Range?): Boolean {
+        return this.range?.contains(range) ?: false
     }
 
     /**
-     * Tests whether the given position overlaps the interval represented by this object.
-     * @param position the position
+     * Tests whether the given range overlaps the interval represented by this object.
+     * @param range the range
      */
-    fun overlaps(position: Position?): Boolean {
-        return this.position?.overlaps(position) ?: false
+    fun overlaps(range: Range?): Boolean {
+        return this.range?.overlaps(range) ?: false
     }
 
     /**
@@ -144,8 +144,8 @@ open class Node() : Origin, Destination, Serializable {
     }
 }
 
-fun <N : Node> N.withPosition(position: Position?): N {
-    this.position = position
+fun <N : Node> N.withRange(range: Range?): N {
+    this.range = range
     return this
 }
 
