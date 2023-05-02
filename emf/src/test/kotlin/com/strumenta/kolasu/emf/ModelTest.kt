@@ -38,7 +38,7 @@ class ModelTest {
                 VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar")),
                 VarDeclaration(Visibility.PRIVATE, "c", LocalDateTimeLiteral(LocalDateTime.now())),
             )
-        ).withPosition(Position(Point(1, 0), Point(1, 1)))
+        ).withRange(Range(Point(1, 0), Point(1, 1)))
         val nsURI = "https://strumenta.com/simplemm"
         val metamodelBuilder = MetamodelBuilder(packageName(CompilationUnit::class), nsURI, "simplemm")
         metamodelBuilder.provideClass(CompilationUnit::class)
@@ -134,7 +134,7 @@ class ModelTest {
     @Test
     fun destinationIsSerialized() {
         val n1 = NodeFoo("abc").apply {
-            destination = TextFileDestination(Position(Point(1, 8), Point(7, 4)))
+            destination = TextFileDestination(Range(Point(1, 8), Point(7, 4)))
         }
         val ePackage = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo").apply {
             provideClass(NodeFoo::class)
@@ -365,7 +365,7 @@ class ModelTest {
 
     @Test
     fun saveToJSONWithParseTreeOrigin() {
-        // We verify the ParseTreeOrigin is not saved, but the position is
+        // We verify the ParseTreeOrigin is not saved, but the range is
         val pt = SimpleLangParser(CommonTokenStream(SimpleLangLexer(CharStreams.fromString("input A is string"))))
             .compilationUnit()
         val ast = MySimpleLangCu().withParseTreeNode(pt)

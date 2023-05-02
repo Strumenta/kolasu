@@ -1,14 +1,14 @@
 package com.smeup.rpgparser.parsing.ast
 
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 
 // *IN01..*IN99
 data class PredefinedIndicatorExpr(val index: Int) : AssignableExpression() {
-    constructor(index: Int, position: Position) : this(index) {
-        this.position = position
+    constructor(index: Int, range: Range) : this(index) {
+        this.range = range
     }
     init {
-        require(index in 1..99) { "Indicator not in range 01 to 99 at $position" }
+        require(index in 1..99) { "Indicator not in range 01 to 99 at $range" }
     }
     override fun size(): Int = 1
 }

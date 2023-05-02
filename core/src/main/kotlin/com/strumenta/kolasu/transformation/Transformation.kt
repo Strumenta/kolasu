@@ -258,7 +258,7 @@ open class ASTTransformer(
                     Issue.semantic(
                         "Source node not mapped: ${source::class.qualifiedName}",
                         IssueSeverity.INFO,
-                        origin?.position
+                        origin?.range
                     )
                 )
             } else {
@@ -500,8 +500,8 @@ open class ASTTransformer(
         set.add(target)
     }
 
-    fun addIssue(message: String, severity: IssueSeverity = IssueSeverity.ERROR, position: Position? = null): Issue {
-        val issue = Issue.semantic(message, severity, position)
+    fun addIssue(message: String, severity: IssueSeverity = IssueSeverity.ERROR, range: Range? = null): Issue {
+        val issue = Issue.semantic(message, severity, range)
         issues.add(issue)
         return issue
     }

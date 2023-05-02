@@ -13,11 +13,11 @@ interface ASTParser<R : Node> {
     fun parse(
         inputStream: InputStream,
         charset: Charset = Charsets.UTF_8,
-        considerPosition: Boolean = true,
+        considerRange: Boolean = true,
         measureLexingTime: Boolean = false
     ):
-        ParsingResult<R> = parse(inputStreamToString(inputStream, charset), considerPosition, measureLexingTime)
-    fun parse(code: String, considerPosition: Boolean = true, measureLexingTime: Boolean = false): ParsingResult<R>
+        ParsingResult<R> = parse(inputStreamToString(inputStream, charset), considerRange, measureLexingTime)
+    fun parse(code: String, considerRange: Boolean = true, measureLexingTime: Boolean = false): ParsingResult<R>
 
-    fun parse(file: File, charset: Charset = Charsets.UTF_8, considerPosition: Boolean = true): ParsingResult<R>
+    fun parse(file: File, charset: Charset = Charsets.UTF_8, considerRange: Boolean = true): ParsingResult<R>
 }

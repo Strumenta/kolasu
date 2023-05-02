@@ -6,9 +6,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.junit.Test as test
 
-data class MySetStatement(val specifiedPosition: Position? = null) : Node(specifiedPosition)
+data class MySetStatement(val specifiedRange: Range? = null) : Node(specifiedRange)
 
-class PositionTest {
+class RangeTest {
 
     @test fun offset() {
         val code =
@@ -92,12 +92,12 @@ class PositionTest {
             """this is some code
                      |second line
                      |third line""".trimMargin("|")
-        assertEquals("", Position(START_POINT, START_POINT).text(code))
-        assertEquals("t", Position(START_POINT, Point(1, 1)).text(code))
-        assertEquals("this is some cod", Position(START_POINT, Point(1, 16)).text(code))
-        assertEquals("this is some code", Position(START_POINT, Point(1, 17)).text(code))
-        assertEquals("this is some code\n", Position(START_POINT, Point(2, 0)).text(code))
-        assertEquals("this is some code\ns", Position(START_POINT, Point(2, 1)).text(code))
+        assertEquals("", Range(START_POINT, START_POINT).text(code))
+        assertEquals("t", Range(START_POINT, Point(1, 1)).text(code))
+        assertEquals("this is some cod", Range(START_POINT, Point(1, 16)).text(code))
+        assertEquals("this is some code", Range(START_POINT, Point(1, 17)).text(code))
+        assertEquals("this is some code\n", Range(START_POINT, Point(2, 0)).text(code))
+        assertEquals("this is some code\ns", Range(START_POINT, Point(2, 1)).text(code))
     }
 
     @test
@@ -107,46 +107,46 @@ class PositionTest {
         val middle = Point(1, 2)
         val end = Point(1, 3)
         val after = Point(1, 4)
-        val position = Position(start, end)
+        val range = Range(start, end)
 
-        assertFalse("contains should return false with point before") { position.contains(before) }
-        assertTrue("contains should return true with point at the beginning") { position.contains(start) }
-        assertTrue("contains should return true with point in the middle") { position.contains(middle) }
-        assertTrue("contains should return true with point at the end") { position.contains(end) }
-        assertFalse("contains should return false with point after") { position.contains(after) }
+        assertFalse("contains should return false with point before") { range.contains(before) }
+        assertTrue("contains should return true with point at the beginning") { range.contains(start) }
+        assertTrue("contains should return true with point in the middle") { range.contains(middle) }
+        assertTrue("contains should return true with point at the end") { range.contains(end) }
+        assertFalse("contains should return false with point after") { range.contains(after) }
     }
 
     @test
-    fun containsPosition() {
-        val before = Position(Point(1, 0), Point(1, 10))
-        val inside = Position(Point(2, 3), Point(2, 8))
-        val after = Position(Point(3, 0), Point(3, 10))
-        val position = Position(Point(2, 0), Point(2, 10))
+    fun containsRange() {
+        val before = Range(Point(1, 0), Point(1, 10))
+        val inside = Range(Point(2, 3), Point(2, 8))
+        val after = Range(Point(3, 0), Point(3, 10))
+        val range = Range(Point(2, 0), Point(2, 10))
 
-        assertFalse("contains should return false with position before") { position.contains(before) }
-        assertTrue("contains should return true with same position") { position.contains(position) }
-        assertTrue("contains should return true with position inside") { position.contains(inside) }
-        assertFalse("contains should return false with position after") { position.contains(after) }
+        assertFalse("contains should return false with range before") { range.contains(before) }
+        assertTrue("contains should return true with same range") { range.contains(range) }
+        assertTrue("contains should return true with range inside") { range.contains(inside) }
+        assertFalse("contains should return false with range after") { range.contains(after) }
     }
 
     @test
     fun containsNode() {
-        val before = Node(Position(Point(1, 0), Point(1, 10)))
-        val inside = Node(Position(Point(2, 3), Point(2, 8)))
-        val after = Node(Position(Point(3, 0), Point(3, 10)))
-        val position = Position(Point(2, 0), Point(2, 10))
+        val before = Node(Range(Point(1, 0), Point(1, 10)))
+        val inside = Node(Range(Point(2, 3), Point(2, 8)))
+        val after = Node(Range(Point(3, 0), Point(3, 10)))
+        val range = Range(Point(2, 0), Point(2, 10))
 
-        assertFalse("contains should return false with node before") { position.contains(before) }
-        assertTrue("contains should return true with node inside") { position.contains(inside) }
-        assertFalse("contains should return false with node after") { position.contains(after) }
+        assertFalse("contains should return false with node before") { range.contains(before) }
+        assertTrue("contains should return true with node inside") { range.contains(inside) }
+        assertFalse("contains should return false with node after") { range.contains(after) }
     }
 
-    @test fun illegalPositionAccepted() {
-        Position(Point(10, 1), Point(5, 2), validate = false)
+    @test fun illegalRangeAccepted() {
+        Range(Point(10, 1), Point(5, 2), validate = false)
     }
 
     @test(expected = Exception::class)
-    fun illegalPositionNotAccepted() {
-        Position(Point(10, 1), Point(5, 2), validate = true)
+    fun illegalRangeNotAccepted() {
+        Range(Point(10, 1), Point(5, 2), validate = true)
     }
 }

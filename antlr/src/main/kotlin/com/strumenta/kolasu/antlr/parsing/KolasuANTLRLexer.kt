@@ -92,7 +92,7 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<
 
             if (last != null && last!!.type != Token.EOF) {
                 val message = "The parser didn't consume the entire input"
-                issues.add(Issue(IssueType.SYNTACTIC, message, position = last!!.endPoint.asPosition))
+                issues.add(Issue(IssueType.SYNTACTIC, message, range = last!!.endPoint.asRange))
             }
         }
 
@@ -111,7 +111,7 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<
  * such as type and channel.
  */
 data class KolasuANTLRToken(override val category: TokenCategory, val token: Token) :
-    KolasuToken(category, token.position, token.text)
+    KolasuToken(category, token.range, token.text)
 
 fun Lexer.injectErrorCollectorInLexer(issues: MutableList<Issue>) {
     this.removeErrorListeners()
@@ -128,7 +128,7 @@ fun Lexer.injectErrorCollectorInLexer(issues: MutableList<Issue>) {
                 Issue(
                     IssueType.LEXICAL,
                     errorMessage ?: "unspecified",
-                    position = Point(line, charPositionInLine).asPosition
+                    range = Point(line, charPositionInLine).asRange
                 )
             )
         }

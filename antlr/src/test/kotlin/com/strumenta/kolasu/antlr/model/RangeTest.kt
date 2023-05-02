@@ -1,10 +1,10 @@
 package com.strumenta.kolasu.antlr.model
 
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.antlr.parsing.toPosition
+import com.strumenta.kolasu.antlr.parsing.toRange
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
 import org.antlr.v4.runtime.CharStreams
@@ -13,23 +13,23 @@ import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.test.assertEquals
 import org.junit.Test as test
 
-data class MySetStatement(val specifiedPosition: Position? = null) : Node(specifiedPosition)
+data class MySetStatement(val specifiedRange: Range? = null) : Node(specifiedRange)
 
-class PositionTest {
+class RangeTest {
 
     @test
-    fun parserRuleContextPosition() {
+    fun parserRuleContextRange() {
         val code = "set foo = 123"
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
         val cu = parser.compilationUnit()
         val setStmt = cu.statement(0) as SimpleLangParser.SetStmtContext
-        val pos = setStmt.toPosition()
-        assertEquals(Position(Point(1, 0), Point(1, 13)), pos)
+        val pos = setStmt.toRange()
+        assertEquals(Range(Point(1, 0), Point(1, 13)), pos)
     }
 
     @test
-    fun positionDerivedFromParseTreeNode() {
+    fun rangeDerivedFromParseTreeNode() {
         val code = "set foo = 123"
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
@@ -37,15 +37,15 @@ class PositionTest {
         val setStmt = cu.statement(0) as SimpleLangParser.SetStmtContext
         val mySetStatement = MySetStatement()
         mySetStatement.origin = ParseTreeOrigin(setStmt)
-        assertEquals(Position(Point(1, 0), Point(1, 13)), mySetStatement.position)
+        assertEquals(Range(Point(1, 0), Point(1, 13)), mySetStatement.range)
     }
 
-    @test fun parserTreePosition() {
+    @test fun parserTreeRange() {
         val code = "set foo = 123"
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
         val cu: ParseTree = parser.compilationUnit()
-        val pos = cu.toPosition()
-        assertEquals(Position(Point(1, 0), Point(1, 13)), pos)
+        val pos = cu.toRange()
+        assertEquals(Range(Point(1, 0), Point(1, 13)), pos)
     }
 }

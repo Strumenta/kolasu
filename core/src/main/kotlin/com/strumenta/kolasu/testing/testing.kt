@@ -65,14 +65,12 @@ fun <N : Node> assertASTsAreEqual(
     expected: Node,
     actual: ParsingResult<N>,
     context: String = "<root>",
-    considerPosition: Boolean = false,
+    considerRange: Boolean = false
 ) {
     assertEquals(0, actual.issues.size, actual.issues.toString())
     assertASTsAreEqual(
-        expected = expected,
-        actual = actual.root!!,
-        context = context,
-        considerPosition = considerPosition,
+        expected = expected, actual = actual.root!!, context = context,
+        considerRange = considerRange
     )
 }
 
@@ -80,12 +78,12 @@ fun assertASTsAreEqual(
     expected: Node,
     actual: Node,
     context: String = "<root>",
-    considerPosition: Boolean = false,
+    considerRange: Boolean = false,
     useLightweightAttributeEquality: Boolean = false
 ) {
     if (expected.nodeType == actual.nodeType) {
-        if (considerPosition) {
-            assertEquals(expected.position, actual.position, "$context.position")
+        if (considerRange) {
+            assertEquals(expected.range, actual.range, "$context.range")
         }
         expected.properties.forEach { expectedProperty ->
             val actualProperty = actual.properties.find { it.name == expectedProperty.name }
@@ -115,7 +113,7 @@ fun assertASTsAreEqual(
                             for (i in expectedPropValueCollection.indices) {
                                 assertASTsAreEqual(
                                     expectedIt.next(), actualIt.next(), "$context[$i]",
-                                    considerPosition = considerPosition,
+                                    considerRange = considerRange,
                                     useLightweightAttributeEquality = useLightweightAttributeEquality
                                 )
                             }
@@ -141,7 +139,7 @@ fun assertASTsAreEqual(
                             expectedPropValue as Node,
                             actualPropValue as Node,
                             context = "$context.${expectedProperty.name}",
-                            considerPosition = considerPosition,
+                            considerRange = considerRange,
                             useLightweightAttributeEquality = useLightweightAttributeEquality
                         )
                     }
