@@ -3,7 +3,9 @@ package com.strumenta.kolasu.antlr.mapping
 import com.strumenta.kolasu.antlr.parsing.withParseTreeNode
 import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.hasValidParents
+import com.strumenta.kolasu.model.invalidRanges
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.transformation.ASTTransformer
 import com.strumenta.kolasu.transformation.GenericNode
