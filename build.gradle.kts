@@ -20,34 +20,37 @@ allprojects {
         mavenLocal()
         mavenCentral()
     }
-
 }
+
+val version = extra["kolasu_version"] as String
+val isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 subprojects {
 
-    tasks.withType(DokkaTask).configureEach {
+    tasks.withType(DokkaTask::class).configureEach {
         dokkaSourceSets {
             named("main") {
-                includeNonPublic = true
-                moduleName = "kolasu-" + moduleName.get()
+                includeNonPublic.set(true)
+                moduleName.set("kolasu-" + moduleName.get())
                 includes.from("README.md")
             }
         }
     }
 
-    task javadocJar(type: Jar, dependsOn: ":${name}:dokkaJavadoc") {
-        archiveClassifier = "javadoc"
-        from "$buildDir/dokka/javadoc"
+    tasks.register<Jar>("javadocJar") {
+        dependsOn(":$name:dokkaJavadoc")
+        archiveClassifier.set("javadoc")
+        from("$buildDir/dokka/javadoc")
     }
 
-    task sourcesJar(type: Jar) {
-        archiveClassifier = "sources"
+    tasks.register<Jar>("sourcesJar") {
+        archiveClassifier.set("sources")
         // See https://discuss.gradle.org/t/why-subproject-sourceset-dirs-project-sourceset-dirs/7376/5
         // Without the closure, parent sources are used for children too
-        from { sourceSets.main.allSource }
+        from(sourceSets.main)
     }
 
-    tasks.withType(Test).all {
+    tasks.withType(Test::class).all {
         testLogging {
             showStandardStreams = true
             showExceptions = true
@@ -62,26 +65,22 @@ subprojects {
 //        enableExperimentalRules = true
 //    }
 
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    val jvm_version = extra["jvm_version"]!! as String
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
         kotlinOptions {
-            jvmTarget = "${jvm_version}"
+            jvmTarget = "$jvm_version"
         }
     }
 
-    tasks.withType(Sign) {
-        onlyIf { isReleaseVersion }
+    if (isReleaseVersion) {
+        tasks.withType(Sign::class) {
+        }
     }
-
-    ktlint {
-        disabledRules = ["no-wildcard-imports", "experimental:argument-list-wrapping"]
-    }
-
 }
 
-ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-
 release {
-    buildTasks = ["publish"]
+    buildTasks.set(listOf("publish"))
     git {
         requireBranch.set("master")
         pushToRemote.set("origin")

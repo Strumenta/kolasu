@@ -58,6 +58,9 @@ idea {
     }
 }
 
+// TODO remove
+ext.isReleaseVersion = !kolasu_version.endsWith("SNAPSHOT")
+
 publishing {
 
     repositories {
