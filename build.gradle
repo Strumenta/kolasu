@@ -1,14 +1,15 @@
 import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version "${kotlin_version}"
-    id "org.jlleitschuh.gradle.ktlint" version "11.3.2"
+    id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.dokka")
+    id("org.jlleitschuh.gradle.ktlint") version "11.3.2"
     id("maven-publish")
     id("idea")
     id("signing")
-    id("org.jetbrains.dokka") version "${dokka_version}"
-    id 'java-library'
-    id 'net.researchgate.release' version '3.0.2'
+
+    id("java-library")
+    id("net.researchgate.release") version "3.0.2"
 }
 
 allprojects {
@@ -35,12 +36,12 @@ subprojects {
     }
 
     task javadocJar(type: Jar, dependsOn: ":${name}:dokkaJavadoc") {
-        archiveClassifier = 'javadoc'
+        archiveClassifier = "javadoc"
         from "$buildDir/dokka/javadoc"
     }
 
     task sourcesJar(type: Jar) {
-        archiveClassifier = 'sources'
+        archiveClassifier = "sources"
         // See https://discuss.gradle.org/t/why-subproject-sourceset-dirs-project-sourceset-dirs/7376/5
         // Without the closure, parent sources are used for children too
         from { sourceSets.main.allSource }
@@ -80,9 +81,9 @@ subprojects {
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 release {
-    buildTasks = ['publish']
+    buildTasks = ["publish"]
     git {
-        requireBranch.set('master')
-        pushToRemote.set('origin')
+        requireBranch.set("master")
+        pushToRemote.set("origin")
     }
 }
