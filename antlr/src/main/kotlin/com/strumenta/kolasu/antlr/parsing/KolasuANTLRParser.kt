@@ -93,7 +93,8 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
         if (lastToken.type != Token.EOF) {
             issues.add(
                 Issue(
-                    IssueType.SYNTACTIC, "The whole input was not consumed",
+                    IssueType.SYNTACTIC,
+                    "The whole input was not consumed",
                     range = lastToken!!.endPoint.asRange
                 )
             )

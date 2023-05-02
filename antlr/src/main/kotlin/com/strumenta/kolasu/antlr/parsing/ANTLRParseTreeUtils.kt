@@ -136,7 +136,9 @@ fun ParserRuleContext.toRange(considerRange: Boolean = true, source: Source? = n
     return if (considerRange && start != null && stop != null) {
         val range = range
         if (source == null) range else Range(range.start, range.end, source)
-    } else null
+    } else {
+        null
+    }
 }
 
 fun TerminalNode.toRange(considerRange: Boolean = true, source: Source? = null): Range? =
