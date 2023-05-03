@@ -70,7 +70,7 @@ fun Point.toEObject(): EObject {
     return eo
 }
 
-fun Position.toEObject(): EObject {
+fun Range.toEObject(): EObject {
     val ec = STARLASU_METAMODEL.getEClass("Position")
     val eo = STARLASU_METAMODEL.eFactoryInstance.create(ec)
     eo.eSet(ec.getEStructuralFeature("start"), this.start.toEObject())
@@ -122,8 +122,8 @@ fun Issue.toEObject(): EObject {
     val messageSF = ec.eAllStructuralFeatures.find { it.name == "message" }!!
     eo.eSet(messageSF, message)
     val positionSF = ec.eAllStructuralFeatures.find { it.name == "position" }!!
-    if (position != null) {
-        eo.eSet(positionSF, position!!.toEObject())
+    if (range != null) {
+        eo.eSet(positionSF, range!!.toEObject())
     }
     return eo
 }
@@ -337,7 +337,7 @@ private fun setOrigin(
         is SimpleOrigin -> {
             val simpleOriginClass = STARLASU_METAMODEL.getEClass("SimpleOrigin")
             val simpleOrigin = simpleOriginClass.instantiate()
-            simpleOrigin.eSet(simpleOriginClass.getEStructuralFeature("position"), origin.position?.toEObject())
+            simpleOrigin.eSet(simpleOriginClass.getEStructuralFeature("position"), origin.range?.toEObject())
             simpleOrigin.eSet(simpleOriginClass.getEStructuralFeature("sourceText"), origin.sourceText)
             eo.eSet(originSF, simpleOrigin)
         }
@@ -370,8 +370,9 @@ private fun setDestination(
         is TextFileDestination -> {
             val textFileInstance = STARLASU_METAMODEL.getEClass("TextFileDestination").instantiate()
 
-            val positionSF = STARLASU_METAMODEL.getEClass("TextFileDestination").getEStructuralFeature("position")
-            textFileInstance.eSet(positionSF, destination.position?.toEObject())
+            val positionSF = STARLASU_METAMODEL.getEClass("TextFileDestination")
+                .getEStructuralFeature("position")
+            textFileInstance.eSet(positionSF, destination.range?.toEObject())
 
             val destinationSF = astNode.getEStructuralFeature("destination")
             eo.eSet(destinationSF, textFileInstance)
@@ -398,9 +399,9 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
         mapping.associate(this, eo)
         val astNode = STARLASU_METAMODEL.getEClass("ASTNode")
 
-        val position = astNode.getEStructuralFeature("position")
-        val positionValue = this.position?.toEObject()
-        eo.eSet(position, positionValue)
+        val positionSF = astNode.getEStructuralFeature("position")
+        val rangeValue = this.range?.toEObject()
+        eo.eSet(positionSF, rangeValue)
 
         setOrigin(eo, this.origin, eResource, mapping)
         setDestination(eo, this.destination, eResource, mapping)

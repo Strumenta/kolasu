@@ -10,7 +10,7 @@ import com.google.gson.JsonPrimitive
 import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.parsing.ParsingResult
@@ -25,7 +25,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
 
 const val JSON_TYPE_KEY = "#type"
-const val JSON_POSITION_KEY = "#position"
+const val JSON_RANGE_KEY = "#range"
 const val JSON_ORIGIN_KEY = "#origin"
 const val JSON_ID_KEY = "#id"
 const val JSON_DESTINATION_KEY = "#destination"
@@ -191,7 +191,7 @@ class JsonGenerator {
         JsonElement {
         val jsonObject = jsonObject(
             JSON_TYPE_KEY to if (shortClassNames) node.javaClass.simpleName else node.javaClass.canonicalName,
-            JSON_POSITION_KEY to node.position?.toJson()
+            JSON_RANGE_KEY to node.range?.toJson()
         )
         if (withIds != null) {
             val id = withIds[node]
@@ -260,9 +260,9 @@ private fun Node.toJsonStreaming(writer: JsonWriter, shortClassNames: Boolean = 
     writer.beginObject()
     writer.name(JSON_TYPE_KEY)
     writer.value(if (shortClassNames) this.javaClass.simpleName else this.javaClass.canonicalName)
-    if (this.position != null) {
-        writer.name(JSON_POSITION_KEY)
-        this.position!!.toJsonStreaming(writer)
+    if (this.range != null) {
+        writer.name(JSON_RANGE_KEY)
+        this.range!!.toJsonStreaming(writer)
     }
     this.processProperties {
         writer.name(it.name)
@@ -326,7 +326,7 @@ fun Issue.toJson(): JsonElement {
         "type" to this.type.name,
         "message" to this.message,
         "severity" to this.severity.name,
-        "position" to this.position?.toJson()
+        "range" to this.range?.toJson()
     )
 }
 
@@ -336,16 +336,16 @@ private fun Issue.toJsonStreaming(writer: JsonWriter) {
     writer.value(this.type.name)
     writer.name("message")
     writer.value(this.message)
-    writer.name("position")
-    if (this.position == null) {
+    writer.name("range")
+    if (this.range == null) {
         writer.nullValue()
     } else {
-        this.position.toJsonStreaming(writer)
+        this.range.toJsonStreaming(writer)
     }
     writer.endObject()
 }
 
-fun Position.toJson(): JsonElement {
+fun Range.toJson(): JsonElement {
     return jsonObject(
         "description" to this.toString(),
         "start" to this.start.toJson(),
@@ -353,7 +353,7 @@ fun Position.toJson(): JsonElement {
     )
 }
 
-private fun Position.toJsonStreaming(writer: JsonWriter) {
+private fun Range.toJsonStreaming(writer: JsonWriter) {
     writer.beginObject()
     writer.name("description")
     writer.value(this.toString())

@@ -22,7 +22,7 @@ data class Result<C>(val issues: List<Issue>, val root: C?) {
                 Issue(
                     type = errorType,
                     message = e.message ?: e.javaClass.simpleName,
-                    position = null
+                    range = null
                 )
             )
             return Result(errors, null)

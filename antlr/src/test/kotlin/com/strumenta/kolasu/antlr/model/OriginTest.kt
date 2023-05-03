@@ -3,10 +3,10 @@ package com.strumenta.kolasu.antlr.model
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.model.pos
+import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.model.range
 import com.strumenta.kolasu.model.withOrigin
-import com.strumenta.kolasu.model.withPosition
+import com.strumenta.kolasu.model.withRange
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
 import org.antlr.v4.runtime.CharStreams
@@ -17,7 +17,7 @@ import org.junit.Test as test
 
 class OriginTest {
 
-    @test fun parseTreeOriginPosition() {
+    @test fun parseTreeOriginRange() {
         val code = """set a = 1 + 2
             |input c is string
             |display 2 * 3
@@ -27,29 +27,29 @@ class OriginTest {
         val parseTreeRoot = parser.compilationUnit()
         println(parseTreeRoot)
         val rootOrigin = ParseTreeOrigin(parseTreeRoot)
-        assertEquals(Position(Point(1, 0), Point(3, 13)), rootOrigin.position)
+        assertEquals(Range(Point(1, 0), Point(3, 13)), rootOrigin.range)
 
         val inputStatement = ParseTreeOrigin(parseTreeRoot.statement(1))
-        assertEquals(Position(Point(2, 0), Point(2, 17)), inputStatement.position)
+        assertEquals(Range(Point(2, 0), Point(2, 17)), inputStatement.range)
 
         var node = Node().withOrigin(rootOrigin)
-        assertEquals(rootOrigin.position, node.position)
+        assertEquals(rootOrigin.range, node.range)
         node.detach()
-        assertEquals(rootOrigin.position, node.position)
+        assertEquals(rootOrigin.range, node.range)
         node = Node().withOrigin(rootOrigin)
-        assertEquals(rootOrigin.position, node.position)
-        node.detach(keepPosition = true)
-        assertEquals(rootOrigin.position, node.position)
+        assertEquals(rootOrigin.range, node.range)
+        node.detach(keepRange = true)
+        assertEquals(rootOrigin.range, node.range)
         node = Node().withOrigin(rootOrigin)
-        assertEquals(rootOrigin.position, node.position)
-        node.detach(keepPosition = false)
+        assertEquals(rootOrigin.range, node.range)
+        node.detach(keepRange = false)
         assertNull(node.origin)
-        assertNull(node.position)
-        node = Node().withOrigin(rootOrigin).withPosition(pos(1, 2, 3, 4))
-        assertEquals(pos(1, 2, 3, 4), node.position)
-        node.detach(keepPosition = false)
+        assertNull(node.range)
+        node = Node().withOrigin(rootOrigin).withRange(range(1, 2, 3, 4))
+        assertEquals(range(1, 2, 3, 4), node.range)
+        node.detach(keepRange = false)
         assertNull(node.origin)
-        assertEquals(pos(1, 2, 3, 4), node.position)
+        assertEquals(range(1, 2, 3, 4), node.range)
     }
 
     @test fun parseTreeOriginsSourceText() {

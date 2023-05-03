@@ -11,7 +11,7 @@ import kotlin.reflect.jvm.javaType
 data class DebugPrintConfiguration constructor(
     var skipEmptyCollections: Boolean = false,
     var skipNull: Boolean = false,
-    var forceShowPosition: Boolean = false,
+    var forceShowRange: Boolean = false,
     val hide: MutableList<String> = mutableListOf(),
     var indentBlock: String = "  "
 )
@@ -56,11 +56,11 @@ fun <N : Node> ParsingResult<N>.debugPrint(
 fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration = DebugPrintConfiguration()): String {
     val indentBlock = configuration.indentBlock
     val sb = StringBuilder()
-    if (this.relevantMemberProperties(withPosition = configuration.forceShowPosition).isEmpty()) {
+    if (this.relevantMemberProperties(withRange = configuration.forceShowRange).isEmpty()) {
         sb.append("$indent${this.javaClass.simpleName}\n")
     } else {
         sb.append("$indent${this.javaClass.simpleName} {\n")
-        this.relevantMemberProperties(withPosition = configuration.forceShowPosition).forEach { property ->
+        this.relevantMemberProperties(withRange = configuration.forceShowRange).forEach { property ->
             if (configuration.hide.contains(property.name)) {
                 // skipping
             } else {

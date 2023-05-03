@@ -19,7 +19,7 @@ open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf(
     ASTTransformer(issues, allowGenericNode) {
     /**
      * Performs the transformation of a node and, recursively, its descendants. In addition to the overridden method,
-     * it also assigns the parseTreeNode to the AST node so that it can keep track of its position.
+     * it also assigns the parseTreeNode to the AST node so that it can keep track of its range.
      * However, a node transformer can override the parseTreeNode of the nodes it creates (but not the parent).
      */
     override fun transform(source: Any?, parent: Node?): Node? {
