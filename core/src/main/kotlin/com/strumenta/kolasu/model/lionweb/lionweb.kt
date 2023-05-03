@@ -4,13 +4,17 @@ import com.strumenta.kolasu.metamodel.StarLasuMetamodel
 import com.strumenta.kolasu.model.*
 import org.lionweb.lioncore.java.metamodel.*
 import org.lionweb.lioncore.java.metamodel.Metamodel
+import org.lionweb.lioncore.java.model.Node
 import org.lionweb.lioncore.java.serialization.JsonSerialization
 import org.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization
+import org.lionweb.lioncore.java.serialization.data.SerializedNode
 import org.lionweb.lioncore.java.utils.MetamodelValidator
 import kotlin.IllegalStateException
+import kotlin.reflect.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KProperty1
+import kotlin.reflect.full.*
 import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.allSupertypes
 import kotlin.reflect.full.superclasses
@@ -107,7 +111,101 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         }
     }
 
+    private fun instantiate(
+        constructor: KFunction<out ASTNode>,
+        concept: Concept,
+        serializedNode: SerializedNode,
+        jsonSerialization: JsonSerialization,
+        unserializedNodesByID: Map<String, Node>,
+        propertiesValues: Map<Property, Any?>
+    ): ASTNode {
+        println("Instantiating with serializedNode $serializedNode")
+        val parameters = mutableMapOf<KParameter, Any?>()
+        constructor.parameters.forEach { constructorParameter ->
+            // Is this constructor parameter corresponding to some feature?
+            val feature = concept.allFeatures().find { f -> f.name == constructorParameter.name }
+            if (feature == null) {
+                TODO()
+            } else {
+                // We can then unserialize the feature and pass that value
+                val serializedPropertyValue = serializedNode.properties.find { it.metaPointer.key == feature.key }
+                if (serializedPropertyValue == null) {
+                    val serializedContainmentValue = serializedNode.containments.find {
+                        it.metaPointer.key == feature.key
+                    }
+                    if (serializedContainmentValue == null) {
+                        TODO()
+                    } else {
+                        val containment = feature as Containment
+                        val childrenIDs = serializedContainmentValue.value as List<String>
+                        val children: MutableList<out Node> = childrenIDs.map { childID ->
+                            unserializedNodesByID[childID] ?: throw IllegalStateException()
+                        }.toMutableList()
+                        if (!containment.isMultiple) {
+                            when (children.size) {
+                                0 -> parameters[constructorParameter] = null
+                                1 -> parameters[constructorParameter] = children[0]
+                                else -> throw IllegalStateException()
+                            }
+                        } else {
+                            parameters[constructorParameter] = children
+                        }
+                    }
+                } else {
+                    parameters[constructorParameter] = propertiesValues[feature as Property]
+                }
+            }
+        }
+        try {
+            val node = constructor.callBy(parameters)
+            node.assignParents()
+            return node
+        } catch (t: Throwable) {
+            throw RuntimeException("Invocation of constructor $constructor failed. Parameters: $parameters", t)
+        }
+    }
+
     fun prepareSerialization(jsonSerialization: JsonSerialization) {
+//        val defaultValueGenerator : (KParameter)->Any?  = {
+// //            when (val t = it.type){
+// //                String::class.createType() -> "DUMMY"
+// //                else -> TODO("Default value for ${it}")
+// //            }
+//            TODO()
+//        }
+
+        jsonSerialization.conceptResolver.registerMetamodel(this)
+        this.mappedConcepts.filter { !it.value.isAbstract }.forEach {
+            val concept = it.value
+            val kolasuClass = it.key
+            jsonSerialization.nodeInstantiator.registerCustomUnserializer(concept.id) {
+                concept, serializedNode,
+                unserializedNodesByID,
+                propertiesValue ->
+                val primaryConstructor = kolasuClass.primaryConstructor
+                if (primaryConstructor == null) {
+                    val emptyLikeConstructor = kolasuClass.constructors.any { it.parameters.all { it.isOptional } }
+                    if (emptyLikeConstructor == null) {
+                        val firstConstructor = kolasuClass.constructors.first()
+                        if (firstConstructor == null) {
+                            TODO()
+                        } else {
+                            instantiate(
+                                firstConstructor, concept!!, serializedNode!!, jsonSerialization,
+                                unserializedNodesByID, propertiesValue
+                            )
+                        }
+                    } else {
+                        TODO()
+                    }
+                } else {
+                    instantiate(
+                        primaryConstructor, concept!!, serializedNode!!,
+                        jsonSerialization, unserializedNodesByID, propertiesValue
+                    )
+                }
+            }
+        }
         mappedEnumerations.forEach { entry ->
             val enumeration = entry.value
             jsonSerialization.primitiveValuesSerialization.registerSerializer(

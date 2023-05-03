@@ -87,7 +87,7 @@ publishing {
             pom {
                 name = "kolasu-" + project.name
                 description = "Framework to work with AST and building languages. Integrated with ANTLR."
-                version = project.version
+                version = kolasu_version
                 packaging = 'jar'
                 url = 'https://github.com/Strumenta/kolasu'
 
@@ -131,3 +131,6 @@ publishing {
 signing {
     sign publishing.publications.kolasu_antlr
 }
+
+runKtlintCheckOverMainSourceSet.dependsOn("generateGrammarSource")
+runKtlintCheckOverTestSourceSet.dependsOn("generateTestGrammarSource")

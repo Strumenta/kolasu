@@ -51,7 +51,7 @@ subprojects {
         archiveClassifier.set("sources")
         // See https://discuss.gradle.org/t/why-subproject-sourceset-dirs-project-sourceset-dirs/7376/5
         // Without the closure, parent sources are used for children too
-        from(sourceSets.main)
+        // from(sourceSets.main)
     }
 
     tasks.withType(Test::class).all {
