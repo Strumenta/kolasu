@@ -27,6 +27,8 @@ val isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 subprojects {
 
+    apply(plugin = "org.jetbrains.dokka")
+
     tasks.withType(DokkaTask::class).configureEach {
         dokkaSourceSets {
             named("main") {
@@ -37,8 +39,10 @@ subprojects {
         }
     }
 
+    val projectName = name
+
     tasks.register<Jar>("javadocJar") {
-        dependsOn(":$name:dokkaJavadoc")
+        dependsOn(":$projectName:dokkaJavadoc")
         archiveClassifier.set("javadoc")
         from("$buildDir/dokka/javadoc")
     }
