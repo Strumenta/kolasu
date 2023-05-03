@@ -22,7 +22,8 @@ allprojects {
     }
 }
 
-val version = extra["kolasu_version"] as String
+val version = project.version as String
+println("VERSION $version")
 val isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 subprojects {

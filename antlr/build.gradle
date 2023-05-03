@@ -60,7 +60,7 @@ idea {
 }
 
 // TODO remove
-ext.isReleaseVersion = !kolasu_version.endsWith("SNAPSHOT")
+ext.isReleaseVersion = !project.version.endsWith("SNAPSHOT")
 
 publishing {
 
@@ -87,7 +87,7 @@ publishing {
             pom {
                 name = "kolasu-" + project.name
                 description = "Framework to work with AST and building languages. Integrated with ANTLR."
-                version = kolasu_version
+                version = project.version
                 packaging = 'jar'
                 url = 'https://github.com/Strumenta/kolasu'
 
