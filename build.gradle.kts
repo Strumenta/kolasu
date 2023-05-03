@@ -86,7 +86,7 @@ subprojects {
 release {
     buildTasks.set(listOf("publish"))
     git {
-        requireBranch.set("master")
+        requireBranch.set("")
         pushToRemote.set("origin")
     }
 }
