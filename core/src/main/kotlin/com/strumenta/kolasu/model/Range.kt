@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.model
 
-import antlr.collections.AST
 import java.io.File
 import java.io.Serializable
 import java.net.URL
