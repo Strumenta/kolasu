@@ -2,6 +2,7 @@ package com.strumenta.kolasu.traversing
 
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
 import com.strumenta.kolasu.model.range
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -9,6 +10,8 @@ import kotlin.test.assertNull
 import kotlin.test.fail
 
 internal class TraversingByRangeTest {
+    object Metamodel : ReflectionBasedMetamodel(Box::class, Item::class)
+
     class Box(
         val name: String,
         val contents: List<ASTNode>,
