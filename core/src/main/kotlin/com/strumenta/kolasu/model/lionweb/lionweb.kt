@@ -119,7 +119,6 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
         unserializedNodesByID: Map<String, Node>,
         propertiesValues: Map<Property, Any?>
     ): ASTNode {
-        println("Instantiating with serializedNode $serializedNode")
         val parameters = mutableMapOf<KParameter, Any?>()
         constructor.parameters.forEach { constructorParameter ->
             // Is this constructor parameter corresponding to some feature?
