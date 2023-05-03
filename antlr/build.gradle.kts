@@ -80,7 +80,7 @@ publishing {
         maven {
             val releaseRepo = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             val snapshotRepo = "https://oss.sonatype.org/content/repositories/snapshots/"
-            url = if (isReleaseVersion) releaseRepo else snapshotRepo
+            url = if (isReleaseVersion) URI(releaseRepo) else snapshotRepo
             credentials {
                 username = if (project.hasProperty("ossrhUsername")) ossrhUsername else "Unknown user"
                 password = if (project.hasProperty("ossrhPassword")) ossrhPassword else "Unknown password"
