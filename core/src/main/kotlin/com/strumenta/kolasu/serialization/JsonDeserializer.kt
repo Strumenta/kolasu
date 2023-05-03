@@ -3,7 +3,7 @@ package com.strumenta.kolasu.serialization
 import com.google.gson.*
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
@@ -91,7 +91,8 @@ class JsonDeserializer {
                     args[p] = value
                 } catch (t: Throwable) {
                     throw RuntimeException(
-                        "Issue deserializing property ${p.name} of ${p.type}. JSON: ${jo.get(p.name)}", t
+                        "Issue deserializing property ${p.name} of ${p.type}. JSON: ${jo.get(p.name)}",
+                        t
                     )
                 }
             }
@@ -107,9 +108,9 @@ class JsonDeserializer {
                 throw IllegalStateException("Class ${clazz.canonicalName} has no primary or default constructor")
             }
         }
-        if (instance != null && jo.has(JSON_POSITION_KEY)) {
-            val position = jo[JSON_POSITION_KEY]?.asJsonObject?.decodeAsPosition()
-            instance.position = position
+        if (instance != null && jo.has(JSON_RANGE_KEY)) {
+            val range = jo[JSON_RANGE_KEY]?.asJsonObject?.decodeAsRange()
+            instance.range = range
         }
 
         return instance ?: throw UnsupportedOperationException()
@@ -120,9 +121,9 @@ class JsonDeserializer {
         val errors = jo["issues"].asJsonArray.map { it.asJsonObject }.map {
             val type = IssueType.valueOf(it["type"].asString)
             val message = it["message"].asString
-            val position = it["position"]?.asJsonObject?.decodeAsPosition()
+            val range = it["range"]?.asJsonObject?.decodeAsRange()
             val severity = IssueSeverity.valueOf(it["severity"].asString)
-            Issue(type, message, severity = severity, position = position)
+            Issue(type, message, severity = severity, range = range)
         }
         val root = if (jo.has("root")) {
             deserialize(rootClass, jo["root"].asJsonObject)
@@ -138,8 +139,8 @@ class JsonDeserializer {
         val issues = jo["issues"].asJsonArray.map { it.asJsonObject }.map {
             val type = IssueType.valueOf(it["type"].asString)
             val message = it["message"].asString
-            val position = it["position"]?.asJsonObject?.decodeAsPosition()
-            Issue(type, message, position = position)
+            val range = it["range"]?.asJsonObject?.decodeAsRange()
+            Issue(type, message, range = range)
         }
         val root = if (jo.has("root")) {
             deserialize(rootClass, jo["root"].asJsonObject)
@@ -151,10 +152,10 @@ class JsonDeserializer {
     }
 }
 
-fun JsonObject.decodeAsPosition(): Position {
+fun JsonObject.decodeAsRange(): Range {
     val start = this["start"]!!.asJsonObject.decodeAsPoint()
     val end = this["end"]!!.asJsonObject.decodeAsPoint()
-    return Position(start, end)
+    return Range(start, end)
 }
 
 private fun JsonObject.decodeAsPoint(): Point {

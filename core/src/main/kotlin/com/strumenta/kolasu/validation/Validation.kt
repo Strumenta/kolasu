@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.validation
 
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import java.io.Serializable
 
 enum class IssueType {
@@ -20,29 +20,29 @@ data class Issue(
     val type: IssueType,
     val message: String,
     val severity: IssueSeverity = IssueSeverity.ERROR,
-    val position: Position? = null
+    val range: Range? = null
 ) : Serializable {
 
     companion object {
         fun lexical(
             message: String,
             severity: IssueSeverity = IssueSeverity.ERROR,
-            position: Position? = null
-        ): Issue = Issue(IssueType.LEXICAL, message, severity, position)
+            range: Range? = null
+        ): Issue = Issue(IssueType.LEXICAL, message, severity, range)
         fun syntactic(
             message: String,
             severity: IssueSeverity = IssueSeverity.ERROR,
-            position: Position? = null
-        ): Issue = Issue(IssueType.SYNTACTIC, message, severity, position)
+            range: Range? = null
+        ): Issue = Issue(IssueType.SYNTACTIC, message, severity, range)
         fun semantic(
             message: String,
             severity: IssueSeverity = IssueSeverity.ERROR,
-            position: Position? = null
-        ): Issue = Issue(IssueType.SEMANTIC, message, severity, position)
+            range: Range? = null
+        ): Issue = Issue(IssueType.SEMANTIC, message, severity, range)
         fun translation(
             message: String,
             severity: IssueSeverity = IssueSeverity.ERROR,
-            position: Position? = null
-        ): Issue = Issue(IssueType.TRANSLATION, message, severity, position)
+            range: Range? = null
+        ): Issue = Issue(IssueType.TRANSLATION, message, severity, range)
     }
 }

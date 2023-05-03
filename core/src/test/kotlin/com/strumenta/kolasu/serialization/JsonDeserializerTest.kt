@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.serialization
 
 import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
@@ -17,10 +17,10 @@ class JsonDeserializerTest {
                 "Section1",
                 listOf(
                     Content(1, null),
-                    Content(2, Content(3, Content(4, null))),
-                ),
+                    Content(2, Content(3, Content(4, null)))
+                )
             ),
-            otherSections = listOf(),
+            otherSections = listOf()
         )
         val json = JsonGenerator().generateString(myRoot)
         val deserialized = JsonDeserializer().deserialize(MyRoot::class.java, json)
@@ -34,10 +34,10 @@ class JsonDeserializerTest {
                 "Section1",
                 listOf(
                     Content(1, null),
-                    Content(2, Content(3, Content(4, null))),
-                ),
+                    Content(2, Content(3, Content(4, null)))
+                )
             ),
-            otherSections = listOf(),
+            otherSections = listOf()
         )
         val originalResult = Result(emptyList(), myRoot)
         val json = JsonGenerator().generateString(originalResult)
@@ -50,12 +50,11 @@ class JsonDeserializerTest {
         val originalResult: Result<MyRoot> = Result(
             listOf(
                 Issue(
-                    IssueType.LEXICAL,
-                    "foo",
-                    position = Position(Point(1, 10), Point(4, 540)),
-                ),
+                    IssueType.LEXICAL, "foo",
+                    range = Range(Point(1, 10), Point(4, 540))
+                )
             ),
-            null,
+            null
         )
         val json = JsonGenerator().generateString(originalResult)
         val deserialized: Result<MyRoot> = JsonDeserializer().deserializeResult(MyRoot::class.java, json)

@@ -3,14 +3,13 @@ package com.strumenta.kolasu.emf.rpgast
 import com.smeup.rpgparser.parsing.ast.Expression
 import com.strumenta.kolasu.model.*
 import java.math.BigDecimal
-import java.util.*
 
 abstract class AbstractDataDefinition(
     override val name: String,
     open val type: Type,
-    specifiedPosition: Position? = null,
+    specifiedRange: Range? = null,
     private val hashCode: Int = name.hashCode()
-) : ASTNode(specifiedPosition), Named {
+) : ASTNode(specifiedRange), Named {
     fun numberOfElements() = type.numberOfElements()
     open fun elementSize() = type.elementSize()
 
@@ -24,14 +23,14 @@ abstract class AbstractDataDefinition(
         if (other is AbstractDataDefinition) name == other.name else false
 }
 
-data class FileDefinition private constructor(override val name: String, val specifiedPosition: Position?) :
+data class FileDefinition private constructor(override val name: String, val specifiedRange: Range?) :
     ASTNode(
-        specifiedPosition
+        specifiedRange
     ),
     Named {
     companion object {
-        operator fun invoke(name: String, specifiedPosition: Position? = null): FileDefinition {
-            return FileDefinition(name.toUpperCase(), specifiedPosition)
+        operator fun invoke(name: String, specifiedRange: Range? = null): FileDefinition {
+            return FileDefinition(name.toUpperCase(), specifiedRange)
         }
     }
 
@@ -47,9 +46,9 @@ data class DataDefinition(
     var fields: List<FieldDefinition> = emptyList(),
     val initializationValue: Expression? = null,
     val inz: Boolean = false,
-    val specifiedPosition: Position? = null
+    val specifiedRange: Range? = null
 ) :
-    AbstractDataDefinition(name, type, specifiedPosition) {
+    AbstractDataDefinition(name, type, specifiedRange) {
 
     override fun isArray() = type is ArrayType
     fun isCompileTimeArray() = type is ArrayType && type.compileTimeArray()
@@ -92,12 +91,12 @@ data class FieldDefinition(
     var overriddenContainer: DataDefinition? = null,
     val initializationValue: Expression? = null,
     val descend: Boolean = false,
-    val specifiedPosition: Position? = null,
+    val specifiedRange: Range? = null,
 
     // true when the FieldDefinition contains a DIM keyword on its line
     val declaredArrayInLineOnThisField: Int? = null
 ) :
-    AbstractDataDefinition(name, type, specifiedPosition) {
+    AbstractDataDefinition(name, type, specifiedRange) {
 
     init {
         require((explicitStartOffset != null) != (calculatedStartOffset != null)) {
@@ -219,9 +218,9 @@ data class FieldDefinition(
 class InStatementDataDefinition(
     override val name: String,
     override val type: Type,
-    val specifiedPosition: Position? = null,
+    val specifiedRange: Range? = null,
     val initializationValue: Expression? = null
-) : AbstractDataDefinition(name, type, specifiedPosition)
+) : AbstractDataDefinition(name, type, specifiedRange)
 
 /**
  * Encoding/Decoding a binary value for a data structure

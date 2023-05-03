@@ -187,16 +187,16 @@ class ProcessingTest {
             listOf(
                 VarDeclaration("A", IntLit("10")),
                 Assignment(ReferenceByName("A"), IntLit("11")),
-                Print(ValueReference(ReferenceByName("A"))),
-            ),
+                Print(ValueReference(ReferenceByName("A")))
+            )
         )
 
         val expectedTransformedTree = MiniCalcFile(
             listOf(
                 VarDeclaration("B", IntLit("10")),
                 Assignment(ReferenceByName("B"), IntLit("11")),
-                Print(ValueReference(ReferenceByName("B"))),
-            ),
+                Print(ValueReference(ReferenceByName("B")))
+            )
         )
 
         val nodesProcessed = HashSet<ASTNode>()
@@ -214,7 +214,7 @@ class ProcessingTest {
                     is Assignment -> Assignment(ReferenceByName("B"), it.value)
                     else -> it
                 }
-            }),
+            })
         )
     }
 

@@ -25,7 +25,7 @@ data class MyFieldDecl(override var name: String) : ASTNode(), Named
 class MyDummyParser : ASTParser<MyCompilationUnit> {
     override fun parse(
         code: String,
-        considerPosition: Boolean,
+        considerRange: Boolean,
         measureLexingTime: Boolean
     ): ParsingResult<MyCompilationUnit> {
         TODO("Not yet implemented")
@@ -33,7 +33,7 @@ class MyDummyParser : ASTParser<MyCompilationUnit> {
 
     val expectedResults = HashMap<File, ParsingResult<MyCompilationUnit>>()
 
-    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<MyCompilationUnit> {
+    override fun parse(file: File, charset: Charset, considerRange: Boolean): ParsingResult<MyCompilationUnit> {
         return expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
     }
 }
@@ -102,7 +102,7 @@ class CLITest {
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -169,7 +169,7 @@ class CLITest {
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -236,7 +236,7 @@ class CLITest {
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -284,7 +284,7 @@ class CLITest {
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -352,7 +352,7 @@ class CLITest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityFoo", mutableListOf()),
+                            MyEntityDecl("EntityFoo", mutableListOf())
                         )
                     )
                 )
@@ -360,7 +360,7 @@ class CLITest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityBar", mutableListOf()),
+                            MyEntityDecl("EntityBar", mutableListOf())
                         )
                     )
                 )
@@ -433,7 +433,7 @@ class CLITest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityFoo", mutableListOf()),
+                            MyEntityDecl("EntityFoo", mutableListOf())
                         )
                     )
                 )
@@ -441,7 +441,7 @@ class CLITest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityBar", mutableListOf()),
+                            MyEntityDecl("EntityBar", mutableListOf())
                         )
                     )
                 )
@@ -504,7 +504,7 @@ class CLITest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityFoo", mutableListOf()),
+                            MyEntityDecl("EntityFoo", mutableListOf())
                         )
                     )
                 )
@@ -512,7 +512,7 @@ class CLITest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityBar", mutableListOf()),
+                            MyEntityDecl("EntityBar", mutableListOf())
                         )
                     )
                 )

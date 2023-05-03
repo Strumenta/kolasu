@@ -1,11 +1,10 @@
 package com.strumenta.kolasu.traversing
 
-import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.model.ASTNode
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
-import com.strumenta.kolasu.model.pos
+import com.strumenta.kolasu.model.range
 import kotlin.system.measureTimeMillis
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -20,9 +19,9 @@ internal class TraversingStructurallyTest {
         val name: String,
         val contents: List<ASTNode> = listOf(),
         val set: Set<ASTNode> = setOf(),
-        specifiedPosition: Position? = null
-    ) : ASTNode(specifiedPosition)
-    class Item(val name: String, specifiedPosition: Position? = null) : ASTNode(specifiedPosition)
+        specifiedRange: Range? = null
+    ) : ASTNode(specifiedRange)
+    class Item(val name: String, specifiedRange: Range? = null) : ASTNode(specifiedRange)
 
     private fun printSequence(sequence: Sequence<ASTNode>): String {
         return sequence.map {
@@ -40,29 +39,29 @@ internal class TraversingStructurallyTest {
             Box(
                 "first",
                 listOf(
-                    Item("1", specifiedPosition = pos(3, 6, 3, 12)),
+                    Item("1", specifiedRange = range(3, 6, 3, 12))
                 ),
-                specifiedPosition = pos(2, 3, 4, 3),
+                specifiedRange = range(2, 3, 4, 3)
             ),
-            Item("2", specifiedPosition = pos(5, 3, 5, 9)),
+            Item("2", specifiedRange = range(5, 3, 5, 9)),
             Box(
                 "big",
                 listOf(
                     Box(
                         "small",
                         listOf(
-                            Item("3", specifiedPosition = pos(8, 7, 8, 13)),
-                            Item("4", specifiedPosition = pos(9, 7, 9, 13)),
-                            Item("5", specifiedPosition = pos(10, 7, 10, 13)),
+                            Item("3", specifiedRange = range(8, 7, 8, 13)),
+                            Item("4", specifiedRange = range(9, 7, 9, 13)),
+                            Item("5", specifiedRange = range(10, 7, 10, 13))
                         ),
-                        specifiedPosition = pos(7, 5, 11, 5),
-                    ),
+                        specifiedRange = range(7, 5, 11, 5)
+                    )
                 ),
-                specifiedPosition = pos(6, 3, 12, 3),
+                specifiedRange = range(6, 3, 12, 3)
             ),
-            Item("6", specifiedPosition = pos(13, 3, 13, 9)),
+            Item("6", specifiedRange = range(13, 3, 13, 9))
         ),
-        specifiedPosition = pos(1, 1, 14, 1),
+        specifiedRange = range(1, 1, 14, 1)
     )
 
     @Test
@@ -168,29 +167,29 @@ internal class TraversingStructurallyTest {
                 Box(
                     "first",
                     set = hashSetOf(
-                        Item("1", specifiedPosition = pos(3, 6, 3, 12)),
+                        Item("1", specifiedRange = range(3, 6, 3, 12))
                     ),
-                    specifiedPosition = pos(2, 3, 4, 3),
+                    specifiedRange = range(2, 3, 4, 3)
                 ),
-                Item("2", specifiedPosition = pos(5, 3, 5, 9)),
+                Item("2", specifiedRange = range(5, 3, 5, 9)),
                 Box(
                     "big",
                     set = hashSetOf(
                         Box(
                             "small",
                             set = hashSetOf(
-                                Item("3", specifiedPosition = pos(8, 7, 8, 13)),
-                                Item("4", specifiedPosition = pos(9, 7, 9, 13)),
-                                Item("5", specifiedPosition = pos(10, 7, 10, 13)),
+                                Item("3", specifiedRange = range(8, 7, 8, 13)),
+                                Item("4", specifiedRange = range(9, 7, 9, 13)),
+                                Item("5", specifiedRange = range(10, 7, 10, 13))
                             ),
-                            specifiedPosition = pos(7, 5, 11, 5),
-                        ),
+                            specifiedRange = range(7, 5, 11, 5)
+                        )
                     ),
-                    specifiedPosition = pos(6, 3, 12, 3),
+                    specifiedRange = range(6, 3, 12, 3)
                 ),
-                Item("6", specifiedPosition = pos(13, 3, 13, 9)),
+                Item("6", specifiedRange = range(13, 3, 13, 9))
             ),
-            specifiedPosition = pos(1, 1, 14, 1),
+            specifiedRange = range(1, 1, 14, 1)
         )
         val set = mutableSetOf<String>()
         testCase.walk().map {

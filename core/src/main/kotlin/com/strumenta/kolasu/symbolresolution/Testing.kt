@@ -18,9 +18,9 @@ fun ASTNode.assertAllReferencesResolved() {
                 property.returnType.isSubtypeOf(
                     ReferenceByName::class.createType(
                         arguments = listOf(
-                            KTypeProjection(variance = KVariance.OUT, type = PossiblyNamed::class.createType()),
-                        ),
-                    ),
+                            KTypeProjection(variance = KVariance.OUT, type = PossiblyNamed::class.createType())
+                        )
+                    )
                 )
             }
             .forEach { property -> assertTrue { (property.get(it) as ReferenceByName<*>).resolved } }

@@ -2,7 +2,7 @@ package com.strumenta.kolasu.serialization
 
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.Result
@@ -16,9 +16,9 @@ class XmlGenerationTest {
         val myRoot = MyRoot(
             mainSection = Section(
                 "Section1",
-                emptyList(),
+                emptyList()
             ),
-            otherSections = listOf(),
+            otherSections = listOf()
         )
         val xml = XMLGenerator().generateString(myRoot)
         assertEquals(
@@ -27,7 +27,7 @@ class XmlGenerationTest {
     <mainSection name="Section1" type="Section"/>
 </root>
 """.replace("\n", System.lineSeparator()),
-            xml,
+            xml
         )
     }
 
@@ -38,10 +38,10 @@ class XmlGenerationTest {
                 "Section1",
                 listOf(
                     Content(1, null),
-                    Content(2, Content(3, Content(4, null))),
-                ),
+                    Content(2, Content(3, Content(4, null)))
+                )
             ),
-            otherSections = listOf(),
+            otherSections = listOf()
         )
         val xml = XMLGenerator().generateString(myRoot)
         assertEquals(
@@ -61,7 +61,7 @@ class XmlGenerationTest {
     </mainSection>
 </root>
 """.replace("\n", System.lineSeparator()),
-            xml,
+            xml
         )
     }
 
@@ -73,10 +73,10 @@ class XmlGenerationTest {
                 listOf(
                     Content(1, null),
                     OtherContent(listOf(1, 2, 3, 100, -122)),
-                    Content(2, Content(3, Content(4, null))),
-                ),
+                    Content(2, Content(3, Content(4, null)))
+                )
             ),
-            otherSections = listOf(),
+            otherSections = listOf()
         )
         val xml = XMLGenerator().generateString(myRoot)
         assertEquals(
@@ -103,7 +103,7 @@ class XmlGenerationTest {
     </mainSection>
 </root>
 """.replace("\n", System.lineSeparator()),
-            xml,
+            xml
         )
     }
 
@@ -114,18 +114,18 @@ class XmlGenerationTest {
             Issue.semantic(
                 "semantic problem",
                 severity = IssueSeverity.ERROR,
-                position = Position(Point(10, 1), Point(12, 3)),
+                range = Range(Point(10, 1), Point(12, 3))
             ),
             Issue.semantic(
                 "semantic warning",
                 severity = IssueSeverity.WARNING,
-                position = Position(Point(10, 1), Point(12, 3)),
+                range = Range(Point(10, 1), Point(12, 3))
             ),
             Issue.semantic(
                 "semantic info",
                 severity = IssueSeverity.INFO,
-                position = Position(Point(10, 1), Point(12, 3)),
-            ),
+                range = Range(Point(10, 1), Point(12, 3))
+            )
         )
         val result = Result<ASTNode>(issues, null)
         val serialized = XMLGenerator().generateString(result)
@@ -135,27 +135,27 @@ class XmlGenerationTest {
     <issues>
         <Issue message="lexical problem" severity="ERROR" type="LEXICAL"/>
         <Issue message="semantic problem" severity="ERROR" type="SEMANTIC">
-            <position description="Position(start=Line 10, Column 1, end=Line 12, Column 3)">
+            <range description="Range(start=Line 10, Column 1, end=Line 12, Column 3)">
                 <start column="1" line="10"/>
                 <end column="3" line="12"/>
-            </position>
+            </range>
         </Issue>
         <Issue message="semantic warning" severity="WARNING" type="SEMANTIC">
-            <position description="Position(start=Line 10, Column 1, end=Line 12, Column 3)">
+            <range description="Range(start=Line 10, Column 1, end=Line 12, Column 3)">
                 <start column="1" line="10"/>
                 <end column="3" line="12"/>
-            </position>
+            </range>
         </Issue>
         <Issue message="semantic info" severity="INFO" type="SEMANTIC">
-            <position description="Position(start=Line 10, Column 1, end=Line 12, Column 3)">
+            <range description="Range(start=Line 10, Column 1, end=Line 12, Column 3)">
                 <start column="1" line="10"/>
                 <end column="3" line="12"/>
-            </position>
+            </range>
         </Issue>
     </issues>
     <root/>
 </result>""".replace("\n", System.lineSeparator()),
-            serialized.trim(),
+            serialized.trim()
         )
     }
 }

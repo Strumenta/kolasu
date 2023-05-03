@@ -24,6 +24,10 @@ dependencies {
     testImplementation "junit:junit:$junit_version"
 }
 
+// TODO remove
+ext.isReleaseVersion = !kolasu_version.endsWith("SNAPSHOT")
+
+
 publishing {
 
     repositories {

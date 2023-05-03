@@ -22,7 +22,7 @@ typealias ParserInstantiator<P> = Function<File, P?>
 abstract class ASTProcessingCommand<R : ASTNode, P : ASTParser<R>>(
     val parserInstantiator: ParserInstantiator<P>,
     help: String = "",
-    name: String? = null,
+    name: String? = null
 ) :
     CliktCommand(help = help, name = name) {
     protected val inputs by argument().file(mustExist = true).multiple()
@@ -30,9 +30,9 @@ abstract class ASTProcessingCommand<R : ASTNode, P : ASTParser<R>>(
     protected val charset by option("--charset", "-c")
         .help("Set the charset to use to load the files. Default is UTF-8")
         .default("UTF-8")
-    protected val ignorePositions by option("--ignore-positions")
-        .help("Ignore positions, so that they do not appear in the AST")
-        .flag("--consider-positions", default = false)
+    protected val ignoreRanges by option("--ignore-ranges")
+        .help("Ignore ranges, so that they do not appear in the AST")
+        .flag("--consider-ranges", default = false)
     protected val verbose by option("--verbose", "-v")
         .help("Print additional messages")
         .flag(default = false)
@@ -75,7 +75,7 @@ abstract class ASTProcessingCommand<R : ASTNode, P : ASTParser<R>>(
                 echo("processing ${input.absolutePath}", trailingNewline = true)
             }
             val parsingResult =
-                parser.parse(input, Charset.forName(charset), considerPosition = !ignorePositions)
+                parser.parse(input, Charset.forName(charset), considerRange = !ignoreRanges)
             if (verbose) {
                 val nErrors = parsingResult.issues.count { it.severity == IssueSeverity.ERROR }
                 val nWarnings = parsingResult.issues.count { it.severity == IssueSeverity.WARNING }

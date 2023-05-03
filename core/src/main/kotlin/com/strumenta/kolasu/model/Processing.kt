@@ -1,4 +1,5 @@
 @file:JvmName("Processing")
+
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.traversing.children
@@ -33,15 +34,16 @@ fun ASTNode.processNodes(operation: (ASTNode) -> Unit, walker: KFunction1<ASTNod
     walker.invoke(this).forEach(operation)
 }
 
-fun ASTNode.invalidPositions(): Sequence<ASTNode> = this.walk().filter {
-    it.position == null || run {
-        val parentPos = it.parent?.position
-        // If the parent position is null, we can't say anything about this node's position
-        (parentPos != null && !(parentPos.contains(it.position!!.start) && parentPos.contains(it.position!!.end)))
+fun ASTNode.invalidRanges(): Sequence<ASTNode> = this.walk().filter {
+    it.range == null || run {
+        val parentPos = it.parent?.range
+        // If the parent range is null, we can't say anything about this node's range
+        (parentPos != null && !(parentPos.contains(it.range!!.start) && parentPos.contains(it.range!!.end)))
     }
 }
 
-fun ASTNode.findInvalidPosition(): ASTNode? = this.invalidPositions().firstOrNull()
+fun ASTNode.findInvalidRange(): ASTNode? = this.invalidRanges().firstOrNull()
+
 
 fun ASTNode.hasValidParents(parent: ASTNode? = this.parent): Boolean {
     return this.parent == parent && this.children.all { it.hasValidParents(this) }

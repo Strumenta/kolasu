@@ -1,23 +1,23 @@
 package com.smeup.rpgparser.parsing.ast
 
 import com.strumenta.kolasu.emf.rpgast.isInt
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 
 // *IN01..*IN99 and *INLR *INRT
 
-data class IndicatorExpr(val index: IndicatorKey, val specifiedPosition: Position? = null) :
-    AssignableExpression(specifiedPosition) {
+data class IndicatorExpr(val index: IndicatorKey, val specifiedRange: Range? = null) :
+    AssignableExpression(specifiedRange) {
 
-    constructor(dataWrapUpChoice: DataWrapUpChoice, specifiedPosition: Position? = null) :
-        this(index = dataWrapUpChoice.name.toIndicatorKey(), specifiedPosition = specifiedPosition)
+    constructor(dataWrapUpChoice: DataWrapUpChoice, specifiedRange: Range? = null) :
+        this(index = dataWrapUpChoice.name.toIndicatorKey(), specifiedRange = specifiedRange)
 
     override fun size(): Int = 1
 }
 
 // *IN
 
-data class GlobalIndicatorExpr(val specifiedPosition: Position? = null) :
-    AssignableExpression(specifiedPosition) {
+data class GlobalIndicatorExpr(val specifiedRange: Range? = null) :
+    AssignableExpression(specifiedRange) {
     override fun size(): Int {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
@@ -34,7 +34,7 @@ enum class IndicatorType(val range: IntRange) {
     RT(101..101),
     OC(102..102),
     OF(103..103),
-    OV(104..104),
+    OV(104..104)
     ;
 
     companion object {

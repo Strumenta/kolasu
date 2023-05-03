@@ -3,16 +3,16 @@ package com.strumenta.kolasu.emf.rpgast
 import com.strumenta.kolasu.model.*
 
 data class ToAstConfiguration(
-    val considerPosition: Boolean = true
+    val considerRange: Boolean = true
 )
 
-fun List<ASTNode>.position(): Position? {
-    val start = this.asSequence().map { it.position?.start }.filterNotNull().sorted().toList()
-    val end = this.asSequence().map { it.position?.end }.filterNotNull().sorted().toList()
+fun List<ASTNode>.range(): Range? {
+    val start = this.asSequence().map { it.range?.start }.filterNotNull().sorted().toList()
+    val end = this.asSequence().map { it.range?.end }.filterNotNull().sorted().toList()
     return if (start.isEmpty() || end.isEmpty()) {
         null
     } else {
-        Position(start.first(), end.last())
+        Range(start.first(), end.last())
     }
 }
 

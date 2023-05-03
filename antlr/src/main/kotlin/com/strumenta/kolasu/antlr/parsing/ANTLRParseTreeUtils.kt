@@ -1,11 +1,17 @@
 package com.strumenta.kolasu.antlr.parsing
 
-import com.strumenta.kolasu.model.*
-import org.antlr.v4.runtime.*
+import antlr.collections.AST
+import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.Origin
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.model.Source
+import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.RuleContext
+import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
-import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 
 /**
@@ -58,7 +64,7 @@ fun Token.getOriginalText(): String {
 /**
  * Given the entire code, this returns the slice covered by this Node.
  */
-fun ASTNode.getText(code: String): String? = position?.text(code)
+fun ASTNode.getText(code: String): String? = range?.text(code)
 
 /**
  * An Origin corresponding to a ParseTreeNode. This is used to indicate that an AST Node has been obtained
@@ -67,8 +73,8 @@ fun ASTNode.getText(code: String): String? = position?.text(code)
  * Note that this is NOT serializable as ParseTree elements are not Serializable.
  */
 class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = null) : Origin {
-    override val position: Position?
-        get() = parseTree.toPosition(source = source)
+    override val range: Range?
+        get() = parseTree.toRange(source = source)
 
     override val sourceText: String?
         get() =
@@ -76,9 +82,11 @@ class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = n
                 is ParserRuleContext -> {
                     parseTree.getOriginalText()
                 }
+
                 is TerminalNode -> {
                     parseTree.text
                 }
+
                 else -> null
             }
 }
@@ -112,36 +120,38 @@ val Token.startPoint: Point
 val Token.endPoint: Point
     get() = if (this.type == Token.EOF) startPoint else startPoint + this.text
 
-val Token.position: Position
-    get() = Position(startPoint, endPoint)
+val Token.range: Range
+    get() = Range(startPoint, endPoint)
 
 /**
- * Returns the position of the receiver parser rule context.
+ * Returns the range of the receiver parser rule context.
  */
-val ParserRuleContext.position: Position
-    get() = Position(start.startPoint, stop.endPoint)
+val ParserRuleContext.range: Range
+    get() = Range(start.startPoint, stop.endPoint)
 
 /**
- * Returns the position of the receiver parser rule context.
- * @param considerPosition if it's false, this method returns null.
+ * Returns the range of the receiver parser rule context.
+ * @param considerRange if it's false, this method returns null.
  */
-fun ParserRuleContext.toPosition(considerPosition: Boolean = true, source: Source? = null): Position? {
-    return if (considerPosition && start != null && stop != null) {
-        val position = position
-        if (source == null) position else Position(position.start, position.end, source)
-    } else null
+fun ParserRuleContext.toRange(considerRange: Boolean = true, source: Source? = null): Range? {
+    return if (considerRange && start != null && stop != null) {
+        val range = range
+        if (source == null) range else Range(range.start, range.end, source)
+    } else {
+        null
+    }
 }
 
-fun TerminalNode.toPosition(considerPosition: Boolean = true, source: Source? = null): Position? =
-    this.symbol.toPosition(considerPosition, source)
+fun TerminalNode.toRange(considerRange: Boolean = true, source: Source? = null): Range? =
+    this.symbol.toRange(considerRange, source)
 
-fun Token.toPosition(considerPosition: Boolean = true, source: Source? = null): Position? =
-    if (considerPosition) Position(this.startPoint, this.endPoint, source) else null
+fun Token.toRange(considerRange: Boolean = true, source: Source? = null): Range? =
+    if (considerRange) Range(this.startPoint, this.endPoint, source) else null
 
-fun ParseTree.toPosition(considerPosition: Boolean = true, source: Source? = null): Position? {
+fun ParseTree.toRange(considerRange: Boolean = true, source: Source? = null): Range? {
     return when (this) {
-        is TerminalNode -> this.toPosition(considerPosition, source)
-        is ParserRuleContext -> this.toPosition(considerPosition, source)
+        is TerminalNode -> this.toRange(considerRange, source)
+        is ParserRuleContext -> this.toRange(considerRange, source)
         else -> null
     }
 }

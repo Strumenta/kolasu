@@ -27,7 +27,7 @@ class SimpleLangKolasuParser : KolasuANTLRParser<ASTNode, SimpleLangParser, Simp
 
     override fun parseTreeToAst(
         parseTreeRoot: SimpleLangParser.CompilationUnitContext,
-        considerPosition: Boolean,
+        considerRange: Boolean,
         issues: MutableList<Issue>
     ): ASTNode? = null
 }
@@ -41,7 +41,7 @@ class KolasuParserTest {
             """set a = 10
             |set b = ""
             |display c
-        """.trimMargin()
+            """.trimMargin()
         )
         assertNotNull(result)
         val lexingResult = parser.tokenFactory.extractTokens(result)

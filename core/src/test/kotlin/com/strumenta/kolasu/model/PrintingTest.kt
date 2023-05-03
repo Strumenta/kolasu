@@ -13,7 +13,7 @@ open class Expressions(
     val public: List<Expr> = emptyList(),
     private val private: List<Expr> = emptyList(),
     protected val protected: List<Expr> = emptyList(),
-    internal val internal: List<Expr> = emptyList(),
+    internal val internal: List<Expr> = emptyList()
 ) : Expr()
 
 class PrintingTest {
@@ -45,7 +45,7 @@ class PrintingTest {
                 } // Add
                 
             """.trimIndent(),
-            ast.debugPrint(),
+            ast.debugPrint()
         )
     }
 
@@ -66,7 +66,7 @@ class PrintingTest {
                 } // Add
             
             """.trimIndent(),
-            ast.debugPrint(),
+            ast.debugPrint()
         )
     }
 
@@ -80,7 +80,7 @@ class PrintingTest {
               } // Empty
               
             """.trimIndent(),
-            ast.debugPrint(),
+            ast.debugPrint()
         )
     }
 }

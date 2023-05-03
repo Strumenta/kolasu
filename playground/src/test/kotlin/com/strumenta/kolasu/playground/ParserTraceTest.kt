@@ -19,7 +19,8 @@ class ParserTraceTest {
     init {
         mm.addMetamodel(
             "com.strumenta.kolasu.playground",
-            "http://mypackage.com", "myp"
+            "http://mypackage.com",
+            "myp"
         )
         mm.provideClass(ANode::class)
     }

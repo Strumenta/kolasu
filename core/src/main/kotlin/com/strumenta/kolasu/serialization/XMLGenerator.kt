@@ -2,7 +2,7 @@ package com.strumenta.kolasu.serialization
 
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
@@ -109,7 +109,7 @@ private fun Element.addNullChild(role: String, document: Document) {
 private fun ASTNode.toXML(role: String, document: Document): Element {
     val element = document.createElement(role)
     element.setAttribute("type", this.javaClass.simpleName)
-    this.position?.let {
+    this.range?.let {
         element.addChild(it.toXML(document = document))
     }
     this.processProperties {
@@ -149,13 +149,13 @@ private fun Issue.toXML(document: Document): Element {
     element.setAttribute("type", this.type.name)
     element.setAttribute("message", this.message)
     element.setAttribute("severity", this.severity.name)
-    this.position?.let {
+    this.range?.let {
         element.addChild(it.toXML(document = document))
     }
     return element
 }
 
-private fun Position.toXML(role: String = "position", document: Document): Element {
+private fun Range.toXML(role: String = "range", document: Document): Element {
     val xmlNode = document.createElement(role)
     xmlNode.setAttribute("description", this.toString())
     xmlNode.addChild(this.start.toXML("start", document))

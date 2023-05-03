@@ -11,7 +11,7 @@ import kotlin.reflect.jvm.javaType
 data class DebugPrintConfiguration constructor(
     var skipEmptyCollections: Boolean = false,
     var skipNull: Boolean = false,
-    var forceShowPosition: Boolean = false,
+    var forceShowRange: Boolean = false,
     val hide: MutableList<String> = mutableListOf(),
     var indentBlock: String = "  "
 )
@@ -59,11 +59,11 @@ fun ASTNode.debugPrint(
 ): String {
     val indentBlock = configuration.indentBlock
     val sb = StringBuilder()
-    if (this.relevantMemberProperties(withPosition = configuration.forceShowPosition).isEmpty()) {
+    if (this.relevantMemberProperties(withRange = configuration.forceShowRange).isEmpty()) {
         sb.append("$indent${this.javaClass.simpleName}\n")
     } else {
         sb.append("$indent${this.javaClass.simpleName} {\n")
-        this.relevantMemberProperties(withPosition = configuration.forceShowPosition).forEach { property ->
+        this.relevantMemberProperties(withRange = configuration.forceShowRange).forEach { property ->
             if (configuration.hide.contains(property.name)) {
                 // skipping
             } else {
@@ -87,7 +87,8 @@ fun ASTNode.debugPrint(
                                 (value as List<ASTNode>).forEach {
                                     sb.append(
                                         it.debugPrint(
-                                            indent + indentBlock + indentBlock, configuration
+                                            indent + indentBlock + indentBlock,
+                                            configuration
                                         )
                                     )
                                 }
@@ -97,7 +98,8 @@ fun ASTNode.debugPrint(
                                 value.forEach {
                                     sb.append(
                                         it?.debugPrint(
-                                            indent + indentBlock + indentBlock, configuration
+                                            indent + indentBlock + indentBlock,
+                                            configuration
                                         )
                                     )
                                 }
@@ -115,7 +117,8 @@ fun ASTNode.debugPrint(
                             sb.append("$indent$indentBlock${property.name} = [\n")
                             sb.append(
                                 value.debugPrint(
-                                    indent + indentBlock + indentBlock, configuration
+                                    indent + indentBlock + indentBlock,
+                                    configuration
                                 )
                             )
                             sb.append("$indent$indentBlock]\n")

@@ -19,7 +19,7 @@ data class ClassDecl(
     override val name: String,
     var superclass: ReferenceByName<ClassDecl>? = null,
     var features: MutableList<FeatureDecl> = mutableListOf(),
-    var operations: MutableList<OperationDecl> = mutableListOf(),
+    var operations: MutableList<OperationDecl> = mutableListOf()
 ) : TypeDecl(name)
 
 data class FeatureDecl(
@@ -39,16 +39,17 @@ data class ParameterDecl(
     var type: ReferenceByName<TypeDecl>,
 ) : ASTNode(), Symbol
 
+
 sealed class StmtNode : ASTNode(), Statement
 
 data class DeclarationStmt(
     override val name: String,
-    var value: ExprNode? = null,
+    var value: ExprNode? = null
 ) : StmtNode(), Symbol
 
 data class AssignmentStmt(
     var lhs: ExprNode,
-    var rhs: ExprNode,
+    var rhs: ExprNode
 ) : StmtNode()
 
 sealed class ExprNode : ASTNode(), Expression
@@ -56,16 +57,16 @@ sealed class ExprNode : ASTNode(), Expression
 // a.v.c.d
 data class RefExpr(
     var context: ExprNode? = null,
-    var symbol: ReferenceByName<Symbol>,
+    var symbol: ReferenceByName<Symbol>
 ) : ExprNode()
 
 data class CallExpr(
     var operation: ReferenceByName<OperationDecl>,
-    var arguments: MutableList<ExprNode> = mutableListOf(),
+    var arguments: MutableList<ExprNode> = mutableListOf()
 ) : ExprNode()
 
 data class NewExpr(
-    var clazz: ReferenceByName<ClassDecl>,
+    var clazz: ReferenceByName<ClassDecl>
 ) : ExprNode()
 
 val symbolResolver = declarativeSymbolResolver {
@@ -153,8 +154,8 @@ class SymbolResolutionTest {
                     features = mutableListOf(
                         FeatureDecl(
                             name = "feature_0",
-                            type = ReferenceByName(name = "class_1"),
-                        ),
+                            type = ReferenceByName(name = "class_1")
+                        )
                     ),
                     operations = mutableListOf(
                         OperationDecl(
@@ -164,23 +165,23 @@ class SymbolResolutionTest {
                                 AssignmentStmt(
                                     lhs = RefExpr(
                                         context = CallExpr(
-                                            operation = ReferenceByName(name = "operation_0"),
+                                            operation = ReferenceByName(name = "operation_0")
                                         ),
-                                        symbol = ReferenceByName(name = "feature_0"),
+                                        symbol = ReferenceByName(name = "feature_0")
                                     ),
                                     rhs = RefExpr(
                                         context = CallExpr(
-                                            operation = ReferenceByName(name = "operation_0"),
+                                            operation = ReferenceByName(name = "operation_0")
                                         ),
-                                        symbol = ReferenceByName(name = "feature_0"),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
+                                        symbol = ReferenceByName(name = "feature_0")
+                                    )
+                                )
+                            )
+                        )
+                    )
                 ),
-                ClassDecl("class_1"),
-            ),
+                ClassDecl("class_1")
+            )
         ).apply { assignParents() }
 
         symbolResolver.resolveNode(compilationUnit, true)

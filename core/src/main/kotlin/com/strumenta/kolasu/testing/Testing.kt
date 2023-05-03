@@ -66,14 +66,12 @@ fun <N : ASTNode> assertASTsAreEqual(
     expected: ASTNode,
     actual: ParsingResult<N>,
     context: String = "<root>",
-    considerPosition: Boolean = false,
+    considerRange: Boolean = false
 ) {
     assertEquals(0, actual.issues.size, actual.issues.toString())
     assertASTsAreEqual(
-        expected = expected,
-        actual = actual.root!!,
-        context = context,
-        considerPosition = considerPosition,
+        expected = expected, actual = actual.root!!, context = context,
+        considerRange = considerRange
     )
 }
 
@@ -81,12 +79,12 @@ fun assertASTsAreEqual(
     expected: ASTNode,
     actual: ASTNode,
     context: String = "<root>",
-    considerPosition: Boolean = false,
+    considerRange: Boolean = false,
     useLightweightAttributeEquality: Boolean = false
 ) {
     if (expected.nodeType == actual.nodeType) {
-        if (considerPosition) {
-            assertEquals(expected.position, actual.position, "$context.position")
+        if (considerRange) {
+            assertEquals(expected.range, actual.range, "$context.range")
         }
         expected.properties.forEach { expectedProperty ->
             val actualProperty = actual.properties.find { it.name == expectedProperty.name }
@@ -103,20 +101,20 @@ fun assertASTsAreEqual(
                         assertEquals(
                             actualPropValueCollection == null,
                             expectedPropValueCollection == null,
-                            "$context.${expectedProperty.name} nullness",
+                            "$context.${expectedProperty.name} nullness"
                         )
                         if (actualPropValueCollection != null && expectedPropValueCollection != null) {
                             assertEquals(
                                 expectedPropValueCollection?.size,
                                 actualPropValueCollection?.size,
-                                "$context.${expectedProperty.name} length",
+                                "$context.${expectedProperty.name} length"
                             )
                             val expectedIt = expectedPropValueCollection.iterator()
                             val actualIt = actualPropValueCollection.iterator()
                             for (i in expectedPropValueCollection.indices) {
                                 assertASTsAreEqual(
                                     expectedIt.next(), actualIt.next(), "$context[$i]",
-                                    considerPosition = considerPosition,
+                                    considerRange = considerRange,
                                     useLightweightAttributeEquality = useLightweightAttributeEquality
                                 )
                             }
@@ -127,13 +125,13 @@ fun assertASTsAreEqual(
                         assertEquals<Any?>(
                             expectedPropValue,
                             actualPropValue,
-                            "$context.${expectedProperty.name}",
+                            "$context.${expectedProperty.name}"
                         )
                     } else if (expectedPropValue != null && actualPropValue == null) {
                         assertEquals<Any?>(
                             expectedPropValue,
                             actualPropValue,
-                            "$context.${expectedProperty.name}",
+                            "$context.${expectedProperty.name}"
                         )
                     } else if (expectedPropValue == null && actualPropValue == null) {
                         // that is ok
@@ -142,7 +140,7 @@ fun assertASTsAreEqual(
                             expectedPropValue as ASTNode,
                             actualPropValue as ASTNode,
                             context = "$context.${expectedProperty.name}",
-                            considerPosition = considerPosition,
+                            considerRange = considerRange,
                             useLightweightAttributeEquality = useLightweightAttributeEquality
                         )
                     }
@@ -152,13 +150,13 @@ fun assertASTsAreEqual(
                     assertEquals(
                         expectedPropValue?.toString(),
                         actualPropValue?.toString(),
-                        "$context, comparing property ${expectedProperty.name}",
+                        "$context, comparing property ${expectedProperty.name}"
                     )
                 } else {
                     assertEquals(
                         expectedPropValue,
                         actualPropValue,
-                        "$context, comparing property ${expectedProperty.name}",
+                        "$context, comparing property ${expectedProperty.name}"
                     )
                 }
             }
@@ -166,7 +164,7 @@ fun assertASTsAreEqual(
     } else {
         fail(
             "$context: expected node of type ${expected.nodeType}, " +
-                "but found ${actual.nodeType}",
+                "but found ${actual.nodeType}"
         )
     }
 }

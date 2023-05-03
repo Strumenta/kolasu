@@ -37,7 +37,7 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
 
     override fun parse(
         code: String,
-        considerPosition: Boolean,
+        considerRange: Boolean,
         measureLexingTime: Boolean
     ): ParsingResultWithFirstStage<MyCompilationUnit, ParserRuleContext> {
         TODO("Not yet implemented")
@@ -49,7 +49,7 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
 
     override fun parseTreeToAst(
         parseTreeRoot: ParserRuleContext,
-        considerPosition: Boolean,
+        considerRange: Boolean,
         issues: MutableList<Issue>
     ): MyCompilationUnit? {
         TODO("Not yet implemented")
@@ -749,7 +749,7 @@ class EMFCLIToolTest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityFoo", mutableListOf()),
+                            MyEntityDecl("EntityFoo", mutableListOf())
                         )
                     )
                 )
@@ -757,7 +757,7 @@ class EMFCLIToolTest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityBar", mutableListOf()),
+                            MyEntityDecl("EntityBar", mutableListOf())
                         )
                     )
                 )

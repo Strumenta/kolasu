@@ -7,7 +7,7 @@ import com.strumenta.kolasu.emf.rpgast.InStatementDataDefinition
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Derived
 import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 // This file contains the AST nodes at the highest level:
 // from the CompilationUnit (which represents the whole file)
 // to its main components
@@ -19,8 +19,8 @@ data class CompilationUnit(
     val subroutines: List<Subroutine>,
     val compileTimeArrays: List<CompileTimeArray>,
     val directives: List<Directive>,
-    val specifiedPosition: Position??
-) : ASTNode(specifiedPosition) {
+    val specifiedRange: Range??
+) : ASTNode(specifiedRange) {
 
     companion object {
         fun empty() = CompilationUnit(
@@ -34,7 +34,7 @@ data class CompilationUnit(
         )
     }
 
-    val entryPlist: PlistStmt?
+    val entryPlist: Statement.PlistStmt?
         get() = main.stmts.plist()
             ?: subroutines.mapNotNull { it.stmts.plist() }.firstOrNull()
 
@@ -105,26 +105,26 @@ data class CompilationUnit(
     fun getFileDefinition(name: String) = fileDefinitions.first { it.name.equals(name, ignoreCase = true) }
 }
 
-data class MainBody(val stmts: List<Statement>, val specifiedPosition: Position? = null) : ASTNode(
-    specifiedPosition
+data class MainBody(val stmts: List<Statement>, val specifiedRange: Range? = null) : ASTNode(
+    specifiedRange
 )
 
 data class Subroutine(
     override val name: String,
     val stmts: List<Statement>,
     val tag: String? = null,
-    val specifiedPosition: Position? = null
-) : Named, ASTNode(specifiedPosition)
+    val specifiedRange: Range? = null
+) : Named, ASTNode(specifiedRange)
 
-data class Function(override val name: String, val specifiedPosition: Position? = null) : Named, ASTNode(
-    specifiedPosition
+data class Function(override val name: String, val specifiedRange: Range? = null) : Named, ASTNode(
+    specifiedRange
 )
 
 data class CompileTimeArray(
     override val name: String,
     val lines: List<String>,
-    val specifiedPosition: Position? = null
-) : Named, ASTNode(specifiedPosition)
+    val specifiedRange: Range? = null
+) : Named, ASTNode(specifiedRange)
 
 enum class DataWrapUpChoice {
     LR,
@@ -132,4 +132,4 @@ enum class DataWrapUpChoice {
 }
 
 // A PList is a list of parameters
-fun List<Statement>.plist(): PlistStmt? = this.asSequence().mapNotNull { it as? PlistStmt }.firstOrNull { it.isEntry }
+fun List<Statement>.plist(): Statement.PlistStmt? = this.asSequence().mapNotNull { it as? Statement.PlistStmt }.firstOrNull { it.isEntry }

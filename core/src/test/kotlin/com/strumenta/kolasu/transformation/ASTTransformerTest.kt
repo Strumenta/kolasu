@@ -1,7 +1,12 @@
 package com.strumenta.kolasu.transformation
 
-import com.strumenta.kolasu.model.*
+
 import com.strumenta.kolasu.model.lionweb.ReflectionBasedMetamodel
+import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
@@ -43,13 +48,14 @@ object Metamodel : ReflectionBasedMetamodel(
 )
 
 data class CU(
-    val specifiedPosition: Position? = null,
+    val specifiedRange: Range? = null,
     var statements: List<ASTNode> =
         listOf()
-) : ASTNode(specifiedPosition)
-data class DisplayIntStatement(val specifiedPosition: Position? = null, val value: Int) : ASTNode(specifiedPosition)
-data class SetStatement(val specifiedPosition: Position? = null, var variable: String = "", val value: Int = 0) :
-    ASTNode(specifiedPosition)
+) : ASTNode(specifiedRange)
+data class DisplayIntStatement(val specifiedRange: Range? = null, val value: Int) : ASTNode(specifiedRange)
+data class SetStatement(val specifiedRange: Range? = null, var variable: String = "", val value: Int = 0) :
+    ASTNode(specifiedRange)
+
 
 enum class Operator {
     PLUS, MULT
@@ -106,7 +112,7 @@ class ASTTransformerTest {
             )
         )
         val transformedCU = transformer.transform(cu)!!
-        assertASTsAreEqual(cu, transformedCU, considerPosition = true)
+        assertASTsAreEqual(cu, transformedCU, considerRange = true)
         assertTrue { transformedCU.hasValidParents() }
         assertEquals(transformedCU.origin, cu)
     }
@@ -182,7 +188,7 @@ class ASTTransformerTest {
                     addIssue(
                         "Illegal types for sum operation. Only integer values are allowed. " +
                             "Found: (${it.left.type?.name ?: "null"}, ${it.right.type?.name ?: "null"})",
-                        IssueSeverity.ERROR, it.position
+                        IssueSeverity.ERROR, it.range
                     )
                 }
             }
@@ -193,7 +199,7 @@ class ASTTransformerTest {
                     addIssue(
                         "Illegal types for concat operation. Only string values are allowed. " +
                             "Found: (${it.left.type?.name ?: "null"}, ${it.right.type?.name ?: "null"})",
-                        IssueSeverity.ERROR, it.position
+                        IssueSeverity.ERROR, it.range
                     )
                 }
             }
@@ -209,7 +215,7 @@ class ASTTransformerTest {
             myTransformer.transform(
                 TypedSum(
                     TypedLiteral("1", Type.INT),
-                    TypedLiteral("1", Type.INT),
+                    TypedLiteral("1", Type.INT)
                 )
             )!!
         )
@@ -224,7 +230,7 @@ class ASTTransformerTest {
             myTransformer.transform(
                 TypedConcat(
                     TypedLiteral("test", Type.STR),
-                    TypedLiteral("test", Type.STR),
+                    TypedLiteral("test", Type.STR)
                 )
             )!!
         )
@@ -239,7 +245,7 @@ class ASTTransformerTest {
             myTransformer.transform(
                 TypedSum(
                     TypedLiteral("1", Type.INT),
-                    TypedLiteral("test", Type.STR),
+                    TypedLiteral("test", Type.STR)
                 )
             )!!
         )
@@ -261,7 +267,7 @@ class ASTTransformerTest {
             myTransformer.transform(
                 TypedConcat(
                     TypedLiteral("1", Type.INT),
-                    TypedLiteral("test", Type.STR),
+                    TypedLiteral("test", Type.STR)
                 )
             )!!
         )

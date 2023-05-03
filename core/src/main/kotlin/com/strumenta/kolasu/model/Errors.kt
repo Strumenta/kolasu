@@ -7,7 +7,7 @@ import com.strumenta.kolasu.traversing.walkDescendants
  */
 interface ErrorNode {
     val message: String
-    val position: Position?
+    val range: Range?
 }
 
 /**

@@ -23,6 +23,9 @@ dependencies {
 compileKotlin.source sourceSets.main.java, sourceSets.main.kotlin
 compileTestKotlin.source sourceSets.test.kotlin
 
+// TODO remove
+ext.isReleaseVersion = !kolasu_version.endsWith("SNAPSHOT")
+
 
 publishing {
 

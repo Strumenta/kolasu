@@ -132,6 +132,7 @@ enum class KPersistence {
 data class KParameterDeclaration(
     override val name: String,
     override val type: KType,
+
     val persistemce: KPersistence = KPersistence.NONE,
 ) : ASTNode(), Named, KTyped
 

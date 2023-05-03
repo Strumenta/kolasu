@@ -2,7 +2,7 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.emf.serialization.JsonGenerator
 import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
@@ -31,14 +31,15 @@ class ResultTest {
         val nsURI = "https://strumenta.com/simplemm"
         val metamodelBuilder = MetamodelBuilder(
             packageName(CompilationUnit::class),
-            nsURI, "simplemm"
+            nsURI,
+            "simplemm"
         )
         metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
 
         val result = Result(
             listOf(
-                Issue(IssueType.LEXICAL, "lex", position = Position(Point(1, 1), Point(2, 10))),
+                Issue(IssueType.LEXICAL, "lex", range = Range(Point(1, 1), Point(2, 10))),
                 Issue(IssueType.SEMANTIC, "foo")
             ),
             cu

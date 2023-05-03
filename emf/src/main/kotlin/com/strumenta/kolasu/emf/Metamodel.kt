@@ -77,10 +77,11 @@ val LocalDateTimeHandler = KolasuClassHandler(LocalDateTime::class, STARLASU_MET
 
 val NodeHandler = KolasuClassHandler(ASTNode::class, STARLASU_METAMODEL.getEClass("ASTNode"))
 val NamedHandler = KolasuClassHandler(Named::class, STARLASU_METAMODEL.getEClass("Named"))
-val PositionHandler = KolasuClassHandler(Position::class, STARLASU_METAMODEL.getEClass("Position"))
+val RangeHandler = KolasuClassHandler(Range::class, STARLASU_METAMODEL.getEClass("Position"))
 val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, STARLASU_METAMODEL.getEClass("PossiblyNamed"))
 val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, STARLASU_METAMODEL.getEClass("ReferenceByName"))
-val ResultHandler = KolasuClassHandler(Result::class, STARLASU_METAMODEL.getEClass("Result"))
+// This class is saved with the name Position for compatibility reasons
+val ResultHandler = KolasuClassHandler(Result::class, STARLASU_METAMODEL.getEClass("Position"))
 
 val StatementHandler = KolasuClassHandler(Statement::class, STARLASU_METAMODEL.getEClass("Statement"))
 val ExpressionHandler = KolasuClassHandler(Expression::class, STARLASU_METAMODEL.getEClass("Expression"))
@@ -97,10 +98,12 @@ val PlaceholderElementHandler = KolasuClassHandler(
 
 val ErrorNodeHandler = KolasuClassHandler(ErrorNode::class, STARLASU_METAMODEL.getEClass("ErrorNode"))
 val GenericErrorNodeHandler = KolasuClassHandler(
-    GenericErrorNode::class, STARLASU_METAMODEL.getEClass("GenericErrorNode")
+    GenericErrorNode::class,
+    STARLASU_METAMODEL.getEClass("GenericErrorNode")
 )
 val GenericNodeHandler = KolasuClassHandler(
-    GenericNode::class, STARLASU_METAMODEL.getEClass("GenericNode")
+    GenericNode::class,
+    STARLASU_METAMODEL.getEClass("GenericNode")
 )
 
 val StringHandler = KolasuDataTypeHandler(String::class, EcorePackage.eINSTANCE.eString)

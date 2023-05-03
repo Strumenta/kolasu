@@ -1,6 +1,5 @@
-package com.strumenta.kolasu.mapping
+package com.strumenta.kolasu.antlr.mapping
 
-import com.strumenta.kolasu.antlr.mapping.ParseTreeToASTTransformer
 import com.strumenta.kolasu.transformation.ParameterConverter
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ParseTree

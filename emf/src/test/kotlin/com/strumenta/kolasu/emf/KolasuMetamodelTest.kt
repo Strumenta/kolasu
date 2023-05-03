@@ -12,7 +12,7 @@ import kotlin.test.assertTrue
 data class ARoot(val nodes: List<ANodeWithAPair>) : ASTNode()
 
 data class ANodeWithAPair(
-    val p: Pair<String, Integer>,
+    val p: Pair<String, Integer>
     /*val fieldLocation: Pair<Int, Int>? = Pair(0, 0),*/
 ) : ASTNode()
 
@@ -37,14 +37,18 @@ class KolasuMetamodelTest {
         val resource = createResource(mmuri) ?: throw IOException("Unsupported destination: $mmuri")
 
         val dependencyMetamodelBuilder = MetamodelBuilder(
-            "kotlin", "https://strumenta.com/kotlin", "kotlin",
+            "kotlin",
+            "https://strumenta.com/kotlin",
+            "kotlin",
             resource
         )
         dependencyMetamodelBuilder.provideClass(Pair::class)
         dependencyMetamodelBuilder.generate()
 
         val metamodelBuilder = MetamodelBuilder(
-            "com.strumenta.kolasu.emf", "https://strumenta.com/simplemm", "simplemm",
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm",
+            "simplemm",
             resource
         )
         metamodelBuilder.provideClass(ANodeWithAPair::class)

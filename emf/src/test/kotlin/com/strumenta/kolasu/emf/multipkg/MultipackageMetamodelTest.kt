@@ -34,15 +34,19 @@ class MultipackageMetamodelTest {
         val resource = JsonResourceFactory().createResource(URI.createFileURI("multipkg.json"))
 
         val mb1 = MetamodelBuilder(
-            "com.strumenta.kolasu.emf", "https://strumenta.com/simplemm",
-            "simplemm", resource
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm",
+            "simplemm",
+            resource
         )
         mb1.provideClass(CompilationUnit::class)
         assertEquals(7, mb1.generate().eClassifiers.size)
 
         val mb2 = MetamodelBuilder(
             "com.strumenta.kolasu.emf.multipkg",
-            "https://strumenta.com/simplemm2", "simplemm2", resource
+            "https://strumenta.com/simplemm2",
+            "simplemm2",
+            resource
         )
         mb2.provideClass(MultiCU::class)
         assertEquals(1, mb2.generate().eClassifiers.size)

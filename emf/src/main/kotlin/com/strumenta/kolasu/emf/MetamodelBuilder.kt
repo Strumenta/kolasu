@@ -64,7 +64,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
 
         eclassTypeHandlers.add(NodeHandler)
         eclassTypeHandlers.add(NamedHandler)
-        eclassTypeHandlers.add(PositionHandler)
+        eclassTypeHandlers.add(RangeHandler)
         eclassTypeHandlers.add(PossiblyNamedHandler)
         eclassTypeHandlers.add(ReferenceByNameHandler)
         eclassTypeHandlers.add(ResultHandler)

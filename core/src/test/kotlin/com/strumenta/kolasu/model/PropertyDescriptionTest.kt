@@ -25,9 +25,9 @@ class PropertyDescriptionTest {
                 false,
                 Multiplicity.SINGULAR,
                 "gino",
-                PropertyType.ATTRIBUTE,
+                PropertyType.ATTRIBUTE
             ),
-            list[0],
+            list[0]
         )
     }
 
@@ -45,9 +45,9 @@ class PropertyDescriptionTest {
                 false,
                 Multiplicity.MANY,
                 listOf("gino", "pino"),
-                PropertyType.ATTRIBUTE,
+                PropertyType.ATTRIBUTE
             ),
-            list[0],
+            list[0]
         )
     }
 
@@ -65,9 +65,9 @@ class PropertyDescriptionTest {
                 true,
                 Multiplicity.SINGULAR,
                 Foo1("gino"),
-                PropertyType.CONTAINMENT,
+                PropertyType.CONTAINMENT
             ),
-            list[0],
+            list[0]
         )
     }
 
@@ -85,9 +85,9 @@ class PropertyDescriptionTest {
                 true,
                 Multiplicity.MANY,
                 listOf(Foo1("gino")),
-                PropertyType.CONTAINMENT,
+                PropertyType.CONTAINMENT
             ),
-            list[0],
+            list[0]
         )
     }
 
@@ -105,9 +105,9 @@ class PropertyDescriptionTest {
                 true,
                 Multiplicity.MANY,
                 emptyList<Foo1>(),
-                PropertyType.CONTAINMENT,
+                PropertyType.CONTAINMENT
             ),
-            list[0],
+            list[0]
         )
     }
 
@@ -125,9 +125,9 @@ class PropertyDescriptionTest {
                 true,
                 Multiplicity.MANY,
                 null,
-                PropertyType.CONTAINMENT,
+                PropertyType.CONTAINMENT
             ),
-            list[0],
+            list[0]
         )
     }
 }

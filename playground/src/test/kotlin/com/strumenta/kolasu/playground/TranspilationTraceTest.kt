@@ -12,13 +12,17 @@ class TranspilationTraceTest {
 
     val mm = MetamodelBuilder(
         "com.strumenta.kolasu.playground",
-        "http://mypackage.com", "myp"
+        "http://mypackage.com",
+        "myp"
     ).apply { provideClass(ANode::class) }.generate()
 
     @Test
     fun serializeTranslationIssues() {
         val tt = TranspilationTrace(
-            "a:1", "b:2", ANode("a", 1), ANode("b", 2),
+            "a:1",
+            "b:2",
+            ANode("a", 1),
+            ANode("b", 2),
             listOf(Issue(IssueType.TRANSLATION, "some issue", IssueSeverity.WARNING))
         )
         assertEquals(
@@ -52,7 +56,8 @@ class TranspilationTraceTest {
     @Test
     fun serializeSourceIssues() {
         val tt = TranspilationTrace(
-            "a:1", "b:2",
+            "a:1",
+            "b:2",
             Result(listOf(Issue(IssueType.SYNTACTIC, "some issue", IssueSeverity.WARNING)), ANode("a", 1)),
             Result(emptyList(), ANode("b", 2))
         )
@@ -88,7 +93,8 @@ class TranspilationTraceTest {
     @Test
     fun serializeTargetIssues() {
         val tt = TranspilationTrace(
-            "a:1", "b:2",
+            "a:1",
+            "b:2",
             Result(emptyList(), ANode("a", 1)),
             Result(listOf(Issue(IssueType.SYNTACTIC, "some issue", IssueSeverity.WARNING)), ANode("b", 2))
         )
@@ -128,7 +134,8 @@ class TranspilationTraceTest {
         aRoot.destination = bRoot
         bRoot.origin = aRoot
         val tt = TranspilationTrace(
-            "a:1", "b:2",
+            "a:1",
+            "b:2",
             Result(emptyList(), aRoot),
             Result(emptyList(), bRoot)
         )

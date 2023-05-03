@@ -1,3 +1,9 @@
+root = true
+
 [*.{kt,kts}]
 max_line_length=120
-disabled_rules=no-wildcard-imports,experimental:argument-list-wrapping
+ktlint_code_style = ktlint_official
+ktlint_standard = enabled
+ktlint_experimental = enabled
+ktlint_no-wildcard-imports = disabled
+

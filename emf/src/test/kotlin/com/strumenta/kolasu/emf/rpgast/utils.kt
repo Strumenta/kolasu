@@ -1,13 +1,14 @@
 package com.strumenta.kolasu.emf.rpgast
 
+
 import com.strumenta.kolasu.model.ASTNode
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 
 fun Any?.asNonNullString(): String = this?.toString() ?: ""
-fun Position?.line() = this?.start?.line.asNonNullString()
-fun Position?.atLine() = this?.start?.line?.let { "line $it " } ?: ""
-fun ASTNode?.startLine() = this?.position?.start?.line.asNonNullString()
-fun ASTNode?.endLine() = this?.position?.end?.line.asNonNullString()
+fun Range?.line() = this?.start?.line.asNonNullString()
+fun Range?.atLine() = this?.start?.line?.let { "line $it " } ?: ""
+fun ASTNode?.startLine() = this?.range?.start?.line.asNonNullString()
+fun ASTNode?.endLine() = this?.range?.end?.line.asNonNullString()
 
 enum class ComparisonOperator(val symbol: String) {
     EQ("="),

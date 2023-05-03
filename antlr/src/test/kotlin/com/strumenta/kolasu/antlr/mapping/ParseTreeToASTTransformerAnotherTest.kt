@@ -13,8 +13,24 @@ import com.strumenta.simplelang.AntlrEntityParser.Entity_typeContext
 import com.strumenta.simplelang.AntlrEntityParser.String_typeContext
 import com.strumenta.simplelang.AntlrScriptLexer
 import com.strumenta.simplelang.AntlrScriptParser
-import com.strumenta.simplelang.AntlrScriptParser.*
-import org.antlr.v4.runtime.*
+import com.strumenta.simplelang.AntlrScriptParser.Concat_expressionContext
+import com.strumenta.simplelang.AntlrScriptParser.Create_statementContext
+import com.strumenta.simplelang.AntlrScriptParser.Div_mult_expressionContext
+import com.strumenta.simplelang.AntlrScriptParser.Entity_by_id_expressionContext
+import com.strumenta.simplelang.AntlrScriptParser.Feature_access_expressionContext
+import com.strumenta.simplelang.AntlrScriptParser.Int_literal_expressionContext
+import com.strumenta.simplelang.AntlrScriptParser.Parens_expressionContext
+import com.strumenta.simplelang.AntlrScriptParser.Print_statementContext
+import com.strumenta.simplelang.AntlrScriptParser.ScriptContext
+import com.strumenta.simplelang.AntlrScriptParser.Set_statementContext
+import com.strumenta.simplelang.AntlrScriptParser.String_literal_expressionContext
+import com.strumenta.simplelang.AntlrScriptParser.Sum_sub_expressionContext
+import org.antlr.v4.runtime.ANTLRErrorListener
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.Parser
+import org.antlr.v4.runtime.RecognitionException
+import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
 import org.junit.Test
@@ -36,6 +52,7 @@ sealed class SStatement : ASTNode()
 data class SCreateStatement(val entity: ReferenceByName<EEntity>, val name: String? = null) : SStatement()
 data class SSetStatement(val feature: ReferenceByName<EFeature>, val instance: SExpression, val value: SExpression) :
     SStatement()
+
 data class SPrintStatement(val message: SExpression) : SStatement()
 
 sealed class SExpression : ASTNode()
@@ -156,7 +173,7 @@ class ParseTreeToASTTransformerAnotherTest {
                     "FOO",
                     mutableListOf(
                         EFeature("A", EStringType()),
-                        EFeature("B", EBooleanType()),
+                        EFeature("B", EBooleanType())
                     )
                 ),
                 EEntity(
@@ -164,7 +181,7 @@ class ParseTreeToASTTransformerAnotherTest {
                     mutableListOf(
                         EFeature("C", EEntityRefType(ReferenceByName("FOO")))
                     )
-                ),
+                )
             )
         )
         val actualAST = transformer.transform(
@@ -209,10 +226,12 @@ class ParseTreeToASTTransformerAnotherTest {
                     TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         Div_mult_expressionContext, SDivision>()(pt, t)
                 }
+
                 "*" -> {
                     TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         Div_mult_expressionContext, SMultiplication>()(pt, t)
                 }
+
                 else -> TODO()
             }
         }
@@ -222,10 +241,12 @@ class ParseTreeToASTTransformerAnotherTest {
                     TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         Sum_sub_expressionContext, SSum>()(pt, t)
                 }
+
                 "-" -> {
                     TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         Sum_sub_expressionContext, SSubtraction>()(pt, t)
                 }
+
                 else -> TODO()
             }
         }
