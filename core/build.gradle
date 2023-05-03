@@ -1,7 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm'
     id "maven-publish"
-    id "antlr"
     id "idea"
     id "signing"
     id "org.jetbrains.dokka"
