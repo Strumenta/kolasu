@@ -1,6 +1,10 @@
 package com.strumenta.kolasu.antlr.parsing
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.PropertyDescription
+import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult

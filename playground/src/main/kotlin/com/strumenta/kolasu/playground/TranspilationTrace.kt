@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.playground
 
-import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.emf.KolasuToEMFMapping
 import com.strumenta.kolasu.emf.STARLASU_METAMODEL
 import com.strumenta.kolasu.emf.addAttribute
@@ -13,6 +12,7 @@ import com.strumenta.kolasu.emf.setResourceURI
 import com.strumenta.kolasu.emf.setSingleContainment
 import com.strumenta.kolasu.emf.setStringAttribute
 import com.strumenta.kolasu.emf.toEObject
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI

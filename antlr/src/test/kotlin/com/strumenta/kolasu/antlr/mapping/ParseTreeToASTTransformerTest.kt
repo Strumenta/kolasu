@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.antlr.mapping
 
 import com.strumenta.kolasu.antlr.parsing.withParseTreeNode
-import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.model.ASTNode
+import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.model.invalidRanges
@@ -23,9 +23,13 @@ val mm by lazy {
 }
 
 object Metamodel : ReflectionBasedMetamodel(
-    CU::class, SetStatement::class, DisplayIntStatement::class,
-    EEntity::class, EModule::class,
-    SStatement::class, SScript::class
+    CU::class,
+    SetStatement::class,
+    DisplayIntStatement::class,
+    EEntity::class,
+    EModule::class,
+    SStatement::class,
+    SScript::class
 )
 
 data class CU(

@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.antlr.model
 
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.antlr.parsing.toRange
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
 import com.strumenta.simplelang.SimpleLangLexer

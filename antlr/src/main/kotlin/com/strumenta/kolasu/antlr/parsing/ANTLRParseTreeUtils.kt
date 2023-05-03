@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.antlr.parsing
 
-import antlr.collections.AST
 import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.Point
