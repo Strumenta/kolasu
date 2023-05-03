@@ -34,7 +34,7 @@ data class CompilationUnit(
         )
     }
 
-    val entryPlist: Statement.PlistStmt?
+    val entryPlist: PlistStmt?
         get() = main.stmts.plist()
             ?: subroutines.mapNotNull { it.stmts.plist() }.firstOrNull()
 
@@ -132,4 +132,4 @@ enum class DataWrapUpChoice {
 }
 
 // A PList is a list of parameters
-fun List<Statement>.plist(): Statement.PlistStmt? = this.asSequence().mapNotNull { it as? Statement.PlistStmt }.firstOrNull { it.isEntry }
+fun List<Statement>.plist(): PlistStmt? = this.asSequence().mapNotNull { it as? PlistStmt }.firstOrNull { it.isEntry }

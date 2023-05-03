@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.model
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.NodeType
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KProperty1
@@ -8,10 +7,10 @@ import kotlin.reflect.KType
 import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.isSubclassOf
 
-fun <T : ASTNode> T.relevantMemberProperties(withPosition: Boolean = false, withNodeType: Boolean = false):
+fun <T : ASTNode> T.relevantMemberProperties(withRange: Boolean = false, withNodeType: Boolean = false):
     List<KProperty1<T, *>> {
     val list = this::class.nodeProperties.map { it as KProperty1<T, *> }.toMutableList()
-    if (withPosition) {
+    if (withRange) {
         list.add(ASTNode::range as KProperty1<T, *>)
     }
     if (withNodeType) {

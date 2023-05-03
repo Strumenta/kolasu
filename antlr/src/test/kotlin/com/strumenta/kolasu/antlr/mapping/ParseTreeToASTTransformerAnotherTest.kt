@@ -7,7 +7,6 @@ import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.simplelang.AntlrEntityLexer
 import com.strumenta.simplelang.AntlrEntityParser
-import com.strumenta.simplelang.AntlrEntityParser.*
 import com.strumenta.simplelang.AntlrEntityParser.Boolean_typeContext
 import com.strumenta.simplelang.AntlrEntityParser.Entity_typeContext
 import com.strumenta.simplelang.AntlrEntityParser.String_typeContext
@@ -108,7 +107,7 @@ class ParseTreeToASTTransformerAnotherTest {
         }
     }
 
-    private fun parseEntities(code: String): ModuleContext {
+    private fun parseEntities(code: String): AntlrEntityParser.ModuleContext {
         val errorListener = MyErrorListener()
 
         val lexer = AntlrEntityLexer(CharStreams.fromString(code))
@@ -135,8 +134,8 @@ class ParseTreeToASTTransformerAnotherTest {
     @Test
     fun testSimpleEntitiesTransformer() {
         val transformer = ParseTreeToASTTransformer(allowGenericNode = false)
-        transformer.registerTrivialPTtoASTConversion<ModuleContext, EModule>()
-        transformer.registerTrivialPTtoASTConversion<EntityContext, EEntity>()
+        transformer.registerTrivialPTtoASTConversion<AntlrEntityParser.ModuleContext, EModule>()
+        transformer.registerTrivialPTtoASTConversion<AntlrEntityParser.EntityContext, EEntity>()
         val expectedAST = EModule(
             "M",
             mutableListOf(
@@ -160,9 +159,9 @@ class ParseTreeToASTTransformerAnotherTest {
     @Test
     fun testEntitiesWithFeaturesTransformer() {
         val transformer = ParseTreeToASTTransformer(allowGenericNode = false)
-        transformer.registerTrivialPTtoASTConversion<ModuleContext, EModule>()
-        transformer.registerTrivialPTtoASTConversion<EntityContext, EEntity>()
-        transformer.registerTrivialPTtoASTConversion<FeatureContext, EFeature>()
+        transformer.registerTrivialPTtoASTConversion<AntlrEntityParser.ModuleContext, EModule>()
+        transformer.registerTrivialPTtoASTConversion<AntlrEntityParser.EntityContext, EEntity>()
+        transformer.registerTrivialPTtoASTConversion<AntlrEntityParser.FeatureContext, EFeature>()
         transformer.registerTrivialPTtoASTConversion<String_typeContext, EStringType>()
         transformer.registerTrivialPTtoASTConversion<Boolean_typeContext, EBooleanType>()
         transformer.registerTrivialPTtoASTConversion<Entity_typeContext, EEntityRefType>("target" to "entity")

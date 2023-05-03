@@ -334,7 +334,7 @@ open class ReflectionBasedMetamodel(id: String, name: String, version: Int, vara
                 property.type = LionCoreBuiltins.getInteger()
             }
 
-            Position::class -> {
+            Range::class -> {
                 property.type = StarLasuMetamodel.position
             }
 
