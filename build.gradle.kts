@@ -86,3 +86,7 @@ release {
         pushToRemote.set("origin")
     }
 }
+
+tasks.wrapper {
+    gradleVersion = "8.1.1"
+}

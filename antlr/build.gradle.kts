@@ -1,3 +1,5 @@
+import java.net.URI
+
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jlleitschuh.gradle.ktlint")
@@ -8,14 +10,13 @@ plugins {
     id("org.jetbrains.dokka")
 }
 
-val javaVersion = if (extra["jvm_version"] == "1.8") JavaVersion.VERSION_1_8 else TODO()
-val antlr_version = extra["antlr_version"] as String
-val kotlin_version = extra["kotlin_version"] as String
+//java {
+//    sourceCompatibility = "$jvm_version"
+//    targetCompatibility = "$jvm_version"
+//}
 
-java {
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-}
+val antlr_version = extra["antlr_version"]
+val kotlin_version = extra["kotlin_version"]
 
 dependencies {
     antlr("org.antlr:antlr4:$antlr_version")
@@ -29,22 +30,10 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
 
-tasks.generateTestGrammarSource {
+generateTestGrammarSource {
     maxHeapSize = "64m"
-    arguments = arguments + listOf("-package", "com.strumenta.simplelang")
-    outputDirectory = File("generated-test-src/antlr/main/com/strumenta/simplelang".toString())
-}
-
-tasks {
-    named("compileJava") {
-        dependsOn("generateGrammarSource")
-    }
-    named("compileKotlin") {
-        dependsOn("generateGrammarSource")
-    }
-    named("compileTestKotlin") {
-        dependsOn("generateTestGrammarSource")
-    }
+    arguments += ["-package", "com.strumenta.simplelang"]
+    outputDirectory = new File("generated-test-src/antlr/main/com/strumenta/simplelang".toString())
 }
 
 sourceSets.getByName("test") {
@@ -52,27 +41,19 @@ sourceSets.getByName("test") {
     java.srcDir("generated-test-src/antlr/main")
 }
 
-//compileKotlin.source(sourceSets.main.java, sourceSets.main.kotlin)
-//compileTestKotlin.source(sourceSets.test.kotlin)
-
-//clean {
-//    delete("generated-src")
-//    delete("generated-test-src")
-//}
-
-//compileJava.dependsOn(generateTestGrammarSource)
+clean {
+    delete("generated-src")
+    delete("generated-test-src")
+}
 
 idea {
     module {
-        testSourceDirs = testSourceDirs + file("generated-test-src/antlr/main")
+        testSourceDirs += file("generated-test-src/antlr/main")
     }
 }
 
 // TODO remove
-//ext.isReleaseVersion = !kolasu_version.endsWith("SNAPSHOT")
-
-val kolasu_version = extra["kolasu_version"] as String
-val isReleaseVersion = !kolasu_version.endsWith("SNAPSHOT")
+ext.isReleaseVersion = !kolasu_version.endsWith("SNAPSHOT")
 
 publishing {
 
@@ -80,7 +61,7 @@ publishing {
         maven {
             val releaseRepo = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             val snapshotRepo = "https://oss.sonatype.org/content/repositories/snapshots/"
-            url = if (isReleaseVersion) URI(releaseRepo) else snapshotRepo
+            url = URI(if (isReleaseVersion) releaseRepo else snapshotRepo)
             credentials {
                 username = if (project.hasProperty("ossrhUsername")) ossrhUsername else "Unknown user"
                 password = if (project.hasProperty("ossrhPassword")) ossrhPassword else "Unknown password"
@@ -89,8 +70,8 @@ publishing {
     }
 
     publications {
-        create<MavenPublication>("kolasu_antlr") {
-            from(components["java"])
+        kolasu_antlr(MavenPublication) {
+            from(components.java)
             artifactId = "kolasu-" + project.name
             artifact("sourcesJar")
             artifact("javadocJar")
@@ -142,4 +123,20 @@ publishing {
 
 signing {
     sign(publishing.publications.kolasu_antlr)
+}
+
+tasks {
+    named("compileTestKotlin") {
+        dependsOn("generateTestGrammarSource")
+    }
+    named("compileKotlin") {
+        dependsOn("generateGrammarSource")
+    }
+    named("compileJava") {
+        dependsOn("generateGrammarSource")
+        dependsOn("generateTestGrammarSource")
+    }
+    named("compileTestKotlin") {
+        dependsOn("generateTestGrammarSource")
+    }
 }
