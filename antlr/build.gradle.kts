@@ -21,20 +21,30 @@ fun Project.useAntlrInTests(packageName: String) {
         arguments = arguments + listOf("-package", packageName)
         outputDirectory = File("generated-test-src/antlr/main/${packageName.replace('.', '/')}".toString())
     }
+    sourceSets.getByName("test") {
+        java.srcDir("src/test/java")
+        java.srcDir("generated-test-src/antlr/main")
+    }
+    tasks {
+        named("compileKotlin") {
+            dependsOn("generateGrammarSource")
+        }
+        named("compileTestKotlin") {
+            dependsOn("generateTestGrammarSource")
+        }
+        named("compileJava") {
+            dependsOn("generateTestGrammarSource")
+        }
+        named("compileTestKotlin") {
+            dependsOn("generateTestGrammarSource")
+        }
+        named("runKtlintCheckOverTestSourceSet") {
+            dependsOn("generateTestGrammarSource")
+        }
+    }
 }
 
 project.useAntlrInTests("com.strumenta.simplelang")
-
-// tasks.generateTestGrammarSource {
-//    maxHeapSize = "64m"
-//    arguments = arguments + listOf("-package", "com.strumenta.simplelang")
-//    outputDirectory = File("generated-test-src/antlr/main/com/strumenta/simplelang".toString())
-// }
-
-sourceSets.getByName("test") {
-    java.srcDir("src/test/java")
-    java.srcDir("generated-test-src/antlr/main")
-}
 
 tasks.clean {
     delete("generated-src")
@@ -122,23 +132,4 @@ publishing {
 
 signing {
     sign(publishing.publications["kolasu_antlr"])
-}
-
-tasks {
-    named("compileTestKotlin") {
-        dependsOn("generateTestGrammarSource")
-    }
-    named("compileKotlin") {
-        dependsOn("generateGrammarSource")
-    }
-    named("compileJava") {
-        dependsOn("generateGrammarSource")
-        dependsOn("generateTestGrammarSource")
-    }
-    named("compileTestKotlin") {
-        dependsOn("generateTestGrammarSource")
-    }
-    named("runKtlintCheckOverTestSourceSet") {
-        dependsOn("generateTestGrammarSource")
-    }
 }
