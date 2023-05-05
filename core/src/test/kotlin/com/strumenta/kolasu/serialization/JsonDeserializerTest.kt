@@ -50,7 +50,8 @@ class JsonDeserializerTest {
         val originalResult: Result<MyRoot> = Result(
             listOf(
                 Issue(
-                    IssueType.LEXICAL, "foo",
+                    IssueType.LEXICAL,
+                    "foo",
                     range = Range(Point(1, 10), Point(4, 540))
                 )
             ),

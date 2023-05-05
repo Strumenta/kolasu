@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.emf.rpgast
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Range
 
 data class ToAstConfiguration(
     val considerRange: Boolean = true
@@ -20,10 +21,12 @@ internal interface DataDefinitionProvider {
     fun isReady(): Boolean
     fun toDataDefinition(): DataDefinition
 }
+
 private data class DataDefinitionHolder(val dataDefinition: DataDefinition) : DataDefinitionProvider {
     override fun isReady() = true
     override fun toDataDefinition() = dataDefinition
 }
+
 private data class DataDefinitionCalculator(val calculator: () -> DataDefinition) : DataDefinitionProvider {
     override fun isReady() = false
     override fun toDataDefinition() = calculator()

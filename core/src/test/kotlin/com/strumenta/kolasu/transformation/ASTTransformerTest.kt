@@ -146,7 +146,8 @@ class ASTTransformerTest {
                     addIssue(
                         "Illegal types for sum operation. Only integer values are allowed. " +
                             "Found: (${it.left.type?.name ?: "null"}, ${it.right.type?.name ?: "null"})",
-                        IssueSeverity.ERROR, it.range
+                        IssueSeverity.ERROR,
+                        it.range
                     )
                 }
             }
@@ -157,7 +158,8 @@ class ASTTransformerTest {
                     addIssue(
                         "Illegal types for concat operation. Only string values are allowed. " +
                             "Found: (${it.left.type?.name ?: "null"}, ${it.right.type?.name ?: "null"})",
-                        IssueSeverity.ERROR, it.range
+                        IssueSeverity.ERROR,
+                        it.range
                     )
                 }
             }

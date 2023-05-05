@@ -27,8 +27,30 @@ val isReleaseVersion = !(version as String).endsWith("SNAPSHOT")
 
 subprojects {
 
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+    apply(plugin = "maven-publish")
+    apply(plugin = "idea")
+    apply(plugin = "signing")
+    apply(plugin = "org.jetbrains.dokka")
+
     this.version = rootProject.version
     this.group = rootProject.group
+
+    val kotlin_version = extra["kotlin_version"]
+
+    dependencies {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
+        implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
+        implementation("org.jetbrains.kotlin:kotlin-test:$kotlin_version")
+
+        testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 
     tasks.withType(DokkaTask::class).configureEach {
         dokkaSourceSets {
@@ -60,13 +82,6 @@ subprojects {
             exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         }
     }
-
-//    ktlint {
-//        version = "0.48.1"
-//        verbose = true
-//        outputToConsole = true
-//        enableExperimentalRules = true
-//    }
 
     val jvm_version = extra["jvm_version"]!! as String
 

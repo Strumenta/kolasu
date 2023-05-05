@@ -1,7 +1,14 @@
 package com.smeup.rpgparser.parsing.ast
 
-import com.strumenta.kolasu.emf.rpgast.*
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.emf.rpgast.AbstractDataDefinition
+import com.strumenta.kolasu.emf.rpgast.ComparisonOperator
+import com.strumenta.kolasu.emf.rpgast.InStatementDataDefinition
+import com.strumenta.kolasu.emf.rpgast.KListType
+import com.strumenta.kolasu.emf.rpgast.startLine
+import com.strumenta.kolasu.model.Derived
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.traversing.findAncestorOfType
 
 class DBFile
@@ -184,7 +191,9 @@ data class ReadEqualStmt(
     override val name: String,
     val specifiedRange: Range? = null
 ) : AbstractReadEqualStmt(
-    searchArg = searchArg, name = name, specifiedRange = specifiedRange,
+    searchArg = searchArg,
+    name = name,
+    specifiedRange = specifiedRange,
     logPref = "READE"
 ) {
 
@@ -196,7 +205,9 @@ data class ReadPreviousEqualStmt(
     override val name: String,
     val specifiedRange: Range? = null
 ) : AbstractReadEqualStmt(
-    searchArg = searchArg, name = name, specifiedRange = specifiedRange,
+    searchArg = searchArg,
+    name = name,
+    specifiedRange = specifiedRange,
     logPref = "READPE"
 ) {
 

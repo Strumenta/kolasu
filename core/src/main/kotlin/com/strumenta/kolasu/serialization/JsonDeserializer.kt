@@ -1,6 +1,9 @@
 package com.strumenta.kolasu.serialization
 
-import com.google.gson.*
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
@@ -9,10 +12,7 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
-import java.lang.IllegalStateException
-import java.lang.UnsupportedOperationException
 import java.util.*
-import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -40,6 +40,7 @@ class JsonDeserializer {
                     val actualClass = Class.forName(className)
                     return deserialize(actualClass.asSubclass(Node::class.java), json.asJsonObject)
                 }
+
                 Collection::class.java.isAssignableFrom(rawClass) -> {
                     require(typeToDeserialize.arguments.size == 1)
                     val elementType = typeToDeserialize.arguments[0]
@@ -54,9 +55,11 @@ class JsonDeserializer {
                 rawClass == String::class.java -> {
                     return json.asString
                 }
+
                 rawClass == Int::class.java -> {
                     return json.asInt
                 }
+
                 else -> {
                     if (json.isJsonObject) {
                         if (json.asJsonObject.has(JSON_TYPE_KEY)) {
@@ -75,6 +78,7 @@ class JsonDeserializer {
         }
         TODO()
     }
+
     fun <T : Node> deserialize(clazz: Class<T>, json: String): T {
         val jo = JsonParser().parse(json).asJsonObject
         return deserialize(clazz, jo)

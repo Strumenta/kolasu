@@ -11,7 +11,11 @@ import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
-import org.antlr.v4.runtime.*
+import org.antlr.v4.runtime.CharStream
+import org.antlr.v4.runtime.Lexer
+import org.antlr.v4.runtime.Parser
+import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.TokenStream
 import org.eclipse.emf.ecore.resource.Resource
 import org.junit.Test
 import java.io.File

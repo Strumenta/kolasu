@@ -1,4 +1,5 @@
 @file:JvmName("ProcessingByRange")
+
 package com.strumenta.kolasu.traversing
 
 import com.strumenta.kolasu.model.Node
@@ -58,7 +59,9 @@ fun Node.walkWithin(range: Range): Sequence<Node> {
         sequenceOf(this) + this.children.walkWithin(range)
     } else if (this.overlaps(range)) {
         this.children.walkWithin(range)
-    } else emptySequence()
+    } else {
+        emptySequence()
+    }
 }
 
 /**

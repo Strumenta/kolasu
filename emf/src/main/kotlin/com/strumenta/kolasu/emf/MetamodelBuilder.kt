@@ -2,11 +2,23 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.PropertyTypeDescription
 import com.strumenta.kolasu.model.processProperties
-import org.eclipse.emf.ecore.*
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EClassifier
+import org.eclipse.emf.ecore.EDataType
+import org.eclipse.emf.ecore.EEnum
+import org.eclipse.emf.ecore.EGenericType
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.ETypeParameter
+import org.eclipse.emf.ecore.ETypedElement
+import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.Resource
 import java.io.Serializable
 import java.util.*
-import kotlin.reflect.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.KTypeParameter
+import kotlin.reflect.KTypeProjection
+import kotlin.reflect.KVariance
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.full.withNullability
@@ -114,6 +126,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                 (ktype.classifier as? KClass<*>)?.isSubclassOf(Enum::class) == true -> {
                     eDataType = createEEnum(ktype.classifier as KClass<out Enum<*>>)
                 }
+
                 else -> {
                     val handler = dataTypeHandlers.find { it.canHandle(ktype) }
                     if (handler == null) {
@@ -242,6 +255,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             KVariance.INVARIANT -> {
                 return provideType(valueType.type!!)
             }
+
             else -> TODO("Variance ${valueType.variance} not yet sypported")
         }
     }
@@ -286,12 +300,14 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                     }
                 }
             }
+
             is KTypeParameter -> {
                 element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
                     eTypeParameter = visibleTypeParameters[classifier.name]
                         ?: throw IllegalStateException("Type parameter not found")
                 }
             }
+
             else -> throw Error("Not a valid classifier: $classifier")
         }
     }

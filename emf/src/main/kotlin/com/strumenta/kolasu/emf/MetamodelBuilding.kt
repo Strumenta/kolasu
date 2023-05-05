@@ -1,7 +1,13 @@
 package com.strumenta.kolasu.emf
 
 import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.*
+import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EDataType
+import org.eclipse.emf.ecore.EEnum
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EReference
+import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 
 fun EEnum.addLiteral(enumEntry: Enum<*>) {

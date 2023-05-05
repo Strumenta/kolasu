@@ -1,9 +1,23 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.EntityDeclaration
+import com.strumenta.kolasu.model.ErrorNode
+import com.strumenta.kolasu.model.Expression
+import com.strumenta.kolasu.model.GenericErrorNode
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PlaceholderElement
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.Statement
 import com.strumenta.kolasu.transformation.GenericNode
 import com.strumenta.kolasu.validation.Result
-import org.eclipse.emf.ecore.*
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EClassifier
+import org.eclipse.emf.ecore.EDataType
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.resource.Resource
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -27,6 +41,7 @@ interface EClassTypeHandler {
             false
         }
     }
+
     fun canHandle(kclass: KClass<*>): Boolean
     fun toEClass(kclass: KClass<*>, eClassProvider: ClassifiersProvider): EClass
     fun external(): Boolean
@@ -41,6 +56,7 @@ interface ClassifiersProvider {
             false
         }
     }
+
     fun provideClass(kClass: KClass<*>): EClass
     fun provideDataType(ktype: KType): EDataType?
 }
@@ -76,6 +92,7 @@ val NamedHandler = KolasuClassHandler(Named::class, STARLASU_METAMODEL.getEClass
 val RangeHandler = KolasuClassHandler(Range::class, STARLASU_METAMODEL.getEClass("Position"))
 val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, STARLASU_METAMODEL.getEClass("PossiblyNamed"))
 val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, STARLASU_METAMODEL.getEClass("ReferenceByName"))
+
 // This class is saved with the name Position for compatibility reasons
 val ResultHandler = KolasuClassHandler(Result::class, STARLASU_METAMODEL.getEClass("Position"))
 

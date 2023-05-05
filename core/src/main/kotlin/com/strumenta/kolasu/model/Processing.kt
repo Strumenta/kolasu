@@ -7,7 +7,10 @@ import com.strumenta.kolasu.traversing.searchByType
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.traversing.walkChildren
 import java.util.*
-import kotlin.reflect.*
+import kotlin.reflect.KFunction1
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KParameter
+import kotlin.reflect.KProperty
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
@@ -274,6 +277,7 @@ fun Node.transformTree(
                 val newValue = v.transformTree(operation, inPlace, mutationsCache)
                 if (newValue != v) changes[p.name] = newValue
             }
+
             is Collection<*> -> {
                 val newValue = v.map { if (it is Node) it.transformTree(operation, inPlace, mutationsCache) else it }
                 if (newValue != v) changes[p.name] = newValue
@@ -315,6 +319,7 @@ fun Node.transformChildren(operation: (Node) -> Node) {
                     }
                 }
             }
+
             is Collection<*> -> {
                 if (value is List<*>) {
                     for (i in 0 until value.size) {
@@ -351,6 +356,7 @@ fun Node.mapChildren(operation: (Node) -> Node): Node {
                     changes[property.name] = newValue
                 }
             }
+
             is Collection<*> -> {
                 val newValue = value.map { if (it is Node) operation(it) else it }
                 if (newValue != value) {

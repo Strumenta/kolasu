@@ -93,3 +93,5 @@ publishing {
 signing {
     sign publishing.publications.kolasu_javalib
 }
+
+compileTestKotlin.dependsOn("generateTestGrammarSource")

@@ -69,7 +69,9 @@ fun <N : Node> assertASTsAreEqual(
 ) {
     assertEquals(0, actual.issues.size, actual.issues.toString())
     assertASTsAreEqual(
-        expected = expected, actual = actual.root!!, context = context,
+        expected = expected,
+        actual = actual.root!!,
+        context = context,
         considerRange = considerRange
     )
 }
@@ -112,7 +114,9 @@ fun assertASTsAreEqual(
                             val actualIt = actualPropValueCollection.iterator()
                             for (i in expectedPropValueCollection.indices) {
                                 assertASTsAreEqual(
-                                    expectedIt.next(), actualIt.next(), "$context[$i]",
+                                    expectedIt.next(),
+                                    actualIt.next(),
+                                    "$context[$i]",
                                     considerRange = considerRange,
                                     useLightweightAttributeEquality = useLightweightAttributeEquality
                                 )

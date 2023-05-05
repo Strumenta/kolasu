@@ -1,10 +1,26 @@
 package com.strumenta.kolasu.transformation
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.GenericErrorNode
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Origin
+import com.strumenta.kolasu.model.PropertyTypeDescription
+import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.model.children
+import com.strumenta.kolasu.model.processProperties
+import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
-import kotlin.reflect.*
-import kotlin.reflect.full.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KParameter
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.full.superclasses
 
 /**
  * A child of an AST node that is automatically populated from a source tree.
@@ -420,6 +436,7 @@ open class ASTTransformer(
                                 null -> {
                                     AbsentParameterValue
                                 }
+
                                 is List<*> -> {
                                     PresentParameterValue(childSource.map { transform(it) }.toMutableList())
                                 }
@@ -464,8 +481,10 @@ open class ASTTransformer(
                     } catch (t: Throwable) {
                         throw RuntimeException(
                             "Invocation of constructor $constructor failed. " +
-                                "We passed: ${constructorParamValues.map { "${it.key.name}=${it.value}" }
-                                    .joinToString(", ")}",
+                                "We passed: ${
+                                constructorParamValues.map { "${it.key.name}=${it.value}" }
+                                    .joinToString(", ")
+                                }",
                             t
                         )
                     }

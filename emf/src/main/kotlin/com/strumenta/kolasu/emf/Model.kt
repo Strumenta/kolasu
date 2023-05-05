@@ -3,12 +3,24 @@ package com.strumenta.kolasu.emf
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.Destination
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Origin
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.SimpleOrigin
+import com.strumenta.kolasu.model.TextFileDestination
+import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.*
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EDataType
+import org.eclipse.emf.ecore.EEnum
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.ByteArrayOutputStream
@@ -136,12 +148,15 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
             val ee = ePackage.getEEnum(pdValue.javaClass)
             return ee.getEEnumLiteral(pdValue.name)
         }
+
         is LocalDate -> {
             return toLocalDateObject(pdValue)
         }
+
         is LocalTime -> {
             return toLocalTimeObject(pdValue)
         }
+
         is LocalDateTime -> {
             val eClass = STARLASU_METAMODEL.getEClass("LocalDateTime")
             val eObject = STARLASU_METAMODEL.eFactoryInstance.create(eClass)
@@ -151,6 +166,7 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
             eObject.eSet(eClass.getEStructuralFeature("time"), timeComponent)
             return eObject
         }
+
         else -> {
             // this could be not a primitive value but a value that we mapped to an EClass
             val eClass = if (pdValue != null) {
@@ -164,6 +180,7 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                 eClass != null -> {
                     pdValue!!.dataToEObject(ePackage)
                 }
+
                 pdValue is ReferenceByName<*> -> {
                     val refEC = STARLASU_METAMODEL.getEClass("ReferenceByName")
                     val refEO = STARLASU_METAMODEL.eFactoryInstance.create(refEC)
@@ -180,6 +197,7 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                     )
                     refEO
                 }
+
                 pdValue is Result<*> -> {
                     val resEC = STARLASU_METAMODEL.getEClass("Result")
                     val resEO = STARLASU_METAMODEL.eFactoryInstance.create(resEC)
@@ -196,6 +214,7 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                     issues.addAll(pdValue.issues.map { it.toEObject() })
                     resEO
                 }
+
                 else -> pdValue
             }
         }
@@ -330,10 +349,12 @@ private fun setOrigin(
             nodeOrigin.eSet(nodeSF, eoCorrespondingToOrigin)
             eo.eSet(originSF, nodeOrigin)
         }
+
         is ParseTreeOrigin -> {
             // The ParseTreeOrigin is not saved in EMF as we do not want to replicate the whole parse-tree
             eo.eSet(originSF, null)
         }
+
         is SimpleOrigin -> {
             val simpleOriginClass = STARLASU_METAMODEL.getEClass("SimpleOrigin")
             val simpleOrigin = simpleOriginClass.instantiate()
@@ -341,6 +362,7 @@ private fun setOrigin(
             simpleOrigin.eSet(simpleOriginClass.getEStructuralFeature("sourceText"), origin.sourceText)
             eo.eSet(originSF, simpleOrigin)
         }
+
         else -> {
             throw IllegalStateException("Only origins representing Nodes or ParseTreeOrigins are currently supported")
         }
@@ -367,6 +389,7 @@ private fun setDestination(
             val destinationSF = astNode.getEStructuralFeature("destination")
             eo.eSet(destinationSF, nodeDestinationInstance)
         }
+
         is TextFileDestination -> {
             val textFileInstance = STARLASU_METAMODEL.getEClass("TextFileDestination").instantiate()
 
@@ -377,6 +400,7 @@ private fun setDestination(
             val destinationSF = astNode.getEStructuralFeature("destination")
             eo.eSet(destinationSF, textFileInstance)
         }
+
         else -> {
             throw IllegalStateException(
                 "Only destinations represented Nodes or TextFileDestinations are currently supported"

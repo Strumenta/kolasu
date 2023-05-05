@@ -143,3 +143,5 @@ publishing {
 signing {
     sign publishing.publications.kolasu_emf
 }
+
+runKtlintCheckOverTestSourceSet.dependsOn("generateTestGrammarSource")

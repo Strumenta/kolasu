@@ -1,18 +1,7 @@
 import java.net.URI
 
 plugins {
-    id("org.jetbrains.kotlin.jvm")
-    id("org.jlleitschuh.gradle.ktlint")
-    id("maven-publish")
     id("antlr")
-    id("idea")
-    id("signing")
-    id("org.jetbrains.dokka")
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 val antlr_version = extra["antlr_version"]
@@ -23,20 +12,24 @@ val isReleaseVersion = !(version as String).endsWith("SNAPSHOT")
 dependencies {
     antlr("org.antlr:antlr4:$antlr_version")
     implementation("org.antlr:antlr4-runtime:$antlr_version")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
-    // we define some testing utilities
-    implementation("org.jetbrains.kotlin:kotlin-test:$kotlin_version")
     implementation(project(":core"))
-
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
 
-tasks.generateTestGrammarSource {
-    maxHeapSize = "64m"
-    arguments = arguments + listOf("-package", "com.strumenta.simplelang")
-    outputDirectory = File("generated-test-src/antlr/main/com/strumenta/simplelang".toString())
+fun Project.useAntlrInTests(packageName: String) {
+    tasks.generateTestGrammarSource {
+        maxHeapSize = "64m"
+        arguments = arguments + listOf("-package", packageName)
+        outputDirectory = File("generated-test-src/antlr/main/${packageName.replace('.', '/')}".toString())
+    }
 }
+
+project.useAntlrInTests("com.strumenta.simplelang")
+
+// tasks.generateTestGrammarSource {
+//    maxHeapSize = "64m"
+//    arguments = arguments + listOf("-package", "com.strumenta.simplelang")
+//    outputDirectory = File("generated-test-src/antlr/main/com/strumenta/simplelang".toString())
+// }
 
 sourceSets.getByName("test") {
     java.srcDir("src/test/java")
