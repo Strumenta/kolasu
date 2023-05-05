@@ -57,8 +57,7 @@ idea {
     }
 }
 
-publishing {
-
+fun PublishingExtension.addSonatypeRepo() {
     repositories {
         maven {
             val releaseRepo = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
@@ -78,9 +77,11 @@ publishing {
             }
         }
     }
+}
 
+fun PublishingExtension.addPublication(pubName: String, pubDescription: String, project: Project) {
     publications {
-        create<MavenPublication>("kolasu_antlr") {
+        create<MavenPublication>(pubName) {
             from(components["java"])
             artifactId = "kolasu-" + project.name
             artifact("sourcesJar")
@@ -89,7 +90,7 @@ publishing {
             suppressPomMetadataWarningsFor("cliRuntimeElements")
             pom {
                 name.set("kolasu-" + project.name)
-                description.set("Framework to work with AST and building languages. Integrated with ANTLR.")
+                description.set(pubDescription)
                 version = project.version as String
                 packaging = "jar"
                 url.set("https://github.com/Strumenta/kolasu")
@@ -128,6 +129,11 @@ publishing {
             }
         }
     }
+}
+
+publishing {
+    addSonatypeRepo()
+    addPublication("kolasu_antlr", "ANTLR integration for Kolasu", project)
 }
 
 signing {
