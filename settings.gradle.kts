@@ -9,7 +9,7 @@ pluginManagement {
 
 rootProject.name = "kolasu"
 include("core")
+include("antlr")
 include("emf")
 include("playground")
 include("javalib")
-include("antlr")

@@ -71,7 +71,7 @@ idea {
 }
 
 // TODO remove
-ext.isReleaseVersion = !kolasu_version.endsWith("SNAPSHOT")
+ext.isReleaseVersion = !(version as String).endsWith("SNAPSHOT")
 
 
 publishing {

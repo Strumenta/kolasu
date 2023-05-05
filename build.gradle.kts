@@ -22,10 +22,13 @@ allprojects {
     }
 }
 
-val version = extra["kolasu_version"] as String
-val isReleaseVersion = !version.endsWith("SNAPSHOT")
+// val version = extra["kolasu_version"] as String
+val isReleaseVersion = !(version as String).endsWith("SNAPSHOT")
 
 subprojects {
+
+    this.version = rootProject.version
+    this.group = rootProject.group
 
     tasks.withType(DokkaTask::class).configureEach {
         dokkaSourceSets {

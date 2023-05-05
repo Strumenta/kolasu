@@ -32,7 +32,7 @@ compileKotlin.source sourceSets.main.java, sourceSets.main.kotlin
 compileTestKotlin.source sourceSets.test.kotlin
 
 // TODO remove
-ext.isReleaseVersion = !kolasu_version.endsWith("SNAPSHOT")
+ext.isReleaseVersion = !(version as String).endsWith("SNAPSHOT")
 
 
 publishing {

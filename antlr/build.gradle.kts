@@ -10,13 +10,15 @@ plugins {
     id("org.jetbrains.dokka")
 }
 
-//java {
-//    sourceCompatibility = "$jvm_version"
-//    targetCompatibility = "$jvm_version"
-//}
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 val antlr_version = extra["antlr_version"]
 val kotlin_version = extra["kotlin_version"]
+// val version = extra["kolasu_version"] as String
+val isReleaseVersion = !(version as String).endsWith("SNAPSHOT")
 
 dependencies {
     antlr("org.antlr:antlr4:$antlr_version")
@@ -30,10 +32,10 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
 
-generateTestGrammarSource {
+tasks.generateTestGrammarSource {
     maxHeapSize = "64m"
-    arguments += ["-package", "com.strumenta.simplelang"]
-    outputDirectory = new File("generated-test-src/antlr/main/com/strumenta/simplelang".toString())
+    arguments = arguments + listOf("-package", "com.strumenta.simplelang")
+    outputDirectory = File("generated-test-src/antlr/main/com/strumenta/simplelang".toString())
 }
 
 sourceSets.getByName("test") {
@@ -41,19 +43,16 @@ sourceSets.getByName("test") {
     java.srcDir("generated-test-src/antlr/main")
 }
 
-clean {
+tasks.clean {
     delete("generated-src")
     delete("generated-test-src")
 }
 
 idea {
     module {
-        testSourceDirs += file("generated-test-src/antlr/main")
+        testSourceDirs = testSourceDirs + file("generated-test-src/antlr/main")
     }
 }
-
-// TODO remove
-ext.isReleaseVersion = !kolasu_version.endsWith("SNAPSHOT")
 
 publishing {
 
@@ -63,66 +62,73 @@ publishing {
             val snapshotRepo = "https://oss.sonatype.org/content/repositories/snapshots/"
             url = URI(if (isReleaseVersion) releaseRepo else snapshotRepo)
             credentials {
-                username = if (project.hasProperty("ossrhUsername")) ossrhUsername else "Unknown user"
-                password = if (project.hasProperty("ossrhPassword")) ossrhPassword else "Unknown password"
+                username = if (project.hasProperty("ossrhUsername")) {
+                    project.properties["ossrhUsername"] as String
+                } else {
+                    "Unknown user"
+                }
+                password = if (project.hasProperty("ossrhPassword")) {
+                    project.properties["ossrhPassword"] as String
+                } else {
+                    "Unknown password"
+                }
             }
         }
     }
 
     publications {
-        kolasu_antlr(MavenPublication) {
-            from(components.java)
+        create<MavenPublication>("kolasu_antlr") {
+            from(components["java"])
             artifactId = "kolasu-" + project.name
             artifact("sourcesJar")
             artifact("javadocJar")
             suppressPomMetadataWarningsFor("cliApiElements")
             suppressPomMetadataWarningsFor("cliRuntimeElements")
             pom {
-                name = "kolasu-" + project.name
-                description = "Framework to work with AST and building languages. Integrated with ANTLR."
-                version = project.version
+                name.set("kolasu-" + project.name)
+                description.set("Framework to work with AST and building languages. Integrated with ANTLR.")
+                version = project.version as String
                 packaging = "jar"
-                url = "https://github.com/Strumenta/kolasu"
+                url.set("https://github.com/Strumenta/kolasu")
 
                 scm {
-                    connection = "scm:git:https://github.com/Strumenta/kolasu.git"
-                    developerConnection = "scm:git:git@github.com:Strumenta/kolasu.git"
-                    url = "https://github.com/Strumenta/kolasu.git"
+                    connection.set("scm:git:https://github.com/Strumenta/kolasu.git")
+                    developerConnection.set("scm:git:git@github.com:Strumenta/kolasu.git")
+                    url.set("https://github.com/Strumenta/kolasu.git")
                 }
 
                 licenses {
                     license {
-                        name = "Apache Licenve V2.0"
-                        url = "https://www.apache.org/licenses/LICENSE-2.0"
-                        distribution = "repo"
+                        name.set("Apache Licenve V2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                        distribution.set("repo")
                     }
                 }
 
                 developers {
                     developer {
-                        id = "ftomassetti"
-                        name = "Federico Tomassetti"
-                        email = "federico@strumenta.com"
+                        id.set("ftomassetti")
+                        name.set("Federico Tomassetti")
+                        email.set("federico@strumenta.com")
                     }
                     developer {
-                        id = "alessiostalla"
-                        name = "Alessio Stalla"
-                        email = "alessio.stalla@strumenta.com"
+                        id.set("alessiostalla")
+                        name.set("Alessio Stalla")
+                        email.set("alessio.stalla@strumenta.com")
                     }
                     developer {
-                        id = "lorenzoaddazi"
-                        name = "Lorenzo Addazi"
-                        email = "lorenzo.addazi@strumenta.com"
+                        id.set("lorenzoaddazi")
+                        name.set("Lorenzo Addazi")
+                        email.set("lorenzo.addazi@strumenta.com")
                     }
                 }
-
             }
         }
     }
 }
 
 signing {
-    sign(publishing.publications.kolasu_antlr)
+    sign(publishing.publications["kolasu_antlr"])
 }
 
 tasks {
@@ -137,6 +143,9 @@ tasks {
         dependsOn("generateTestGrammarSource")
     }
     named("compileTestKotlin") {
+        dependsOn("generateTestGrammarSource")
+    }
+    named("runKtlintCheckOverTestSourceSet") {
         dependsOn("generateTestGrammarSource")
     }
 }
