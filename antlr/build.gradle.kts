@@ -1,5 +1,3 @@
-
-
 plugins {
     id("antlr")
 }
@@ -25,23 +23,7 @@ fun Project.useAntlrInTests(packageName: String) {
         java.srcDir("src/test/java")
         java.srcDir("generated-test-src/antlr/main")
     }
-    tasks {
-        named("compileKotlin") {
-            dependsOn("generateGrammarSource")
-        }
-        named("compileTestKotlin") {
-            dependsOn("generateTestGrammarSource")
-        }
-        named("compileJava") {
-            dependsOn("generateTestGrammarSource")
-        }
-        named("compileTestKotlin") {
-            dependsOn("generateTestGrammarSource")
-        }
-        named("runKtlintCheckOverTestSourceSet") {
-            dependsOn("generateTestGrammarSource")
-        }
-    }
+    setAntlrTasksDeps()
 }
 
 project.useAntlrInTests("com.strumenta.simplelang")
