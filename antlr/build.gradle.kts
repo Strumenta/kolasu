@@ -1,4 +1,4 @@
-import java.net.URI
+
 
 plugins {
     id("antlr")
@@ -57,82 +57,8 @@ idea {
     }
 }
 
-fun PublishingExtension.addSonatypeRepo() {
-    repositories {
-        maven {
-            val releaseRepo = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            val snapshotRepo = "https://oss.sonatype.org/content/repositories/snapshots/"
-            url = URI(if (isReleaseVersion) releaseRepo else snapshotRepo)
-            credentials {
-                username = if (project.hasProperty("ossrhUsername")) {
-                    project.properties["ossrhUsername"] as String
-                } else {
-                    "Unknown user"
-                }
-                password = if (project.hasProperty("ossrhPassword")) {
-                    project.properties["ossrhPassword"] as String
-                } else {
-                    "Unknown password"
-                }
-            }
-        }
-    }
-}
-
-fun PublishingExtension.addPublication(pubName: String, pubDescription: String, project: Project) {
-    publications {
-        create<MavenPublication>(pubName) {
-            from(components["java"])
-            artifactId = "kolasu-" + project.name
-            artifact("sourcesJar")
-            artifact("javadocJar")
-            suppressPomMetadataWarningsFor("cliApiElements")
-            suppressPomMetadataWarningsFor("cliRuntimeElements")
-            pom {
-                name.set("kolasu-" + project.name)
-                description.set(pubDescription)
-                version = project.version as String
-                packaging = "jar"
-                url.set("https://github.com/Strumenta/kolasu")
-
-                scm {
-                    connection.set("scm:git:https://github.com/Strumenta/kolasu.git")
-                    developerConnection.set("scm:git:git@github.com:Strumenta/kolasu.git")
-                    url.set("https://github.com/Strumenta/kolasu.git")
-                }
-
-                licenses {
-                    license {
-                        name.set("Apache Licenve V2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
-                        distribution.set("repo")
-                    }
-                }
-
-                developers {
-                    developer {
-                        id.set("ftomassetti")
-                        name.set("Federico Tomassetti")
-                        email.set("federico@strumenta.com")
-                    }
-                    developer {
-                        id.set("alessiostalla")
-                        name.set("Alessio Stalla")
-                        email.set("alessio.stalla@strumenta.com")
-                    }
-                    developer {
-                        id.set("lorenzoaddazi")
-                        name.set("Lorenzo Addazi")
-                        email.set("lorenzo.addazi@strumenta.com")
-                    }
-                }
-            }
-        }
-    }
-}
-
 publishing {
-    addSonatypeRepo()
+    addSonatypeRepo(project)
     addPublication("kolasu_antlr", "ANTLR integration for Kolasu", project)
 }
 
