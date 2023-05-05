@@ -15,6 +15,7 @@ import java.io.Serializable
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.findAnnotation
@@ -207,11 +208,36 @@ open class ASTNode() : Node, Origin, Destination, Serializable {
         }
     }
 
-    override fun addChild(p0: Containment?, p1: Node?) {
-        TODO("Not yet implemented")
+    override fun addChild(containment: Containment, child: Node) {
+        try {
+            if (!this.concept.allContainments().contains(containment)) {
+                throw IllegalArgumentException("Invalid containment $containment")
+            }
+            val memberProperty = this::class.memberProperties.find { it.name == containment.name }
+                ?: throw IllegalStateException()
+            if (containment.isMultiple) {
+                val list = (if (memberProperty.visibility == KVisibility.PRIVATE) {
+                    val getter = this::class.functions.find { it.name == "get${containment.name!!.capitalize()}" }!!
+                    getter.call(this)
+                } else {
+                    (memberProperty as KProperty1<ASTNode, *>).get(this)
+                }) as MutableList<in Node>
+                list.add(child)
+            } else {
+                if (memberProperty.visibility == KVisibility.PRIVATE) {
+                    val setter = this::class.functions.find { it.name == "set${containment.name!!.capitalize()}" }!!
+                    setter.call(this, child)
+                } else {
+                    (memberProperty as KMutableProperty1<ASTNode, Node>).set(this, child)
+                }
+            }
+        } catch (e: Throwable) {
+            throw RuntimeException("Unable to add to containment $containment", e)
+        }
+
     }
 
-    override fun removeChild(p0: Node?) {
+    override fun removeChild(child: Node) {
         TODO("Not yet implemented")
     }
 
