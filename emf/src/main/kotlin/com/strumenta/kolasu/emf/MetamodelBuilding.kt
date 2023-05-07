@@ -9,9 +9,17 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
+import kotlin.reflect.KClass
+import kotlin.reflect.full.staticFunctions
 
 fun EEnum.addLiteral(enumEntry: Enum<*>) {
     this.addLiteral(enumEntry.name)
+}
+
+fun EEnum.addAllLiterals(enumClass: KClass<out Enum<*>>) {
+    val literals = enumClass.staticFunctions.find { it.name == "values" }!!.call() as Array<Enum<*>>
+    literals.forEach { addLiteral(it) }
+
 }
 
 fun EEnum.addLiteral(name: String) {

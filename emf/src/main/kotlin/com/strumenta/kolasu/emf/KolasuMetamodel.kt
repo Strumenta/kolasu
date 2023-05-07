@@ -101,16 +101,12 @@ private fun createStarlasuMetamodel(): EPackage {
 
     val issueType = EcoreFactory.eINSTANCE.createEEnum()
     issueType.name = "IssueType"
-    issueType.addLiteral(IssueType.LEXICAL)
-    issueType.addLiteral(IssueType.SYNTACTIC)
-    issueType.addLiteral(IssueType.SEMANTIC)
+    issueType.addAllLiterals(IssueType::class)
     ePackage.eClassifiers.add(issueType)
 
     val issueSeverity = EcoreFactory.eINSTANCE.createEEnum()
     issueSeverity.name = "IssueSeverity"
-    issueSeverity.addLiteral(IssueSeverity.ERROR)
-    issueSeverity.addLiteral(IssueSeverity.WARNING)
-    issueSeverity.addLiteral(IssueSeverity.INFO)
+    issueSeverity.addAllLiterals(IssueSeverity::class)
     ePackage.eClassifiers.add(issueSeverity)
 
     val issue = ePackage.createEClass("Issue").apply {
