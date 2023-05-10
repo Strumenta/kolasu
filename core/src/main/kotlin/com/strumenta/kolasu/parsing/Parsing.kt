@@ -16,6 +16,13 @@ import java.io.InputStream
 import java.io.Serializable
 import java.nio.charset.Charset
 
+/**
+ * The result of processing a piece of source code.
+ * @param D the type of the transformed data.
+ * @param issues a list of issues encountered while processing the code.
+ * @param data the result of the process.
+ * @param code the processed source code.
+ */
 open class CodeProcessingResult<D>(
     val issues: List<Issue>,
     val data: D?,
@@ -96,6 +103,9 @@ class LexingResult<T : KolasuToken>(
     }
 }
 
+/**
+ * The result of first-stage parsing: from source code to a parse tree.
+ */
 class FirstStageParsingResult<C : ParserRuleContext>(
     issues: List<Issue>,
     val root: C?,
@@ -123,6 +133,15 @@ class FirstStageParsingResult<C : ParserRuleContext>(
     }
 }
 
+/**
+ * The complete result of parsing a piece of source code into an AST.
+ * @param RootNode the type of the root AST node.
+ * @param issues a list of issues encountered while processing the code.
+ * @param root the resulting AST.
+ * @param code the processed source code.
+ * @param firstStage the result of the first parsing stage (from source code to parse tree).
+ * @param time the time spent in the entire parsing process.
+ */
 class ParsingResult<RootNode : Node>(
     issues: List<Issue>,
     val root: RootNode?,
