@@ -3,17 +3,19 @@ package com.strumenta.kolasu.transformation
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.hasValidParents
+import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-data class CU(val specifiedPosition: Position? = null, var statements: List<Node> = listOf()) : Node(specifiedPosition)
-data class DisplayIntStatement(val specifiedPosition: Position? = null, val value: Int) : Node(specifiedPosition)
-data class SetStatement(val specifiedPosition: Position? = null, var variable: String = "", val value: Int = 0) :
-    Node(specifiedPosition)
+data class CU(var statements: List<Node> = listOf()) : Node()
+abstract class Statement : Node()
+data class DisplayIntStatement(val value: Int) : Statement()
+data class SetStatement(var variable: String = "", val value: Int = 0) : Statement()
 
 enum class Operator {
     PLUS, MULT
@@ -258,5 +260,25 @@ class ASTTransformerTest {
         assertEquals(transformedCU.origin, cu)
         assertEquals(1, transformedCU.statements.size)
         assertASTsAreEqual(cu.statements[1], transformedCU.statements[0])
+    }
+
+    @Test
+    fun testNestedOrigin() {
+        val transformer = ASTTransformer()
+        transformer.registerNodeFactory(CU::class, CU::class)
+            .withChild(CU::statements, CU::statements)
+        transformer.registerNodeFactory(DisplayIntStatement::class) { s ->
+            s.withOrigin(GenericNode())
+        }
+
+        val cu = CU(
+            statements = listOf(
+                DisplayIntStatement(value = 456)
+            )
+        )
+        val transformedCU = transformer.transform(cu)!! as CU
+        assertTrue { transformedCU.hasValidParents() }
+        assertEquals(transformedCU.origin, cu)
+        assertIs<GenericNode>(transformedCU.statements[0].origin)
     }
 }
