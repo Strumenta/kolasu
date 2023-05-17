@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.PrintHelpMessage
 import com.github.ajalt.clikt.output.CliktConsole
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.junit.Test
@@ -20,19 +21,24 @@ data class MyEntityDecl(override var name: String, val fields: List<MyFieldDecl>
 data class MyFieldDecl(override var name: String) : Node(), Named
 
 class MyDummyParser : ASTParser<MyCompilationUnit> {
+
+    val expectedResults = HashMap<File, ParsingResult<MyCompilationUnit>>()
+
     override fun parse(
         code: String,
         considerPosition: Boolean,
-        measureLexingTime: Boolean
+        measureLexingTime: Boolean,
+        source: Source?
     ): ParsingResult<MyCompilationUnit> {
         TODO("Not yet implemented")
     }
 
-    val expectedResults = HashMap<File, ParsingResult<MyCompilationUnit>>()
-
-    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<MyCompilationUnit> {
-        return expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
-    }
+    override fun parse(
+        file: File,
+        charset: Charset,
+        considerPosition: Boolean,
+        measureLexingTime: Boolean) : ParsingResult<MyCompilationUnit> =
+        expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
 }
 
 class CapturingCliktConsole : CliktConsole {

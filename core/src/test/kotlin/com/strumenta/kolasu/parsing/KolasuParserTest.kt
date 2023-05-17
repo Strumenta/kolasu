@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
@@ -24,7 +25,8 @@ class SimpleLangKolasuParser : KolasuParser<Node, SimpleLangParser, SimpleLangPa
     override fun parseTreeToAst(
         parseTreeRoot: SimpleLangParser.CompilationUnitContext,
         considerPosition: Boolean,
-        issues: MutableList<Issue>
+        issues: MutableList<Issue>,
+        source: Source?
     ): Node? = null
 }
 
