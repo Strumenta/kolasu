@@ -58,7 +58,8 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
         file: File,
         charset: Charset,
         considerPosition: Boolean,
-        measureLexingTime: Boolean): ParsingResult<MyCompilationUnit> =
+        measureLexingTime: Boolean
+    ): ParsingResult<MyCompilationUnit> =
         expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
 }
 

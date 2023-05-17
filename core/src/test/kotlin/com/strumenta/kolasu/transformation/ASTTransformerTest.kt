@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.transformation
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.testing.assertASTsAreEqual

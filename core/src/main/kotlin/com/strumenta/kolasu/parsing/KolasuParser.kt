@@ -234,8 +234,12 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         return ast
     }
 
-    override fun parse(code: String, considerPosition: Boolean, measureLexingTime: Boolean, source: Source?): ParsingResult<R> =
-        parse(CharStreams.fromString(code), considerPosition, measureLexingTime, source)
+    override fun parse(
+        code: String,
+        considerPosition: Boolean,
+        measureLexingTime: Boolean,
+        source: Source?
+    ): ParsingResult<R> = parse(CharStreams.fromString(code), considerPosition, measureLexingTime, source)
 
     @JvmOverloads
     fun parse(
@@ -265,7 +269,8 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         file: File,
         charset: Charset,
         considerPosition: Boolean,
-        measureLexingTime: Boolean) : ParsingResult<R> =
+        measureLexingTime: Boolean
+    ): ParsingResult<R> =
         parse(FileInputStream(file), charset, considerPosition, measureLexingTime, FileSource(file))
 
     // For convenient use from Java
