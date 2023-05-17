@@ -31,8 +31,12 @@ interface ASTParser<R : Node> {
     ): ParsingResult<R> =
         parse(inputStreamToString(inputStream, charset), considerPosition, measureLexingTime, source)
 
-    fun parse(code: String, considerPosition: Boolean = true, measureLexingTime: Boolean = false,
-              source: Source? = null): ParsingResult<R>
+    fun parse(
+        code: String,
+        considerPosition: Boolean = true,
+        measureLexingTime: Boolean = false,
+        source: Source? = null
+    ): ParsingResult<R>
 
     fun parse(code: String, considerPosition: Boolean = true, measureLexingTime: Boolean = false): ParsingResult<R> =
         parse(code, considerPosition, measureLexingTime, StringSource(code))
@@ -41,5 +45,6 @@ interface ASTParser<R : Node> {
         file: File,
         charset: Charset = Charsets.UTF_8,
         considerPosition: Boolean = true,
-        measureLexingTime: Boolean = false) : ParsingResult<R>
+        measureLexingTime: Boolean = false
+    ): ParsingResult<R>
 }

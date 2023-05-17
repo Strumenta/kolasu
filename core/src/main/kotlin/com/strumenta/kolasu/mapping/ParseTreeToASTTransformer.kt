@@ -19,7 +19,8 @@ import kotlin.reflect.KClass
 open class ParseTreeToASTTransformer(
     issues: MutableList<Issue> = mutableListOf(),
     allowGenericNode: Boolean = true,
-    val source: Source? = null) : ASTTransformer(issues, allowGenericNode) {
+    val source: Source? = null
+) : ASTTransformer(issues, allowGenericNode) {
     /**
      * Performs the transformation of a node and, recursively, its descendants. In addition to the overridden method,
      * it also assigns the parseTreeNode to the AST node so that it can keep track of its position.
