@@ -273,7 +273,7 @@ open class ASTTransformer(
                 issues.add(
                     Issue.semantic(
                         "Source node not mapped: ${source::class.qualifiedName}",
-                        IssueSeverity.INFO,
+                        IssueSeverity.WARNING,
                         origin?.range
                     )
                 )
@@ -345,7 +345,7 @@ open class ASTTransformer(
         source: S,
         allowGenericNode: Boolean = true
     ): Node? {
-        return try {
+        val node = try {
             transformer.constructor(source, this, transformer)
         } catch (e: Exception) {
             if (allowGenericNode) {
@@ -353,7 +353,11 @@ open class ASTTransformer(
             } else {
                 throw e
             }
-        }?.withOrigin(asOrigin(source))
+        }
+        if (node?.origin == null) {
+            node?.withOrigin(asOrigin(source))
+        }
+        return node
     }
 
     protected open fun <S : Any, T : Node> getNodeTransformer(kClass: KClass<S>): NodeTransformer<S, T>? {

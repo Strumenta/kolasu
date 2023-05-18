@@ -1,8 +1,10 @@
 package com.strumenta.kolasu.antlr.parsing
 
+import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.PropertyDescription
+import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.parsing.ASTParser
@@ -63,7 +65,8 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
     protected abstract fun parseTreeToAst(
         parseTreeRoot: C,
         considerRange: Boolean = true,
-        issues: MutableList<Issue>
+        issues: MutableList<Issue>,
+        source: Source? = null
     ): R?
 
     protected open fun attachListeners(parser: P, issues: MutableList<Issue>) {
@@ -168,22 +171,25 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
     override fun parse(
         code: String,
         considerRange: Boolean,
-        measureLexingTime: Boolean
+        measureLexingTime: Boolean,
+        source: Source?
     ): ParsingResultWithFirstStage<R, C> {
         val inputStream = CharStreams.fromString(code)
-        return parse(inputStream, considerRange, measureLexingTime)
+        return parse(inputStream, considerRange, measureLexingTime, source)
     }
 
     @JvmOverloads
     fun parse(
         inputStream: CharStream,
         considerRange: Boolean = true,
-        measureLexingTime: Boolean = false
+        measureLexingTime: Boolean = false,
+        source: Source? = null
     ): ParsingResultWithFirstStage<R, C> {
         val start = System.currentTimeMillis()
         val firstStage = parseFirstStage(inputStream, measureLexingTime)
         val myIssues = firstStage.issues.toMutableList()
-        var ast = parseTreeToAst(firstStage.root!!, considerRange, myIssues)
+        var ast = parseTreeToAst(firstStage.root!!, considerRange, myIssues, source)
+
         assignParents(ast)
         ast = if (ast == null) null else postProcessAst(ast, myIssues)
         if (ast != null && !considerRange) {
@@ -201,8 +207,8 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
         )
     }
 
-    override fun parse(file: File, charset: Charset, considerRange: Boolean): ParsingResult<R> =
-        parse(FileInputStream(file), charset, considerRange)
+    override fun parse(file: File, charset: Charset, considerRange: Boolean, measureLexingTime: Boolean): ParsingResult<R> =
+        parse(FileInputStream(file), charset, considerRange = considerRange, measureLexingTime = measureLexingTime, FileSource(file))
 
     // For convenient use from Java
     fun walk(node: Node) = node.walk()

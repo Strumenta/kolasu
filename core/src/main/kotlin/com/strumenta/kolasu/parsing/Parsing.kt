@@ -13,6 +13,13 @@ import java.io.InputStream
 import java.io.Serializable
 import java.nio.charset.Charset
 
+/**
+ * The result of processing a piece of source code.
+ * @param D the type of the transformed data.
+ * @param issues a list of issues encountered while processing the code.
+ * @param data the result of the process.
+ * @param code the processed source code.
+ */
 open class CodeProcessingResult<D>(
     val issues: List<Issue>,
     val data: D?,

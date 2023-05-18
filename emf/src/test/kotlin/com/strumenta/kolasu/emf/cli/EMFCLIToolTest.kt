@@ -9,6 +9,7 @@ import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.runtime.CharStream
@@ -47,6 +48,10 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
         TODO("Not yet implemented")
     }
 
+    override fun createANTLRLexer(charStream: CharStream): Lexer {
+        TODO("Not yet implemented")
+    }
+
     override fun createANTLRParser(tokenStream: TokenStream): Parser {
         TODO("Not yet implemented")
     }
@@ -54,20 +59,21 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
     override fun parseTreeToAst(
         parseTreeRoot: ParserRuleContext,
         considerRange: Boolean,
-        issues: MutableList<Issue>
+        issues: MutableList<Issue>,
+        source: Source?
     ): MyCompilationUnit? {
-        TODO("Not yet implemented")
-    }
-
-    override fun createANTLRLexer(inputStream: CharStream): Lexer {
         TODO("Not yet implemented")
     }
 
     val expectedResults = HashMap<File, ParsingResult<MyCompilationUnit>>()
 
-    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<MyCompilationUnit> {
-        return expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
-    }
+    override fun parse(
+        file: File,
+        charset: Charset,
+        considerPosition: Boolean,
+        measureLexingTime: Boolean
+    ): ParsingResult<MyCompilationUnit> =
+        expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
 }
 
 class CapturingCliktConsole : CliktConsole {

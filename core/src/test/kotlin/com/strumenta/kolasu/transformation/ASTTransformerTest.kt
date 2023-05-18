@@ -3,11 +3,13 @@ package com.strumenta.kolasu.transformation
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.hasValidParents
+import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 data class CU(val specifiedRange: Range? = null, var statements: List<Node> = listOf()) : Node(specifiedRange)
@@ -260,5 +262,25 @@ class ASTTransformerTest {
         assertEquals(transformedCU.origin, cu)
         assertEquals(1, transformedCU.statements.size)
         assertASTsAreEqual(cu.statements[1], transformedCU.statements[0])
+    }
+
+    @Test
+    fun testNestedOrigin() {
+        val transformer = ASTTransformer()
+        transformer.registerNodeTransformer(CU::class, CU::class)
+            .withChild(CU::statements, CU::statements)
+        transformer.registerNodeTransformer(DisplayIntStatement::class) { s ->
+            s.withOrigin(GenericNode())
+        }
+
+        val cu = CU(
+            statements = listOf(
+                DisplayIntStatement(value = 456)
+            )
+        )
+        val transformedCU = transformer.transform(cu)!! as CU
+        assertTrue { transformedCU.hasValidParents() }
+        assertEquals(transformedCU.origin, cu)
+        assertIs<GenericNode>(transformedCU.statements[0].origin)
     }
 }

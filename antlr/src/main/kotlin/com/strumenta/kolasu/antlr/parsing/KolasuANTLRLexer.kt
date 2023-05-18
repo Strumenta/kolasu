@@ -27,7 +27,7 @@ interface TokenFactory<T : KolasuToken> {
 
     private fun convertToken(terminalNode: TerminalNode): T = convertToken(terminalNode.symbol)
 
-    fun extractTokens(result: ParsingResultWithFirstStage<*, *>): LexingResult<T>? {
+    fun extractTokens(result: FirstStageParsingResult<*>): LexingResult<T>? {
         val antlrTerminals = mutableListOf<TerminalNode>()
         fun extractTokensFromParseTree(pt: ParseTree?) {
             if (pt is TerminalNode) {
@@ -39,12 +39,12 @@ interface TokenFactory<T : KolasuToken> {
             }
         }
 
-        val ptRoot = result.firstStage?.root
+        val ptRoot = result.root
         return if (ptRoot != null) {
             extractTokensFromParseTree(ptRoot)
             antlrTerminals.sortBy { it.symbol.tokenIndex }
             val tokens = antlrTerminals.map { convertToken(it) }.toMutableList()
-            LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime)
+            LexingResult(result.issues, tokens, result.code, result.lexingTime)
         } else {
             null
         }
