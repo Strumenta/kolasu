@@ -2,6 +2,7 @@ package com.strumenta.kolasu.mapping
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Origin
+import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.parsing.withParseTreeNode
 import com.strumenta.kolasu.transformation.ASTTransformer
@@ -15,8 +16,11 @@ import kotlin.reflect.KClass
  * Implements a transformation from an ANTLR parse tree (the output of the parser) to an AST (a higher-level
  * representation of the source code).
  */
-open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf(), allowGenericNode: Boolean = true) :
-    ASTTransformer(issues, allowGenericNode) {
+open class ParseTreeToASTTransformer(
+    issues: MutableList<Issue> = mutableListOf(),
+    allowGenericNode: Boolean = true,
+    val source: Source? = null
+) : ASTTransformer(issues, allowGenericNode) {
     /**
      * Performs the transformation of a node and, recursively, its descendants. In addition to the overridden method,
      * it also assigns the parseTreeNode to the AST node so that it can keep track of its position.
@@ -24,8 +28,12 @@ open class ParseTreeToASTTransformer(issues: MutableList<Issue> = mutableListOf(
      */
     override fun transform(source: Any?, parent: Node?): Node? {
         val node = super.transform(source, parent)
-        if (node != null && node.origin == null && source is ParserRuleContext) {
-            node.withParseTreeNode(source)
+        if (node != null && source is ParserRuleContext) {
+            if (node.origin == null) {
+                node.withParseTreeNode(source, this.source)
+            } else if (node.position != null && node.source == null) {
+                node.position!!.source = this.source
+            }
         }
         return node
     }

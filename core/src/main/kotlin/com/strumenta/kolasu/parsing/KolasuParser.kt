@@ -132,7 +132,8 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
     protected abstract fun parseTreeToAst(
         parseTreeRoot: C,
         considerPosition: Boolean = true,
-        issues: MutableList<Issue>
+        issues: MutableList<Issue>,
+        source: Source? = null
     ): R?
 
     protected open fun attachListeners(parser: P, issues: MutableList<Issue>) {
@@ -233,21 +234,24 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         return ast
     }
 
-    override fun parse(code: String, considerPosition: Boolean, measureLexingTime: Boolean): ParsingResult<R> {
-        val inputStream = CharStreams.fromString(code)
-        return parse(inputStream, considerPosition, measureLexingTime)
-    }
+    override fun parse(
+        code: String,
+        considerPosition: Boolean,
+        measureLexingTime: Boolean,
+        source: Source?
+    ): ParsingResult<R> = parse(CharStreams.fromString(code), considerPosition, measureLexingTime, source)
 
     @JvmOverloads
     fun parse(
         inputStream: CharStream,
         considerPosition: Boolean = true,
-        measureLexingTime: Boolean = false
+        measureLexingTime: Boolean = false,
+        source: Source? = null
     ): ParsingResult<R> {
         val start = System.currentTimeMillis()
         val firstStage = parseFirstStage(inputStream, measureLexingTime)
         val myIssues = firstStage.issues.toMutableList()
-        var ast = parseTreeToAst(firstStage.root!!, considerPosition, myIssues)
+        var ast = parseTreeToAst(firstStage.root!!, considerPosition, myIssues, source)
         assignParents(ast)
         ast = if (ast == null) null else postProcessAst(ast, myIssues)
         if (ast != null && !considerPosition) {
@@ -261,8 +265,13 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         )
     }
 
-    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<R> =
-        parse(FileInputStream(file), charset, considerPosition)
+    override fun parse(
+        file: File,
+        charset: Charset,
+        considerPosition: Boolean,
+        measureLexingTime: Boolean
+    ): ParsingResult<R> =
+        parse(FileInputStream(file), charset, considerPosition, measureLexingTime, FileSource(file))
 
     // For convenient use from Java
     fun walk(node: Node) = node.walk()

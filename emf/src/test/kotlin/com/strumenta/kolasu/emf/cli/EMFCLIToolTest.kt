@@ -6,6 +6,7 @@ import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.MetamodelBuilder
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.parsing.ANTLRTokenFactory
 import com.strumenta.kolasu.parsing.KolasuANTLRToken
 import com.strumenta.kolasu.parsing.ParsingResult
@@ -45,24 +46,21 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
     override fun parseTreeToAst(
         parseTreeRoot: ParserRuleContext,
         considerPosition: Boolean,
-        issues: MutableList<Issue>
+        issues: MutableList<Issue>,
+        source: Source?
     ): MyCompilationUnit? {
-        TODO("Not yet implemented")
-    }
-
-    override fun parse(
-        code: String,
-        considerPosition: Boolean,
-        measureLexingTime: Boolean
-    ): ParsingResult<MyCompilationUnit> {
         TODO("Not yet implemented")
     }
 
     val expectedResults = HashMap<File, ParsingResult<MyCompilationUnit>>()
 
-    override fun parse(file: File, charset: Charset, considerPosition: Boolean): ParsingResult<MyCompilationUnit> {
-        return expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
-    }
+    override fun parse(
+        file: File,
+        charset: Charset,
+        considerPosition: Boolean,
+        measureLexingTime: Boolean
+    ): ParsingResult<MyCompilationUnit> =
+        expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
 }
 
 class CapturingCliktConsole : CliktConsole {

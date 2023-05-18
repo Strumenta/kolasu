@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Source
+import com.strumenta.kolasu.model.StringSource
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStream
@@ -24,10 +26,25 @@ interface ASTParser<R : Node> {
         inputStream: InputStream,
         charset: Charset = Charsets.UTF_8,
         considerPosition: Boolean = true,
-        measureLexingTime: Boolean = false
-    ):
-        ParsingResult<R> = parse(inputStreamToString(inputStream, charset), considerPosition, measureLexingTime)
-    fun parse(code: String, considerPosition: Boolean = true, measureLexingTime: Boolean = false): ParsingResult<R>
+        measureLexingTime: Boolean = false,
+        source: Source? = null
+    ): ParsingResult<R> =
+        parse(inputStreamToString(inputStream, charset), considerPosition, measureLexingTime, source)
 
-    fun parse(file: File, charset: Charset = Charsets.UTF_8, considerPosition: Boolean = true): ParsingResult<R>
+    fun parse(
+        code: String,
+        considerPosition: Boolean = true,
+        measureLexingTime: Boolean = false,
+        source: Source? = null
+    ): ParsingResult<R>
+
+    fun parse(code: String, considerPosition: Boolean = true, measureLexingTime: Boolean = false): ParsingResult<R> =
+        parse(code, considerPosition, measureLexingTime, StringSource(code))
+
+    fun parse(
+        file: File,
+        charset: Charset = Charsets.UTF_8,
+        considerPosition: Boolean = true,
+        measureLexingTime: Boolean = false
+    ): ParsingResult<R>
 }
