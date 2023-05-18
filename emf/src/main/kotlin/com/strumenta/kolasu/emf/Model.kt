@@ -90,7 +90,7 @@ fun Range.toEObject(): EObject {
     return eo
 }
 
-fun <T : Node> Result<T>.toEObject(astPackage: EPackage): EObject {
+fun <T : Node> com.strumenta.kolasu.validation.Result<T>.toEObject(astPackage: EPackage): EObject {
     val resultEO = makeResultEObject(this)
     val rootSF = resultEO.eClass().eAllStructuralFeatures.find { it.name == "root" }!!
     if (root != null) {

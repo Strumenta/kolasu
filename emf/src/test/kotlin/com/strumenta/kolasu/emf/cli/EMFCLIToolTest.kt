@@ -508,6 +508,9 @@ class EMFCLIToolTest {
     }, {
       "name" : "SEMANTIC",
       "value" : 2
+    }, {
+      "name" : "TRANSLATION",
+      "value" : 3
     } ]
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EEnum",

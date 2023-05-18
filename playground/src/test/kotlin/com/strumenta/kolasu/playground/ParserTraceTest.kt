@@ -49,6 +49,7 @@ class ParserTraceTest {
     },
     "issues": [
       {
+        "type": "TRANSLATION",
         "message": "some issue",
         "severity": "WARNING"
       }

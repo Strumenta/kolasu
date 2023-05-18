@@ -45,6 +45,7 @@ class TranspilationTraceTest {
   },
   "generatedCode" : "b:2",
   "issues" : [ {
+    "type" : "TRANSLATION",
     "message" : "some issue",
     "severity" : "WARNING"
   } ]

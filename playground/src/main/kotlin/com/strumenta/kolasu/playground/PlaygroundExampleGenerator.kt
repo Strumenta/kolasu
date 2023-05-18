@@ -3,11 +3,11 @@ package com.strumenta.kolasu.playground
 import com.google.gson.JsonObject
 import com.google.gson.internal.Streams
 import com.google.gson.stream.JsonWriter
-import com.strumenta.kolasu.antlr.parsing.ParsingResultWithFirstStage
 import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.createResource
 import com.strumenta.kolasu.emf.saveAsJsonObject
 import com.strumenta.kolasu.emf.toEObject
+import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
@@ -17,8 +17,8 @@ import java.io.FileOutputStream
 import java.io.FileWriter
 import java.io.Writer
 
-class PlaygroundExampleGenerator(
-    val parser: EcoreEnabledParser<*, *, *, *>,
+class PlaygroundExampleGenerator<R : Node>(
+    val parser: EcoreEnabledParser<R, *, *, *>,
     val directory: File,
     val failOnError: Boolean = true,
     resourceURI: URI = URI.createURI("")
@@ -57,23 +57,23 @@ class PlaygroundExampleGenerator(
 
 class ExampleGenerationFailure(val result: ParsingResult<*>, message: String) : RuntimeException(message)
 
-fun ParsingResultWithFirstStage<*, *>.saveForPlayground(
-    metamodel: Resource,
+fun <N : Node>ParsingResult<N>.saveForPlayground(
+    resource: Resource,
     writer: Writer,
     name: String,
     indent: String = ""
 ) {
-    val simplifiedResult = Result(issues, root)
-    val eObject = simplifiedResult.toEObject(metamodel)
+    val simplifiedResult: Result<N> = Result(issues, root)
+    val eObject = simplifiedResult.toEObject(resource)
     try {
-        metamodel.contents.add(eObject)
+        resource.contents.add(eObject)
         val ast = eObject.saveAsJsonObject()
         val jsonObject = JsonObject()
         jsonObject.addProperty("name", name)
         jsonObject.addProperty("code", code)
         jsonObject.add("ast", ast)
-        if (firstStage.time != null) {
-            jsonObject.addProperty("parsingTime", firstStage!!.time)
+        if (time != null) {
+            jsonObject.addProperty("parsingTime", time)
         }
         if (time != null) {
             jsonObject.addProperty("astBuildingTime", time)
@@ -82,6 +82,6 @@ fun ParsingResultWithFirstStage<*, *>.saveForPlayground(
         jsonWriter.isLenient = true
         Streams.write(jsonObject, jsonWriter)
     } finally {
-        metamodel.contents.remove(eObject)
+        resource.contents.remove(eObject)
     }
 }
