@@ -19,7 +19,6 @@ fun EEnum.addLiteral(enumEntry: Enum<*>) {
 fun EEnum.addAllLiterals(enumClass: KClass<out Enum<*>>) {
     val literals = enumClass.staticFunctions.find { it.name == "values" }!!.call() as Array<Enum<*>>
     literals.forEach { addLiteral(it) }
-
 }
 
 fun EEnum.addLiteral(name: String) {

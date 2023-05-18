@@ -207,8 +207,19 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
         )
     }
 
-    override fun parse(file: File, charset: Charset, considerRange: Boolean, measureLexingTime: Boolean): ParsingResult<R> =
-        parse(FileInputStream(file), charset, considerRange = considerRange, measureLexingTime = measureLexingTime, FileSource(file))
+    override fun parse(
+        file: File,
+        charset: Charset,
+        considerRange: Boolean,
+        measureLexingTime: Boolean
+    ): ParsingResult<R> =
+        parse(
+            FileInputStream(file),
+            charset,
+            considerRange = considerRange,
+            measureLexingTime = measureLexingTime,
+            FileSource(file)
+        )
 
     // For convenient use from Java
     fun walk(node: Node) = node.walk()

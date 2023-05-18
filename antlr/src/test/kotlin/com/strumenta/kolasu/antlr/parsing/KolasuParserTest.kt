@@ -2,7 +2,6 @@ package com.strumenta.kolasu.antlr.parsing
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Source
-import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
@@ -10,8 +9,6 @@ import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.Lexer
 import org.antlr.v4.runtime.TokenStream
 import org.junit.Test
-import java.io.File
-import java.nio.charset.Charset
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
