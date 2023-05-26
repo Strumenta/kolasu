@@ -232,6 +232,10 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         valueType: KType,
         eClass: EClass
     ) {
+        if (valueType.classifier is KClass<*> && (valueType.classifier as KClass<*>).isSubclassOf(Collection::class)) {
+            throw IllegalStateException("We do not support references to lists. EClass $eClass, property $prop")
+        }
+
         val ec = EcoreFactory.eINSTANCE.createEReference()
         ec.name = prop.name
         if (prop.multiple) {
