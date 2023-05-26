@@ -36,8 +36,8 @@ fun PublishingExtension.addPublication(pubName: String, pubDescription: String, 
         create<MavenPublication>(pubName) {
             from(project.components["java"])
             artifactId = "kolasu-" + project.name
-            artifact("sourcesJar")
-            artifact("javadocJar")
+            artifact(project.tasks.named("sourcesJar"))
+            artifact(project.tasks.named("kdocJar"))
             suppressPomMetadataWarningsFor("cliApiElements")
             suppressPomMetadataWarningsFor("cliRuntimeElements")
             pom {

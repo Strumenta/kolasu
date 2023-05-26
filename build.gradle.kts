@@ -62,17 +62,33 @@ subprojects {
         }
     }
 
-    tasks.register<Jar>("javadocJar") {
-        dependsOn(":$name:dokkaJavadoc")
+//    tasks.register<Jar>("javadocJar") {
+//        dependsOn(":$name:dokkaJavadoc")
+//        archiveClassifier.set("javadoc")
+//        from("$buildDir/dokka/javadoc")
+//    }
+
+    tasks.register<Jar>("kdocJar") {
+        dependsOn("dokkaJavadoc")
+        from((tasks.named("dokkaJavadoc").get() as DokkaTask).outputDirectory)
         archiveClassifier.set("javadoc")
-        from("$buildDir/dokka/javadoc")
     }
 
     tasks.register<Jar>("sourcesJar") {
         archiveClassifier.set("sources")
         // See https://discuss.gradle.org/t/why-subproject-sourceset-dirs-project-sourceset-dirs/7376/5
         // Without the closure, parent sources are used for children too
-        from(sourceSets.main)
+        from(sourceSets["main"].allSource)
+    }
+
+    tasks.named("publish") {
+        dependsOn("kdocJar")
+        dependsOn("sourcesJar")
+    }
+
+    tasks.named("publishToMavenLocal") {
+        dependsOn("kdocJar")
+        dependsOn("sourcesJar")
     }
 
     tasks.withType(Test::class).all {
