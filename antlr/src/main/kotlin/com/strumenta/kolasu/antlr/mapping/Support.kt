@@ -36,7 +36,7 @@ fun <T> ParseTreeToASTTransformer.translateList(original: Collection<out ParserR
     return original?.map { transform(it) as T }?.toObservableList() ?: ObservableList()
 }
 
-private fun <E> List<E>.toObservableList(): ObservableList<E> {
+fun <E> List<E>.toObservableList(): ObservableList<E> {
     val ol = ObservableList<E>()
     ol.addAll(this)
     return ol
