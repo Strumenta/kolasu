@@ -47,3 +47,7 @@ publishing {
 signing {
     sign(publishing.publications["kolasu_antlr"])
 }
+
+tasks.named("sourcesJar") {
+    dependsOn("generateGrammarSource")
+}
