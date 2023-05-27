@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.model.observable
 
+import com.strumenta.kolasu.model.Node
+
 interface ListObserver<E> {
     fun added(e: E)
     fun removed(e: E)

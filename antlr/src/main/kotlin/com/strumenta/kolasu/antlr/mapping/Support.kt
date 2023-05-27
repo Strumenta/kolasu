@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.antlr.mapping
 
+import com.strumenta.kolasu.model.observable.ObservableList
 import com.strumenta.kolasu.transformation.ParameterConverter
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ParseTree
@@ -31,8 +32,14 @@ fun <T> ParseTreeToASTTransformer.translateCasted(original: ParserRuleContext): 
  * JExtendsType(translateCasted(pt.typeType()), translateList(pt.annotation()))
  * ```
  */
-fun <T> ParseTreeToASTTransformer.translateList(original: Collection<out ParserRuleContext>?): MutableList<T> {
-    return original?.map { transform(it) as T }?.toMutableList() ?: mutableListOf()
+fun <T> ParseTreeToASTTransformer.translateList(original: Collection<out ParserRuleContext>?): ObservableList<T> {
+    return original?.map { transform(it) as T }?.toObservableList() ?: ObservableList()
+}
+
+private fun <E> List<E>.toObservableList(): ObservableList<E> {
+    val ol = ObservableList<E>()
+    ol.addAll(this)
+    return ol
 }
 
 /**
