@@ -4,7 +4,6 @@ plugins {
 
 val antlr_version = extra["antlr_version"]
 val kotlin_version = extra["kotlin_version"]
-// val version = extra["kolasu_version"] as String
 val isReleaseVersion = !(version as String).endsWith("SNAPSHOT")
 
 dependencies {
@@ -31,12 +30,6 @@ project.useAntlrInTests("com.strumenta.simplelang")
 tasks.clean {
     delete("generated-src")
     delete("generated-test-src")
-}
-
-idea {
-    module {
-        testSourceDirs = testSourceDirs + file("generated-test-src/antlr/main")
-    }
 }
 
 publishing {

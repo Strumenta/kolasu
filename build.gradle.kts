@@ -5,7 +5,6 @@ plugins {
     id("org.jetbrains.dokka")
     id("org.jlleitschuh.gradle.ktlint") version "11.3.2"
     id("maven-publish")
-    id("idea")
     id("signing")
 
     id("java-library")
