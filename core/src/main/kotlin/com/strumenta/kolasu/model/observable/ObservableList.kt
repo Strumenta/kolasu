@@ -1,13 +1,11 @@
 package com.strumenta.kolasu.model.observable
 
-import com.strumenta.kolasu.model.Node
-
 interface ListObserver<E> {
     fun added(e: E)
     fun removed(e: E)
 }
 
-class ObservableList<E>(private val base : MutableList<E> = mutableListOf()) : MutableList<E> by base {
+class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) : MutableList<E> by base {
     private val observers = mutableListOf<ListObserver<in E>>()
 
     fun registerObserver(observer: ListObserver<in E>) {
@@ -59,5 +57,4 @@ class ObservableList<E>(private val base : MutableList<E> = mutableListOf()) : M
             false
         }
     }
-
 }

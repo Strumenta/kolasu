@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.model.observable.Observer
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -141,6 +142,22 @@ open class Node() : Origin, Destination, Serializable {
      */
     final override fun toString(): String {
         return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
+    }
+
+    @property:Internal
+    val observers: MutableList<Observer<in Node>> = mutableListOf()
+    fun registerObserver(observer: Observer<*>) {
+        observers.add(observer as Observer<in Node>)
+    }
+
+    fun unregisterObserver(observer: Observer<in Node>) {
+        observers.remove(observer)
+    }
+
+    protected fun notifyOfPropertyChange(propertyName: String, oldValue: Any?, newValue: Any?) {
+        observers.forEach {
+            it.receivePropertyChangeNotification(this, propertyName, oldValue, newValue)
+        }
     }
 }
 

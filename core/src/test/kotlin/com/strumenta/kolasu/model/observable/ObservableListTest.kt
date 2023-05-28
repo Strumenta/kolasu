@@ -3,7 +3,6 @@ package com.strumenta.kolasu.model.observable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-
 class MyListObserver : ListObserver<Int> {
     val observations = mutableListOf<String>()
 
@@ -14,7 +13,6 @@ class MyListObserver : ListObserver<Int> {
     override fun removed(e: Int) {
         observations.add("removed $e")
     }
-
 }
 
 class ObservableListTest {

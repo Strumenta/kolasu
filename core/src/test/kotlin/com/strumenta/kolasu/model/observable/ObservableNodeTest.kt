@@ -1,9 +1,10 @@
 package com.strumenta.kolasu.model.observable
 
+import com.strumenta.kolasu.model.Node
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class MyObservableNode : ObservableNode() {
+class MyObservableNode : Node() {
     var p1: Int = 0
         set(value) {
             notifyOfPropertyChange("p1", field, value)
@@ -11,10 +12,10 @@ class MyObservableNode : ObservableNode() {
         }
 }
 
-class MyObserver : Observer<ObservableNode> {
+class MyObserver : Observer<Node> {
     val observations = mutableListOf<String>()
     override fun receivePropertyChangeNotification(
-        node: ObservableNode,
+        node: Node,
         propertyName: String,
         oldValue: Any?,
         newValue: Any?
@@ -22,18 +23,16 @@ class MyObserver : Observer<ObservableNode> {
         observations.add("$propertyName: $oldValue -> $newValue")
     }
 
-    override fun receivePropertyAddedNotification(node: ObservableNode, propertyName: String, added: Any?) {
+    override fun receivePropertyAddedNotification(node: Node, propertyName: String, added: Any?) {
         observations.add("$propertyName: added $added")
     }
 
-    override fun receivePropertyRemovedNotification(node: ObservableNode, propertyName: String, removed: Any?) {
+    override fun receivePropertyRemovedNotification(node: Node, propertyName: String, removed: Any?) {
         observations.add("$propertyName: removed $removed")
     }
-
 }
 
-class MyObservableNodeMP : ObservableNode() {
-
+class MyObservableNodeMP : Node() {
 
     val p5 = ObservableList<MyObservableNodeMP>()
     init {
@@ -73,32 +72,47 @@ class ObservableNodeTest {
         assertEquals(null, n1.parent)
         assertEquals(n1, n2.parent)
         assertEquals(null, n3.parent)
-        assertEquals(listOf("p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[], observers=[])"), obs.observations)
+        assertEquals(
+            listOf("p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])"),
+            obs.observations
+        )
 
         n1.p5.add(n3)
         assertEquals(null, n1.parent)
         assertEquals(n1, n2.parent)
         assertEquals(n1, n3.parent)
-        assertEquals(listOf(
-            "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[], observers=[])",
-            "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[], observers=[])"), obs.observations)
+        assertEquals(
+            listOf(
+                "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])",
+                "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])"
+            ),
+            obs.observations
+        )
 
         n1.p5.remove(n2)
         assertEquals(null, n1.parent)
         assertEquals(null, n2.parent)
         assertEquals(n1, n3.parent)
-        assertEquals(listOf(
-            "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[], observers=[])",
-            "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[], observers=[])",
-            "p5: removed com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[], observers=[])"), obs.observations)
+        assertEquals(
+            listOf(
+                "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])",
+                "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])",
+                "p5: removed com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])"
+            ),
+            obs.observations
+        )
 
         n1.p5.remove(n2)
         assertEquals(null, n1.parent)
         assertEquals(null, n2.parent)
         assertEquals(n1, n3.parent)
-        assertEquals(listOf(
-            "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[], observers=[])",
-            "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[], observers=[])",
-            "p5: removed com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[], observers=[])"), obs.observations)
+        assertEquals(
+            listOf(
+                "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])",
+                "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])",
+                "p5: removed com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])"
+            ),
+            obs.observations
+        )
     }
 }
