@@ -36,6 +36,26 @@ data class TextFileDestination(val range: Range?) : Destination, Serializable
  */
 open class Node() : Origin, Destination, Serializable {
 
+    private val annotations: MutableList<AnnotationInstance> = mutableListOf()
+
+    fun getAnnotations() : List<AnnotationInstance> {
+        return annotations
+    }
+
+    fun <I:AnnotationInstance>getAnnotations(kClass: KClass<I>) : List<I> {
+        return annotations.filterIsInstance(kClass.java)
+    }
+
+    fun addAnnotation(annotationInstance: AnnotationInstance) {
+        require(annotationInstance.annotatedNode == this)
+        annotations.add(annotationInstance)
+    }
+
+    fun removeAnnotation(annotationInstance: AnnotationInstance) {
+        require(annotationInstance.annotatedNode == this)
+        annotations.remove(annotationInstance)
+    }
+
     @Internal
     protected var rangeOverride: Range? = null
 
