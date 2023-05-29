@@ -62,6 +62,16 @@ open class Node() : Origin, Destination, Serializable {
             nodeProperties.map { PropertyDescription.buildFor(it, this) }
         } catch (e: Throwable) {
             throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
+        }.also { properties ->
+            val alreadyFound = mutableSetOf<String>()
+            properties.forEach { property ->
+                val name = property.name
+                if (alreadyFound.contains(name)) {
+                    throw IllegalStateException("Duplicate property with name $name")
+                } else {
+                    alreadyFound.add(name)
+                }
+            }
         }
 
     /**
