@@ -578,15 +578,6 @@ class EMFCLIToolTest {
     "eSuperTypes" : [ {
       "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
       "${"\$ref"}" : "/0/PossiblyNamed"
-    } ],
-    "eStructuralFeatures" : [ {
-      "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EAttribute",
-      "name" : "name",
-      "lowerBound" : 1,
-      "eType" : {
-        "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EDataType",
-        "${"\$ref"}" : "http://www.eclipse.org/emf/2002/Ecore#//EString"
-      }
     } ]
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
