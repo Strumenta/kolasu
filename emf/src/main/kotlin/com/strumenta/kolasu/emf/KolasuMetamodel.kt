@@ -124,7 +124,7 @@ private fun createStarlasuMetamodel(): EPackage {
     val named = ePackage.createEClass("Named").apply {
         isInterface = true
         eSuperTypes.add(possiblyNamed)
-        addAttribute("name", stringDT, 1, 1)
+        // We cannot override name to just change the lower bound to be 1, as EMF does not support that
     }
 
     val referenceByName = ePackage.createEClass("ReferenceByName").apply {

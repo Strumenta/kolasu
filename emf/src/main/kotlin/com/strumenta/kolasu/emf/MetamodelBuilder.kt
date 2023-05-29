@@ -227,7 +227,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
         val featuresNames = mutableSetOf<String>()
         eClass.eAllStructuralFeatures.forEach { f ->
             if (featuresNames.contains(f.name)) {
-                throw IllegalStateException("Duplicate Feature with name ${f.name}")
+                throw IllegalStateException("Duplicate Feature with name ${f.name} in ${eClass.name}")
             } else {
                 featuresNames.add(f.name)
             }
