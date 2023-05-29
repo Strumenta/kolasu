@@ -224,6 +224,15 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                 throw RuntimeException("Issue processing property $prop in class $kClass", e)
             }
         }
+        val featuresNames = mutableSetOf<String>()
+        eClass.eAllStructuralFeatures.forEach { f ->
+            if (featuresNames.contains(f.name)) {
+                throw IllegalStateException("Duplicate Feature with name ${f.name}")
+            } else {
+                featuresNames.add(f.name)
+            }
+        }
+
         return eClass
     }
 
