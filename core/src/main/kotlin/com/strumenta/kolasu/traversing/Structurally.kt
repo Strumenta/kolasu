@@ -105,18 +105,20 @@ fun Node.walkChildren(): Sequence<Node> {
     }
 }
 
+typealias ASTWalker = (Node) -> Sequence<Node>
+
 /**
  * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method.
  * For post-order traversal, take "walkLeavesFirst"
  * @return walks the whole AST starting from the childnodes of this node.
  */
 @JvmOverloads
-fun Node.walkDescendants(walker: (Node) -> Sequence<Node> = Node::walk): Sequence<Node> {
+fun Node.walkDescendants(walker: ASTWalker = Node::walk): Sequence<Node> {
     return walker.invoke(this).filter { node -> node != this }
 }
 
 @JvmOverloads
-fun <N : Any> Node.walkDescendants(type: KClass<N>, walker: (Node) -> Sequence<Node> = Node::walk): Sequence<N> {
+fun <N : Any> Node.walkDescendants(type: KClass<N>, walker: ASTWalker = Node::walk): Sequence<N> {
     return walkDescendants(walker).filterIsInstance(type.java)
 }
 
@@ -142,7 +144,7 @@ val Node.children: List<Node>
 @JvmOverloads
 fun <T> Node.searchByType(
     klass: Class<T>,
-    walker: KFunction1<Node, Sequence<Node>> = Node::walk
+    walker: ASTWalker = Node::walk
 ) = walker.invoke(this).filterIsInstance(klass)
 
 /**
@@ -151,7 +153,7 @@ fun <T> Node.searchByType(
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  * @return all nodes in this AST (sub)tree that are instances of, or extend [klass].
  */
-fun <T> Node.collectByType(klass: Class<T>, walker: KFunction1<Node, Sequence<Node>> = Node::walk): List<T> {
+fun <T> Node.collectByType(klass: Class<T>, walker: ASTWalker = Node::walk): List<T> {
     return walker.invoke(this).filterIsInstance(klass).toList()
 }
 

@@ -3,6 +3,7 @@ package com.strumenta.kolasu.serialization
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.traversing.ASTWalker
 import com.strumenta.kolasu.traversing.walk
 import java.util.IdentityHashMap
 
@@ -41,7 +42,7 @@ class OnlyReferencedIdProvider(
  * @return walks the whole AST starting from the given node and associates each visited node with a generated id
  **/
 fun Node.computeIds(
-    walker: (Node) -> Sequence<Node> = Node::walk,
+    walker: ASTWalker = Node::walk,
     idProvider: IdProvider = SequentialIdProvider()
 ): IdentityHashMap<Node, String> {
     val idsMap = IdentityHashMap<Node, String>()
@@ -53,6 +54,6 @@ fun Node.computeIds(
 }
 
 fun Node.computeIdsForReferencedNodes(
-    walker: (Node) -> Sequence<Node> = Node::walk,
+    walker: ASTWalker = Node::walk,
     idProvider: IdProvider = OnlyReferencedIdProvider(this)
 ): IdentityHashMap<Node, String> = computeIds(walker, idProvider)
