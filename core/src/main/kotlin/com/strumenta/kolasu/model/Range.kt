@@ -115,12 +115,30 @@ fun lineRange(lineNumber: Int, lineCode: String, source: Source? = null): Range 
     return Range(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length), source)
 }
 
-abstract class Source : Serializable
+abstract class Source : Serializable, Comparable<Source> {
+    protected abstract fun stringDescription(): String
+
+    override fun compareTo(other: Source): Int {
+        return this.stringDescription().compareTo(other.stringDescription())
+    }
+}
+
 class SourceSet(val name: String, val root: Path)
-class SourceSetElement(val sourceSet: SourceSet, val relativePath: Path) : Source()
-class FileSource(val file: File) : Source()
-class StringSource(val code: String? = null) : Source()
-class URLSource(val url: URL) : Source()
+class SourceSetElement(val sourceSet: SourceSet, val relativePath: Path) : Source() {
+    override fun stringDescription(): String = "${this.javaClass.name}:$relativePath"
+}
+class FileSource(val file: File) : Source() {
+    override fun stringDescription(): String = "${this.javaClass.name}:${file.path}"
+}
+class StringSource(val code: String? = null) : Source() {
+    override fun stringDescription(): String {
+        val codeSnippet = if (code == null) "<NULL>" else if (code.length > 100) code.substring(0, 100) else code
+        return "${this.javaClass.name}:$codeSnippet"
+    }
+}
+class URLSource(val url: URL) : Source() {
+    override fun stringDescription(): String = "${this.javaClass.name}:$url"
+}
 
 /**
  * This source is intended to be used for nodes that are "calculated".
@@ -130,7 +148,26 @@ class URLSource(val url: URL) : Source()
  * @param description this is a description of the source. It is used to describe the process that calculated the node.
  *                    Examples of values could be "type inference".
  */
-data class SyntheticSource(val description: String) : Source()
+data class SyntheticSource(val description: String) : Source() {
+    override fun stringDescription(): String = "${this.javaClass.name}:$description"
+}
+
+fun compareSources(sourceA: Source?, sourceB: Source?): Int {
+    return when {
+        sourceA == null && sourceB == null -> {
+            0
+        }
+        sourceA == null && sourceB != null -> {
+            -1
+        }
+        sourceA != null && sourceB == null -> {
+            1
+        }
+        else -> {
+            sourceA!!.compareTo(sourceB!!)
+        }
+    }
+}
 
 /**
  * An area in a source file, from start to end.
@@ -148,6 +185,11 @@ data class Range(val start: Point, val end: Point, var source: Source? = null) :
     }
 
     override fun compareTo(other: Range): Int {
+        val sourceCmp = compareSources(this.source, other.source)
+        if (sourceCmp != 0) {
+            return sourceCmp
+        }
+
         val cmp = this.start.compareTo(other.start)
         return if (cmp == 0) {
             this.end.compareTo(other.end)
