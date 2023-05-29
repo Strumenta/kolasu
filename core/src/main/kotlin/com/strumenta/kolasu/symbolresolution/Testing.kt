@@ -23,6 +23,6 @@ fun Node.assertAllReferencesResolved() {
                     )
                 )
             }
-            .forEach { property -> assertTrue { (property.get(it) as ReferenceByName<*>).resolved } }
+            .forEach { property -> assertTrue { (property.get(it) as ReferenceByName<*>).isResolved } }
     }
 }

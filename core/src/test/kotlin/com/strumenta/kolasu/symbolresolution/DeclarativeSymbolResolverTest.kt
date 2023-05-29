@@ -89,10 +89,10 @@ val symbolResolver = declarativeSymbolResolver {
 
     scopeFor(RefExpr::symbol) { callExpr: CallExpr ->
         val scope = Scope()
-        if (!callExpr.operation.resolved) {
+        if (!callExpr.operation.isResolved) {
             resolveProperty(CallExpr::operation, callExpr)
         }
-        if (callExpr.operation.referred != null && !callExpr.operation.referred!!.returns!!.resolved) {
+        if (callExpr.operation.referred != null && !callExpr.operation.referred!!.returns!!.isResolved) {
             resolveProperty(OperationDecl::returns, callExpr.operation.referred!!)
         }
         if (callExpr.operation.referred!!.returns!!.referred != null) {
@@ -107,7 +107,7 @@ val symbolResolver = declarativeSymbolResolver {
 
     scopeFor(RefExpr::symbol) { newExpr: NewExpr ->
         val scope = Scope()
-        if (!newExpr.clazz.resolved) {
+        if (!newExpr.clazz.isResolved) {
             resolveProperty(NewExpr::clazz, newExpr)
         }
         if (newExpr.clazz.referred != null) {

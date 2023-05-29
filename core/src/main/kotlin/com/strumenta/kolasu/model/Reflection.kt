@@ -68,7 +68,7 @@ data class PropertyDescription(
         }
     }
 
-    val multiple: Boolean
+    val isMultiple: Boolean
         get() = multiplicity == Multiplicity.MANY
 
     companion object {

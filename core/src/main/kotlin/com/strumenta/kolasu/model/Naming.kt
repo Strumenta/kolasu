@@ -45,18 +45,18 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) : Seriali
     }
 
     override fun toString(): String {
-        return if (resolved) {
+        return if (isResolved) {
             "Ref($name)[Solved]"
         } else {
             "Ref($name)[Unsolved]"
         }
     }
 
-    val resolved: Boolean
+    val isResolved: Boolean
         get() = referred != null
 
     override fun hashCode(): Int {
-        return name.hashCode() * (7 + if (resolved) 2 else 1)
+        return name.hashCode() * (7 + if (isResolved) 2 else 1)
     }
 
     override fun equals(other: Any?): Boolean {
