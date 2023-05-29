@@ -5,7 +5,6 @@ package com.strumenta.kolasu.traversing
 import com.strumenta.kolasu.model.Node
 import java.util.*
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction1
 
 /**
  * Traverse the entire tree, deep first, starting from this Node.

@@ -8,7 +8,6 @@ import com.strumenta.kolasu.traversing.searchByType
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.traversing.walkChildren
 import java.util.*
-import kotlin.reflect.KFunction1
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty
