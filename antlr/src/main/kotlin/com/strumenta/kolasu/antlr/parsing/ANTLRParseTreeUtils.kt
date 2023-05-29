@@ -96,7 +96,7 @@ class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = n
  *
  * Note that this, differently from Node.parseTreeNode, permits to specify also a Source.
  */
-fun <T : Node> T.withParseTreeNode(parseTree: ParserRuleContext?, source: Source? = null): T {
+fun <T : Node> T.withParseTreeNode(parseTree: ParseTree?, source: Source? = null): T {
     if (parseTree != null) {
         this.origin = ParseTreeOrigin(parseTree, source)
     }
