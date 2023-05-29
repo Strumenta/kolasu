@@ -13,7 +13,7 @@ data class Result<C>(val issues: List<Issue>, val root: C?) {
         get() = issues.filter { it.severity == IssueSeverity.ERROR }.toList()
     val warnings
         get() = issues.filter { it.severity == IssueSeverity.WARNING }.toList()
-    val correct: Boolean
+    val isCorrect: Boolean
         get() = issues.isEmpty()
 
     companion object {

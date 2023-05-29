@@ -155,7 +155,7 @@ class JsonGenerator {
                     if (withIds != null) {
                         jsonObject.addProperty(
                             "referred",
-                            if (value.resolved) withIds[value.referred as Node] ?: "<unknown>" else null
+                            if (value.isResolved) withIds[value.referred as Node] ?: "<unknown>" else null
                         )
                     }
                     jsonObject
@@ -214,7 +214,7 @@ class JsonGenerator {
             try {
                 if (it.value == null) {
                     jsonObject.add(it.name, JsonNull.INSTANCE)
-                } else if (it.multiple) {
+                } else if (it.isMultiple) {
                     if (it.provideNodes) {
                         jsonObject.add(
                             it.name,
@@ -268,7 +268,7 @@ private fun Node.toJsonStreaming(writer: JsonWriter, shortClassNames: Boolean = 
         writer.name(it.name)
         if (it.value == null) {
             writer.nullValue()
-        } else if (it.multiple) {
+        } else if (it.isMultiple) {
             writer.beginArray()
             if (it.provideNodes) {
                 (it.value as Collection<*>).forEach {

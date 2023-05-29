@@ -93,7 +93,7 @@ fun assertASTsAreEqual(
             val actualPropValue = actualProperty.value
             val expectedPropValue = expectedProperty.value
             if (expectedProperty.provideNodes) {
-                if (expectedProperty.multiple) {
+                if (expectedProperty.isMultiple) {
                     if (expectedPropValue is IgnoreChildren<*>) {
                         // Nothing to do
                     } else {

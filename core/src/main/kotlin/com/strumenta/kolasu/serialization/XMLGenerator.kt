@@ -115,7 +115,7 @@ private fun Node.toXML(role: String, document: Document): Element {
     this.processProperties {
         if (it.value == null) {
             element.addNullChild(it.name, document)
-        } else if (it.multiple) {
+        } else if (it.isMultiple) {
             if (it.provideNodes) {
                 element.addListOfNodes(it.name, (it.value as Collection<*>).map { it as Node }, document)
             } else {

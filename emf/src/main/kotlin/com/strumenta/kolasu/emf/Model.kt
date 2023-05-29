@@ -433,7 +433,7 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
         this.processProperties { pd ->
             val esf = ec.eAllStructuralFeatures.find { it.name == pd.name }!!
             if (pd.provideNodes) {
-                if (pd.multiple) {
+                if (pd.isMultiple) {
                     val elist = eo.eGet(esf) as MutableList<EObject?>
                     (pd.value as List<*>?)?.forEach {
                         try {
@@ -451,7 +451,7 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
                     }
                 }
             } else {
-                if (pd.multiple) {
+                if (pd.isMultiple) {
                     val elist = eo.eGet(esf) as MutableList<Any>
                     (pd.value as List<*>?)?.forEach {
                         try {

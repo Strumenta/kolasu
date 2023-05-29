@@ -44,7 +44,7 @@ class PlaygroundExampleGenerator<R : Node>(
 
     fun generateExample(name: String, code: String) {
         val parsingResult = parser.parse(code)
-        if (!parsingResult.correct && failOnError) {
+        if (!parsingResult.isCorrect && failOnError) {
             throw ExampleGenerationFailure(parsingResult, "Cannot generate examples from code with errors")
         }
 
