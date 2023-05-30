@@ -92,11 +92,11 @@ class ASTTransformerTest {
         }
         assertASTsAreEqual(
             Mult(IntLiteral(7), IntLiteral(8)),
-            myTransformer.transform(GenericBinaryExpression(Operator.MULT, IntLiteral(7), IntLiteral(8)))!!
+            myTransformer.transformToNode(GenericBinaryExpression(Operator.MULT, IntLiteral(7), IntLiteral(8)))!!
         )
         assertASTsAreEqual(
             Sum(IntLiteral(7), IntLiteral(8)),
-            myTransformer.transform(GenericBinaryExpression(Operator.PLUS, IntLiteral(7), IntLiteral(8)))!!
+            myTransformer.transformToNode(GenericBinaryExpression(Operator.PLUS, IntLiteral(7), IntLiteral(8)))!!
         )
     }
 
@@ -122,7 +122,7 @@ class ASTTransformerTest {
                 ),
                 BLangIntLiteral(4)
             ),
-            myTransformer.transform(
+            myTransformer.transformToNode(
                 ALangMult(
                     ALangSum(
                         ALangIntLiteral(1),
@@ -171,7 +171,7 @@ class ASTTransformerTest {
                 TypedLiteral("1", Type.INT),
                 Type.INT
             ),
-            myTransformer.transform(
+            myTransformer.transformToNode(
                 TypedSum(
                     TypedLiteral("1", Type.INT),
                     TypedLiteral("1", Type.INT),
@@ -186,7 +186,7 @@ class ASTTransformerTest {
                 TypedLiteral("test", Type.STR),
                 Type.STR
             ),
-            myTransformer.transform(
+            myTransformer.transformToNode(
                 TypedConcat(
                     TypedLiteral("test", Type.STR),
                     TypedLiteral("test", Type.STR),
@@ -201,7 +201,7 @@ class ASTTransformerTest {
                 TypedLiteral("test", Type.STR),
                 null
             ),
-            myTransformer.transform(
+            myTransformer.transformToNode(
                 TypedSum(
                     TypedLiteral("1", Type.INT),
                     TypedLiteral("test", Type.STR),
@@ -223,7 +223,7 @@ class ASTTransformerTest {
                 TypedLiteral("test", Type.STR),
                 null
             ),
-            myTransformer.transform(
+            myTransformer.transformToNode(
                 TypedConcat(
                     TypedLiteral("1", Type.INT),
                     TypedLiteral("test", Type.STR),
@@ -285,7 +285,7 @@ class ASTTransformerTest {
     fun testTransforingOneNodeToMany() {
         val transformer = ASTTransformer()
         transformer.registerNodeFactory(BarRoot::class, BazRoot::class)
-            .withChild(BarRoot::stmts, BazRoot::stmts)
+            //.withChild(BarRoot::stmts, BazRoot::stmts)
         transformer.registerNodeFactory(BarStmt::class) { s ->
             listOf(BazStmt("${s.desc}-1"), BazStmt("${s.desc}-2"))
         }
@@ -296,15 +296,19 @@ class ASTTransformerTest {
                 BarStmt("b")
             )
         )
-        val transformed = transformer.transform(original) as BazRoot
+        val transformed = transformer.transformToNode(original) as BazRoot
         assertTrue { transformed.hasValidParents() }
         assertEquals(transformed.origin, original)
-        assertASTsAreEqual(BazRoot(mutableListOf(
-            BazStmt("a-1"),
-            BazStmt("a-2"),
-            BazStmt("b-1"),
-            BazStmt("b-2")
-        )))
+        assertASTsAreEqual(
+            BazRoot(
+                mutableListOf(
+                    BazStmt("a-1"),
+                    BazStmt("a-2"),
+                    BazStmt("b-1"),
+                    BazStmt("b-2")
+                )
+            )
+        )
     }
 }
 

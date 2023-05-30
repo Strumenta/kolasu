@@ -18,13 +18,43 @@ annotation class Mapped(val path: String = "")
 /**
  * Factory that, given a tree node, will instantiate the corresponding transformed node.
  */
-class NodeFactory<Source, Output : Node>(
-    val constructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output?,
-    val children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
-    var finalizer: (Output) -> Unit = {},
-    var skipChildren: Boolean = false,
+class NodeFactory<Source, Output : Node> {
+    var constructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> List<Output>
+    var children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf()
+    var finalizer: (Output) -> Unit = {}
+    var skipChildren: Boolean = false
     var childrenSetAtConstruction: Boolean = false
-) {
+
+    constructor(
+        constructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> List<Output>,
+        children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
+        finalizer: (Output) -> Unit = {},
+        skipChildren: Boolean = false,
+        childrenSetAtConstruction: Boolean = false
+    ) {
+        this.constructor = constructor
+        this.children = children
+        this.finalizer = finalizer
+        this.skipChildren = skipChildren
+        this.childrenSetAtConstruction = childrenSetAtConstruction
+    }
+
+    constructor(
+        singleConstructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output?,
+        children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
+        finalizer: (Output) -> Unit = {},
+        skipChildren: Boolean = false,
+        childrenSetAtConstruction: Boolean = false
+    ) {
+        this.constructor = { source, at, nf ->
+            val result = singleConstructor(source, at, nf)
+            if (result == null) emptyList() else listOf(result)
+        }
+        this.children = children
+        this.finalizer = finalizer
+        this.skipChildren = skipChildren
+        this.childrenSetAtConstruction = childrenSetAtConstruction
+    }
 
     /**
      * Specify how to convert a child. The value obtained from the conversion could either be used
@@ -231,6 +261,15 @@ open class ASTTransformer(
     private val _knownClasses = mutableMapOf<String, MutableSet<KClass<*>>>()
     val knownClasses: Map<String, Set<KClass<*>>> = _knownClasses
 
+    fun transformToNode(source: Any?, parent: Node? = null): Node? {
+        val result = transform(source, parent)
+        return when (result.size) {
+            0 -> null
+            1 -> result.first()
+            else -> throw IllegalStateException()
+        }
+    }
+
     /**
      * Performs the transformation of a node and, recursively, its descendants.
      */
@@ -243,21 +282,23 @@ open class ASTTransformer(
             throw Error("Mapping error: received collection when value was expected")
         }
         val factory = getNodeFactory<Any, Node>(source::class as KClass<Any>)
-        val node: Node?
+        val nodes: List<Node>
         if (factory != null) {
-            node = makeNode(factory, source, allowGenericNode = allowGenericNode)
-            if (node == null) {
+            nodes = makeNodes(factory, source, allowGenericNode = allowGenericNode)
+            if (nodes == null) {
                 return emptyList()
             }
             if (!factory.skipChildren && !factory.childrenSetAtConstruction) {
-                setChildren(factory, source, node)
+                nodes.forEach { node -> setChildren(factory, source, node) }
             }
-            factory.finalizer(node)
-            node.parent = parent
+            nodes.forEach { node ->
+                factory.finalizer(node)
+                node.parent = parent
+            }
         } else {
             if (allowGenericNode) {
                 val origin = asOrigin(source)
-                node = GenericNode(parent).withOrigin(origin)
+                nodes = listOf(GenericNode(parent).withOrigin(origin))
                 issues.add(
                     Issue.semantic(
                         "Source node not mapped: ${source::class.qualifiedName}",
@@ -269,7 +310,7 @@ open class ASTTransformer(
                 throw IllegalStateException("Unable to translate node $source (class ${source.javaClass})")
             }
         }
-        return listOf(node)
+        return nodes
     }
 
     private fun setChildren(
@@ -326,24 +367,26 @@ open class ASTTransformer(
         return source
     }
 
-    protected open fun <S : Any, T : Node> makeNode(
+    protected open fun <S : Any, T : Node> makeNodes(
         factory: NodeFactory<S, T>,
         source: S,
         allowGenericNode: Boolean = true
-    ): Node? {
-        val node = try {
+    ): List<Node> {
+        val nodes = try {
             factory.constructor(source, this, factory)
         } catch (e: Exception) {
             if (allowGenericNode) {
-                GenericErrorNode(e)
+                listOf(GenericErrorNode(e))
             } else {
                 throw e
             }
         }
-        if (node?.origin == null) {
-            node?.withOrigin(asOrigin(source))
+        nodes.forEach { node ->
+            if (node?.origin == null) {
+                node?.withOrigin(asOrigin(source))
+            }
         }
-        return node
+        return nodes
     }
 
     protected open fun <S : Any, T : Node> getNodeFactory(kClass: KClass<S>): NodeFactory<S, T>? {
@@ -373,6 +416,15 @@ open class ASTTransformer(
         return nodeFactory
     }
 
+    fun <S : Any, T : Node> registerMultipleNodeFactory(
+        kclass: KClass<S>,
+        factory: (S, ASTTransformer, NodeFactory<S, T>) -> List<T>
+    ): NodeFactory<S, T> {
+        val nodeFactory = NodeFactory(factory)
+        factories[kclass] = nodeFactory
+        return nodeFactory
+    }
+
     fun <S : Any, T : Node> registerNodeFactory(
         kclass: KClass<S>,
         factory: (S, ASTTransformer) -> T?
@@ -384,6 +436,9 @@ open class ASTTransformer(
 
     fun <S : Any, T : Node> registerNodeFactory(kclass: KClass<S>, factory: (S) -> T?): NodeFactory<S, T> =
         registerNodeFactory(kclass) { input, _, _ -> factory(input) }
+
+    fun <S : Any, T : Node> registerMultipleNodeFactory(kclass: KClass<S>, factory: (S) -> List<T>): NodeFactory<S, T> =
+        registerMultipleNodeFactory(kclass) { input, _, _ -> factory(input) }
 
     inline fun <reified S : Any, reified T : Node> registerNodeFactory(): NodeFactory<S, T> {
         return registerNodeFactory(S::class, T::class)

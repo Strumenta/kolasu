@@ -21,13 +21,14 @@ open class ParseTreeToASTTransformer(
     allowGenericNode: Boolean = true,
     val source: Source? = null
 ) : ASTTransformer(issues, allowGenericNode) {
+
     /**
      * Performs the transformation of a node and, recursively, its descendants. In addition to the overridden method,
      * it also assigns the parseTreeNode to the AST node so that it can keep track of its position.
      * However, a node factory can override the parseTreeNode of the nodes it creates (but not the parent).
      */
-    override fun transform(source: Any?, parent: Node?): Node? {
-        val node = super.transform(source, parent)
+    override fun transform(source: Any?, parent: Node?): List<Node> {
+        val node = super.transform(source, parent) as Node?
         if (node != null && source is ParserRuleContext) {
             if (node.origin == null) {
                 node.withParseTreeNode(source, this.source)
@@ -35,7 +36,7 @@ open class ParseTreeToASTTransformer(
                 node.position!!.source = this.source
             }
         }
-        return node
+        return if (node == null) emptyList() else listOf(node)
     }
 
     override fun getSource(node: Node, source: Any): Any {
