@@ -39,22 +39,37 @@ class NodeFactory<Source, Output : Node> {
         this.childrenSetAtConstruction = childrenSetAtConstruction
     }
 
-    constructor(
-        singleConstructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output?,
-        children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
-        finalizer: (Output) -> Unit = {},
-        skipChildren: Boolean = false,
-        childrenSetAtConstruction: Boolean = false
-    ) {
-        this.constructor = { source, at, nf ->
-            val result = singleConstructor(source, at, nf)
-            if (result == null) emptyList() else listOf(result)
+    companion object {
+        fun <Source, Output : Node> single(
+            singleConstructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output?,
+            children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
+            finalizer: (Output) -> Unit = {},
+            skipChildren: Boolean = false,
+            childrenSetAtConstruction: Boolean = false
+        ): NodeFactory<Source, Output> {
+            return NodeFactory({ source, at, nf ->
+                val result = singleConstructor(source, at, nf)
+                if (result == null) emptyList() else listOf(result)
+            }, children, finalizer, skipChildren, childrenSetAtConstruction)
         }
-        this.children = children
-        this.finalizer = finalizer
-        this.skipChildren = skipChildren
-        this.childrenSetAtConstruction = childrenSetAtConstruction
     }
+
+//    constructor(
+//        singleConstructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output?,
+//        children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
+//        finalizer: (Output) -> Unit = {},
+//        skipChildren: Boolean = false,
+//        childrenSetAtConstruction: Boolean = false
+//    ) {
+//        this.constructor = { source, at, nf ->
+//            val result = singleConstructor(source, at, nf)
+//            if (result == null) emptyList() else listOf(result)
+//        }
+//        this.children = children
+//        this.finalizer = finalizer
+//        this.skipChildren = skipChildren
+//        this.childrenSetAtConstruction = childrenSetAtConstruction
+//    }
 
     /**
      * Specify how to convert a child. The value obtained from the conversion could either be used
@@ -350,11 +365,16 @@ open class ASTTransformer(
         node: Node,
         pd: PropertyTypeDescription
     ) {
-        val src = (childNodeFactory as ChildNodeFactory<Any, Any, Any>).get(getSource(node, source))
+        val src = (childNodeFactory as ChildNodeFactory<Any, Any, Any>).get(getSource(node, source)) as List<*>
         val child: Any? = if (pd.multiple) {
-            (src as Collection<*>?)?.mapNotNull { transform(it, node) } ?: listOf<Node?>()
+            src.map { transform(it, node) }.flatten()
         } else {
-            transform(src, node)
+            require(src.size < 2)
+            if (src.isEmpty()) {
+                transform(null, node)
+            } else {
+                transform(src.first(), node)
+            }
         }
         try {
             childNodeFactory.set(node, child)
@@ -411,7 +431,7 @@ open class ASTTransformer(
         kclass: KClass<S>,
         factory: (S, ASTTransformer, NodeFactory<S, T>) -> T?
     ): NodeFactory<S, T> {
-        val nodeFactory = NodeFactory(factory)
+        val nodeFactory = NodeFactory.single(factory)
         factories[kclass] = nodeFactory
         return nodeFactory
     }
@@ -449,7 +469,7 @@ open class ASTTransformer(
         // We are looking for any constructor with does not take parameters or have default
         // values for all its parameters
         val emptyLikeConstructor = target.constructors.find { it.parameters.all { param -> param.isOptional } }
-        val nodeFactory = NodeFactory(
+        val nodeFactory = NodeFactory.single(
             { source: S, _, thisFactory ->
                 if (target.isSealed) {
                     throw IllegalStateException("Unable to instantiate sealed class $target")

@@ -28,15 +28,17 @@ open class ParseTreeToASTTransformer(
      * However, a node factory can override the parseTreeNode of the nodes it creates (but not the parent).
      */
     override fun transform(source: Any?, parent: Node?): List<Node> {
-        val node = super.transform(source, parent) as Node?
-        if (node != null && source is ParserRuleContext) {
-            if (node.origin == null) {
-                node.withParseTreeNode(source, this.source)
-            } else if (node.position != null && node.source == null) {
-                node.position!!.source = this.source
+        val transformed = super.transform(source, parent)
+        return transformed.map { node ->
+            if (node != null && source is ParserRuleContext) {
+                if (node.origin == null) {
+                    node.withParseTreeNode(source, this.source)
+                } else if (node.position != null && node.source == null) {
+                    node.position!!.source = this.source
+                }
             }
-        }
-        return if (node == null) emptyList() else listOf(node)
+            return if (node == null) emptyList() else listOf(node)
+        }.flatten()
     }
 
     override fun getSource(node: Node, source: Any): Any {

@@ -142,7 +142,7 @@ class ParseTreeToASTTransformerTest {
                 EEntity("BAR", mutableListOf())
             )
         )
-        val actualAST = transformer.transform(
+        val actualAST = transformer.transformToNode(
             parseEntities(
                 """
             module M {
@@ -182,7 +182,7 @@ class ParseTreeToASTTransformerTest {
                 ),
             )
         )
-        val actualAST = transformer.transform(
+        val actualAST = transformer.transformToNode(
             parseEntities(
                 """
             module M {
@@ -284,7 +284,7 @@ class ParseTreeToASTTransformerTest {
                 )
             )
         )
-        val actualAST = transformer.transform(
+        val actualAST = transformer.transformToNode(
             parseScript(
                 """create Client
                 set name of Client #1 to 'ACME Inc.'
