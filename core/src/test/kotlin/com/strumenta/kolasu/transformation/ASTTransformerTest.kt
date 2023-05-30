@@ -70,7 +70,7 @@ class ASTTransformerTest {
                 DisplayIntStatement(value = 456)
             )
         )
-        val transformedCU = transformer.transform(cu)!!
+        val transformedCU = transformer.transform(cu)!!.first()
         assertASTsAreEqual(cu, transformedCU, considerPosition = true)
         assertTrue { transformedCU.hasValidParents() }
         assertEquals(transformedCU.origin, cu)
@@ -280,4 +280,37 @@ class ASTTransformerTest {
         assertEquals(transformedCU.origin, cu)
         assertIs<GenericNode>(transformedCU.statements[0].origin)
     }
+
+    @Test
+    fun testTransforingOneNodeToMany() {
+        val transformer = ASTTransformer()
+        transformer.registerNodeFactory(BarRoot::class, BazRoot::class)
+            .withChild(BarRoot::stmts, BazRoot::stmts)
+        transformer.registerNodeFactory(BarStmt::class) { s ->
+            listOf(BazStmt("${s.desc}-1"), BazStmt("${s.desc}-2"))
+        }
+
+        val original = BarRoot(
+            stmts = mutableListOf(
+                BarStmt("a"),
+                BarStmt("b")
+            )
+        )
+        val transformed = transformer.transform(original) as BazRoot
+        assertTrue { transformed.hasValidParents() }
+        assertEquals(transformed.origin, original)
+        assertASTsAreEqual(BazRoot(mutableListOf(
+            BazStmt("a-1"),
+            BazStmt("a-2"),
+            BazStmt("b-1"),
+            BazStmt("b-2")
+        )))
+    }
 }
+
+data class BazRoot(var stmts: MutableList<BazStmt> = mutableListOf()) : Node()
+
+data class BazStmt(val desc: String) : Node()
+
+data class BarRoot(var stmts: MutableList<BarStmt> = mutableListOf()) : Node()
+data class BarStmt(val desc: String) : Node()

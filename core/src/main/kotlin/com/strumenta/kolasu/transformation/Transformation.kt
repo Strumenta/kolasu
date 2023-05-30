@@ -235,9 +235,9 @@ open class ASTTransformer(
      * Performs the transformation of a node and, recursively, its descendants.
      */
     @JvmOverloads
-    open fun transform(source: Any?, parent: Node? = null): Node? {
+    open fun transform(source: Any?, parent: Node? = null): List<Node> {
         if (source == null) {
-            return null
+            return emptyList()
         }
         if (source is Collection<*>) {
             throw Error("Mapping error: received collection when value was expected")
@@ -247,7 +247,7 @@ open class ASTTransformer(
         if (factory != null) {
             node = makeNode(factory, source, allowGenericNode = allowGenericNode)
             if (node == null) {
-                return null
+                return emptyList()
             }
             if (!factory.skipChildren && !factory.childrenSetAtConstruction) {
                 setChildren(factory, source, node)
@@ -269,7 +269,7 @@ open class ASTTransformer(
                 throw IllegalStateException("Unable to translate node $source (class ${source.javaClass})")
             }
         }
-        return node
+        return listOf(node)
     }
 
     private fun setChildren(
