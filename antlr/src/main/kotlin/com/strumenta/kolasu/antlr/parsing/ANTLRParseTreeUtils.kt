@@ -72,8 +72,14 @@ fun Node.getText(code: String): String? = range?.text(code)
  * Note that this is NOT serializable as ParseTree elements are not Serializable.
  */
 class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = null) : Origin {
-    override val range: Range?
-        get() = parseTree.toRange(source = source)
+
+    private var rangeOverride: Range? = null
+
+    override var range: Range?
+        get() = rangeOverride ?: parseTree.toRange(source = source)
+        set(value) {
+            rangeOverride = value
+        }
 
     override val sourceText: String?
         get() =
