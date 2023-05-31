@@ -1,13 +1,9 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.symbolresolution.Scope
-import com.strumenta.kolasu.symbolresolution.Symbol
+import com.strumenta.kolasu.model.annotations.AnnotationInstance
+import com.strumenta.kolasu.model.annotations.SingleAnnotationType
 import kotlin.test.Test
-import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
-import org.junit.Test as test
 
 object DocumentationAnnotation : SingleAnnotationType<DocumentationAnnotationInstance>("Documentation")
 

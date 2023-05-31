@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.model.annotations.AnnotationInstance
 import com.strumenta.kolasu.model.observable.Observer
 import java.io.Serializable
 import kotlin.reflect.KClass
@@ -19,12 +20,26 @@ open class Node() : Serializable {
         return annotations
     }
 
-    fun <I:AnnotationInstance>getAnnotations(kClass: KClass<I>) : List<I> {
+    fun <I: AnnotationInstance>getAnnotations(kClass: KClass<I>) : List<I> {
         return annotations.filterIsInstance(kClass.java)
+    }
+
+    fun <I: AnnotationInstance>getSingleAnnotations(kClass: KClass<I>) : I? {
+        val instances = annotations.filterIsInstance(kClass.java)
+        return if (instances.isEmpty()) {
+            null
+        } else if (instances.size == 1) {
+            instances.first()
+        } else {
+            throw IllegalStateException("More than one instance of $kClass found")
+        }
     }
 
     fun addAnnotation(annotationInstance: AnnotationInstance) {
         require(annotationInstance.annotatedNode == this)
+        if (annotationInstance.type.single) {
+            annotations.removeIf { it.type == annotationInstance.type}
+        }
         annotations.add(annotationInstance)
     }
 
