@@ -37,7 +37,7 @@ class ParseTreeToASTTransformerTest {
                 DisplayIntStatement(value = 456).withParseTreeNode(pt.statement(1))
             )
         ).withParseTreeNode(pt)
-        val transformedCU = transformer.transform(pt).first()
+        val transformedCU = transformer.transformToNode(pt)!!
         assertASTsAreEqual(cu, transformedCU, considerPosition = true)
         assertTrue { transformedCU.hasValidParents() }
         assertNull(transformedCU.invalidPositions().firstOrNull())

@@ -19,7 +19,7 @@ annotation class Mapped(val path: String = "")
  * Factory that, given a tree node, will instantiate the corresponding transformed node.
  */
 class NodeFactory<Source, Output : Node> {
-    var constructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> List<Output>
+    val constructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> List<Output>
     var children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf()
     var finalizer: (Output) -> Unit = {}
     var skipChildren: Boolean = false
@@ -285,7 +285,9 @@ open class ASTTransformer(
                 require(node is Node)
                 node
             }
-            else -> throw IllegalStateException()
+            else -> throw IllegalStateException(
+                "Cannot transform into a single Node as multiple nodes where produced"
+            )
         }
     }
 
@@ -376,9 +378,9 @@ open class ASTTransformer(
         } else {
             require(childrenSource.size < 2)
             if (childrenSource.isEmpty()) {
-                transform(null, node)
+                transformToNode(null, node)
             } else {
-                transform(childrenSource.first(), node)
+                transformToNode(childrenSource.first(), node)
             }
         }
         try {
@@ -496,7 +498,7 @@ open class ASTTransformer(
                                     AbsentParameterValue
                                 }
                                 is List<*> -> {
-                                    PresentParameterValue(childSource.map { transform(it) }.toMutableList())
+                                    PresentParameterValue(childSource.map { transform(it) }.flatten().toMutableList())
                                 }
 
                                 is String -> {
@@ -506,8 +508,12 @@ open class ASTTransformer(
                                 else -> {
                                     if (kParameter.type == String::class.createType() && childSource is ParseTree) {
                                         PresentParameterValue(childSource.text)
-                                    } else {
+                                    } else if ((kParameter.type.classifier as? KClass<*>)
+                                        ?.isSubclassOf(Collection::class) == true
+                                    ) {
                                         PresentParameterValue(transform(childSource))
+                                    } else {
+                                        PresentParameterValue(transformToNode(childSource))
                                     }
                                 }
                             }

@@ -30,7 +30,7 @@ open class ParseTreeToASTTransformer(
     override fun transform(source: Any?, parent: Node?): List<Node> {
         val transformed = super.transform(source, parent)
         return transformed.map { node ->
-            if (node != null && source is ParserRuleContext) {
+            if (source is ParserRuleContext) {
                 if (node.origin == null) {
                     node.withParseTreeNode(source, this.source)
                 } else if (node.position != null && node.source == null) {
@@ -63,7 +63,7 @@ open class ParseTreeToASTTransformer(
             "Node $source (${source.javaClass}) has ${nodeChildren.size} " +
                 "node children: $nodeChildren"
         }
-        transformer.transform(nodeChildren[0]) as Node
+        transformer.transformToNode(nodeChildren[0]) as Node
     }
 
     /**
