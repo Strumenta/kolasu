@@ -8,45 +8,20 @@ import kotlin.reflect.KVisibility
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 
-interface Origin {
-    val range: Range?
-    val sourceText: String?
-    val source: Source?
-        get() = range?.source
-}
-
-class SimpleOrigin(override val range: Range?, override val sourceText: String?) : Origin, Serializable
-
-data class CompositeOrigin(
-    val elements: List<Origin>,
-    override val range: Range?,
-    override val sourceText: String?
-) : Origin, Serializable
-
-interface Destination
-
-data class CompositeDestination(val elements: List<Destination>) : Destination, Serializable
-data class TextFileDestination(val range: Range?) : Destination, Serializable
-
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
- *
- * It implements Origin as it could be the source of a AST-to-AST transformation, so the node itself can be
- * the Origin of another node.
  */
-open class Node() : Origin, Destination, Serializable {
+open class Node() : Serializable {
 
     @Internal
-    protected var rangeOverride: Range? = null
+    val destinations = mutableListOf<Destination>()
 
     constructor(range: Range?) : this() {
         this.range = range
     }
 
     constructor(origin: Origin?) : this() {
-        if (origin != null) {
-            this.origin = origin
-        }
+        this.origin = origin
     }
 
     @Internal
@@ -75,7 +50,7 @@ open class Node() : Origin, Destination, Serializable {
         }
 
     /**
-     * The node from which this AST Node has been generated, if any.
+     * The origin from which this AST Node has been generated, if any.
      */
     @property:Internal
     var origin: Origin? = null
@@ -92,32 +67,21 @@ open class Node() : Origin, Destination, Serializable {
      * Otherwise, the value of this property is the range of the origin, if any.
      */
     @property:Internal
-    override var range: Range?
-        get() = rangeOverride ?: origin?.range
-        set(range) {
-            this.rangeOverride = range
+    var range: Range?
+        get() = origin?.range
+        set(value) {
+            if (origin == null) {
+                if (value != null) {
+                    origin = SimpleOrigin(value)
+                }
+            } else {
+                origin!!.range = value
+            }
         }
 
     @property:Internal
-    override val source: Source?
+    val source: Source?
         get() = origin?.source
-
-    fun detach(keepRange: Boolean = true, keepSourceText: Boolean = false) {
-        val existingOrigin = origin
-        if (existingOrigin != null) {
-            if (keepRange || keepSourceText) {
-                this.origin = SimpleOrigin(
-                    if (keepRange) existingOrigin.range else null,
-                    if (keepSourceText) existingOrigin.sourceText else null
-                )
-            } else {
-                this.origin = null
-            }
-            if (existingOrigin is Node && existingOrigin.destination == this) {
-                existingOrigin.destination = null
-            }
-        }
-    }
 
     /**
      * Tests whether the given range is contained in the interval represented by this object.
@@ -139,11 +103,8 @@ open class Node() : Origin, Destination, Serializable {
      * The source text for this node
      */
     @Internal
-    override val sourceText: String?
+    val sourceText: String?
         get() = origin?.sourceText
-
-    @Internal
-    var destination: Destination? = null
 
     /**
      * This must be final because otherwise data classes extending this will automatically generate
@@ -177,7 +138,12 @@ fun <N : Node> N.withRange(range: Range?): N {
 }
 
 fun <N : Node> N.withOrigin(origin: Origin?): N {
-    this.origin = if (origin == this) { null } else { origin }
+    this.origin = if (origin == NodeOrigin(this)) { null } else { origin }
+    return this
+}
+
+fun <N : Node> N.withOrigin(node: Node): N {
+    this.origin = if (node == this) { null } else { NodeOrigin(node) }
     return this
 }
 

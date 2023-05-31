@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.transformation
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeOrigin
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.model.withOrigin
@@ -74,7 +75,7 @@ class ASTTransformerTest {
         val transformedCU = transformer.transform(cu)!!
         assertASTsAreEqual(cu, transformedCU, considerRange = true)
         assertTrue { transformedCU.hasValidParents() }
-        assertEquals(transformedCU.origin, cu)
+        assertEquals(NodeOrigin(cu), transformedCU.origin)
     }
 
     /**
@@ -259,7 +260,7 @@ class ASTTransformerTest {
         )
         val transformedCU = transformer.transform(cu)!! as CU
         assertTrue { transformedCU.hasValidParents() }
-        assertEquals(transformedCU.origin, cu)
+        assertEquals(transformedCU.origin, NodeOrigin(cu))
         assertEquals(1, transformedCU.statements.size)
         assertASTsAreEqual(cu.statements[1], transformedCU.statements[0])
     }
@@ -280,7 +281,7 @@ class ASTTransformerTest {
         )
         val transformedCU = transformer.transform(cu)!! as CU
         assertTrue { transformedCU.hasValidParents() }
-        assertEquals(transformedCU.origin, cu)
-        assertIs<GenericNode>(transformedCU.statements[0].origin)
+        assertEquals(transformedCU.origin, NodeOrigin(cu))
+        assertIs<GenericNode>((transformedCU.statements[0].origin as NodeOrigin).node)
     }
 }
