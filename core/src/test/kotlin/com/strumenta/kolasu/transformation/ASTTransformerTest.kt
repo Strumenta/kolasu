@@ -84,8 +84,14 @@ class ASTTransformerTest {
         val myTransformer = ASTTransformer(allowGenericNode = false).apply {
             registerNodeFactory(GenericBinaryExpression::class) { source: GenericBinaryExpression ->
                 when (source.operator) {
-                    Operator.MULT -> Mult(transformToNode(source.left) as Expression, transformToNode(source.right) as Expression)
-                    Operator.PLUS -> Sum(transformToNode(source.left) as Expression, transformToNode(source.right) as Expression)
+                    Operator.MULT -> Mult(
+                        transformToNode(source.left) as Expression,
+                        transformToNode(source.right) as Expression
+                    )
+                    Operator.PLUS -> Sum(
+                        transformToNode(source.left) as Expression,
+                        transformToNode(source.right) as Expression
+                    )
                 }
             }
             registerIdentityTransformation(IntLiteral::class)
@@ -108,10 +114,16 @@ class ASTTransformerTest {
         val myTransformer = ASTTransformer(allowGenericNode = false).apply {
             registerNodeFactory(ALangIntLiteral::class) { source: ALangIntLiteral -> BLangIntLiteral(source.value) }
             registerNodeFactory(ALangSum::class) { source: ALangSum ->
-                BLangSum(transformToNode(source.left) as BLangExpression, transformToNode(source.right) as BLangExpression)
+                BLangSum(
+                    transformToNode(source.left) as BLangExpression,
+                    transformToNode(source.right) as BLangExpression
+                )
             }
             registerNodeFactory(ALangMult::class) { source: ALangMult ->
-                BLangMult(transformToNode(source.left) as BLangExpression, transformToNode(source.right) as BLangExpression)
+                BLangMult(
+                    transformToNode(source.left) as BLangExpression,
+                    transformToNode(source.right) as BLangExpression
+                )
             }
         }
         assertASTsAreEqual(
@@ -285,7 +297,7 @@ class ASTTransformerTest {
     fun testTransforingOneNodeToMany() {
         val transformer = ASTTransformer()
         transformer.registerNodeFactory(BarRoot::class, BazRoot::class)
-            .withChild(BarRoot::stmts) { BazRoot::stmts }
+            .withChild(BazRoot::stmts, BarRoot::stmts)
         transformer.registerMultipleNodeFactory(BarStmt::class) { s ->
             listOf(BazStmt("${s.desc}-1"), BazStmt("${s.desc}-2"))
         }

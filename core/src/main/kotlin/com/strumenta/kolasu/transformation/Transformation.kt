@@ -280,7 +280,11 @@ open class ASTTransformer(
         val result = transform(source, parent)
         return when (result.size) {
             0 -> null
-            1 -> result.first()
+            1 -> {
+                val node = result.first()
+                require(node is Node)
+                node
+            }
             else -> throw IllegalStateException()
         }
     }
@@ -365,15 +369,16 @@ open class ASTTransformer(
         node: Node,
         pd: PropertyTypeDescription
     ) {
-        val src = (childNodeFactory as ChildNodeFactory<Any, Any, Any>).get(getSource(node, source)) as List<*>
+        val childFactory = childNodeFactory as ChildNodeFactory<Any, Any, Any>
+        val childrenSource = childFactory.get(getSource(node, source)) as List<*>
         val child: Any? = if (pd.multiple) {
-            src.map { transform(it, node) }.flatten()
+            childrenSource.map { transform(it, node) }.flatten()
         } else {
-            require(src.size < 2)
-            if (src.isEmpty()) {
+            require(childrenSource.size < 2)
+            if (childrenSource.isEmpty()) {
                 transform(null, node)
             } else {
-                transform(src.first(), node)
+                transform(childrenSource.first(), node)
             }
         }
         try {

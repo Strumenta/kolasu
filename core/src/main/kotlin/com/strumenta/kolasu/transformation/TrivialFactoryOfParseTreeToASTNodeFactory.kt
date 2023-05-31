@@ -51,7 +51,7 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
                         value.text
                     }
                     else -> {
-                        astTransformer.transform(value)
+                        astTransformer.transformToNode(value)
                     }
                 }
             }
@@ -130,7 +130,7 @@ inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer
 inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer.unwrap(wrappingMember: KCallable<*>) {
     this.registerNodeFactory(S::class) { parseTreeNode, astTransformer ->
         val wrapped = wrappingMember.call(parseTreeNode)
-        astTransformer.transform(wrapped) as T?
+        astTransformer.transformToNode(wrapped) as T?
     }
 }
 
