@@ -25,7 +25,7 @@ open class CodeProcessingResult<D>(
     val data: D?,
     val code: String? = null
 ) : Serializable {
-    val correct: Boolean
+    val isCorrect: Boolean
         get() = issues.none { it.severity != IssueSeverity.INFO }
 
     override fun equals(other: Any?): Boolean {

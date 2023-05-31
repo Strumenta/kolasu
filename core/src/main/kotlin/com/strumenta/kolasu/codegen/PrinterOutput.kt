@@ -126,7 +126,7 @@ class PrinterOutput(
         generation()
         val endPoint = currentPoint
         val nodeRangeInGeneratedCode = Range(startPoint, endPoint)
-        ast.destination = TextFileDestination(range = nodeRangeInGeneratedCode)
+        ast.destinations += TextFileDestination(range = nodeRangeInGeneratedCode)
     }
 
     fun <T : Node> printList(elements: List<T>, separator: String = ", ") {

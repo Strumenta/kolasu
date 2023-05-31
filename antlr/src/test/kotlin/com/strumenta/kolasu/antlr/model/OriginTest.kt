@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.antlr.model
 
+import com.strumenta.kolasu.antlr.detachFromParseTree
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
@@ -34,22 +35,22 @@ class OriginTest {
 
         var node = Node().withOrigin(rootOrigin)
         assertEquals(rootOrigin.range, node.range)
-        node.detach()
+        node.detachFromParseTree()
         assertEquals(rootOrigin.range, node.range)
         node = Node().withOrigin(rootOrigin)
         assertEquals(rootOrigin.range, node.range)
-        node.detach(keepRange = true)
+        node.detachFromParseTree(keepRange = true)
         assertEquals(rootOrigin.range, node.range)
         node = Node().withOrigin(rootOrigin)
         assertEquals(rootOrigin.range, node.range)
-        node.detach(keepRange = false)
+        node.detachFromParseTree(keepRange = false)
         assertNull(node.origin)
         assertNull(node.range)
         node = Node().withOrigin(rootOrigin).withRange(range(1, 2, 3, 4))
         assertEquals(range(1, 2, 3, 4), node.range)
-        node.detach(keepRange = false)
+        node.detachFromParseTree(keepRange = false)
         assertNull(node.origin)
-        assertEquals(range(1, 2, 3, 4), node.range)
+        assertEquals(null, node.range)
     }
 
     @test fun parseTreeOriginsSourceText() {
@@ -70,15 +71,15 @@ class OriginTest {
 
         var node = Node().withOrigin(rootOrigin)
         assertEquals(rootOrigin.sourceText, node.sourceText)
-        node.detach()
+        node.detachFromParseTree()
         assertNull(node.sourceText)
         node = Node().withOrigin(rootOrigin)
         assertEquals(rootOrigin.sourceText, node.sourceText)
-        node.detach(keepSourceText = true)
+        node.detachFromParseTree(keepSourceText = true)
         assertEquals(rootOrigin.sourceText, node.sourceText)
         node = Node().withOrigin(rootOrigin)
         assertEquals(rootOrigin.sourceText, node.sourceText)
-        node.detach(keepSourceText = false)
+        node.detachFromParseTree(keepSourceText = false)
         assertNull(node.sourceText)
     }
 }

@@ -5,6 +5,8 @@ import com.google.gson.JsonParser
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.model.Destination
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeDestination
+import com.strumenta.kolasu.model.NodeOrigin
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
@@ -338,11 +340,11 @@ private fun setOrigin(
     val astNode = STARLASU_METAMODEL.getEClass("ASTNode")
     val originSF = astNode.getEStructuralFeature("origin")
     when (origin) {
-        is Node -> {
+        is NodeOrigin -> {
             val nodeOriginClass = STARLASU_METAMODEL.getEClass("NodeOrigin")
             val nodeSF = nodeOriginClass.getEStructuralFeature("node")
             val nodeOrigin = nodeOriginClass.instantiate()
-            val eoCorrespondingToOrigin = mapping.getAssociatedEObject(origin) ?: throw IllegalStateException(
+            val eoCorrespondingToOrigin = mapping.getAssociatedEObject(origin.node) ?: throw IllegalStateException(
                 "No EObject mapped to origin $origin. " +
                     "Mapping contains ${mapping.size} entries"
             )
@@ -378,12 +380,12 @@ private fun setDestination(
     val astNode = STARLASU_METAMODEL.getEClass("ASTNode")
     when (destination) {
         null -> return
-        is Node -> {
+        is NodeDestination -> {
             val nodeDestination = STARLASU_METAMODEL.getEClass("NodeDestination")
 
             val nodeDestinationInstance = nodeDestination.instantiate()
             val nodeSF = nodeDestination.getEStructuralFeature("node")
-            val eoCorrespondingToOrigin = destination.getOrCreateEObject(eResource, mapping)
+            val eoCorrespondingToOrigin = destination.node.getOrCreateEObject(eResource, mapping)
             nodeDestinationInstance.eSet(nodeSF, eoCorrespondingToOrigin)
 
             val destinationSF = astNode.getEStructuralFeature("destination")
@@ -428,12 +430,13 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
         eo.eSet(positionSF, rangeValue)
 
         setOrigin(eo, this.origin, eResource, mapping)
-        setDestination(eo, this.destination, eResource, mapping)
+        require(this.destinations.size < 2)
+        setDestination(eo, this.destinations.firstOrNull(), eResource, mapping)
 
         this.processProperties { pd ->
             val esf = ec.eAllStructuralFeatures.find { it.name == pd.name }!!
             if (pd.provideNodes) {
-                if (pd.multiple) {
+                if (pd.isMultiple) {
                     val elist = eo.eGet(esf) as MutableList<EObject?>
                     (pd.value as List<*>?)?.forEach {
                         try {
@@ -451,7 +454,7 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
                     }
                 }
             } else {
-                if (pd.multiple) {
+                if (pd.isMultiple) {
                     val elist = eo.eGet(esf) as MutableList<Any>
                     (pd.value as List<*>?)?.forEach {
                         try {

@@ -72,8 +72,14 @@ fun Node.getText(code: String): String? = range?.text(code)
  * Note that this is NOT serializable as ParseTree elements are not Serializable.
  */
 class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = null) : Origin {
-    override val range: Range?
-        get() = parseTree.toRange(source = source)
+
+    private var rangeOverride: Range? = null
+
+    override var range: Range?
+        get() = rangeOverride ?: parseTree.toRange(source = source)
+        set(value) {
+            rangeOverride = value
+        }
 
     override val sourceText: String?
         get() =
@@ -93,13 +99,25 @@ class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = n
 /**
  * Set the origin of the AST node as a ParseTreeOrigin, providing the parseTree is not null.
  * If the parseTree is null, no operation is performed.
+ *
+ * Note that this, differently from Node.parseTreeNode, permits to specify also a Source.
  */
-fun <T : Node> T.withParseTreeNode(parseTree: ParserRuleContext?, source: Source? = null): T {
+fun <T : Node> T.withParseTreeNode(parseTree: ParseTree?, source: Source? = null): T {
     if (parseTree != null) {
         this.origin = ParseTreeOrigin(parseTree, source)
     }
     return this
 }
+
+var Node.parseTreeNode: ParseTree?
+    get() {
+        return (this.origin as? ParseTreeOrigin)?.parseTree
+    }
+    set(value) {
+        if (value != null) {
+            this.origin = ParseTreeOrigin(value)
+        }
+    }
 
 val RuleContext.hasChildren: Boolean
     get() = this.childCount > 0

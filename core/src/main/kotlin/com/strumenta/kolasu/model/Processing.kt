@@ -2,12 +2,12 @@
 
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.traversing.ASTWalker
 import com.strumenta.kolasu.traversing.children
 import com.strumenta.kolasu.traversing.searchByType
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.traversing.walkChildren
 import java.util.*
-import kotlin.reflect.KFunction1
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty
@@ -33,7 +33,7 @@ fun Node.assignParents() {
  * Recursively execute [operation] on [this] node, and all nodes below this node.
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
-fun Node.processNodes(operation: (Node) -> Unit, walker: KFunction1<Node, Sequence<Node>> = Node::walk) {
+fun Node.processNodes(operation: (Node) -> Unit, walker: ASTWalker = Node::walk) {
     walker.invoke(this).forEach(operation)
 }
 
@@ -89,7 +89,7 @@ fun <T : Any> Class<T>.processProperties(
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  * @return the first node in the AST for which the [predicate] is true. Null if none are found.
  */
-fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<Node>> = Node::walk): Node? {
+fun Node.find(predicate: (Node) -> Boolean, walker: ASTWalker = Node::walk): Node? {
     return walker.invoke(this).find(predicate)
 }
 
@@ -103,7 +103,7 @@ fun Node.find(predicate: (Node) -> Boolean, walker: KFunction1<Node, Sequence<No
 fun <T> Node.processNodesOfType(
     klass: Class<T>,
     operation: (T) -> Unit,
-    walker: KFunction1<Node, Sequence<Node>> = Node::walk
+    walker: ASTWalker = Node::walk
 ) {
     searchByType(klass, walker).forEach(operation)
 }

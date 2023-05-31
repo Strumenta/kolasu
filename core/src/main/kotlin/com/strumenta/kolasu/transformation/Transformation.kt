@@ -2,6 +2,7 @@ package com.strumenta.kolasu.transformation
 
 import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeOrigin
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.PropertyTypeDescription
 import com.strumenta.kolasu.model.Range
@@ -407,6 +408,17 @@ open class ASTTransformer(
         return registerNodeTransformer(S::class, T::class)
     }
 
+    /**
+     * Define the origin of the node as the source, but only if source is a Node, otherwise
+     * this method does not do anything.
+     */
+    private fun <N : Node>N.settingNodeOrigin(source: Any): N {
+        if (source is Node) {
+            this.origin = NodeOrigin(source)
+        }
+        return this
+    }
+
     fun <S : Any, T : Node> registerNodeTransformer(
         source: KClass<S>,
         target: KClass<T>,
@@ -481,7 +493,7 @@ open class ASTTransformer(
                     try {
                         val instance = constructor.callBy(constructorParamValues)
                         instance.children.forEach { child -> child.parent = instance }
-                        instance
+                        instance.settingNodeOrigin(source)
                     } catch (t: Throwable) {
                         throw RuntimeException(
                             "Invocation of constructor $constructor failed. " +
@@ -499,7 +511,7 @@ open class ASTTransformer(
                                 "constructor for $target"
                         )
                     }
-                    target.createInstance()
+                    target.createInstance().settingNodeOrigin(source)
                 }
             },
             // If I do not have an emptyLikeConstructor, then I am forced to invoke a constructor with parameters and

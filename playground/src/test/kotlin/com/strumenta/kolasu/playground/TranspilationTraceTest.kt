@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.playground
 
 import com.strumenta.kolasu.emf.MetamodelBuilder
+import com.strumenta.kolasu.model.plusAssign
+import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
@@ -132,8 +134,8 @@ class TranspilationTraceTest {
     fun serializeSourceAndDestination() {
         val aRoot = ANode("a", 1)
         val bRoot = ANode("b", 2)
-        aRoot.destination = bRoot
-        bRoot.origin = aRoot
+        aRoot.destinations += bRoot
+        bRoot.withOrigin(aRoot)
         val tt = TranspilationTrace(
             "a:1",
             "b:2",

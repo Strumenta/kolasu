@@ -32,7 +32,7 @@ interface PlaceholderElement {
     var placeholderName: String?
 
     @property:Internal
-    val multiplePlaceholderElement: Boolean
+    val isMultiplePlaceholderElement: Boolean
 
     /**
      * Return true if the node can be represented by this PlaceholderElement.
