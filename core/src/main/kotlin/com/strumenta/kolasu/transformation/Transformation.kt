@@ -54,23 +54,6 @@ class NodeFactory<Source, Output : Node> {
         }
     }
 
-//    constructor(
-//        singleConstructor: (Source, ASTTransformer, NodeFactory<Source, Output>) -> Output?,
-//        children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
-//        finalizer: (Output) -> Unit = {},
-//        skipChildren: Boolean = false,
-//        childrenSetAtConstruction: Boolean = false
-//    ) {
-//        this.constructor = { source, at, nf ->
-//            val result = singleConstructor(source, at, nf)
-//            if (result == null) emptyList() else listOf(result)
-//        }
-//        this.children = children
-//        this.finalizer = finalizer
-//        this.skipChildren = skipChildren
-//        this.childrenSetAtConstruction = childrenSetAtConstruction
-//    }
-
     /**
      * Specify how to convert a child. The value obtained from the conversion could either be used
      * as a constructor parameter when instantiating the parent, or be used to set the value after
