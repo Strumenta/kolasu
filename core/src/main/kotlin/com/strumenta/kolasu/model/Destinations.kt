@@ -8,3 +8,13 @@ data class CompositeDestination(val elements: List<Destination>) : Destination, 
 data class TextFileDestination(val range: Range?) : Destination, Serializable
 
 data class NodeDestination(val node: Node) : Destination
+
+operator fun MutableList<Destination>.plusAssign(node: Node) {
+    this.add(NodeDestination(node))
+}
+
+operator fun MutableList<Destination>.minusAssign(node: Node) {
+    this.remove(NodeDestination(node))
+}
+
+operator fun List<Destination>.contains(node: Node): Boolean = NodeDestination(node) in this

@@ -1,8 +1,9 @@
 package com.strumenta.kolasu.antlr
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.NodeDestination
 import com.strumenta.kolasu.model.SimpleOrigin
+import com.strumenta.kolasu.model.contains
+import com.strumenta.kolasu.model.minusAssign
 
 fun Node.detachFromParseTree(keepRange: Boolean = true, keepSourceText: Boolean = false) {
     val existingOrigin = origin
@@ -15,8 +16,8 @@ fun Node.detachFromParseTree(keepRange: Boolean = true, keepSourceText: Boolean 
         } else {
             this.origin = null
         }
-        if (existingOrigin is Node && existingOrigin.destinations.contains(NodeDestination(this))) {
-            existingOrigin.destinations.remove(NodeDestination(this))
+        if ((existingOrigin is Node) && (this in existingOrigin.destinations)) {
+            existingOrigin.destinations -= this
         }
     }
 }

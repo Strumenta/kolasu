@@ -141,7 +141,7 @@ class ModelTest {
     @Test
     fun destinationIsSerialized() {
         val n1 = NodeFoo("abc").apply {
-            destinations.add(TextFileDestination(Range(Point(1, 8), Point(7, 4))))
+            destinations += TextFileDestination(Range(Point(1, 8), Point(7, 4)))
         }
         val ePackage = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo").apply {
             provideClass(NodeFoo::class)
