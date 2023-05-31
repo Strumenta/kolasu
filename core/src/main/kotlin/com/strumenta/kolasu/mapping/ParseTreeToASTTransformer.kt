@@ -27,8 +27,8 @@ open class ParseTreeToASTTransformer(
      * it also assigns the parseTreeNode to the AST node so that it can keep track of its position.
      * However, a node factory can override the parseTreeNode of the nodes it creates (but not the parent).
      */
-    override fun transform(source: Any?, parent: Node?): List<Node> {
-        val transformed = super.transform(source, parent)
+    override fun transformIntoNodes(source: Any?, parent: Node?): List<Node> {
+        val transformed = super.transformIntoNodes(source, parent)
         return transformed.map { node ->
             if (source is ParserRuleContext) {
                 if (node.origin == null) {
@@ -63,7 +63,7 @@ open class ParseTreeToASTTransformer(
             "Node $source (${source.javaClass}) has ${nodeChildren.size} " +
                 "node children: $nodeChildren"
         }
-        transformer.transformToNode(nodeChildren[0]) as Node
+        transformer.transform(nodeChildren[0]) as Node
     }
 
     /**

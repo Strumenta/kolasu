@@ -70,7 +70,7 @@ class ASTTransformerTest {
                 DisplayIntStatement(value = 456)
             )
         )
-        val transformedCU = transformer.transformToNode(cu)!!
+        val transformedCU = transformer.transform(cu)!!
         assertASTsAreEqual(cu, transformedCU, considerPosition = true)
         assertTrue { transformedCU.hasValidParents() }
         assertEquals(transformedCU.origin, cu)
@@ -85,12 +85,12 @@ class ASTTransformerTest {
             registerNodeFactory(GenericBinaryExpression::class) { source: GenericBinaryExpression ->
                 when (source.operator) {
                     Operator.MULT -> Mult(
-                        transformToNode(source.left) as Expression,
-                        transformToNode(source.right) as Expression
+                        transform(source.left) as Expression,
+                        transform(source.right) as Expression
                     )
                     Operator.PLUS -> Sum(
-                        transformToNode(source.left) as Expression,
-                        transformToNode(source.right) as Expression
+                        transform(source.left) as Expression,
+                        transform(source.right) as Expression
                     )
                 }
             }
@@ -98,11 +98,11 @@ class ASTTransformerTest {
         }
         assertASTsAreEqual(
             Mult(IntLiteral(7), IntLiteral(8)),
-            myTransformer.transformToNode(GenericBinaryExpression(Operator.MULT, IntLiteral(7), IntLiteral(8)))!!
+            myTransformer.transform(GenericBinaryExpression(Operator.MULT, IntLiteral(7), IntLiteral(8)))!!
         )
         assertASTsAreEqual(
             Sum(IntLiteral(7), IntLiteral(8)),
-            myTransformer.transformToNode(GenericBinaryExpression(Operator.PLUS, IntLiteral(7), IntLiteral(8)))!!
+            myTransformer.transform(GenericBinaryExpression(Operator.PLUS, IntLiteral(7), IntLiteral(8)))!!
         )
     }
 
@@ -115,14 +115,14 @@ class ASTTransformerTest {
             registerNodeFactory(ALangIntLiteral::class) { source: ALangIntLiteral -> BLangIntLiteral(source.value) }
             registerNodeFactory(ALangSum::class) { source: ALangSum ->
                 BLangSum(
-                    transformToNode(source.left) as BLangExpression,
-                    transformToNode(source.right) as BLangExpression
+                    transform(source.left) as BLangExpression,
+                    transform(source.right) as BLangExpression
                 )
             }
             registerNodeFactory(ALangMult::class) { source: ALangMult ->
                 BLangMult(
-                    transformToNode(source.left) as BLangExpression,
-                    transformToNode(source.right) as BLangExpression
+                    transform(source.left) as BLangExpression,
+                    transform(source.right) as BLangExpression
                 )
             }
         }
@@ -134,7 +134,7 @@ class ASTTransformerTest {
                 ),
                 BLangIntLiteral(4)
             ),
-            myTransformer.transformToNode(
+            myTransformer.transform(
                 ALangMult(
                     ALangSum(
                         ALangIntLiteral(1),
@@ -183,7 +183,7 @@ class ASTTransformerTest {
                 TypedLiteral("1", Type.INT),
                 Type.INT
             ),
-            myTransformer.transformToNode(
+            myTransformer.transform(
                 TypedSum(
                     TypedLiteral("1", Type.INT),
                     TypedLiteral("1", Type.INT),
@@ -198,7 +198,7 @@ class ASTTransformerTest {
                 TypedLiteral("test", Type.STR),
                 Type.STR
             ),
-            myTransformer.transformToNode(
+            myTransformer.transform(
                 TypedConcat(
                     TypedLiteral("test", Type.STR),
                     TypedLiteral("test", Type.STR),
@@ -213,7 +213,7 @@ class ASTTransformerTest {
                 TypedLiteral("test", Type.STR),
                 null
             ),
-            myTransformer.transformToNode(
+            myTransformer.transform(
                 TypedSum(
                     TypedLiteral("1", Type.INT),
                     TypedLiteral("test", Type.STR),
@@ -235,7 +235,7 @@ class ASTTransformerTest {
                 TypedLiteral("test", Type.STR),
                 null
             ),
-            myTransformer.transformToNode(
+            myTransformer.transform(
                 TypedConcat(
                     TypedLiteral("1", Type.INT),
                     TypedLiteral("test", Type.STR),
@@ -266,7 +266,7 @@ class ASTTransformerTest {
                 SetStatement(variable = "foo", value = 123)
             )
         )
-        val transformedCU = transformer.transformToNode(cu)!! as CU
+        val transformedCU = transformer.transform(cu)!! as CU
         assertTrue { transformedCU.hasValidParents() }
         assertEquals(transformedCU.origin, cu)
         assertEquals(1, transformedCU.statements.size)
@@ -287,7 +287,7 @@ class ASTTransformerTest {
                 DisplayIntStatement(value = 456)
             )
         )
-        val transformedCU = transformer.transformToNode(cu)!! as CU
+        val transformedCU = transformer.transform(cu)!! as CU
         assertTrue { transformedCU.hasValidParents() }
         assertEquals(transformedCU.origin, cu)
         assertIs<GenericNode>(transformedCU.statements[0].origin)
@@ -308,7 +308,7 @@ class ASTTransformerTest {
                 BarStmt("b")
             )
         )
-        val transformed = transformer.transformToNode(original) as BazRoot
+        val transformed = transformer.transform(original) as BazRoot
         assertTrue { transformed.hasValidParents() }
         assertEquals(transformed.origin, original)
         assertASTsAreEqual(

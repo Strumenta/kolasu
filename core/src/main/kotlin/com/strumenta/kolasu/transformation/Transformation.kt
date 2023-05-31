@@ -259,8 +259,12 @@ open class ASTTransformer(
     private val _knownClasses = mutableMapOf<String, MutableSet<KClass<*>>>()
     val knownClasses: Map<String, Set<KClass<*>>> = _knownClasses
 
-    fun transformToNode(source: Any?, parent: Node? = null): Node? {
-        val result = transform(source, parent)
+    /**
+     * This ensures that the generated value is a single Node or null.
+     */
+    @JvmOverloads
+    fun transform(source: Any?, parent: Node? = null): Node? {
+        val result = transformIntoNodes(source, parent)
         return when (result.size) {
             0 -> null
             1 -> {
@@ -278,7 +282,7 @@ open class ASTTransformer(
      * Performs the transformation of a node and, recursively, its descendants.
      */
     @JvmOverloads
-    open fun transform(source: Any?, parent: Node? = null): List<Node> {
+    open fun transformIntoNodes(source: Any?, parent: Node? = null): List<Node> {
         if (source == null) {
             return emptyList()
         }
@@ -357,13 +361,13 @@ open class ASTTransformer(
         val childFactory = childNodeFactory as ChildNodeFactory<Any, Any, Any>
         val childrenSource = childFactory.get(getSource(node, source)) as List<*>
         val child: Any? = if (pd.multiple) {
-            childrenSource.map { transform(it, node) }.flatten()
+            childrenSource.map { transformIntoNodes(it, node) }.flatten()
         } else {
             require(childrenSource.size < 2)
             if (childrenSource.isEmpty()) {
-                transformToNode(null, node)
+                transform(null, node)
             } else {
-                transformToNode(childrenSource.first(), node)
+                transform(childrenSource.first(), node)
             }
         }
         try {
@@ -481,7 +485,10 @@ open class ASTTransformer(
                                     AbsentParameterValue
                                 }
                                 is List<*> -> {
-                                    PresentParameterValue(childSource.map { transform(it) }.flatten().toMutableList())
+                                    PresentParameterValue(
+                                        childSource.map { transformIntoNodes(it) }
+                                            .flatten().toMutableList()
+                                    )
                                 }
 
                                 is String -> {
@@ -494,9 +501,9 @@ open class ASTTransformer(
                                     } else if ((kParameter.type.classifier as? KClass<*>)
                                         ?.isSubclassOf(Collection::class) == true
                                     ) {
-                                        PresentParameterValue(transform(childSource))
+                                        PresentParameterValue(transformIntoNodes(childSource))
                                     } else {
-                                        PresentParameterValue(transformToNode(childSource))
+                                        PresentParameterValue(transform(childSource))
                                     }
                                 }
                             }

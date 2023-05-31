@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.ParserRuleContext
  * ```
  */
 fun <T> ParseTreeToASTTransformer.translateCasted(original: ParserRuleContext): T {
-    val result = transformToNode(original)
+    val result = transform(original)
     if (result is Nothing) {
         throw IllegalStateException("Transformation produced Nothing")
     }
@@ -28,7 +28,7 @@ fun <T> ParseTreeToASTTransformer.translateCasted(original: ParserRuleContext): 
  * ```
  */
 fun <T> ParseTreeToASTTransformer.translateList(original: Collection<out ParserRuleContext>?): MutableList<T> {
-    return original?.map { transform(it) as List<T> }?.flatten()?.toMutableList() ?: mutableListOf()
+    return original?.map { transformIntoNodes(it) as List<T> }?.flatten()?.toMutableList() ?: mutableListOf()
 }
 
 /**
@@ -45,7 +45,7 @@ fun <T> ParseTreeToASTTransformer.translateList(original: Collection<out ParserR
  *  ```
  */
 fun <T> ParseTreeToASTTransformer.translateOptional(original: ParserRuleContext?): T? {
-    return original?.let { transformToNode(it) as T }
+    return original?.let { transform(it) as T }
 }
 
 /**
