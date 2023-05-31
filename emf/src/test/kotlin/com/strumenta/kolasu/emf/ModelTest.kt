@@ -2,7 +2,6 @@ package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.antlr.parsing.withParseTreeNode
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.NodeOrigin
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
@@ -119,9 +118,7 @@ class ModelTest {
     @Test
     fun originIsSerialized() {
         val n1 = NodeFoo("abc")
-        val n2 = NodeFoo("def").apply {
-            origin = NodeOrigin(n1)
-        }
+        val n2 = NodeFoo("def").withOrigin(n1)
         val ePackage = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo")
             .apply {
                 provideClass(NodeFoo::class)

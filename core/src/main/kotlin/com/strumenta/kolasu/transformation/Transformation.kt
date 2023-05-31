@@ -408,7 +408,11 @@ open class ASTTransformer(
         return registerNodeTransformer(S::class, T::class)
     }
 
-    private fun <N : Node>N.settingOrigin(source: Any): N {
+    /**
+     * Define the origin of the node as the source, but only if source is a Node, otherwise
+     * this method does not do anything.
+     */
+    private fun <N : Node>N.settingNodeOrigin(source: Any): N {
         if (source is Node) {
             this.origin = NodeOrigin(source)
         }
@@ -489,7 +493,7 @@ open class ASTTransformer(
                     try {
                         val instance = constructor.callBy(constructorParamValues)
                         instance.children.forEach { child -> child.parent = instance }
-                        instance.settingOrigin(source)
+                        instance.settingNodeOrigin(source)
                     } catch (t: Throwable) {
                         throw RuntimeException(
                             "Invocation of constructor $constructor failed. " +
@@ -507,7 +511,7 @@ open class ASTTransformer(
                                 "constructor for $target"
                         )
                     }
-                    target.createInstance().settingOrigin(source)
+                    target.createInstance().settingNodeOrigin(source)
                 }
             },
             // If I do not have an emptyLikeConstructor, then I am forced to invoke a constructor with parameters and
