@@ -32,10 +32,25 @@ gradlePlugin {
     }
 }
 
-tasks.named<KotlinCompile>("compileKotlin") {
-    dependsOn("generateBuildConfig")
-}
-
 publishing {
     addSonatypeRepo(project)
+}
+
+afterEvaluate {
+    tasks {
+        named("generateMetadataFileForPluginMavenPublication") {
+        dependsOn("kdocJar")
+    }
+    }
+}
+
+tasks {
+
+    named("compileKotlin") {
+        dependsOn("generateBuildConfig")
+    }
+
+//    named("generateMetadataFileForPluginMavenPublication") {
+//        dependsOn("kdocJar")
+//    }
 }

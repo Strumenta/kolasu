@@ -27,8 +27,13 @@ buildConfig {
     buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"${rootProject.extra["kotlinPluginID"]}\"")
 }
 
-tasks.named<KotlinCompile>("compileKotlin") {
-    dependsOn("generateBuildConfig")
+tasks {
+    named("compileKotlin") {
+        dependsOn("generateBuildConfig")
+    }
+    named("dokkaJavadoc") {
+        dependsOn("kaptKotlin")
+    }
 }
 
 publishing {

@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.kcp.gradle
 
-import com.strumenta.starlasu.BuildConfig
+import com.strumenta.kolasu.BuildConfig
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
