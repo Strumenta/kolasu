@@ -135,6 +135,7 @@ open class Node() : Serializable {
         }
     }
 
+    @Internal
     val allAnnotations: List<Annotation>
         get() = annotations
 
