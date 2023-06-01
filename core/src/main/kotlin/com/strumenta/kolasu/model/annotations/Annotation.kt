@@ -15,9 +15,6 @@ sealed class Annotation {
 
     var annotatedNode: Node? = null
 
-    constructor() {
-
-    }
     @Internal
     val annotationType: String
         get() = this::class.qualifiedName!!
