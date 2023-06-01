@@ -14,44 +14,8 @@ import kotlin.reflect.full.memberProperties
  */
 open class Node() : Serializable {
 
+    @Internal
     private val annotations: MutableList<Annotation> = mutableListOf()
-
-    fun getAnnotations(): List<Annotation> {
-        return annotations
-    }
-
-    fun <I : Annotation>getAnnotations(kClass: KClass<I>): List<I> {
-        return annotations.filterIsInstance(kClass.java)
-    }
-
-    fun <I : Annotation>getSingleAnnotations(kClass: KClass<I>): I? {
-        val instances = annotations.filterIsInstance(kClass.java)
-        return if (instances.isEmpty()) {
-            null
-        } else if (instances.size == 1) {
-            instances.first()
-        } else {
-            throw IllegalStateException("More than one instance of $kClass found")
-        }
-    }
-
-    fun <A : Annotation>addAnnotation(annotation: A): A {
-        if (annotation.annotatedNode != null) {
-            throw java.lang.IllegalStateException("Annotation already attached")
-        }
-        annotation.attachTo(this)
-        if (annotation.single) {
-            annotations.filter { it.annotationType == annotation.annotationType }.forEach { removeAnnotation(it) }
-        }
-        annotations.add(annotation)
-        return annotation
-    }
-
-    fun removeAnnotation(annotation: Annotation) {
-        require(annotation.annotatedNode == this)
-        annotation.detach()
-        annotations.remove(annotation)
-    }
 
     @Internal
     val destinations = mutableListOf<Destination>()
@@ -169,6 +133,42 @@ open class Node() : Serializable {
         observers.forEach {
             it.receivePropertyChangeNotification(this, propertyName, oldValue, newValue)
         }
+    }
+
+    val allAnnotations: List<Annotation>
+        get() = annotations
+
+    fun <I : Annotation>annotationsByType(kClass: KClass<I>): List<I> {
+        return annotations.filterIsInstance(kClass.java)
+    }
+
+    fun <I : Annotation>getSingleAnnotations(kClass: KClass<I>): I? {
+        val instances = annotations.filterIsInstance(kClass.java)
+        return if (instances.isEmpty()) {
+            null
+        } else if (instances.size == 1) {
+            instances.first()
+        } else {
+            throw IllegalStateException("More than one instance of $kClass found")
+        }
+    }
+
+    fun <A : Annotation>addAnnotation(annotation: A): A {
+        if (annotation.annotatedNode != null) {
+            throw java.lang.IllegalStateException("Annotation already attached")
+        }
+        annotation.attachTo(this)
+        if (annotation.single) {
+            annotations.filter { it.annotationType == annotation.annotationType }.forEach { removeAnnotation(it) }
+        }
+        annotations.add(annotation)
+        return annotation
+    }
+
+    fun removeAnnotation(annotation: Annotation) {
+        require(annotation.annotatedNode == this)
+        annotation.detach()
+        annotations.remove(annotation)
     }
 
     fun hasAnnotation(annotation: Annotation): Boolean {
