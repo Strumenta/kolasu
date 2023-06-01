@@ -16,15 +16,15 @@ open class Node() : Serializable {
 
     private val annotations: MutableList<Annotation> = mutableListOf()
 
-    fun getAnnotations() : List<Annotation> {
+    fun getAnnotations(): List<Annotation> {
         return annotations
     }
 
-    fun <I: Annotation>getAnnotations(kClass: KClass<I>) : List<I> {
+    fun <I : Annotation>getAnnotations(kClass: KClass<I>): List<I> {
         return annotations.filterIsInstance(kClass.java)
     }
 
-    fun <I: Annotation>getSingleAnnotations(kClass: KClass<I>) : I? {
+    fun <I : Annotation>getSingleAnnotations(kClass: KClass<I>): I? {
         val instances = annotations.filterIsInstance(kClass.java)
         return if (instances.isEmpty()) {
             null
@@ -35,7 +35,7 @@ open class Node() : Serializable {
         }
     }
 
-    fun <A: Annotation>addAnnotation(annotation: A) : A {
+    fun <A : Annotation>addAnnotation(annotation: A): A {
         if (annotation.annotatedNode != null) {
             throw java.lang.IllegalStateException("Annotation already attached")
         }

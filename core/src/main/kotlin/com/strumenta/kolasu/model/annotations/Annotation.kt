@@ -20,11 +20,11 @@ sealed class Annotation {
         get() = this::class.qualifiedName!!
 
     @Internal
-    val single : Boolean
+    val single: Boolean
         get() = !multiple
 
     @Internal
-    abstract val multiple : Boolean
+    abstract val multiple: Boolean
 
     @Internal
     val attached: Boolean

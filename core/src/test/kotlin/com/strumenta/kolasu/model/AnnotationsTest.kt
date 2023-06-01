@@ -6,11 +6,11 @@ import com.strumenta.kolasu.model.annotations.SingleAnnotation
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-data class DocumentationAnnotation(val text: String)
-    : SingleAnnotation()
+data class DocumentationAnnotation(val text: String) :
+    SingleAnnotation()
 
-data class CommentAnnotation(val text: String)
-    : MultipleAnnotation()
+data class CommentAnnotation(val text: String) :
+    MultipleAnnotation()
 
 class N1 : Node()
 
@@ -26,9 +26,9 @@ class AnnotationsTest {
         assertEquals(true, ann1.attached)
         assertEquals(a, ann1.annotatedNode)
         assertEquals(listOf(ann1), a.getAnnotations())
-        assertEquals(listOf(),  b.getAnnotations())
+        assertEquals(listOf(), b.getAnnotations())
         assertEquals(listOf(ann1), a.getAnnotations(Annotation::class))
-        assertEquals(listOf(),  b.getAnnotations(Annotation::class))
+        assertEquals(listOf(), b.getAnnotations(Annotation::class))
         a.removeAnnotation(ann1)
         assertEquals(null, ann1.annotatedNode)
         assertEquals(false, ann1.attached)
@@ -43,9 +43,9 @@ class AnnotationsTest {
         assertEquals(true, ann3.attached)
         assertEquals(a, ann3.annotatedNode)
         assertEquals(listOf(ann3), a.getAnnotations())
-        assertEquals(listOf(),  b.getAnnotations())
+        assertEquals(listOf(), b.getAnnotations())
         assertEquals(listOf(ann3), a.getAnnotations(DocumentationAnnotation::class))
-        assertEquals(listOf(),  b.getAnnotations(DocumentationAnnotation::class))
+        assertEquals(listOf(), b.getAnnotations(DocumentationAnnotation::class))
     }
 
     @Test
@@ -58,9 +58,9 @@ class AnnotationsTest {
         assertEquals(true, ann1.attached)
         assertEquals(a, ann1.annotatedNode)
         assertEquals(listOf(ann1), a.getAnnotations())
-        assertEquals(listOf(),  b.getAnnotations())
+        assertEquals(listOf(), b.getAnnotations())
         assertEquals(listOf(ann1), a.getAnnotations(Annotation::class))
-        assertEquals(listOf(),  b.getAnnotations(Annotation::class))
+        assertEquals(listOf(), b.getAnnotations(Annotation::class))
         a.removeAnnotation(ann1)
         assertEquals(null, ann1.annotatedNode)
         assertEquals(false, ann1.attached)
@@ -75,10 +75,8 @@ class AnnotationsTest {
         assertEquals(true, ann3.attached)
         assertEquals(a, ann3.annotatedNode)
         assertEquals(listOf(ann2, ann3), a.getAnnotations())
-        assertEquals(listOf(),  b.getAnnotations())
+        assertEquals(listOf(), b.getAnnotations())
         assertEquals(listOf(ann2, ann3), a.getAnnotations(CommentAnnotation::class))
-        assertEquals(listOf(),  b.getAnnotations(CommentAnnotation::class))
-
+        assertEquals(listOf(), b.getAnnotations(CommentAnnotation::class))
     }
-
 }
