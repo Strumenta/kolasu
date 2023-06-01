@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.model.annotations.AnnotationInstance
+import com.strumenta.kolasu.model.annotations.Annotation
 import com.strumenta.kolasu.model.observable.Observer
 import java.io.Serializable
 import kotlin.reflect.KClass
@@ -14,17 +14,17 @@ import kotlin.reflect.full.memberProperties
  */
 open class Node() : Serializable {
 
-    private val annotations: MutableList<AnnotationInstance> = mutableListOf()
+    private val annotations: MutableList<Annotation> = mutableListOf()
 
-    fun getAnnotations() : List<AnnotationInstance> {
+    fun getAnnotations() : List<Annotation> {
         return annotations
     }
 
-    fun <I: AnnotationInstance>getAnnotations(kClass: KClass<I>) : List<I> {
+    fun <I: Annotation>getAnnotations(kClass: KClass<I>) : List<I> {
         return annotations.filterIsInstance(kClass.java)
     }
 
-    fun <I: AnnotationInstance>getSingleAnnotations(kClass: KClass<I>) : I? {
+    fun <I: Annotation>getSingleAnnotations(kClass: KClass<I>) : I? {
         val instances = annotations.filterIsInstance(kClass.java)
         return if (instances.isEmpty()) {
             null
@@ -35,17 +35,20 @@ open class Node() : Serializable {
         }
     }
 
-    fun addAnnotation(annotationInstance: AnnotationInstance) {
-        require(annotationInstance.annotatedNode == this)
-        if (annotationInstance.type.single) {
-            annotations.removeIf { it.type == annotationInstance.type}
+    fun addAnnotation(annotation: Annotation) {
+        require(annotation.annotatedNode == this)
+        if (annotation.single) {
+            val toBeRemoved = annotations.filter { it.annotationType == annotation.annotationType }
+            toBeRemoved.forEach { removeAnnotation(it) }
         }
-        annotations.add(annotationInstance)
+        annotations.add(annotation)
+        annotation.attached = true
     }
 
-    fun removeAnnotation(annotationInstance: AnnotationInstance) {
-        require(annotationInstance.annotatedNode == this)
-        annotations.remove(annotationInstance)
+    fun removeAnnotation(annotation: Annotation) {
+        require(annotation.annotatedNode == this)
+        annotations.remove(annotation)
+        annotation.attached = false
     }
 
     @Internal
