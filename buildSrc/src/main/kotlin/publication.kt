@@ -31,17 +31,17 @@ fun PublishingExtension.addSonatypeRepo(project: Project) {
     }
 }
 
-fun PublishingExtension.addPublication(pubName: String, pubDescription: String, project: Project) {
+fun PublishingExtension.addPublication(pubName: String, pubDescription: String, project: Project, addPrefix: Boolean = true) {
     publications {
         create<MavenPublication>(pubName) {
             from(project.components["java"])
-            artifactId = "kolasu-" + project.name
+            artifactId = if (addPrefix) "kolasu-" + project.name else project.name
             artifact(project.tasks.named("sourcesJar"))
             artifact(project.tasks.named("kdocJar"))
             suppressPomMetadataWarningsFor("cliApiElements")
             suppressPomMetadataWarningsFor("cliRuntimeElements")
             pom {
-                name.set("kolasu-" + project.name)
+                name.set(if (addPrefix) "kolasu-" + project.name else project.name)
                 description.set(pubDescription)
                 version = project.version as String
                 packaging = "jar"
