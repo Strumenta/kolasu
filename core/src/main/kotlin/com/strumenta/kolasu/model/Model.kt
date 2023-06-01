@@ -167,8 +167,8 @@ open class Node() : Serializable {
 
     fun removeAnnotation(annotation: Annotation) {
         require(annotation.annotatedNode == this)
-        annotation.detach()
         annotations.remove(annotation)
+        annotation.detach()
     }
 
     fun hasAnnotation(annotation: Annotation): Boolean {
