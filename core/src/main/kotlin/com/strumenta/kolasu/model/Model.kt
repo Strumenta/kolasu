@@ -143,7 +143,7 @@ open class Node() : Serializable {
         return annotations.filterIsInstance(kClass.java)
     }
 
-    fun <I : Annotation>getSingleAnnotations(kClass: KClass<I>): I? {
+    fun <I : Annotation>getSingleAnnotation(kClass: KClass<I>): I? {
         val instances = annotations.filterIsInstance(kClass.java)
         return if (instances.isEmpty()) {
             null
