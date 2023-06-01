@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.model.annotations.Annotation
 import com.strumenta.kolasu.model.observable.Observer
 import java.io.Serializable
 import kotlin.reflect.KClass
@@ -12,6 +13,9 @@ import kotlin.reflect.full.memberProperties
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
 open class Node() : Serializable {
+
+    @Internal
+    private val annotations: MutableList<Annotation> = mutableListOf()
 
     @Internal
     val destinations = mutableListOf<Destination>()
@@ -129,6 +133,47 @@ open class Node() : Serializable {
         observers.forEach {
             it.receivePropertyChangeNotification(this, propertyName, oldValue, newValue)
         }
+    }
+
+    @Internal
+    val allAnnotations: List<Annotation>
+        get() = annotations
+
+    fun <I : Annotation>annotationsByType(kClass: KClass<I>): List<I> {
+        return annotations.filterIsInstance(kClass.java)
+    }
+
+    fun <I : Annotation>getSingleAnnotation(kClass: KClass<I>): I? {
+        val instances = annotations.filterIsInstance(kClass.java)
+        return if (instances.isEmpty()) {
+            null
+        } else if (instances.size == 1) {
+            instances.first()
+        } else {
+            throw IllegalStateException("More than one instance of $kClass found")
+        }
+    }
+
+    fun <A : Annotation>addAnnotation(annotation: A): A {
+        if (annotation.annotatedNode != null) {
+            throw java.lang.IllegalStateException("Annotation already attached")
+        }
+        annotation.attachTo(this)
+        if (annotation.single) {
+            annotations.filter { it.annotationType == annotation.annotationType }.forEach { removeAnnotation(it) }
+        }
+        annotations.add(annotation)
+        return annotation
+    }
+
+    fun removeAnnotation(annotation: Annotation) {
+        require(annotation.annotatedNode == this)
+        annotations.remove(annotation)
+        annotation.detach()
+    }
+
+    fun hasAnnotation(annotation: Annotation): Boolean {
+        return annotations.contains(annotation)
     }
 }
 
