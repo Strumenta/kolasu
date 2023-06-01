@@ -61,12 +61,6 @@ subprojects {
         }
     }
 
-//    tasks.register<Jar>("javadocJar") {
-//        dependsOn(":$name:dokkaJavadoc")
-//        archiveClassifier.set("javadoc")
-//        from("$buildDir/dokka/javadoc")
-//    }
-
     tasks.register<Jar>("kdocJar") {
         dependsOn("dokkaJavadoc")
         from((tasks.named("dokkaJavadoc").get() as DokkaTask).outputDirectory)
@@ -108,6 +102,14 @@ subprojects {
 
     if (isReleaseVersion) {
         tasks.withType(Sign::class) {
+        }
+    }
+
+    ktlint {
+        filter {
+            exclude { element ->
+                element.file.absolutePath.split(File.separator).contains("build")
+            }
         }
     }
 }

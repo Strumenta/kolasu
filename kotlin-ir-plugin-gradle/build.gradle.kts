@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 
 plugins {
     id("java-gradle-plugin")
@@ -39,8 +39,8 @@ publishing {
 afterEvaluate {
     tasks {
         named("generateMetadataFileForPluginMavenPublication") {
-        dependsOn("kdocJar")
-    }
+            dependsOn("kdocJar")
+        }
     }
 }
 

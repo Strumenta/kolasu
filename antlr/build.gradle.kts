@@ -44,3 +44,7 @@ signing {
 tasks.named("sourcesJar") {
     dependsOn("generateGrammarSource")
 }
+
+tasks.named("runKtlintCheckOverMainSourceSet") {
+    dependsOn("generateGrammarSource")
+}
