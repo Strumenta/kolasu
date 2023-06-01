@@ -3,11 +3,21 @@ package com.strumenta.kolasu.model.annotations
 import com.strumenta.kolasu.model.Internal
 import com.strumenta.kolasu.model.Node
 
-sealed class Annotation(open val annotatedNode: Node) {
-    init {
-        this.annotatedNode.addAnnotation(this)
+sealed class Annotation {
+    fun attachTo(node: Node) {
+        require(annotatedNode == null)
+        annotatedNode = node
     }
 
+    fun detach() {
+        annotatedNode = null
+    }
+
+    var annotatedNode: Node? = null
+
+    constructor() {
+
+    }
     @Internal
     val annotationType: String
         get() = this::class.qualifiedName!!
@@ -20,15 +30,16 @@ sealed class Annotation(open val annotatedNode: Node) {
     abstract val multiple : Boolean
 
     @Internal
-    var attached: Boolean = false
+    val attached: Boolean
+        get() = annotatedNode?.hasAnnotation(this) ?: false
 }
 
-abstract class SingleAnnotation(annotatedNode: Node) : Annotation(annotatedNode) {
+abstract class SingleAnnotation() : Annotation() {
     override val multiple: Boolean
         get() = false
 }
 
-abstract class MultipleAnnotation(annotatedNode: Node) : Annotation(annotatedNode) {
+abstract class MultipleAnnotation() : Annotation() {
     override val multiple: Boolean
         get() = true
 }

@@ -35,20 +35,22 @@ open class Node() : Serializable {
         }
     }
 
-    fun addAnnotation(annotation: Annotation) {
-        require(annotation.annotatedNode == this)
+    fun <A: Annotation>addAnnotation(annotation: A) : A {
+        if (annotation.annotatedNode != null) {
+            throw java.lang.IllegalStateException("Annotation already attached")
+        }
+        annotation.attachTo(this)
         if (annotation.single) {
-            val toBeRemoved = annotations.filter { it.annotationType == annotation.annotationType }
-            toBeRemoved.forEach { removeAnnotation(it) }
+            annotations.filter { it.annotationType == annotation.annotationType }.forEach { removeAnnotation(it) }
         }
         annotations.add(annotation)
-        annotation.attached = true
+        return annotation
     }
 
     fun removeAnnotation(annotation: Annotation) {
         require(annotation.annotatedNode == this)
+        annotation.detach()
         annotations.remove(annotation)
-        annotation.attached = false
     }
 
     @Internal
@@ -167,6 +169,10 @@ open class Node() : Serializable {
         observers.forEach {
             it.receivePropertyChangeNotification(this, propertyName, oldValue, newValue)
         }
+    }
+
+    fun hasAnnotation(annotation: Annotation): Boolean {
+        return annotations.contains(annotation)
     }
 }
 
