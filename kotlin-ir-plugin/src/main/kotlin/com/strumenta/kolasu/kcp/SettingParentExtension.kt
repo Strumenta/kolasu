@@ -87,7 +87,7 @@ class SettingParentExtension(val pluginContext: IrPluginContext, val messageColl
                     //        p5.registerObserver(MultiplePropertyListObserver(this, "p5"))
                     //    }
                     val registerObserver = pluginContext.referenceFunctions(
-                        FqName("${ObservableList::class.qualifiedName}.registerObserver")
+                        FqName("${ObservableList::class.qualifiedName}.subscribe")
                     ).single()
 
                     val propertyGetter = declaration.getter!!

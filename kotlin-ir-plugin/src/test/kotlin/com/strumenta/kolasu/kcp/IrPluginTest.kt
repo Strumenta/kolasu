@@ -111,7 +111,7 @@ fun main() {
           package mytest
 
           import com.strumenta.kolasu.model.Node
-          import com.strumenta.kolasu.model.observable.Observer
+          import com.strumenta.kolasu.model.observable.SimpleNodeObserver
 
     data class MyNode(var p1: Int) : Node()
 
@@ -123,26 +123,26 @@ var p2 : Int = 0
     }
 }
 
-object MyObserver : Observer<Node> {
+object MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
-    override fun receivePropertyChangeNotification(
+    override fun <V : Any?>onAttributeChange(
         node: Node,
-        propertyName: String,
-        oldValue: Any?,
-        newValue: Any?
+        attributeName: String,
+        oldValue: V,
+        newValue: V
     ) {
-        observations.add("${'$'}propertyName: ${'$'}oldValue -> ${'$'}newValue")
+        observations.add("${'$'}attributeName: ${'$'}oldValue -> ${'$'}newValue")
     }
 
 }
 
 fun main() {
   val n = MyNode(1)
-  n.registerObserver(MyObserver)
+  n.subscribe(MyObserver)
   n.p1 = 2
   n.p1 = 3
   val f = Foo()
-  f.registerObserver(MyObserver)
+  f.subscribe(MyObserver)
   f.p2 = 4
 }
 
@@ -172,7 +172,6 @@ fun main() {
           package mytest
 
           import com.strumenta.kolasu.model.Node
-          import com.strumenta.kolasu.model.observable.Observer
 
     data class MyNode(var p1: MyNode? = null) : Node()
 
@@ -204,7 +203,6 @@ fun main() {
           package mytest
 
           import com.strumenta.kolasu.model.Node
-          import com.strumenta.kolasu.model.observable.Observer
 
     data class MyNode(var p4: MutableList<MyNode> = mutableListOf()) : Node()
 
@@ -243,7 +241,6 @@ fun main() {
           import com.strumenta.kolasu.model.Node
           import com.strumenta.kolasu.model.observable.ObservableList
           import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
-          import com.strumenta.kolasu.model.observable.Observer
 
     data class MyNode(var p4: ObservableList<MyNode> = ObservableList()) : Node()
 
