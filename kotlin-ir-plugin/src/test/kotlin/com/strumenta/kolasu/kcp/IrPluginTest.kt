@@ -269,6 +269,11 @@ fun main() {
         val mainKt = result.classLoader.loadClass("mytest.MainKt")
         mainKt.methods.find { it.name == "main" }!!.invoke(null)
     }
+
+    @Test
+    fun `references are auto-observed`() {
+        TODO()
+    }
 }
 
 fun compile(
