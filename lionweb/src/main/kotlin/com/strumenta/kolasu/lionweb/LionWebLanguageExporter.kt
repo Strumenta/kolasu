@@ -14,15 +14,15 @@ import com.strumenta.kolasu.model.referredType
  * We create this Class to represent that collection of AST classes.
  */
 class KolasuLanguage {
-    val astClasses: MutableList<KClass<in Node>> = mutableListOf()
+    val astClasses: MutableList<KClass<out Node>> = mutableListOf()
 
-    fun addClass(kClass: KClass<in Node>) : Boolean {
+    fun <N: Node>addClass(kClass: KClass<N>) : Boolean {
         if (astClasses.add(kClass)) {
             kClass.nodeProperties.forEach { nodeProperty ->
                 if (nodeProperty.isContainment()) {
-                    addClass(nodeProperty.containedType() as KClass<in Node>)
+                    addClass(nodeProperty.containedType())
                 } else if (nodeProperty.isReference()) {
-                    addClass(nodeProperty.referredType() as KClass<in Node>)
+                    addClass(nodeProperty.referredType())
                 }
                 // TODO add enums and other datatypes
             }

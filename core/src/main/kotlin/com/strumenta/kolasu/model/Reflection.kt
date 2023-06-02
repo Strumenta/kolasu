@@ -201,19 +201,19 @@ private fun providesNodes(kTypeProjection: KTypeProjection): Boolean {
 }
 
 
-fun KProperty1<in Node, *>.isContainment() : Boolean {
+fun <N: Node>KProperty1<N, *>.isContainment() : Boolean {
     return providesNodes(this.returnType.classifier)
 }
 
-fun KProperty1<in Node, *>.isReference() : Boolean {
+fun <N: Node>KProperty1<N, *>.isReference() : Boolean {
     return this.returnType.classifier == ReferenceByName::class
 }
 
-fun KProperty1<in Node, *>.isAttribute() : Boolean {
-    return !isContainment() && !isReference
+fun <N: Node>KProperty1<N, *>.isAttribute() : Boolean {
+    return !isContainment() && !isReference()
 }
 
-fun KProperty1<in Node, *>.containedType() : KClass<out Node> {
+fun <N: Node>KProperty1<N, *>.containedType() : KClass<out Node> {
     require(isContainment())
     if ((this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
         return this.returnType.arguments[0].type!!.classifier as KClass<out Node>
@@ -222,7 +222,7 @@ fun KProperty1<in Node, *>.containedType() : KClass<out Node> {
     }
 }
 
-fun KProperty1<in Node, *>.referredType() : KClass<out Node> {
+fun <N: Node>KProperty1<N, *>.referredType() : KClass<out Node> {
     require(isReference())
     return this.returnType.arguments[0].type!!.classifier as KClass<out Node>
 }
