@@ -35,13 +35,6 @@ import org.jetbrains.kotlin.ir.util.statements
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 
-// private val IrProperty.location: CompilerMessageSourceLocation?
-//  get() {
-//    return CompilerMessageLocationWithRange(
-//      this.fileEntry.name, this.
-//    )
-//  }
-
 /**
  * Set the parent appropriately when modifying a containment value.
  */
