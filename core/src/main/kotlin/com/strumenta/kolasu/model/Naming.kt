@@ -1,5 +1,9 @@
 package com.strumenta.kolasu.model
 
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.ObservableSource
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.disposables.Disposable
 import java.io.Serializable
 
 /**
@@ -22,6 +26,8 @@ interface Named : PossiblyNamed {
     override val name: String
 }
 
+data class ReferenceChangeNotification<N: PossiblyNamed>(val oldValue: N?, val newValue: N?)
+
 /**
  * A reference associated by using a name.
  * It can be used only to refer to Nodes and not to other values.
@@ -29,13 +35,20 @@ interface Named : PossiblyNamed {
  * This is not statically enforced as we may want to use some interface, which cannot extend Node.
  * However, this is enforced dynamically.
  */
-class ReferenceByName<N>(val name: String, initialReferred: N? = null) : Serializable where N : PossiblyNamed {
+class ReferenceByName<N>(val name: String, initialReferred: N? = null) : Serializable, Disposable,
+    ObservableSource<ReferenceChangeNotification<N>> where N : PossiblyNamed  {
+
+    private val observers: MutableList<Observer<in ReferenceChangeNotification<N>>> = mutableListOf()
+
 
     var referred: N? = null
         set(value) {
             require(value is Node || value == null) {
                 "We cannot enforce it statically but only Node should be referred to. Instead $value was assigned " +
                     "(class: ${value?.javaClass})"
+            }
+            observers.forEach { observer ->
+                observer.onNext(ReferenceChangeNotification(field, value))
             }
             field = value
         }
@@ -67,6 +80,19 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) : Seriali
         if (referred != other.referred) return false
 
         return true
+    }
+
+    override fun subscribe(observer: Observer<in ReferenceChangeNotification<N>>) {
+        observers.add(observer)
+        observer.onSubscribe(this)
+    }
+
+    override fun dispose() {
+        throw UnsupportedOperationException()
+    }
+
+    override fun isDisposed(): Boolean {
+        return false
     }
 }
 

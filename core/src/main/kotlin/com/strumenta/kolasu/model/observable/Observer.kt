@@ -21,7 +21,8 @@ data class ChildRemoved<N: Node>(override val node: N,
 
 data class ReferenceSet<N: Node>(override val node: N,
                                  val referenceName: String,
-                                        val referredNode: Node?) : NodeNotification<N>()
+                                 val oldReferredNode: Node?,
+                                        val newReferredNode: Node?) : NodeNotification<N>()
 
 data class ReferencedToAdded<N: Node>(override val node: N,
                                                val referenceName: String,
@@ -39,7 +40,7 @@ open class SimpleNodeObserver : Observer<NodeNotification<in Node>> {
     open fun onChildAdded(node: Node, containmentName: String, added: Node) {}
     open fun onChildRemoved(node: Node, containmentName: String, removed: Node) {}
 
-    open fun onReferenceSet(node: Node, referenceName: String, referredNode: Node?) {}
+    open fun onReferenceSet(node: Node, referenceName: String, oldReferredNode: Node?, newReferredNode: Node?) {}
 
     open fun onReferringAdded(node: Node, referenceName: String, referring: Node) {}
     open fun onReferringRemoved(node: Node, referenceName: String, referring: Node) {}
@@ -61,9 +62,9 @@ open class SimpleNodeObserver : Observer<NodeNotification<in Node>> {
             is AttributeChangedNotification<Node, *> -> onAttributeChange(notification.node, notification.attributeName, notification.oldValue, notification.newValue)
             is ChildAdded<Node> -> onChildAdded(notification.node, notification.containmentName, notification.child)
             is ChildRemoved<Node> -> onChildRemoved(notification.node, notification.containmentName, notification.child)
-            is ReferenceSet<Node> -> onReferenceSet(notification.node, notification.referenceName, notification.referredNode)
-            is ReferencedToAdded<Node> -> onReferenceSet(notification.node, notification.referenceName, notification.referringNode)
-            is ReferencedToRemoved<Node> -> onReferenceSet(notification.node, notification.referenceName, notification.referringNode)
+            is ReferenceSet<Node> -> onReferenceSet(notification.node, notification.referenceName, notification.oldReferredNode, notification.newReferredNode)
+            is ReferencedToAdded<Node> -> onReferringAdded(notification.node, notification.referenceName, notification.referringNode)
+            is ReferencedToRemoved<Node> -> onReferringRemoved(notification.node, notification.referenceName, notification.referringNode)
         }
     }
 }

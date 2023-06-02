@@ -142,14 +142,6 @@ open class Node() : Serializable, ObservableSource<NodeNotification<in Node>>, D
 
     @property:Internal
     val observers: MutableList<NodeObserver> = mutableListOf()
-//    fun registerObserver(observer: GenericObserver) {
-//        observer.onSubscribe(this)
-//        observers.add(observer)
-//    }
-//
-//    fun unregisterObserver(observer: GenericObserver) {
-//        observers.remove(observer)
-//    }
 
     protected fun notifyOfPropertyChange(propertyName: String, oldValue: Any?, newValue: Any?) {
         observers.forEach {
