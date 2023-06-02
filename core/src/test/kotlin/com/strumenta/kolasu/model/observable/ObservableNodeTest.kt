@@ -49,7 +49,7 @@ class MyObservableNodeMP : Node() {
 
     val p5 = ObservableList<MyObservableNodeMP>()
     init {
-        p5.registerObserver(MultiplePropertyListObserver(this, "p5"))
+        p5.subscribe(MultiplePropertyListObserver(this, "p5"))
     }
 }
 

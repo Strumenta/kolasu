@@ -1,16 +1,27 @@
 package com.strumenta.kolasu.model.observable
 
-interface ListObserver<E> {
-    fun added(e: E)
-    fun removed(e: E)
-}
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.ObservableSource
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.disposables.Disposable
 
-class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) : MutableList<E> by base {
-    private val observers = mutableListOf<ListObserver<in E>>()
+//interface ListObserver<E> {
+//    fun added(e: E)
+//    fun removed(e: E)
+//}
 
-    fun registerObserver(observer: ListObserver<in E>) {
-        observers.add(observer)
-    }
+sealed class ListNotification<E>
+
+data class ListAddition<E>(val added: E): ListNotification<E>()
+data class ListRemoval<E>(val removed: E): ListNotification<E>()
+
+class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) : MutableList<E> by base,
+    ObservableSource<ListNotification<E>>, Disposable {
+    private val observers = mutableListOf<Observer<in ListNotification<E>>>()
+
+//    fun registerObserver(observer: ListObserver<in E>) {
+//        observers.add(observer)
+//    }
 
     override fun addAll(elements: Collection<E>): Boolean {
         var modified = false
@@ -30,7 +41,7 @@ class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) : Mu
 
     override fun add(element: E): Boolean {
         return if (base.add(element)) {
-            observers.forEach { it.added(element) }
+            observers.forEach { it.onNext(ListAddition(element)) }
             true
         } else {
             false
@@ -51,10 +62,23 @@ class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) : Mu
 
     override fun remove(element: E): Boolean {
         return if (base.remove(element)) {
-            observers.forEach { it.removed(element) }
+            observers.forEach { it.onNext(ListRemoval(element)) }
             true
         } else {
             false
         }
+    }
+
+    override fun subscribe(observer: Observer<in ListNotification<E>>) {
+        observers.add(observer)
+        observer.onSubscribe(this)
+    }
+
+    override fun dispose() {
+        throw UnsupportedOperationException()
+    }
+
+    override fun isDisposed(): Boolean {
+        return false
     }
 }
