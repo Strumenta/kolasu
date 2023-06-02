@@ -17,7 +17,7 @@ class KolasuLanguage {
     val astClasses: MutableList<KClass<out Node>> = mutableListOf()
 
     fun <N: Node>addClass(kClass: KClass<N>) : Boolean {
-        if (astClasses.add(kClass)) {
+        if (!astClasses.contains(kClass) && astClasses.add(kClass)) {
             kClass.nodeProperties.forEach { nodeProperty ->
                 if (nodeProperty.isContainment()) {
                     addClass(nodeProperty.containedType())

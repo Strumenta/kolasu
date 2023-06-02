@@ -73,18 +73,18 @@ data class PropertyDescription(
 
     companion object {
 
-        fun multiple(property: KProperty1<in Node, *>): Boolean {
+        fun <N:Node>multiple(property: KProperty1<N, *>): Boolean {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             return (classifier?.isSubclassOf(Collection::class) == true)
         }
 
-        fun optional(property: KProperty1<in Node, *>): Boolean {
+        fun <N:Node>optional(property: KProperty1<N, *>): Boolean {
             val propertyType = property.returnType
             return !multiple(property) && propertyType.isMarkedNullable
         }
 
-        fun multiplicity(property: KProperty1<in Node, *>): Multiplicity {
+        fun <N:Node>multiplicity(property: KProperty1<N, *>): Multiplicity {
             return when {
                 multiple(property) -> Multiplicity.MANY
                 optional(property) -> Multiplicity.OPTIONAL
@@ -92,7 +92,7 @@ data class PropertyDescription(
             }
         }
 
-        fun providesNodes(property: KProperty1<in Node, *>): Boolean {
+        fun <N:Node>providesNodes(property: KProperty1<N, *>): Boolean {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             return if (multiple(property)) {
@@ -102,16 +102,16 @@ data class PropertyDescription(
             }
         }
 
-        fun buildFor(property: KProperty1<in Node, *>, node: Node): PropertyDescription {
+        fun <N:Node>buildFor(property: KProperty1<N, *>, node: Node): PropertyDescription {
             val multiplicity = multiplicity(property)
             val provideNodes = providesNodes(property)
             return PropertyDescription(
                 name = property.name,
                 provideNodes = provideNodes,
                 multiplicity = multiplicity,
-                value = property.get(node),
+                value = property.get(node as N),
                 when {
-                    property.isReference -> PropertyType.REFERENCE
+                    property.isReference() -> PropertyType.REFERENCE
                     provideNodes -> PropertyType.CONTAINMENT
                     else -> PropertyType.ATTRIBUTE
                 }
@@ -119,9 +119,6 @@ data class PropertyDescription(
         }
     }
 }
-
-private val KProperty1<in Node, *>.isReference: Boolean get() =
-    ((this.returnType as? KType)?.classifier as? KClass<*>) == ReferenceByName::class
 
 private fun providesNodes(classifier: KClassifier?): Boolean {
     if (classifier == null) {
@@ -202,7 +199,11 @@ private fun providesNodes(kTypeProjection: KTypeProjection): Boolean {
 
 
 fun <N: Node>KProperty1<N, *>.isContainment() : Boolean {
-    return providesNodes(this.returnType.classifier)
+    if ((this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
+        return providesNodes(this.returnType.arguments[0].type!!.classifier as KClass<out Node>)
+    } else {
+        return providesNodes(this.returnType.classifier as KClass<out Node>)
+    }
 }
 
 fun <N: Node>KProperty1<N, *>.isReference() : Boolean {
