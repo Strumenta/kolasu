@@ -59,7 +59,6 @@ data class NodeWithReference(val ref: ReferenceByName<NamedNode>, val id: Int) :
     init {
         ref.subscribe(ReferenceToNodeObserver(this, "ref"))
     }
-
 }
 
 class ObservableNodeTest {
@@ -165,31 +164,58 @@ class ObservableNodeTest {
         nwr1.ref.referred = a
         assertEquals(listOf("ref: changed from null to a"), obs1.observations)
         assertEquals(listOf(), obs2.observations)
-        assertEquals(listOf(
-            "a is now referred to by com.strumenta.kolasu.model.observable.NodeWithReference(id=1, ref=Ref(foo)[Unsolved]).ref"),
-            obsA.observations)
+        assertEquals(
+            listOf(
+                "a is now referred to by com.strumenta.kolasu.model.observable." +
+                    "NodeWithReference(id=1, ref=Ref(foo)[Unsolved]).ref"
+            ),
+            obsA.observations
+        )
         assertEquals(listOf(), obsB.observations)
         clearObservations()
 
         nwr1.ref.referred = b
         assertEquals(listOf("ref: changed from a to b"), obs1.observations)
         assertEquals(listOf(), obs2.observations)
-        assertEquals(listOf(
-            "a is not referred anymore by com.strumenta.kolasu.model.observable.NodeWithReference(id=1, ref=Ref(foo)[Solved]).ref"), obsA.observations)
-        assertEquals(listOf("b is now referred to by com.strumenta.kolasu.model.observable.NodeWithReference(id=1, ref=Ref(foo)[Solved]).ref"), obsB.observations)
+        assertEquals(
+            listOf(
+                "a is not referred anymore by com.strumenta.kolasu.model.observable." +
+                    "NodeWithReference(id=1, ref=Ref(foo)[Solved]).ref"
+            ),
+            obsA.observations
+        )
+        assertEquals(
+            listOf(
+                "b is now referred to by com.strumenta.kolasu.model.observable." +
+                    "NodeWithReference(id=1, ref=Ref(foo)[Solved]).ref"
+            ),
+            obsB.observations
+        )
         clearObservations()
 
         nwr1.ref.referred = null
         assertEquals(listOf("ref: changed from b to null"), obs1.observations)
         assertEquals(listOf(), obs2.observations)
         assertEquals(listOf(), obsA.observations)
-        assertEquals(listOf("b is not referred anymore by com.strumenta.kolasu.model.observable.NodeWithReference(id=1, ref=Ref(foo)[Solved]).ref"), obsB.observations)
+        assertEquals(
+            listOf(
+                "b is not referred anymore by com.strumenta.kolasu.model.observable." +
+                    "NodeWithReference(id=1, ref=Ref(foo)[Solved]).ref"
+            ),
+            obsB.observations
+        )
         clearObservations()
 
         nwr2.ref.referred = a
         assertEquals(listOf(), obs1.observations)
         assertEquals(listOf("ref: changed from null to a"), obs2.observations)
-        assertEquals(listOf("a is now referred to by com.strumenta.kolasu.model.observable.NodeWithReference(id=2, ref=Ref(bar)[Unsolved]).ref"), obsA.observations)
+        assertEquals(
+            listOf(
+                "a is now referred to by com.strumenta.kolasu.model.observable." +
+                    "NodeWithReference(id=2, ref=Ref(bar)[Unsolved]).ref"
+            ),
+            obsA.observations
+        )
         assertEquals(listOf(), obsB.observations)
     }
 }

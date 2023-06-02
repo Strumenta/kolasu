@@ -1,22 +1,23 @@
 package com.strumenta.kolasu.model.observable
 
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableSource
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
 
-//interface ListObserver<E> {
+// interface ListObserver<E> {
 //    fun added(e: E)
 //    fun removed(e: E)
-//}
+// }
 
 sealed class ListNotification<E>
 
-data class ListAddition<E>(val added: E): ListNotification<E>()
-data class ListRemoval<E>(val removed: E): ListNotification<E>()
+data class ListAddition<E>(val added: E) : ListNotification<E>()
+data class ListRemoval<E>(val removed: E) : ListNotification<E>()
 
-class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) : MutableList<E> by base,
-    ObservableSource<ListNotification<E>>, Disposable {
+class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
+    MutableList<E> by base,
+    ObservableSource<ListNotification<E>>,
+    Disposable {
     private val observers = mutableListOf<Observer<in ListNotification<E>>>()
 
 //    fun registerObserver(observer: ListObserver<in E>) {

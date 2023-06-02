@@ -8,17 +8,13 @@ import kotlin.test.assertEquals
 class MyListObserver : Observer<ListNotification<Int>> {
     val observations = mutableListOf<String>()
 
-
     override fun onSubscribe(d: Disposable) {
-
     }
 
     override fun onError(e: Throwable) {
-
     }
 
     override fun onComplete() {
-
     }
 
     override fun onNext(notification: ListNotification<Int>) {

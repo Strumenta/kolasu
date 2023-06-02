@@ -6,9 +6,9 @@ import com.strumenta.kolasu.model.ReferenceChangeNotification
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
 
-class ReferenceToNodeObserver<N: PossiblyNamed>(val container: Node, val referenceName: String) : Observer<ReferenceChangeNotification<N>> {
+class ReferenceToNodeObserver<N : PossiblyNamed>(val container: Node, val referenceName: String) :
+    Observer<ReferenceChangeNotification<N>> {
     override fun onSubscribe(d: Disposable) {
-
     }
 
     override fun onError(e: Throwable) {
@@ -21,8 +21,14 @@ class ReferenceToNodeObserver<N: PossiblyNamed>(val container: Node, val referen
 
     override fun onNext(referenceNotification: ReferenceChangeNotification<N>) {
         container.observers.forEach { nodeObserver ->
-            nodeObserver.onNext(ReferenceSet(container, referenceName, referenceNotification.oldValue as Node?,
-                referenceNotification.newValue as Node?))
+            nodeObserver.onNext(
+                ReferenceSet(
+                    container,
+                    referenceName,
+                    referenceNotification.oldValue as Node?,
+                    referenceNotification.newValue as Node?
+                )
+            )
             if (referenceNotification.oldValue != null) {
                 referenceNotification.oldValue.observers.forEach {
                     it.onNext(ReferencedToRemoved(referenceNotification.oldValue, referenceName, container))

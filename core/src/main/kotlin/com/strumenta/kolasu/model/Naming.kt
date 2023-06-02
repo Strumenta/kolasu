@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.model
 
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableSource
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
@@ -26,7 +25,7 @@ interface Named : PossiblyNamed {
     override val name: String
 }
 
-data class ReferenceChangeNotification<N: PossiblyNamed>(val oldValue: N?, val newValue: N?)
+data class ReferenceChangeNotification<N : PossiblyNamed>(val oldValue: N?, val newValue: N?)
 
 /**
  * A reference associated by using a name.
@@ -35,11 +34,12 @@ data class ReferenceChangeNotification<N: PossiblyNamed>(val oldValue: N?, val n
  * This is not statically enforced as we may want to use some interface, which cannot extend Node.
  * However, this is enforced dynamically.
  */
-class ReferenceByName<N>(val name: String, initialReferred: N? = null) : Serializable, Disposable,
-    ObservableSource<ReferenceChangeNotification<N>> where N : PossiblyNamed  {
+class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
+    Serializable,
+    Disposable,
+    ObservableSource<ReferenceChangeNotification<N>> where N : PossiblyNamed {
 
     private val observers: MutableList<Observer<in ReferenceChangeNotification<N>>> = mutableListOf()
-
 
     var referred: N? = null
         set(value) {

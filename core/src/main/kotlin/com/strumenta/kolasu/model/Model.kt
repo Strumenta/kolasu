@@ -6,7 +6,6 @@ import com.strumenta.kolasu.model.observable.NodeNotification
 import io.reactivex.rxjava3.core.ObservableSource
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
-import org.reactivestreams.Subscriber
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -125,7 +124,6 @@ open class Node() : Serializable, ObservableSource<NodeNotification<in Node>>, D
     final override fun toString(): String {
         return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
     }
-
 
     override fun subscribe(observer: NodeObserver) {
         observers.add(observer)
