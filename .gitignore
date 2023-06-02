@@ -37,3 +37,4 @@ generated-test-src
 /*.json
 /*.xmi
 **/bin/
+.netlify
