@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.model.observable
 
 import com.strumenta.kolasu.model.Node
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.disposables.Disposable
 import org.reactivestreams.Subscriber
 import org.reactivestreams.Subscription
 
@@ -31,21 +33,22 @@ data class ReferencedToRemoved<N: Node>(override val node: N,
 
 
 
-open class SimpleNodeObserver<N : Node> : Subscriber<NodeNotification<N>> {
-    open fun <V: Any?>onAttributeChange(node: N, attributeName: String, oldValue: V, newValue: V) {}
+open class SimpleNodeObserver : Observer<NodeNotification<in Node>> {
+    open fun <V: Any?>onAttributeChange(node: Node, attributeName: String, oldValue: V, newValue: V) {}
 
-    open fun onChildAdded(node: N, containmentName: String, added: Node) {}
-    open fun onChildRemoved(node: N, containmentName: String, removed: Node) {}
+    open fun onChildAdded(node: Node, containmentName: String, added: Node) {}
+    open fun onChildRemoved(node: Node, containmentName: String, removed: Node) {}
 
-    open fun onReferenceSet(node: N, referenceName: String, referredNode: Node?) {}
+    open fun onReferenceSet(node: Node, referenceName: String, referredNode: Node?) {}
 
-    open fun onReferringAdded(node: N, referenceName: String, referring: Node) {}
-    open fun onReferringRemoved(node: N, referenceName: String, referring: Node) {}
-    override fun onSubscribe(s: Subscription?) {
+    open fun onReferringAdded(node: Node, referenceName: String, referring: Node) {}
+    open fun onReferringRemoved(node: Node, referenceName: String, referring: Node) {}
+
+    override fun onSubscribe(d: Disposable) {
 
     }
 
-    override fun onError(t: Throwable?) {
+    override fun onError(e: Throwable) {
 
     }
 
@@ -53,14 +56,14 @@ open class SimpleNodeObserver<N : Node> : Subscriber<NodeNotification<N>> {
 
     }
 
-    override fun onNext(notification: NodeNotification<N>) {
+    override fun onNext(notification: NodeNotification<in Node>) {
         when (notification) {
-            is AttributeChangedNotification<N, *> -> onAttributeChange(notification.node, notification.attributeName, notification.oldValue, notification.newValue)
-            is ChildAdded<N> -> onChildAdded(notification.node, notification.containmentName, notification.child)
-            is ChildRemoved<N> -> onChildRemoved(notification.node, notification.containmentName, notification.child)
-            is ReferenceSet<N> -> onReferenceSet(notification.node, notification.referenceName, notification.referredNode)
-            is ReferencedToAdded<N> -> onReferenceSet(notification.node, notification.referenceName, notification.referringNode)
-            is ReferencedToRemoved<N> -> onReferenceSet(notification.node, notification.referenceName, notification.referringNode)
+            is AttributeChangedNotification<Node, *> -> onAttributeChange(notification.node, notification.attributeName, notification.oldValue, notification.newValue)
+            is ChildAdded<Node> -> onChildAdded(notification.node, notification.containmentName, notification.child)
+            is ChildRemoved<Node> -> onChildRemoved(notification.node, notification.containmentName, notification.child)
+            is ReferenceSet<Node> -> onReferenceSet(notification.node, notification.referenceName, notification.referredNode)
+            is ReferencedToAdded<Node> -> onReferenceSet(notification.node, notification.referenceName, notification.referringNode)
+            is ReferencedToRemoved<Node> -> onReferenceSet(notification.node, notification.referenceName, notification.referringNode)
         }
     }
 }

@@ -3,6 +3,9 @@ package com.strumenta.kolasu.model
 import com.strumenta.kolasu.model.annotations.Annotation
 import com.strumenta.kolasu.model.observable.AttributeChangedNotification
 import com.strumenta.kolasu.model.observable.NodeNotification
+import io.reactivex.rxjava3.core.ObservableSource
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.disposables.Disposable
 import org.reactivestreams.Subscriber
 import java.io.Serializable
 import kotlin.reflect.KClass
@@ -11,12 +14,12 @@ import kotlin.reflect.KVisibility
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 
-typealias GenericObserver = Subscriber<NodeNotification<in Node>>
+typealias NodeObserver = Observer<in NodeNotification<in Node>>
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
-open class Node() : Serializable {
+open class Node() : Serializable, ObservableSource<NodeNotification<in Node>>, Disposable {
 
     @Internal
     private val annotations: MutableList<Annotation> = mutableListOf()
@@ -123,15 +126,30 @@ open class Node() : Serializable {
         return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
     }
 
-    @property:Internal
-    val observers: MutableList<GenericObserver> = mutableListOf()
-    fun registerObserver(observer: GenericObserver) {
+
+    override fun subscribe(observer: NodeObserver) {
         observers.add(observer)
+        observer.onSubscribe(this)
     }
 
-    fun unregisterObserver(observer: GenericObserver) {
-        observers.remove(observer)
+    override fun dispose() {
+        throw UnsupportedOperationException()
     }
+
+    override fun isDisposed(): Boolean {
+        return false
+    }
+
+    @property:Internal
+    val observers: MutableList<NodeObserver> = mutableListOf()
+//    fun registerObserver(observer: GenericObserver) {
+//        observer.onSubscribe(this)
+//        observers.add(observer)
+//    }
+//
+//    fun unregisterObserver(observer: GenericObserver) {
+//        observers.remove(observer)
+//    }
 
     protected fun notifyOfPropertyChange(propertyName: String, oldValue: Any?, newValue: Any?) {
         observers.forEach {

@@ -12,7 +12,7 @@ class MyObservableNode : Node() {
         }
 }
 
-class MyObserver : SimpleNodeObserver<Node>() {
+class MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
     override fun <V> onAttributeChange(node: Node, attributeName: String, oldValue: V, newValue: V) {
         observations.add("$attributeName: $oldValue -> $newValue")
@@ -43,7 +43,7 @@ class ObservableNodeTest {
         assertEquals(listOf(), obs.observations)
         n.p1 = 1
         assertEquals(listOf(), obs.observations)
-        n.registerObserver(obs)
+        n.subscribe(obs)
         n.p1 = 2
         assertEquals(listOf("p1: 1 -> 2"), obs.observations)
         n.p1 = 3
@@ -56,7 +56,7 @@ class ObservableNodeTest {
         val n2 = MyObservableNodeMP()
         val n3 = MyObservableNodeMP()
         val obs = MyObserver()
-        n1.registerObserver(obs)
+        n1.subscribe(obs)
 
         assertEquals(null, n1.parent)
         assertEquals(null, n2.parent)
