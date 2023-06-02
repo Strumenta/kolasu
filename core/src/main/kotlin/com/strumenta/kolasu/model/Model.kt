@@ -1,13 +1,17 @@
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.model.annotations.Annotation
-import com.strumenta.kolasu.model.observable.Observer
+import com.strumenta.kolasu.model.observable.AttributeChangedNotification
+import com.strumenta.kolasu.model.observable.NodeNotification
+import org.reactivestreams.Subscriber
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
+
+typealias GenericObserver = Subscriber<NodeNotification<in Node>>
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
@@ -120,18 +124,18 @@ open class Node() : Serializable {
     }
 
     @property:Internal
-    val observers: MutableList<Observer<in Node>> = mutableListOf()
-    fun registerObserver(observer: Observer<*>) {
-        observers.add(observer as Observer<in Node>)
+    val observers: MutableList<GenericObserver> = mutableListOf()
+    fun registerObserver(observer: GenericObserver) {
+        observers.add(observer)
     }
 
-    fun unregisterObserver(observer: Observer<in Node>) {
+    fun unregisterObserver(observer: GenericObserver) {
         observers.remove(observer)
     }
 
     protected fun notifyOfPropertyChange(propertyName: String, oldValue: Any?, newValue: Any?) {
         observers.forEach {
-            it.receivePropertyChangeNotification(this, propertyName, oldValue, newValue)
+            it.onNext(AttributeChangedNotification(this, propertyName, oldValue, newValue))
         }
     }
 

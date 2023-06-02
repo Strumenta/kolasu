@@ -12,23 +12,18 @@ class MyObservableNode : Node() {
         }
 }
 
-class MyObserver : Observer<Node> {
+class MyObserver : SimpleNodeObserver<Node>() {
     val observations = mutableListOf<String>()
-    override fun receivePropertyChangeNotification(
-        node: Node,
-        propertyName: String,
-        oldValue: Any?,
-        newValue: Any?
-    ) {
-        observations.add("$propertyName: $oldValue -> $newValue")
+    override fun <V> onAttributeChange(node: Node, attributeName: String, oldValue: V, newValue: V) {
+        observations.add("$attributeName: $oldValue -> $newValue")
     }
 
-    override fun receivePropertyAddedNotification(node: Node, propertyName: String, added: Any?) {
-        observations.add("$propertyName: added $added")
+    override fun onChildAdded(node: Node, containmentName: String, added: Node) {
+        observations.add("$containmentName: added $added")
     }
 
-    override fun receivePropertyRemovedNotification(node: Node, propertyName: String, removed: Any?) {
-        observations.add("$propertyName: removed $removed")
+    override fun onChildRemoved(node: Node, containmentName: String, removed: Node) {
+        observations.add("$containmentName: removed $removed")
     }
 }
 
