@@ -90,43 +90,6 @@ class FieldObservableExtension(val pluginContext: IrPluginContext) : IrElementTr
                 }
             anonymousInitializerSymbolImpl.parent = irClass
             irClass.declarations.add(anonymousInitializerSymbolImpl)
-
-//            val prevBody = declaration.setter?.body
-//            if (prevBody == null) {
-//                if (declaration.setter == null) {
-//                    declaration.setter = IrFactoryImpl.createFunction(declaration.startOffset, declaration.endOffset, AutoObserveReferenceOrigin,
-//                        IrSimpleFunctionSymbolImpl(),
-//                        Name.identifier("<set-${declaration.name}>"),
-//                        DescriptorVisibilities.PUBLIC,
-//                        Modality.FINAL,
-//                        pluginContext.irBuiltIns.unitType,
-//                        false,
-//                        false,
-//                        false,
-//                        false,
-//                        false,
-//                        false,
-//                        false,
-//                        true
-//                    )
-//                    val anonymousInitializerSymbolImpl = IrFactoryImpl.createAnonymousInitializer(
-//                        -1,
-//                        -1,
-//                        IrDeclarationOrigin.GeneratedByPlugin(object : GeneratedDeclarationKey() {}),
-//                        IrAnonymousInitializerSymbolImpl(),
-//                        false
-//                    )
-//                    declaration.setter!!.body = DeclarationIrBuilder(pluginContext, anonymousInitializerSymbolImpl.symbol).irBlockBody(
-//                        IrFactoryImpl.createBlockBody(-1, -1)
-//                    ) {
-//
-//                    }
-//                } else {
-//                    TODO()
-//                }
-//            } else {
-//                TODO()
-//            }
         } else {
             val irContext = pluginContext
             val prevBody = declaration.setter?.body
