@@ -226,7 +226,7 @@ open class Node() : Serializable {
         return prop.call(this)
     }
     fun <T : PossiblyNamed>setReferenceReferred(referenceName: String, referred: T) {
-        val ref : ReferenceByName<T> = getReference(referenceName)
+        val ref: ReferenceByName<T> = getReference(referenceName)
         ref.referred = referred
     }
 }

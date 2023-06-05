@@ -1,13 +1,7 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.symbolresolution.Scope
-import com.strumenta.kolasu.symbolresolution.Symbol
 import kotlin.test.Test
-import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
-import org.junit.Test as test
 
 class HNodeA(override var name: String) : Node(), Named
 
