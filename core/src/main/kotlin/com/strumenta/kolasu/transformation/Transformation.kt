@@ -31,13 +31,41 @@ annotation class Mapped(val path: String = "")
 /**
  * Transformer that, given a tree node, will instantiate the corresponding transformed node.
  */
-class NodeTransformer<Source, Output : Node>(
-    val constructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> Output?,
-    val children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
-    var finalizer: (Output) -> Unit = {},
-    var skipChildren: Boolean = false,
+class NodeTransformer<Source, Output : Node> {
+    val constructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> List<Output>
+    var children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf()
+    var finalizer: (Output) -> Unit = {}
+    var skipChildren: Boolean = false
     var childrenSetAtConstruction: Boolean = false
-) {
+
+    constructor(
+        constructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> List<Output>,
+        children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
+        finalizer: (Output) -> Unit = {},
+        skipChildren: Boolean = false,
+        childrenSetAtConstruction: Boolean = false
+    ) {
+        this.constructor = constructor
+        this.children = children
+        this.finalizer = finalizer
+        this.skipChildren = skipChildren
+        this.childrenSetAtConstruction = childrenSetAtConstruction
+    }
+
+    companion object {
+        fun <Source, Output : Node> single(
+            singleConstructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> Output?,
+            children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
+            finalizer: (Output) -> Unit = {},
+            skipChildren: Boolean = false,
+            childrenSetAtConstruction: Boolean = false
+        ): NodeTransformer<Source, Output> {
+            return NodeTransformer({ source, at, nf ->
+                val result = singleConstructor(source, at, nf)
+                if (result == null) emptyList() else listOf(result)
+            }, children, finalizer, skipChildren, childrenSetAtConstruction)
+        }
+    }
 
     /**
      * Specify how to convert a child. The value obtained from the conversion could either be used
@@ -245,32 +273,53 @@ open class ASTTransformer(
     val knownClasses: Map<String, Set<KClass<*>>> = _knownClasses
 
     /**
+     * This ensures that the generated value is a single Node or null.
+     */
+    @JvmOverloads
+    fun transform(source: Any?, parent: Node? = null): Node? {
+        val result = transformIntoNodes(source, parent)
+        return when (result.size) {
+            0 -> null
+            1 -> {
+                val node = result.first()
+                require(node is Node)
+                node
+            }
+            else -> throw IllegalStateException(
+                "Cannot transform into a single Node as multiple nodes where produced"
+            )
+        }
+    }
+
+    /**
      * Performs the transformation of a node and, recursively, its descendants.
      */
     @JvmOverloads
-    open fun transform(source: Any?, parent: Node? = null): Node? {
+    open fun transformIntoNodes(source: Any?, parent: Node? = null): List<Node> {
         if (source == null) {
-            return null
+            return emptyList()
         }
         if (source is Collection<*>) {
             throw Error("Mapping error: received collection when value was expected")
         }
         val transformer = getNodeTransformer<Any, Node>(source::class as KClass<Any>)
-        val node: Node?
+        val nodes: List<Node>
         if (transformer != null) {
-            node = makeNode(transformer, source, allowGenericNode = allowGenericNode)
-            if (node == null) {
-                return null
+            nodes = makeNodes(transformer, source, allowGenericNode = allowGenericNode)
+            if (nodes == null) {
+                return emptyList()
             }
             if (!transformer.skipChildren && !transformer.childrenSetAtConstruction) {
-                setChildren(transformer, source, node)
+                nodes.forEach { node -> setChildren(transformer, source, node) }
             }
-            transformer.finalizer(node)
-            node.parent = parent
+            nodes.forEach { node ->
+                transformer.finalizer(node)
+                node.parent = parent
+            }
         } else {
             if (allowGenericNode) {
                 val origin = asOrigin(source)
-                node = GenericNode(parent).withOrigin(origin)
+                nodes = listOf(GenericNode(parent).withOrigin(origin))
                 issues.add(
                     Issue.semantic(
                         "Source node not mapped: ${source::class.qualifiedName}",
@@ -282,7 +331,7 @@ open class ASTTransformer(
                 throw IllegalStateException("Unable to translate node $source (class ${source.javaClass})")
             }
         }
-        return node
+        return nodes
     }
 
     private fun setChildren(
@@ -324,11 +373,17 @@ open class ASTTransformer(
         node: Node,
         pd: PropertyTypeDescription
     ) {
-        val src = (childNodeTransformer as ChildNodeTransformer<Any, Any, Any>).get(getSource(node, source))
+        val childFactory = childNodeTransformer as ChildNodeTransformer<Any, Any, Any>
+        val childrenSource = childFactory.get(getSource(node, source)) as List<*>
         val child: Any? = if (pd.multiple) {
-            (src as Collection<*>?)?.mapNotNull { transform(it, node) } ?: listOf<Node?>()
+            childrenSource.map { transformIntoNodes(it, node) }.flatten()
         } else {
-            transform(src, node)
+            require(childrenSource.size < 2)
+            if (childrenSource.isEmpty()) {
+                transform(null, node)
+            } else {
+                transform(childrenSource.first(), node)
+            }
         }
         try {
             childNodeTransformer.set(node, child)
@@ -341,24 +396,26 @@ open class ASTTransformer(
         return source
     }
 
-    protected open fun <S : Any, T : Node> makeNode(
+    protected open fun <S : Any, T : Node> makeNodes(
         transformer: NodeTransformer<S, T>,
         source: S,
         allowGenericNode: Boolean = true
-    ): Node? {
-        val node = try {
+    ): List<Node> {
+        val nodes = try {
             transformer.constructor(source, this, transformer)
         } catch (e: Exception) {
             if (allowGenericNode) {
-                GenericErrorNode(e)
+                listOf(GenericErrorNode(e))
             } else {
                 throw e
             }
         }
-        if (node?.origin == null) {
-            node?.withOrigin(asOrigin(source))
+        nodes.forEach { node ->
+            if (node?.origin == null) {
+                node?.withOrigin(asOrigin(source))
+            }
         }
-        return node
+        return nodes
     }
 
     protected open fun <S : Any, T : Node> getNodeTransformer(kClass: KClass<S>): NodeTransformer<S, T>? {
@@ -383,6 +440,15 @@ open class ASTTransformer(
         kclass: KClass<S>,
         transformer: (S, ASTTransformer, NodeTransformer<S, T>) -> T?
     ): NodeTransformer<S, T> {
+        val nodeTransformer = NodeTransformer.single(transformer)
+        nodeTransformers[kclass] = nodeTransformer
+        return nodeTransformer
+    }
+
+    fun <S : Any, T : Node> registerMultipleNodeTransformer(
+        kclass: KClass<S>,
+        transformer: (S, ASTTransformer, NodeTransformer<S, T>) -> List<T>
+    ): NodeTransformer<S, T> {
         val nodeTransformer = NodeTransformer(transformer)
         nodeTransformers[kclass] = nodeTransformer
         return nodeTransformer
@@ -392,7 +458,18 @@ open class ASTTransformer(
         kclass: KClass<S>,
         transformer: (S, ASTTransformer) -> T?
     ): NodeTransformer<S, T> = registerNodeTransformer(kclass) { source, transformer, _ ->
-        transformer(source, transformer)
+        transformer(
+            source,
+            transformer
+        )
+    }
+
+    fun <S : Any, T : Node> registerMultipleNodeTransformer(kclass: KClass<S>, factory: (S) -> List<T>):
+        NodeTransformer<S, T> =
+        registerMultipleNodeTransformer(kclass) { input, _, _ -> factory(input) }
+
+    inline fun <reified S : Any, reified T : Node> registerNodeTransformer(): NodeTransformer<S, T> {
+        return registerNodeTransformer(S::class, T::class)
     }
 
     inline fun <reified S : Any, T : Node> registerNodeTransformer(
@@ -403,10 +480,6 @@ open class ASTTransformer(
 
     fun <S : Any, T : Node> registerNodeTransformer(kclass: KClass<S>, transformer: (S) -> T?): NodeTransformer<S, T> =
         registerNodeTransformer(kclass) { input, _, _ -> transformer(input) }
-
-    inline fun <reified S : Any, reified T : Node> registerNodeTransformer(): NodeTransformer<S, T> {
-        return registerNodeTransformer(S::class, T::class)
-    }
 
     /**
      * Define the origin of the node as the source, but only if source is a Node, otherwise
@@ -428,7 +501,7 @@ open class ASTTransformer(
         // We are looking for any constructor with does not take parameters or have default
         // values for all its parameters
         val emptyLikeConstructor = target.constructors.find { it.parameters.all { param -> param.isOptional } }
-        val nodeTransformer = NodeTransformer(
+        val nodeTransformer = NodeTransformer.single(
             { source: S, _, thisTransformer ->
                 if (target.isSealed) {
                     throw IllegalStateException("Unable to instantiate sealed class $target")
@@ -454,7 +527,10 @@ open class ASTTransformer(
                                 }
 
                                 is List<*> -> {
-                                    PresentParameterValue(childSource.map { transform(it) }.toMutableList())
+                                    PresentParameterValue(
+                                        childSource.map { transformIntoNodes(it) }
+                                            .flatten().toMutableList()
+                                    )
                                 }
 
                                 is String -> {
@@ -482,8 +558,9 @@ open class ASTTransformer(
                     }
                 }
                 // We check `childrenSetAtConstruction` and not `emptyLikeConstructor` because, while we set this value
-                // initially based on `emptyLikeConstructor` being equal to null, this can be later changed in `withChild`,
-                // so we should really check the value that `childrenSetAtConstruction` time has when we actually invoke
+                // initially based on `emptyLikeConstructor` being equal to null, this can be later changed in
+                // `withChild`, so we should really check the value that `childrenSetAtConstruction` time has when
+                // we actually invoke
                 // the transformer.
                 if (thisTransformer.childrenSetAtConstruction) {
                     val constructor = target.preferredConstructor()

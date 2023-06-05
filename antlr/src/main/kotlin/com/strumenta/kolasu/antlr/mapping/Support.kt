@@ -33,7 +33,7 @@ fun <T> ParseTreeToASTTransformer.translateCasted(original: ParserRuleContext): 
  * ```
  */
 fun <T> ParseTreeToASTTransformer.translateList(original: Collection<out ParserRuleContext>?): ObservableList<T> {
-    return original?.map { transform(it) as T }?.toObservableList() ?: ObservableList()
+    return original?.map { transformIntoNodes(it) as List<T> }?.flatten()?.toObservableList() ?: ObservableList()
 }
 
 fun <E> List<E>.toObservableList(): ObservableList<E> {

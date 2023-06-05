@@ -88,80 +88,84 @@ fun assertASTsAreEqual(
             assertEquals(expected.range, actual.range, "$context.range")
         }
         expected.properties.forEach { expectedProperty ->
-            val actualProperty = actual.properties.find { it.name == expectedProperty.name }
-                ?: fail("No property ${expectedProperty.name} found at $context")
-            val actualPropValue = actualProperty.value
-            val expectedPropValue = expectedProperty.value
-            if (expectedProperty.provideNodes) {
-                if (expectedProperty.isMultiple) {
-                    if (expectedPropValue is IgnoreChildren<*>) {
-                        // Nothing to do
-                    } else {
-                        val actualPropValueCollection = actualPropValue?.let { it as Collection<Node> }
-                        val expectedPropValueCollection = expectedPropValue?.let { it as Collection<Node> }
-                        assertEquals(
-                            actualPropValueCollection == null,
-                            expectedPropValueCollection == null,
-                            "$context.${expectedProperty.name} nullness"
-                        )
-                        if (actualPropValueCollection != null && expectedPropValueCollection != null) {
+            try {
+                val actualProperty = actual.properties.find { it.name == expectedProperty.name }
+                    ?: fail("No property ${expectedProperty.name} found at $context")
+                val actualPropValue = actualProperty.value
+                val expectedPropValue = expectedProperty.value
+                if (expectedProperty.provideNodes) {
+                    if (expectedProperty.isMultiple) {
+                        if (expectedPropValue is IgnoreChildren<*>) {
+                            // Nothing to do
+                        } else {
+                            val actualPropValueCollection = actualPropValue?.let { it as Collection<Node> }
+                            val expectedPropValueCollection = expectedPropValue?.let { it as Collection<Node> }
                             assertEquals(
-                                expectedPropValueCollection?.size,
-                                actualPropValueCollection?.size,
-                                "$context.${expectedProperty.name} length"
+                                actualPropValueCollection == null,
+                                expectedPropValueCollection == null,
+                                "$context.${expectedProperty.name} nullness"
                             )
-                            val expectedIt = expectedPropValueCollection.iterator()
-                            val actualIt = actualPropValueCollection.iterator()
-                            for (i in expectedPropValueCollection.indices) {
-                                assertASTsAreEqual(
-                                    expectedIt.next(),
-                                    actualIt.next(),
-                                    "$context[$i]",
-                                    considerRange = considerRange,
-                                    useLightweightAttributeEquality = useLightweightAttributeEquality
+                            if (actualPropValueCollection != null && expectedPropValueCollection != null) {
+                                assertEquals(
+                                    expectedPropValueCollection?.size,
+                                    actualPropValueCollection?.size,
+                                    "$context.${expectedProperty.name} length"
                                 )
+                                val expectedIt = expectedPropValueCollection.iterator()
+                                val actualIt = actualPropValueCollection.iterator()
+                                for (i in expectedPropValueCollection.indices) {
+                                    assertASTsAreEqual(
+                                        expectedIt.next(),
+                                        actualIt.next(),
+                                        "$context[$i]",
+                                        considerRange = considerRange,
+                                        useLightweightAttributeEquality = useLightweightAttributeEquality
+                                    )
+                                }
                             }
+                        }
+                    } else {
+                        if (expectedPropValue == null && actualPropValue != null) {
+                            assertEquals<Any?>(
+                                expectedPropValue,
+                                actualPropValue,
+                                "$context.${expectedProperty.name}"
+                            )
+                        } else if (expectedPropValue != null && actualPropValue == null) {
+                            assertEquals<Any?>(
+                                expectedPropValue,
+                                actualPropValue,
+                                "$context.${expectedProperty.name}"
+                            )
+                        } else if (expectedPropValue == null && actualPropValue == null) {
+                            // that is ok
+                        } else {
+                            assertASTsAreEqual(
+                                expectedPropValue as Node,
+                                actualPropValue as Node,
+                                context = "$context.${expectedProperty.name}",
+                                considerRange = considerRange,
+                                useLightweightAttributeEquality = useLightweightAttributeEquality
+                            )
                         }
                     }
                 } else {
-                    if (expectedPropValue == null && actualPropValue != null) {
-                        assertEquals<Any?>(
-                            expectedPropValue,
-                            actualPropValue,
-                            "$context.${expectedProperty.name}"
+                    if (useLightweightAttributeEquality) {
+                        assertEquals(
+                            expectedPropValue?.toString(),
+                            actualPropValue?.toString(),
+                            "$context, comparing property ${expectedProperty.name}"
                         )
-                    } else if (expectedPropValue != null && actualPropValue == null) {
-                        assertEquals<Any?>(
-                            expectedPropValue,
-                            actualPropValue,
-                            "$context.${expectedProperty.name}"
-                        )
-                    } else if (expectedPropValue == null && actualPropValue == null) {
-                        // that is ok
                     } else {
-                        assertASTsAreEqual(
-                            expectedPropValue as Node,
-                            actualPropValue as Node,
-                            context = "$context.${expectedProperty.name}",
-                            considerRange = considerRange,
-                            useLightweightAttributeEquality = useLightweightAttributeEquality
+                        assertEquals(
+                            expectedPropValue,
+                            actualPropValue,
+                            "$context, comparing property ${expectedProperty.name}"
                         )
                     }
                 }
-            } else {
-                if (useLightweightAttributeEquality) {
-                    assertEquals(
-                        expectedPropValue?.toString(),
-                        actualPropValue?.toString(),
-                        "$context, comparing property ${expectedProperty.name}"
-                    )
-                } else {
-                    assertEquals(
-                        expectedPropValue,
-                        actualPropValue,
-                        "$context, comparing property ${expectedProperty.name}"
-                    )
-                }
+            } catch (e: Exception) {
+                throw RuntimeException("Issue while processing property $expectedProperty of $expected", e)
             }
         }
     } else {
