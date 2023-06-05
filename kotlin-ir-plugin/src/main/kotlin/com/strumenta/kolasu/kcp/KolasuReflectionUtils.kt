@@ -65,7 +65,6 @@ fun IrProperty.declareReference(): Boolean {
     return propertyType?.isReference() ?: false
 }
 
-
 @ObsoleteDescriptorBasedAPI
 fun IrType.isSingleContainment(): Boolean {
     return if (this is IrSimpleType) {

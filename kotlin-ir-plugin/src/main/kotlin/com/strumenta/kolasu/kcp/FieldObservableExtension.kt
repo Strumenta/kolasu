@@ -4,8 +4,6 @@ package com.strumenta.kolasu.kcp
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
-import com.strumenta.kolasu.model.observable.ObservableList
 import com.strumenta.kolasu.model.observable.ReferenceToNodeObserver
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
@@ -13,15 +11,6 @@ import org.jetbrains.kotlin.backend.common.extensions.FirIncompatiblePluginAPI
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irBlockBody
-import org.jetbrains.kotlin.com.google.gwt.dev.js.rhino.IRFactory
-import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
-import org.jetbrains.kotlin.descriptors.DescriptorVisibility
-import org.jetbrains.kotlin.descriptors.Modality
-import org.jetbrains.kotlin.descriptors.Visibilities
-import org.jetbrains.kotlin.descriptors.impl.ClassDescriptorImpl
-import org.jetbrains.kotlin.fir.BuiltinTypes
-import org.jetbrains.kotlin.fir.backend.IrBuiltInsOverFir
-import org.jetbrains.kotlin.ir.IrBuiltIns
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -37,18 +26,12 @@ import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.interpreter.toIrConst
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrAnonymousInitializerSymbolImpl
-import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
-import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.util.allParameters
 import org.jetbrains.kotlin.ir.util.parentAsClass
 import org.jetbrains.kotlin.ir.util.statements
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.types.KotlinType
-import org.jetbrains.kotlin.types.KotlinTypeFactory
-import org.jetbrains.kotlin.types.TypeAttributes
 
-object AutoObserveReferenceOrigin: IrDeclarationOriginImpl("AutoObserveReference", true)
+object AutoObserveReferenceOrigin : IrDeclarationOriginImpl("AutoObserveReference", true)
 
 /**
  * Make a certain field observable.
@@ -60,8 +43,6 @@ class FieldObservableExtension(val pluginContext: IrPluginContext) : IrElementTr
     ).single()
 
     override fun visitPropertyNew(declaration: IrProperty): IrStatement {
-
-
         if (declaration.declareReference()) {
             //     init {
             //        ref.subscribe(ReferenceToNodeObserver(this, "ref"))
@@ -109,7 +90,6 @@ class FieldObservableExtension(val pluginContext: IrPluginContext) : IrElementTr
                 }
             anonymousInitializerSymbolImpl.parent = irClass
             irClass.declarations.add(anonymousInitializerSymbolImpl)
-
 
 //            val prevBody = declaration.setter?.body
 //            if (prevBody == null) {
