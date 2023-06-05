@@ -28,7 +28,7 @@ fun <T> ParseTreeToASTTransformer.translateCasted(original: ParserRuleContext): 
  * ```
  */
 fun <T> ParseTreeToASTTransformer.translateList(original: Collection<out ParserRuleContext>?): MutableList<T> {
-    return original?.map { transform(it) as T }?.toMutableList() ?: mutableListOf()
+    return original?.map { transformIntoNodes(it) as List<T> }?.flatten()?.toMutableList() ?: mutableListOf()
 }
 
 /**
