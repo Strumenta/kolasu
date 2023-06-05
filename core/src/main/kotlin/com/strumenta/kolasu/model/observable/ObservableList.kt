@@ -4,11 +4,6 @@ import io.reactivex.rxjava3.core.ObservableSource
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
 
-// interface ListObserver<E> {
-//    fun added(e: E)
-//    fun removed(e: E)
-// }
-
 sealed class ListNotification<E>
 
 data class ListAddition<E>(val added: E) : ListNotification<E>()
@@ -20,10 +15,6 @@ class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
     Disposable {
     private val observers = mutableListOf<Observer<in ListNotification<E>>>()
 
-//    fun registerObserver(observer: ListObserver<in E>) {
-//        observers.add(observer)
-//    }
-
     override fun addAll(elements: Collection<E>): Boolean {
         var modified = false
         elements.forEach { element ->
@@ -33,11 +24,17 @@ class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
     }
 
     override fun addAll(index: Int, elements: Collection<E>): Boolean {
-        TODO("Not yet implemented")
+        var currIndex = index
+        for (element in elements) {
+            add(currIndex, element)
+            currIndex++
+        }
+        return true
     }
 
     override fun add(index: Int, element: E) {
-        TODO("Not yet implemented")
+        base.add(index, element)
+        observers.forEach { it.onNext(ListAddition(element)) }
     }
 
     override fun add(element: E): Boolean {
@@ -50,15 +47,22 @@ class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
     }
 
     override fun removeAt(index: Int): E {
-        TODO("Not yet implemented")
+        val element = base.removeAt(index)
+        observers.forEach { it.onNext(ListRemoval(element)) }
+        return element
     }
 
     override fun set(index: Int, element: E): E {
-        TODO("Not yet implemented")
+        val oldElement = base.set(index, element)
+        observers.forEach { it.onNext(ListRemoval(oldElement)) }
+        observers.forEach { it.onNext(ListAddition(element)) }
+        return oldElement
     }
 
     override fun removeAll(elements: Collection<E>): Boolean {
-        TODO("Not yet implemented")
+        var changed = false
+        elements.forEach { changed = changed || remove(it) }
+        return changed
     }
 
     override fun remove(element: E): Boolean {
