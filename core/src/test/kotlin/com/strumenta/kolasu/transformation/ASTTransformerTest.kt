@@ -86,8 +86,14 @@ class ASTTransformerTest {
         val myTransformer = ASTTransformer(allowGenericNode = false).apply {
             registerNodeTransformer(GenericBinaryExpression::class) { source: GenericBinaryExpression ->
                 when (source.operator) {
-                    Operator.MULT -> Mult(transform(source.left) as Expression, transform(source.right) as Expression)
-                    Operator.PLUS -> Sum(transform(source.left) as Expression, transform(source.right) as Expression)
+                    Operator.MULT -> Mult(
+                        transform(source.left) as Expression,
+                        transform(source.right) as Expression
+                    )
+                    Operator.PLUS -> Sum(
+                        transform(source.left) as Expression,
+                        transform(source.right) as Expression
+                    )
                 }
             }
             registerIdentityTransformation(IntLiteral::class)
@@ -284,4 +290,42 @@ class ASTTransformerTest {
         assertEquals(transformedCU.origin, NodeOrigin(cu))
         assertIs<GenericNode>((transformedCU.statements[0].origin as NodeOrigin).node)
     }
+
+    @Test
+    fun testTransforingOneNodeToMany() {
+        val transformer = ASTTransformer()
+        transformer.registerNodeTransformer(BarRoot::class, BazRoot::class)
+            .withChild(BazRoot::stmts, BarRoot::stmts)
+        transformer.registerMultipleNodeTransformer(BarStmt::class) { s ->
+            listOf(BazStmt("${s.desc}-1"), BazStmt("${s.desc}-2"))
+        }
+
+        val original = BarRoot(
+            stmts = mutableListOf(
+                BarStmt("a"),
+                BarStmt("b")
+            )
+        )
+        val transformed = transformer.transform(original) as Node
+        assertTrue { transformed.hasValidParents() }
+        assertEquals(transformed.origin, NodeOrigin(original))
+        assertASTsAreEqual(
+            BazRoot(
+                mutableListOf(
+                    BazStmt("a-1"),
+                    BazStmt("a-2"),
+                    BazStmt("b-1"),
+                    BazStmt("b-2")
+                )
+            ),
+            transformed
+        )
+    }
 }
+
+data class BazRoot(var stmts: MutableList<BazStmt> = mutableListOf()) : Node()
+
+data class BazStmt(val desc: String) : Node()
+
+data class BarRoot(var stmts: MutableList<BarStmt> = mutableListOf()) : Node()
+data class BarStmt(val desc: String) : Node()
