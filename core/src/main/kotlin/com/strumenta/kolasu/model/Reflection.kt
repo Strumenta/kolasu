@@ -144,6 +144,13 @@ fun KClass<*>.isANode(): Boolean {
     return this.isSubclassOf(Node::class) || this.isMarkedAsNodeType()
 }
 
+val KClass<*>.isConcept: Boolean
+    get() = isANode() && !this.java.isInterface
+
+val KClass<*>.isConceptInterface: Boolean
+    get() = isANode() && this.java.isInterface
+
+
 /**
  * @return is [this] class annotated with NodeType?
  */
