@@ -84,8 +84,14 @@ class ASTTransformerTest {
         val myTransformer = ASTTransformer(allowGenericNode = false).apply {
             registerNodeFactory(GenericBinaryExpression::class) { source: GenericBinaryExpression ->
                 when (source.operator) {
-                    Operator.MULT -> Mult(transform(source.left) as Expression, transform(source.right) as Expression)
-                    Operator.PLUS -> Sum(transform(source.left) as Expression, transform(source.right) as Expression)
+                    Operator.MULT -> Mult(
+                        transform(source.left) as Expression,
+                        transform(source.right) as Expression
+                    )
+                    Operator.PLUS -> Sum(
+                        transform(source.left) as Expression,
+                        transform(source.right) as Expression
+                    )
                 }
             }
             registerIdentityTransformation(IntLiteral::class)
@@ -108,10 +114,16 @@ class ASTTransformerTest {
         val myTransformer = ASTTransformer(allowGenericNode = false).apply {
             registerNodeFactory(ALangIntLiteral::class) { source: ALangIntLiteral -> BLangIntLiteral(source.value) }
             registerNodeFactory(ALangSum::class) { source: ALangSum ->
-                BLangSum(transform(source.left) as BLangExpression, transform(source.right) as BLangExpression)
+                BLangSum(
+                    transform(source.left) as BLangExpression,
+                    transform(source.right) as BLangExpression
+                )
             }
             registerNodeFactory(ALangMult::class) { source: ALangMult ->
-                BLangMult(transform(source.left) as BLangExpression, transform(source.right) as BLangExpression)
+                BLangMult(
+                    transform(source.left) as BLangExpression,
+                    transform(source.right) as BLangExpression
+                )
             }
         }
         assertASTsAreEqual(
@@ -280,4 +292,42 @@ class ASTTransformerTest {
         assertEquals(transformedCU.origin, cu)
         assertIs<GenericNode>(transformedCU.statements[0].origin)
     }
+
+    @Test
+    fun testTransforingOneNodeToMany() {
+        val transformer = ASTTransformer()
+        transformer.registerNodeFactory(BarRoot::class, BazRoot::class)
+            .withChild(BazRoot::stmts, BarRoot::stmts)
+        transformer.registerMultipleNodeFactory(BarStmt::class) { s ->
+            listOf(BazStmt("${s.desc}-1"), BazStmt("${s.desc}-2"))
+        }
+
+        val original = BarRoot(
+            stmts = mutableListOf(
+                BarStmt("a"),
+                BarStmt("b")
+            )
+        )
+        val transformed = transformer.transform(original) as BazRoot
+        assertTrue { transformed.hasValidParents() }
+        assertEquals(transformed.origin, original)
+        assertASTsAreEqual(
+            BazRoot(
+                mutableListOf(
+                    BazStmt("a-1"),
+                    BazStmt("a-2"),
+                    BazStmt("b-1"),
+                    BazStmt("b-2")
+                )
+            ),
+            transformed
+        )
+    }
 }
+
+data class BazRoot(var stmts: MutableList<BazStmt> = mutableListOf()) : Node()
+
+data class BazStmt(val desc: String) : Node()
+
+data class BarRoot(var stmts: MutableList<BarStmt> = mutableListOf()) : Node()
+data class BarStmt(val desc: String) : Node()
