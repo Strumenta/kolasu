@@ -1,8 +1,7 @@
 package com.strumenta.kolasu.model
 
-import io.reactivex.rxjava3.core.ObservableSource
 import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.subjects.PublishSubject
 import java.io.Serializable
 
 /**
@@ -35,11 +34,9 @@ data class ReferenceChangeNotification<N : PossiblyNamed>(val oldValue: N?, val 
  * However, this is enforced dynamically.
  */
 class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
-    Serializable,
-    Disposable,
-    ObservableSource<ReferenceChangeNotification<N>> where N : PossiblyNamed {
+    Serializable where N : PossiblyNamed {
 
-    private val observers: MutableList<Observer<in ReferenceChangeNotification<N>>> = mutableListOf()
+    val changes = PublishSubject.create<ReferenceChangeNotification<N>>()
 
     var referred: N? = null
         set(value) {
@@ -47,9 +44,7 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
                 "We cannot enforce it statically but only Node should be referred to. Instead $value was assigned " +
                     "(class: ${value?.javaClass})"
             }
-            observers.forEach { observer ->
-                observer.onNext(ReferenceChangeNotification(field, value))
-            }
+            changes.onNext(ReferenceChangeNotification(field, value))
             field = value
         }
 
@@ -82,23 +77,14 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
         return true
     }
 
-    override fun subscribe(observer: Observer<in ReferenceChangeNotification<N>>) {
-        observers.add(observer)
-        observer.onSubscribe(this)
-    }
-
-    override fun dispose() {
-        throw UnsupportedOperationException()
-    }
-
-    override fun isDisposed(): Boolean {
-        return false
+    fun subscribe(observer: Observer<in ReferenceChangeNotification<N>>) {
+        changes.subscribe(observer)
     }
 }
 
 /**
  * Try to resolve the reference by finding a named element with a matching name.
- * The name match is performed in a case sensitive or insensitive way depending on the value of @param[caseInsensitive].
+ * The name match is performed in a case-sensitive or insensitive way depending on the value of @param[caseInsensitive].
  */
 fun <N> ReferenceByName<N>.tryToResolve(
     candidates: Iterable<N>,
