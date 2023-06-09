@@ -20,25 +20,23 @@ class ReferenceToNodeObserver<N : PossiblyNamed>(val container: Node, val refere
     }
 
     override fun onNext(referenceNotification: ReferenceChangeNotification<N>) {
-        container.observers.forEach { nodeObserver ->
-            nodeObserver.onNext(
-                ReferenceSet(
-                    container,
-                    referenceName,
-                    referenceNotification.oldValue as Node?,
-                    referenceNotification.newValue as Node?
-                )
+        container.changes.onNext(
+            ReferenceSet(
+                container,
+                referenceName,
+                referenceNotification.oldValue as Node?,
+                referenceNotification.newValue as Node?
             )
-            if (referenceNotification.oldValue != null) {
-                referenceNotification.oldValue.observers.forEach {
-                    it.onNext(ReferencedToRemoved(referenceNotification.oldValue, referenceName, container))
-                }
-            }
-            if (referenceNotification.newValue != null) {
-                referenceNotification.newValue.observers.forEach {
-                    it.onNext(ReferencedToAdded(referenceNotification.newValue, referenceName, container))
-                }
-            }
+        )
+        if (referenceNotification.oldValue != null) {
+            referenceNotification.oldValue.changes.onNext(
+                ReferencedToRemoved(referenceNotification.oldValue, referenceName, container)
+            )
+        }
+        if (referenceNotification.newValue != null) {
+            referenceNotification.newValue.changes.onNext(
+                ReferencedToAdded(referenceNotification.newValue, referenceName, container)
+            )
         }
     }
 }

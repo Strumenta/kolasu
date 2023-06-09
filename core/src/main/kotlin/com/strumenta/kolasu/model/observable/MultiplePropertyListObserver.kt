@@ -10,16 +10,12 @@ class MultiplePropertyListObserver<C : Node, E : Node>(
 ) : Observer<ListNotification<E>> {
     private fun added(e: E) {
         e.parent = container
-        container.observers.forEach {
-            it.onNext(ChildAdded(container, containmentName, e))
-        }
+        container.changes.onNext(ChildAdded(container, containmentName, e))
     }
 
     private fun removed(e: E) {
         e.parent = null
-        container.observers.forEach {
-            it.onNext(ChildRemoved(container, containmentName, e))
-        }
+        container.changes.onNext(ChildRemoved(container, containmentName, e))
     }
 
     override fun onSubscribe(d: Disposable) {

@@ -3,9 +3,8 @@ package com.strumenta.kolasu.model
 import com.strumenta.kolasu.model.annotations.Annotation
 import com.strumenta.kolasu.model.observable.AttributeChangedNotification
 import com.strumenta.kolasu.model.observable.NodeNotification
-import io.reactivex.rxjava3.core.ObservableSource
 import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.subjects.PublishSubject
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
@@ -16,10 +15,10 @@ typealias NodeObserver = Observer<in NodeNotification<in Node>>
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
-open class Node() : Serializable, ObservableSource<NodeNotification<in Node>>, Disposable {
+open class Node() : Serializable {
 
     @property:Internal
-    val observers: MutableList<NodeObserver> = mutableListOf()
+    val changes = PublishSubject.create<NodeNotification<in Node>>()
 
     @Internal
     private val annotations: MutableList<Annotation> = mutableListOf()
@@ -126,23 +125,8 @@ open class Node() : Serializable, ObservableSource<NodeNotification<in Node>>, D
         return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
     }
 
-    override fun subscribe(observer: NodeObserver) {
-        observers.add(observer)
-        observer.onSubscribe(this)
-    }
-
-    override fun dispose() {
-        throw UnsupportedOperationException()
-    }
-
-    override fun isDisposed(): Boolean {
-        return false
-    }
-
     protected fun notifyOfPropertyChange(propertyName: String, oldValue: Any?, newValue: Any?) {
-        observers.forEach {
-            it.onNext(AttributeChangedNotification(this, propertyName, oldValue, newValue))
-        }
+        changes.onNext(AttributeChangedNotification(this, propertyName, oldValue, newValue))
     }
 
     @Internal
@@ -240,5 +224,9 @@ open class Node() : Serializable, ObservableSource<NodeNotification<in Node>>, D
     fun <T : PossiblyNamed>setReferenceReferred(referenceName: String, referred: T) {
         val ref: ReferenceByName<T> = getReference(referenceName)
         ref.referred = referred
+    }
+
+    fun subscribe(observer: Observer<NodeNotification<in Node>>) {
+        this.changes.subscribe(observer)
     }
 }
