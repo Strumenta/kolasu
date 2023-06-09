@@ -1,8 +1,7 @@
 package com.strumenta.kolasu.model.observable
 
-import io.reactivex.rxjava3.core.ObservableSource
 import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.subjects.PublishSubject
 
 sealed class ListNotification<E>
 
@@ -10,10 +9,8 @@ data class ListAddition<E>(val added: E) : ListNotification<E>()
 data class ListRemoval<E>(val removed: E) : ListNotification<E>()
 
 class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
-    MutableList<E> by base,
-    ObservableSource<ListNotification<E>>,
-    Disposable {
-    private val observers = mutableListOf<Observer<in ListNotification<E>>>()
+    MutableList<E> by base {
+    val changes = PublishSubject.create<ListNotification<E>>()
 
     override fun addAll(elements: Collection<E>): Boolean {
         var modified = false
@@ -34,12 +31,12 @@ class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
 
     override fun add(index: Int, element: E) {
         base.add(index, element)
-        observers.forEach { it.onNext(ListAddition(element)) }
+        changes.onNext(ListAddition(element))
     }
 
     override fun add(element: E): Boolean {
         return if (base.add(element)) {
-            observers.forEach { it.onNext(ListAddition(element)) }
+            changes.onNext(ListAddition(element))
             true
         } else {
             false
@@ -48,14 +45,14 @@ class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
 
     override fun removeAt(index: Int): E {
         val element = base.removeAt(index)
-        observers.forEach { it.onNext(ListRemoval(element)) }
+        changes.onNext(ListRemoval(element))
         return element
     }
 
     override fun set(index: Int, element: E): E {
         val oldElement = base.set(index, element)
-        observers.forEach { it.onNext(ListRemoval(oldElement)) }
-        observers.forEach { it.onNext(ListAddition(element)) }
+        changes.onNext(ListRemoval(oldElement))
+        changes.onNext(ListAddition(element))
         return oldElement
     }
 
@@ -67,23 +64,14 @@ class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
 
     override fun remove(element: E): Boolean {
         return if (base.remove(element)) {
-            observers.forEach { it.onNext(ListRemoval(element)) }
+            changes.onNext(ListRemoval(element))
             true
         } else {
             false
         }
     }
 
-    override fun subscribe(observer: Observer<in ListNotification<E>>) {
-        observers.add(observer)
-        observer.onSubscribe(this)
-    }
-
-    override fun dispose() {
-        throw UnsupportedOperationException()
-    }
-
-    override fun isDisposed(): Boolean {
-        return false
+    fun subscribe(observer: Observer<in ListNotification<E>>) {
+        changes.subscribe(observer)
     }
 }
