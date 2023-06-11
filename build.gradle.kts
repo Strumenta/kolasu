@@ -9,6 +9,7 @@ plugins {
 
     id("java-library")
     id("net.researchgate.release") version "3.0.2"
+    id("org.jetbrains.kotlinx.kover") version "0.7.1" apply(false)
 }
 
 allprojects {
@@ -32,6 +33,7 @@ subprojects {
     apply(plugin = "idea")
     apply(plugin = "signing")
     apply(plugin = "org.jetbrains.dokka")
+    apply(plugin = "org.jetbrains.kotlinx.kover")
 
     this.version = rootProject.version
     this.group = rootProject.group
