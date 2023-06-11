@@ -6,6 +6,7 @@ import com.strumenta.kolasu.model.ReferenceByName
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.junit.JUnitAsserter.assertTrue
 
 data class SimpleRoot(val id: Int, val children : MutableList<SimpleDecl>) : Node()
 
@@ -58,8 +59,22 @@ class LionWebLanguageExporterTest {
         assertEquals(simpleDecl, simpleNodeA.extendedConcept)
         assertEquals(listOf(StarLasuLWLanguage.Named), simpleNodeA.implemented)
         assertEquals(false, simpleNodeA.isAbstract)
-        assertEquals(3, simpleNodeA.features.size)
+        assertEquals(2, simpleNodeA.features.size)
         assertEquals(3, simpleNodeA.allFeatures().size)
+
+        assertEquals(true, StarLasuLWLanguage.Named.getPropertyByName("name") in simpleNodeA.allFeatures())
+
+        val simpleNodeARef = simpleNodeA.getReferenceByName("ref")!!
+        assertEquals("ref", simpleNodeARef.name)
+        assertEquals(false, simpleNodeARef.isOptional)
+        assertEquals(false, simpleNodeARef.isMultiple)
+        assertEquals(simpleNodeA, simpleNodeARef.type)
+
+        val simpleNodeAChild = simpleNodeA.getContainmentByName("child")!!
+        assertEquals("child", simpleNodeAChild.name)
+        assertEquals(true, simpleNodeAChild.isOptional)
+        assertEquals(false, simpleNodeAChild.isMultiple)
+        assertEquals(simpleNodeB, simpleNodeAChild.type)
 
         assertEquals("SimpleNodeB", simpleNodeB.name)
         assertEquals(simpleDecl, simpleNodeB.extendedConcept)
@@ -67,5 +82,9 @@ class LionWebLanguageExporterTest {
         assertEquals(1, simpleNodeB.features.size)
         assertEquals(1, simpleNodeB.allFeatures().size)
 
+        val simpleNodeBValue = simpleNodeB.getPropertyByName("value")!!
+        assertEquals("value", simpleNodeBValue.name)
+        assertEquals(false, simpleNodeBValue.isOptional)
+        assertEquals(LionCoreBuiltins.getString(), simpleNodeBValue.type)
     }
 }

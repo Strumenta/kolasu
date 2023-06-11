@@ -106,6 +106,7 @@ class LionWebLanguageExporter {
                     is Reference -> {
                         val ref = io.lionweb.lioncore.java.language.Reference(it.name, featuresContainer)
                         ref.setOptional(it.optional)
+                        ref.setType(toLWFeaturesContainer(it.type))
                         featuresContainer.addFeature(ref)
                     }
                     is Containment -> {

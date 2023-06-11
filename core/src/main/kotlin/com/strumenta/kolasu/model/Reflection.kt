@@ -259,7 +259,7 @@ fun <N: Any>KProperty1<N, *>.asReference() : Reference {
         this.returnType.isMarkedNullable -> true
         else -> false
     }
-    return Reference(this.name, optional, this.returnType.classifier as KClass<*>)
+    return Reference(this.name, optional, this.returnType.arguments[0].type?.classifier as KClass<*>)
 }
 
 fun <N: Any>KProperty1<N, *>.asAttribute() : Attribute {
