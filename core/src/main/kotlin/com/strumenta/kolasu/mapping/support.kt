@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.mapping
 
+import com.strumenta.kolasu.transformation.ASTTransformer
 import org.antlr.v4.runtime.ParserRuleContext
 
 /**
@@ -10,7 +11,7 @@ import org.antlr.v4.runtime.ParserRuleContext
  * JPostIncrementExpr(translateCasted<JExpression>(expression().first()))
  * ```
  */
-fun <T> ParseTreeToASTTransformer.translateCasted(original: ParserRuleContext): T {
+fun <T> ASTTransformer.translateCasted(original: Any): T {
     val result = transform(original)
     if (result is Nothing) {
         throw IllegalStateException("Transformation produced Nothing")
@@ -27,7 +28,7 @@ fun <T> ParseTreeToASTTransformer.translateCasted(original: ParserRuleContext): 
  * JExtendsType(translateCasted(pt.typeType()), translateList(pt.annotation()))
  * ```
  */
-fun <T> ParseTreeToASTTransformer.translateList(original: Collection<out ParserRuleContext>?): MutableList<T> {
+fun <T> ASTTransformer.translateList(original: Collection<out Any>?): MutableList<T> {
     return original?.map { transformIntoNodes(it) as List<T> }?.flatten()?.toMutableList() ?: mutableListOf()
 }
 
@@ -44,7 +45,7 @@ fun <T> ParseTreeToASTTransformer.translateList(original: Collection<out ParserR
  *  )
  *  ```
  */
-fun <T> ParseTreeToASTTransformer.translateOptional(original: ParserRuleContext?): T? {
+fun <T> ASTTransformer.translateOptional(original: Any?): T? {
     return original?.let { transform(it) as T }
 }
 
