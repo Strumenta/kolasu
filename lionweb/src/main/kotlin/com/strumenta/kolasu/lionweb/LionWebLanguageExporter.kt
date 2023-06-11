@@ -63,6 +63,7 @@ class LionWebLanguageExporter {
         kolasuLanguage.astClasses.forEach { astClass ->
             if (astClass.isConcept) {
                 val concept = Concept(lionwebLanguage, astClass.simpleName)
+                concept.isAbstract = astClass.isAbstract || astClass.isSealed
                 astToLWConcept[astClass] = concept
             } else if (astClass.isConceptInterface) {
                 val conceptInterface = ConceptInterface(lionwebLanguage, astClass.simpleName)
@@ -72,6 +73,20 @@ class LionWebLanguageExporter {
         // Then we populate them, so that self-references can be described
         kolasuLanguage.astClasses.forEach { astClass ->
             val featuresContainer = astToLWConcept[astClass]!!
+
+            if (astClass.java.isInterface) {
+                TODO()
+            } else {
+                val concept = featuresContainer as Concept
+                val superClasses = astClass.supertypes.map { it.classifier as KClass<*> }.filter { !it.java.isInterface }
+                if (superClasses == listOf(Node::class)) {
+                    concept.extendedConcept = StarLasuLWLanguage.ASTNode
+                } else if (superClasses.size == 1) {
+                    concept.extendedConcept = astToLWConcept[superClasses.first()] as Concept
+                } else {
+                    throw IllegalStateException()
+                }
+            }
             astClass.features().forEach {
                 when (it) {
                     is Attribute -> {

@@ -28,12 +28,12 @@ class LionWebLanguageExporterTest {
 
         val simpleRoot = lwLanguage.getConceptByName("SimpleRoot")!!
         val simpleDecl = lwLanguage.getConceptByName("SimpleDecl")!!
-
-        // TODO verify that all of them extend ASTConcept
+        val simpleNodeA = lwLanguage.getConceptByName("SimpleNodeA")!!
+        val simpleNodeB = lwLanguage.getConceptByName("SimpleNodeB")!!
 
         assertEquals("SimpleRoot", simpleRoot.name)
+        assertEquals(StarLasuLWLanguage.ASTNode, simpleRoot.extendedConcept)
         assertEquals(false, simpleRoot.isAbstract)
-        assertEquals(null, simpleRoot.extendedConcept)
         assertEquals(2, simpleRoot.allFeatures().size)
 
         val simpleRootID = simpleRoot.getPropertyByName("id")!!
@@ -48,7 +48,16 @@ class LionWebLanguageExporterTest {
         assertEquals(simpleDecl, simpleRootChildren.type)
 
         assertEquals("SimpleDecl", simpleDecl.name)
+        assertEquals(StarLasuLWLanguage.ASTNode, simpleDecl.extendedConcept)
         assertEquals(true, simpleDecl.isAbstract)
+
+        assertEquals("SimpleNodeA", simpleNodeA.name)
+        assertEquals(simpleDecl, simpleNodeA.extendedConcept)
+        assertEquals(false, simpleNodeA.isAbstract)
+
+        assertEquals("SimpleNodeB", simpleNodeB.name)
+        assertEquals(simpleDecl, simpleNodeB.extendedConcept)
+        assertEquals(false, simpleNodeB.isAbstract)
 
     }
 }
