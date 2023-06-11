@@ -3,6 +3,7 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
+import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -26,9 +27,28 @@ class LionWebLanguageExporterTest {
         assertEquals(4, lwLanguage.elements.size)
 
         val simpleRoot = lwLanguage.getConceptByName("SimpleRoot")!!
+        val simpleDecl = lwLanguage.getConceptByName("SimpleDecl")!!
+
+        // TODO verify that all of them extend ASTConcept
+
         assertEquals("SimpleRoot", simpleRoot.name)
+        assertEquals(false, simpleRoot.isAbstract)
         assertEquals(null, simpleRoot.extendedConcept)
-        assertEquals(3, simpleRoot.allFeatures().size)
+        assertEquals(2, simpleRoot.allFeatures().size)
+
+        val simpleRootID = simpleRoot.getPropertyByName("id")!!
+        assertEquals("id", simpleRootID.name)
+        assertEquals(false, simpleRootID.isOptional)
+        assertEquals(LionCoreBuiltins.getInteger(), simpleRootID.type)
+
+        val simpleRootChildren = simpleRoot.getContainmentByName("children")!!
+        assertEquals("children", simpleRootChildren.name)
+        assertEquals(true, simpleRootChildren.isOptional)
+        assertEquals(true, simpleRootChildren.isMultiple)
+        assertEquals(simpleDecl, simpleRootChildren.type)
+
+        assertEquals("SimpleDecl", simpleDecl.name)
+        assertEquals(true, simpleDecl.isAbstract)
 
     }
 }

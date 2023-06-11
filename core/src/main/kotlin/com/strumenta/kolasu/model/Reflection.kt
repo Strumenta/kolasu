@@ -1,5 +1,9 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Feature
+import com.strumenta.kolasu.language.Reference
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KProperty1
@@ -204,7 +208,6 @@ private fun providesNodes(kTypeProjection: KTypeProjection): Boolean {
     }
 }
 
-
 fun <N: Node>KProperty1<N, *>.isContainment() : Boolean {
     if ((this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
         return providesNodes(this.returnType.arguments[0].type!!.classifier as KClass<out Node>)
@@ -223,14 +226,66 @@ fun <N: Node>KProperty1<N, *>.isAttribute() : Boolean {
 
 fun <N: Node>KProperty1<N, *>.containedType() : KClass<out Node> {
     require(isContainment())
-    if ((this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
-        return this.returnType.arguments[0].type!!.classifier as KClass<out Node>
+    return if ((this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
+        this.returnType.arguments[0].type!!.classifier as KClass<out Node>
     } else {
-        return this.returnType.classifier as KClass<out Node>
+        this.returnType.classifier as KClass<out Node>
     }
 }
 
 fun <N: Node>KProperty1<N, *>.referredType() : KClass<out Node> {
     require(isReference())
     return this.returnType.arguments[0].type!!.classifier as KClass<out Node>
+}
+
+fun <N: Node>KProperty1<N, *>.asContainment() : Containment {
+    val multiplicity = when {
+        (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
+            Multiplicity.MANY
+        }
+        this.returnType.isMarkedNullable -> Multiplicity.OPTIONAL
+        else -> Multiplicity.SINGULAR
+    }
+    val type = if (multiplicity == Multiplicity.MANY) this.returnType.arguments[0].type!!.classifier as KClass<*>
+    else this.returnType.classifier as KClass<*>
+    return Containment(this.name, multiplicity, type)
+}
+
+fun <N: Node>KProperty1<N, *>.asReference() : Reference {
+    val optional = when {
+        (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
+            throw IllegalStateException()
+        }
+        this.returnType.isMarkedNullable -> true
+        else -> false
+    }
+    return Reference(this.name, optional, this.returnType.classifier as KClass<*>)
+}
+
+fun <N: Node>KProperty1<N, *>.asAttribute() : Attribute {
+    val optional = when {
+        (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
+            throw IllegalStateException()
+        }
+        this.returnType.isMarkedNullable -> true
+        else -> false
+    }
+    return Attribute(this.name, optional, this.returnType)
+}
+
+fun <N: Node>KClass<N>.features() : List<Feature> {
+    return this.nodeProperties.map {
+        when {
+            it.isAttribute() -> {
+                it.asAttribute()
+            }
+            it.isReference() -> {
+                it.asReference()
+            }
+            it.isContainment() -> {
+                it.asContainment()
+            }
+            else -> throw IllegalStateException()
+        }
+    }
 }
