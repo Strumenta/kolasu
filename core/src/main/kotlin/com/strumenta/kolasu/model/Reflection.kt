@@ -208,7 +208,7 @@ private fun providesNodes(kTypeProjection: KTypeProjection): Boolean {
     }
 }
 
-fun <N: Node>KProperty1<N, *>.isContainment() : Boolean {
+fun <N: Any>KProperty1<N, *>.isContainment() : Boolean {
     if ((this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
         return providesNodes(this.returnType.arguments[0].type!!.classifier as KClass<out Node>)
     } else {
@@ -216,11 +216,11 @@ fun <N: Node>KProperty1<N, *>.isContainment() : Boolean {
     }
 }
 
-fun <N: Node>KProperty1<N, *>.isReference() : Boolean {
+fun <N: Any>KProperty1<N, *>.isReference() : Boolean {
     return this.returnType.classifier == ReferenceByName::class
 }
 
-fun <N: Node>KProperty1<N, *>.isAttribute() : Boolean {
+fun <N: Any>KProperty1<N, *>.isAttribute() : Boolean {
     return !isContainment() && !isReference()
 }
 
@@ -238,7 +238,7 @@ fun <N: Node>KProperty1<N, *>.referredType() : KClass<out Node> {
     return this.returnType.arguments[0].type!!.classifier as KClass<out Node>
 }
 
-fun <N: Node>KProperty1<N, *>.asContainment() : Containment {
+fun <N: Any>KProperty1<N, *>.asContainment() : Containment {
     val multiplicity = when {
         (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
             Multiplicity.MANY
@@ -251,7 +251,7 @@ fun <N: Node>KProperty1<N, *>.asContainment() : Containment {
     return Containment(this.name, multiplicity, type)
 }
 
-fun <N: Node>KProperty1<N, *>.asReference() : Reference {
+fun <N: Any>KProperty1<N, *>.asReference() : Reference {
     val optional = when {
         (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
             throw IllegalStateException()
@@ -262,7 +262,7 @@ fun <N: Node>KProperty1<N, *>.asReference() : Reference {
     return Reference(this.name, optional, this.returnType.classifier as KClass<*>)
 }
 
-fun <N: Node>KProperty1<N, *>.asAttribute() : Attribute {
+fun <N: Any>KProperty1<N, *>.asAttribute() : Attribute {
     val optional = when {
         (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
             throw IllegalStateException()
@@ -273,19 +273,37 @@ fun <N: Node>KProperty1<N, *>.asAttribute() : Attribute {
     return Attribute(this.name, optional, this.returnType)
 }
 
-fun <N: Node>KClass<N>.features() : List<Feature> {
-    return this.nodeProperties.map {
-        when {
-            it.isAttribute() -> {
-                it.asAttribute()
+private val featuresCache = mutableMapOf<KClass<*>, List<Feature>>()
+
+fun <N:Any>KClass<N>.features() : List<Feature> {
+    if (!featuresCache.containsKey(this)) {
+        // Named can be used also for things which are not Node, so we treat it as a special case
+        featuresCache[this] = if (!isANode() && this != Named::class) {
+            emptyList()
+        } else {
+            val inheritedNamed =
+                supertypes.map { (it.classifier as? KClass<*>)?.features()?.map { it.name } ?: emptyList() }
+                    .flatten()
+                    .toSet()
+            val notInheritedProps = nodeProperties.filter { it.name !in inheritedNamed }
+            notInheritedProps.map {
+                when {
+                    it.isAttribute() -> {
+                        it.asAttribute()
+                    }
+
+                    it.isReference() -> {
+                        it.asReference()
+                    }
+
+                    it.isContainment() -> {
+                        it.asContainment()
+                    }
+
+                    else -> throw IllegalStateException()
+                }
             }
-            it.isReference() -> {
-                it.asReference()
-            }
-            it.isContainment() -> {
-                it.asContainment()
-            }
-            else -> throw IllegalStateException()
         }
     }
+    return featuresCache[this]!!
 }

@@ -33,7 +33,9 @@ class LionWebLanguageExporterTest {
 
         assertEquals("SimpleRoot", simpleRoot.name)
         assertEquals(StarLasuLWLanguage.ASTNode, simpleRoot.extendedConcept)
+        assertEquals(emptyList(), simpleRoot.implemented)
         assertEquals(false, simpleRoot.isAbstract)
+        assertEquals(2, simpleRoot.features.size)
         assertEquals(2, simpleRoot.allFeatures().size)
 
         val simpleRootID = simpleRoot.getPropertyByName("id")!!
@@ -49,15 +51,21 @@ class LionWebLanguageExporterTest {
 
         assertEquals("SimpleDecl", simpleDecl.name)
         assertEquals(StarLasuLWLanguage.ASTNode, simpleDecl.extendedConcept)
+        assertEquals(emptyList(), simpleRoot.implemented)
         assertEquals(true, simpleDecl.isAbstract)
 
         assertEquals("SimpleNodeA", simpleNodeA.name)
         assertEquals(simpleDecl, simpleNodeA.extendedConcept)
+        assertEquals(listOf(StarLasuLWLanguage.Named), simpleNodeA.implemented)
         assertEquals(false, simpleNodeA.isAbstract)
+        assertEquals(3, simpleNodeA.features.size)
+        assertEquals(3, simpleNodeA.allFeatures().size)
 
         assertEquals("SimpleNodeB", simpleNodeB.name)
         assertEquals(simpleDecl, simpleNodeB.extendedConcept)
         assertEquals(false, simpleNodeB.isAbstract)
+        assertEquals(1, simpleNodeB.features.size)
+        assertEquals(1, simpleNodeB.allFeatures().size)
 
     }
 }
