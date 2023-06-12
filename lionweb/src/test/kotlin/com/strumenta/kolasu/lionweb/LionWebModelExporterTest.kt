@@ -30,7 +30,6 @@ class LionWeModelExporterTest {
         val lwLanguage = exporter.correspondingLanguage(kLanguage)
 
         val simpleRoot = lwLanguage.getConceptByName("SimpleRoot")!!
-        val simpleDecl = lwLanguage.getConceptByName("SimpleDecl")!!
         val simpleNodeA = lwLanguage.getConceptByName("SimpleNodeA")!!
         val simpleNodeB = lwLanguage.getConceptByName("SimpleNodeB")!!
 
@@ -41,13 +40,23 @@ class LionWeModelExporterTest {
         val child1 = lwAST.getChildrenByContainmentName("children")[0]
         assertSame(simpleNodeA, child1.concept)
         assertEquals("A1", child1.getPropertyValueByName("name"))
-        //assertEquals(1, child1.getReferenceValues("ref").size)
+        val lwReference1 = child1.concept.getReferenceByName("ref")!!
+        val refValue1 = child1.getReferenceValues(lwReference1)
+        assertEquals(1, refValue1.size)
+        assertEquals("A1", refValue1[0].resolveInfo)
+        assertSame(child1, refValue1[0].referred)
 
         val child2 = lwAST.getChildrenByContainmentName("children")[1]
         assertSame(simpleNodeB, child2.concept)
+        assertEquals("some magic value", child2.getPropertyValueByName("value"))
 
         val child3 = lwAST.getChildrenByContainmentName("children")[2]
         assertSame(simpleNodeA, child3.concept)
         assertEquals("A3", child3.getPropertyValueByName("name"))
+        val lwReference3 = child3.concept.getReferenceByName("ref")!!
+        val refValue3 = child3.getReferenceValues(lwReference3)
+        assertEquals(1, refValue3.size)
+        assertEquals("A1", refValue3[0].resolveInfo)
+        assertSame(child1, refValue3[0].referred)
     }
 }
