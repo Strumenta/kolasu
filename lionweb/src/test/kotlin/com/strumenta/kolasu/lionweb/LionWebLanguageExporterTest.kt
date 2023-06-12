@@ -6,13 +6,16 @@ import com.strumenta.kolasu.model.ReferenceByName
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.junit.JUnitAsserter.assertTrue
 
-data class SimpleRoot(val id: Int, val children : MutableList<SimpleDecl>) : Node()
+data class SimpleRoot(val id: Int, val children: MutableList<SimpleDecl>) : Node()
 
-sealed class SimpleDecl: Node()
+sealed class SimpleDecl : Node()
 
-data class SimpleNodeA(override val name: String, val ref: ReferenceByName<SimpleNodeA>, val child: SimpleNodeB?) : Named, SimpleDecl()
+data class SimpleNodeA(
+    override val name: String,
+    val ref: ReferenceByName<SimpleNodeA>,
+    val child: SimpleNodeB?
+) : Named, SimpleDecl()
 
 data class SimpleNodeB(val value: String) : SimpleDecl()
 

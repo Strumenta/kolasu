@@ -1,15 +1,11 @@
 package com.strumenta.kolasu.lionweb
 
-import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
-import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
-import kotlin.test.junit.JUnitAsserter.assertTrue
 
-class LionWeModelExporterTest {
+class LionWebModelExporterTest {
 
     @Test
     fun exportSimpleModel() {
@@ -20,8 +16,12 @@ class LionWeModelExporterTest {
         a1.ref.referred = a1
         val b2 = SimpleNodeB("some magic value")
         val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b2)
-        val ast = SimpleRoot(12345, mutableListOf(
-            a1, b2, a3))
+        val ast = SimpleRoot(
+            12345,
+            mutableListOf(
+                a1, b2, a3
+            )
+        )
 
         val exporter = LionWebModelExporter()
         exporter.recordLanguage(kLanguage)

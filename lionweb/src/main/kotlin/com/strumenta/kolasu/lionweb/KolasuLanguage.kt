@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
 class KolasuLanguage {
     val astClasses: MutableList<KClass<out Node>> = mutableListOf()
 
-    fun <N: Node>addClass(kClass: KClass<N>) : Boolean {
+    fun <N : Node> addClass(kClass: KClass<N>): Boolean {
         if (!astClasses.contains(kClass) && astClasses.add(kClass)) {
             if (kClass.isSealed) {
                 kClass.sealedSubclasses.forEach {

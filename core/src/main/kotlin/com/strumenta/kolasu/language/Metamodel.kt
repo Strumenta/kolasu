@@ -27,4 +27,8 @@ data class Reference(override val name: String, val optional: Boolean, override 
         get() = if (optional) Multiplicity.OPTIONAL else Multiplicity.SINGULAR
 }
 
-data class Containment(override val name: String, override val multiplicity: Multiplicity, override val type: KClass<*>) : Link()
+data class Containment(
+    override val name: String,
+    override val multiplicity: Multiplicity,
+    override val type: KClass<*>
+) : Link()

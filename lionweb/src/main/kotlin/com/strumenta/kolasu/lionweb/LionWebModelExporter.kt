@@ -2,7 +2,6 @@ package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.allFeatures
-import com.strumenta.kolasu.model.features
 import com.strumenta.kolasu.traversing.walk
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
@@ -36,7 +35,7 @@ class LionWebModelExporter {
     private val languageExporter = LionWebLanguageExporter()
     private val nodesMapping = mutableMapOf<com.strumenta.kolasu.model.Node, Node>()
 
-    fun correspondingLanguage(kolasuLanguage: KolasuLanguage) : Language {
+    fun correspondingLanguage(kolasuLanguage: KolasuLanguage): Language {
         return languageExporter.correspondingLanguage(kolasuLanguage)
     }
 
@@ -44,7 +43,7 @@ class LionWebModelExporter {
         languageExporter.export(kolasuLanguage)
     }
 
-    fun export(kolasuTree: com.strumenta.kolasu.model.Node) : Node {
+    fun export(kolasuTree: com.strumenta.kolasu.model.Node): Node {
         if (nodesMapping.containsKey(kolasuTree)) {
             return nodesMapping[kolasuTree]!!
         }
@@ -59,13 +58,15 @@ class LionWebModelExporter {
             lwNode.concept.allFeatures().forEach { feature ->
                 when (feature) {
                     is Property -> {
-                        val kAttribute = kFeatures.find { it.name == feature.name } as? com.strumenta.kolasu.language.Attribute
-                            ?: throw IllegalArgumentException("Property ${feature.name} not found in ${kNode}")
+                        val kAttribute = kFeatures.find { it.name == feature.name }
+                            as? com.strumenta.kolasu.language.Attribute
+                            ?: throw IllegalArgumentException("Property ${feature.name} not found in $kNode")
                         val kValue = kNode.getAttributeValue(kAttribute)
                         lwNode.setPropertyValue(feature, kValue)
                     }
                     is Containment -> {
-                        val kContainment = kFeatures.find { it.name == feature.name } as com.strumenta.kolasu.language.Containment
+                        val kContainment = kFeatures.find { it.name == feature.name }
+                            as com.strumenta.kolasu.language.Containment
                         val kValue = kNode.getChildren(kContainment)
                         kValue.forEach { kChild ->
                             val lwChild = nodesMapping[kChild]!!
@@ -73,9 +74,11 @@ class LionWebModelExporter {
                         }
                     }
                     is Reference -> {
-                        val kReference = kFeatures.find { it.name == feature.name } as com.strumenta.kolasu.language.Reference
+                        val kReference = kFeatures.find { it.name == feature.name }
+                            as com.strumenta.kolasu.language.Reference
                         val kValue = kNode.getReference(kReference)
-                        val lwReferred : Node? = if (kValue.referred == null) null else nodesMapping[kValue.referred!! as com.strumenta.kolasu.model.Node]!!
+                        val lwReferred: Node? = if (kValue.referred == null) null
+                        else nodesMapping[kValue.referred!! as com.strumenta.kolasu.model.Node]!!
                         lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
                     }
                 }
@@ -85,11 +88,11 @@ class LionWebModelExporter {
         return nodesMapping[kolasuTree]!!
     }
 
-    private fun findConcept(kNode: com.strumenta.kolasu.model.Node) : Concept {
+    private fun findConcept(kNode: com.strumenta.kolasu.model.Node): Concept {
         return languageExporter.toConcept(kNode.javaClass.kotlin)
     }
 
-    private fun nodeID(kNode: com.strumenta.kolasu.model.Node) : String {
+    private fun nodeID(kNode: com.strumenta.kolasu.model.Node): String {
         return "${kNode.source.id}-${kNode.positionalID}"
     }
 }

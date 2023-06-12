@@ -30,11 +30,12 @@ class LionWebLanguageExporter {
         astToLWConcept[Named::class] = StarLasuLWLanguage.Named
     }
 
-    fun correspondingLanguage(kolasuLanguage: KolasuLanguage) : Language {
-        return kLanguageToLWLanguage[kolasuLanguage] ?: throw java.lang.IllegalArgumentException("Unknown Kolasu Language $kolasuLanguage")
+    fun correspondingLanguage(kolasuLanguage: KolasuLanguage): Language {
+        return kLanguageToLWLanguage[kolasuLanguage]
+            ?: throw java.lang.IllegalArgumentException("Unknown Kolasu Language $kolasuLanguage")
     }
 
-    fun export(kolasuLanguage: KolasuLanguage) : Language {
+    fun export(kolasuLanguage: KolasuLanguage): Language {
         val lionwebLanguage = Language()
         // First we create all types
         kolasuLanguage.astClasses.forEach { astClass ->
@@ -55,7 +56,8 @@ class LionWebLanguageExporter {
                 TODO()
             } else {
                 val concept = featuresContainer as Concept
-                val superClasses = astClass.supertypes.map { it.classifier as KClass<*> }.filter { !it.java.isInterface }
+                val superClasses = astClass.supertypes.map { it.classifier as KClass<*> }
+                    .filter { !it.java.isInterface }
                 if (superClasses.size == 1) {
                     concept.extendedConcept = astToLWConcept[superClasses.first()] as Concept
                 } else {
@@ -94,7 +96,7 @@ class LionWebLanguageExporter {
         return lionwebLanguage
     }
 
-    private fun toLWDataType(kType: KType) : DataType<*> {
+    private fun toLWDataType(kType: KType): DataType<*> {
         return when (kType) {
             Int::class.createType() -> LionCoreBuiltins.getInteger()
             String::class.createType() -> LionCoreBuiltins.getString()
@@ -102,17 +104,15 @@ class LionWebLanguageExporter {
         }
     }
 
-    private fun toLWFeaturesContainer(kClass: KClass<*>) : FeaturesContainer<*> {
+    private fun toLWFeaturesContainer(kClass: KClass<*>): FeaturesContainer<*> {
         return astToLWConcept[kClass] ?: throw IllegalArgumentException("Unknown KClass $kClass")
     }
 
-    fun toConceptInterface(kClass: KClass<*>) : ConceptInterface {
+    fun toConceptInterface(kClass: KClass<*>): ConceptInterface {
         return toLWFeaturesContainer(kClass) as ConceptInterface
     }
 
     fun toConcept(kClass: KClass<*>): Concept {
         return toLWFeaturesContainer(kClass) as Concept
     }
-
 }
-
