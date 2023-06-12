@@ -50,7 +50,6 @@ data class AssignmentStmt(
 
 sealed class ExprNode : Node(), Expression
 
-// a.v.c.d
 data class RefExpr(
     var context: ExprNode? = null,
     var symbol: ReferenceByName<Named>,
@@ -82,29 +81,29 @@ class SymbolResolutionTest {
     fun testIncrementalSymbolResolutionDevelopment() {
         getCompilationUnit()
             // pre-condition - v1
-            .apply { assertNotAllReferencesOfPropertyResolved(ClassDecl::superclass) }
-            .apply { assertNotAllReferencesOfPropertyResolved(FeatureDecl::type) }
-            .apply { assertNotAllReferencesOfPropertyResolved(RefExpr::symbol) }
-            .apply { assertNotAllReferencesOfPropertyResolved(CallExpr::operation) }
-            .apply { assertNotAllReferencesOfPropertyResolved(OperationDecl::returns) }
+            .apply { assertNotAllReferencesResolved(ClassDecl::superclass) }
+            .apply { assertNotAllReferencesResolved(FeatureDecl::type) }
+            .apply { assertNotAllReferencesResolved(RefExpr::symbol) }
+            .apply { assertNotAllReferencesResolved(CallExpr::operation) }
+            .apply { assertNotAllReferencesResolved(OperationDecl::returns) }
             .apply { assertNotAllReferencesResolved() }
             // resolution - v1
             .apply { getPartialSymbolResolver().resolveSymbols(this) }
             // post-condition - v1 (pre-condition - v2)
-            .apply { assertAllReferencesOfPropertyResolved(ClassDecl::superclass) }
-            .apply { assertNotAllReferencesOfPropertyResolved(FeatureDecl::type) }
-            .apply { assertNotAllReferencesOfPropertyResolved(RefExpr::symbol) }
-            .apply { assertNotAllReferencesOfPropertyResolved(CallExpr::operation) }
-            .apply { assertNotAllReferencesOfPropertyResolved(OperationDecl::returns) }
+            .apply { assertAllReferencesResolved(ClassDecl::superclass) }
+            .apply { assertNotAllReferencesResolved(FeatureDecl::type) }
+            .apply { assertNotAllReferencesResolved(RefExpr::symbol) }
+            .apply { assertNotAllReferencesResolved(CallExpr::operation) }
+            .apply { assertNotAllReferencesResolved(OperationDecl::returns) }
             .apply { assertNotAllReferencesResolved() }
             // resolution - v2
             .apply { getFullSymbolResolver().resolveSymbols(this) }
             // post-condition - v2
-            .apply { assertAllReferencesOfPropertyResolved(ClassDecl::superclass) }
-            .apply { assertAllReferencesOfPropertyResolved(FeatureDecl::type) }
-            .apply { assertAllReferencesOfPropertyResolved(RefExpr::symbol) }
-            .apply { assertAllReferencesOfPropertyResolved(CallExpr::operation) }
-            .apply { assertAllReferencesOfPropertyResolved(OperationDecl::returns) }
+            .apply { assertAllReferencesResolved(ClassDecl::superclass) }
+            .apply { assertAllReferencesResolved(FeatureDecl::type) }
+            .apply { assertAllReferencesResolved(RefExpr::symbol) }
+            .apply { assertAllReferencesResolved(CallExpr::operation) }
+            .apply { assertAllReferencesResolved(OperationDecl::returns) }
             .apply { assertAllReferencesResolved() }
     }
 

@@ -5,6 +5,7 @@ import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.nodeProperties
 import com.strumenta.kolasu.traversing.walk
+import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeProjection
 import kotlin.reflect.KVariance
@@ -12,50 +13,54 @@ import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.test.assertTrue
 
-fun Node.assertAllReferencesResolved() {
-    this.assertAllReferencesOfTypeResolved<PossiblyNamed>()
+fun Node.assertAllReferencesResolved(
+    withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class,
+) = assertTrue {
+    this.getReferenceResolvedValues(withReturnType).all { it }
 }
 
-fun Node.assertNotAllReferencesResolved() {
-    this.assertNotAllReferencesOfTypeResolved<PossiblyNamed>()
+fun Node.assertNotAllReferencesResolved(
+    withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class,
+) = assertTrue {
+    this.getReferenceResolvedValues(withReturnType).ifEmpty { sequenceOf(false) }.any { !it }
 }
 
-inline fun <reified T : PossiblyNamed> Node.assertAllReferencesOfTypeResolved() {
-    assertTrue { this.getReferenceResolutionInfo<T>().all { it } }
+fun Node.assertAllReferencesResolved(
+    forProperty: ReferenceByNameProperty,
+) = assertTrue {
+    this.getReferenceResolvedValues(forProperty).all { it }
 }
 
-inline fun <reified T : PossiblyNamed> Node.assertNotAllReferencesOfTypeResolved() {
-    assertTrue { this.getReferenceResolutionInfo<T>().ifEmpty { sequenceOf(false) }.any { !it } }
+fun Node.assertNotAllReferencesResolved(
+    forProperty: ReferenceByNameProperty,
+) = assertTrue {
+    this.getReferenceResolvedValues(forProperty).ifEmpty { sequenceOf(false) }.any { !it }
 }
 
-fun Node.assertAllReferencesOfPropertyResolved(targetProperty: ReferenceByNameProperty) {
-    assertTrue { this.getReferenceResolutionInfo(targetProperty).all { it } }
-}
-
-fun Node.assertNotAllReferencesOfPropertyResolved(targetProperty: ReferenceByNameProperty) {
-    assertTrue { this.getReferenceResolutionInfo(targetProperty).ifEmpty { sequenceOf(false) }.any { !it } }
-}
-
-inline fun <reified T : PossiblyNamed> Node.getReferenceResolutionInfo(): Sequence<Boolean> {
+private fun Node.getReferenceResolvedValues(
+    withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class,
+): Sequence<Boolean> {
     return this.walk().flatMap {
         it.nodeProperties
-            .filter { property -> property.returnType.isSubtypeOf(referenceByNameType<T>()) }
+            .filter { property -> property.returnType.isSubtypeOf(referenceByName(withReturnType)) }
             .mapNotNull { property -> property.get(it) }
             .map { value -> (value as ReferenceByName<*>).resolved }
     }
 }
 
-fun Node.getReferenceResolutionInfo(targetProperty: ReferenceByNameProperty): Sequence<Boolean> {
+private fun Node.getReferenceResolvedValues(
+    forProperty: ReferenceByNameProperty,
+): Sequence<Boolean> {
     return this.walk().flatMap {
         it.nodeProperties
-            .filter { property -> property == targetProperty }
+            .filter { property -> property == forProperty }
             .mapNotNull { property -> property.get(it) }
             .map { value -> (value as ReferenceByName<*>).resolved }
     }
 }
 
-inline fun <reified T : PossiblyNamed> referenceByNameType(): KType {
+private fun referenceByName(targetClass: KClass<out PossiblyNamed>): KType {
     return ReferenceByName::class.createType(
-        arguments = listOf(KTypeProjection(variance = KVariance.OUT, type = T::class.createType())),
+        arguments = listOf(KTypeProjection(variance = KVariance.OUT, type = targetClass.createType())),
     )
 }
