@@ -90,7 +90,7 @@ data class DeclarativeSymbolResolver(val issues: MutableList<Issue> = mutableLis
     }
 }
 
-fun declarativeSymbolResolver(
+fun symbolResolver(
     issues: MutableList<Issue> = mutableListOf(),
     init: DeclarativeSymbolResolver.() -> Unit,
 ) = DeclarativeSymbolResolver(issues).apply(init)
