@@ -5,6 +5,7 @@ pluginManagement {
         id("org.jetbrains.kotlin.jvm") version "$kotlin_version"
         id("org.jetbrains.dokka") version "$dokka_version"
         id("com.github.gmazzo.buildconfig") version "3.1.0"
+        id("org.jetbrains.kotlinx.kover") version "0.7.1"
     }
 }
 
