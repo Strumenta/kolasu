@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.symbolresolution
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.traversing.walkChildren
 import com.strumenta.kolasu.validation.Issue
@@ -24,7 +25,7 @@ data class DeclarativeSymbolResolver(val issues: MutableList<Issue> = mutableLis
 
     @Suppress("unchecked_cast")
     fun resolveProperty(property: ReferenceByNameProperty, context: Node) {
-        (context.properties.find { it.name == property.name }!!.value as ReferenceByName<Symbol>?)
+        (context.properties.find { it.name == property.name }!!.value as ReferenceByName<PossiblyNamed>?)
             ?.apply { this.referred = getScope(property, context)?.resolve(this.name, property.getReferredType()) }
     }
 
