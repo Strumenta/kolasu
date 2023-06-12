@@ -16,7 +16,7 @@ class KolasuLanguageTest {
 
     @Test
     fun allASTClassesAreFound() {
-        val kolasuLanguage = KolasuLanguage()
+        val kolasuLanguage = KolasuLanguage("com.strumenta.TestLanguage1")
         assertEquals(emptySet(), kolasuLanguage.astClasses.toSet())
         kolasuLanguage.addClass(Root::class)
         assertEquals(setOf(Root::class, NodeA::class, NodeB::class), kolasuLanguage.astClasses.toSet())

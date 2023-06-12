@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
  * There is no explicit Language defined in Kolasu, it is just a bunch of AST classes.
  * We create this Class to represent that collection of AST classes.
  */
-class KolasuLanguage {
+class KolasuLanguage(val qualifiedName: String) {
     val astClasses: MutableList<KClass<out Node>> = mutableListOf()
 
     fun <N : Node> addClass(kClass: KClass<N>): Boolean {

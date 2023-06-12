@@ -37,14 +37,20 @@ class LionWebLanguageExporter {
 
     fun export(kolasuLanguage: KolasuLanguage): Language {
         val lionwebLanguage = Language()
+        lionwebLanguage.version = "1"
+        lionwebLanguage.name = kolasuLanguage.qualifiedName
+        lionwebLanguage.key = kolasuLanguage.qualifiedName
+
         // First we create all types
         kolasuLanguage.astClasses.forEach { astClass ->
             if (astClass.isConcept) {
                 val concept = Concept(lionwebLanguage, astClass.simpleName)
+                concept.key = lionwebLanguage.key + "-" + concept.name
                 concept.isAbstract = astClass.isAbstract || astClass.isSealed
                 astToLWConcept[astClass] = concept
             } else if (astClass.isConceptInterface) {
                 val conceptInterface = ConceptInterface(lionwebLanguage, astClass.simpleName)
+                conceptInterface.key = lionwebLanguage.key + "-" + conceptInterface.name
                 astToLWConcept[astClass] = conceptInterface
             }
         }
@@ -72,18 +78,21 @@ class LionWebLanguageExporter {
                 when (it) {
                     is Attribute -> {
                         val prop = Property(it.name, featuresContainer)
+                        prop.key = prop.name
                         prop.setOptional(it.optional)
                         prop.setType(toLWDataType(it.type))
                         featuresContainer.addFeature(prop)
                     }
                     is Reference -> {
                         val ref = io.lionweb.lioncore.java.language.Reference(it.name, featuresContainer)
+                        ref.key = ref.name
                         ref.setOptional(it.optional)
                         ref.setType(toLWFeaturesContainer(it.type))
                         featuresContainer.addFeature(ref)
                     }
                     is Containment -> {
                         val cont = io.lionweb.lioncore.java.language.Containment(it.name, featuresContainer)
+                        cont.key = cont.name
                         cont.setOptional(true)
                         cont.setMultiple(it.multiplicity == Multiplicity.MANY)
                         cont.setType(toLWFeaturesContainer(it.type))
