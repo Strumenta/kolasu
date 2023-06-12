@@ -23,11 +23,31 @@ import kotlin.reflect.full.createType
 class LionWebLanguageExporter {
 
     private val astToLWConcept = mutableMapOf<KClass<*>, FeaturesContainer<*>>()
+    private val LWConceptToKolasuClass = mutableMapOf<FeaturesContainer<*>, KClass<*>>()
     private val kLanguageToLWLanguage = mutableMapOf<KolasuLanguage, Language>()
 
     init {
-        astToLWConcept[Node::class] = StarLasuLWLanguage.ASTNode
-        astToLWConcept[Named::class] = StarLasuLWLanguage.Named
+        val starLasuKLanguage = KolasuLanguage("com.strumenta.starlasu")
+        kLanguageToLWLanguage[starLasuKLanguage] = StarLasuLWLanguage
+        registerMapping(Node::class, StarLasuLWLanguage.ASTNode)
+        registerMapping(Named::class, StarLasuLWLanguage.Named)
+    }
+
+    private fun registerMapping(kolasuClass: KClass<*>, featuresContainer: FeaturesContainer<*>) {
+        astToLWConcept[kolasuClass] = featuresContainer
+        LWConceptToKolasuClass[featuresContainer] = kolasuClass
+    }
+
+    fun getKolasuClassesToConceptsMapping() : Map<KClass<*>, FeaturesContainer<*>> {
+        return astToLWConcept
+    }
+
+    fun getConceptsToKolasuClassesMapping() : Map<FeaturesContainer<*>, KClass<*>> {
+        return LWConceptToKolasuClass
+    }
+
+    fun knownLWLanguages() : Set<Language> {
+        return kLanguageToLWLanguage.values.toSet()
     }
 
     fun correspondingLanguage(kolasuLanguage: KolasuLanguage): Language {
@@ -47,11 +67,11 @@ class LionWebLanguageExporter {
                 val concept = Concept(lionwebLanguage, astClass.simpleName)
                 concept.key = lionwebLanguage.key + "-" + concept.name
                 concept.isAbstract = astClass.isAbstract || astClass.isSealed
-                astToLWConcept[astClass] = concept
+                registerMapping(astClass, concept)
             } else if (astClass.isConceptInterface) {
                 val conceptInterface = ConceptInterface(lionwebLanguage, astClass.simpleName)
                 conceptInterface.key = lionwebLanguage.key + "-" + conceptInterface.name
-                astToLWConcept[astClass] = conceptInterface
+                registerMapping(astClass, conceptInterface)
             }
         }
         // Then we populate them, so that self-references can be described

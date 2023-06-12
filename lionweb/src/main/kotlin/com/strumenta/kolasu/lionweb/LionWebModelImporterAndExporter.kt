@@ -2,6 +2,8 @@ package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.allFeatures
+import com.strumenta.kolasu.model.containingProperty
+import com.strumenta.kolasu.model.indexInContainingProperty
 import com.strumenta.kolasu.traversing.walk
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
@@ -11,14 +13,17 @@ import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.Node
 import io.lionweb.lioncore.java.model.ReferenceValue
 import io.lionweb.lioncore.java.model.impl.DynamicNode
+import io.lionweb.lioncore.java.serialization.JsonSerialization
 import java.lang.IllegalArgumentException
 
 private val com.strumenta.kolasu.model.Node.positionalID: String
     get() {
-        if (this.parent == null) {
-            return "root"
+        return if (this.parent == null) {
+            "root"
         } else {
-            TODO()
+            val cp = this.containingProperty()!!
+            val postfix = if (cp.multiple) "${cp.name}[${this.indexInContainingProperty()!!}]" else cp.name
+            "${this.parent!!.positionalID}-${postfix}"
         }
     }
 private val Source?.id: String
@@ -30,10 +35,16 @@ private val Source?.id: String
         }
     }
 
-class LionWebModelExporter {
+class LionWebModelImporterAndExporter {
 
     private val languageExporter = LionWebLanguageExporter()
-    private val nodesMapping = mutableMapOf<com.strumenta.kolasu.model.Node, Node>()
+    private val kolasuToLWNodesMapping = mutableMapOf<com.strumenta.kolasu.model.Node, Node>()
+    private val lwToKolasuNodesMapping = mutableMapOf<Node,com.strumenta.kolasu.model.Node>()
+
+    private fun registerMapping(kNode: com.strumenta.kolasu.model.Node, lwNode: Node) {
+        kolasuToLWNodesMapping[kNode] = lwNode
+        lwToKolasuNodesMapping[lwNode] = kNode
+    }
 
     fun correspondingLanguage(kolasuLanguage: KolasuLanguage): Language {
         return languageExporter.correspondingLanguage(kolasuLanguage)
@@ -44,16 +55,17 @@ class LionWebModelExporter {
     }
 
     fun export(kolasuTree: com.strumenta.kolasu.model.Node): Node {
-        if (nodesMapping.containsKey(kolasuTree)) {
-            return nodesMapping[kolasuTree]!!
+        if (kolasuToLWNodesMapping.containsKey(kolasuTree)) {
+            return kolasuToLWNodesMapping[kolasuTree]!!
         }
         kolasuTree.walk().forEach {
-            nodesMapping.computeIfAbsent(it) {
-                DynamicNode(nodeID(it), findConcept(it))
+            if (!kolasuToLWNodesMapping.containsKey(it)) {
+                val lwNode = DynamicNode(nodeID(it), findConcept(it))
+                registerMapping(it, lwNode)
             }
         }
         kolasuTree.walk().forEach { kNode ->
-            val lwNode = nodesMapping[kNode]!!
+            val lwNode = kolasuToLWNodesMapping[kNode]!!
             val kFeatures = kNode.javaClass.kotlin.allFeatures()
             lwNode.concept.allFeatures().forEach { feature ->
                 when (feature) {
@@ -69,7 +81,7 @@ class LionWebModelExporter {
                             as com.strumenta.kolasu.language.Containment
                         val kValue = kNode.getChildren(kContainment)
                         kValue.forEach { kChild ->
-                            val lwChild = nodesMapping[kChild]!!
+                            val lwChild = kolasuToLWNodesMapping[kChild]!!
                             lwNode.addChild(feature, lwChild)
                         }
                     }
@@ -78,14 +90,27 @@ class LionWebModelExporter {
                             as com.strumenta.kolasu.language.Reference
                         val kValue = kNode.getReference(kReference)
                         val lwReferred: Node? = if (kValue.referred == null) null
-                        else nodesMapping[kValue.referred!! as com.strumenta.kolasu.model.Node]!!
+                        else kolasuToLWNodesMapping[kValue.referred!! as com.strumenta.kolasu.model.Node]!!
                         lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
                     }
                 }
             }
         }
 
-        return nodesMapping[kolasuTree]!!
+        return kolasuToLWNodesMapping[kolasuTree]!!
+    }
+
+    fun import(lwTree: Node): com.strumenta.kolasu.model.Node {
+        lwTree.thisAndAllDescendants().forEach { lwNode ->
+            val kClass = languageExporter.getConceptsToKolasuClassesMapping()[lwNode.concept]!!
+            val kNode: com.strumenta.kolasu.model.Node = TODO()
+            registerMapping(kNode, lwNode)
+        }
+        lwTree.thisAndAllDescendants().forEach { lwNode ->
+            val kNode: com.strumenta.kolasu.model.Node = lwToKolasuNodesMapping[lwNode]!!
+            TODO()
+        }
+        return lwToKolasuNodesMapping[lwTree]!!
     }
 
     private fun findConcept(kNode: com.strumenta.kolasu.model.Node): Concept {
@@ -94,5 +119,18 @@ class LionWebModelExporter {
 
     private fun nodeID(kNode: com.strumenta.kolasu.model.Node): String {
         return "${kNode.source.id}-${kNode.positionalID}"
+    }
+
+    fun unserializeToNodes(json: String): List<Node> {
+        val js = JsonSerialization.getStandardSerialization()
+        languageExporter.knownLWLanguages().forEach {
+            js.conceptResolver.registerLanguage(it)
+        }
+        js.nodeInstantiator.enableDynamicNodes()
+//        languageExporter.getConceptsToKolasuClassesMapping().forEach { entry ->
+//            val lwFeaturesContainer = entry.key
+//            js.nodeInstantiator.registerCustomUnserializer(lwFeaturesContainer.id, object : NodeInstantiator<>)
+//        }
+        return js.unserializeToNodes(json)
     }
 }

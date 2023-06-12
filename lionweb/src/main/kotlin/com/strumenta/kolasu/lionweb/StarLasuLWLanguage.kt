@@ -5,12 +5,17 @@ import io.lionweb.lioncore.java.language.ConceptInterface
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
+import io.lionweb.lioncore.java.utils.LanguageValidator
 
 object StarLasuLWLanguage : Language() {
     init {
-        Concept(this, "ASTNode")
-        ConceptInterface(this, "Named")
-            .addFeature(Property.createRequired("name", LionCoreBuiltins.getString()))
+        setName("StarLasu")
+        setID("com_strumenta_starlasu")
+        setVersion("1")
+        setKey(id)
+        Concept(this, "ASTNode", id+"_ASTNode").setKey(id+"_ASTNode")
+        ConceptInterface(this, "Named", id+"_Named").setKey(id+"_Named")
+            .addFeature(Property.createRequired("name", LionCoreBuiltins.getString(), "starlasu_Named_name").setKey("starlasu_Named_name"))
     }
 
     val ASTNode: Concept

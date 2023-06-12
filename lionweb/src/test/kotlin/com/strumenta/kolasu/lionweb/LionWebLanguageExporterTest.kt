@@ -9,7 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
-data class SimpleRoot(val id: Int, val children: MutableList<SimpleDecl>) : Node()
+data class SimpleRoot(val id: Int, val childrez: MutableList<SimpleDecl>) : Node()
 
 sealed class SimpleDecl : Node()
 
@@ -51,8 +51,8 @@ class LionWebLanguageExporterTest {
         assertEquals(false, simpleRootID.isOptional)
         assertEquals(LionCoreBuiltins.getInteger(), simpleRootID.type)
 
-        val simpleRootChildren = simpleRoot.getContainmentByName("children")!!
-        assertEquals("children", simpleRootChildren.name)
+        val simpleRootChildren = simpleRoot.getContainmentByName("childrez")!!
+        assertEquals("childrez", simpleRootChildren.name)
         assertEquals(true, simpleRootChildren.isOptional)
         assertEquals(true, simpleRootChildren.isMultiple)
         assertEquals(simpleDecl, simpleRootChildren.type)
