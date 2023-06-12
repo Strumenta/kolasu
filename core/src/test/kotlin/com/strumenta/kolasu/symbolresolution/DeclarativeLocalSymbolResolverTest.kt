@@ -65,123 +65,160 @@ data class NewExpr(
     var clazz: ReferenceByName<ClassDecl>,
 ) : ExprNode()
 
-val symbolResolver = symbolResolver {
-
-    scopeFor(ClassDecl::superclass) { compilationUnit: CompilationUnit ->
-        Scope().apply { compilationUnit.content.filterIsInstance<ClassDecl>().forEach { define(it) } }
-    }
-
-    scopeFor(FeatureDecl::type) { compilationUnit: CompilationUnit ->
-        Scope().apply { compilationUnit.content.forEach { define(it) } }
-    }
-
-    scopeFor(RefExpr::symbol) { refExpr: RefExpr ->
-        var scope: Scope? = null
-        if (refExpr.context != null) {
-            scope = getScope(RefExpr::symbol, refExpr.context!!)
-        }
-        scope
-    }
-
-    scopeFor(RefExpr::symbol) { callExpr: CallExpr ->
-        val scope = Scope()
-        if (!callExpr.operation.resolved) {
-            resolveProperty(CallExpr::operation, callExpr)
-        }
-        if (callExpr.operation.referred != null && !callExpr.operation.referred!!.returns!!.resolved) {
-            resolveProperty(OperationDecl::returns, callExpr.operation.referred!!)
-        }
-        if (callExpr.operation.referred!!.returns!!.referred != null) {
-            val returnType = callExpr.operation.referred!!.returns!!.referred!!
-            if (returnType is ClassDecl) {
-                returnType.features.forEach { scope.define(it) }
-                returnType.operations.forEach { scope.define(it) }
-            }
-        }
-        scope
-    }
-
-    scopeFor(RefExpr::symbol) { newExpr: NewExpr ->
-        val scope = Scope()
-        if (!newExpr.clazz.resolved) {
-            resolveProperty(NewExpr::clazz, newExpr)
-        }
-        if (newExpr.clazz.referred != null) {
-            val returnType = newExpr.clazz.referred
-            if (returnType is ClassDecl) {
-                returnType.features.forEach { scope.define(it) }
-                returnType.operations.forEach { scope.define(it) }
-            }
-        }
-        scope
-    }
-
-    scopeFor(CallExpr::operation) { callExpr: CallExpr ->
-        callExpr.findAncestorOfType(ClassDecl::class.java)?.let {
-            getScope(CallExpr::operation, it)
-        }
-    }
-
-    scopeFor(CallExpr::operation) { classDecl: ClassDecl ->
-        Scope().apply { classDecl.operations.forEach { define(it) } }
-    }
-
-    scopeFor(OperationDecl::returns) { operationDecl: OperationDecl ->
-        operationDecl.findAncestorOfType(CompilationUnit::class.java)?.let {
-            getScope(OperationDecl::returns, it)
-        }
-    }
-
-    scopeFor(OperationDecl::returns) { compilationUnit: CompilationUnit ->
-        Scope().apply { compilationUnit.content.forEach { this.define(it) } }
-    }
-}
-
 class SymbolResolutionTest {
 
     @Test
-    fun example() {
-        val compilationUnit = CompilationUnit(
-            content = mutableListOf(
-                ClassDecl(
-                    name = "class_0",
-                    features = mutableListOf(
-                        FeatureDecl(
-                            name = "feature_0",
-                            type = ReferenceByName(name = "class_1"),
-                        ),
+    fun testSymbolResolution() {
+        getCompilationUnit()
+            // pre-condition
+            .apply { assertNotAllReferencesResolved() }
+            // resolution
+            .apply { getFullSymbolResolver().resolveSymbols(this) }
+            // post-condition
+            .apply { assertAllReferencesResolved() }
+    }
+
+    @Test
+    fun testIncrementalSymbolResolutionDevelopment() {
+        getCompilationUnit()
+            // pre-condition - v1
+            .apply { assertNotAllReferencesOfPropertyResolved(ClassDecl::superclass) }
+            .apply { assertNotAllReferencesOfPropertyResolved(FeatureDecl::type) }
+            .apply { assertNotAllReferencesOfPropertyResolved(RefExpr::symbol) }
+            .apply { assertNotAllReferencesOfPropertyResolved(CallExpr::operation) }
+            .apply { assertNotAllReferencesOfPropertyResolved(OperationDecl::returns) }
+            .apply { assertNotAllReferencesResolved() }
+            // resolution - v1
+            .apply { getPartialSymbolResolver().resolveSymbols(this) }
+            // post-condition - v1 (pre-condition - v2)
+            .apply { assertAllReferencesOfPropertyResolved(ClassDecl::superclass) }
+            .apply { assertNotAllReferencesOfPropertyResolved(FeatureDecl::type) }
+            .apply { assertNotAllReferencesOfPropertyResolved(RefExpr::symbol) }
+            .apply { assertNotAllReferencesOfPropertyResolved(CallExpr::operation) }
+            .apply { assertNotAllReferencesOfPropertyResolved(OperationDecl::returns) }
+            .apply { assertNotAllReferencesResolved() }
+            // resolution - v2
+            .apply { getFullSymbolResolver().resolveSymbols(this) }
+            // post-condition - v2
+            .apply { assertAllReferencesOfPropertyResolved(ClassDecl::superclass) }
+            .apply { assertAllReferencesOfPropertyResolved(FeatureDecl::type) }
+            .apply { assertAllReferencesOfPropertyResolved(RefExpr::symbol) }
+            .apply { assertAllReferencesOfPropertyResolved(CallExpr::operation) }
+            .apply { assertAllReferencesOfPropertyResolved(OperationDecl::returns) }
+            .apply { assertAllReferencesResolved() }
+    }
+
+    private fun getCompilationUnit() = CompilationUnit(
+        content = mutableListOf(
+            ClassDecl(
+                name = "class_0",
+                features = mutableListOf(
+                    FeatureDecl(
+                        name = "feature_0",
+                        type = ReferenceByName(name = "class_1"),
                     ),
-                    operations = mutableListOf(
-                        OperationDecl(
-                            name = "operation_0",
-                            returns = ReferenceByName(name = "class_0"),
-                            statements = mutableListOf(
-                                AssignmentStmt(
-                                    lhs = RefExpr(
-                                        context = CallExpr(
-                                            operation = ReferenceByName(name = "operation_0"),
-                                        ),
-                                        symbol = ReferenceByName(name = "feature_0"),
+                ),
+                operations = mutableListOf(
+                    OperationDecl(
+                        name = "operation_0",
+                        returns = ReferenceByName(name = "class_0"),
+                        statements = mutableListOf(
+                            AssignmentStmt(
+                                lhs = RefExpr(
+                                    context = CallExpr(
+                                        operation = ReferenceByName(name = "operation_0"),
                                     ),
-                                    rhs = RefExpr(
-                                        context = CallExpr(
-                                            operation = ReferenceByName(name = "operation_0"),
-                                        ),
-                                        symbol = ReferenceByName(name = "feature_0"),
+                                    symbol = ReferenceByName(name = "feature_0"),
+                                ),
+                                rhs = RefExpr(
+                                    context = CallExpr(
+                                        operation = ReferenceByName(name = "operation_0"),
                                     ),
+                                    symbol = ReferenceByName(name = "feature_0"),
                                 ),
                             ),
                         ),
                     ),
                 ),
-                ClassDecl("class_1"),
             ),
-        ).apply { assignParents() }
+            ClassDecl("class_1"),
+        ),
+    ).apply { assignParents() }
 
-        symbolResolver.resolveNode(compilationUnit, true)
+    private fun getFullSymbolResolver() = symbolResolver {
+        scopeFor(ClassDecl::superclass) { compilationUnit: CompilationUnit ->
+            Scope().apply { compilationUnit.content.filterIsInstance<ClassDecl>().forEach { define(it) } }
+        }
 
-        compilationUnit.assertAllReferencesResolved()
+        scopeFor(FeatureDecl::type) { compilationUnit: CompilationUnit ->
+            Scope().apply { compilationUnit.content.forEach { define(it) } }
+        }
 
-        println(compilationUnit)
+        scopeFor(RefExpr::symbol) { refExpr: RefExpr ->
+            var scope: Scope? = null
+            if (refExpr.context != null) {
+                scope = getScope(RefExpr::symbol, refExpr.context!!)
+            }
+            scope
+        }
+
+        scopeFor(RefExpr::symbol) { callExpr: CallExpr ->
+            val scope = Scope()
+            if (!callExpr.operation.resolved) {
+                resolveProperty(CallExpr::operation, callExpr)
+            }
+            if (callExpr.operation.referred != null && !callExpr.operation.referred!!.returns!!.resolved) {
+                resolveProperty(OperationDecl::returns, callExpr.operation.referred!!)
+            }
+            if (callExpr.operation.referred!!.returns!!.referred != null) {
+                val returnType = callExpr.operation.referred!!.returns!!.referred!!
+                if (returnType is ClassDecl) {
+                    returnType.features.forEach { scope.define(it) }
+                    returnType.operations.forEach { scope.define(it) }
+                }
+            }
+            scope
+        }
+
+        scopeFor(RefExpr::symbol) { newExpr: NewExpr ->
+            val scope = Scope()
+            if (!newExpr.clazz.resolved) {
+                resolveProperty(NewExpr::clazz, newExpr)
+            }
+            if (newExpr.clazz.referred != null) {
+                val returnType = newExpr.clazz.referred
+                if (returnType is ClassDecl) {
+                    returnType.features.forEach { scope.define(it) }
+                    returnType.operations.forEach { scope.define(it) }
+                }
+            }
+            scope
+        }
+
+        scopeFor(CallExpr::operation) { callExpr: CallExpr ->
+            callExpr.findAncestorOfType(ClassDecl::class.java)?.let {
+                getScope(CallExpr::operation, it)
+            }
+        }
+
+        scopeFor(CallExpr::operation) { classDecl: ClassDecl ->
+            Scope().apply { classDecl.operations.forEach { define(it) } }
+        }
+
+        scopeFor(OperationDecl::returns) { operationDecl: OperationDecl ->
+            operationDecl.findAncestorOfType(CompilationUnit::class.java)?.let {
+                getScope(OperationDecl::returns, it)
+            }
+        }
+
+        scopeFor(OperationDecl::returns) { compilationUnit: CompilationUnit ->
+            Scope().apply { compilationUnit.content.forEach { this.define(it) } }
+        }
+    }
+
+    private fun getPartialSymbolResolver() = symbolResolver {
+        scopeFor(ClassDecl::superclass) { compilationUnit: CompilationUnit ->
+            Scope().apply { compilationUnit.content.filterIsInstance<ClassDecl>().forEach { define(it) } }
+        }
     }
 }
