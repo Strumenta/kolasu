@@ -38,15 +38,15 @@ class LionWebLanguageExporter {
         LWConceptToKolasuClass[featuresContainer] = kolasuClass
     }
 
-    fun getKolasuClassesToConceptsMapping() : Map<KClass<*>, FeaturesContainer<*>> {
+    fun getKolasuClassesToConceptsMapping(): Map<KClass<*>, FeaturesContainer<*>> {
         return astToLWConcept
     }
 
-    fun getConceptsToKolasuClassesMapping() : Map<FeaturesContainer<*>, KClass<*>> {
+    fun getConceptsToKolasuClassesMapping(): Map<FeaturesContainer<*>, KClass<*>> {
         return LWConceptToKolasuClass
     }
 
-    fun knownLWLanguages() : Set<Language> {
+    fun knownLWLanguages(): Set<Language> {
         return kLanguageToLWLanguage.values.toSet()
     }
 

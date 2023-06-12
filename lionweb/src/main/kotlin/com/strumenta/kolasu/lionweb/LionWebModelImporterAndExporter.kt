@@ -29,7 +29,7 @@ private val com.strumenta.kolasu.model.Node.positionalID: String
         } else {
             val cp = this.containingProperty()!!
             val postfix = if (cp.multiple) "${cp.name}[${this.indexInContainingProperty()!!}]" else cp.name
-            "${this.parent!!.positionalID}-${postfix}"
+            "${this.parent!!.positionalID}-$postfix"
         }
     }
 private val Source?.id: String
@@ -45,7 +45,7 @@ class LionWebModelImporterAndExporter {
 
     private val languageExporter = LionWebLanguageExporter()
     private val kolasuToLWNodesMapping = mutableMapOf<com.strumenta.kolasu.model.Node, Node>()
-    private val lwToKolasuNodesMapping = mutableMapOf<Node,com.strumenta.kolasu.model.Node>()
+    private val lwToKolasuNodesMapping = mutableMapOf<Node, com.strumenta.kolasu.model.Node>()
 
     private fun registerMapping(kNode: com.strumenta.kolasu.model.Node, lwNode: Node) {
         kolasuToLWNodesMapping[kNode] = lwNode
@@ -113,7 +113,7 @@ class LionWebModelImporterAndExporter {
             values[referenceByName] = referred
         }
 
-        fun populateReferences(lwToKolasuNodesMapping : Map<Node,com.strumenta.kolasu.model.Node>) {
+        fun populateReferences(lwToKolasuNodesMapping: Map<Node, com.strumenta.kolasu.model.Node>) {
             values.forEach { entry ->
                 if (entry.value == null) {
                     entry.key.referred = null
@@ -124,7 +124,8 @@ class LionWebModelImporterAndExporter {
         }
     }
 
-    private fun instantiate(kClass: KClass<*>, data: Node, referencesPostponer: ReferencesPostponer) : com.strumenta.kolasu.model.Node {
+    private fun instantiate(kClass: KClass<*>, data: Node, referencesPostponer: ReferencesPostponer):
+        com.strumenta.kolasu.model.Node {
         if (kClass.constructors.size == 1) {
             val constructor = kClass.constructors.first()
             val params = mutableMapOf<KParameter, Any?>()
@@ -169,7 +170,12 @@ class LionWebModelImporterAndExporter {
                                 } else {
                                     throw IllegalStateException()
                                 }
-                                val kChild = if (lwChild == null) null else (lwToKolasuNodesMapping[lwChild] ?: throw IllegalStateException("Unable to find Kolasu Node corresponding to $lwChild"))
+                                val kChild = if (lwChild == null) null else (
+                                    lwToKolasuNodesMapping[lwChild]
+                                        ?: throw IllegalStateException(
+                                            "Unable to find Kolasu Node corresponding to $lwChild"
+                                        )
+                                    )
                                 params[param] = kChild
                             }
                         }
