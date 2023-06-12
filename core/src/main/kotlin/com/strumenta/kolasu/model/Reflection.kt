@@ -275,6 +275,16 @@ fun <N: Any>KProperty1<N, *>.asAttribute() : Attribute {
 
 private val featuresCache = mutableMapOf<KClass<*>, List<Feature>>()
 
+fun <N:Any>KClass<N>.allFeatures() : List<Feature> {
+    val res = mutableListOf<Feature>()
+    res.addAll(features())
+    supertypes.mapNotNull { (it.classifier as? KClass<*>) }.forEach { supertype ->
+        res.addAll(supertype.allFeatures())
+    }
+    return res
+}
+
+
 fun <N:Any>KClass<N>.features() : List<Feature> {
     if (!featuresCache.containsKey(this)) {
         // Named can be used also for things which are not Node, so we treat it as a special case

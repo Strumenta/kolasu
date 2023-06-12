@@ -5,62 +5,33 @@ import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Named
-import io.lionweb.lioncore.java.language.Language
-import kotlin.reflect.KClass
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.containedType
 import com.strumenta.kolasu.model.features
 import com.strumenta.kolasu.model.isConcept
 import com.strumenta.kolasu.model.isConceptInterface
-import com.strumenta.kolasu.model.isContainment
-import com.strumenta.kolasu.model.isReference
-import com.strumenta.kolasu.model.nodeProperties
-import com.strumenta.kolasu.model.referredType
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.ConceptInterface
 import io.lionweb.lioncore.java.language.DataType
 import io.lionweb.lioncore.java.language.FeaturesContainer
+import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
+import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
-
-/**
- * There is no explicit Language defined in Kolasu, it is just a bunch of AST classes.
- * We create this Class to represent that collection of AST classes.
- */
-class KolasuLanguage {
-    val astClasses: MutableList<KClass<out Node>> = mutableListOf()
-
-    fun <N: Node>addClass(kClass: KClass<N>) : Boolean {
-        if (!astClasses.contains(kClass) && astClasses.add(kClass)) {
-            if (kClass.isSealed) {
-                kClass.sealedSubclasses.forEach {
-                    addClass(it)
-                }
-            }
-            kClass.nodeProperties.forEach { nodeProperty ->
-                if (nodeProperty.isContainment()) {
-                    addClass(nodeProperty.containedType())
-                } else if (nodeProperty.isReference()) {
-                    addClass(nodeProperty.referredType())
-                }
-                // TODO add enums and other datatypes
-            }
-            return true
-        } else {
-            return false
-        }
-    }
-}
 
 class LionWebLanguageExporter {
 
     private val astToLWConcept = mutableMapOf<KClass<*>, FeaturesContainer<*>>()
+    private val kLanguageToLWLanguage = mutableMapOf<KolasuLanguage, Language>()
 
     init {
         astToLWConcept[Node::class] = StarLasuLWLanguage.ASTNode
         astToLWConcept[Named::class] = StarLasuLWLanguage.Named
+    }
+
+    fun correspondingLanguage(kolasuLanguage: KolasuLanguage) : Language {
+        return kLanguageToLWLanguage[kolasuLanguage] ?: throw java.lang.IllegalArgumentException("Unknown Kolasu Language $kolasuLanguage")
     }
 
     fun export(kolasuLanguage: KolasuLanguage) : Language {
@@ -119,6 +90,7 @@ class LionWebLanguageExporter {
                 }
             }
         }
+        kLanguageToLWLanguage[kolasuLanguage] = lionwebLanguage
         return lionwebLanguage
     }
 
@@ -134,8 +106,12 @@ class LionWebLanguageExporter {
         return astToLWConcept[kClass] ?: throw IllegalArgumentException("Unknown KClass $kClass")
     }
 
-    private fun toConceptInterface(kClass: KClass<*>) : ConceptInterface {
+    fun toConceptInterface(kClass: KClass<*>) : ConceptInterface {
         return toLWFeaturesContainer(kClass) as ConceptInterface
+    }
+
+    fun toConcept(kClass: KClass<*>): Concept {
+        return toLWFeaturesContainer(kClass) as Concept
     }
 
 }
