@@ -8,7 +8,7 @@ import com.strumenta.kolasu.validation.Issue
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSuperclassOf
 
-data class DeclarativeSymbolResolver(val issues: MutableList<Issue> = mutableListOf()) : LocalSymbolResolver() {
+data class DeclarativeLocalSymbolResolver(val issues: MutableList<Issue> = mutableListOf()) : LocalSymbolResolver() {
 
     val classScopeDefinitions: ClassScopeDefinitions = mutableMapOf()
     val propertyScopeDefinitions: PropertyScopeDefinitions = mutableMapOf()
@@ -92,5 +92,5 @@ data class DeclarativeSymbolResolver(val issues: MutableList<Issue> = mutableLis
 
 fun symbolResolver(
     issues: MutableList<Issue> = mutableListOf(),
-    init: DeclarativeSymbolResolver.() -> Unit,
-) = DeclarativeSymbolResolver(issues).apply(init)
+    init: DeclarativeLocalSymbolResolver.() -> Unit,
+) = DeclarativeLocalSymbolResolver(issues).apply(init)

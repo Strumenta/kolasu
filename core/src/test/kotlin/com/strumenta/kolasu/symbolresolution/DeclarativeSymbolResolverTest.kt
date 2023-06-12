@@ -65,7 +65,7 @@ data class NewExpr(
     var clazz: ReferenceByName<ClassDecl>,
 ) : ExprNode()
 
-val symbolResolver = declarativeSymbolResolver {
+val symbolResolver = symbolResolver {
 
     scopeFor(ClassDecl::superclass) { compilationUnit: CompilationUnit ->
         Scope().apply { compilationUnit.content.filterIsInstance<ClassDecl>().forEach { define(it) } }
