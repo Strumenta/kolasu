@@ -53,7 +53,7 @@ fun Node.referenceByNameProperties(): Collection<ReferenceByNameProperty> {
                 .isSubtypeOf(
                     ReferenceByName::class.createType(
                         arguments = listOf(
-                            KTypeProjection(variance = KVariance.OUT, type = PossiblyNamed::class.createType()),
+                            KTypeProjection(variance = KVariance.OUT, type = PossiblyNamed::class.createType())
                         ),
                         nullable = true
                     )

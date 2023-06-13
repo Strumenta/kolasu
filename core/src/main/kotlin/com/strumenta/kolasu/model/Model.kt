@@ -1,9 +1,5 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.language.Attribute
-import com.strumenta.kolasu.language.Containment
-import com.strumenta.kolasu.language.Reference
-import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility

@@ -17,7 +17,8 @@ object StarLasuLWLanguage : Language() {
             .addFeature(
                 Property.createRequired(
                     "name",
-                    LionCoreBuiltins.getString(), "starlasu_Named_name"
+                    LionCoreBuiltins.getString(),
+                    "starlasu_Named_name"
                 ).setKey("starlasu_Named_name")
             )
     }

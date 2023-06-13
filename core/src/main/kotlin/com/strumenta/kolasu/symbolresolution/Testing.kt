@@ -14,31 +14,31 @@ import kotlin.reflect.full.isSubtypeOf
 import kotlin.test.assertTrue
 
 fun Node.assertAllReferencesResolved(
-    withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class,
+    withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class
 ) = assertTrue {
     this.getReferenceResolvedValues(withReturnType).all { it }
 }
 
 fun Node.assertNotAllReferencesResolved(
-    withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class,
+    withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class
 ) = assertTrue {
     this.getReferenceResolvedValues(withReturnType).ifEmpty { sequenceOf(false) }.any { !it }
 }
 
 fun Node.assertAllReferencesResolved(
-    forProperty: ReferenceByNameProperty,
+    forProperty: ReferenceByNameProperty
 ) = assertTrue {
     this.getReferenceResolvedValues(forProperty).all { it }
 }
 
 fun Node.assertNotAllReferencesResolved(
-    forProperty: ReferenceByNameProperty,
+    forProperty: ReferenceByNameProperty
 ) = assertTrue {
     this.getReferenceResolvedValues(forProperty).ifEmpty { sequenceOf(false) }.any { !it }
 }
 
 private fun Node.getReferenceResolvedValues(
-    withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class,
+    withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class
 ): Sequence<Boolean> {
     return this.walk().flatMap {
         it.nodeProperties
@@ -49,7 +49,7 @@ private fun Node.getReferenceResolvedValues(
 }
 
 private fun Node.getReferenceResolvedValues(
-    forProperty: ReferenceByNameProperty,
+    forProperty: ReferenceByNameProperty
 ): Sequence<Boolean> {
     return this.walk().flatMap {
         it.nodeProperties
@@ -61,6 +61,6 @@ private fun Node.getReferenceResolvedValues(
 
 private fun referenceByName(targetClass: KClass<out PossiblyNamed>): KType {
     return ReferenceByName::class.createType(
-        arguments = listOf(KTypeProjection(variance = KVariance.OUT, type = targetClass.createType())),
+        arguments = listOf(KTypeProjection(variance = KVariance.OUT, type = targetClass.createType()))
     )
 }

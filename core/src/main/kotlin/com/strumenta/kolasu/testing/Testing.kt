@@ -156,12 +156,12 @@ fun assertASTsAreEqual(
                         assertEquals(
                             expectedPropValue.name,
                             actualPropValue.name,
-                            "$context, comparing reference name of ${expectedProperty.name} ",
+                            "$context, comparing reference name of ${expectedProperty.name} "
                         )
                         assertEquals(
                             expectedPropValue.referred?.toString(),
                             actualPropValue.referred?.toString(),
-                            "$context, comparing reference pointer ${expectedProperty.name}",
+                            "$context, comparing reference pointer ${expectedProperty.name}"
                         )
                     } else {
                         TODO()

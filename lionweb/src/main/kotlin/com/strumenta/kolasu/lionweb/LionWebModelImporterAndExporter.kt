@@ -95,8 +95,11 @@ class LionWebModelImporterAndExporter {
                         val kReference = kFeatures.find { it.name == feature.name }
                             as com.strumenta.kolasu.language.Reference
                         val kValue = kNode.getReference(kReference)
-                        val lwReferred: Node? = if (kValue.referred == null) null
-                        else kolasuToLWNodesMapping[kValue.referred!! as com.strumenta.kolasu.model.Node]!!
+                        val lwReferred: Node? = if (kValue.referred == null) {
+                            null
+                        } else {
+                            kolasuToLWNodesMapping[kValue.referred!! as com.strumenta.kolasu.model.Node]!!
+                        }
                         lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
                     }
                 }
@@ -170,12 +173,16 @@ class LionWebModelImporterAndExporter {
                                 } else {
                                     throw IllegalStateException()
                                 }
-                                val kChild = if (lwChild == null) null else (
-                                    lwToKolasuNodesMapping[lwChild]
-                                        ?: throw IllegalStateException(
-                                            "Unable to find Kolasu Node corresponding to $lwChild"
+                                val kChild = if (lwChild == null) {
+                                    null
+                                } else {
+                                    (
+                                        lwToKolasuNodesMapping[lwChild]
+                                            ?: throw IllegalStateException(
+                                                "Unable to find Kolasu Node corresponding to $lwChild"
+                                            )
                                         )
-                                    )
+                                }
                                 params[param] = kChild
                             }
                         }

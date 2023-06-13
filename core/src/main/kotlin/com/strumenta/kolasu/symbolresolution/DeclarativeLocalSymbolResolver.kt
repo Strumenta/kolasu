@@ -92,5 +92,5 @@ data class DeclarativeLocalSymbolResolver(val issues: MutableList<Issue> = mutab
 
 fun symbolResolver(
     issues: MutableList<Issue> = mutableListOf(),
-    init: DeclarativeLocalSymbolResolver.() -> Unit,
+    init: DeclarativeLocalSymbolResolver.() -> Unit
 ) = DeclarativeLocalSymbolResolver(issues).apply(init)
