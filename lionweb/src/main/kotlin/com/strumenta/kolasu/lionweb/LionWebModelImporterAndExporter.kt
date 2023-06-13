@@ -28,7 +28,7 @@ private val com.strumenta.kolasu.model.Node.positionalID: String
             "root"
         } else {
             val cp = this.containingProperty()!!
-            val postfix = if (cp.multiple) "${cp.name}[${this.indexInContainingProperty()!!}]" else cp.name
+            val postfix = if (cp.isMultiple) "${cp.name}[${this.indexInContainingProperty()!!}]" else cp.name
             "${this.parent!!.positionalID}-$postfix"
         }
     }
