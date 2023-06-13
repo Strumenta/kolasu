@@ -1,5 +1,8 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.model.annotations.Annotation
 import com.strumenta.kolasu.model.observable.Observer
 import java.io.Serializable
@@ -172,6 +175,31 @@ open class Node() : Serializable {
 
     fun hasAnnotation(annotation: Annotation): Boolean {
         return annotations.contains(annotation)
+    }
+
+    fun getChildren(containment: Containment): List<Node> {
+        return when (val rawValue = nodeProperties.find { it.name == containment.name }!!.get(this)) {
+            null -> {
+                emptyList()
+            }
+
+            is List<*> -> {
+                rawValue as List<Node>
+            }
+
+            else -> {
+                listOf(rawValue as Node)
+            }
+        }
+    }
+
+    fun getReference(reference: Reference): ReferenceByName<*> {
+        val rawValue = nodeProperties.find { it.name == reference.name }!!.get(this)
+        return rawValue as ReferenceByName<*>
+    }
+
+    fun getAttributeValue(attribute: Attribute): Any? {
+        return nodeProperties.find { it.name == attribute.name }!!.get(this)
     }
 
     fun <T : Any?>setAttribute(attributeName: String, value: T) {

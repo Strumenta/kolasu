@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.symbolresolution.Scope
-import com.strumenta.kolasu.symbolresolution.Symbol
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -10,9 +9,9 @@ import org.junit.Test as test
 
 class MyNode(override val name: String) : Node(), Named
 
-data class ASymbol(override val name: String, val index: Int = 0) : Symbol
-data class BSymbol(override val name: String, val index: Int = 0) : Symbol
-data class USymbol(override val name: String? = null) : Symbol
+data class ASymbol(override val name: String, val index: Int = 0) : Named
+data class BSymbol(override val name: String, val index: Int = 0) : Named
+data class USymbol(override val name: String? = null) : PossiblyNamed
 
 data class NodeOverridingName(
     override var name: String

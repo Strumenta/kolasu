@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.symbolresolution
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.nodeProperties
 import com.strumenta.kolasu.utils.memoize
@@ -15,16 +16,18 @@ import kotlin.reflect.full.isSubtypeOf
 // TODO handle multiple symbols (e.g. function overloading)
 // TODO allow other than name-based symbol binding (e.g. predicated, numbered, etc.)
 data class Scope(var parent: Scope? = null, var symbolTable: SymbolTable = mutableMapOf()) {
-    fun define(symbol: Symbol) {
+    fun define(symbol: PossiblyNamed) {
         val name: String = symbol.name ?: throw IllegalArgumentException("The given symbol must have a name")
         this.symbolTable.computeIfAbsent(name) { mutableListOf() }.add(symbol)
     }
 
-    fun resolve(name: String, type: KClass<out Symbol> = Symbol::class): Symbol? {
+    fun resolve(name: String, type: KClass<out PossiblyNamed> = PossiblyNamed::class): PossiblyNamed? {
         return this.symbolTable.getOrDefault(name, mutableListOf()).find { type.isInstance(it) }
             ?: this.parent?.resolve(name, type)
     }
 }
+
+typealias SymbolTable = MutableMap<String, MutableList<PossiblyNamed>>
 
 class ScopeDefinition(val contextType: KClass<out Node>, scopeFunction: (Node) -> Scope?) {
     val scopeFunction: (Node) -> Scope? = scopeFunction.memoize()
@@ -35,11 +38,11 @@ typealias PropertyScopeDefinitions = MutableMap<ReferenceByNameProperty, Mutable
 
 // ReferenceByNameProperty
 
-typealias ReferenceByNameProperty = KProperty1<out Node, ReferenceByName<out Symbol>?>
+typealias ReferenceByNameProperty = KProperty1<out Node, ReferenceByName<out PossiblyNamed>?>
 
 @Suppress("unchecked_cast")
-fun ReferenceByNameProperty.getReferredType(): KClass<out Symbol> {
-    return this.returnType.arguments[0].type!!.classifier!! as KClass<out Symbol>
+fun ReferenceByNameProperty.getReferredType(): KClass<out PossiblyNamed> {
+    return this.returnType.arguments[0].type!!.classifier!! as KClass<out PossiblyNamed>
 }
 
 @Suppress("unchecked_cast")
@@ -50,7 +53,7 @@ fun Node.referenceByNameProperties(): Collection<ReferenceByNameProperty> {
                 .isSubtypeOf(
                     ReferenceByName::class.createType(
                         arguments = listOf(
-                            KTypeProjection(variance = KVariance.OUT, type = Symbol::class.createType())
+                            KTypeProjection(variance = KVariance.OUT, type = PossiblyNamed::class.createType()),
                         ),
                         nullable = true
                     )

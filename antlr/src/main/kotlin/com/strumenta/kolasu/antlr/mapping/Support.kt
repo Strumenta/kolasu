@@ -2,6 +2,7 @@ package com.strumenta.kolasu.antlr.mapping
 
 import com.strumenta.kolasu.model.observable.ObservableList
 import com.strumenta.kolasu.transformation.ParameterConverter
+import com.strumenta.kolasu.transformation.ASTTransformer
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.reflect.KParameter
@@ -15,7 +16,7 @@ import kotlin.reflect.full.createType
  * JPostIncrementExpr(translateCasted<JExpression>(expression().first()))
  * ```
  */
-fun <T> ParseTreeToASTTransformer.translateCasted(original: ParserRuleContext): T {
+fun <T> ASTTransformer.translateCasted(original: Any): T {
     val result = transform(original)
     if (result is Nothing) {
         throw IllegalStateException("Transformation produced Nothing")
@@ -32,8 +33,8 @@ fun <T> ParseTreeToASTTransformer.translateCasted(original: ParserRuleContext): 
  * JExtendsType(translateCasted(pt.typeType()), translateList(pt.annotation()))
  * ```
  */
-fun <T> ParseTreeToASTTransformer.translateList(original: Collection<out ParserRuleContext>?): ObservableList<T> {
-    return original?.map { transformIntoNodes(it) as List<T> }?.flatten()?.toObservableList() ?: ObservableList()
+fun <T> ASTTransformer.translateList(original: Collection<out Any>?): MutableList<T> {
+    return original?.map { transformIntoNodes(it) as List<T> }?.flatten()?.toMutableList() ?: mutableListOf()
 }
 
 fun <E> List<E>.toObservableList(): ObservableList<E> {
@@ -55,7 +56,7 @@ fun <E> List<E>.toObservableList(): ObservableList<E> {
  *  )
  *  ```
  */
-fun <T> ParseTreeToASTTransformer.translateOptional(original: ParserRuleContext?): T? {
+fun <T> ASTTransformer.translateOptional(original: Any?): T? {
     return original?.let { transform(it) as T }
 }
 

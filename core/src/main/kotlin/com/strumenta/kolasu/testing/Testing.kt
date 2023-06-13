@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.testing
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PropertyType
+import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.parsing.ParsingResult
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -148,6 +150,21 @@ fun assertASTsAreEqual(
                                 useLightweightAttributeEquality = useLightweightAttributeEquality
                             )
                         }
+                    }
+                } else if (expectedProperty.propertyType == PropertyType.REFERENCE) {
+                    if (expectedPropValue is ReferenceByName<*> && actualPropValue is ReferenceByName<*>) {
+                        assertEquals(
+                            expectedPropValue.name,
+                            actualPropValue.name,
+                            "$context, comparing reference name of ${expectedProperty.name} ",
+                        )
+                        assertEquals(
+                            expectedPropValue.referred?.toString(),
+                            actualPropValue.referred?.toString(),
+                            "$context, comparing reference pointer ${expectedProperty.name}",
+                        )
+                    } else {
+                        TODO()
                     }
                 } else {
                     if (useLightweightAttributeEquality) {
