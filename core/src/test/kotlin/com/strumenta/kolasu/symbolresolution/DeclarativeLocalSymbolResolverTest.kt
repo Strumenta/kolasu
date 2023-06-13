@@ -1,6 +1,12 @@
 package com.strumenta.kolasu.symbolresolution
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.Expression
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.Statement
+import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.traversing.findAncestorOfType
 import org.junit.Test
 
@@ -163,10 +169,10 @@ class SymbolResolutionTest {
 
         scopeFor(RefExpr::symbol) { callExpr: CallExpr ->
             val scope = Scope()
-            if (!callExpr.operation.resolved) {
+            if (!callExpr.operation.isResolved) {
                 resolveProperty(CallExpr::operation, callExpr)
             }
-            if (callExpr.operation.referred != null && !callExpr.operation.referred!!.returns!!.resolved) {
+            if (callExpr.operation.referred != null && !callExpr.operation.referred!!.returns!!.isResolved) {
                 resolveProperty(OperationDecl::returns, callExpr.operation.referred!!)
             }
             if (callExpr.operation.referred!!.returns!!.referred != null) {
@@ -181,7 +187,7 @@ class SymbolResolutionTest {
 
         scopeFor(RefExpr::symbol) { newExpr: NewExpr ->
             val scope = Scope()
-            if (!newExpr.clazz.resolved) {
+            if (!newExpr.clazz.isResolved) {
                 resolveProperty(NewExpr::clazz, newExpr)
             }
             if (newExpr.clazz.referred != null) {
