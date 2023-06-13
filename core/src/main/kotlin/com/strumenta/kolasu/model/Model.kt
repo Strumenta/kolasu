@@ -1,5 +1,8 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Reference
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -141,6 +144,31 @@ open class Node() : Origin, Destination, Serializable {
      */
     final override fun toString(): String {
         return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
+    }
+
+    fun getChildren(containment: Containment): List<Node> {
+        return when (val rawValue = nodeProperties.find { it.name == containment.name }!!.get(this)) {
+            null -> {
+                emptyList()
+            }
+
+            is List<*> -> {
+                rawValue as List<Node>
+            }
+
+            else -> {
+                listOf(rawValue as Node)
+            }
+        }
+    }
+
+    fun getReference(reference: Reference): ReferenceByName<*> {
+        val rawValue = nodeProperties.find { it.name == reference.name }!!.get(this)
+        return rawValue as ReferenceByName<*>
+    }
+
+    fun getAttributeValue(attribute: Attribute): Any? {
+        return nodeProperties.find { it.name == attribute.name }!!.get(this)
     }
 }
 
