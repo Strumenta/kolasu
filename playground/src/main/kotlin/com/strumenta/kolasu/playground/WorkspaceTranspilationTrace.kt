@@ -11,7 +11,7 @@ import com.strumenta.kolasu.validation.Result
 class WorkspaceTranspilationTrace {
     data class WorkspaceFile(val path: String, val code: String, val result: Result<Node>)
 
-    val originalFiles : List<WorkspaceFile> = mutableListOf()
-    val generatedFiles : List<WorkspaceFile> = mutableListOf()
-    val transpilationIssues: List<Issue> = emptyList()
+    val originalFiles : MutableList<WorkspaceFile> = mutableListOf()
+    val generatedFiles : MutableList<WorkspaceFile> = mutableListOf()
+    val transpilationIssues: MutableList<Issue> = mutableListOf()
 }
