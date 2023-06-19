@@ -3,6 +3,10 @@ package com.strumenta.kolasu.model.observable
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceChangeNotification
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.disposables.Disposable
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -14,7 +18,7 @@ class MyObservableNode : Node() {
         }
 }
 
-class MyObserver : SimpleNodeObserver() {
+class MyObserver(val description: String? = null) : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
     override fun <V> onAttributeChange(node: Node, attributeName: String, oldValue: V, newValue: V) {
         observations.add("$attributeName: $oldValue -> $newValue")
@@ -57,7 +61,34 @@ data class NamedNode(override val name: String) : Node(), Named
 
 data class NodeWithReference(val ref: ReferenceByName<NamedNode>, val id: Int) : Node() {
     init {
-        ref.subscribe(ReferenceToNodeObserver(this, "ref"))
+        val container = this
+        val referenceName = "ref"
+        ref.changes.map { referenceNotification ->
+            ReferenceSet(
+                container,
+                referenceName,
+                referenceNotification.oldValue as Node?,
+                referenceNotification.newValue as Node?
+            ) as NodeNotification<in Node>
+        }.subscribe(this.changes)
+        ref.changes.mapOptional { referenceNotification ->
+            if (referenceNotification.oldValue != null) {
+                Optional.of(ReferencedToRemoved(referenceNotification.oldValue!!, referenceName, container))
+            } else {
+                Optional.empty()
+            } as Optional<ReferencedToRemoved<in Node>>
+        }.subscribe { referenceNotification ->
+            (referenceNotification.node as Node).changes.onNext(referenceNotification)
+        }
+        ref.changes.mapOptional { referenceNotification ->
+            if (referenceNotification.newValue != null) {
+                Optional.of(ReferencedToAdded(referenceNotification.newValue!!, referenceName, container))
+            } else {
+                Optional.empty()
+            } as Optional<ReferencedToAdded<in Node>>
+        }.subscribe { referenceNotification ->
+            (referenceNotification.node as Node).changes.onNext(referenceNotification)
+        }
     }
 }
 
@@ -81,7 +112,7 @@ class ObservableNodeTest {
         val n1 = MyObservableNodeMP()
         val n2 = MyObservableNodeMP()
         val n3 = MyObservableNodeMP()
-        val obs = MyObserver()
+        val obs = MyObserver("Observer to n1")
         n1.subscribe(obs)
 
         assertEquals(null, n1.parent)
@@ -139,10 +170,10 @@ class ObservableNodeTest {
 
     @Test
     fun observeReferences() {
-        val obs1 = MyObserver()
-        val obs2 = MyObserver()
-        val obsA = MyObserver()
-        val obsB = MyObserver()
+        val obs1 = MyObserver("Observer to nwr1")
+        val obs2 = MyObserver("Observer to nwr2")
+        val obsA = MyObserver("Observer to a")
+        val obsB = MyObserver("Observer to b")
 
         fun clearObservations() {
             obs1.observations.clear()
