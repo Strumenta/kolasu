@@ -23,7 +23,7 @@ class TranspilationTraceTest {
         )
         assertEquals(
             """{
-  "eClass" : "https://strumenta.com/starlasu/transpilation/v1#//TranspilationTrace",
+  "eClass" : "https://strumenta.com/starlasu/transpilation/v2#//TranspilationTrace",
   "originalCode" : "a:1",
   "sourceResult" : {
     "root" : {
@@ -58,7 +58,7 @@ class TranspilationTraceTest {
         )
         assertEquals(
             """{
-  "eClass" : "https://strumenta.com/starlasu/transpilation/v1#//TranspilationTrace",
+  "eClass" : "https://strumenta.com/starlasu/transpilation/v2#//TranspilationTrace",
   "originalCode" : "a:1",
   "sourceResult" : {
     "root" : {
@@ -94,7 +94,7 @@ class TranspilationTraceTest {
         )
         assertEquals(
             """{
-  "eClass" : "https://strumenta.com/starlasu/transpilation/v1#//TranspilationTrace",
+  "eClass" : "https://strumenta.com/starlasu/transpilation/v2#//TranspilationTrace",
   "originalCode" : "a:1",
   "sourceResult" : {
     "root" : {
@@ -134,7 +134,7 @@ class TranspilationTraceTest {
         )
         assertEquals(
             """{
-  "eClass" : "https://strumenta.com/starlasu/transpilation/v1#//TranspilationTrace",
+  "eClass" : "https://strumenta.com/starlasu/transpilation/v2#//TranspilationTrace",
   "originalCode" : "a:1",
   "sourceResult" : {
     "root" : {
