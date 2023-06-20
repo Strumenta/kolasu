@@ -3,10 +3,6 @@ package com.strumenta.kolasu.model.observable
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.ReferenceChangeNotification
-import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.disposables.Disposable
-import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -61,34 +57,7 @@ data class NamedNode(override val name: String) : Node(), Named
 
 data class NodeWithReference(val ref: ReferenceByName<NamedNode>, val id: Int) : Node() {
     init {
-        val container = this
-        val referenceName = "ref"
-        ref.changes.map { referenceNotification ->
-            ReferenceSet(
-                container,
-                referenceName,
-                referenceNotification.oldValue as Node?,
-                referenceNotification.newValue as Node?
-            ) as NodeNotification<in Node>
-        }.subscribe(this.changes)
-        ref.changes.mapOptional { referenceNotification ->
-            if (referenceNotification.oldValue != null) {
-                Optional.of(ReferencedToRemoved(referenceNotification.oldValue!!, referenceName, container))
-            } else {
-                Optional.empty()
-            } as Optional<ReferencedToRemoved<in Node>>
-        }.subscribe { referenceNotification ->
-            (referenceNotification.node as Node).changes.onNext(referenceNotification)
-        }
-        ref.changes.mapOptional { referenceNotification ->
-            if (referenceNotification.newValue != null) {
-                Optional.of(ReferencedToAdded(referenceNotification.newValue!!, referenceName, container))
-            } else {
-                Optional.empty()
-            } as Optional<ReferencedToAdded<in Node>>
-        }.subscribe { referenceNotification ->
-            (referenceNotification.node as Node).changes.onNext(referenceNotification)
-        }
+        ref.setContainer(this, "ref")
     }
 }
 

@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.model
 
-import io.reactivex.rxjava3.core.Observer
+import com.strumenta.kolasu.model.observable.ReferenceSet
+import com.strumenta.kolasu.model.observable.ReferencedToAdded
+import com.strumenta.kolasu.model.observable.ReferencedToRemoved
 import io.reactivex.rxjava3.subjects.PublishSubject
 import java.io.Serializable
 
@@ -48,6 +50,31 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
             field = value
         }
 
+    private var container: Node? = null
+    private var referenceName: String? = null
+
+    fun setContainer(node: Node, referenceName: String) {
+        if (container == node) {
+            return
+        }
+        if (container != null) {
+            throw IllegalStateException("$this is already contained in $container as ${this.referenceName}")
+        }
+        changes.map {
+            ReferenceSet(node, referenceName, it.oldValue as Node?, it.newValue as Node?)
+        }.subscribe(node.changes)
+        changes
+            .filter { it.oldValue != null }
+            .map { ReferencedToRemoved(it.oldValue as Node, referenceName, node) }
+            .subscribe { it.node.changes.onNext(it) }
+        changes
+            .filter { it.newValue != null }
+            .map { ReferencedToAdded(it.newValue as Node, referenceName, node) }
+            .subscribe { it.node.changes.onNext(it) }
+        container = node
+        this.referenceName = referenceName
+    }
+
     init {
         this.referred = initialReferred
     }
@@ -76,10 +103,6 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
 
         return true
     }
-
-    fun subscribe(observer: Observer<in ReferenceChangeNotification<N>>) {
-        changes.subscribe(observer)
-    }
 }
 
 /**
@@ -96,9 +119,10 @@ fun <N> ReferenceByName<N>.tryToResolve(
 }
 
 /**
- * Try to resolve the reference by assigining @param[possibleValue]. The assignment is not performed if
- * @param[possibleValue] is null.
+ * Try to resolve the reference by assigning [possibleValue]. The assignment is not performed if
+ * [possibleValue] is null.
  *
+ * @param possibleValue the candidate value.
  * @return true if the assignment has been performed
  */
 fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : PossiblyNamed {
