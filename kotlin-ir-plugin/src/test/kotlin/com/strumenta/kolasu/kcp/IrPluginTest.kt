@@ -419,7 +419,7 @@ fun main() {
         if (mainMethod.parameterCount == 0) {
             mainMethod.invoke(null)
         } else if (mainMethod.parameterCount == 1) {
-            mainMethod.invoke(arrayOf<String>())
+            mainMethod.invoke(null, arrayOf<String>())
         } else {
             throw IllegalStateException(
                 "The main method found expect these parameters: ${mainMethod.parameters}. " +
