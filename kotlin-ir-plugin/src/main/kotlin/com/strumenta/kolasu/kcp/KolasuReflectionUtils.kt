@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.kcp
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ReferenceByName
 import org.jetbrains.kotlin.backend.jvm.ir.getIoFile
 import org.jetbrains.kotlin.backend.jvm.ir.psiElement
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
@@ -59,6 +60,12 @@ fun IrProperty.declareSingleContainment(): Boolean {
 }
 
 @ObsoleteDescriptorBasedAPI
+fun IrProperty.declareReference(): Boolean {
+    val propertyType = this.backingField?.type
+    return propertyType?.isReference() ?: false
+}
+
+@ObsoleteDescriptorBasedAPI
 fun IrType.isSingleContainment(): Boolean {
     return if (this is IrSimpleType) {
         this.isAssignableTo(Node::class)
@@ -70,6 +77,11 @@ fun IrType.isSingleContainment(): Boolean {
 @ObsoleteDescriptorBasedAPI
 fun IrType.isSingleAttribute(): Boolean {
     return !this.isAssignableTo(Collection::class) && !this.isAssignableTo(Node::class)
+}
+
+@ObsoleteDescriptorBasedAPI
+fun IrType.isReference(): Boolean {
+    return this.isAssignableTo(ReferenceByName::class)
 }
 
 @ObsoleteDescriptorBasedAPI

@@ -1,17 +1,27 @@
 package com.strumenta.kolasu.model.observable
 
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.disposables.Disposable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class MyListObserver : ListObserver<Int> {
+class MyListObserver : Observer<ListNotification<Int>> {
     val observations = mutableListOf<String>()
 
-    override fun added(e: Int) {
-        observations.add("added $e")
+    override fun onSubscribe(d: Disposable) {
     }
 
-    override fun removed(e: Int) {
-        observations.add("removed $e")
+    override fun onError(e: Throwable) {
+    }
+
+    override fun onComplete() {
+    }
+
+    override fun onNext(notification: ListNotification<Int>) {
+        when (notification) {
+            is ListAddition -> observations.add("added ${notification.added}")
+            is ListRemoval -> observations.add("removed ${notification.removed}")
+        }
     }
 }
 
@@ -20,7 +30,7 @@ class ObservableListTest {
     fun observeAdditionAndRemoval() {
         val li = ObservableList<Int>()
         val o = MyListObserver()
-        li.registerObserver(o)
+        li.subscribe(o)
         li.add(1)
         li.add(2)
         li.add(3)

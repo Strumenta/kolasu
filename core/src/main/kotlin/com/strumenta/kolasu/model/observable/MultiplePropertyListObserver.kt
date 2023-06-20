@@ -1,19 +1,36 @@
 package com.strumenta.kolasu.model.observable
 
 import com.strumenta.kolasu.model.Node
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.disposables.Disposable
 
-class MultiplePropertyListObserver<E : Node>(val container: Node, val propertyName: String) : ListObserver<E> {
-    override fun added(e: E) {
+class MultiplePropertyListObserver<C : Node, E : Node>(
+    val container: C,
+    val containmentName: String
+) : Observer<ListNotification<E>> {
+    private fun added(e: E) {
         e.parent = container
-        container.observers.forEach {
-            it.receivePropertyAddedNotification(container, propertyName, e)
-        }
+        container.changes.onNext(ChildAdded(container, containmentName, e))
     }
 
-    override fun removed(e: E) {
+    private fun removed(e: E) {
         e.parent = null
-        container.observers.forEach {
-            it.receivePropertyRemovedNotification(container, propertyName, e)
+        container.changes.onNext(ChildRemoved(container, containmentName, e))
+    }
+
+    override fun onSubscribe(d: Disposable) {
+    }
+
+    override fun onError(e: Throwable) {
+    }
+
+    override fun onComplete() {
+    }
+
+    override fun onNext(notification: ListNotification<E>) {
+        when (notification) {
+            is ListAddition -> added(notification.added)
+            is ListRemoval -> removed(notification.removed)
         }
     }
 }

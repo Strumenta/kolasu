@@ -4,16 +4,24 @@ import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.model.annotations.Annotation
-import com.strumenta.kolasu.model.observable.Observer
+import com.strumenta.kolasu.model.observable.AttributeChangedNotification
+import com.strumenta.kolasu.model.observable.NodeNotification
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.subjects.PublishSubject
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty1
 
+typealias NodeObserver = Observer<in NodeNotification<in Node>>
+
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
 open class Node() : Serializable {
+
+    @property:Internal
+    val changes = PublishSubject.create<NodeNotification<in Node>>()
 
     @Internal
     private val annotations: MutableList<Annotation> = mutableListOf()
@@ -120,20 +128,8 @@ open class Node() : Serializable {
         return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
     }
 
-    @property:Internal
-    val observers: MutableList<Observer<in Node>> = mutableListOf()
-    fun registerObserver(observer: Observer<*>) {
-        observers.add(observer as Observer<in Node>)
-    }
-
-    fun unregisterObserver(observer: Observer<in Node>) {
-        observers.remove(observer)
-    }
-
     protected fun notifyOfPropertyChange(propertyName: String, oldValue: Any?, newValue: Any?) {
-        observers.forEach {
-            it.receivePropertyChangeNotification(this, propertyName, oldValue, newValue)
-        }
+        changes.onNext(AttributeChangedNotification(this, propertyName, oldValue, newValue))
     }
 
     @Internal
@@ -256,5 +252,9 @@ open class Node() : Serializable {
     fun <T : PossiblyNamed>setReferenceReferred(referenceName: String, referred: T) {
         val ref: ReferenceByName<T> = getReference(referenceName)
         ref.referred = referred
+    }
+
+    fun subscribe(observer: Observer<NodeNotification<in Node>>) {
+        this.changes.subscribe(observer)
     }
 }
