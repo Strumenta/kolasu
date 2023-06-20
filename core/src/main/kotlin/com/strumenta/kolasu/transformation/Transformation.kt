@@ -459,9 +459,11 @@ open class ASTTransformer(
     }
 
     fun <S : Any> notTranslateDirectly(): NodeFactory<S, Node> {
-        throw java.lang.IllegalStateException("A Node of this type should never be translated directly. " +
+        throw java.lang.IllegalStateException(
+            "A Node of this type should never be translated directly. " +
                 "It is expected that the container will not delegate the translation of this node but it will " +
-                "handle it directly")
+                "handle it directly"
+        )
     }
 
     fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeFactory<S, T> {
