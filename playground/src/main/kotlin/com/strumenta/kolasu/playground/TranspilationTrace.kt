@@ -26,4 +26,3 @@ class TranspilationTrace<S : Node, T : Node>(
         Result(emptyList(), sourceAST), Result(emptyList(), targetAST), transpilationIssues
     )
 }
-

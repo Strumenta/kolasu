@@ -68,7 +68,7 @@ private fun makeWorkspaceTranspilationTraceEObject(): EObject {
     return TRANSPILATION_METAMODEL.eFactoryInstance.create(ec)
 }
 
-private fun makeWorkspaceFileEObject() : EObject {
+private fun makeWorkspaceFileEObject(): EObject {
     val ec = TRANSPILATION_METAMODEL.getEClass("WorkspaceFile")
     return TRANSPILATION_METAMODEL.eFactoryInstance.create(ec)
 }
@@ -96,8 +96,14 @@ fun WorkspaceTranspilationTrace.toEObject(resource: Resource): EObject {
     val transpilationTraceEO = makeWorkspaceTranspilationTraceEObject()
     val mapping = KolasuToEMFMapping()
 
-    transpilationTraceEO.setMultipleContainment("originalFiles", this.originalFiles.map { it.toEObject(resource, mapping) })
-    transpilationTraceEO.setMultipleContainment("generatedFiles", this.generatedFiles.map { it.toEObject(resource, mapping) })
+    transpilationTraceEO.setMultipleContainment(
+        "originalFiles",
+        this.originalFiles.map { it.toEObject(resource, mapping) }
+    )
+    transpilationTraceEO.setMultipleContainment(
+        "generatedFiles",
+        this.generatedFiles.map { it.toEObject(resource, mapping) }
+    )
 
     transpilationTraceEO.setMultipleContainment("issues", this.transpilationIssues.map { it.toEObject() })
     return transpilationTraceEO
