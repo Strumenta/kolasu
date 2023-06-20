@@ -190,8 +190,7 @@ fun main() {
         )
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
-        val mainKt = result.classLoader.loadClass("mytest.MainKt")
-        mainKt.methods.find { it.name == "main" }!!.invoke(null)
+        result.invokeMainMethod("mytest.MainKt")
     }
 
     @Test
@@ -266,8 +265,7 @@ fun main() {
         )
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
-        val mainKt = result.classLoader.loadClass("mytest.MainKt")
-        mainKt.methods.find { it.name == "main" }!!.invoke(null)
+        result.invokeMainMethod("mytest.MainKt")
     }
 
     @Test
@@ -416,15 +414,19 @@ fun main() {
         val mainKt = this.classLoader.loadClass(className)
         val mainMethod = mainKt.methods.find { it.name == "main" }
             ?: throw IllegalArgumentException("Main method not found in compiled code")
-        if (mainMethod.parameterCount == 0) {
-            mainMethod.invoke(null)
-        } else if (mainMethod.parameterCount == 1) {
-            mainMethod.invoke(null, arrayOf<String>())
-        } else {
-            throw IllegalStateException(
-                "The main method found expect these parameters: ${mainMethod.parameters}. " +
-                    "Main method: $mainMethod"
-            )
+        when (mainMethod.parameterCount) {
+            0 -> {
+                mainMethod.invoke(null)
+            }
+            1 -> {
+                mainMethod.invoke(null, arrayOf<String>())
+            }
+            else -> {
+                throw IllegalStateException(
+                    "The main method found expect these parameters: ${mainMethod.parameters}. " +
+                        "Main method: $mainMethod"
+                )
+            }
         }
     }
 }
