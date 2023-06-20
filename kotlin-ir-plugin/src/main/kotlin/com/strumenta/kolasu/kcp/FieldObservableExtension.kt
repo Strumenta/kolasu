@@ -13,7 +13,6 @@ import org.jetbrains.kotlin.backend.common.lower.irBlockBody
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.builders.irCall
-import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
@@ -44,11 +43,11 @@ class FieldObservableExtension(val pluginContext: IrPluginContext) : IrElementTr
     override fun visitPropertyNew(declaration: IrProperty): IrStatement {
         if (declaration.declareReference()) {
             //     init {
-            //        ref.subscribe(ReferenceToNodeObserver(this, "ref"))
+            //        ref.setContainer(this, "ref")
             //    }
 
-            val registerObserver = pluginContext.referenceFunctions(
-                FqName("${ReferenceByName::class.qualifiedName}.subscribe")
+            val referenceByNameSetContainerMethod = pluginContext.referenceFunctions(
+                FqName("${ReferenceByName::class.qualifiedName}.setContainer")
             ).single()
 
             val propertyGetter = declaration.getter!!
@@ -65,25 +64,18 @@ class FieldObservableExtension(val pluginContext: IrPluginContext) : IrElementTr
                 DeclarationIrBuilder(pluginContext, anonymousInitializerSymbolImpl.symbol).irBlockBody(
                     IrFactoryImpl.createBlockBody(-1, -1)
                 ) {
-                    +irCall(registerObserver).apply {
+                    +irCall(referenceByNameSetContainerMethod).apply {
                         val thisValue = irClass.thisReceiver!!
-                        val referenceToNodeObserverConstructor = pluginContext.referenceConstructors(
-                            FqName(ReferenceToNodeObserver::class.qualifiedName!!)
-                        ).single()
                         // dispatchReceiver: p5 -> this.getP5()
                         dispatchReceiver = irCall(propertyGetter).apply {
                             dispatchReceiver = irGet(thisValue)
                         }
-                        // ReferenceToNodeObserver(this, "ref")
+                        // passing "this"
+                        putValueArgument(0, irGet(thisValue))
+                        // passing the name of the reference
                         putValueArgument(
-                            0,
-                            irCallConstructor(referenceToNodeObserverConstructor, emptyList()).apply {
-                                putValueArgument(0, irGet(thisValue))
-                                putValueArgument(
-                                    1,
-                                    declaration.name.identifier.toIrConst(pluginContext.irBuiltIns.stringType)
-                                )
-                            }
+                            1,
+                            declaration.name.identifier.toIrConst(pluginContext.irBuiltIns.stringType)
                         )
                     }
                 }
