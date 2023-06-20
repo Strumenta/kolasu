@@ -4,7 +4,6 @@ package com.strumenta.kolasu.kcp
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.observable.ReferenceToNodeObserver
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.FirIncompatiblePluginAPI
