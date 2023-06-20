@@ -458,6 +458,14 @@ open class ASTTransformer(
         return registerNodeFactory(S::class, T::class)
     }
 
+    fun <S : Any> notTranslateDirectly(): NodeFactory<S, Node> {
+        throw java.lang.IllegalStateException(
+            "A Node of this type should never be translated directly. " +
+                "It is expected that the container will not delegate the translation of this node but it will " +
+                "handle it directly"
+        )
+    }
+
     fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeFactory<S, T> {
         registerKnownClass(target)
         // We are looking for any constructor with does not take parameters or have default
