@@ -417,8 +417,10 @@ fun main() {
         val mainMethod = mainKt.methods.find { it.name == "main" }
             ?: throw IllegalArgumentException("Main method not found in compiled code")
         require(mainMethod.parameterCount == 0) {
-            throw IllegalStateException("The main method found expect these parameters: ${mainMethod.parameters}. " +
-                    "Main method: $mainMethod")
+            throw IllegalStateException(
+                "The main method found expect these parameters: ${mainMethod.parameters}. " +
+                    "Main method: $mainMethod"
+            )
         }
         mainMethod.invoke(null)
     }
