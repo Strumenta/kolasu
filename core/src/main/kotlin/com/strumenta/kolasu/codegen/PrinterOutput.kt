@@ -102,7 +102,7 @@ class PrinterOutput(
             try {
                 printer.print(this, ast)
             } catch (e: RuntimeException) {
-                throw RuntimeException("Issue occurred while printing ${ast.toString()}", e)
+                throw RuntimeException("Issue occurred while printing $ast", e)
             }
         }
         print(postfix)
