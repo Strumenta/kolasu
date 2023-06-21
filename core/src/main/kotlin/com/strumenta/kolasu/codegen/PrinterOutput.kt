@@ -99,7 +99,11 @@ class PrinterOutput(
         val printer = nodePrinterOverrider(ast) ?: nodePrinters[ast::class]
             ?: throw java.lang.IllegalArgumentException("Unable to print $ast")
         associate(ast) {
-            printer.print(this, ast)
+            try {
+                printer.print(this, ast)
+            } catch (e: RuntimeException) {
+                throw RuntimeException("Issue occurred while printing $ast", e)
+            }
         }
         print(postfix)
     }
