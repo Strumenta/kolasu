@@ -59,7 +59,7 @@ class LionWebLanguageExporter {
         val lionwebLanguage = Language()
         lionwebLanguage.version = "1"
         lionwebLanguage.name = kolasuLanguage.qualifiedName
-        lionwebLanguage.key = kolasuLanguage.qualifiedName
+        lionwebLanguage.key = kolasuLanguage.qualifiedName.replace('.', '-')
         lionwebLanguage.id = "starlasu_language_${kolasuLanguage.qualifiedName.replace('.', '-')}"
         lionwebLanguage.addDependency(StarLasuLWLanguage)
 
@@ -67,14 +67,14 @@ class LionWebLanguageExporter {
         kolasuLanguage.astClasses.forEach { astClass ->
             if (astClass.isConcept) {
                 val concept = Concept(lionwebLanguage, astClass.simpleName)
-                concept.key = lionwebLanguage.key + "-" + concept.name
-                concept.id = lionwebLanguage.id + "-" + concept.name
+                concept.key = lionwebLanguage.key + "_" + concept.name
+                concept.id = lionwebLanguage.id + "_" + concept.name
                 concept.isAbstract = astClass.isAbstract || astClass.isSealed
                 registerMapping(astClass, concept)
             } else if (astClass.isConceptInterface) {
                 val conceptInterface = ConceptInterface(lionwebLanguage, astClass.simpleName)
-                conceptInterface.key = lionwebLanguage.key + "-" + conceptInterface.name
-                conceptInterface.id = lionwebLanguage.id + "-" + conceptInterface.name
+                conceptInterface.key = lionwebLanguage.key + "_" + conceptInterface.name
+                conceptInterface.id = lionwebLanguage.id + "_" + conceptInterface.name
                 registerMapping(astClass, conceptInterface)
             }
         }
@@ -152,4 +152,128 @@ class LionWebLanguageExporter {
     fun toConcept(kClass: KClass<*>): Concept {
         return toLWFeaturesContainer(kClass) as Concept
     }
+
+    fun matchingKClass(concept: Concept): KClass<*>? {
+        return this.LWConceptToKolasuClass.entries.find { it.key.key == concept.key
+                && it.key.language!!.id == concept.language!!.id
+                && it.key.language!!.version == concept.language!!.version }?.value
+    }
+//
+//    private fun instantiate(
+//        constructor: KFunction<out Node>,
+//        concept: Concept,
+//        serializedNode: SerializedNode,
+//        jsonSerialization: JsonSerialization,
+//        unserializedNodesByID: Map<String, Node>,
+//        propertiesValues: Map<Property, Any?>
+//    ): Node {
+//        val parameters = mutableMapOf<KParameter, Any?>()
+//        constructor.parameters.forEach { constructorParameter ->
+//            // Is this constructor parameter corresponding to some feature?
+//            val feature = concept.allFeatures().find { f -> f.name == constructorParameter.name }
+//            if (feature == null) {
+//                TODO()
+//            } else {
+//                when (feature) {
+//                    is Property -> {
+//                        // We can then unserialize the feature and pass that value
+//                        val serializedPropertyValue = serializedNode.properties.find {
+//                            it.metaPointer.key == feature.key
+//                        }
+//                        if (serializedPropertyValue == null) {
+//                            throw IllegalStateException("Missing value for property ${feature.name}")
+//                        } else {
+//                            parameters[constructorParameter] = propertiesValues[feature as Property]
+//                        }
+//                    }
+//
+//                    is LWContainment -> {
+//                        val serializedContainmentValue = serializedNode.containments.find {
+//                            it.metaPointer.key == feature.key
+//                        }
+//                        if (serializedContainmentValue == null) {
+//                            throw IllegalStateException("Missing value for containment ${feature.name}")
+//                        } else {
+//                            val containment = feature
+//                            val childrenIDs = serializedContainmentValue.value as List<String>
+//                            val children: MutableList<out Node> = childrenIDs.map { childID ->
+//                                unserializedNodesByID[childID] ?: throw IllegalStateException()
+//                            }.toMutableList()
+//                            if (!containment.isMultiple) {
+//                                when (children.size) {
+//                                    0 -> parameters[constructorParameter] = null
+//                                    1 -> parameters[constructorParameter] = children[0]
+//                                    else -> throw IllegalStateException()
+//                                }
+//                            } else {
+//                                parameters[constructorParameter] = children
+//                            }
+//                        }
+//                    }
+//
+//                    is LWReference -> {
+//                        TODO("References in constructor not yet supported")
+//                    }
+//                    else -> throw IllegalStateException()
+//                }
+//            }
+//        }
+//        try {
+//            val node = constructor.callBy(parameters)
+//            node.assignParents()
+//            return node
+//        } catch (t: Throwable) {
+//            throw RuntimeException("Invocation of constructor $constructor failed. Parameters: $parameters", t)
+//        }
+//    }
+//
+//    fun prepareSerialization(jsonSerialization: JsonSerialization, kolasuLanguage: KolasuLanguage) {
+//        val lionwebLanguage = correspondingLanguage(kolasuLanguage)
+//        jsonSerialization.conceptResolver.registerLanguage(lionwebLanguage)
+//        this.LWConceptToKolasuClass.filter { !it.value.isAbstract }.forEach {
+//            val concept = it.key
+//            val kolasuClass = it.value
+//            jsonSerialization.nodeInstantiator.registerCustomUnserializer(concept.id) { concept, serializedNode,
+//                                                                                        unserializedNodesByID,
+//                                                                                        propertiesValue ->
+//                val primaryConstructor = kolasuClass.primaryConstructor
+//                if (primaryConstructor == null) {
+//                    val emptyLikeConstructor = kolasuClass.constructors.any { it.parameters.all { it.isOptional } }
+//                    if (emptyLikeConstructor == null) {
+//                        val firstConstructor = kolasuClass.constructors.first()
+//                        if (firstConstructor == null) {
+//                            TODO()
+//                        } else {
+//                            instantiate(
+//                                firstConstructor,
+//                                concept!!,
+//                                serializedNode!!,
+//                                jsonSerialization,
+//                                unserializedNodesByID,
+//                                propertiesValue
+//                            )
+//                        }
+//                    } else {
+//                        TODO()
+//                    }
+//                } else {
+//                    instantiate(
+//                        primaryConstructor,
+//                        concept!!,
+//                        serializedNode!!,
+//                        jsonSerialization,
+//                        unserializedNodesByID,
+//                        propertiesValue
+//                    )
+//                }
+//            }
+//        }
+//        mappedEnumerations.forEach { entry ->
+//            val enumeration = entry.value
+//            jsonSerialization.primitiveValuesSerialization.registerSerializer(
+//                enumeration.id,
+//                PrimitiveValuesSerialization.PrimitiveSerializer<Enum<*>> { enum -> enum.name }
+//            )
+//        }
+//    }
 }
