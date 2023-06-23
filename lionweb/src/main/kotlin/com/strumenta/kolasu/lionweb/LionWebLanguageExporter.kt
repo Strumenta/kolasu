@@ -60,6 +60,7 @@ class LionWebLanguageExporter {
         lionwebLanguage.version = "1"
         lionwebLanguage.name = kolasuLanguage.qualifiedName
         lionwebLanguage.key = kolasuLanguage.qualifiedName
+        lionwebLanguage.addDependency(StarLasuLWLanguage)
 
         // First we create all types
         kolasuLanguage.astClasses.forEach { astClass ->
@@ -129,6 +130,7 @@ class LionWebLanguageExporter {
         return when (kType) {
             Int::class.createType() -> LionCoreBuiltins.getInteger()
             String::class.createType() -> LionCoreBuiltins.getString()
+            Boolean::class.createType() -> LionCoreBuiltins.getBoolean()
             else -> throw UnsupportedOperationException("KType: $kType")
         }
     }

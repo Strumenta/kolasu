@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.lionweb
 
+import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.Source
@@ -29,15 +30,17 @@ private val com.strumenta.kolasu.model.Node.positionalID: String
         } else {
             val cp = this.containingProperty()!!
             val postfix = if (cp.multiple) "${cp.name}[${this.indexInContainingProperty()!!}]" else cp.name
-            "${this.parent!!.positionalID}-$postfix"
+            "${this.parent!!.positionalID}_$postfix"
         }
     }
 private val Source?.id: String
     get() {
-        if (this == null) {
-            return "UNKNOWN_SOURCE"
+        return if (this == null) {
+            "UNKNOWN_SOURCE"
+        } else if (this is FileSource) {
+            "file_${this.file.path.replace('.', '-').replace('/', '-')}"
         } else {
-            TODO("Source $this")
+            TODO("Unable to generate ID for Source $this (${this.javaClass.canonicalName})")
         }
     }
 
@@ -209,7 +212,7 @@ class LionWebModelImporterAndExporter {
     }
 
     private fun nodeID(kNode: com.strumenta.kolasu.model.Node): String {
-        return "${kNode.source.id}-${kNode.positionalID}"
+        return "${kNode.source.id}_${kNode.positionalID}"
     }
 
     fun unserializeToNodes(json: String): List<Node> {
