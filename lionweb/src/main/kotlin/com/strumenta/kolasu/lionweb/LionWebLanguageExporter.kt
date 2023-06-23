@@ -60,6 +60,7 @@ class LionWebLanguageExporter {
         lionwebLanguage.version = "1"
         lionwebLanguage.name = kolasuLanguage.qualifiedName
         lionwebLanguage.key = kolasuLanguage.qualifiedName
+        lionwebLanguage.id = "starlasu_language_${kolasuLanguage.qualifiedName.replace('.', '-')}"
         lionwebLanguage.addDependency(StarLasuLWLanguage)
 
         // First we create all types
@@ -67,11 +68,13 @@ class LionWebLanguageExporter {
             if (astClass.isConcept) {
                 val concept = Concept(lionwebLanguage, astClass.simpleName)
                 concept.key = lionwebLanguage.key + "-" + concept.name
+                concept.id = lionwebLanguage.id + "-" + concept.name
                 concept.isAbstract = astClass.isAbstract || astClass.isSealed
                 registerMapping(astClass, concept)
             } else if (astClass.isConceptInterface) {
                 val conceptInterface = ConceptInterface(lionwebLanguage, astClass.simpleName)
                 conceptInterface.key = lionwebLanguage.key + "-" + conceptInterface.name
+                conceptInterface.id = lionwebLanguage.id + "-" + conceptInterface.name
                 registerMapping(astClass, conceptInterface)
             }
         }
@@ -99,21 +102,24 @@ class LionWebLanguageExporter {
                 when (it) {
                     is Attribute -> {
                         val prop = Property(it.name, featuresContainer)
-                        prop.key = prop.name
+                        prop.key = featuresContainer.key+"_"+prop.name
+                        prop.id  = featuresContainer.id+"_"+prop.name
                         prop.setOptional(it.optional)
                         prop.setType(toLWDataType(it.type))
                         featuresContainer.addFeature(prop)
                     }
                     is Reference -> {
                         val ref = io.lionweb.lioncore.java.language.Reference(it.name, featuresContainer)
-                        ref.key = ref.name
+                        ref.key = featuresContainer.key+"_"+ref.name
+                        ref.id  = featuresContainer.id+"_"+ref.name
                         ref.setOptional(it.optional)
                         ref.setType(toLWFeaturesContainer(it.type))
                         featuresContainer.addFeature(ref)
                     }
                     is Containment -> {
                         val cont = io.lionweb.lioncore.java.language.Containment(it.name, featuresContainer)
-                        cont.key = cont.name
+                        cont.key = featuresContainer.key+"_"+cont.name
+                        cont.id  = featuresContainer.id+"_"+cont.name
                         cont.setOptional(true)
                         cont.setMultiple(it.multiplicity == Multiplicity.MANY)
                         cont.setType(toLWFeaturesContainer(it.type))

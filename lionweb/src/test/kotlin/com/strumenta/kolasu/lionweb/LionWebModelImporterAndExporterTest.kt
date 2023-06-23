@@ -20,7 +20,7 @@ class LionWebModelImporterAndExporterTest {
   ],
   "nodes": [
     {
-      "id": "UNKNOWN_SOURCE-root",
+      "id": "UNKNOWN_SOURCE_root",
       "concept": {
         "language": "com.strumenta.SimpleLang",
         "version": "1",
@@ -44,9 +44,9 @@ class LionWebModelImporterAndExporterTest {
             "key": "childrez"
           },
           "children": [
-            "UNKNOWN_SOURCE-root-childrez[0]",
-            "UNKNOWN_SOURCE-root-childrez[1]",
-            "UNKNOWN_SOURCE-root-childrez[2]"
+            "UNKNOWN_SOURCE_root_childrez_0",
+            "UNKNOWN_SOURCE_root_childrez_1",
+            "UNKNOWN_SOURCE_root_childrez_2"
           ]
         }
       ],
@@ -54,7 +54,7 @@ class LionWebModelImporterAndExporterTest {
       "parent": null
     },
     {
-      "id": "UNKNOWN_SOURCE-root-childrez[0]",
+      "id": "UNKNOWN_SOURCE_root_childrez_0",
       "concept": {
         "language": "com.strumenta.SimpleLang",
         "version": "1",
@@ -90,15 +90,15 @@ class LionWebModelImporterAndExporterTest {
           "targets": [
             {
               "resolveInfo": "A1",
-              "reference": "UNKNOWN_SOURCE-root-childrez[0]"
+              "reference": "UNKNOWN_SOURCE_root_childrez_0"
             }
           ]
         }
       ],
-      "parent": "UNKNOWN_SOURCE-root"
+      "parent": "UNKNOWN_SOURCE_root"
     },
     {
-      "id": "UNKNOWN_SOURCE-root-childrez[1]",
+      "id": "UNKNOWN_SOURCE_root_childrez_1",
       "concept": {
         "language": "com.strumenta.SimpleLang",
         "version": "1",
@@ -116,10 +116,10 @@ class LionWebModelImporterAndExporterTest {
       ],
       "children": [],
       "references": [],
-      "parent": "UNKNOWN_SOURCE-root"
+      "parent": "UNKNOWN_SOURCE_root"
     },
     {
-      "id": "UNKNOWN_SOURCE-root-childrez[2]",
+      "id": "UNKNOWN_SOURCE_root_childrez_2",
       "concept": {
         "language": "com.strumenta.SimpleLang",
         "version": "1",
@@ -143,7 +143,7 @@ class LionWebModelImporterAndExporterTest {
             "key": "child"
           },
           "children": [
-            "UNKNOWN_SOURCE-root-childrez[2]-child"
+            "UNKNOWN_SOURCE_root_childrez_2_child"
           ]
         }
       ],
@@ -157,15 +157,15 @@ class LionWebModelImporterAndExporterTest {
           "targets": [
             {
               "resolveInfo": "A1",
-              "reference": "UNKNOWN_SOURCE-root-childrez[0]"
+              "reference": "UNKNOWN_SOURCE_root_childrez_0"
             }
           ]
         }
       ],
-      "parent": "UNKNOWN_SOURCE-root"
+      "parent": "UNKNOWN_SOURCE_root"
     },
     {
-      "id": "UNKNOWN_SOURCE-root-childrez[2]-child",
+      "id": "UNKNOWN_SOURCE_root_childrez_2_child",
       "concept": {
         "language": "com.strumenta.SimpleLang",
         "version": "1",
@@ -183,7 +183,7 @@ class LionWebModelImporterAndExporterTest {
       ],
       "children": [],
       "references": [],
-      "parent": "UNKNOWN_SOURCE-root-childrez[2]"
+      "parent": "UNKNOWN_SOURCE_root_childrez_2"
     }
   ]
 }"""
