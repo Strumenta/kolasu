@@ -20,17 +20,17 @@ import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
 import java.lang.IllegalStateException
 
-data class KotlinFile(val path: String , val code: String)
+data class KotlinFile(val path: String, val code: String)
 
 class ASTGenerator(val packageName: String, val language: Language) {
 
-    private fun typeName(featuresContainer: FeaturesContainer<*>) : TypeName {
+    private fun typeName(featuresContainer: FeaturesContainer<*>): TypeName {
         return when {
             featuresContainer.id == StarLasuLWLanguage.ASTNode.id -> {
                 Node::class.java.asTypeName()
             }
             featuresContainer.language == this.language -> {
-                ClassName.bestGuess("${packageName}.${featuresContainer.name}")
+                ClassName.bestGuess("$packageName.${featuresContainer.name}")
             }
             else -> {
                 TODO()
@@ -38,7 +38,7 @@ class ASTGenerator(val packageName: String, val language: Language) {
         }
     }
 
-    private fun typeName(dataType: DataType<*>) : TypeName {
+    private fun typeName(dataType: DataType<*>): TypeName {
         if (dataType == LionCoreBuiltins.getString()) {
             return String::class.java.asTypeName()
         } else if (dataType == LionCoreBuiltins.getBoolean()) {
@@ -48,7 +48,7 @@ class ASTGenerator(val packageName: String, val language: Language) {
         }
     }
 
-    fun generateClasses() : Set<KotlinFile> {
+    fun generateClasses(): Set<KotlinFile> {
         val fileSpecBuilder = FileSpec.builder(packageName, "${language.name}AST.kt")
         language.elements.forEach { element ->
             when (element) {
@@ -75,17 +75,21 @@ class ASTGenerator(val packageName: String, val language: Language) {
                             is Property -> {
                                 val type = typeName(feature.type!!)
                                 constructor.addParameter(feature.name!!, type)
-                                typeSpec.addProperty(PropertySpec.builder(feature.name!!, type)
-                                    .mutable(true).initializer(feature.name!!).build())
+                                typeSpec.addProperty(
+                                    PropertySpec.builder(feature.name!!, type)
+                                        .mutable(true).initializer(feature.name!!).build()
+                                )
                             }
                             is Containment -> {
                                 var type = typeName(feature.type!!)
                                 if (feature.isMultiple) {
-                                   type = MutableList::class.java.asClassName().parameterizedBy(type)
+                                    type = MutableList::class.java.asClassName().parameterizedBy(type)
                                 }
                                 constructor.addParameter(feature.name!!, type)
-                                typeSpec.addProperty(PropertySpec.builder(feature.name!!, type)
-                                    .mutable(true).initializer(feature.name!!).build())
+                                typeSpec.addProperty(
+                                    PropertySpec.builder(feature.name!!, type)
+                                        .mutable(true).initializer(feature.name!!).build()
+                                )
                             }
                             is Reference -> TODO()
                         }

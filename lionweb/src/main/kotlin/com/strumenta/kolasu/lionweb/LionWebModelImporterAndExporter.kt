@@ -131,7 +131,7 @@ class LionWebModelImporterAndExporter {
 
     private fun instantiate(kClass: KClass<*>, data: Node, referencesPostponer: ReferencesPostponer):
         com.strumenta.kolasu.model.Node {
-        val constructor : KFunction<Any> = when {
+        val constructor: KFunction<Any> = when {
             kClass.constructors.size == 1 -> {
                 kClass.constructors.first()
             }
@@ -142,63 +142,62 @@ class LionWebModelImporterAndExporter {
                 TODO()
             }
         }
-            val params = mutableMapOf<KParameter, Any?>()
-            constructor.parameters.forEach { param ->
-                val feature = data.concept.getFeatureByName(param.name!!)
-                if (feature == null) {
-                    TODO()
-                } else {
-                    when (feature) {
-                        is Property -> {
-                            params[param] = data.getPropertyValue(feature)
-                        }
-                        is Reference -> {
-                            val referenceValues = data.getReferenceValues(feature)
-                            when {
-                                referenceValues.size > 1 -> {
-                                    throw IllegalStateException()
-                                }
-                                referenceValues.size == 0 -> {
-                                    params[param] = null
-                                }
-                                referenceValues.size == 1 -> {
-                                    val rf = referenceValues.first()
-                                    val referenceByName = ReferenceByName<PossiblyNamed>(rf.resolveInfo!!, null)
-                                    referencesPostponer.registerPostponedReference(referenceByName, rf.referred)
-                                    params[param] = referenceByName
-                                }
-                            }
-                        }
-                        is Containment -> {
-                            val lwChildren = data.getChildren(feature)
-                            if (feature.isMultiple) {
-                                val kChildren = lwChildren.map { lwToKolasuNodesMapping[it]!! }
-                                params[param] = kChildren
-                            } else {
-                                // Given we navigate the tree in reverse the child should have been already
-                                // instantiated
-                                val lwChild: Node? = if (lwChildren.size == 0) {
-                                    null
-                                } else if (lwChildren.size == 1) {
-                                    lwChildren.first()
-                                } else {
-                                    throw IllegalStateException()
-                                }
-                                val kChild = if (lwChild == null) null else (
-                                    lwToKolasuNodesMapping[lwChild]
-                                        ?: throw IllegalStateException(
-                                            "Unable to find Kolasu Node corresponding to $lwChild"
-                                        )
-                                    )
-                                params[param] = kChild
-                            }
-                        }
-                        else -> throw IllegalStateException()
+        val params = mutableMapOf<KParameter, Any?>()
+        constructor.parameters.forEach { param ->
+            val feature = data.concept.getFeatureByName(param.name!!)
+            if (feature == null) {
+                TODO()
+            } else {
+                when (feature) {
+                    is Property -> {
+                        params[param] = data.getPropertyValue(feature)
                     }
+                    is Reference -> {
+                        val referenceValues = data.getReferenceValues(feature)
+                        when {
+                            referenceValues.size > 1 -> {
+                                throw IllegalStateException()
+                            }
+                            referenceValues.size == 0 -> {
+                                params[param] = null
+                            }
+                            referenceValues.size == 1 -> {
+                                val rf = referenceValues.first()
+                                val referenceByName = ReferenceByName<PossiblyNamed>(rf.resolveInfo!!, null)
+                                referencesPostponer.registerPostponedReference(referenceByName, rf.referred)
+                                params[param] = referenceByName
+                            }
+                        }
+                    }
+                    is Containment -> {
+                        val lwChildren = data.getChildren(feature)
+                        if (feature.isMultiple) {
+                            val kChildren = lwChildren.map { lwToKolasuNodesMapping[it]!! }
+                            params[param] = kChildren
+                        } else {
+                            // Given we navigate the tree in reverse the child should have been already
+                            // instantiated
+                            val lwChild: Node? = if (lwChildren.size == 0) {
+                                null
+                            } else if (lwChildren.size == 1) {
+                                lwChildren.first()
+                            } else {
+                                throw IllegalStateException()
+                            }
+                            val kChild = if (lwChild == null) null else (
+                                lwToKolasuNodesMapping[lwChild]
+                                    ?: throw IllegalStateException(
+                                        "Unable to find Kolasu Node corresponding to $lwChild"
+                                    )
+                                )
+                            params[param] = kChild
+                        }
+                    }
+                    else -> throw IllegalStateException()
                 }
             }
-            return constructor.callBy(params) as com.strumenta.kolasu.model.Node
-
+        }
+        return constructor.callBy(params) as com.strumenta.kolasu.model.Node
     }
 
     fun import(lwTree: Node): com.strumenta.kolasu.model.Node {

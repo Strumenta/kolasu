@@ -102,24 +102,24 @@ class LionWebLanguageExporter {
                 when (it) {
                     is Attribute -> {
                         val prop = Property(it.name, featuresContainer)
-                        prop.key = featuresContainer.key+"_"+prop.name
-                        prop.id  = featuresContainer.id+"_"+prop.name
+                        prop.key = featuresContainer.key + "_" + prop.name
+                        prop.id = featuresContainer.id + "_" + prop.name
                         prop.setOptional(it.optional)
                         prop.setType(toLWDataType(it.type))
                         featuresContainer.addFeature(prop)
                     }
                     is Reference -> {
                         val ref = io.lionweb.lioncore.java.language.Reference(it.name, featuresContainer)
-                        ref.key = featuresContainer.key+"_"+ref.name
-                        ref.id  = featuresContainer.id+"_"+ref.name
+                        ref.key = featuresContainer.key + "_" + ref.name
+                        ref.id = featuresContainer.id + "_" + ref.name
                         ref.setOptional(it.optional)
                         ref.setType(toLWFeaturesContainer(it.type))
                         featuresContainer.addFeature(ref)
                     }
                     is Containment -> {
                         val cont = io.lionweb.lioncore.java.language.Containment(it.name, featuresContainer)
-                        cont.key = featuresContainer.key+"_"+cont.name
-                        cont.id  = featuresContainer.id+"_"+cont.name
+                        cont.key = featuresContainer.key + "_" + cont.name
+                        cont.id = featuresContainer.id + "_" + cont.name
                         cont.setOptional(true)
                         cont.setMultiple(it.multiplicity == Multiplicity.MANY)
                         cont.setType(toLWFeaturesContainer(it.type))
@@ -154,9 +154,11 @@ class LionWebLanguageExporter {
     }
 
     fun matchingKClass(concept: Concept): KClass<*>? {
-        return this.LWConceptToKolasuClass.entries.find { it.key.key == concept.key
-                && it.key.language!!.id == concept.language!!.id
-                && it.key.language!!.version == concept.language!!.version }?.value
+        return this.LWConceptToKolasuClass.entries.find {
+            it.key.key == concept.key &&
+                it.key.language!!.id == concept.language!!.id &&
+                it.key.language!!.version == concept.language!!.version
+        }?.value
     }
 //
 //    private fun instantiate(

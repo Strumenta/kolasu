@@ -4,7 +4,6 @@ import io.lionweb.lioncore.java.serialization.JsonSerialization
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-
 class ASTClassesGenerationTest {
 
     @Test
