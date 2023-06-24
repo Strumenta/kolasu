@@ -54,3 +54,8 @@ tasks.named("compileKotlin") {
 //    named("generateMetadataFileForPluginMavenPublication") {
 //        dependsOn("kdocJar")
 //    }
+
+
+test {
+    useJUnitPlatform()
+}

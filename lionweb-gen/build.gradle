@@ -98,3 +98,7 @@ publishing {
 signing {
     sign publishing.publications.kolasu_lionweb_gen
 }
+
+test {
+    useJUnitPlatform()
+}
