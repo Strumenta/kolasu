@@ -1,8 +1,9 @@
 import com.strumenta.kolasu.lionweb.StarLasuLWLanguage
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.serialization.JsonSerialization
-import junit.framework.TestCase.assertEquals
-import kotlin.test.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
 
 class ASTClassesGenerationTest {
 
