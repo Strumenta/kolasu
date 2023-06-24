@@ -22,7 +22,7 @@ import java.lang.IllegalStateException
 
 data class KotlinFile(val path: String , val code: String)
 
-class ASTClassesGenerator(val packageName: String, val language: Language) {
+class ASTGenerator(val packageName: String, val language: Language) {
 
     private fun typeName(featuresContainer: FeaturesContainer<*>) : TypeName {
         return when {

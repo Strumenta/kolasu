@@ -12,7 +12,7 @@ class ASTClassesGenerationTest {
         val jsonser = JsonSerialization.getStandardSerialization()
         jsonser.nodeResolver.addTree(StarLasuLWLanguage)
         val propertiesLanguage = jsonser.unserializeToNodes(inputStream).first() as Language
-        val generated = ASTClassesGenerator("com.strumenta.properties", propertiesLanguage).generateClasses()
+        val generated = ASTGenerator("com.strumenta.properties", propertiesLanguage).generateClasses()
         assertEquals(1, generated.size)
         println(generated.first().code)
     }

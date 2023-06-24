@@ -1,0 +1,56 @@
+plugins {
+    id("java-gradle-plugin")
+    id 'org.jetbrains.kotlin.jvm'
+    id("com.github.gmazzo.buildconfig") version "3.1.0"
+    id("maven-publish")
+    id("com.gradle.plugin-publish") version "1.2.0"
+}
+
+dependencies {
+    //implementation(kotlin("gradle-plugin-api"))
+    api(project(":lionweb-gen"))
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+}
+
+buildConfig {
+//    val project = project(":kotlin-ir-plugin")
+    packageName("com.strumenta.kolasu.lionwebgen")
+    buildConfigField("String", "PLUGIN_ID", "\"${lionwebGenGradlePluginID}\"")
+    buildConfigField("String", "PLUGIN_GROUP", "\"${project.group}\"")
+    buildConfigField("String", "PLUGIN_NAME", "\"${project.name}\"")
+    buildConfigField("String", "PLUGIN_VERSION", "\"${project.version}\"")
+}
+
+gradlePlugin {
+    plugins {
+        create("lionwebGenGradlePlugin") {
+            id = lionwebGenGradlePluginID as String
+            displayName = "Kolasu LionWeb Gen"
+            description = "Kolasu LionWeb Gen"
+            implementationClass = "com.strumenta.kolasu.lionwebgen.LionWebGradlePlugin"
+        }
+    }
+}
+//
+//publishing {
+//    addSonatypeRepo(project)
+//}
+
+//afterEvaluate {
+//    tasks {
+//        named("generateMetadataFileForPluginMavenPublication") {
+//            dependsOn("kdocJar")
+//        }
+//    }
+//}
+//
+
+tasks.named("compileKotlin") {
+    dependsOn("generateBuildConfig")
+}
+
+
+//    named("generateMetadataFileForPluginMavenPublication") {
+//        dependsOn("kdocJar")
+//    }
