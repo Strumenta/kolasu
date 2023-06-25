@@ -147,4 +147,43 @@ class LionWebGradlePluginTest {
         runner.withProjectDir(projectDir)
         val result = runner.build()
     }
+
+    @Test
+    fun `try out the exporter`() {
+        File(projectDir, "src/main/kotlin").mkdirs()
+        projectDir!!.resolve("src/main/kotlin/myfile.kt")
+            .writeText("""
+                import com.strumenta.kolasu.model.Node
+                
+                data class A(val p1: String): Node
+            """.trimIndent())
+        projectDir!!.resolve("build.gradle.kts").writeText(
+            """plugins {
+                id("org.jetbrains.kotlin.jvm") version "1.8.22"
+                id("com.google.devtools.ksp") version "1.8.22-1.0.11"
+                id("${BuildConfig.PLUGIN_ID}") version "${BuildConfig.PLUGIN_VERSION}"
+            }
+           
+           repositories {
+              mavenLocal()
+              mavenCentral()
+              maven(url="https://s01.oss.sonatype.org/content/repositories/snapshots/")
+           }
+           
+           dependencies {
+             implementation("com.strumenta.kolasu:kolasu-core:${BuildConfig.PLUGIN_VERSION}")
+             implementation("com.strumenta.kolasu:kolasu-lionweb-gen:${BuildConfig.PLUGIN_VERSION}")
+             ksp("com.strumenta.kolasu:kolasu-lionweb-gen:${BuildConfig.PLUGIN_VERSION}")
+           }
+            
+        """
+        )
+
+        val runner = GradleRunner.create()
+        runner.forwardOutput()
+        runner.withPluginClasspath()
+        runner.withArguments("compileKotlin", "--stacktrace")
+        runner.withProjectDir(projectDir)
+        val result = runner.build()
+    }
 }
