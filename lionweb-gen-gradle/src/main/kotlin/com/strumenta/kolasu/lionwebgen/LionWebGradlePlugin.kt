@@ -9,11 +9,18 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import java.io.File
 import java.io.FileInputStream
+import java.io.FilenameFilter
 
 class LionWebGradlePlugin : Plugin<Project> {
     override fun apply(target: Project): Unit = with(target) {
         val configuration = extensions.create("lionweb", LionWebGradleExtension::class.java)
         configuration.outdir.convention(File(project.buildDir, "lionweb-gen"))
+        val srcMainLionweb = target.file("src/main/lionweb")
+        if (srcMainLionweb.exists() && srcMainLionweb.isDirectory) {
+            configuration.languages.convention(
+                srcMainLionweb.listFiles { _, name -> name != null && name.endsWith(".json") }?.toList() ?: emptyList()
+            )
+        }
         val lionwebgen = target.tasks.create("lionwebgen") {
             it.doLast {
                 println("LIonWeb generation task - started")
@@ -34,9 +41,6 @@ class LionWebGradlePlugin : Plugin<Project> {
             }
         }
         lionwebgen.group = "lionweb"
-
-
-
     }
 
 }

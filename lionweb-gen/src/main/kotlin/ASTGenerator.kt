@@ -83,7 +83,7 @@ class ASTGenerator(val packageName: String, val language: Language) {
                             is Containment -> {
                                 var type = typeName(feature.type!!)
                                 if (feature.isMultiple) {
-                                    type = MutableList::class.java.asClassName().parameterizedBy(type)
+                                    type = ClassName.bestGuess("kotlin.collections.MutableList").parameterizedBy(type)
                                 }
                                 constructor.addParameter(feature.name!!, type)
                                 typeSpec.addProperty(
