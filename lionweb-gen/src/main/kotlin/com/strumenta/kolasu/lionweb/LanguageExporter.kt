@@ -14,7 +14,6 @@ class LionWebSymbolProcessor : SymbolProcessor {
         }
         return emptyList()
     }
-
 }
 
 class LanguageExporter : SymbolProcessorProvider {
@@ -22,5 +21,4 @@ class LanguageExporter : SymbolProcessorProvider {
         println("CREATING LionWebSymbolProcessor")
         return LionWebSymbolProcessor()
     }
-
 }
