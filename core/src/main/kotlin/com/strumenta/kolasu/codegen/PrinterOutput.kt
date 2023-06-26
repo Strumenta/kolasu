@@ -5,6 +5,7 @@ import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.START_POINT
 import com.strumenta.kolasu.model.TextFileDestination
 import kotlin.reflect.KClass
+import kotlin.reflect.full.superclasses
 
 /**
  * Know how to print a single node type.
@@ -91,13 +92,33 @@ class PrinterOutput(
         print(postfix)
     }
 
+    private fun findPrinter(ast: Node, kclass: KClass<*>) : NodePrinter? {
+        val overrider = nodePrinterOverrider(ast)
+        if (overrider != null) {
+            return overrider
+        }
+        val properPrinter = nodePrinters[kclass]
+        if (properPrinter != null) {
+            return properPrinter
+        }
+        val superclass = kclass.superclasses.filter { !it.java.isInterface }.firstOrNull()
+        if (superclass != null) {
+            return getPrinter(ast, superclass)
+        }
+        return null
+    }
+
+    private fun getPrinter(ast: Node, kclass: KClass<*> = ast::class) : NodePrinter {
+        val printer = findPrinter(ast, kclass)
+        return printer ?: throw java.lang.IllegalArgumentException("Unable to print $ast")
+    }
+
     fun print(ast: Node?, prefix: String = "", postfix: String = "") {
         if (ast == null) {
             return
         }
         print(prefix)
-        val printer = nodePrinterOverrider(ast) ?: nodePrinters[ast::class]
-            ?: throw java.lang.IllegalArgumentException("Unable to print $ast")
+        val printer = getPrinter(ast)
         associate(ast) {
             try {
                 printer.print(this, ast)
