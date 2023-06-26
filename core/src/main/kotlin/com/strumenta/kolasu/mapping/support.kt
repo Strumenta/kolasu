@@ -77,6 +77,5 @@ val ParserRuleContext.onlyChild: ParserRuleContext
                 "while it has ${nodeChildren.size}. ParserRuleContext: ${this.getOriginalText()} " +
                 "(${this.javaClass.canonicalName})"
         }
-        require(nodeChildren[0] is ParserRuleContext)
         return nodeChildren[0]
     }
