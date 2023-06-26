@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.START_POINT
 import com.strumenta.kolasu.model.TextFileDestination
+import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.full.superclasses
 
@@ -177,5 +178,14 @@ class PrinterOutput(
             printList(elements, separator)
             print(postfix)
         }
+    }
+
+    fun printOneOf(vararg alternatives: Node?) {
+        val notNull = alternatives.filterNotNull()
+        if (notNull.size != 1) {
+            throw IllegalStateException("Expected exactly one alternative to be not null. " +
+                    "Not null alternatives: $notNull")
+        }
+        print(notNull.first())
     }
 }
