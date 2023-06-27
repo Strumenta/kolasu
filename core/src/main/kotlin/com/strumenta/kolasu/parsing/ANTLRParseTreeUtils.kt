@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
-import java.lang.IllegalStateException
+import kotlin.IllegalStateException
 import kotlin.reflect.KClass
 
 /**
@@ -36,6 +36,9 @@ fun ParserRuleContext.processDescendantsAndErrors(
 fun ParserRuleContext.getOriginalText(): String {
     val a: Int = this.start.startIndex
     val b: Int = this.stop.stopIndex
+    if (a > b) {
+        throw IllegalStateException("Start index should be less than or equal to the stop index. Start: $a, Stop: $b")
+    }
     val interval = org.antlr.v4.runtime.misc.Interval(a, b)
     return this.start.inputStream.getText(interval)
 }
@@ -51,6 +54,9 @@ fun TerminalNode.getOriginalText(): String = this.symbol.getOriginalText()
 fun Token.getOriginalText(): String {
     val a: Int = this.startIndex
     val b: Int = this.stopIndex
+    if (a > b) {
+        throw IllegalStateException("Start index should be less than or equal to the stop index. Start: $a, Stop: $b")
+    }
     val interval = org.antlr.v4.runtime.misc.Interval(a, b)
     return this.inputStream.getText(interval)
 }
