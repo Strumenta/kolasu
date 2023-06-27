@@ -49,19 +49,19 @@ class PrinterOutput(
         }
     }
 
-    fun print(text: String) {
+    fun print(text: String, allowMultiLine: Boolean = false) {
         if (text.isEmpty()) {
             return
         }
-        var text = text
-        val needPrintln = text.endsWith("\n")
+        var adaptedText = text
+        val needPrintln = adaptedText.endsWith("\n")
         if (needPrintln) {
-            text = text.removeSuffix("\n")
+            adaptedText = adaptedText.removeSuffix("\n")
         }
         considerIndentation()
-        require(text.lines().size < 2) { "Given text span multiple lines: $text" }
-        sb.append(text)
-        currentPoint += text
+        require(adaptedText.lines().size < 2 || allowMultiLine) { "Given text span multiple lines: $adaptedText" }
+        sb.append(adaptedText)
+        currentPoint += adaptedText
         if (needPrintln) {
             println()
         }
