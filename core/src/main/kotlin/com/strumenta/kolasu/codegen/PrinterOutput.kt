@@ -123,7 +123,7 @@ class PrinterOutput(
         associate(ast) {
             try {
                 printer.print(this, ast)
-            } catch (e: RuntimeException) {
+            } catch (e: Throwable) {
                 throw RuntimeException("Issue occurred while printing $ast", e)
             }
         }
