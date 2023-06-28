@@ -492,9 +492,9 @@ open class ASTTransformer(
         return this
     }
 
-    fun <S : Any> notTranslateDirectly(): NodeTransformer<S, Node> {
+    inline fun <reified S : Any> notTranslateDirectly(): NodeTransformer<S, Node> = registerNodeTransformer<S, Node> {
         throw java.lang.IllegalStateException(
-            "A Node of this type should never be translated directly. " +
+            "A Node of this type (${this.javaClass.canonicalName}) should never be translated directly. " +
                 "It is expected that the container will not delegate the translation of this node but it will " +
                 "handle it directly"
         )

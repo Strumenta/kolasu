@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.antlr.mapping
 
+import com.strumenta.kolasu.antlr.parsing.getOriginalText
 import com.strumenta.kolasu.model.observable.ObservableList
 import com.strumenta.kolasu.transformation.ASTTransformer
 import com.strumenta.kolasu.transformation.ParameterConverter
@@ -82,8 +83,11 @@ fun <T> ParseTreeToASTTransformer.translateOnlyChild(parent: ParserRuleContext):
 val ParserRuleContext.onlyChild: ParserRuleContext
     get() {
         val nodeChildren = children.filterIsInstance<ParserRuleContext>()
-        require(nodeChildren.size == 1)
-        require(nodeChildren[0] is ParserRuleContext)
+        require(nodeChildren.size == 1) {
+            "ParserRuleContext was expected to have exactly one child, " +
+                "while it has ${nodeChildren.size}. ParserRuleContext: ${this.getOriginalText()} " +
+                "(${this.javaClass.canonicalName})"
+        }
         return nodeChildren[0]
     }
 
