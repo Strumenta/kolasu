@@ -2,9 +2,13 @@ package com.strumenta.kolasu.codegen
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.START_POINT
 import com.strumenta.kolasu.model.TextFileDestination
+import java.lang.IllegalStateException
 import kotlin.reflect.KClass
+import kotlin.reflect.full.superclasses
 
 /**
  * Know how to print a single node type.
@@ -47,19 +51,19 @@ class PrinterOutput(
         }
     }
 
-    fun print(text: String) {
+    fun print(text: String, allowMultiLine: Boolean = false) {
         if (text.isEmpty()) {
             return
         }
-        var text = text
-        val needPrintln = text.endsWith("\n")
+        var adaptedText = text
+        val needPrintln = adaptedText.endsWith("\n")
         if (needPrintln) {
-            text = text.removeSuffix("\n")
+            adaptedText = adaptedText.removeSuffix("\n")
         }
         considerIndentation()
-        require(text.lines().size < 2) { "Given text span multiple lines: $text" }
-        sb.append(text)
-        currentPoint += text
+        require(adaptedText.lines().size < 2 || allowMultiLine) { "Given text span multiple lines: $adaptedText" }
+        sb.append(adaptedText)
+        currentPoint += adaptedText
         if (needPrintln) {
             println()
         }
@@ -91,17 +95,37 @@ class PrinterOutput(
         print(postfix)
     }
 
+    private fun findPrinter(ast: Node, kclass: KClass<*>): NodePrinter? {
+        val overrider = nodePrinterOverrider(ast)
+        if (overrider != null) {
+            return overrider
+        }
+        val properPrinter = nodePrinters[kclass]
+        if (properPrinter != null) {
+            return properPrinter
+        }
+        val superclass = kclass.superclasses.filter { !it.java.isInterface }.firstOrNull()
+        if (superclass != null) {
+            return getPrinter(ast, superclass)
+        }
+        return null
+    }
+
+    private fun getPrinter(ast: Node, kclass: KClass<*> = ast::class): NodePrinter {
+        val printer = findPrinter(ast, kclass)
+        return printer ?: throw java.lang.IllegalArgumentException("Unable to print $ast")
+    }
+
     fun print(ast: Node?, prefix: String = "", postfix: String = "") {
         if (ast == null) {
             return
         }
         print(prefix)
-        val printer = nodePrinterOverrider(ast) ?: nodePrinters[ast::class]
-            ?: throw java.lang.IllegalArgumentException("Unable to print $ast")
+        val printer = getPrinter(ast)
         associate(ast) {
             try {
                 printer.print(this, ast)
-            } catch (e: RuntimeException) {
+            } catch (e: Throwable) {
                 throw RuntimeException("Issue occurred while printing $ast", e)
             }
         }
@@ -144,6 +168,17 @@ class PrinterOutput(
         }
     }
 
+    fun <T : PossiblyNamed> printRefsList(elements: List<ReferenceByName<T>>, separator: String = ", ") {
+        var i = 0
+        while (i < elements.size) {
+            if (i != 0) {
+                print(separator)
+            }
+            print(elements[i].name)
+            i += 1
+        }
+    }
+
     fun <T : Node> printList(
         prefix: String,
         elements: List<T>,
@@ -156,5 +191,30 @@ class PrinterOutput(
             printList(elements, separator)
             print(postfix)
         }
+    }
+
+    fun <T : PossiblyNamed> printRefsList(
+        prefix: String,
+        elements: List<ReferenceByName<T>>,
+        postfix: String,
+        printEvenIfEmpty: Boolean = false,
+        separator: String = ", "
+    ) {
+        if (elements.isNotEmpty() || printEvenIfEmpty) {
+            print(prefix)
+            printRefsList(elements, separator)
+            print(postfix)
+        }
+    }
+
+    fun printOneOf(vararg alternatives: Node?) {
+        val notNull = alternatives.filterNotNull()
+        if (notNull.size != 1) {
+            throw IllegalStateException(
+                "Expected exactly one alternative to be not null. " +
+                    "Not null alternatives: $notNull"
+            )
+        }
+        print(notNull.first())
     }
 }
