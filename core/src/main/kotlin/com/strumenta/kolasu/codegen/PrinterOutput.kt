@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.codegen
 
-import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.PossiblyNamed
@@ -96,7 +95,7 @@ class PrinterOutput(
         print(postfix)
     }
 
-    private fun findPrinter(ast: Node, kclass: KClass<*>) : NodePrinter? {
+    private fun findPrinter(ast: Node, kclass: KClass<*>): NodePrinter? {
         val overrider = nodePrinterOverrider(ast)
         if (overrider != null) {
             return overrider
@@ -112,7 +111,7 @@ class PrinterOutput(
         return null
     }
 
-    private fun getPrinter(ast: Node, kclass: KClass<*> = ast::class) : NodePrinter {
+    private fun getPrinter(ast: Node, kclass: KClass<*> = ast::class): NodePrinter {
         val printer = findPrinter(ast, kclass)
         return printer ?: throw java.lang.IllegalArgumentException("Unable to print $ast")
     }
@@ -211,8 +210,10 @@ class PrinterOutput(
     fun printOneOf(vararg alternatives: Node?) {
         val notNull = alternatives.filterNotNull()
         if (notNull.size != 1) {
-            throw IllegalStateException("Expected exactly one alternative to be not null. " +
-                    "Not null alternatives: $notNull")
+            throw IllegalStateException(
+                "Expected exactly one alternative to be not null. " +
+                    "Not null alternatives: $notNull"
+            )
         }
         print(notNull.first())
     }
