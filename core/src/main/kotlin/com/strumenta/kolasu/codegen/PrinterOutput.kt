@@ -175,7 +175,7 @@ class PrinterOutput(
             if (i != 0) {
                 print(separator)
             }
-            print(elements[i])
+            print(elements[i].name)
             i += 1
         }
     }
