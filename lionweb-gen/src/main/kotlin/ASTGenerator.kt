@@ -39,7 +39,7 @@ class ASTGenerator(val packageName: String, val language: Language) {
 
     private fun typeName(dataType: DataType<*>): TypeName {
         if (dataType == LionCoreBuiltins.getString()) {
-            return String::class.java.asTypeName()
+            return ClassName.bestGuess("kotlin.String")
         } else if (dataType == LionCoreBuiltins.getBoolean()) {
             return Boolean::class.java.asTypeName()
         } else {

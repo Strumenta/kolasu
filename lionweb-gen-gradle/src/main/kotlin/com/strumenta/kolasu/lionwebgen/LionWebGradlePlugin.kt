@@ -18,7 +18,7 @@ class LionWebGradlePlugin : Plugin<Project> {
         val srcMainLionweb = target.file("src/main/lionweb")
         if (srcMainLionweb.exists() && srcMainLionweb.isDirectory) {
             configuration.languages.convention(
-                srcMainLionweb.listFiles { _, name -> name != null && name.endsWith(".json") }?.toList() ?: emptyList()
+                srcMainLionweb.listFiles { _, name -> name != null && (name.endsWith(".json") || name.endsWith(".ecore")) }?.toList() ?: emptyList()
             )
         }
         val lionwebgen = target.tasks.create("lionwebgen") {
@@ -26,16 +26,24 @@ class LionWebGradlePlugin : Plugin<Project> {
                 println("LIonWeb generation task - started")
                 println("  languages: ${configuration.languages.get()}")
                 configuration.languages.get().forEach { languageFile ->
-                    val jsonser = JsonSerialization.getStandardSerialization()
-                    jsonser.nodeResolver.addTree(StarLasuLWLanguage)
-                    val language = jsonser.unserializeToNodes(FileInputStream(languageFile)).first() as Language
-                    val ktFiles = ASTGenerator(configuration.packageName.get(), language).generateClasses()
-                    ktFiles.forEach { ktFile ->
-                        val file = File(configuration.outdir.get(), ktFile.path)
-                        file.parentFile.mkdirs()
-                        file.writeText(ktFile.code)
-                        println("  generated ${file.path}")
+                    when (languageFile.extension) {
+                        "json" -> {
+                            val jsonser = JsonSerialization.getStandardSerialization()
+                            jsonser.nodeResolver.addTree(StarLasuLWLanguage)
+                            val language = jsonser.unserializeToNodes(FileInputStream(languageFile)).first() as Language
+                            val ktFiles = ASTGenerator(configuration.packageName.get(), language).generateClasses()
+                            ktFiles.forEach { ktFile ->
+                                val file = File(configuration.outdir.get(), ktFile.path)
+                                file.parentFile.mkdirs()
+                                file.writeText(ktFile.code)
+                                println("  generated ${file.path}")
+                            }
+                        }
+                        "ecore" -> {
+                            throw RuntimeException("Working on ecore files")
+                        }
                     }
+
                 }
                 println("LIonWeb generation task - completed")
             }
