@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.lionwebgen
 
-import ASTGenerator
-import ASTGeneratorCommand
+import com.strumenta.kolasu.lionweb.ASTGenerator
 import com.strumenta.kolasu.lionweb.KotlinCodeProcessor
 import com.strumenta.kolasu.lionweb.StarLasuLWLanguage
 import io.lionweb.lioncore.java.language.Language
@@ -10,7 +9,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import java.io.File
 import java.io.FileInputStream
-import java.io.FilenameFilter
 
 class LionWebGradlePlugin : Plugin<Project> {
     override fun apply(target: Project): Unit = with(target) {

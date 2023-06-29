@@ -1,3 +1,4 @@
+import com.strumenta.kolasu.lionweb.ASTGenerator
 import com.strumenta.kolasu.lionweb.StarLasuLWLanguage
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.serialization.JsonSerialization

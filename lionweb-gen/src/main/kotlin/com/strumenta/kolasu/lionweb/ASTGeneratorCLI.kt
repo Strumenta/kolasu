@@ -1,10 +1,10 @@
 @file:JvmName("ASTGeneratorCLI")
 
+package com.strumenta.kolasu.lionweb
+
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.types.file
-import com.strumenta.kolasu.lionweb.KotlinCodeProcessor
-import com.strumenta.kolasu.lionweb.StarLasuLWLanguage
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import java.io.File

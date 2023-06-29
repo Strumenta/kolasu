@@ -1,0 +1,25 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'com.google.devtools.ksp' version '1.8.22-1.0.11'
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+    implementation project(':lionweb-ksp')
+    implementation project(':core')
+    implementation project(':lionweb')
+    implementation project(path: ':lionweb-gen')
+    ksp project(':lionweb-ksp')
+    implementation "com.github.ajalt.clikt:clikt:$clikt_version"
+}
+
+ksp {
+    arg("lionwebgendir", new File(project.buildDir, "lionwebgen").absolutePath)
+}
+
+tasks.create("genLanguage", JavaExec.class) {
+    dependsOn("build")
+    classpath = sourceSets.main.runtimeClasspath
+    it.mainClass = "com.pippo.LanguageKt"
+    it.args(new File(project.buildDir, "lionwebgen/language.json"))
+}
