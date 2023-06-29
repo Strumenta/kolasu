@@ -17,7 +17,6 @@ import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
-import java.lang.IllegalStateException
 
 data class KotlinFile(val path: String, val code: String)
 
@@ -38,65 +37,77 @@ class ASTGenerator(val packageName: String, val language: Language) {
     }
 
     private fun typeName(dataType: DataType<*>): TypeName {
-        if (dataType == LionCoreBuiltins.getString()) {
-            return ClassName.bestGuess("kotlin.String")
-        } else if (dataType == LionCoreBuiltins.getBoolean()) {
-            return Boolean::class.java.asTypeName()
-        } else {
-            TODO("DataType: $dataType")
+        return when (dataType) {
+            LionCoreBuiltins.getString() -> {
+                ClassName.bestGuess("kotlin.String")
+            }
+            LionCoreBuiltins.getBoolean() -> {
+                Boolean::class.java.asTypeName()
+            }
+            else -> {
+                TODO("DataType: $dataType")
+            }
         }
     }
 
-    fun generateClasses(): Set<KotlinFile> {
+    fun generateClasses(existingKotlinClasses: Set<String> = emptySet()): Set<KotlinFile> {
         val fileSpecBuilder = FileSpec.builder(packageName, "${language.name}AST.kt")
         language.elements.forEach { element ->
             when (element) {
-                is Language -> Unit
                 is Concept -> {
                     val typeSpec = TypeSpec.classBuilder(element.name!!)
-                    if (element.isAbstract) {
-                        typeSpec.modifiers.add(KModifier.SEALED)
-                    }
-                    if (element.features.isNotEmpty()) {
-                        typeSpec.modifiers.add(KModifier.DATA)
-                    }
-                    if (element.extendedConcept == null) {
-                        throw IllegalStateException()
+                    val fqName = "$packageName.${element.name!!}"
+                    if (fqName in existingKotlinClasses) {
+                        println("    Skipping ${element.name} as a Kotlin class with that name already exist")
+                        fileSpecBuilder.addFileComment("Skipping ${element.name} as a Kotlin class with that name already exist")
                     } else {
-                        typeSpec.superclass(typeName(element.extendedConcept!!))
-                    }
-                    element.implemented.forEach {
-                        TODO()
-                    }
-                    val constructor = FunSpec.constructorBuilder()
-                    element.features.forEach { feature ->
-                        when (feature) {
-                            is Property -> {
-                                val type = typeName(feature.type!!)
-                                constructor.addParameter(feature.name!!, type)
-                                typeSpec.addProperty(
-                                    PropertySpec.builder(feature.name!!, type)
-                                        .mutable(true).initializer(feature.name!!).build()
-                                )
-                            }
-                            is Containment -> {
-                                var type = typeName(feature.type!!)
-                                if (feature.isMultiple) {
-                                    type = ClassName.bestGuess("kotlin.collections.MutableList").parameterizedBy(type)
-                                }
-                                constructor.addParameter(feature.name!!, type)
-                                typeSpec.addProperty(
-                                    PropertySpec.builder(feature.name!!, type)
-                                        .mutable(true).initializer(feature.name!!).build()
-                                )
-                            }
-                            is Reference -> TODO()
+                        if (element.isAbstract) {
+                            typeSpec.modifiers.add(KModifier.SEALED)
                         }
+                        if (element.features.isNotEmpty()) {
+                            typeSpec.modifiers.add(KModifier.DATA)
+                        }
+                        if (element.extendedConcept == null) {
+                            throw IllegalStateException()
+                        } else {
+                            typeSpec.superclass(typeName(element.extendedConcept!!))
+                        }
+                        element.implemented.forEach {
+                            TODO()
+                        }
+                        val constructor = FunSpec.constructorBuilder()
+                        element.features.forEach { feature ->
+                            when (feature) {
+                                is Property -> {
+                                    val type = typeName(feature.type!!)
+                                    constructor.addParameter(feature.name!!, type)
+                                    typeSpec.addProperty(
+                                        PropertySpec.builder(feature.name!!, type)
+                                            .mutable(true).initializer(feature.name!!).build()
+                                    )
+                                }
+
+                                is Containment -> {
+                                    var type = typeName(feature.type!!)
+                                    if (feature.isMultiple) {
+                                        type =
+                                            ClassName.bestGuess("kotlin.collections.MutableList").parameterizedBy(type)
+                                    }
+                                    constructor.addParameter(feature.name!!, type)
+                                    typeSpec.addProperty(
+                                        PropertySpec.builder(feature.name!!, type)
+                                            .mutable(true).initializer(feature.name!!).build()
+                                    )
+                                }
+
+                                is Reference -> TODO()
+                            }
+                        }
+                        if (constructor.parameters.isNotEmpty()) {
+                            typeSpec.primaryConstructor(constructor.build())
+                        }
+                        fileSpecBuilder.addType(typeSpec.build())
                     }
-                    if (constructor.parameters.isNotEmpty()) {
-                        typeSpec.primaryConstructor(constructor.build())
-                    }
-                    fileSpecBuilder.addType(typeSpec.build())
                 }
                 else -> TODO()
             }

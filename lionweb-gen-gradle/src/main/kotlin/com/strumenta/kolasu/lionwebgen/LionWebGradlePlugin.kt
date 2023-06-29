@@ -2,6 +2,7 @@ package com.strumenta.kolasu.lionwebgen
 
 import ASTGenerator
 import ASTGeneratorCommand
+import com.strumenta.kolasu.lionweb.KotlinCodeProcessor
 import com.strumenta.kolasu.lionweb.StarLasuLWLanguage
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.serialization.JsonSerialization
@@ -31,7 +32,8 @@ class LionWebGradlePlugin : Plugin<Project> {
                             val jsonser = JsonSerialization.getStandardSerialization()
                             jsonser.nodeResolver.addTree(StarLasuLWLanguage)
                             val language = jsonser.unserializeToNodes(FileInputStream(languageFile)).first() as Language
-                            val ktFiles = ASTGenerator(configuration.packageName.get(), language).generateClasses()
+                            val existingKotlinClasses = KotlinCodeProcessor().classesDeclaredInDir(target.file("src/main/kotlin"))
+                            val ktFiles = ASTGenerator(configuration.packageName.get(), language).generateClasses(existingKotlinClasses)
                             ktFiles.forEach { ktFile ->
                                 val file = File(configuration.outdir.get(), ktFile.path)
                                 file.parentFile.mkdirs()

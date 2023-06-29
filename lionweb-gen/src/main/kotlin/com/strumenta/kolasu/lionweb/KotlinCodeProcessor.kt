@@ -1,0 +1,84 @@
+package com.strumenta.kolasu.lionweb
+
+import com.intellij.openapi.util.Disposer
+import com.intellij.psi.PsiManager
+import com.intellij.testFramework.LightVirtualFile
+import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
+import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.idea.KotlinFileType
+import org.jetbrains.kotlin.psi.KtDeclaration
+import org.jetbrains.kotlin.psi.KtFile
+import java.io.File
+import kotlin.test.assertEquals
+
+private val KtDeclaration.fqName: String
+    get() {
+        val packageName = (this.parent as KtFile).packageDirective?.fqName
+        return if (packageName == null) {
+            this.name!!
+        } else {
+            "$packageName.$name"
+        }
+    }
+class KotlinCodeProcessor {
+
+    fun astClassesDeclaredInFile(code: String) : Set<String> {
+        val ktFile = parse(code)
+        return ktFile.declarations.map {
+            it.fqName
+        }.toSet()
+    }
+    fun classesDeclaredInFile(code: String) : Set<String> {
+        val ktFile = parse(code)
+        return ktFile.declarations.map {
+            it.fqName
+        }.toSet()
+    }
+
+    fun astClassesDeclaredInFile(file: File) : Set<String> {
+        require(file.isFile)
+        return astClassesDeclaredInFile(file.readText())
+    }
+
+    fun classesDeclaredInFile(file: File) : Set<String> {
+        require(file.isFile)
+        return classesDeclaredInFile(file.readText())
+    }
+
+    fun classesDeclaredInDir(file: File) : Set<String> {
+        require(file.isDirectory)
+        val set = mutableSetOf<String>()
+        file.listFiles()?.forEach {
+            when {
+                it.isFile -> set.addAll(classesDeclaredInFile(it))
+                it.isDirectory -> set.addAll(classesDeclaredInDir(it))
+            }
+        }
+        return set
+    }
+
+    fun astClassesDeclaredInDir(file: File) : Set<String> {
+        require(file.isDirectory)
+        val set = mutableSetOf<String>()
+        file.listFiles()?.forEach {
+            when {
+                it.isFile -> set.addAll(astClassesDeclaredInFile(it))
+                it.isDirectory -> set.addAll(astClassesDeclaredInDir(it))
+            }
+        }
+        return set
+    }
+
+    private fun parse(code: String): KtFile {
+        val disposable = Disposer.newDisposable()
+        try {
+            val env = KotlinCoreEnvironment.createForProduction(
+                disposable, CompilerConfiguration(), EnvironmentConfigFiles.JVM_CONFIG_FILES)
+            val file = LightVirtualFile("temp.kt", KotlinFileType.INSTANCE, code)
+            return PsiManager.getInstance(env.project).findFile(file) as KtFile
+        } finally {
+            disposable.dispose()
+        }
+    }
+}
