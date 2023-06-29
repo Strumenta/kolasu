@@ -21,18 +21,30 @@ dependencies {
     cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    implementation("io.lionweb.lioncore-java:lioncore-java-core:$lionwebVersion")
+    implementation("io.lionweb.lioncore-java:lioncore-java-core-fat:$lionwebVersion")
     implementation("io.lionweb.lioncore-java:lioncore-java-emf:$lionwebVersion")
     api(project(":core"))
     api(project(":emf"))
     api(project(":lionweb"))
 
+
     implementation("com.squareup:kotlinpoet:1.14.2")
     cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
+    implementation("com.google.code.gson:gson:$gson_version") {
+        version {
+            strictly gson_version
+        }
+    }
 
-    implementation("com.google.devtools.ksp:symbol-processing-api:$kotlin_version-1.0.11")
+    implementation("com.google.devtools.ksp:symbol-processing-api:$kotlin_version-$kspVersion")
 
-    implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlin_version")
+    implementation("org.jetbrains.kotlin:kotlin-compiler:1.9.0-RC")
+
+//    implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlin_version") {
+//        exclude group: "org.jetbrains.kotlin", module: "kotlin-build-common"
+//        exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib"
+//        exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk8"
+//    }
 
 }
 
@@ -108,4 +120,12 @@ signing {
 
 test {
     useJUnitPlatform()
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'com.google.code.gson') {
+            details.useVersion gson_version
+        }
+    }
 }

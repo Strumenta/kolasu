@@ -21,6 +21,8 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
         fun write(os: OutputStream) {
             val buf = PrintWriter(os)
             buf.println("""
+                    // ${classes.first().containingFile?.filePath}
+                    // ${classes.first().containingFile?.origin}
                     package $packageName
                     
                     import com.strumenta.kolasu.lionweb.LanguageGeneratorCommand
@@ -63,8 +65,14 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
             languagesByPackage.forEach { languageEntry ->
                 val usedFiles = languageEntry.value.classes.mapNotNull { it.containingFile }.toSet().toTypedArray()
                 val dependencies = Dependencies(true, *usedFiles)
-                val os = environment.codeGenerator.createNewFile(dependencies, languageEntry.key, "Language", "kt")
-                languageEntry.value.write(os)
+                val os = environment.codeGenerator.createNewFile(dependencies, "META-INF/languages",
+                    languageEntry.key, "txt")
+                val buf = PrintWriter(os)
+                languageEntry.value.classes.forEach {
+                    it.qualifiedName?.asString()?.let {  buf.println(it) }
+                }
+                buf.flush()
+                languageEntry.value.write(environment.codeGenerator.createNewFile(dependencies, languageEntry.key, "Language", "kt"))
             }
 
             generated = true
