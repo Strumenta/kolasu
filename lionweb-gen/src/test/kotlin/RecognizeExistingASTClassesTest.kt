@@ -48,7 +48,13 @@ public data class Property(
   public var `value`: Value,
 ) : Node()"""
         val existingClasses = KotlinCodeProcessor().classesDeclaredInFile(code)
-        assertEquals(setOf("com.strumenta.props.PropertiesFile", "com.strumenta.props.SomeOtherClass", "com.strumenta.props.Property"), existingClasses)
+        assertEquals(
+            setOf(
+                "com.strumenta.props.PropertiesFile", "com.strumenta.props.SomeOtherClass",
+                "com.strumenta.props.Property"
+            ),
+            existingClasses
+        )
 
         val existingASTClasses = KotlinCodeProcessor().astClassesDeclaredInFile(code)
         assertEquals(setOf("com.strumenta.props.PropertiesFile", "com.strumenta.props.Property"), existingASTClasses)
