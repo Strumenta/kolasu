@@ -27,7 +27,7 @@ class LionWebGradlePluginTest {
         val runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
-        runner.withArguments("lionwebgen", "--stacktrace")
+        runner.withArguments("genASTClasses", "--stacktrace")
         runner.withProjectDir(projectDir)
         val result = runner.build()
     }
@@ -51,7 +51,7 @@ class LionWebGradlePluginTest {
         val runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
-        runner.withArguments("lionwebgen", "--stacktrace")
+        runner.withArguments("genASTClasses", "--stacktrace")
         runner.withProjectDir(projectDir)
         val result = runner.build()
     }
@@ -89,7 +89,7 @@ class LionWebGradlePluginTest {
             
             tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
                 source(File(buildDir, "lionweb-gen"), sourceSets["main"].kotlin)
-                dependsOn("lionwebgen")
+                dependsOn("genASTClasses")
             }
         """
         )
@@ -135,7 +135,7 @@ class LionWebGradlePluginTest {
             
             tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
                 source(File(buildDir, "lionweb-gen"), sourceSets["main"].kotlin)
-                dependsOn("lionwebgen")
+                dependsOn("genASTClasses")
             }
         """
         )

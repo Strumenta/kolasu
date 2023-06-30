@@ -8,4 +8,5 @@ interface LionWebGradleExtension {
     val packageName: Property<String>
     val languages: ListProperty<File>
     val outdir: Property<File>
+    val exportPackages: ListProperty<String>
 }

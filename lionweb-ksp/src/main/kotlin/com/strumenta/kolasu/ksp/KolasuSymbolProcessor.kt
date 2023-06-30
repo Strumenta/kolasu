@@ -18,6 +18,12 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
     class LanguageDef(val packageName: String) {
         val classes = mutableListOf<KSClassDeclaration>()
 
+        fun dependencies() : Dependencies {
+            val usedFiles = this.classes.mapNotNull { it.containingFile }.toSet().toTypedArray()
+            val dependencies = Dependencies(true, *usedFiles)
+            return dependencies
+        }
+
         fun write(os: OutputStream) {
             val buf = PrintWriter(os)
             buf.println("""
@@ -47,14 +53,22 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
         }
     }
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        val exportPackagesStr = environment.options["exportPackages"]
+        if (exportPackagesStr.isNullOrBlank()) {
+            // No packages to export, we are done here
+            return emptyList()
+        }
+        val exportPackages = exportPackagesStr.split(",").map { it.trim() }
+
         val languagesByPackage = mutableMapOf<String, LanguageDef>()
-        resolver.getAllFiles().forEach { ksFile ->
+        resolver.getAllFiles().filter { it.packageName.asString() in exportPackages }.forEach { ksFile ->
+            val packageName = ksFile.packageName.asString()
             ksFile.declarations.forEach { ksDeclaration ->
                 if (ksDeclaration is KSClassDeclaration) {
                     val isNodeDecl = ksDeclaration.getAllSuperTypes().any { it.declaration.qualifiedName?.asString() == Node::class.qualifiedName}
                     if (isNodeDecl) {
-                        languagesByPackage.computeIfAbsent(ksDeclaration.packageName.asString()) {
-                            LanguageDef(ksDeclaration.packageName.asString())
+                        languagesByPackage.computeIfAbsent(packageName) {
+                            LanguageDef(packageName)
                         }.classes.add(ksDeclaration)
                     }
                 }
@@ -62,17 +76,9 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
         }
 
         if (!generated) {
-            languagesByPackage.forEach { languageEntry ->
-                val usedFiles = languageEntry.value.classes.mapNotNull { it.containingFile }.toSet().toTypedArray()
-                val dependencies = Dependencies(true, *usedFiles)
-                val os = environment.codeGenerator.createNewFile(dependencies, "META-INF/languages",
-                    languageEntry.key, "txt")
-                val buf = PrintWriter(os)
-                languageEntry.value.classes.forEach {
-                    it.qualifiedName?.asString()?.let {  buf.println(it) }
-                }
-                buf.flush()
-                languageEntry.value.write(environment.codeGenerator.createNewFile(dependencies, languageEntry.key, "Language", "kt"))
+            languagesByPackage.values.forEach { languageDef ->
+                languageDef.write(environment.codeGenerator.createNewFile(languageDef.dependencies(),
+                    languageDef.packageName, "Language", "kt"))
             }
 
             generated = true

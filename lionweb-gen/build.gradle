@@ -38,7 +38,7 @@ dependencies {
 
     implementation("com.google.devtools.ksp:symbol-processing-api:$kotlin_version-$kspVersion")
 
-    implementation("org.jetbrains.kotlin:kotlin-compiler:1.9.0-RC")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version")
 
 //    implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlin_version") {
 //        exclude group: "org.jetbrains.kotlin", module: "kotlin-build-common"

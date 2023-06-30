@@ -135,6 +135,7 @@ class LionWebLanguageExporter {
     private fun toLWDataType(kType: KType): DataType<*> {
         return when (kType) {
             Int::class.createType() -> LionCoreBuiltins.getInteger()
+            Long::class.createType() -> LionCoreBuiltins.getInteger()
             String::class.createType() -> LionCoreBuiltins.getString()
             Boolean::class.createType() -> LionCoreBuiltins.getBoolean()
             else -> throw UnsupportedOperationException("KType: $kType")
