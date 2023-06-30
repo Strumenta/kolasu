@@ -23,7 +23,7 @@ val Project.sourceSets: SourceSetContainer
 val Project.kotlinVersion
     get() = project.propertyValue("kotlinVersion", "1.8.22")
 val Project.kolasuVersion
-    get() = project.propertyValue("kolasuVersion", "1.5.19")
+    get() = project.propertyValue("kolasuVersion", BuildConfig.PLUGIN_VERSION)
 
 val Project.lionwebVersion
     get() = project.propertyValue("lionwebVersion", "0.0.18")

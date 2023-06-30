@@ -15,23 +15,23 @@ class LionWebModelImporterAndExporterTest {
   "languages": [
     {
       "version": "1",
-      "key": "com.strumenta.SimpleLang"
+      "key": "com-strumenta-SimpleLang"
     }
   ],
   "nodes": [
     {
       "id": "UNKNOWN_SOURCE_root",
       "concept": {
-        "language": "com.strumenta.SimpleLang",
+        "language": "com-strumenta-SimpleLang",
         "version": "1",
-        "key": "com.strumenta.SimpleLang-SimpleRoot"
+        "key": "com-strumenta-SimpleLang_SimpleRoot"
       },
       "properties": [
         {
           "property": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "id"
+            "key": "com-strumenta-SimpleLang_SimpleRoot_id"
           },
           "value": "12345"
         }
@@ -39,9 +39,9 @@ class LionWebModelImporterAndExporterTest {
       "children": [
         {
           "containment": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "childrez"
+            "key": "com-strumenta-SimpleLang_SimpleRoot_childrez"
           },
           "children": [
             "UNKNOWN_SOURCE_root_childrez_0",
@@ -56,9 +56,9 @@ class LionWebModelImporterAndExporterTest {
     {
       "id": "UNKNOWN_SOURCE_root_childrez_0",
       "concept": {
-        "language": "com.strumenta.SimpleLang",
+        "language": "com-strumenta-SimpleLang",
         "version": "1",
-        "key": "com.strumenta.SimpleLang-SimpleNodeA"
+        "key": "com-strumenta-SimpleLang_SimpleNodeA"
       },
       "properties": [
         {
@@ -73,9 +73,9 @@ class LionWebModelImporterAndExporterTest {
       "children": [
         {
           "containment": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "child"
+            "key": "com-strumenta-SimpleLang_SimpleNodeA_child"
           },
           "children": []
         }
@@ -83,9 +83,9 @@ class LionWebModelImporterAndExporterTest {
       "references": [
         {
           "reference": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "ref"
+            "key": "com-strumenta-SimpleLang_SimpleNodeA_ref"
           },
           "targets": [
             {
@@ -100,16 +100,16 @@ class LionWebModelImporterAndExporterTest {
     {
       "id": "UNKNOWN_SOURCE_root_childrez_1",
       "concept": {
-        "language": "com.strumenta.SimpleLang",
+        "language": "com-strumenta-SimpleLang",
         "version": "1",
-        "key": "com.strumenta.SimpleLang-SimpleNodeB"
+        "key": "com-strumenta-SimpleLang_SimpleNodeB"
       },
       "properties": [
         {
           "property": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "value"
+            "key": "com-strumenta-SimpleLang_SimpleNodeB_value"
           },
           "value": "some magic value"
         }
@@ -121,9 +121,9 @@ class LionWebModelImporterAndExporterTest {
     {
       "id": "UNKNOWN_SOURCE_root_childrez_2",
       "concept": {
-        "language": "com.strumenta.SimpleLang",
+        "language": "com-strumenta-SimpleLang",
         "version": "1",
-        "key": "com.strumenta.SimpleLang-SimpleNodeA"
+        "key": "com-strumenta-SimpleLang_SimpleNodeA"
       },
       "properties": [
         {
@@ -138,9 +138,9 @@ class LionWebModelImporterAndExporterTest {
       "children": [
         {
           "containment": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "child"
+            "key": "com-strumenta-SimpleLang_SimpleNodeA_child"
           },
           "children": [
             "UNKNOWN_SOURCE_root_childrez_2_child"
@@ -150,9 +150,9 @@ class LionWebModelImporterAndExporterTest {
       "references": [
         {
           "reference": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "ref"
+            "key": "com-strumenta-SimpleLang_SimpleNodeA_ref"
           },
           "targets": [
             {
@@ -167,16 +167,16 @@ class LionWebModelImporterAndExporterTest {
     {
       "id": "UNKNOWN_SOURCE_root_childrez_2_child",
       "concept": {
-        "language": "com.strumenta.SimpleLang",
+        "language": "com-strumenta-SimpleLang",
         "version": "1",
-        "key": "com.strumenta.SimpleLang-SimpleNodeB"
+        "key": "com-strumenta-SimpleLang_SimpleNodeB"
       },
       "properties": [
         {
           "property": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "value"
+            "key": "com-strumenta-SimpleLang_SimpleNodeB_value"
           },
           "value": "some other value"
         }

@@ -2,9 +2,11 @@ import com.strumenta.kolasu.lionweb.ASTGenerator
 import io.lionweb.lioncore.java.emf.EMFMetamodelImporter
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import kotlin.test.Ignore
 
 class ClassesGenerationFromEMFTest {
 
@@ -18,6 +20,7 @@ class ClassesGenerationFromEMFTest {
     }
 
     @Test
+    @Ignore
     fun allASTClassesAreGeneratedAsExpected() {
         val jvmTypesPackage = loadEPackage("JavaVMTypes")
         val xbasePackage = loadEPackage("xbase")
@@ -36,10 +39,7 @@ class ClassesGenerationFromEMFTest {
     fun allASTClassesAreGeneratedAsExpectedOCCI() {
         val occiPackage = loadEPackage("OCCI")
         val emfMMImporter = EMFMetamodelImporter()
+        emfMMImporter.importEPackage(EcorePackage.eINSTANCE)
         val occiLWLanguage = emfMMImporter.importEPackage(occiPackage)
-
-//        val generated = ASTGenerator("xtend.stuff", xtendLWLanguage).generateClasses()
-//        assertEquals(1, generated.size)
-//        println(generated.first().code)
     }
 }

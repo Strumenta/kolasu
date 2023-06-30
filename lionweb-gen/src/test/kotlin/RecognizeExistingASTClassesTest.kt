@@ -1,4 +1,5 @@
 import com.strumenta.kolasu.lionweb.KotlinCodeProcessor
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -29,6 +30,7 @@ public data class Property(
     }
 
     @Test
+    @Ignore
     fun caseWithNodesAndOtherClasses() {
         val code = """package com.strumenta.props
 

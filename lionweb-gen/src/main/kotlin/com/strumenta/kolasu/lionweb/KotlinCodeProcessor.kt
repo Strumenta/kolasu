@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiManager
 import org.jetbrains.kotlin.com.intellij.testFramework.LightVirtualFile
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.idea.KotlinFileType
+import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.psi.KtFile
 import java.io.File
@@ -28,9 +29,13 @@ class KotlinCodeProcessor {
 
     fun astClassesDeclaredInFile(code: String): Set<String> {
         val ktFile = parse(code)
-        return ktFile.declarations.map {
-            it.fqName
-        }.toSet()
+        return ktFile.declarations.filterIsInstance(KtClass::class.java)
+            .filter {
+                // TODO implement it correctly
+                true
+            }.map {
+                it.fqName.toString()
+            }.toSet()
     }
     fun classesDeclaredInFile(code: String): Set<String> {
         val ktFile = parse(code)
@@ -50,6 +55,9 @@ class KotlinCodeProcessor {
     }
 
     fun classesDeclaredInDir(file: File): Set<String> {
+        if (!file.exists()) {
+            return emptySet()
+        }
         require(file.isDirectory)
         val set = mutableSetOf<String>()
         file.listFiles()?.forEach {
