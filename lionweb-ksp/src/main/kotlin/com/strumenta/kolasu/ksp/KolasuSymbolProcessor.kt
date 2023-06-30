@@ -8,8 +8,10 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.strumenta.kolasu.model.Node
+import java.io.File
 import java.io.OutputStream
 import java.io.PrintWriter
+import java.lang.IllegalStateException
 
 class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : SymbolProcessor {
 
@@ -53,7 +55,13 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
         }
     }
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val exportPackagesStr = environment.options["exportPackages"]
+        val kspFile = File(environment.options["file"] as String)
+        if (!kspFile.exists()) {
+            throw IllegalStateException("The KSP configuration file at $kspFile does not exist")
+        }
+        val exportPackagesStr = kspFile.readText().trim().split("=")[1]
+
+
         if (exportPackagesStr.isNullOrBlank()) {
             // No packages to export, we are done here
             return emptyList()

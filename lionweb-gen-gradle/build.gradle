@@ -1,5 +1,6 @@
 plugins {
     id("java-gradle-plugin")
+    //id("org.gradle.kotlin.kotlin-dsl") version "4.0.14"
     id 'org.jetbrains.kotlin.jvm'
     id("com.github.gmazzo.buildconfig") version "3.1.0"
     id("maven-publish")
@@ -16,6 +17,8 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
     implementation("com.google.code.gson:gson:$gson_version")
+    implementation("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kotlin_version-$kspVersion")
+
 }
 
 buildConfig {
@@ -36,29 +39,10 @@ gradlePlugin {
         }
     }
 }
-//
-//publishing {
-//    addSonatypeRepo(project)
-//}
-
-//afterEvaluate {
-//    tasks {
-//        named("generateMetadataFileForPluginMavenPublication") {
-//            dependsOn("kdocJar")
-//        }
-//    }
-//}
-//
 
 tasks.named("compileKotlin") {
     dependsOn("generateBuildConfig")
 }
-
-
-//    named("generateMetadataFileForPluginMavenPublication") {
-//        dependsOn("kdocJar")
-//    }
-
 
 test {
     useJUnitPlatform()

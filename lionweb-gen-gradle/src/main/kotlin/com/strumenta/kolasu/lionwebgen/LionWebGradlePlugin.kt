@@ -8,19 +8,11 @@ import io.lionweb.lioncore.java.serialization.JsonSerialization
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.configurationcache.extensions.capitalized
-import org.gradle.process.JavaExecSpec
-import org.gradle.process.internal.DefaultExecActionFactory
-import org.gradle.process.internal.DefaultJavaExecAction
 import java.io.File
 import java.io.FileInputStream
-
-val Project.sourceSets: SourceSetContainer
-    get() = (this as ExtensionAware).extensions.getByName("sourceSets") as SourceSetContainer
-
+import com.google.devtools.ksp.gradle.KspExtension
 
 class LionWebGradlePlugin : Plugin<Project> {
 
@@ -39,7 +31,7 @@ class LionWebGradlePlugin : Plugin<Project> {
                             val language = jsonser.unserializeToNodes(FileInputStream(languageFile)).first() as Language
                             val existingKotlinClasses = KotlinCodeProcessor().classesDeclaredInDir(project.file("src/main/kotlin"))
 
-                            val ktFiles = ASTGenerator(configuration.packageName.get(), language).generateClasses(existingKotlinClasses)
+                            val ktFiles = ASTGenerator(configuration.importPackageNames.get()[language.name] ?: language.name, language).generateClasses(existingKotlinClasses)
                             ktFiles.forEach { ktFile ->
                                 val file = File(configuration.outdir.get(), ktFile.path)
                                 file.parentFile.mkdirs()
@@ -59,7 +51,7 @@ class LionWebGradlePlugin : Plugin<Project> {
     }
 
     private fun languageFile(project: Project, packageName: String) : File {
-        return File(project.buildDir, "lionwebgen/$packageName.json")
+        return File(project.buildDir, "lionwebgen${File.separator}$packageName.json")
     }
 
     private fun createGenLanguage(project: Project,
@@ -96,7 +88,7 @@ class LionWebGradlePlugin : Plugin<Project> {
     fun prepareConfiguration(project: Project) : LionWebGradleExtension {
         val configuration = project.extensions.create("lionweb", LionWebGradleExtension::class.java)
         configuration.outdir.convention(File(project.buildDir, "lionweb-gen"))
-        val srcMainLionweb = project.file("src/main/lionweb")
+        val srcMainLionweb = project.file("src${File.separator}main${File.separator}lionweb")
         if (srcMainLionweb.exists() && srcMainLionweb.isDirectory) {
             configuration.languages.convention(
                 srcMainLionweb.listFiles { _, name -> name != null && (name.endsWith(".json") || name.endsWith(".ecore")) }?.toList() ?: emptyList()
@@ -107,9 +99,55 @@ class LionWebGradlePlugin : Plugin<Project> {
     }
 
     override fun apply(project: Project) {
+        if (!project.plugins.hasPlugin("com.google.devtools.ksp")) {
+            project.logger.warn("Please ensure to configure plugin \"com.google.devtools.ksp\"")
+        }
+        addDependencies(project)
+        configureCompilation(project)
+
+
         val configuration = prepareConfiguration(project)
+        configureKsp(project, configuration)
         createGenASTClasses(project, configuration)
         createGenLanguages(project, configuration)
+    }
+
+    private fun configureKsp(project: Project, configuration: LionWebGradleExtension) {
+        val ksp = project.extensions.findByName("ksp") as KspExtension
+        val kspFile = File(project.buildDir, "lionwebgen${File.separator}kspconf.txt")
+        ksp.arg("lionwebgendir", File(project.buildDir, "lionwebgen").absolutePath)
+        ksp.arg("file", kspFile.absolutePath)
+
+        val prepareKsp = project.tasks.create("prepareKsp") {
+            it.doFirst {
+                val exportPackagesStr = configuration.exportPackages.get().let { it.joinToString(",") }
+                kspFile.parentFile.mkdirs()
+                kspFile.writeText("exportPackages=$exportPackagesStr\n")
+            }
+        }
+        project.tasks.getByName("compileKotlin").dependsOn(prepareKsp)
+    }
+
+    private fun configureCompilation(project: Project) {
+        project.sourceSets.getByName("main") {
+            it.java.srcDir("src${File.separator}main${File.separator}java")
+            it.java.srcDir(File(project.buildDir, "lionweb-gen"))
+        }
+
+        project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).forEach {
+            it.source(File(project.buildDir, "lionweb-gen"), File(project.rootDir, "src/main/kotlin"))
+            it.dependsOn("genASTClasses")
+        }
+    }
+
+    private fun addDependencies(project: Project) {
+        project.dependencies.add("implementation", "com.strumenta.kolasu:kolasu-core:${project.kolasuVersion}")
+        project.dependencies.add("implementation", "com.strumenta.kolasu:kolasu-lionweb-ksp:${project.kolasuVersion}")
+        project.dependencies.add("implementation", "com.strumenta.kolasu:kolasu-lionweb:${project.kolasuVersion}")
+        project.dependencies.add("implementation", "com.strumenta.kolasu:kolasu-lionweb-gen:${project.kolasuVersion}")
+        project.dependencies.add("ksp", "com.strumenta.kolasu:kolasu-lionweb-ksp:${project.kolasuVersion}")
+        project.dependencies.add("implementation", "com.github.ajalt.clikt:clikt:3.5.0")
+        project.dependencies.add("implementation", "io.lionweb.lioncore-java:lioncore-java-core-fat:${project.lionwebVersion}")
     }
 
 }
