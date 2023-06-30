@@ -10,7 +10,6 @@ import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.psi.KtFile
 import java.io.File
-import kotlin.test.assertEquals
 
 private val KtDeclaration.fqName: String
     get() {
@@ -23,30 +22,30 @@ private val KtDeclaration.fqName: String
     }
 class KotlinCodeProcessor {
 
-    fun astClassesDeclaredInFile(code: String) : Set<String> {
+    fun astClassesDeclaredInFile(code: String): Set<String> {
         val ktFile = parse(code)
         return ktFile.declarations.map {
             it.fqName
         }.toSet()
     }
-    fun classesDeclaredInFile(code: String) : Set<String> {
+    fun classesDeclaredInFile(code: String): Set<String> {
         val ktFile = parse(code)
         return ktFile.declarations.map {
             it.fqName
         }.toSet()
     }
 
-    fun astClassesDeclaredInFile(file: File) : Set<String> {
+    fun astClassesDeclaredInFile(file: File): Set<String> {
         require(file.isFile)
         return astClassesDeclaredInFile(file.readText())
     }
 
-    fun classesDeclaredInFile(file: File) : Set<String> {
+    fun classesDeclaredInFile(file: File): Set<String> {
         require(file.isFile)
         return classesDeclaredInFile(file.readText())
     }
 
-    fun classesDeclaredInDir(file: File) : Set<String> {
+    fun classesDeclaredInDir(file: File): Set<String> {
         require(file.isDirectory)
         val set = mutableSetOf<String>()
         file.listFiles()?.forEach {
@@ -58,7 +57,7 @@ class KotlinCodeProcessor {
         return set
     }
 
-    fun astClassesDeclaredInDir(file: File) : Set<String> {
+    fun astClassesDeclaredInDir(file: File): Set<String> {
         require(file.isDirectory)
         val set = mutableSetOf<String>()
         file.listFiles()?.forEach {
@@ -74,7 +73,8 @@ class KotlinCodeProcessor {
         val disposable = Disposer.newDisposable()
         try {
             val env = KotlinCoreEnvironment.createForProduction(
-                disposable, CompilerConfiguration(), EnvironmentConfigFiles.JVM_CONFIG_FILES)
+                disposable, CompilerConfiguration(), EnvironmentConfigFiles.JVM_CONFIG_FILES
+            )
             val file = LightVirtualFile("temp.kt", KotlinFileType.INSTANCE, code)
             return PsiManager.getInstance(env.project).findFile(file) as KtFile
         } finally {

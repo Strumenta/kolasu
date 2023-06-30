@@ -47,11 +47,11 @@ private fun Any?.toJsonElement(): JsonElement {
         is Number -> toJson()
         is Char -> toJson()
         is Boolean -> toJson()
-        else -> throw IllegalArgumentException("${this} cannot be converted to JSON")
+        else -> throw IllegalArgumentException("$this cannot be converted to JSON")
     }
 }
 
-fun jsonObject(vararg values: Pair<String, *>) : JsonObject {
+fun jsonObject(vararg values: Pair<String, *>): JsonObject {
     val jo = JsonObject()
     values.forEach {
         jo.add(it.first, it.second.toJsonElement())

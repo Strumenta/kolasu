@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test
 
 class ClassesGenerationFromEMFTest {
 
-    private fun loadEPackage(name: String) : EPackage {
+    private fun loadEPackage(name: String): EPackage {
         val inputStream = this.javaClass.getResourceAsStream("/$name.ecore")
         requireNotNull(inputStream)
-        val resource = EcoreResourceFactoryImpl().createResource(URI.createURI("resource://${name}.ecore"))
+        val resource = EcoreResourceFactoryImpl().createResource(URI.createURI("resource://$name.ecore"))
         resource.load(inputStream, mapOf<Any, Any>())
         assertEquals(1, resource.contents.size)
         return resource.contents.first() as EPackage
@@ -27,7 +27,6 @@ class ClassesGenerationFromEMFTest {
         val xbaseLWLanguage = emfMMImporter.importEPackage(xbasePackage)
         val xtendLWLanguage = emfMMImporter.importEPackage(xtendPackage)
 
-
         val generated = ASTGenerator("xtend.stuff", xtendLWLanguage).generateClasses()
         assertEquals(1, generated.size)
         println(generated.first().code)
@@ -38,7 +37,6 @@ class ClassesGenerationFromEMFTest {
         val occiPackage = loadEPackage("OCCI")
         val emfMMImporter = EMFMetamodelImporter()
         val occiLWLanguage = emfMMImporter.importEPackage(occiPackage)
-
 
 //        val generated = ASTGenerator("xtend.stuff", xtendLWLanguage).generateClasses()
 //        assertEquals(1, generated.size)
