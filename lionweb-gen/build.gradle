@@ -36,16 +36,9 @@ dependencies {
         }
     }
 
-    implementation("com.google.devtools.ksp:symbol-processing-api:$kotlin_version-$kspVersion")
-
+    // We use the embeddable version because it avoids issues with conflicting versions of dependencies
+    // that we have when using the normal one
     implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version")
-
-//    implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlin_version") {
-//        exclude group: "org.jetbrains.kotlin", module: "kotlin-build-common"
-//        exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib"
-//        exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk8"
-//    }
-
 }
 
 publishing {

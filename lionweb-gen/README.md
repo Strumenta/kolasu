@@ -1,1 +1,1 @@
-Logic to generate Kotlin classes from LionWeb languages.
+Logic to generate Kolasu AST classes from LionWeb languages.

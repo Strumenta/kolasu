@@ -20,6 +20,10 @@ private val KtDeclaration.fqName: String
             "$packageName.$name"
         }
     }
+
+/**
+ * This class finds Kotlin classes definitions.
+ */
 class KotlinCodeProcessor {
 
     fun astClassesDeclaredInFile(code: String): Set<String> {

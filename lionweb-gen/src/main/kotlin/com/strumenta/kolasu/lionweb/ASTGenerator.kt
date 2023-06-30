@@ -21,35 +21,10 @@ import io.lionweb.lioncore.java.language.Reference
 
 data class KotlinFile(val path: String, val code: String)
 
+/**
+ * This class generates Kotlin code for a given LIonWeb Language.
+ */
 class ASTGenerator(val packageName: String, val language: Language) {
-
-    private fun typeName(featuresContainer: FeaturesContainer<*>): TypeName {
-        return when {
-            featuresContainer.id == StarLasuLWLanguage.ASTNode.id -> {
-                Node::class.java.asTypeName()
-            }
-            featuresContainer.language == this.language -> {
-                ClassName.bestGuess("$packageName.${featuresContainer.name}")
-            }
-            else -> {
-                TODO()
-            }
-        }
-    }
-
-    private fun typeName(dataType: DataType<*>): TypeName {
-        return when (dataType) {
-            LionCoreBuiltins.getString() -> {
-                ClassName.bestGuess("kotlin.String")
-            }
-            LionCoreBuiltins.getBoolean() -> {
-                Boolean::class.java.asTypeName()
-            }
-            else -> {
-                TODO("DataType: $dataType")
-            }
-        }
-    }
 
     fun generateClasses(existingKotlinClasses: Set<String> = emptySet()): Set<KotlinFile> {
         val fileSpecBuilder = FileSpec.builder(packageName, "${language.name}AST.kt")
@@ -115,5 +90,33 @@ class ASTGenerator(val packageName: String, val language: Language) {
         }
         val file = KotlinFile(path = "ast.kt", fileSpecBuilder.build().toString())
         return setOf(file)
+    }
+
+    private fun typeName(featuresContainer: FeaturesContainer<*>): TypeName {
+        return when {
+            featuresContainer.id == StarLasuLWLanguage.ASTNode.id -> {
+                Node::class.java.asTypeName()
+            }
+            featuresContainer.language == this.language -> {
+                ClassName.bestGuess("$packageName.${featuresContainer.name}")
+            }
+            else -> {
+                TODO()
+            }
+        }
+    }
+
+    private fun typeName(dataType: DataType<*>): TypeName {
+        return when (dataType) {
+            LionCoreBuiltins.getString() -> {
+                ClassName.bestGuess("kotlin.String")
+            }
+            LionCoreBuiltins.getBoolean() -> {
+                Boolean::class.java.asTypeName()
+            }
+            else -> {
+                TODO("DataType: $dataType")
+            }
+        }
     }
 }
