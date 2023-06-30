@@ -35,7 +35,9 @@ class ASTGenerator(val packageName: String, val language: Language) {
                     val fqName = "$packageName.${element.name!!}"
                     if (fqName in existingKotlinClasses) {
                         println("    Skipping ${element.name} as a Kotlin class with that name already exist")
-                        fileSpecBuilder.addFileComment("Skipping ${element.name} as a Kotlin class with that name already exist")
+                        fileSpecBuilder.addFileComment(
+                            "Skipping ${element.name} as a Kotlin class with that name already exist"
+                        )
                     } else {
                         if (element.isAbstract) {
                             typeSpec.modifiers.add(KModifier.SEALED)
