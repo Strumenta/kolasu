@@ -26,6 +26,7 @@ dependencies {
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
     implementation 'org.redundent:kotlin-xml-builder:1.7.3'
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.4.0")
+    implementation "com.google.code.gson:gson:$gson_version"
 
     cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
 
@@ -52,7 +53,7 @@ sourceSets {
 compileKotlin.source sourceSets.main.java, sourceSets.main.kotlin
 compileTestKotlin.source sourceSets.test.kotlin
 
-clean{
+clean {
     delete "generated-src"
     delete "generated-test-src"
 }
