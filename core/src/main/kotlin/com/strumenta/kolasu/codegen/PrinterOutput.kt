@@ -2,8 +2,6 @@ package com.strumenta.kolasu.codegen
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.START_POINT
 import com.strumenta.kolasu.model.TextFileDestination
 import java.lang.IllegalStateException
