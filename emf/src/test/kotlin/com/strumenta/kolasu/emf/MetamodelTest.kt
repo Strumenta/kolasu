@@ -152,7 +152,6 @@ class MetamodelTest {
         )
         metamodelBuilder.provideClass(NodeWithReference::class)
         val ePackage = metamodelBuilder.generate()
-        println(ePackage.saveAsJsonObject().toString())
         assertEquals("com.strumenta.kolasu.emf", ePackage.name)
         assertEquals(1, ePackage.eClassifiers.size)
 
@@ -166,4 +165,27 @@ class MetamodelTest {
         val pointers = nodeWithReference.eStructuralFeatures.find { it.name == "pointers" } as EReference
         assertEquals(true, pointers.isContainment)
     }
+
+    @Test
+    fun internalClasses() {
+        val metamodelBuilder = MetamodelBuilder(
+            "com.strumenta.kolasu.emf",
+            "https://strumenta.com/simplemm",
+            "simplemm"
+        )
+        metamodelBuilder.provideClass(MyClassWithInternalClasses::class)
+        val ePackage = metamodelBuilder.generate()
+        assertEquals("com.strumenta.kolasu.emf", ePackage.name)
+        assertEquals(2, ePackage.eClassifiers.size)
+        val MyClassWithInternalClasses = ePackage.eClassifiers[0]
+        val Internal = ePackage.eClassifiers[1]
+        assertEquals("MyClassWithInternalClasses", MyClassWithInternalClasses.name)
+        assertEquals("MyClassWithInternalClasses.Internal", Internal.name)
+    }
+}
+
+class MyClassWithInternalClasses : Node() {
+    class Internal : Node()
+
+    class InternalWhichIsNotANode
 }

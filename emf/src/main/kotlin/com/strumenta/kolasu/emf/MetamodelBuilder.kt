@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.PropertyTypeDescription
+import com.strumenta.kolasu.model.isANode
 import com.strumenta.kolasu.model.processProperties
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
@@ -25,12 +26,23 @@ import kotlin.reflect.full.withNullability
 
 private val KClass<*>.packageName: String?
     get() {
-        val qname = this.qualifiedName ?: throw IllegalStateException("The class has no qualified name: $this")
+        val isInternal = this.java.name.contains('$')
+        val qname = if (isInternal) {
+            this.java.name.split("$").first()
+        } else {
+            this.qualifiedName ?: throw IllegalStateException("The class has no qualified name: $this")
+        }
         return if (qname == this.simpleName) {
             null
         } else {
-            require(qname.endsWith(".${this.simpleName}"))
-            qname.removeSuffix(".${this.simpleName}")
+            if (isInternal) {
+                val last = qname.split(".").last()
+                require(qname.endsWith(".$last"))
+                qname.removeSuffix(".$last")
+            } else {
+                require(qname.endsWith(".${this.simpleName}"))
+                qname.removeSuffix(".${this.simpleName}")
+            }
         }
     }
 
@@ -369,6 +381,11 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             registerKClassForEClass(kClass, eClass)
             if (kClass.isSealed) {
                 kClass.sealedSubclasses.forEach {
+                    queue.add(it)
+                }
+            }
+            kClass.nestedClasses.forEach {
+                if (it.isANode()) {
                     queue.add(it)
                 }
             }
