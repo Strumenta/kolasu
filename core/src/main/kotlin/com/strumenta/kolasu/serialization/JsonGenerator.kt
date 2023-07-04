@@ -189,7 +189,7 @@ class JsonGenerator {
         JsonElement {
         val nodeType = node.nodeType
         val jsonObject = jsonObject(
-            JSON_TYPE_KEY to if (shortClassNames) nodeType.substring(nodeType.indexOf('.') + 1) else nodeType,
+            JSON_TYPE_KEY to if (shortClassNames) nodeType.substring(nodeType.lastIndexOf('.') + 1) else nodeType,
             JSON_POSITION_KEY to node.position?.toJson()
         )
         if (withIds != null) {
