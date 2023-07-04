@@ -12,18 +12,27 @@ import kotlin.reflect.KVariance
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubtypeOf
 
-// TODO handle case-sensitivity : boolean
 // TODO handle multiple symbols (e.g. function overloading)
 // TODO allow other than name-based symbol binding (e.g. predicated, numbered, etc.)
-data class Scope(var parent: Scope? = null, var symbolTable: SymbolTable = mutableMapOf()) {
+data class Scope(
+    var parent: Scope? = null,
+    val symbolTable: SymbolTable = mutableMapOf(),
+    val ignoreCase: Boolean = false,
+) {
     fun define(symbol: PossiblyNamed) {
-        val name: String = symbol.name ?: throw IllegalArgumentException("The given symbol must have a name")
-        this.symbolTable.computeIfAbsent(name) { mutableListOf() }.add(symbol)
+        this.symbolTable.computeIfAbsent(symbol.name.toSymbolTableKey()) { mutableListOf() }.add(symbol)
     }
 
     fun resolve(name: String, type: KClass<out PossiblyNamed> = PossiblyNamed::class): PossiblyNamed? {
-        return this.symbolTable.getOrDefault(name, mutableListOf()).find { type.isInstance(it) }
-            ?: this.parent?.resolve(name, type)
+        val key = name.toSymbolTableKey()
+        return this.symbolTable.getOrDefault(key, mutableListOf()).find { type.isInstance(it) }
+            ?: this.parent?.resolve(key, type)
+    }
+
+    private fun String?.toSymbolTableKey() = when {
+        this != null && ignoreCase -> this.lowercase()
+        this != null -> this
+        else -> throw IllegalArgumentException("The given symbol must have a name")
     }
 }
 

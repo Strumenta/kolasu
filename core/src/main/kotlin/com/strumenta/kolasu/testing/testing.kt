@@ -170,12 +170,12 @@ fun assertASTsAreEqual(
                         assertEquals(
                             expectedPropValue.name,
                             actualPropValue.name,
-                            "$context, comparing reference name of ${expectedProperty.name} ",
+                            "$context, comparing reference name of ${expectedProperty.name} of ${expected.nodeType}",
                         )
                         assertEquals(
                             expectedPropValue.referred?.toString(),
                             actualPropValue.referred?.toString(),
-                            "$context, comparing reference pointer ${expectedProperty.name}",
+                            "$context, comparing reference pointer ${expectedProperty.name} of ${expected.nodeType}",
                         )
                     } else {
                         TODO()
@@ -185,13 +185,13 @@ fun assertASTsAreEqual(
                         assertEquals(
                             expectedPropValue?.toString(),
                             actualPropValue?.toString(),
-                            "$context, comparing property ${expectedProperty.name}",
+                            "$context, comparing property ${expectedProperty.name} of ${expected.nodeType}",
                         )
                     } else {
                         assertEquals(
                             expectedPropValue,
                             actualPropValue,
-                            "$context, comparing property ${expectedProperty.name}",
+                            "$context, comparing property ${expectedProperty.name} of ${expected.nodeType}",
                         )
                     }
                 }

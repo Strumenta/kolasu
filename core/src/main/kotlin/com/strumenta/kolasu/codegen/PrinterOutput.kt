@@ -2,8 +2,6 @@ package com.strumenta.kolasu.codegen
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.START_POINT
 import com.strumenta.kolasu.model.TextFileDestination
 import java.lang.IllegalStateException
@@ -168,17 +166,6 @@ class PrinterOutput(
         }
     }
 
-    fun <T : PossiblyNamed> printRefsList(elements: List<ReferenceByName<T>>, separator: String = ", ") {
-        var i = 0
-        while (i < elements.size) {
-            if (i != 0) {
-                print(separator)
-            }
-            print(elements[i].name)
-            i += 1
-        }
-    }
-
     fun <T : Node> printList(
         prefix: String,
         elements: List<T>,
@@ -189,20 +176,6 @@ class PrinterOutput(
         if (elements.isNotEmpty() || printEvenIfEmpty) {
             print(prefix)
             printList(elements, separator)
-            print(postfix)
-        }
-    }
-
-    fun <T : PossiblyNamed> printRefsList(
-        prefix: String,
-        elements: List<ReferenceByName<T>>,
-        postfix: String,
-        printEvenIfEmpty: Boolean = false,
-        separator: String = ", "
-    ) {
-        if (elements.isNotEmpty() || printEvenIfEmpty) {
-            print(prefix)
-            printRefsList(elements, separator)
             print(postfix)
         }
     }
