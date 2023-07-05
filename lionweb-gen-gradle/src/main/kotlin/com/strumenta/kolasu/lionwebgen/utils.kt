@@ -20,8 +20,6 @@ val Project.extra: ExtraPropertiesExtension
 val Project.sourceSets: SourceSetContainer
     get() = (this as ExtensionAware).extensions.getByName("sourceSets") as SourceSetContainer
 
-val Project.kotlinVersion
-    get() = project.propertyValue("kotlinVersion", "1.8.22")
 val Project.kolasuVersion
     get() = project.propertyValue("kolasuVersion", BuildConfig.PLUGIN_VERSION)
 
