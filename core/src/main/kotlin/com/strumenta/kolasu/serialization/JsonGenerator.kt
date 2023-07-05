@@ -1,8 +1,7 @@
 package com.strumenta.kolasu.serialization
 
-import com.github.salomonbrys.kotson.jsonObject
-import com.github.salomonbrys.kotson.toJsonArray
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
@@ -29,6 +28,36 @@ const val JSON_POSITION_KEY = "#position"
 const val JSON_ORIGIN_KEY = "#origin"
 const val JSON_ID_KEY = "#id"
 const val JSON_DESTINATION_KEY = "#destination"
+
+fun Iterable<*>.toJsonArray() = jsonArray(this.iterator())
+fun jsonArray(values: Iterator<Any?>): JsonArray {
+    val array = JsonArray()
+    for (value in values)
+        array.add(value.toJsonElement())
+    return array
+}
+
+private fun Any?.toJsonElement(): JsonElement {
+    if (this == null)
+        return JsonNull.INSTANCE
+
+    return when (this) {
+        is JsonElement -> this
+        is String -> toJson()
+        is Number -> toJson()
+        is Char -> toJson()
+        is Boolean -> toJson()
+        else -> throw IllegalArgumentException("$this cannot be converted to JSON")
+    }
+}
+
+fun jsonObject(vararg values: Pair<String, *>): JsonObject {
+    val jo = JsonObject()
+    values.forEach {
+        jo.add(it.first, it.second.toJsonElement())
+    }
+    return jo
+}
 
 /**
  * Converts an AST to JSON.

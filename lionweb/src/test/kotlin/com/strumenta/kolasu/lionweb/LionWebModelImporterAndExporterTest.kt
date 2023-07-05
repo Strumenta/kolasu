@@ -15,23 +15,23 @@ class LionWebModelImporterAndExporterTest {
   "languages": [
     {
       "version": "1",
-      "key": "com.strumenta.SimpleLang"
+      "key": "com-strumenta-SimpleLang"
     }
   ],
   "nodes": [
     {
-      "id": "UNKNOWN_SOURCE-root",
+      "id": "UNKNOWN_SOURCE_root",
       "concept": {
-        "language": "com.strumenta.SimpleLang",
+        "language": "com-strumenta-SimpleLang",
         "version": "1",
-        "key": "com.strumenta.SimpleLang-SimpleRoot"
+        "key": "com-strumenta-SimpleLang_SimpleRoot"
       },
       "properties": [
         {
           "property": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "id"
+            "key": "com-strumenta-SimpleLang_SimpleRoot_id"
           },
           "value": "12345"
         }
@@ -39,14 +39,14 @@ class LionWebModelImporterAndExporterTest {
       "children": [
         {
           "containment": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "childrez"
+            "key": "com-strumenta-SimpleLang_SimpleRoot_childrez"
           },
           "children": [
-            "UNKNOWN_SOURCE-root-childrez[0]",
-            "UNKNOWN_SOURCE-root-childrez[1]",
-            "UNKNOWN_SOURCE-root-childrez[2]"
+            "UNKNOWN_SOURCE_root_childrez_0",
+            "UNKNOWN_SOURCE_root_childrez_1",
+            "UNKNOWN_SOURCE_root_childrez_2"
           ]
         }
       ],
@@ -54,11 +54,11 @@ class LionWebModelImporterAndExporterTest {
       "parent": null
     },
     {
-      "id": "UNKNOWN_SOURCE-root-childrez[0]",
+      "id": "UNKNOWN_SOURCE_root_childrez_0",
       "concept": {
-        "language": "com.strumenta.SimpleLang",
+        "language": "com-strumenta-SimpleLang",
         "version": "1",
-        "key": "com.strumenta.SimpleLang-SimpleNodeA"
+        "key": "com-strumenta-SimpleLang_SimpleNodeA"
       },
       "properties": [
         {
@@ -73,9 +73,9 @@ class LionWebModelImporterAndExporterTest {
       "children": [
         {
           "containment": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "child"
+            "key": "com-strumenta-SimpleLang_SimpleNodeA_child"
           },
           "children": []
         }
@@ -83,47 +83,47 @@ class LionWebModelImporterAndExporterTest {
       "references": [
         {
           "reference": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "ref"
+            "key": "com-strumenta-SimpleLang_SimpleNodeA_ref"
           },
           "targets": [
             {
               "resolveInfo": "A1",
-              "reference": "UNKNOWN_SOURCE-root-childrez[0]"
+              "reference": "UNKNOWN_SOURCE_root_childrez_0"
             }
           ]
         }
       ],
-      "parent": "UNKNOWN_SOURCE-root"
+      "parent": "UNKNOWN_SOURCE_root"
     },
     {
-      "id": "UNKNOWN_SOURCE-root-childrez[1]",
+      "id": "UNKNOWN_SOURCE_root_childrez_1",
       "concept": {
-        "language": "com.strumenta.SimpleLang",
+        "language": "com-strumenta-SimpleLang",
         "version": "1",
-        "key": "com.strumenta.SimpleLang-SimpleNodeB"
+        "key": "com-strumenta-SimpleLang_SimpleNodeB"
       },
       "properties": [
         {
           "property": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "value"
+            "key": "com-strumenta-SimpleLang_SimpleNodeB_value"
           },
           "value": "some magic value"
         }
       ],
       "children": [],
       "references": [],
-      "parent": "UNKNOWN_SOURCE-root"
+      "parent": "UNKNOWN_SOURCE_root"
     },
     {
-      "id": "UNKNOWN_SOURCE-root-childrez[2]",
+      "id": "UNKNOWN_SOURCE_root_childrez_2",
       "concept": {
-        "language": "com.strumenta.SimpleLang",
+        "language": "com-strumenta-SimpleLang",
         "version": "1",
-        "key": "com.strumenta.SimpleLang-SimpleNodeA"
+        "key": "com-strumenta-SimpleLang_SimpleNodeA"
       },
       "properties": [
         {
@@ -138,52 +138,52 @@ class LionWebModelImporterAndExporterTest {
       "children": [
         {
           "containment": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "child"
+            "key": "com-strumenta-SimpleLang_SimpleNodeA_child"
           },
           "children": [
-            "UNKNOWN_SOURCE-root-childrez[2]-child"
+            "UNKNOWN_SOURCE_root_childrez_2_child"
           ]
         }
       ],
       "references": [
         {
           "reference": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "ref"
+            "key": "com-strumenta-SimpleLang_SimpleNodeA_ref"
           },
           "targets": [
             {
               "resolveInfo": "A1",
-              "reference": "UNKNOWN_SOURCE-root-childrez[0]"
+              "reference": "UNKNOWN_SOURCE_root_childrez_0"
             }
           ]
         }
       ],
-      "parent": "UNKNOWN_SOURCE-root"
+      "parent": "UNKNOWN_SOURCE_root"
     },
     {
-      "id": "UNKNOWN_SOURCE-root-childrez[2]-child",
+      "id": "UNKNOWN_SOURCE_root_childrez_2_child",
       "concept": {
-        "language": "com.strumenta.SimpleLang",
+        "language": "com-strumenta-SimpleLang",
         "version": "1",
-        "key": "com.strumenta.SimpleLang-SimpleNodeB"
+        "key": "com-strumenta-SimpleLang_SimpleNodeB"
       },
       "properties": [
         {
           "property": {
-            "language": "com.strumenta.SimpleLang",
+            "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "value"
+            "key": "com-strumenta-SimpleLang_SimpleNodeB_value"
           },
           "value": "some other value"
         }
       ],
       "children": [],
       "references": [],
-      "parent": "UNKNOWN_SOURCE-root-childrez[2]"
+      "parent": "UNKNOWN_SOURCE_root_childrez_2"
     }
   ]
 }"""
