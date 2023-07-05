@@ -115,7 +115,7 @@ val KClass<*>.eClassifierName: String
 
 val Class<*>.eClassifierName: String
     get() = if (this.enclosingClass != null) {
-        "${this.enclosingClass.simpleName}${this.simpleName}"
+        "${this.enclosingClass.simpleName}.${this.simpleName}"
     } else {
         this.simpleName
     }

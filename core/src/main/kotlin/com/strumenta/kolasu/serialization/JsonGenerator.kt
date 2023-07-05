@@ -216,8 +216,9 @@ class JsonGenerator {
         withDestinationIds: IdentityHashMap<Node, String>? = null
     ):
         JsonElement {
+        val nodeType = node.nodeType
         val jsonObject = jsonObject(
-            JSON_TYPE_KEY to if (shortClassNames) node.javaClass.simpleName else node.javaClass.canonicalName,
+            JSON_TYPE_KEY to if (shortClassNames) nodeType.substring(nodeType.lastIndexOf('.') + 1) else nodeType,
             JSON_POSITION_KEY to node.position?.toJson()
         )
         if (withIds != null) {
