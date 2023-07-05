@@ -1,10 +1,10 @@
 import com.strumenta.kolasu.lionwebgen.BuildConfig
-import org.gradle.internal.impldep.org.junit.Ignore
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 import java.nio.file.Files
+import kotlin.test.Ignore
 
 
 class LionWebGradlePluginTest {
