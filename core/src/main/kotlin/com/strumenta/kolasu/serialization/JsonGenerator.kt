@@ -38,8 +38,9 @@ fun jsonArray(values: Iterator<Any?>): JsonArray {
 }
 
 private fun Any?.toJsonElement(): JsonElement {
-    if (this == null)
+    if (this == null) {
         return JsonNull.INSTANCE
+    }
 
     return when (this) {
         is JsonElement -> this

@@ -11,6 +11,8 @@ dependencies {
     implementation(project(":core"))
 }
 
+def isReleaseVersion = !(version as String).endsWith("SNAPSHOT")
+
 publishing {
 
     repositories {

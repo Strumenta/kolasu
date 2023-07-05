@@ -52,7 +52,8 @@ public data class Property(
         val existingClasses = KotlinCodeProcessor().classesDeclaredInFile(code)
         assertEquals(
             setOf(
-                "com.strumenta.props.PropertiesFile", "com.strumenta.props.SomeOtherClass",
+                "com.strumenta.props.PropertiesFile",
+                "com.strumenta.props.SomeOtherClass",
                 "com.strumenta.props.Property"
             ),
             existingClasses

@@ -32,7 +32,7 @@ class LionWebGradlePlugin : Plugin<Project> {
         createGenLanguagesTask(project, configuration)
     }
 
-    private fun createGenASTClassesTask(project: Project, configuration: LionWebGradleExtension) : Task {
+    private fun createGenASTClassesTask(project: Project, configuration: LionWebGradleExtension): Task {
         return project.tasks.create(genASTClasses) {
             it.group = tasksGroup
             it.doLast {
@@ -45,9 +45,14 @@ class LionWebGradlePlugin : Plugin<Project> {
                             val jsonser = JsonSerialization.getStandardSerialization()
                             jsonser.nodeResolver.addTree(StarLasuLWLanguage)
                             val language = jsonser.unserializeToNodes(FileInputStream(languageFile)).first() as Language
-                            val existingKotlinClasses = KotlinCodeProcessor().classesDeclaredInDir(project.file("src/main/kotlin"))
+                            val existingKotlinClasses = KotlinCodeProcessor().classesDeclaredInDir(
+                                project.file("src/main/kotlin")
+                            )
 
-                            val ktFiles = ASTGenerator(configuration.importPackageNames.get()[language.name] ?: language.name, language)
+                            val ktFiles = ASTGenerator(
+                                configuration.importPackageNames.get()[language.name] ?: language.name,
+                                language
+                            )
                                 .generateClasses(existingKotlinClasses)
                             ktFiles.forEach { ktFile ->
                                 val file = File(configuration.outdir.get(), ktFile.path)
@@ -57,14 +62,13 @@ class LionWebGradlePlugin : Plugin<Project> {
                             }
                         }
                     }
-
                 }
                 println("LIonWeb AST Classes generation task - completed")
             }
         }
     }
 
-    private fun createGenLanguagesTask(project: Project, configuration: LionWebGradleExtension) : Task {
+    private fun createGenLanguagesTask(project: Project, configuration: LionWebGradleExtension): Task {
         return project.tasks.create(genLanguages) { it ->
             it.group = tasksGroup
             it.dependsOn("compileKotlin")
@@ -73,7 +77,7 @@ class LionWebGradlePlugin : Plugin<Project> {
                 configuration.exportPackages.get().forEach { packageName ->
                     project.javaexec { jes ->
                         jes.classpath = project.sourceSets.getByName("main").runtimeClasspath
-                        jes.mainClass.set("${packageName}.LanguageKt")
+                        jes.mainClass.set("$packageName.LanguageKt")
                         jes.args = mutableListOf(lionwebLanguageFile(project, packageName).absolutePath)
                     }
                 }
@@ -84,7 +88,7 @@ class LionWebGradlePlugin : Plugin<Project> {
     /**
      * Prepare the plugin configuration setting in place default values.
      */
-    private fun prepareConfiguration(project: Project) : LionWebGradleExtension {
+    private fun prepareConfiguration(project: Project): LionWebGradleExtension {
         val configuration = project.extensions.create("lionweb", LionWebGradleExtension::class.java)
         configuration.outdir.convention(File(project.buildDir, "lionweb-gen"))
         val srcMainLionweb = project.file("src${File.separator}main${File.separator}lionweb")
@@ -98,7 +102,7 @@ class LionWebGradlePlugin : Plugin<Project> {
         return configuration
     }
 
-    private fun lionwebLanguageFile(project: Project, packageName: String) : File {
+    private fun lionwebLanguageFile(project: Project, packageName: String): File {
         return File(project.buildDir, "lionwebgen${File.separator}$packageName.json")
     }
 
@@ -133,16 +137,20 @@ class LionWebGradlePlugin : Plugin<Project> {
         }
 
         project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).forEach {
-            it.source(File(project.buildDir, "lionweb-gen"),
-                File(project.rootDir, "src${File.separator}main${File.separator}kotlin"))
+            it.source(
+                File(project.buildDir, "lionweb-gen"),
+                File(project.rootDir, "src${File.separator}main${File.separator}kotlin")
+            )
             it.dependsOn(genASTClasses)
         }
     }
 
     private fun addDependencies(project: Project) {
         fun addKolasuModule(moduleName: String) {
-            project.dependencies.add("implementation",
-                "com.strumenta.kolasu:kolasu-$moduleName:${project.kolasuVersion}")
+            project.dependencies.add(
+                "implementation",
+                "com.strumenta.kolasu:kolasu-$moduleName:${project.kolasuVersion}"
+            )
         }
 
         addKolasuModule("core")
@@ -153,7 +161,9 @@ class LionWebGradlePlugin : Plugin<Project> {
         project.dependencies.add("implementation", "com.github.ajalt.clikt:clikt:3.5.0")
 
         // We need to use this one to avoid an issue with Gson
-        project.dependencies.add("implementation", "io.lionweb.lioncore-java:lioncore-java-core-fat:${project.lionwebVersion}")
+        project.dependencies.add(
+            "implementation",
+            "io.lionweb.lioncore-java:lioncore-java-core-fat:${project.lionwebVersion}"
+        )
     }
-
 }

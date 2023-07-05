@@ -4,8 +4,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 import java.nio.file.Files
-import kotlin.test.Ignore
-
 
 class LionWebGradlePluginTest {
     var projectDir: File? = null
@@ -60,5 +58,4 @@ class LionWebGradlePluginTest {
         runner.withProjectDir(projectDir)
         val result = runner.build()
     }
-
 }

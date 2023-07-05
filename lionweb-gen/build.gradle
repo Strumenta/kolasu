@@ -41,6 +41,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version")
 }
 
+def isReleaseVersion = !(version as String).endsWith("SNAPSHOT")
+
+
 publishing {
 
     repositories {
@@ -60,7 +63,7 @@ publishing {
             from components.java
             artifactId "kolasu-" + project.name
             artifact sourcesJar
-            artifact javadocJar
+            artifact kdocJar
             suppressPomMetadataWarningsFor('cliApiElements')
             suppressPomMetadataWarningsFor('cliRuntimeElements')
             pom {
