@@ -7,7 +7,6 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiManager
 import org.jetbrains.kotlin.com.intellij.testFramework.LightVirtualFile
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.idea.KotlinFileType
-import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.psi.KtFile
 import java.io.File
@@ -27,26 +26,11 @@ private val KtDeclaration.fqName: String
  */
 class KotlinCodeProcessor {
 
-    fun astClassesDeclaredInFile(code: String): Set<String> {
-        val ktFile = parse(code)
-        return ktFile.declarations.filterIsInstance(KtClass::class.java)
-            .filter {
-                // TODO implement it correctly
-                true
-            }.map {
-                it.fqName.toString()
-            }.toSet()
-    }
     fun classesDeclaredInFile(code: String): Set<String> {
         val ktFile = parse(code)
         return ktFile.declarations.map {
             it.fqName
         }.toSet()
-    }
-
-    fun astClassesDeclaredInFile(file: File): Set<String> {
-        require(file.isFile)
-        return astClassesDeclaredInFile(file.readText())
     }
 
     fun classesDeclaredInFile(file: File): Set<String> {
@@ -64,18 +48,6 @@ class KotlinCodeProcessor {
             when {
                 it.isFile -> set.addAll(classesDeclaredInFile(it))
                 it.isDirectory -> set.addAll(classesDeclaredInDir(it))
-            }
-        }
-        return set
-    }
-
-    fun astClassesDeclaredInDir(file: File): Set<String> {
-        require(file.isDirectory)
-        val set = mutableSetOf<String>()
-        file.listFiles()?.forEach {
-            when {
-                it.isFile -> set.addAll(astClassesDeclaredInFile(it))
-                it.isDirectory -> set.addAll(astClassesDeclaredInDir(it))
             }
         }
         return set

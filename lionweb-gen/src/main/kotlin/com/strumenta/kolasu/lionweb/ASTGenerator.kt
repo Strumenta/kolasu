@@ -116,6 +116,9 @@ class ASTGenerator(val packageName: String, val language: Language) {
             LionCoreBuiltins.getBoolean() -> {
                 Boolean::class.java.asTypeName()
             }
+            LionCoreBuiltins.getInteger() -> {
+                ClassName.bestGuess("kotlin.Int")
+            }
             else -> {
                 TODO("DataType: $dataType")
             }

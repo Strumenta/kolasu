@@ -25,7 +25,7 @@ public data class Property(
         val existingClasses = KotlinCodeProcessor().classesDeclaredInFile(code)
         assertEquals(setOf("com.strumenta.props.PropertiesFile", "com.strumenta.props.Property"), existingClasses)
 
-        val existingASTClasses = KotlinCodeProcessor().astClassesDeclaredInFile(code)
+        val existingASTClasses = KotlinCodeProcessor().classesDeclaredInFile(code)
         assertEquals(setOf("com.strumenta.props.PropertiesFile", "com.strumenta.props.Property"), existingASTClasses)
     }
 
@@ -58,7 +58,7 @@ public data class Property(
             existingClasses
         )
 
-        val existingASTClasses = KotlinCodeProcessor().astClassesDeclaredInFile(code)
+        val existingASTClasses = KotlinCodeProcessor().classesDeclaredInFile(code)
         assertEquals(setOf("com.strumenta.props.PropertiesFile", "com.strumenta.props.Property"), existingASTClasses)
     }
 }

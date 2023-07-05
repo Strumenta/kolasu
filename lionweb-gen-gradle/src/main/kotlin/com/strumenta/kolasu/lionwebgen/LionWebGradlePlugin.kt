@@ -47,7 +47,8 @@ class LionWebGradlePlugin : Plugin<Project> {
                             val language = jsonser.unserializeToNodes(FileInputStream(languageFile)).first() as Language
                             val existingKotlinClasses = KotlinCodeProcessor().classesDeclaredInDir(project.file("src/main/kotlin"))
 
-                            val ktFiles = ASTGenerator(configuration.importPackageNames.get()[language.name] ?: language.name, language).generateClasses(existingKotlinClasses)
+                            val ktFiles = ASTGenerator(configuration.importPackageNames.get()[language.name] ?: language.name, language)
+                                .generateClasses(existingKotlinClasses)
                             ktFiles.forEach { ktFile ->
                                 val file = File(configuration.outdir.get(), ktFile.path)
                                 file.parentFile.mkdirs()
