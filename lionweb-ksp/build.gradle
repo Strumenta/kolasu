@@ -1,0 +1,82 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.google.devtools.ksp:symbol-processing-api:${kotlin_version}-${kspVersion}"
+    implementation(project(":core"))
+}
+
+publishing {
+
+    repositories {
+        maven {
+            def releaseRepo = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotRepo = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url = isReleaseVersion ? releaseRepo : snapshotRepo
+            credentials {
+                username = project.hasProperty('ossrhUsername') ? ossrhUsername : "Unknown user"
+                password = project.hasProperty('ossrhPassword') ? ossrhPassword : "Unknown password"
+            }
+        }
+    }
+
+    publications {
+        kolasu_lionweb_ksp(MavenPublication) {
+            from components.java
+            artifactId "kolasu-" + project.name
+            artifact sourcesJar
+            //artifact javadocJar
+            suppressPomMetadataWarningsFor('cliApiElements')
+            suppressPomMetadataWarningsFor('cliRuntimeElements')
+            pom {
+                name = "kolasu-" + project.name
+                description = "Kolasu classes generation for LIonWeb"
+                version = project.version
+                packaging = 'jar'
+                url = 'https://github.com/Strumenta/kolasu'
+
+                scm {
+                    connection = 'scm:git:https://github.com/Strumenta/kolasu.git'
+                    developerConnection = 'scm:git:git@github.com:Strumenta/kolasu.git'
+                    url = 'https://github.com/Strumenta/kolasu.git'
+                }
+
+                licenses {
+                    license {
+                        name = 'Apache Licenve V2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                        distribution = 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'ftomassetti'
+                        name = 'Federico Tomassetti'
+                        email = 'federico@strumenta.com'
+                    }
+                    developer {
+                        id = 'alessiostalla'
+                        name = 'Alessio Stalla'
+                        email = 'alessio.stalla@strumenta.com'
+                    }
+                    developer {
+                        id = 'lorenzoaddazi'
+                        name = 'Lorenzo Addazi'
+                        email = 'lorenzo.addazi@strumenta.com'
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.kolasu_lionweb_ksp
+}

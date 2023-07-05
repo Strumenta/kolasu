@@ -13,7 +13,7 @@ val clikt_version = extra["clikt_version"]
 dependencies {
     implementation("com.github.ajalt.clikt:clikt:$clikt_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-    api("io.lionweb.lioncore-java:lioncore-java-core:$lionwebVersion")
+    implementation("io.lionweb.lioncore-java:lioncore-java-core-fat:$lionwebVersion")
     api(project(":core"))
 }
 

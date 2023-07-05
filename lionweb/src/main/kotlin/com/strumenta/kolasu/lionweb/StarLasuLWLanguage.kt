@@ -8,7 +8,7 @@ import io.lionweb.lioncore.java.language.Property
 
 object StarLasuLWLanguage : Language() {
     init {
-        setName("StarLasu")
+        setName("com.strumenta.StarLasu")
         setID("com_strumenta_starlasu")
         setVersion("1")
         setKey(id)

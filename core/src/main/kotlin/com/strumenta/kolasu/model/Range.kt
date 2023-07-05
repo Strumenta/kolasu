@@ -127,7 +127,7 @@ class SourceSet(val name: String, val root: Path)
 class SourceSetElement(val sourceSet: SourceSet, val relativePath: Path) : Source() {
     override fun stringDescription(): String = "${this.javaClass.name}:$relativePath"
 }
-class FileSource(val file: File) : Source() {
+data class FileSource(val file: File) : Source() {
     override fun stringDescription(): String = "${this.javaClass.name}:${file.path}"
 }
 class StringSource(val code: String? = null) : Source() {

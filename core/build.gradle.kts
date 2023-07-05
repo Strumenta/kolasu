@@ -2,7 +2,6 @@ val clikt_version = extra["clikt_version"]
 val gson_version = extra["gson_version"]
 
 dependencies {
-    implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
     implementation("org.redundent:kotlin-xml-builder:1.9.0")
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.8.0")
     implementation("com.google.code.gson:gson:$gson_version")
