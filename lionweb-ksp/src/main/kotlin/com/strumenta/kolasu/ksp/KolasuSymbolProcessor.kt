@@ -29,11 +29,9 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
         fun write(os: OutputStream) {
             val buf = PrintWriter(os)
             buf.println("""
-                    // ${classes.first().containingFile?.filePath}
-                    // ${classes.first().containingFile?.origin}
                     package $packageName
                     
-                    import com.strumenta.kolasu.lionweb.LanguageGeneratorCommand
+                    import com.strumenta.kolasu.lionweb.LionWebLanguageGeneratorCommand
                     import com.strumenta.kolasu.lionweb.KolasuLanguage
                     import com.strumenta.kolasu.lionweb.LionWebLanguageExporter
                     import io.lionweb.lioncore.java.language.Language
@@ -48,7 +46,7 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
                     }
 
                     fun main(args: Array<String>) {
-                        LanguageGeneratorCommand(lwLanguage).main(args)
+                        LionWebLanguageGeneratorCommand(lwLanguage).main(args)
                     }                    
             """.trimIndent())
             buf.flush()

@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.lionweb
+package com.strumenta.kolasu.language
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.containedType
@@ -14,6 +14,9 @@ import kotlin.reflect.KClass
  */
 class KolasuLanguage(val qualifiedName: String) {
     val astClasses: MutableList<KClass<out Node>> = mutableListOf()
+
+    val simpleName: String
+        get() = qualifiedName.split(".").last()
 
     fun <N : Node> addClass(kClass: KClass<N>): Boolean {
         if (!astClasses.contains(kClass) && astClasses.add(kClass)) {
