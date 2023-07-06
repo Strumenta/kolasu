@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.lionweb
+package com.strumenta.kolasu.emf.cli
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
