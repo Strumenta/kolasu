@@ -61,11 +61,13 @@ fun EPackage.setResourceURI(uri: String) {
     resource.contents.add(this)
 }
 
-fun KolasuLanguage.toEPackage(nsUri: String? = null, nsPrefix: String? = null) : EPackage {
+fun KolasuLanguage.toEPackage(nsUri: String? = null, nsPrefix: String? = null): EPackage {
 
-    val mmBuilder = MetamodelBuilder(this.qualifiedName,
+    val mmBuilder = MetamodelBuilder(
+        this.qualifiedName,
         nsUri ?: "https://strumenta.com/${this.qualifiedName}",
-              nsPrefix ?: this.simpleName)
+        nsPrefix ?: this.simpleName
+    )
     this.astClasses.forEach {
         mmBuilder.provideClass(it)
     }

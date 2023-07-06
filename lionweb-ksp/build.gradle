@@ -7,8 +7,10 @@ repositories {
     mavenCentral()
 }
 
+def completeKspVersion = kspVersion.contains("-") ? kspVersion : "${kotlin_version}-${kspVersion}"
+
 dependencies {
-    implementation "com.google.devtools.ksp:symbol-processing-api:${kotlin_version}-${kspVersion}"
+    implementation "com.google.devtools.ksp:symbol-processing-api:${completeKspVersion}"
     implementation(project(":core"))
 }
 
