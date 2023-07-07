@@ -64,7 +64,8 @@ fun EPackage.setResourceURI(uri: String) {
 fun KolasuLanguage.toEPackage(nsUri: String? = null, nsPrefix: String? = null): EPackage {
     val qualifiedNameParts = this.qualifiedName.split(".")
     val nsUriCalc = nsUri ?: if (qualifiedNameParts.size >= 3) {
-        "https://${qualifiedNameParts[1]}.${qualifiedNameParts[0]}/${qualifiedName.removePrefix("${qualifiedNameParts[0]}.${qualifiedNameParts[1]}.")}"
+        "https://${qualifiedNameParts[1]}.${qualifiedNameParts[0]}/" +
+            qualifiedName.removePrefix("${qualifiedNameParts[0]}.${qualifiedNameParts[1]}.")
     } else {
         "https://strumenta.com/${this.qualifiedName}"
     }
