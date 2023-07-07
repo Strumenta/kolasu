@@ -1,13 +1,16 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm'
+    id "org.jetbrains.dokka"
 }
 
 repositories {
     mavenCentral()
 }
 
+def completeKspVersion = kspVersion.contains("-") ? kspVersion : "${kotlin_version}-${kspVersion}"
+
 dependencies {
-    implementation "com.google.devtools.ksp:symbol-processing-api:${kotlin_version}-${kspVersion}"
+    implementation "com.google.devtools.ksp:symbol-processing-api:${completeKspVersion}"
     implementation(project(":core"))
 }
 
@@ -32,7 +35,7 @@ publishing {
             from components.java
             artifactId "kolasu-" + project.name
             artifact sourcesJar
-            //artifact javadocJar
+            artifact javadocJar
             suppressPomMetadataWarningsFor('cliApiElements')
             suppressPomMetadataWarningsFor('cliRuntimeElements')
             pom {

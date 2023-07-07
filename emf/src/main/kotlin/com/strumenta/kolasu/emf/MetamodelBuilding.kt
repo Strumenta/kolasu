@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.emf
 
+import com.strumenta.kolasu.language.KolasuLanguage
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
@@ -71,4 +72,24 @@ fun EClass.addAttribute(name: String, type: EDataType, min: Int, max: Int): EAtt
 fun EPackage.setResourceURI(uri: String) {
     val resource = EcoreResourceFactoryImpl().createResource(URI.createURI(uri))
     resource.contents.add(this)
+}
+
+fun KolasuLanguage.toEPackage(nsUri: String? = null, nsPrefix: String? = null): EPackage {
+    val qualifiedNameParts = this.qualifiedName.split(".")
+    val nsUriCalc = nsUri ?: if (qualifiedNameParts.size >= 3) {
+        "https://${qualifiedNameParts[1]}.${qualifiedNameParts[0]}/" +
+            qualifiedName.removePrefix("${qualifiedNameParts[0]}.${qualifiedNameParts[1]}.")
+    } else {
+        "https://strumenta.com/${this.qualifiedName}"
+    }
+
+    val mmBuilder = MetamodelBuilder(
+        this.qualifiedName,
+        nsUriCalc,
+        nsPrefix ?: this.simpleName
+    )
+    this.astClasses.forEach {
+        mmBuilder.provideClass(it)
+    }
+    return mmBuilder.generate()
 }
