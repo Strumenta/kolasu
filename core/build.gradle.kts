@@ -6,7 +6,6 @@ dependencies {
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.8.0")
     implementation("com.google.code.gson:gson:$gson_version")
 
-    implementation "com.google.code.gson:gson:$gson_version"
     api("com.github.ajalt.clikt:clikt:$clikt_version")
     api("io.reactivex.rxjava3:rxjava:3.1.1")
 }
