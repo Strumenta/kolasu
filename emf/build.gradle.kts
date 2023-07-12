@@ -18,7 +18,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
     implementation("com.google.code.gson:gson:$gson_version")
 
-    implementation("com.github.ajalt.clikt:clikt:$clikt_version")
+    api("com.github.ajalt.clikt:clikt:$clikt_version")
 
     testImplementation("org.antlr:antlr4-runtime:$antlr_version")
 }
