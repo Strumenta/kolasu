@@ -28,7 +28,8 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
 
         fun write(os: OutputStream) {
             val buf = PrintWriter(os)
-            buf.println("""
+            buf.println(
+                """
                     package $packageName
                     
                     import com.strumenta.kolasu.lionweb.LionWebLanguageGeneratorCommand

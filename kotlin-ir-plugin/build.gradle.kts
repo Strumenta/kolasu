@@ -7,7 +7,7 @@ plugins {
     id("maven-publish")
 }
 
-val kotlinVersion = extra["kotlin_version"]
+val kotlinVersion = extra["kotlinVersion"]
 
 dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlinVersion")

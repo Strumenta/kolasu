@@ -3,7 +3,7 @@ plugins {
 }
 
 val antlr_version = extra["antlr_version"]
-val kotlin_version = extra["kotlin_version"]
+val kotlinVersion = extra["kotlinVersion"]
 val gson_version = extra["gson_version"]
 val clikt_version = extra["clikt_version"]
 

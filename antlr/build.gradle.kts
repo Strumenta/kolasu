@@ -3,7 +3,7 @@ plugins {
 }
 
 val antlr_version = extra["antlr_version"]
-val kotlin_version = extra["kotlin_version"]
+val kotlinVersion = extra["kotlinVersion"]
 val isReleaseVersion = !(version as String).endsWith("SNAPSHOT")
 
 dependencies {

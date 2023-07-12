@@ -38,14 +38,14 @@ subprojects {
     this.version = rootProject.version
     this.group = rootProject.group
 
-    val kotlin_version = extra["kotlin_version"]
+    val kotlinVersion = extra["kotlinVersion"]
 
     dependencies {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
-        implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
-        implementation("org.jetbrains.kotlin:kotlin-test:$kotlin_version")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+        implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+        implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
 
-        testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+        testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
     }
 
     java {

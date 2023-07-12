@@ -1,7 +1,15 @@
 package com.strumenta.kolasu.serialization
 
 import com.google.gson.stream.JsonWriter
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.BaseNode
+import com.strumenta.kolasu.model.ExtNode
+import com.strumenta.kolasu.model.Multiplicity
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeOverridingName
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.PropertyDescription
+import com.strumenta.kolasu.model.PropertyType
+import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
@@ -192,24 +200,41 @@ class JsonGenerationTest {
         )
     }
 
-
     @Test
     fun dynamicNode() {
-        val node = DynamicNode("com.strumenta.kolasu.test.Node", listOf(
-            PropertyDescription(
-                "someAttr", false, Multiplicity.SINGULAR, 123, PropertyType.ATTRIBUTE
-            ),
-            PropertyDescription(
-                "someListAttr", false, Multiplicity.MANY, listOf("a", "b"), PropertyType.ATTRIBUTE
-            ),
-            PropertyDescription(
-                "someChild", true, Multiplicity.SINGULAR, BaseNode(456), PropertyType.CONTAINMENT
-            ),
-            PropertyDescription(
-                "someChildren", true, Multiplicity.MANY,
-                listOf(BaseNode(78), BaseNode(90)), PropertyType.CONTAINMENT
-            ),
-        ))
+        val node = DynamicNode(
+            "com.strumenta.kolasu.test.Node",
+            listOf(
+                PropertyDescription(
+                    "someAttr",
+                    false,
+                    Multiplicity.SINGULAR,
+                    123,
+                    PropertyType.ATTRIBUTE
+                ),
+                PropertyDescription(
+                    "someListAttr",
+                    false,
+                    Multiplicity.MANY,
+                    listOf("a", "b"),
+                    PropertyType.ATTRIBUTE
+                ),
+                PropertyDescription(
+                    "someChild",
+                    true,
+                    Multiplicity.SINGULAR,
+                    BaseNode(456),
+                    PropertyType.CONTAINMENT
+                ),
+                PropertyDescription(
+                    "someChildren",
+                    true,
+                    Multiplicity.MANY,
+                    listOf(BaseNode(78), BaseNode(90)),
+                    PropertyType.CONTAINMENT
+                )
+            )
+        )
         val json = JsonGenerator().generateString(node, withIds = node.computeIdsForReferencedNodes())
         assertEquals(
             """
@@ -236,7 +261,7 @@ class JsonGenerationTest {
               ]
             }
             """.trimIndent(),
-            json,
+            json
         )
     }
 }
