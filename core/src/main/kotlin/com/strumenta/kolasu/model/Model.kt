@@ -55,6 +55,10 @@ open class Node() : Origin, Destination, Serializable {
     open val nodeType: String
         get() = this::class.qualifiedName!!
 
+    @Internal
+    open val simpleNodeType: String
+        get() = nodeType.split(".").last()
+
     /**
      * The properties of this AST nodes, including attributes, children, and references.
      */
