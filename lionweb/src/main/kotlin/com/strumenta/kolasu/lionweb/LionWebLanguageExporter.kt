@@ -162,5 +162,4 @@ class LionWebLanguageExporter {
                 it.key.language!!.version == concept.language!!.version
         }?.value
     }
-
 }

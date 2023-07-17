@@ -192,24 +192,26 @@ class JsonGenerationTest {
         )
     }
 
-
     @Test
     fun dynamicNode() {
-        val node = DynamicNode("com.strumenta.kolasu.test.Node", listOf(
-            PropertyDescription(
-                "someAttr", false, Multiplicity.SINGULAR, 123, PropertyType.ATTRIBUTE
-            ),
-            PropertyDescription(
-                "someListAttr", false, Multiplicity.MANY, listOf("a", "b"), PropertyType.ATTRIBUTE
-            ),
-            PropertyDescription(
-                "someChild", true, Multiplicity.SINGULAR, BaseNode(456), PropertyType.CONTAINMENT
-            ),
-            PropertyDescription(
-                "someChildren", true, Multiplicity.MANY,
-                listOf(BaseNode(78), BaseNode(90)), PropertyType.CONTAINMENT
-            ),
-        ))
+        val node = DynamicNode(
+            "com.strumenta.kolasu.test.Node",
+            listOf(
+                PropertyDescription(
+                    "someAttr", false, Multiplicity.SINGULAR, 123, PropertyType.ATTRIBUTE
+                ),
+                PropertyDescription(
+                    "someListAttr", false, Multiplicity.MANY, listOf("a", "b"), PropertyType.ATTRIBUTE
+                ),
+                PropertyDescription(
+                    "someChild", true, Multiplicity.SINGULAR, BaseNode(456), PropertyType.CONTAINMENT
+                ),
+                PropertyDescription(
+                    "someChildren", true, Multiplicity.MANY,
+                    listOf(BaseNode(78), BaseNode(90)), PropertyType.CONTAINMENT
+                ),
+            )
+        )
         val json = JsonGenerator().generateString(node, withIds = node.computeIdsForReferencedNodes())
         assertEquals(
             """
