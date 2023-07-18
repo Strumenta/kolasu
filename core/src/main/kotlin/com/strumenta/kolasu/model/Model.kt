@@ -9,7 +9,6 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
 import kotlin.reflect.cast
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.isSupertypeOf
 import kotlin.reflect.full.memberProperties
 
 interface Origin {
