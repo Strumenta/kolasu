@@ -11,7 +11,6 @@ import io.reactivex.rxjava3.subjects.PublishSubject
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KProperty1
 
 typealias NodeObserver = Observer<in NodeNotification<in Node>>
 
@@ -194,17 +193,22 @@ open class Node() : Serializable {
         return rawValue as ReferenceByName<*>
     }
 
-    fun getAttributeValue(attribute: Attribute): Any? {
-        return nodeProperties.find { it.name == attribute.name }!!.get(this)
+    fun <T : PossiblyNamed>getReference(name: String): ReferenceByName<T> {
+        val rawValue = properties.find { it.name == name }!!.value
+        return rawValue as ReferenceByName<T>
     }
 
-    fun <T : Any?>setAttribute(attributeName: String, value: T) {
+    fun getAttributeValue(attribute: Attribute): Any? {
+        return properties.find { it.name == attribute.name }!!.value
+    }
+
+    fun getAttributeValue(name: String): Any? {
+        return properties.find { it.name == name }!!.value
+    }
+
+    fun <T : Any?>setAttributeValue(attributeName: String, value: T) {
         val prop = nodeProperties.find { it.name == attributeName } as KMutableProperty<T>
         prop.setter.call(this, value)
-    }
-    fun <T : Any?>getAttribute(attributeName: String): T {
-        val prop = nodeProperties.find { it.name == attributeName }!!
-        return prop.call(this) as T
     }
 
     fun <T : Node>getContainment(containmentName: String): List<T> {
@@ -245,10 +249,6 @@ open class Node() : Serializable {
         }
     }
 
-    fun <T : PossiblyNamed>getReference(referenceName: String): ReferenceByName<T> {
-        val prop = nodeProperties.find { it.name == referenceName } as KProperty1<Node, ReferenceByName<T>>
-        return prop.call(this)
-    }
     fun <T : PossiblyNamed>setReferenceReferred(referenceName: String, referred: T) {
         val ref: ReferenceByName<T> = getReference(referenceName)
         ref.referred = referred

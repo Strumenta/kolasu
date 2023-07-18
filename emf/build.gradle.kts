@@ -15,7 +15,7 @@ dependencies {
     api("org.eclipse.emf:org.eclipse.emf.ecore:2.25.0")
     api("org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.16.0")
     api("org.eclipse.emfcloud:emfjson-jackson:2.0.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4.1")
     implementation("com.google.code.gson:gson:$gson_version")
 
     api("com.github.ajalt.clikt:clikt:$clikt_version")
