@@ -13,7 +13,7 @@ import com.strumenta.kolasu.model.isConceptInterface
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.ConceptInterface
 import io.lionweb.lioncore.java.language.DataType
-import io.lionweb.lioncore.java.language.FeaturesContainer
+import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
@@ -23,8 +23,8 @@ import kotlin.reflect.full.createType
 
 class LionWebLanguageExporter {
 
-    private val astToLWConcept = mutableMapOf<KClass<*>, FeaturesContainer<*>>()
-    private val LWConceptToKolasuClass = mutableMapOf<FeaturesContainer<*>, KClass<*>>()
+    private val astToLWConcept = mutableMapOf<KClass<*>, Classifier<*>>()
+    private val LWConceptToKolasuClass = mutableMapOf<Classifier<*>, KClass<*>>()
     private val kLanguageToLWLanguage = mutableMapOf<KolasuLanguage, Language>()
 
     init {
@@ -34,16 +34,16 @@ class LionWebLanguageExporter {
         registerMapping(Named::class, StarLasuLWLanguage.Named)
     }
 
-    private fun registerMapping(kolasuClass: KClass<*>, featuresContainer: FeaturesContainer<*>) {
+    private fun registerMapping(kolasuClass: KClass<*>, featuresContainer: Classifier<*>) {
         astToLWConcept[kolasuClass] = featuresContainer
         LWConceptToKolasuClass[featuresContainer] = kolasuClass
     }
 
-    fun getKolasuClassesToConceptsMapping(): Map<KClass<*>, FeaturesContainer<*>> {
+    fun getKolasuClassesToConceptsMapping(): Map<KClass<*>, Classifier<*>> {
         return astToLWConcept
     }
 
-    fun getConceptsToKolasuClassesMapping(): Map<FeaturesContainer<*>, KClass<*>> {
+    fun getConceptsToKolasuClassesMapping(): Map<Classifier<*>, KClass<*>> {
         return LWConceptToKolasuClass
     }
 
@@ -114,7 +114,7 @@ class LionWebLanguageExporter {
                         ref.key = featuresContainer.key + "_" + ref.name
                         ref.id = featuresContainer.id + "_" + ref.name
                         ref.setOptional(it.optional)
-                        ref.setType(toLWFeaturesContainer(it.type))
+                        ref.setType(toLWClassifier(it.type))
                         featuresContainer.addFeature(ref)
                     }
                     is Containment -> {
@@ -123,7 +123,7 @@ class LionWebLanguageExporter {
                         cont.id = featuresContainer.id + "_" + cont.name
                         cont.setOptional(true)
                         cont.setMultiple(it.multiplicity == Multiplicity.MANY)
-                        cont.setType(toLWFeaturesContainer(it.type))
+                        cont.setType(toLWClassifier(it.type))
                         featuresContainer.addFeature(cont)
                     }
                 }
@@ -143,16 +143,16 @@ class LionWebLanguageExporter {
         }
     }
 
-    private fun toLWFeaturesContainer(kClass: KClass<*>): FeaturesContainer<*> {
+    private fun toLWClassifier(kClass: KClass<*>): Classifier<*> {
         return astToLWConcept[kClass] ?: throw IllegalArgumentException("Unknown KClass $kClass")
     }
 
     fun toConceptInterface(kClass: KClass<*>): ConceptInterface {
-        return toLWFeaturesContainer(kClass) as ConceptInterface
+        return toLWClassifier(kClass) as ConceptInterface
     }
 
     fun toConcept(kClass: KClass<*>): Concept {
-        return toLWFeaturesContainer(kClass) as Concept
+        return toLWClassifier(kClass) as Concept
     }
 
     fun matchingKClass(concept: Concept): KClass<*>? {

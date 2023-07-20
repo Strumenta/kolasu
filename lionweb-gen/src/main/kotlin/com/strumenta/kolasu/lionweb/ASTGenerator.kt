@@ -13,7 +13,7 @@ import com.strumenta.kolasu.model.Node
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.DataType
-import io.lionweb.lioncore.java.language.FeaturesContainer
+import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
@@ -94,7 +94,7 @@ class ASTGenerator(val packageName: String, val language: Language) {
         return setOf(file)
     }
 
-    private fun typeName(featuresContainer: FeaturesContainer<*>): TypeName {
+    private fun typeName(featuresContainer: Classifier<*>): TypeName {
         return when {
             featuresContainer.id == StarLasuLWLanguage.ASTNode.id -> {
                 Node::class.java.asTypeName()
