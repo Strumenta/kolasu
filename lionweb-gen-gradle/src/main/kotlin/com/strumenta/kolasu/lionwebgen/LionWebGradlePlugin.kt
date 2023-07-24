@@ -13,8 +13,8 @@ import java.io.File
 import java.io.FileInputStream
 
 val tasksGroup = "lionweb"
-val genASTClasses = "genASTClasses"
-val genLanguages = "genLanguages"
+val genASTClasses = "generateASTClasses"
+val genLanguages = "generateLanguages"
 val kspPlugin = "com.google.devtools.ksp"
 
 class LionWebGradlePlugin : Plugin<Project> {
@@ -35,6 +35,7 @@ class LionWebGradlePlugin : Plugin<Project> {
     private fun createGenASTClassesTask(project: Project, configuration: LionWebGradleExtension) : Task {
         return project.tasks.create(genASTClasses) {
             it.group = tasksGroup
+            it.description = "Generate Kolasu ASTs from LionWeb languages"
             it.doLast {
                 println("LIonWeb AST Classes generation task - started")
                 println("  languages: ${configuration.languages.get()}")
@@ -66,6 +67,7 @@ class LionWebGradlePlugin : Plugin<Project> {
 
     private fun createGenLanguagesTask(project: Project, configuration: LionWebGradleExtension) : Task {
         return project.tasks.create(genLanguages) { it ->
+            it.description = "Generate LionWeb languages from Kolasu ASTs"
             it.group = tasksGroup
             it.dependsOn("compileKotlin")
             it.doLast {
