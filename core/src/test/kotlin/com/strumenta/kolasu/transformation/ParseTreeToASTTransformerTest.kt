@@ -3,10 +3,12 @@ package com.strumenta.kolasu.transformation
 import com.strumenta.kolasu.mapping.ParseTreeToASTTransformer
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.traversing.walk
+import com.strumenta.kolasu.validation.Issue
 import com.strumenta.simplelang.AntlrEntityLexer
 import com.strumenta.simplelang.AntlrEntityParser
 import com.strumenta.simplelang.AntlrEntityParser.Boolean_typeContext
@@ -301,4 +303,42 @@ class ParseTreeToASTTransformerTest {
         }
         assertASTsAreEqual(expectedAST, actualAST)
     }
+
+    // Ensure that https://github.com/Strumenta/kolasu/issues/241 is fixed
+    @Test
+    fun transformChildFactory() {
+        val ctx = EntCtxFeature("foo", EntCtxStringType())
+        val transformer = EntTransformer()
+        val ast = transformer.transform(ctx)
+        assertASTsAreEqual(EntFeature("foo", EntStringType()), ast!!)
+    }
 }
+
+class EntTransformer(issues: MutableList<Issue> = mutableListOf()) :
+    ParseTreeToASTTransformer(issues, allowGenericNode = false) {
+        init {
+            registerNodeFactory(EntCtxFeature::class) { ctx -> EntFeature(name = ctx.name) }
+                .withChild(EntFeature::type, EntCtxFeature::type,)
+            this.registerNodeFactory(EntCtxStringType::class, EntStringType::class)
+        }
+    }
+
+data class EntCtxFeature(
+    val name: String? = null,
+    var type: EntCtxType? = null
+)
+
+open class EntCtxType
+
+open class EntCtxPrimitiveType : EntCtxType()
+class EntCtxStringType : EntCtxPrimitiveType()
+
+data class EntFeature(
+    override val name: String? = null,
+    var type: EntType? = null
+) : Node(), PossiblyNamed
+
+open class EntType : Node()
+
+open class EntPrimitiveType : EntType()
+class EntStringType : EntPrimitiveType()
