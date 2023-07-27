@@ -3,12 +3,19 @@ package com.strumenta.kolasu.transformation
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
+import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.*
+import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.superclasses
 
 /**
  * A child of an AST node that is automatically populated from a source tree.
@@ -359,7 +366,12 @@ open class ASTTransformer(
         pd: PropertyTypeDescription
     ) {
         val childFactory = childNodeFactory as ChildNodeFactory<Any, Any, Any>
-        val childrenSource = childFactory.get(getSource(node, source)) as List<*>
+        val rawChildrenSource = childFactory.get(getSource(node, source))
+        val childrenSource : List<*> = if (rawChildrenSource !is List<*>) {
+            listOf(rawChildrenSource)
+        } else {
+            rawChildrenSource
+        }
         val child: Any? = if (pd.multiple) {
             childrenSource.map { transformIntoNodes(it, node) }.flatten()
         } else {
