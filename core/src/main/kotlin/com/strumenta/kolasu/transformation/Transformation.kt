@@ -3,7 +3,6 @@ package com.strumenta.kolasu.transformation
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
-import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
@@ -367,7 +366,7 @@ open class ASTTransformer(
     ) {
         val childFactory = childNodeFactory as ChildNodeFactory<Any, Any, Any>
         val rawChildrenSource = childFactory.get(getSource(node, source))
-        val childrenSource : List<*> = if (rawChildrenSource !is List<*>) {
+        val childrenSource: List<*> = if (rawChildrenSource !is List<*>) {
             listOf(rawChildrenSource)
         } else {
             rawChildrenSource

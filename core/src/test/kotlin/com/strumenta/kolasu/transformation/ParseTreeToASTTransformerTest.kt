@@ -316,12 +316,12 @@ class ParseTreeToASTTransformerTest {
 
 class EntTransformer(issues: MutableList<Issue> = mutableListOf()) :
     ParseTreeToASTTransformer(issues, allowGenericNode = false) {
-        init {
-            registerNodeFactory(EntCtxFeature::class) { ctx -> EntFeature(name = ctx.name) }
-                .withChild(EntFeature::type, EntCtxFeature::type,)
-            this.registerNodeFactory(EntCtxStringType::class, EntStringType::class)
-        }
+    init {
+        registerNodeFactory(EntCtxFeature::class) { ctx -> EntFeature(name = ctx.name) }
+            .withChild(EntFeature::type, EntCtxFeature::type,)
+        this.registerNodeFactory(EntCtxStringType::class, EntStringType::class)
     }
+}
 
 data class EntCtxFeature(
     val name: String? = null,
