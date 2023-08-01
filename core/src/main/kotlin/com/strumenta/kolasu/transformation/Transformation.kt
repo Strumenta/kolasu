@@ -21,6 +21,9 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 
 /**
@@ -306,9 +309,6 @@ open class ASTTransformer(
         val nodes: List<Node>
         if (transformer != null) {
             nodes = makeNodes(transformer, source, allowGenericNode = allowGenericNode)
-            if (nodes == null) {
-                return emptyList()
-            }
             if (!transformer.skipChildren && !transformer.childrenSetAtConstruction) {
                 nodes.forEach { node -> setChildren(transformer, source, node) }
             }
@@ -374,16 +374,11 @@ open class ASTTransformer(
         pd: PropertyTypeDescription
     ) {
         val childFactory = childNodeTransformer as ChildNodeTransformer<Any, Any, Any>
-        val childrenSource = childFactory.get(getSource(node, source)) as List<*>
+        val childrenSource = childFactory.get(getSource(node, source))
         val child: Any? = if (pd.multiple) {
-            childrenSource.map { transformIntoNodes(it, node) }.flatten()
+            (childrenSource as List<*>).map { transformIntoNodes(it, node) }.flatten()
         } else {
-            require(childrenSource.size < 2)
-            if (childrenSource.isEmpty()) {
-                transform(null, node)
-            } else {
-                transform(childrenSource.first(), node)
-            }
+            transform(childrenSource, node)
         }
         try {
             childNodeTransformer.set(node, child)
@@ -411,8 +406,8 @@ open class ASTTransformer(
             }
         }
         nodes.forEach { node ->
-            if (node?.origin == null) {
-                node?.withOrigin(asOrigin(source))
+            if (node.origin == null) {
+                node.withOrigin(asOrigin(source))
             }
         }
         return nodes
