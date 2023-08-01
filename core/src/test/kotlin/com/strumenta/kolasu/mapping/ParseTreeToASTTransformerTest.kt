@@ -331,10 +331,14 @@ class ParseTreeToASTTransformerTest {
                 else -> TODO()
             }
         }
-        transformer.unwrap<AntlrScriptParser.Parens_expressionContext, SExpression>(AntlrScriptParser.Parens_expressionContext::expression)
+        transformer.unwrap<AntlrScriptParser.Parens_expressionContext, SExpression>(
+            AntlrScriptParser.Parens_expressionContext::expression
+        )
         transformer.registerTrivialPTtoASTConversion<AntlrScriptParser.Print_statementContext, SPrintStatement>()
         transformer.registerTrivialPTtoASTConversion<AntlrScriptParser.Concat_expressionContext, SConcat>()
-        transformer.registerTrivialPTtoASTConversion<AntlrScriptParser.Feature_access_expressionContext, SFeatureAccess>(
+        transformer.registerTrivialPTtoASTConversion<
+            AntlrScriptParser.Feature_access_expressionContext, SFeatureAccess
+            >(
             AntlrScriptParser.Feature_access_expressionContext::instance to SFeatureAccess::container
         )
         val expectedAST = SScript(
@@ -398,7 +402,8 @@ class ParseTreeToASTTransformerTest {
         assertASTsAreEqual(Ent("foo", listOf(EntFeature("bar", EntStringType()))), ast!!)
         assertASTsAreEqual(
             Ent("foo", listOf(EntFeature(null, null))),
-            transformer.transform(EntCtx("foo", listOf(null, EntCtxFeature(), null)))!!)
+            transformer.transform(EntCtx("foo", listOf(null, EntCtxFeature(), null)))!!
+        )
     }
 }
 
@@ -436,4 +441,3 @@ open class EntType : Node()
 
 open class EntPrimitiveType : EntType()
 class EntStringType : EntPrimitiveType()
-
