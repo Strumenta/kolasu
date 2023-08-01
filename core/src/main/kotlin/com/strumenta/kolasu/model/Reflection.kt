@@ -208,10 +208,10 @@ private fun providesNodes(kTypeProjection: KTypeProjection): Boolean {
 }
 
 fun <N : Any> KProperty1<N, *>.isContainment(): Boolean {
-    if ((this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
-        return providesNodes(this.returnType.arguments[0].type!!.classifier as KClass<out Node>)
+    return if ((this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
+        providesNodes(this.returnType.arguments[0].type!!.classifier as KClass<out Node>)
     } else {
-        return providesNodes(this.returnType.classifier as KClass<out Node>)
+        providesNodes(this.returnType.classifier as KClass<out Node>)
     }
 }
 
