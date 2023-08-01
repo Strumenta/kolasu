@@ -11,6 +11,7 @@ import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
 import java.lang.IllegalStateException
 import java.lang.UnsupportedOperationException
+import java.lang.reflect.InvocationTargetException
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
@@ -95,7 +96,13 @@ class JsonDeserializer {
                     )
                 }
             }
-            instance = primaryConstructor.callBy(args)
+            try {
+                instance = primaryConstructor.callBy(args)
+            } catch (e: InvocationTargetException) {
+                throw RuntimeException(
+                    "Issue instantiating ${clazz.canonicalName} with args ${args.map { "${it.key.name}:${it.key.type} = ${it.value}" }.joinToString(", ")} by using constructor $primaryConstructor", e
+                )
+            }
         } else {
             if (clazz.kotlin.objectInstance != null) {
                 return clazz.kotlin.objectInstance!!
