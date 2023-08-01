@@ -100,7 +100,10 @@ class JsonDeserializer {
                 instance = primaryConstructor.callBy(args)
             } catch (e: InvocationTargetException) {
                 throw RuntimeException(
-                    "Issue instantiating ${clazz.canonicalName} with args ${args.map { "${it.key.name}:${it.key.type} = ${it.value}" }.joinToString(", ")} by using constructor $primaryConstructor", e
+                    "Issue instantiating ${clazz.canonicalName} with args ${args.map {
+                        "${it.key.name}:${it.key.type} = ${it.value}"
+                    }.joinToString(", ")} by using constructor $primaryConstructor",
+                    e
                 )
             }
         } else {
