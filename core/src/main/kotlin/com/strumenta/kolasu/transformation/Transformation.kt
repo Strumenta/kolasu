@@ -299,9 +299,6 @@ open class ASTTransformer(
         val nodes: List<Node>
         if (factory != null) {
             nodes = makeNodes(factory, source, allowGenericNode = allowGenericNode)
-            if (nodes == null) {
-                return emptyList()
-            }
             if (!factory.skipChildren && !factory.childrenSetAtConstruction) {
                 nodes.forEach { node -> setChildren(factory, source, node) }
             }
@@ -365,21 +362,11 @@ open class ASTTransformer(
         pd: PropertyTypeDescription
     ) {
         val childFactory = childNodeFactory as ChildNodeFactory<Any, Any, Any>
-        val rawChildrenSource = childFactory.get(getSource(node, source))
-        val childrenSource: List<*> = if (rawChildrenSource !is List<*>) {
-            listOf(rawChildrenSource)
-        } else {
-            rawChildrenSource
-        }
+        val childrenSource = childFactory.get(getSource(node, source))
         val child: Any? = if (pd.multiple) {
-            childrenSource.map { transformIntoNodes(it, node) }.flatten()
+            (childrenSource as List<*>).map { transformIntoNodes(it, node) }.flatten()
         } else {
-            require(childrenSource.size < 2)
-            if (childrenSource.isEmpty()) {
-                transform(null, node)
-            } else {
-                transform(childrenSource.first(), node)
-            }
+            transform(childrenSource, node)
         }
         try {
             childNodeFactory.set(node, child)
@@ -407,8 +394,8 @@ open class ASTTransformer(
             }
         }
         nodes.forEach { node ->
-            if (node?.origin == null) {
-                node?.withOrigin(asOrigin(source))
+            if (node.origin == null) {
+                node.withOrigin(asOrigin(source))
             }
         }
         return nodes

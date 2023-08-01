@@ -37,7 +37,7 @@ open class ParseTreeToASTTransformer(
                     node.position!!.source = this.source
                 }
             }
-            return if (node == null) emptyList() else listOf(node)
+            return listOf(node)
         }.flatten()
     }
 
