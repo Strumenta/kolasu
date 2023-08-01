@@ -11,11 +11,22 @@ import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.model.invalidRanges
 import com.strumenta.kolasu.testing.assertASTsAreEqual
-import com.strumenta.kolasu.transformation.*
+import com.strumenta.kolasu.transformation.ASTTransformer
+import com.strumenta.kolasu.transformation.GenericNode
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
-import com.strumenta.simplelang.*
-import org.antlr.v4.runtime.*
+import com.strumenta.simplelang.AntlrEntityLexer
+import com.strumenta.simplelang.AntlrEntityParser
+import com.strumenta.simplelang.AntlrScriptLexer
+import com.strumenta.simplelang.AntlrScriptParser
+import com.strumenta.simplelang.SimpleLangLexer
+import com.strumenta.simplelang.SimpleLangParser
+import org.antlr.v4.runtime.ANTLRErrorListener
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.Parser
+import org.antlr.v4.runtime.RecognitionException
+import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
 import org.junit.Test
@@ -45,6 +56,7 @@ sealed class SStatement : Node()
 data class SCreateStatement(val entity: ReferenceByName<EEntity>, val name: String? = null) : SStatement()
 data class SSetStatement(val feature: ReferenceByName<EFeature>, val instance: SExpression, val value: SExpression) :
     SStatement()
+
 data class SPrintStatement(val message: SExpression) : SStatement()
 
 sealed class SExpression : Node()
@@ -159,6 +171,7 @@ class ParseTreeToASTTransformerTest {
             SetStatement(variable = ctx.ID().text, value = ctx.expression().INT_LIT().text.toInt())
         }
     }
+
     class MyErrorListener : ANTLRErrorListener {
         override fun syntaxError(
             p0: Recognizer<*, *>?,
@@ -266,7 +279,7 @@ class ParseTreeToASTTransformerTest {
                     "FOO",
                     mutableListOf(
                         EFeature("A", EStringType()),
-                        EFeature("B", EBooleanType()),
+                        EFeature("B", EBooleanType())
                     )
                 ),
                 EEntity(
@@ -274,7 +287,7 @@ class ParseTreeToASTTransformerTest {
                     mutableListOf(
                         EFeature("C", EEntityRefType(ReferenceByName("FOO")))
                     )
-                ),
+                )
             )
         )
         val actualAST = transformer.transform(
@@ -319,10 +332,12 @@ class ParseTreeToASTTransformerTest {
                     TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         AntlrScriptParser.Div_mult_expressionContext, SDivision>()(pt, t)
                 }
+
                 "*" -> {
                     TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         AntlrScriptParser.Div_mult_expressionContext, SMultiplication>()(pt, t)
                 }
+
                 else -> TODO()
             }
         }
@@ -332,10 +347,12 @@ class ParseTreeToASTTransformerTest {
                     TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         AntlrScriptParser.Sum_sub_expressionContext, SSum>()(pt, t)
                 }
+
                 "-" -> {
                     TrivialFactoryOfParseTreeToASTNodeTransformer.trivialTransformer<
                         AntlrScriptParser.Sum_sub_expressionContext, SSubtraction>()(pt, t)
                 }
+
                 else -> TODO()
             }
         }
@@ -421,7 +438,7 @@ class EntTransformer(issues: MutableList<Issue> = mutableListOf()) :
         registerNodeTransformer(EntCtx::class) { ctx -> Ent(ctx.name) }
             .withChild(Ent::features, EntCtx::features)
         registerNodeTransformer(EntCtxFeature::class) { ctx -> EntFeature(name = ctx.name) }
-            .withChild(EntFeature::type, EntCtxFeature::type,)
+            .withChild(EntFeature::type, EntCtxFeature::type)
         this.registerNodeTransformer(EntCtxStringType::class, EntStringType::class)
     }
 }
