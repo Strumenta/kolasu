@@ -7,6 +7,7 @@ import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
+import kotlin.reflect.cast
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 
@@ -151,7 +152,11 @@ open class Node() : Origin, Destination, Serializable {
     }
 
     fun getChildren(containment: Containment): List<Node> {
-        return when (val rawValue = nodeProperties.find { it.name == containment.name }!!.get(this)) {
+        return getChildren(containment.name)
+    }
+
+    fun getChildren(name: String): List<Node> {
+        return when (val rawValue = properties.find { it.name == name }!!.value) {
             null -> {
                 emptyList()
             }
@@ -167,12 +172,31 @@ open class Node() : Origin, Destination, Serializable {
     }
 
     fun getReference(reference: Reference): ReferenceByName<*> {
-        val rawValue = nodeProperties.find { it.name == reference.name }!!.get(this)
+        return getReference(reference.name)
+    }
+
+    fun getReference(name: String): ReferenceByName<*> {
+        val rawValue = properties.find { it.name == name }!!.value
         return rawValue as ReferenceByName<*>
     }
 
     fun getAttributeValue(attribute: Attribute): Any? {
-        return nodeProperties.find { it.name == attribute.name }!!.get(this)
+        val value = getAttributeValue(attribute.name)
+        if (value == null) {
+            if (!attribute.optional) {
+                throw IllegalStateException("Mandatory attribute ${attribute.name} is null")
+            }
+        } else {
+            val classifier = attribute.type.classifier
+            if (classifier is KClass<*>) {
+                return classifier.cast(value)
+            }
+        }
+        return value
+    }
+
+    fun getAttributeValue(name: String): Any? {
+        return properties.find { it.name == name }!!.value
     }
 }
 
