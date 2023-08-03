@@ -4,7 +4,6 @@ import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.asAttribute
 import com.strumenta.kolasu.model.containedType
-import com.strumenta.kolasu.model.isANode
 import com.strumenta.kolasu.model.isAttribute
 import com.strumenta.kolasu.model.isContainment
 import com.strumenta.kolasu.model.isMarkedAsNodeType

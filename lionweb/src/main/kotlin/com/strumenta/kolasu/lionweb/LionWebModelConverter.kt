@@ -30,26 +30,8 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
-private val com.strumenta.kolasu.model.Node.positionalID: String
-    get() {
-        return if (this.parent == null) {
-            "root"
-        } else {
-            val cp = this.containingProperty()!!
-            val postfix = if (cp.multiple) "${cp.name}_${this.indexInContainingProperty()!!}" else cp.name
-            "${this.parent!!.positionalID}_$postfix"
-        }
-    }
-private val Source?.id: String
-    get() {
-        return if (this == null) {
-            "UNKNOWN_SOURCE"
-        } else if (this is FileSource) {
-            "file_${this.file.path.replace('.', '-').replace('/', '-')}"
-        } else {
-            TODO("Unable to generate ID for Source $this (${this.javaClass.canonicalName})")
-        }
-    }
+typealias KNode = com.strumenta.kolasu.model.Node
+typealias LWNode = Node
 
 /**
  * This class is able to convert between Kolasu and LionWeb models, tracking the mapping.
@@ -57,12 +39,12 @@ private val Source?.id: String
 class LionWebModelConverter {
 
     private val languageExporter = LionWebLanguageConverter()
-    private val kolasuToLWNodesMapping = mutableMapOf<com.strumenta.kolasu.model.Node, Node>()
-    private val lwToKolasuNodesMapping = mutableMapOf<Node, com.strumenta.kolasu.model.Node>()
+    private val nodesMapping = BiMap<KNode, LWNode>()
+    // private val kolasuToLWNodesMapping = mutableMapOf<com.strumenta.kolasu.model.Node, Node>()
+    // private val lwToKolasuNodesMapping = mutableMapOf<Node, com.strumenta.kolasu.model.Node>()
 
-    private fun registerMapping(kNode: com.strumenta.kolasu.model.Node, lwNode: Node) {
-        kolasuToLWNodesMapping[kNode] = lwNode
-        lwToKolasuNodesMapping[lwNode] = kNode
+    private fun registerMapping(kNode: KNode, lwNode: LWNode) {
+        nodesMapping.associate(kNode, lwNode)
     }
 
     fun correspondingLanguage(kolasuLanguage: KolasuLanguage): Language {
@@ -78,17 +60,17 @@ class LionWebModelConverter {
     }
 
     fun export(kolasuTree: com.strumenta.kolasu.model.Node): Node {
-        if (kolasuToLWNodesMapping.containsKey(kolasuTree)) {
-            return kolasuToLWNodesMapping[kolasuTree]!!
+        if (nodesMapping.containsA(kolasuTree)) {
+            return nodesMapping.byA(kolasuTree)!!
         }
-        kolasuTree.walk().forEach {
-            if (!kolasuToLWNodesMapping.containsKey(it)) {
-                val lwNode = DynamicNode(nodeID(it), findConcept(it))
-                registerMapping(it, lwNode)
+        kolasuTree.walk().forEach { kNode ->
+            if (!nodesMapping.containsA(kNode)) {
+                val lwNode = DynamicNode(nodeID(kNode), findConcept(kNode))
+                registerMapping(kNode, lwNode)
             }
         }
         kolasuTree.walk().forEach { kNode ->
-            val lwNode = kolasuToLWNodesMapping[kNode]!!
+            val lwNode = nodesMapping.byA(kNode)!!
             val kFeatures = kNode.javaClass.kotlin.allFeatures()
             lwNode.concept.allFeatures().forEach { feature ->
                 when (feature) {
@@ -104,7 +86,7 @@ class LionWebModelConverter {
                             as com.strumenta.kolasu.language.Containment
                         val kValue = kNode.getChildren(kContainment)
                         kValue.forEach { kChild ->
-                            val lwChild = kolasuToLWNodesMapping[kChild]!!
+                            val lwChild = nodesMapping.byA(kChild)!!
                             lwNode.addChild(feature, lwChild)
                         }
                     }
@@ -113,29 +95,29 @@ class LionWebModelConverter {
                             as com.strumenta.kolasu.language.Reference
                         val kValue = kNode.getReference(kReference)
                         val lwReferred: Node? = if (kValue.referred == null) null
-                        else kolasuToLWNodesMapping[kValue.referred!! as com.strumenta.kolasu.model.Node]!!
+                        else nodesMapping.byA(kValue.referred!! as KNode)!!
                         lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
                     }
                 }
             }
         }
 
-        return kolasuToLWNodesMapping[kolasuTree]!!
+        return nodesMapping.byA(kolasuTree)!!
     }
 
     private class ReferencesPostponer {
 
-        private val values = IdentityHashMap<ReferenceByName<PossiblyNamed>, Node?>()
-        fun registerPostponedReference(referenceByName: ReferenceByName<PossiblyNamed>, referred: Node?) {
+        private val values = IdentityHashMap<ReferenceByName<PossiblyNamed>, LWNode?>()
+        fun registerPostponedReference(referenceByName: ReferenceByName<PossiblyNamed>, referred: LWNode?) {
             values[referenceByName] = referred
         }
 
-        fun populateReferences(lwToKolasuNodesMapping: Map<Node, com.strumenta.kolasu.model.Node>) {
+        fun populateReferences(nodesMapping: BiMap<KNode, LWNode>) {
             values.forEach { entry ->
                 if (entry.value == null) {
                     entry.key.referred = null
                 } else {
-                    entry.key.referred = lwToKolasuNodesMapping[entry.value]!! as PossiblyNamed
+                    entry.key.referred = nodesMapping.byB(entry.value as LWNode)!! as PossiblyNamed
                 }
             }
         }
@@ -204,7 +186,7 @@ class LionWebModelConverter {
                     is Containment -> {
                         val lwChildren = data.getChildren(feature)
                         if (feature.isMultiple) {
-                            val kChildren = lwChildren.map { lwToKolasuNodesMapping[it]!! }
+                            val kChildren = lwChildren.map { nodesMapping.byB(it)!! }
                             params[param] = kChildren
                         } else {
                             // Given we navigate the tree in reverse the child should have been already
@@ -217,7 +199,7 @@ class LionWebModelConverter {
                                 throw IllegalStateException()
                             }
                             val kChild = if (lwChild == null) null else (
-                                lwToKolasuNodesMapping[lwChild]
+                                nodesMapping.byB(lwChild)
                                     ?: throw IllegalStateException(
                                         "Unable to find Kolasu Node corresponding to $lwChild"
                                     )
@@ -245,11 +227,11 @@ class LionWebModelConverter {
             registerMapping(kNode, lwNode)
         }
         lwTree.thisAndAllDescendants().forEach { lwNode ->
-            val kNode: com.strumenta.kolasu.model.Node = lwToKolasuNodesMapping[lwNode]!!
+            val kNode: com.strumenta.kolasu.model.Node = nodesMapping.byB(lwNode)!!
             // TODO populate values not already set at construction time
         }
-        referencesPostponer.populateReferences(lwToKolasuNodesMapping)
-        return lwToKolasuNodesMapping[lwTree]!!
+        referencesPostponer.populateReferences(nodesMapping)
+        return nodesMapping.byB(lwTree)!!
     }
 
     private fun findConcept(kNode: com.strumenta.kolasu.model.Node): Concept {
@@ -266,10 +248,28 @@ class LionWebModelConverter {
             js.conceptResolver.registerLanguage(it)
         }
         js.nodeInstantiator.enableDynamicNodes()
-//        languageExporter.getConceptsToKolasuClassesMapping().forEach { entry ->
-//            val lwFeaturesContainer = entry.key
-//            js.nodeInstantiator.registerCustomUnserializer(lwFeaturesContainer.id, object : NodeInstantiator<>)
-//        }
         return js.unserializeToNodes(json)
     }
 }
+
+private val com.strumenta.kolasu.model.Node.positionalID: String
+    get() {
+        return if (this.parent == null) {
+            "root"
+        } else {
+            val cp = this.containingProperty()!!
+            val postfix = if (cp.multiple) "${cp.name}_${this.indexInContainingProperty()!!}" else cp.name
+            "${this.parent!!.positionalID}_$postfix"
+        }
+    }
+
+private val Source?.id: String
+    get() {
+        return if (this == null) {
+            "UNKNOWN_SOURCE"
+        } else if (this is FileSource) {
+            "file_${this.file.path.replace('.', '-').replace('/', '-')}"
+        } else {
+            TODO("Unable to generate ID for Source $this (${this.javaClass.canonicalName})")
+        }
+    }

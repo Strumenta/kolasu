@@ -20,4 +20,7 @@ class BiMap<A, B> {
 
     fun byA(a: A): B? = _asToBs[a]
     fun byB(b: B): A? = _bsToAs[b]
+
+    fun containsA(a: A): Boolean = _asToBs.containsKey(a)
+    fun containsB(b: B): Boolean = _bsToAs.containsKey(b)
 }

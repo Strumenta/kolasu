@@ -27,7 +27,10 @@ class KolasuLanguageTest {
         val kolasuLanguage = KolasuLanguage("com.strumenta.TestLanguage1")
         assertEquals(emptySet(), kolasuLanguage.astClasses.toSet())
         kolasuLanguage.addClass(Root::class)
-        assertEquals(setOf(Root::class, NodeA::class, NodeB::class, FooMyRelevantInterface::class), kolasuLanguage.astClasses.toSet())
+        assertEquals(
+            setOf(Root::class, NodeA::class, NodeB::class, FooMyRelevantInterface::class),
+            kolasuLanguage.astClasses.toSet()
+        )
     }
 
     @Test

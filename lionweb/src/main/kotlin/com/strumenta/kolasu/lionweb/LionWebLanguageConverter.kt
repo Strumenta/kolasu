@@ -19,7 +19,6 @@ import io.lionweb.lioncore.java.language.Enumeration
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
-import io.lionweb.lioncore.java.serialization.NodeInstantiator.ConceptSpecificNodeInstantiator
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
