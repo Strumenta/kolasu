@@ -94,9 +94,11 @@ class ASTGenerator(val packageName: String, val language: Language) {
             when (element) {
                 is Concept -> {
                     val typeSpec = TypeSpec.classBuilder(element.name!!)
-                    typeSpec.addAnnotation(AnnotationSpec.builder(LionWebAssociation::class.java)
-                        .addMember("key = \"${element.key}\"")
-                        .build())
+                    typeSpec.addAnnotation(
+                        AnnotationSpec.builder(LionWebAssociation::class.java)
+                            .addMember("key = \"${element.key}\"")
+                            .build()
+                    )
                     val fqName = "$packageName.${element.name!!}"
                     if (fqName in existingKotlinClasses) {
                         println("    Skipping ${element.name} as a Kotlin class with that name already exist")
@@ -136,9 +138,11 @@ class ASTGenerator(val packageName: String, val language: Language) {
                 }
                 is Enumeration -> {
                     val typeSpec = TypeSpec.enumBuilder(element.name!!)
-                    typeSpec.addAnnotation(AnnotationSpec.builder(LionWebAssociation::class.java)
-                        .addMember("key = \"${element.key}\"")
-                        .build())
+                    typeSpec.addAnnotation(
+                        AnnotationSpec.builder(LionWebAssociation::class.java)
+                            .addMember("key = \"${element.key}\"")
+                            .build()
+                    )
                     element.literals.forEach {
                         typeSpec.addEnumConstant(it.name!!)
                     }

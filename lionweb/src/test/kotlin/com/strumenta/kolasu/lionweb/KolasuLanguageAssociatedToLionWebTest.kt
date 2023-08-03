@@ -7,7 +7,6 @@ import com.strumenta.kolasu.model.ReferenceByName
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Enumeration
 import io.lionweb.lioncore.java.language.Language
-import io.lionweb.lioncore.java.utils.LanguageValidator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -31,9 +30,11 @@ class KolasuLanguageAssociatedToLionWebTest {
     @Test
     fun enumsAreRecorded() {
         val lwImpExp = LionWebModelImporterAndExporter()
-        val lwLanguage = lwImpExp.recordLanguage(KolasuLanguage("pricing").apply {
-            addClass(LWRoot::class)
-        })
+        val lwLanguage = lwImpExp.recordLanguage(
+            KolasuLanguage("pricing").apply {
+                addClass(LWRoot::class)
+            }
+        )
         assertEquals(4, lwLanguage.elements.size)
         val myEnum = lwLanguage.getElementByName("MyEnum")
         assertTrue { myEnum is Enumeration }
@@ -67,5 +68,4 @@ class KolasuLanguageAssociatedToLionWebTest {
         assertEquals(LWNodeA::class, lie.matchingKClass(lwNodeA))
         assertEquals(LWNodeB::class, lie.matchingKClass(lwNodeB))
     }
-
 }

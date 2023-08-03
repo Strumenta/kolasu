@@ -21,17 +21,14 @@ import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import java.lang.ClassCastException
 import java.lang.IllegalArgumentException
-import java.lang.reflect.Modifier
 import java.util.IdentityHashMap
 import kotlin.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
-import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.full.staticProperties
 
 private val com.strumenta.kolasu.model.Node.positionalID: String
     get() {
@@ -69,7 +66,7 @@ class LionWebModelImporterAndExporter {
         return languageExporter.correspondingLanguage(kolasuLanguage)
     }
 
-    fun recordLanguage(kolasuLanguage: KolasuLanguage) : Language {
+    fun recordLanguage(kolasuLanguage: KolasuLanguage): Language {
         return languageExporter.export(kolasuLanguage)
     }
 
@@ -165,16 +162,19 @@ class LionWebModelImporterAndExporter {
                         val propValue = data.getPropertyValue(feature)
                         if (propValue is DynamicEnumerationValue) {
                             val enumeration = propValue.enumeration
-                            val kClass : KClass<out Enum<*>>? = languageExporter.getEnumerationsToKolasuClassesMapping()[enumeration] as? KClass<out Enum<*>>
+                            val kClass: KClass<out Enum<*>>? = languageExporter
+                                .getEnumerationsToKolasuClassesMapping()[enumeration] as? KClass<out Enum<*>>
                             if (kClass == null) {
                                 throw IllegalStateException("Cannot find Kolasu class for Enumeration $enumeration")
                             }
-                            val entries = kClass.java.methods.find{it.name == "getEntries"}!!.invoke(null) as List<Any>
-                            //val entriesProp = kClass.memberProperties.find { it.name == "entries" }
-                            //val fields = kClass.java.declaredFields.filter { Modifier.isStatic(it.modifiers) }.map { it.get(null) }
+                            val entries = kClass.java.methods.find {
+                                it.name == "getEntries"
+                            }!!.invoke(null) as List<Any>
+                            // val entriesProp = kClass.memberProperties.find { it.name == "entries" }
+                            // val fields = kClass.java.declaredFields.filter { Modifier.isStatic(it.modifiers) }.map { it.get(null) }
                             val nameProp = kClass.memberProperties.find { it.name == "name" }!! as KProperty1<Any, *>
                             val namesToFields = entries.associate { nameProp.invoke(it) as String to it }
-                            //val entries = kClass.staticProperties.first().get()
+                            // val entries = kClass.staticProperties.first().get()
                             val nameToSearch = propValue.serializedValue.split("/").last()
                             params[param] = namesToFields[nameToSearch]!!
                         } else {
@@ -228,7 +228,7 @@ class LionWebModelImporterAndExporter {
         }
         try {
             return constructor.callBy(params) as com.strumenta.kolasu.model.Node
-        } catch (e: ClassCastException){
+        } catch (e: ClassCastException) {
             throw RuntimeException("Issue instantiating using constructor $constructor with params $params", e)
         }
     }

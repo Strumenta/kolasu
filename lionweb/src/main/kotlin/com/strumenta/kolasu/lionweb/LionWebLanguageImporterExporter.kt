@@ -149,7 +149,7 @@ class LionWebLanguageImporterExporter {
             Boolean::class.createType() -> LionCoreBuiltins.getBoolean()
             else -> {
                 val kClass = kType.classifier as KClass<*>
-                val isEnum = kClass.supertypes.any {  it.classifier == Enum::class }
+                val isEnum = kClass.supertypes.any { it.classifier == Enum::class }
                 if (isEnum) {
                     val enumeration = astToLWEnumeration[kClass]
                     if (enumeration == null) {
@@ -190,7 +190,7 @@ class LionWebLanguageImporterExporter {
     fun importLanguages(lwLanguage: Language, kolasuLanguage: KolasuLanguage) {
         this.kLanguageToLWLanguage[kolasuLanguage] = lwLanguage
         kolasuLanguage.astClasses.forEach { astClass ->
-            var classifier : Classifier<*>? = null
+            var classifier: Classifier<*>? = null
             val annotation = astClass.annotations.filterIsInstance(LionWebAssociation::class.java).firstOrNull()
             if (annotation != null) {
                 classifier = lwLanguage.elements.filterIsInstance(Classifier::class.java).find {
@@ -202,7 +202,7 @@ class LionWebLanguageImporterExporter {
             }
         }
         kolasuLanguage.enumClasses.forEach { enumClass ->
-            var enumeration : Enumeration? = null
+            var enumeration: Enumeration? = null
             val annotation = enumClass.annotations.filterIsInstance(LionWebAssociation::class.java).firstOrNull()
             if (annotation != null) {
                 enumeration = lwLanguage.elements.filterIsInstance(Enumeration::class.java).find {
