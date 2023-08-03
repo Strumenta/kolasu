@@ -16,15 +16,22 @@ import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.Node
 import io.lionweb.lioncore.java.model.ReferenceValue
+import io.lionweb.lioncore.java.model.impl.DynamicEnumerationValue
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
+import java.lang.ClassCastException
 import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
+import java.lang.reflect.Modifier
 import java.util.IdentityHashMap
+import kotlin.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
+import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.full.staticProperties
 
 private val com.strumenta.kolasu.model.Node.positionalID: String
     get() {
@@ -49,7 +56,7 @@ private val Source?.id: String
 
 class LionWebModelImporterAndExporter {
 
-    private val languageExporter = LionWebLanguageExporter()
+    private val languageExporter = LionWebLanguageImporterExporter()
     private val kolasuToLWNodesMapping = mutableMapOf<com.strumenta.kolasu.model.Node, Node>()
     private val lwToKolasuNodesMapping = mutableMapOf<Node, com.strumenta.kolasu.model.Node>()
 
@@ -62,8 +69,12 @@ class LionWebModelImporterAndExporter {
         return languageExporter.correspondingLanguage(kolasuLanguage)
     }
 
-    fun recordLanguage(kolasuLanguage: KolasuLanguage) {
-        languageExporter.export(kolasuLanguage)
+    fun recordLanguage(kolasuLanguage: KolasuLanguage) : Language {
+        return languageExporter.export(kolasuLanguage)
+    }
+
+    fun importLanguages(lwLanguage: Language, kolasuLanguage: KolasuLanguage) {
+        this.languageExporter.importLanguages(lwLanguage, kolasuLanguage)
     }
 
     fun export(kolasuTree: com.strumenta.kolasu.model.Node): Node {
@@ -151,7 +162,24 @@ class LionWebModelImporterAndExporter {
             } else {
                 when (feature) {
                     is Property -> {
-                        params[param] = data.getPropertyValue(feature)
+                        val propValue = data.getPropertyValue(feature)
+                        if (propValue is DynamicEnumerationValue) {
+                            val enumeration = propValue.enumeration
+                            val kClass : KClass<out Enum<*>>? = languageExporter.getEnumerationsToKolasuClassesMapping()[enumeration] as? KClass<out Enum<*>>
+                            if (kClass == null) {
+                                throw IllegalStateException("Cannot find Kolasu class for Enumeration $enumeration")
+                            }
+                            val entries = kClass.java.methods.find{it.name == "getEntries"}!!.invoke(null) as List<Any>
+                            //val entriesProp = kClass.memberProperties.find { it.name == "entries" }
+                            //val fields = kClass.java.declaredFields.filter { Modifier.isStatic(it.modifiers) }.map { it.get(null) }
+                            val nameProp = kClass.memberProperties.find { it.name == "name" }!! as KProperty1<Any, *>
+                            val namesToFields = entries.associate { nameProp.invoke(it) as String to it }
+                            //val entries = kClass.staticProperties.first().get()
+                            val nameToSearch = propValue.serializedValue.split("/").last()
+                            params[param] = namesToFields[nameToSearch]!!
+                        } else {
+                            params[param] = propValue
+                        }
                     }
                     is Reference -> {
                         val referenceValues = data.getReferenceValues(feature)
@@ -198,7 +226,11 @@ class LionWebModelImporterAndExporter {
                 }
             }
         }
-        return constructor.callBy(params) as com.strumenta.kolasu.model.Node
+        try {
+            return constructor.callBy(params) as com.strumenta.kolasu.model.Node
+        } catch (e: ClassCastException){
+            throw RuntimeException("Issue instantiating using constructor $constructor with params $params", e)
+        }
     }
 
     fun import(lwTree: Node): com.strumenta.kolasu.model.Node {

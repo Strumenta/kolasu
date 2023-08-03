@@ -22,7 +22,7 @@ data class SimpleNodeA(
 
 data class SimpleNodeB(val value: String) : SimpleDecl()
 
-class LionWebLanguageExporterTest {
+class LionWebLanguageImporterExporterTest {
 
     @Test
     fun exportSimpleLanguage() {
@@ -30,7 +30,7 @@ class LionWebLanguageExporterTest {
             addClass(SimpleRoot::class)
         }
         assertEquals(4, kLanguage.astClasses.size)
-        val lwLanguage = LionWebLanguageExporter().export(kLanguage)
+        val lwLanguage = LionWebLanguageImporterExporter().export(kLanguage)
         assertEquals("1", lwLanguage.version)
         assertEquals(4, lwLanguage.elements.size)
 

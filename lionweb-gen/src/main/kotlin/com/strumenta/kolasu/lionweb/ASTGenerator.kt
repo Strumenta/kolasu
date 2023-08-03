@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.lionweb
 
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -74,6 +75,9 @@ class ASTGenerator(val packageName: String, val language: Language) {
                 var type = typeName(feature.type!!)
                 type =
                     ClassName.bestGuess(ReferenceByName::class.qualifiedName!!).parameterizedBy(type)
+                if (feature.isOptional) {
+                    type = type.copy(nullable = true)
+                }
                 constructor.addParameter(feature.name!!, type)
                 typeSpec.addProperty(
                     PropertySpec.builder(feature.name!!, type)
@@ -90,6 +94,9 @@ class ASTGenerator(val packageName: String, val language: Language) {
             when (element) {
                 is Concept -> {
                     val typeSpec = TypeSpec.classBuilder(element.name!!)
+                    typeSpec.addAnnotation(AnnotationSpec.builder(LionWebAssociation::class.java)
+                        .addMember("key = \"${element.key}\"")
+                        .build())
                     val fqName = "$packageName.${element.name!!}"
                     if (fqName in existingKotlinClasses) {
                         println("    Skipping ${element.name} as a Kotlin class with that name already exist")
@@ -129,6 +136,9 @@ class ASTGenerator(val packageName: String, val language: Language) {
                 }
                 is Enumeration -> {
                     val typeSpec = TypeSpec.enumBuilder(element.name!!)
+                    typeSpec.addAnnotation(AnnotationSpec.builder(LionWebAssociation::class.java)
+                        .addMember("key = \"${element.key}\"")
+                        .build())
                     element.literals.forEach {
                         typeSpec.addEnumConstant(it.name!!)
                     }

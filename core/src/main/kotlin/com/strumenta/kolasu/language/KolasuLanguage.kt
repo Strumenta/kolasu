@@ -14,9 +14,14 @@ import kotlin.reflect.KClass
  */
 class KolasuLanguage(val qualifiedName: String) {
     val astClasses: MutableList<KClass<out Node>> = mutableListOf()
+    val enumClasses: MutableList<KClass<out Enum<*>>> = mutableListOf()
 
     val simpleName: String
         get() = qualifiedName.split(".").last()
+
+    fun addEnumClass(kClass: KClass<out Enum<*>>) {
+        enumClasses.add(kClass)
+    }
 
     fun <N : Node> addClass(kClass: KClass<N>): Boolean {
         if (!astClasses.contains(kClass) && astClasses.add(kClass)) {
