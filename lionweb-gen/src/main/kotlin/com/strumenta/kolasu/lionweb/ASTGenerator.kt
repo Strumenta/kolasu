@@ -12,17 +12,16 @@ import com.squareup.kotlinpoet.asTypeName
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
+import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.DataType
-import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Enumeration
 import io.lionweb.lioncore.java.language.Feature
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
-import io.lionweb.lioncore.java.self.LionCore
 import org.jetbrains.kotlin.konan.file.File
 
 data class KotlinFile(val path: String, val code: String)
@@ -32,8 +31,13 @@ data class KotlinFile(val path: String, val code: String)
  */
 class ASTGenerator(val packageName: String, val language: Language) {
 
-    private fun processFeature(feature: Feature<*>, constructor: FunSpec.Builder,
-                               typeSpec: TypeSpec.Builder, inherited: Boolean, sealed: Boolean) {
+    private fun processFeature(
+        feature: Feature<*>,
+        constructor: FunSpec.Builder,
+        typeSpec: TypeSpec.Builder,
+        inherited: Boolean,
+        sealed: Boolean
+    ) {
         val modifiers = mutableListOf<KModifier>()
         if (inherited) {
             modifiers.add(KModifier.OVERRIDE)
@@ -103,8 +107,8 @@ class ASTGenerator(val packageName: String, val language: Language) {
                             throw IllegalStateException()
                         } else {
                             typeSpec.superclass(typeName(element.extendedConcept!!))
-                            element.extendedConcept.allFeatures().forEach {
-                                typeSpec.addSuperclassConstructorParameter(it.name)
+                            (element.extendedConcept as Concept).allFeatures().forEach {
+                                typeSpec.addSuperclassConstructorParameter(it.name!!)
                             }
                         }
                         element.implemented.forEach {
@@ -126,14 +130,15 @@ class ASTGenerator(val packageName: String, val language: Language) {
                 is Enumeration -> {
                     val typeSpec = TypeSpec.enumBuilder(element.name!!)
                     element.literals.forEach {
-                        typeSpec.addEnumConstant(it.name)
+                        typeSpec.addEnumConstant(it.name!!)
                     }
                     fileSpecBuilder.addType(typeSpec.build())
                 }
                 else -> TODO("element is $element")
             }
         }
-        val path = if (packageName.isNullOrEmpty()) "AST.kt" else packageName.split(".").joinToString(File.separator) + File.separator + "AST.kt"
+        val path = if (packageName.isNullOrEmpty()) "AST.kt" else packageName.split(".")
+            .joinToString(File.separator) + File.separator + "AST.kt"
         val file = KotlinFile(path = path, fileSpecBuilder.build().toString())
         return setOf(file)
     }

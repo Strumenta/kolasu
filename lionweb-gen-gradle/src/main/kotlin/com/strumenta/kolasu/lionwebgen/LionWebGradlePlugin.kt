@@ -155,7 +155,7 @@ class LionWebGradlePlugin : Plugin<Project> {
         project.dependencies.add("implementation", "com.github.ajalt.clikt:clikt:3.5.0")
 
         // We need to use this one to avoid an issue with Gson
-        project.dependencies.add("implementation", "io.lionweb.lioncore-java:lioncore-java-core-fat:${project.lionwebVersion}")
+        project.dependencies.add("implementation", "io.lionweb.lioncore-java:lioncore-java-core:${project.lionwebVersion}")
     }
 
 }

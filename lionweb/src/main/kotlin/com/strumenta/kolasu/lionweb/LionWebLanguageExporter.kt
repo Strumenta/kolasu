@@ -10,10 +10,10 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.features
 import com.strumenta.kolasu.model.isConcept
 import com.strumenta.kolasu.model.isConceptInterface
+import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.ConceptInterface
 import io.lionweb.lioncore.java.language.DataType
-import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property

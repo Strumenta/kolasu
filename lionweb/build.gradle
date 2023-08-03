@@ -20,7 +20,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-    api("io.lionweb.lioncore-java:lioncore-java-core-fat:$lionwebVersion")
+    api("io.lionweb.lioncore-java:lioncore-java-core:$lionwebVersion")
     api(project(":core"))
 }
 
