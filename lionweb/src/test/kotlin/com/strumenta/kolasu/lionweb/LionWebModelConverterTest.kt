@@ -9,7 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
-class LionWebModelImporterAndExporterTest {
+class LionWebModelConverterTest {
 
     val serialized = """{
   "serializationFormatVersion": "1",
@@ -207,7 +207,7 @@ class LionWebModelImporterAndExporterTest {
         )
         ast.assignParents()
 
-        val exporter = LionWebModelImporterAndExporter()
+        val exporter = LionWebModelConverter()
         exporter.recordLanguage(kLanguage)
         val lwAST = exporter.export(ast)
 
@@ -247,7 +247,7 @@ class LionWebModelImporterAndExporterTest {
 
     @Test
     fun importSimpleModel() {
-        val importer = LionWebModelImporterAndExporter()
+        val importer = LionWebModelConverter()
         val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
             addClass(SimpleRoot::class)
         }

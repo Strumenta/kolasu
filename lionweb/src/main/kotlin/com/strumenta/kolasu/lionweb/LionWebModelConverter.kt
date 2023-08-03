@@ -51,9 +51,12 @@ private val Source?.id: String
         }
     }
 
-class LionWebModelImporterAndExporter {
+/**
+ * This class is able to convert between Kolasu and LionWeb models, tracking the mapping.
+ */
+class LionWebModelConverter {
 
-    private val languageExporter = LionWebLanguageImporterExporter()
+    private val languageExporter = LionWebLanguageConverter()
     private val kolasuToLWNodesMapping = mutableMapOf<com.strumenta.kolasu.model.Node, Node>()
     private val lwToKolasuNodesMapping = mutableMapOf<Node, com.strumenta.kolasu.model.Node>()
 

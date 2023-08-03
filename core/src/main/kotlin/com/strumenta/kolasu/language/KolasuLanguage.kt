@@ -1,14 +1,19 @@
 package com.strumenta.kolasu.language
 
+import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.asAttribute
 import com.strumenta.kolasu.model.containedType
+import com.strumenta.kolasu.model.isANode
 import com.strumenta.kolasu.model.isAttribute
 import com.strumenta.kolasu.model.isContainment
+import com.strumenta.kolasu.model.isMarkedAsNodeType
 import com.strumenta.kolasu.model.isReference
 import com.strumenta.kolasu.model.nodeProperties
 import com.strumenta.kolasu.model.referredType
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 
 /**
@@ -16,11 +21,11 @@ import kotlin.reflect.full.superclasses
  * We create this Class to represent that collection of AST classes.
  */
 class KolasuLanguage(val qualifiedName: String) {
-    val astClasses: List<KClass<out Node>>
+    val astClasses: List<KClass<*>>
         get() = _astClasses
     val enumClasses: List<KClass<out Enum<*>>>
         get() = _enumClasses
-    private val _astClasses: MutableList<KClass<out Node>> = mutableListOf()
+    private val _astClasses: MutableList<KClass<*>> = mutableListOf()
     private val _enumClasses: MutableList<KClass<out Enum<*>>> = mutableListOf()
 
     val simpleName: String
@@ -30,8 +35,41 @@ class KolasuLanguage(val qualifiedName: String) {
         _enumClasses.add(kClass)
     }
 
+    fun addInterfaceClass(kClass: KClass<*>): Boolean {
+        if (!_astClasses.contains(kClass) && _astClasses.add(kClass)) {
+            kClass.supertypes.forEach { superType -> processSuperType(superType) }
+            return true
+        } else {
+            return false
+        }
+    }
+
+    private fun processSuperType(superType: KType) {
+        val kClass = superType.classifier as? KClass<*>
+        when (kClass) {
+            null -> Unit
+            Node::class -> Unit
+            Named::class -> Unit
+            Any::class -> Unit
+            else -> {
+                if (kClass.java.isInterface) {
+                    if (kClass.isMarkedAsNodeType()) {
+                        addInterfaceClass(kClass)
+                    }
+                } else {
+                    if (kClass.isSubclassOf(Node::class)) {
+                        addClass(kClass as KClass<out Node>)
+                    }
+                }
+            }
+        }
+    }
+
     fun <N : Node> addClass(kClass: KClass<N>): Boolean {
         if (!_astClasses.contains(kClass) && _astClasses.add(kClass)) {
+            kClass.supertypes.forEach { superType ->
+                processSuperType(superType)
+            }
             if (kClass.isSealed) {
                 kClass.sealedSubclasses.forEach {
                     addClass(it)
@@ -55,6 +93,6 @@ class KolasuLanguage(val qualifiedName: String) {
         }
     }
 
-    fun findASTClass(name: String): KClass<out Node>? = astClasses.find { it.simpleName == name }
+    fun findASTClass(name: String): KClass<*>? = astClasses.find { it.simpleName == name }
     fun findEnumClass(name: String): KClass<out Enum<*>>? = enumClasses.find { it.simpleName == name }
 }

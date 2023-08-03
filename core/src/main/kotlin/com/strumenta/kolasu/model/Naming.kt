@@ -15,6 +15,7 @@ interface PossiblyNamed {
 /**
  * An entity which has a name.
  */
+@NodeType
 interface Named : PossiblyNamed {
     /**
      * The mandatory name of the entity.

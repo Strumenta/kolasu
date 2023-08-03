@@ -3,11 +3,13 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeType
 import com.strumenta.kolasu.model.ReferenceByName
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.utils.LanguageValidator
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 
 data class SimpleRoot(val id: Int, val childrez: MutableList<SimpleDecl>) : Node()
@@ -18,26 +20,33 @@ data class SimpleNodeA(
     override val name: String,
     val ref: ReferenceByName<SimpleNodeA>,
     val child: SimpleNodeB?
-) : Named, SimpleDecl()
+) : Named, SimpleDecl(), MyRelevantInterface, MyIrrelevantInterface
+
+interface MyIrrelevantInterface
+
+@NodeType
+interface MyRelevantInterface
 
 data class SimpleNodeB(val value: String) : SimpleDecl()
 
-class LionWebLanguageImporterExporterTest {
+class LionWebLanguageConverterTest {
 
     @Test
     fun exportSimpleLanguage() {
         val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
             addClass(SimpleRoot::class)
         }
-        assertEquals(4, kLanguage.astClasses.size)
-        val lwLanguage = LionWebLanguageImporterExporter().export(kLanguage)
+        assertEquals(5, kLanguage.astClasses.size)
+        val lwLanguage = LionWebLanguageConverter().export(kLanguage)
         assertEquals("1", lwLanguage.version)
-        assertEquals(4, lwLanguage.elements.size)
+        assertEquals(5, lwLanguage.elements.size)
 
         val simpleRoot = lwLanguage.getConceptByName("SimpleRoot")!!
         val simpleDecl = lwLanguage.getConceptByName("SimpleDecl")!!
         val simpleNodeA = lwLanguage.getConceptByName("SimpleNodeA")!!
         val simpleNodeB = lwLanguage.getConceptByName("SimpleNodeB")!!
+        val myRelevantInterface = lwLanguage.getConceptInterfaceByName("MyRelevantInterface")!!
+        assertNull(lwLanguage.getConceptInterfaceByName("MyIrrelevantInterface"))
 
         assertEquals("SimpleRoot", simpleRoot.name)
         assertSame(lwLanguage, simpleRoot.language)
@@ -67,7 +76,7 @@ class LionWebLanguageImporterExporterTest {
         assertEquals("SimpleNodeA", simpleNodeA.name)
         assertSame(lwLanguage, simpleNodeA.language)
         assertEquals(simpleDecl, simpleNodeA.extendedConcept)
-        assertEquals(listOf(StarLasuLWLanguage.Named), simpleNodeA.implemented)
+        assertEquals(listOf(StarLasuLWLanguage.Named, myRelevantInterface), simpleNodeA.implemented)
         assertEquals(false, simpleNodeA.isAbstract)
         assertEquals(2, simpleNodeA.features.size)
         assertEquals(3, simpleNodeA.allFeatures().size)

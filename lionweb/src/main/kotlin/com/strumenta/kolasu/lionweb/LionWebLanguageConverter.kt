@@ -10,6 +10,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.features
 import com.strumenta.kolasu.model.isConcept
 import com.strumenta.kolasu.model.isConceptInterface
+import com.strumenta.kolasu.model.isMarkedAsNodeType
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.ConceptInterface
@@ -18,48 +19,44 @@ import io.lionweb.lioncore.java.language.Enumeration
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
+import io.lionweb.lioncore.java.serialization.NodeInstantiator.ConceptSpecificNodeInstantiator
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 
-class LionWebLanguageImporterExporter {
-
-    private val astToLWConcept = mutableMapOf<KClass<*>, Classifier<*>>()
-    private val astToLWEnumeration = mutableMapOf<KClass<*>, Enumeration>()
-    private val LWConceptToKolasuClass = mutableMapOf<Classifier<*>, KClass<*>>()
-    private val LWEnumerationToKolasuClass = mutableMapOf<Enumeration, KClass<*>>()
-    private val kLanguageToLWLanguage = mutableMapOf<KolasuLanguage, Language>()
+/**
+ * This class is able to convert between Kolasu and LionWeb languages, tracking the mapping.
+ */
+class LionWebLanguageConverter {
+    private val astClassesAndClassifiers = BiMap<KClass<*>, Classifier<*>>()
+    private val classesAndEnumerations = BiMap<KClass<out Enum<*>>, Enumeration>()
+    private val languages = BiMap<KolasuLanguage, Language>()
 
     init {
-        val starLasuKLanguage = KolasuLanguage("com.strumenta.starlasu")
-        kLanguageToLWLanguage[starLasuKLanguage] = StarLasuLWLanguage
+        val starLasuKLanguage = KolasuLanguage(StarLasuLWLanguage.name)
+        languages.associate(starLasuKLanguage, StarLasuLWLanguage)
         registerMapping(Node::class, StarLasuLWLanguage.ASTNode)
         registerMapping(Named::class, StarLasuLWLanguage.Named)
     }
 
-    private fun registerMapping(kolasuClass: KClass<*>, featuresContainer: Classifier<*>) {
-        astToLWConcept[kolasuClass] = featuresContainer
-        LWConceptToKolasuClass[featuresContainer] = kolasuClass
-    }
-
     fun getKolasuClassesToConceptsMapping(): Map<KClass<*>, Classifier<*>> {
-        return astToLWConcept
+        return astClassesAndClassifiers.asToBsMap
     }
 
     fun getConceptsToKolasuClassesMapping(): Map<Classifier<*>, KClass<*>> {
-        return LWConceptToKolasuClass
+        return astClassesAndClassifiers.bsToAsMap
     }
 
     fun getEnumerationsToKolasuClassesMapping(): Map<Enumeration, KClass<*>> {
-        return LWEnumerationToKolasuClass
+        return classesAndEnumerations.bsToAsMap
     }
 
     fun knownLWLanguages(): Set<Language> {
-        return kLanguageToLWLanguage.values.toSet()
+        return languages.bs
     }
 
     fun correspondingLanguage(kolasuLanguage: KolasuLanguage): Language {
-        return kLanguageToLWLanguage[kolasuLanguage]
+        return languages.byA(kolasuLanguage)
             ?: throw java.lang.IllegalArgumentException("Unknown Kolasu Language $kolasuLanguage")
     }
 
@@ -89,21 +86,26 @@ class LionWebLanguageImporterExporter {
 
         // Then we populate them, so that self-references can be described
         kolasuLanguage.astClasses.forEach { astClass ->
-            val featuresContainer = astToLWConcept[astClass]!!
+            val featuresContainer = astClassesAndClassifiers.byA(astClass)
 
             if (astClass.java.isInterface) {
-                TODO()
+                val conceptInterface = featuresContainer as ConceptInterface
+                val superInterfaces = astClass.supertypes.map { it.classifier as KClass<*> }
+                    .filter { it.java.isInterface }
+                superInterfaces.filter { it.isMarkedAsNodeType() }.forEach {
+                    conceptInterface.addExtendedInterface(toConceptInterface(it))
+                }
             } else {
                 val concept = featuresContainer as Concept
                 val superClasses = astClass.supertypes.map { it.classifier as KClass<*> }
                     .filter { !it.java.isInterface }
                 if (superClasses.size == 1) {
-                    concept.extendedConcept = astToLWConcept[superClasses.first()] as Concept
+                    concept.extendedConcept = astClassesAndClassifiers.byA(superClasses.first()) as Concept
                 } else {
                     throw IllegalStateException()
                 }
                 val interfaces = astClass.supertypes.map { it.classifier as KClass<*> }.filter { it.java.isInterface }
-                interfaces.forEach {
+                interfaces.filter { it.isMarkedAsNodeType() }.forEach {
                     concept.addImplementedInterface(toConceptInterface(it))
                 }
             }
@@ -137,7 +139,7 @@ class LionWebLanguageImporterExporter {
                 }
             }
         }
-        kLanguageToLWLanguage[kolasuLanguage] = lionwebLanguage
+        languages.associate(kolasuLanguage, lionwebLanguage)
         return lionwebLanguage
     }
 
@@ -151,11 +153,11 @@ class LionWebLanguageImporterExporter {
                 val kClass = kType.classifier as KClass<*>
                 val isEnum = kClass.supertypes.any { it.classifier == Enum::class }
                 if (isEnum) {
-                    val enumeration = astToLWEnumeration[kClass]
+                    val enumeration = classesAndEnumerations.byA(kClass as KClass<out Enum<*>>)
                     if (enumeration == null) {
                         val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
                         lionwebLanguage.addElement(newEnumeration)
-                        astToLWEnumeration[kClass] = newEnumeration
+                        classesAndEnumerations.associate(kClass, newEnumeration)
                         return newEnumeration
                     } else {
                         return enumeration
@@ -167,10 +169,6 @@ class LionWebLanguageImporterExporter {
         }
     }
 
-    private fun toLWClassifier(kClass: KClass<*>): Classifier<*> {
-        return astToLWConcept[kClass] ?: throw IllegalArgumentException("Unknown KClass $kClass")
-    }
-
     fun toConceptInterface(kClass: KClass<*>): ConceptInterface {
         return toLWClassifier(kClass) as ConceptInterface
     }
@@ -180,7 +178,7 @@ class LionWebLanguageImporterExporter {
     }
 
     fun matchingKClass(concept: Concept): KClass<*>? {
-        return this.LWConceptToKolasuClass.entries.find {
+        return this.astClassesAndClassifiers.bsToAsMap.entries.find {
             it.key.key == concept.key &&
                 it.key.language!!.id == concept.language!!.id &&
                 it.key.language!!.version == concept.language!!.version
@@ -188,7 +186,7 @@ class LionWebLanguageImporterExporter {
     }
 
     fun importLanguages(lwLanguage: Language, kolasuLanguage: KolasuLanguage) {
-        this.kLanguageToLWLanguage[kolasuLanguage] = lwLanguage
+        this.languages.associate(kolasuLanguage, lwLanguage)
         kolasuLanguage.astClasses.forEach { astClass ->
             var classifier: Classifier<*>? = null
             val annotation = astClass.annotations.filterIsInstance(LionWebAssociation::class.java).firstOrNull()
@@ -198,7 +196,7 @@ class LionWebLanguageImporterExporter {
                 }
             }
             if (classifier != null) {
-                LWConceptToKolasuClass[classifier] = astClass
+                registerMapping(astClass, classifier)
             }
         }
         kolasuLanguage.enumClasses.forEach { enumClass ->
@@ -210,8 +208,16 @@ class LionWebLanguageImporterExporter {
                 }
             }
             if (enumeration != null) {
-                LWEnumerationToKolasuClass[enumeration] = enumClass
+                classesAndEnumerations.associate(enumClass, enumeration)
             }
         }
+    }
+
+    private fun registerMapping(kolasuClass: KClass<*>, featuresContainer: Classifier<*>) {
+        astClassesAndClassifiers.associate(kolasuClass, featuresContainer)
+    }
+
+    private fun toLWClassifier(kClass: KClass<*>): Classifier<*> {
+        return astClassesAndClassifiers.byA(kClass) ?: throw IllegalArgumentException("Unknown KClass $kClass")
     }
 }

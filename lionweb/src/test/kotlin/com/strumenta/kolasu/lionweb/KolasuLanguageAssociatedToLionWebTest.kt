@@ -29,7 +29,7 @@ class KolasuLanguageAssociatedToLionWebTest {
 
     @Test
     fun enumsAreRecorded() {
-        val lwImpExp = LionWebModelImporterAndExporter()
+        val lwImpExp = LionWebModelConverter()
         val lwLanguage = lwImpExp.recordLanguage(
             KolasuLanguage("pricing").apply {
                 addClass(LWRoot::class)
@@ -62,7 +62,7 @@ class KolasuLanguageAssociatedToLionWebTest {
         val kolasuLanguage = KolasuLanguage("LangA").apply {
             addClass(LWRoot::class)
         }
-        val lie = LionWebLanguageImporterExporter()
+        val lie = LionWebLanguageConverter()
         lie.importLanguages(lwLang, kolasuLanguage)
         assertEquals(LWRoot::class, lie.matchingKClass(lwRoot))
         assertEquals(LWNodeA::class, lie.matchingKClass(lwNodeA))
