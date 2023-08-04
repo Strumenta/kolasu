@@ -5,6 +5,7 @@ import java.io.Serializable
 /**
  * An entity that can have a name
  */
+@NodeType
 interface PossiblyNamed {
     /**
      * The optional name of the entity.
