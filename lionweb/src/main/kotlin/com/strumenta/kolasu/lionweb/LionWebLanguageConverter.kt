@@ -16,15 +16,11 @@ import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.ConceptInterface
 import io.lionweb.lioncore.java.language.DataType
 import io.lionweb.lioncore.java.language.Enumeration
-import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
-
-typealias LWLanguage = Language
-typealias EnumKClass = KClass<out Enum<*>>
 
 /**
  * This class is able to convert between Kolasu and LionWeb languages, tracking the mapping.

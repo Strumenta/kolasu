@@ -30,7 +30,7 @@ class KolasuLanguageAssociatedToLionWebTest {
     @Test
     fun enumsAreRecorded() {
         val lwImpExp = LionWebModelConverter()
-        val lwLanguage = lwImpExp.recordLanguage(
+        val lwLanguage = lwImpExp.exportLanguageToLionWeb(
             KolasuLanguage("pricing").apply {
                 addClass(LWRoot::class)
             }

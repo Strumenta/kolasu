@@ -30,43 +30,33 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
-typealias KNode = com.strumenta.kolasu.model.Node
-typealias LWNode = Node
-
 /**
  * This class is able to convert between Kolasu and LionWeb models, tracking the mapping.
  */
 class LionWebModelConverter {
-
-    private val languageExporter = LionWebLanguageConverter()
+    private val languageConverter = LionWebLanguageConverter()
     private val nodesMapping = BiMap<KNode, LWNode>()
-    // private val kolasuToLWNodesMapping = mutableMapOf<com.strumenta.kolasu.model.Node, Node>()
-    // private val lwToKolasuNodesMapping = mutableMapOf<Node, com.strumenta.kolasu.model.Node>()
-
-    private fun registerMapping(kNode: KNode, lwNode: LWNode) {
-        nodesMapping.associate(kNode, lwNode)
-    }
 
     fun correspondingLanguage(kolasuLanguage: KolasuLanguage): Language {
-        return languageExporter.correspondingLanguage(kolasuLanguage)
+        return languageConverter.correspondingLanguage(kolasuLanguage)
     }
 
-    fun recordLanguage(kolasuLanguage: KolasuLanguage): Language {
-        return languageExporter.exportToLionWeb(kolasuLanguage)
+    fun exportLanguageToLionWeb(kolasuLanguage: KolasuLanguage): Language {
+        return languageConverter.exportToLionWeb(kolasuLanguage)
     }
 
-    fun importLanguages(lwLanguage: Language, kolasuLanguage: KolasuLanguage) {
-        this.languageExporter.associateLanguages(lwLanguage, kolasuLanguage)
+    fun associateLanguages(lwLanguage: Language, kolasuLanguage: KolasuLanguage) {
+        this.languageConverter.associateLanguages(lwLanguage, kolasuLanguage)
     }
 
-    fun export(kolasuTree: com.strumenta.kolasu.model.Node): Node {
+    fun exportModelToLionWeb(kolasuTree: KNode): LWNode {
         if (nodesMapping.containsA(kolasuTree)) {
             return nodesMapping.byA(kolasuTree)!!
         }
         kolasuTree.walk().forEach { kNode ->
             if (!nodesMapping.containsA(kNode)) {
                 val lwNode = DynamicNode(nodeID(kNode), findConcept(kNode))
-                registerMapping(kNode, lwNode)
+                associateNodes(kNode, lwNode)
             }
         }
         kolasuTree.walk().forEach { kNode ->
@@ -105,9 +95,42 @@ class LionWebModelConverter {
         return nodesMapping.byA(kolasuTree)!!
     }
 
-    private class ReferencesPostponer {
+    fun importModelFromLionWeb(lwTree: LWNode): KNode {
+        val referencesPostponer = ReferencesPostponer()
+        lwTree.thisAndAllDescendants().reversed().forEach { lwNode ->
+            val kClass = languageConverter.correspondingKolasuClass(lwNode.concept)
+                ?: throw RuntimeException("We do not have StarLasu AST class for LIonWeb Concept ${lwNode.concept}")
+            val kNode: com.strumenta.kolasu.model.Node = instantiate(kClass, lwNode, referencesPostponer)
+            associateNodes(kNode, lwNode)
+        }
+        lwTree.thisAndAllDescendants().forEach { lwNode ->
+            val kNode: com.strumenta.kolasu.model.Node = nodesMapping.byB(lwNode)!!
+            // TODO populate values not already set at construction time
+        }
+        referencesPostponer.populateReferences(nodesMapping)
+        return nodesMapping.byB(lwTree)!!
+    }
 
+    /**
+     * Unserialize nodes, taking into accaount the known languages.
+     */
+    fun unserializeToNodes(json: String, useDynamicNodesIfNeeded: Boolean = true): List<LWNode> {
+        val js = JsonSerialization.getStandardSerialization()
+        languageConverter.knownLWLanguages().forEach {
+            js.conceptResolver.registerLanguage(it)
+        }
+        if (useDynamicNodesIfNeeded) {
+            js.enableDynamicNodes()
+        }
+        return js.unserializeToNodes(json)
+    }
+
+    /**
+     * Track reference values, so that we can populate them once the nodes are instantiated.
+     */
+    private class ReferencesPostponer {
         private val values = IdentityHashMap<ReferenceByName<PossiblyNamed>, LWNode?>()
+
         fun registerPostponedReference(referenceByName: ReferenceByName<PossiblyNamed>, referred: LWNode?) {
             values[referenceByName] = referred
         }
@@ -147,7 +170,7 @@ class LionWebModelConverter {
                         val propValue = data.getPropertyValue(feature)
                         if (propValue is DynamicEnumerationValue) {
                             val enumeration = propValue.enumeration
-                            val kClass: KClass<out Enum<*>>? = languageExporter
+                            val kClass: KClass<out Enum<*>>? = languageConverter
                                 .getEnumerationsToKolasuClassesMapping()[enumeration] as? KClass<out Enum<*>>
                             if (kClass == null) {
                                 throw IllegalStateException("Cannot find Kolasu class for Enumeration $enumeration")
@@ -218,41 +241,20 @@ class LionWebModelConverter {
         }
     }
 
-    fun import(lwTree: Node): com.strumenta.kolasu.model.Node {
-        val referencesPostponer = ReferencesPostponer()
-        lwTree.thisAndAllDescendants().reversed().forEach { lwNode ->
-            val kClass = languageExporter.correspondingKolasuClass(lwNode.concept)
-                ?: throw RuntimeException("We do not have StarLasu AST class for LIonWeb Concept ${lwNode.concept}")
-            val kNode: com.strumenta.kolasu.model.Node = instantiate(kClass, lwNode, referencesPostponer)
-            registerMapping(kNode, lwNode)
-        }
-        lwTree.thisAndAllDescendants().forEach { lwNode ->
-            val kNode: com.strumenta.kolasu.model.Node = nodesMapping.byB(lwNode)!!
-            // TODO populate values not already set at construction time
-        }
-        referencesPostponer.populateReferences(nodesMapping)
-        return nodesMapping.byB(lwTree)!!
-    }
-
     private fun findConcept(kNode: com.strumenta.kolasu.model.Node): Concept {
-        return languageExporter.correspondingConcept(kNode.javaClass.kotlin)
+        return languageConverter.correspondingConcept(kNode.javaClass.kotlin)
     }
 
     private fun nodeID(kNode: com.strumenta.kolasu.model.Node): String {
         return "${kNode.source.id}_${kNode.positionalID}"
     }
 
-    fun unserializeToNodes(json: String): List<Node> {
-        val js = JsonSerialization.getStandardSerialization()
-        languageExporter.knownLWLanguages().forEach {
-            js.conceptResolver.registerLanguage(it)
-        }
-        js.nodeInstantiator.enableDynamicNodes()
-        return js.unserializeToNodes(json)
+    private fun associateNodes(kNode: KNode, lwNode: LWNode) {
+        nodesMapping.associate(kNode, lwNode)
     }
 }
 
-private val com.strumenta.kolasu.model.Node.positionalID: String
+private val KNode.positionalID: String
     get() {
         return if (this.parent == null) {
             "root"

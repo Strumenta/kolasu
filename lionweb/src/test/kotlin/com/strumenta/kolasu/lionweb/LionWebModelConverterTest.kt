@@ -208,8 +208,8 @@ class LionWebModelConverterTest {
         ast.assignParents()
 
         val exporter = LionWebModelConverter()
-        exporter.recordLanguage(kLanguage)
-        val lwAST = exporter.export(ast)
+        exporter.exportLanguageToLionWeb(kLanguage)
+        val lwAST = exporter.exportModelToLionWeb(ast)
 
         val lwLanguage = exporter.correspondingLanguage(kLanguage)
 
@@ -247,13 +247,13 @@ class LionWebModelConverterTest {
 
     @Test
     fun importSimpleModel() {
-        val importer = LionWebModelConverter()
+        val mConverter = LionWebModelConverter()
         val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
             addClass(SimpleRoot::class)
         }
-        importer.recordLanguage(kLanguage)
-        val lwAST = importer.unserializeToNodes(serialized).first()
-        val kAST = importer.import(lwAST)
+        mConverter.exportLanguageToLionWeb(kLanguage)
+        val lwAST = mConverter.unserializeToNodes(serialized).first()
+        val kAST = mConverter.importModelFromLionWeb(lwAST)
 
         val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
         a1.ref.referred = a1
