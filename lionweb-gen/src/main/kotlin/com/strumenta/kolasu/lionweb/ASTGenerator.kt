@@ -126,8 +126,12 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                 )
             }
         }
-        val path = if (packageName.isNullOrEmpty()) "AST.kt" else packageName.split(".")
-            .joinToString(File.separator) + File.separator + "AST.kt"
+        val path = if (packageName.isNullOrEmpty()) {
+            "AST.kt"
+        } else {
+            packageName.split(".")
+                .joinToString(File.separator) + File.separator + "AST.kt"
+        }
         val file = KotlinFile(path = path, fileSpecBuilder.build().toString())
         return setOf(file)
     }
