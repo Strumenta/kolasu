@@ -64,9 +64,9 @@ class LionWebModelConverterTest {
       "properties": [
         {
           "property": {
-            "language": "com_strumenta_starlasu",
+            "language": "LIonCore-builtins",
             "version": "1",
-            "key": "starlasu_Named_name"
+            "key": "LIonCore-builtins-INamed-name"
           },
           "value": "A1"
         }
@@ -129,9 +129,9 @@ class LionWebModelConverterTest {
       "properties": [
         {
           "property": {
-            "language": "com_strumenta_starlasu",
+            "language": "LIonCore-builtins",
             "version": "1",
-            "key": "starlasu_Named_name"
+            "key": "LIonCore-builtins-INamed-name"
           },
           "value": "A3"
         }

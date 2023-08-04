@@ -76,12 +76,15 @@ class LionWebLanguageConverterTest {
         assertEquals("SimpleNodeA", simpleNodeA.name)
         assertSame(lwLanguage, simpleNodeA.language)
         assertEquals(simpleDecl, simpleNodeA.extendedConcept)
-        assertEquals(listOf(StarLasuLWLanguage.Named, myRelevantInterface), simpleNodeA.implemented)
+        assertEquals(listOf(LionCoreBuiltins.getINamed(), myRelevantInterface), simpleNodeA.implemented)
         assertEquals(false, simpleNodeA.isAbstract)
         assertEquals(2, simpleNodeA.features.size)
         assertEquals(3, simpleNodeA.allFeatures().size)
 
-        assertEquals(true, StarLasuLWLanguage.Named.getPropertyByName("name") in simpleNodeA.allFeatures())
+        assertEquals(
+            true,
+            LionCoreBuiltins.getINamed().getPropertyByName("name") in simpleNodeA.allFeatures()
+        )
 
         val simpleNodeARef = simpleNodeA.getReferenceByName("ref")!!
         assertEquals("ref", simpleNodeARef.name)
