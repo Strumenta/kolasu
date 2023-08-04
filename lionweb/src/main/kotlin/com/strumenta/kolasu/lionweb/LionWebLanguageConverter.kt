@@ -23,13 +23,16 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 
+typealias LWLanguage = Language
+typealias EnumKClass = KClass<out Enum<*>>
+
 /**
  * This class is able to convert between Kolasu and LionWeb languages, tracking the mapping.
  */
 class LionWebLanguageConverter {
     private val astClassesAndClassifiers = BiMap<KClass<*>, Classifier<*>>()
-    private val classesAndEnumerations = BiMap<KClass<out Enum<*>>, Enumeration>()
-    private val languages = BiMap<KolasuLanguage, Language>()
+    private val classesAndEnumerations = BiMap<EnumKClass, Enumeration>()
+    private val languages = BiMap<KolasuLanguage, LWLanguage>()
 
     init {
         val starLasuKLanguage = KolasuLanguage(StarLasuLWLanguage.name)
@@ -38,29 +41,8 @@ class LionWebLanguageConverter {
         registerMapping(Named::class, StarLasuLWLanguage.Named)
     }
 
-    fun getKolasuClassesToConceptsMapping(): Map<KClass<*>, Classifier<*>> {
-        return astClassesAndClassifiers.asToBsMap
-    }
-
-    fun getConceptsToKolasuClassesMapping(): Map<Classifier<*>, KClass<*>> {
-        return astClassesAndClassifiers.bsToAsMap
-    }
-
-    fun getEnumerationsToKolasuClassesMapping(): Map<Enumeration, KClass<*>> {
-        return classesAndEnumerations.bsToAsMap
-    }
-
-    fun knownLWLanguages(): Set<Language> {
-        return languages.bs
-    }
-
-    fun correspondingLanguage(kolasuLanguage: KolasuLanguage): Language {
-        return languages.byA(kolasuLanguage)
-            ?: throw java.lang.IllegalArgumentException("Unknown Kolasu Language $kolasuLanguage")
-    }
-
-    fun export(kolasuLanguage: KolasuLanguage): Language {
-        val lionwebLanguage = Language()
+    fun exportToLionWeb(kolasuLanguage: KolasuLanguage): LWLanguage {
+        val lionwebLanguage = LWLanguage()
         lionwebLanguage.version = "1"
         lionwebLanguage.name = kolasuLanguage.qualifiedName
         lionwebLanguage.key = kolasuLanguage.qualifiedName.replace('.', '-')
@@ -92,7 +74,7 @@ class LionWebLanguageConverter {
                 val superInterfaces = astClass.supertypes.map { it.classifier as KClass<*> }
                     .filter { it.java.isInterface }
                 superInterfaces.filter { it.isMarkedAsNodeType() }.forEach {
-                    conceptInterface.addExtendedInterface(toConceptInterface(it))
+                    conceptInterface.addExtendedInterface(correspondingConceptInterface(it))
                 }
             } else {
                 val concept = featuresContainer as Concept
@@ -105,7 +87,7 @@ class LionWebLanguageConverter {
                 }
                 val interfaces = astClass.supertypes.map { it.classifier as KClass<*> }.filter { it.java.isInterface }
                 interfaces.filter { it.isMarkedAsNodeType() }.forEach {
-                    concept.addImplementedInterface(toConceptInterface(it))
+                    concept.addImplementedInterface(correspondingConceptInterface(it))
                 }
             }
             astClass.features().forEach {
@@ -142,49 +124,13 @@ class LionWebLanguageConverter {
         return lionwebLanguage
     }
 
-    private fun toLWDataType(kType: KType, lionwebLanguage: Language): DataType<*> {
-        return when (kType) {
-            Int::class.createType() -> LionCoreBuiltins.getInteger()
-            Long::class.createType() -> LionCoreBuiltins.getInteger()
-            String::class.createType() -> LionCoreBuiltins.getString()
-            Boolean::class.createType() -> LionCoreBuiltins.getBoolean()
-            else -> {
-                val kClass = kType.classifier as KClass<*>
-                val isEnum = kClass.supertypes.any { it.classifier == Enum::class }
-                if (isEnum) {
-                    val enumeration = classesAndEnumerations.byA(kClass as KClass<out Enum<*>>)
-                    if (enumeration == null) {
-                        val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
-                        lionwebLanguage.addElement(newEnumeration)
-                        classesAndEnumerations.associate(kClass, newEnumeration)
-                        return newEnumeration
-                    } else {
-                        return enumeration
-                    }
-                } else {
-                    throw UnsupportedOperationException("KType: $kType")
-                }
-            }
-        }
-    }
-
-    fun toConceptInterface(kClass: KClass<*>): ConceptInterface {
-        return toLWClassifier(kClass) as ConceptInterface
-    }
-
-    fun toConcept(kClass: KClass<*>): Concept {
-        return toLWClassifier(kClass) as Concept
-    }
-
-    fun matchingKClass(concept: Concept): KClass<*>? {
-        return this.astClassesAndClassifiers.bsToAsMap.entries.find {
-            it.key.key == concept.key &&
-                it.key.language!!.id == concept.language!!.id &&
-                it.key.language!!.version == concept.language!!.version
-        }?.value
-    }
-
-    fun importLanguages(lwLanguage: Language, kolasuLanguage: KolasuLanguage) {
+    /**
+     * Importing a LionWeb language as a Kolasu language requires the generation of classes, to be performed
+     * separately. Once that is done we associate the Kolasu language defined by those classes to a certain
+     * LionWeb language, so that we can import LionWeb models by instantiating the corresponding classes in the
+     * Kolasu language.
+     */
+    fun associateLanguages(lwLanguage: LWLanguage, kolasuLanguage: KolasuLanguage) {
         this.languages.associate(kolasuLanguage, lwLanguage)
         kolasuLanguage.astClasses.forEach { astClass ->
             var classifier: Classifier<*>? = null
@@ -212,11 +158,87 @@ class LionWebLanguageConverter {
         }
     }
 
+    fun knownLWLanguages(): Set<LWLanguage> {
+        return languages.bs
+    }
+
+    fun knownKolasuLanguages(): Set<KolasuLanguage> {
+        return languages.`as`
+    }
+
+    fun correspondingLanguage(kolasuLanguage: KolasuLanguage): LWLanguage {
+        return languages.byA(kolasuLanguage)
+            ?: throw java.lang.IllegalArgumentException("Unknown Kolasu Language $kolasuLanguage")
+    }
+
+    fun correspondingLanguage(lwLanguage: LWLanguage): KolasuLanguage {
+        return languages.byB(lwLanguage)
+            ?: throw java.lang.IllegalArgumentException("Unknown LionWeb Language $lwLanguage")
+    }
+
+    fun getKolasuClassesToClassifiersMapping(): Map<KClass<*>, Classifier<*>> {
+        return astClassesAndClassifiers.asToBsMap
+    }
+
+    fun getClassifiersToKolasuClassesMapping(): Map<Classifier<*>, KClass<*>> {
+        return astClassesAndClassifiers.bsToAsMap
+    }
+
+    fun getEnumerationsToKolasuClassesMapping(): Map<Enumeration, EnumKClass> {
+        return classesAndEnumerations.bsToAsMap
+    }
+
+    fun getKolasuClassesToEnumerationsMapping(): Map<EnumKClass, Enumeration> {
+        return classesAndEnumerations.asToBsMap
+    }
+
+    fun correspondingConceptInterface(kClass: KClass<*>): ConceptInterface {
+        return toLWClassifier(kClass) as ConceptInterface
+    }
+
+    fun correspondingConcept(kClass: KClass<*>): Concept {
+        return toLWClassifier(kClass) as Concept
+    }
+
+    fun correspondingKolasuClass(classifier: Classifier<*>): KClass<*>? {
+        return this.astClassesAndClassifiers.bsToAsMap.entries.find {
+            it.key.key == classifier.key &&
+                it.key.language!!.id == classifier.language!!.id &&
+                it.key.language!!.version == classifier.language!!.version
+        }?.value
+    }
+
     private fun registerMapping(kolasuClass: KClass<*>, featuresContainer: Classifier<*>) {
         astClassesAndClassifiers.associate(kolasuClass, featuresContainer)
     }
 
     private fun toLWClassifier(kClass: KClass<*>): Classifier<*> {
         return astClassesAndClassifiers.byA(kClass) ?: throw IllegalArgumentException("Unknown KClass $kClass")
+    }
+
+    private fun toLWDataType(kType: KType, lionwebLanguage: LWLanguage): DataType<*> {
+        return when (kType) {
+            Int::class.createType() -> LionCoreBuiltins.getInteger()
+            Long::class.createType() -> LionCoreBuiltins.getInteger()
+            String::class.createType() -> LionCoreBuiltins.getString()
+            Boolean::class.createType() -> LionCoreBuiltins.getBoolean()
+            else -> {
+                val kClass = kType.classifier as KClass<*>
+                val isEnum = kClass.supertypes.any { it.classifier == Enum::class }
+                if (isEnum) {
+                    val enumeration = classesAndEnumerations.byA(kClass as EnumKClass)
+                    if (enumeration == null) {
+                        val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
+                        lionwebLanguage.addElement(newEnumeration)
+                        classesAndEnumerations.associate(kClass, newEnumeration)
+                        return newEnumeration
+                    } else {
+                        return enumeration
+                    }
+                } else {
+                    throw UnsupportedOperationException("KType: $kType")
+                }
+            }
+        }
     }
 }

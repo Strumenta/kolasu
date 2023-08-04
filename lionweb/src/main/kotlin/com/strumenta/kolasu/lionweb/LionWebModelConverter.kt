@@ -52,11 +52,11 @@ class LionWebModelConverter {
     }
 
     fun recordLanguage(kolasuLanguage: KolasuLanguage): Language {
-        return languageExporter.export(kolasuLanguage)
+        return languageExporter.exportToLionWeb(kolasuLanguage)
     }
 
     fun importLanguages(lwLanguage: Language, kolasuLanguage: KolasuLanguage) {
-        this.languageExporter.importLanguages(lwLanguage, kolasuLanguage)
+        this.languageExporter.associateLanguages(lwLanguage, kolasuLanguage)
     }
 
     fun export(kolasuTree: com.strumenta.kolasu.model.Node): Node {
@@ -221,7 +221,7 @@ class LionWebModelConverter {
     fun import(lwTree: Node): com.strumenta.kolasu.model.Node {
         val referencesPostponer = ReferencesPostponer()
         lwTree.thisAndAllDescendants().reversed().forEach { lwNode ->
-            val kClass = languageExporter.matchingKClass(lwNode.concept)
+            val kClass = languageExporter.correspondingKolasuClass(lwNode.concept)
                 ?: throw RuntimeException("We do not have StarLasu AST class for LIonWeb Concept ${lwNode.concept}")
             val kNode: com.strumenta.kolasu.model.Node = instantiate(kClass, lwNode, referencesPostponer)
             registerMapping(kNode, lwNode)
@@ -235,7 +235,7 @@ class LionWebModelConverter {
     }
 
     private fun findConcept(kNode: com.strumenta.kolasu.model.Node): Concept {
-        return languageExporter.toConcept(kNode.javaClass.kotlin)
+        return languageExporter.correspondingConcept(kNode.javaClass.kotlin)
     }
 
     private fun nodeID(kNode: com.strumenta.kolasu.model.Node): String {

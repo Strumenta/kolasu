@@ -63,9 +63,9 @@ class KolasuLanguageAssociatedToLionWebTest {
             addClass(LWRoot::class)
         }
         val lie = LionWebLanguageConverter()
-        lie.importLanguages(lwLang, kolasuLanguage)
-        assertEquals(LWRoot::class, lie.matchingKClass(lwRoot))
-        assertEquals(LWNodeA::class, lie.matchingKClass(lwNodeA))
-        assertEquals(LWNodeB::class, lie.matchingKClass(lwNodeB))
+        lie.associateLanguages(lwLang, kolasuLanguage)
+        assertEquals(LWRoot::class, lie.correspondingKolasuClass(lwRoot))
+        assertEquals(LWNodeA::class, lie.correspondingKolasuClass(lwNodeA))
+        assertEquals(LWNodeB::class, lie.correspondingKolasuClass(lwNodeB))
     }
 }

@@ -37,7 +37,7 @@ class LionWebLanguageConverterTest {
             addClass(SimpleRoot::class)
         }
         assertEquals(5, kLanguage.astClasses.size)
-        val lwLanguage = LionWebLanguageConverter().export(kLanguage)
+        val lwLanguage = LionWebLanguageConverter().exportToLionWeb(kLanguage)
         assertEquals("1", lwLanguage.version)
         assertEquals(5, lwLanguage.elements.size)
 
