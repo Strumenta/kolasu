@@ -9,7 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
-class LionWebModelImporterAndExporterTest {
+class LionWebModelConverterTest {
 
     val serialized = """{
   "serializationFormatVersion": "1",
@@ -64,9 +64,9 @@ class LionWebModelImporterAndExporterTest {
       "properties": [
         {
           "property": {
-            "language": "com_strumenta_starlasu",
+            "language": "LIonCore-builtins",
             "version": "1",
-            "key": "starlasu_Named_name"
+            "key": "LIonCore-builtins-INamed-name"
           },
           "value": "A1"
         }
@@ -129,9 +129,9 @@ class LionWebModelImporterAndExporterTest {
       "properties": [
         {
           "property": {
-            "language": "com_strumenta_starlasu",
+            "language": "LIonCore-builtins",
             "version": "1",
-            "key": "starlasu_Named_name"
+            "key": "LIonCore-builtins-INamed-name"
           },
           "value": "A3"
         }
@@ -209,9 +209,9 @@ class LionWebModelImporterAndExporterTest {
         )
         ast.assignParents()
 
-        val exporter = LionWebModelImporterAndExporter()
-        exporter.recordLanguage(kLanguage)
-        val lwAST = exporter.export(ast)
+        val exporter = LionWebModelConverter()
+        exporter.exportLanguageToLionWeb(kLanguage)
+        val lwAST = exporter.exportModelToLionWeb(ast)
 
         val lwLanguage = exporter.correspondingLanguage(kLanguage)
 
@@ -249,13 +249,13 @@ class LionWebModelImporterAndExporterTest {
 
     @Test
     fun importSimpleModel() {
-        val importer = LionWebModelImporterAndExporter()
+        val mConverter = LionWebModelConverter()
         val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
             addClass(SimpleRoot::class)
         }
-        importer.recordLanguage(kLanguage)
-        val lwAST = importer.unserializeToNodes(serialized).first()
-        val kAST = importer.import(lwAST)
+        mConverter.exportLanguageToLionWeb(kLanguage)
+        val lwAST = mConverter.unserializeToNodes(serialized).first()
+        val kAST = mConverter.importModelFromLionWeb(lwAST)
 
         val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
         a1.ref.referred = a1

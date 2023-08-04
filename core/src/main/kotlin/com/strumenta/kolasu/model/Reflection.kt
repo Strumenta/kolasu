@@ -279,21 +279,28 @@ private val featuresCache = mutableMapOf<KClass<*>, List<Feature>>()
 
 fun <N : Any> KClass<N>.allFeatures(): List<Feature> {
     val res = mutableListOf<Feature>()
-    res.addAll(features())
+    res.addAll(declaredFeatures())
     supertypes.mapNotNull { (it.classifier as? KClass<*>) }.forEach { supertype ->
         res.addAll(supertype.allFeatures())
     }
     return res
 }
 
-fun <N : Any> KClass<N>.features(): List<Feature> {
+fun <N : Any> KClass<N>.isInherited(feature: Feature): Boolean {
+    this.supertypes.map { it.classifier as KClass<*> }.any { supertype ->
+        supertype.allFeatures().any { f -> f.name == feature.name }
+    }
+    return false
+}
+
+fun <N : Any> KClass<N>.declaredFeatures(): List<Feature> {
     if (!featuresCache.containsKey(this)) {
         // Named can be used also for things which are not Node, so we treat it as a special case
         featuresCache[this] = if (!isANode() && this != Named::class) {
             emptyList()
         } else {
             val inheritedNamed =
-                supertypes.map { (it.classifier as? KClass<*>)?.features()?.map { it.name } ?: emptyList() }
+                supertypes.map { (it.classifier as? KClass<*>)?.allFeatures()?.map { it.name } ?: emptyList() }
                     .flatten()
                     .toSet()
             val notInheritedProps = nodeProperties.filter { it.name !in inheritedNamed }

@@ -9,6 +9,7 @@ import java.io.Serializable
 /**
  * An entity that can have a name
  */
+@NodeType
 interface PossiblyNamed {
     /**
      * The optional name of the entity.
@@ -19,6 +20,7 @@ interface PossiblyNamed {
 /**
  * An entity which has a name.
  */
+@NodeType
 interface Named : PossiblyNamed {
     /**
      * The mandatory name of the entity.

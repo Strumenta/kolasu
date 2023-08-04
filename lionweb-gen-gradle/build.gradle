@@ -13,7 +13,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-    implementation("io.lionweb.lioncore-java:lioncore-java-core-fat:$lionwebVersion")
+    implementation("io.lionweb.lioncore-java:lioncore-java-core:$lionwebVersion")
     api(project(":lionweb-gen"))
     testImplementation(project(":lionweb-ksp"))
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlinVersion")
