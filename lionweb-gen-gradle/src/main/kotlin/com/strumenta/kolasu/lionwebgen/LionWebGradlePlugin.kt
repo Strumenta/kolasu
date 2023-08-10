@@ -143,7 +143,7 @@ class LionWebGradlePlugin : Plugin<Project> {
 
     private fun addDependencies(project: Project) {
         fun addKolasuModule(moduleName: String) {
-            project.dependencies.add("implementation",
+            project.dependencies.add("api",
                 "com.strumenta.kolasu:kolasu-$moduleName:${project.kolasuVersion}")
         }
 
@@ -152,10 +152,10 @@ class LionWebGradlePlugin : Plugin<Project> {
         addKolasuModule("lionweb")
         addKolasuModule("lionweb-gen")
         project.dependencies.add("ksp", "com.strumenta.kolasu:kolasu-lionweb-ksp:${project.kolasuVersion}")
-        project.dependencies.add("implementation", "com.github.ajalt.clikt:clikt:3.5.0")
+        project.dependencies.add("api", "com.github.ajalt.clikt:clikt:3.5.0")
 
         // We need to use this one to avoid an issue with Gson
-        project.dependencies.add("implementation", "io.lionweb.lioncore-java:lioncore-java-core:${project.lionwebVersion}")
+        project.dependencies.add("api", "io.lionweb.lioncore-java:lioncore-java-core:${project.lionwebVersion}")
     }
 
 }
