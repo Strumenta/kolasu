@@ -77,6 +77,20 @@ subprojects {
         disabledRules = ["no-wildcard-imports", "experimental:argument-list-wrapping"]
     }
 
+    java {
+        toolchain {
+            def cleanVersion = jvm_version.startsWith("1.") ? jvm_version.substring("1.".length()) : jvm_version
+            languageVersion.set(JavaLanguageVersion.of(cleanVersion))
+        }
+    }
+
+    java {
+        sourceCompatibility = "$jvm_version"
+        targetCompatibility = "$jvm_version"
+        registerFeature('cli') {
+            usingSourceSet(sourceSets.main)
+        }
+    }
 }
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")

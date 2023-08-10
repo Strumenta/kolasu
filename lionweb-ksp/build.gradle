@@ -83,3 +83,13 @@ publishing {
 signing {
     sign publishing.publications.kolasu_lionweb_ksp
 }
+
+tasks.findByName("dokkaJavadoc").dependsOn(":core:compileKotlin")
+
+java {
+    sourceCompatibility = "$jvm_version"
+    targetCompatibility = "$jvm_version"
+    registerFeature('cli') {
+        usingSourceSet(sourceSets.main)
+    }
+}

@@ -48,3 +48,17 @@ tasks.named("compileKotlin") {
 test {
     useJUnitPlatform()
 }
+
+tasks.findByName("dokkaJavadoc").dependsOn("generateBuildConfig")
+tasks.findByName("dokkaJavadoc").dependsOn(":core:compileKotlin")
+tasks.findByName("dokkaJavadoc").dependsOn(":emf:compileKotlin")
+tasks.findByName("dokkaJavadoc").dependsOn(":lionweb:jar")
+tasks.findByName("dokkaJavadoc").dependsOn(":lionweb-gen:jar")
+
+java {
+    sourceCompatibility = "$jvm_version"
+    targetCompatibility = "$jvm_version"
+    registerFeature('cli') {
+        usingSourceSet(sourceSets.main)
+    }
+}

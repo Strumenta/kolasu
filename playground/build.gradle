@@ -90,3 +90,6 @@ publishing {
 signing {
     sign publishing.publications.kolasu_playground
 }
+
+tasks.findByName("dokkaJavadoc").dependsOn(":core:compileKotlin")
+tasks.findByName("dokkaJavadoc").dependsOn(":emf:compileKotlin")

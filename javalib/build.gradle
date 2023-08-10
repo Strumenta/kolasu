@@ -90,3 +90,6 @@ publishing {
 signing {
     sign publishing.publications.kolasu_javalib
 }
+
+tasks.findByName("dokkaJavadoc").dependsOn(":core:compileKotlin")
+tasks.findByName("sourcesJar").dependsOn("generateGrammarSource")

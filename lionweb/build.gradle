@@ -94,3 +94,5 @@ publishing {
 signing {
     sign publishing.publications.kolasu_lionweb
 }
+
+tasks.findByName("dokkaJavadoc").dependsOn(":core:compileKotlin")

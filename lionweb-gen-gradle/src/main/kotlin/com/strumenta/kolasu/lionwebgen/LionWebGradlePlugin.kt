@@ -36,11 +36,12 @@ class LionWebGradlePlugin : Plugin<Project> {
         return project.tasks.create(genASTClasses) {
             it.group = tasksGroup
             it.description = "Generate Kolasu ASTs from LionWeb languages"
+            it.inputs.files(configuration.languages.get())
             it.doLast {
                 println("LIonWeb AST Classes generation task - started")
                 println("  languages: ${configuration.languages.get()}")
                 configuration.languages.get().forEach { languageFile ->
-                    println("prcessing languageFile $languageFile")
+                    println("processing languageFile $languageFile")
                     when (languageFile.extension) {
                         "json" -> {
                             val jsonser = JsonSerialization.getStandardSerialization()
@@ -55,6 +56,7 @@ class LionWebGradlePlugin : Plugin<Project> {
                                 file.parentFile.mkdirs()
                                 file.writeText(ktFile.code)
                                 println("  generated ${file.path}")
+                                it.outputs.file(file)
                             }
                         }
                     }
@@ -135,9 +137,13 @@ class LionWebGradlePlugin : Plugin<Project> {
         }
 
         project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).forEach {
-            it.source(File(project.buildDir, "lionweb-gen"),
-                File(project.rootDir, "src${File.separator}main${File.separator}kotlin"))
-            it.dependsOn(genASTClasses)
+            if (it.name == "kotlinCompile") {
+                it.source(
+                    File(project.buildDir, "lionweb-gen"),
+                    File(project.rootDir, "src${File.separator}main${File.separator}kotlin")
+                )
+                it.dependsOn(genASTClasses)
+            }
         }
     }
 

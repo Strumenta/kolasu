@@ -136,3 +136,5 @@ publishing {
 signing {
     sign publishing.publications.kolasu_core
 }
+
+tasks.findByName("generateGrammarSource").dependsOn("sourcesJar")
