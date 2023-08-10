@@ -153,8 +153,6 @@ class LionWebGradlePlugin : Plugin<Project> {
         addKolasuModule("lionweb-gen")
         project.dependencies.add("ksp", "com.strumenta.kolasu:kolasu-lionweb-ksp:${project.kolasuVersion}")
         project.dependencies.add("api", "com.github.ajalt.clikt:clikt:3.5.0")
-
-        // We need to use this one to avoid an issue with Gson
         project.dependencies.add("api", "io.lionweb.lioncore-java:lioncore-java-core:${project.lionwebVersion}")
     }
 
