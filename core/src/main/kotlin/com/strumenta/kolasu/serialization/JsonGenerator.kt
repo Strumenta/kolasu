@@ -82,7 +82,8 @@ class JsonGenerator {
         root: Node,
         withIds: IdentityHashMap<Node, String>? = null,
         withOriginIds: IdentityHashMap<Node, String>? = null,
-        withDestinationIds: IdentityHashMap<Node, String>? = null
+        withDestinationIds: IdentityHashMap<Node, String>? = null,
+        shortClassNames: Boolean = false
     ): JsonElement {
         return nodeToJson(
             root, shortClassNames,
@@ -130,27 +131,28 @@ class JsonGenerator {
         if (result.root == null) {
             writer.nullValue()
         } else {
-            result.root.toJsonStreaming(writer, shortClassNames)
+            generateJSONWithStreaming(result.root, writer, shortClassNames)
         }
         writer.endObject()
     }
 
     fun generateJSONWithStreaming(root: Node, writer: JsonWriter, shortClassNames: Boolean = false) {
-        root.toJsonStreaming(writer, shortClassNames)
+        val gson = gsonBuilder.setPrettyPrinting().create()
+        gson.toJson(generateJSON(root, null, null, null, shortClassNames), writer)
     }
 
     fun generateString(root: Node, withIds: IdentityHashMap<Node, String>? = null): String {
-        val gson = GsonBuilder().setPrettyPrinting().create()
+        val gson = gsonBuilder.setPrettyPrinting().create()
         return gson.toJson(generateJSON(root, withIds))
     }
 
     fun generateString(result: Result<out Node>, withIds: IdentityHashMap<Node, String>? = null): String {
-        val gson = GsonBuilder().setPrettyPrinting().create()
+        val gson = gsonBuilder.setPrettyPrinting().create()
         return gson.toJson(generateJSON(result, withIds))
     }
 
     fun generateString(result: ParsingResult<out Node>, withIds: IdentityHashMap<Node, String>? = null): String {
-        val gson = GsonBuilder().setPrettyPrinting().create()
+        val gson = gsonBuilder.setPrettyPrinting().create()
         return gson.toJson(generateJSON(result, withIds))
     }
 

@@ -115,10 +115,9 @@ class JsonGenerationTest {
         assertEquals(
             """{"#type":"com.strumenta.kolasu.serialization.MyRoot",
                 |"mainSection":{"#type":"com.strumenta.kolasu.serialization.Section","contents":
-                |[{"#type":"com.strumenta.kolasu.serialization.Content","annidatedContent":null,"id":1},
-                |{"#type":"com.strumenta.kolasu.serialization.Content","annidatedContent":
-                |{"#type":"com.strumenta.kolasu.serialization.Content","annidatedContent":
-                |{"#type":"com.strumenta.kolasu.serialization.Content","annidatedContent":null,"id":4},"id":3},"id":2}],
+                |[{"#type":"com.strumenta.kolasu.serialization.Content","id":1},
+                |{"#type":"com.strumenta.kolasu.serialization.Content","annidatedContent":{"#type":"com.strumenta.kolasu.serialization.Content",
+                |"annidatedContent":{"#type":"com.strumenta.kolasu.serialization.Content","id":4},"id":3},"id":2}],
                 |"name":"Section1"},"otherSections":[]}
             """.trimMargin().replace("\n", ""),
             json,
