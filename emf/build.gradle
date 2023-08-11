@@ -142,3 +142,5 @@ signing {
 
 tasks.findByName("dokkaJavadoc").dependsOn(":core:compileKotlin")
 tasks.findByName("sourcesJar").dependsOn("generateGrammarSource")
+tasks.findByName("runKtlintCheckOverMainSourceSet").dependsOn("generateGrammarSource")
+tasks.findByName("runKtlintCheckOverTestSourceSet").dependsOn("generateTestGrammarSource")

@@ -37,6 +37,7 @@ class LionWebGradlePlugin : Plugin<Project> {
             it.group = tasksGroup
             it.description = "Generate Kolasu ASTs from LionWeb languages"
             it.inputs.files(configuration.languages.get())
+            it.outputs.dir(configuration.outdir.get())
             it.doLast {
                 println("LIonWeb AST Classes generation task - started")
                 println("  languages: ${configuration.languages.get()}")
@@ -56,7 +57,6 @@ class LionWebGradlePlugin : Plugin<Project> {
                                 file.parentFile.mkdirs()
                                 file.writeText(ktFile.code)
                                 println("  generated ${file.path}")
-                                it.outputs.file(file)
                             }
                         }
                     }
