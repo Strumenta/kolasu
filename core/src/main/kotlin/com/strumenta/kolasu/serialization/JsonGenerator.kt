@@ -138,7 +138,16 @@ class JsonGenerator {
 
     fun generateJSONWithStreaming(root: Node, writer: JsonWriter, shortClassNames: Boolean = false) {
         val gson = gsonBuilder.setPrettyPrinting().create()
-        gson.toJson(generateJSON(root = root, withIds = null, withOriginIds = null, withDestinationIds = null, shortClassNames = shortClassNames), writer)
+        gson.toJson(
+            generateJSON(
+                root = root,
+                withIds = null,
+                withOriginIds = null,
+                withDestinationIds = null,
+                shortClassNames = shortClassNames
+            ),
+            writer
+        )
     }
 
     fun generateString(root: Node, withIds: IdentityHashMap<Node, String>? = null): String {
