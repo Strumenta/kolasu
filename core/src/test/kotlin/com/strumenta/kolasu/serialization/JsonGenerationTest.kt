@@ -125,6 +125,99 @@ class JsonGenerationTest {
     }
 
     @Test
+    fun generateJsonWithStreamingShortNames() {
+        val myRoot = MyRoot(
+            mainSection = Section(
+                "Section1",
+                listOf(
+                    Content(1, null),
+                    Content(2, Content(3, Content(4, null))),
+                ),
+            ),
+            otherSections = listOf(),
+        )
+        val writer = StringWriter()
+        JsonGenerator().generateJSONWithStreaming(root = myRoot, writer = JsonWriter(writer), shortClassNames = true)
+        val json = writer.toString()
+        assertEquals(
+            """{"#type":"MyRoot",
+                |"mainSection":{"#type":"Section","contents":
+                |[{"#type":"Content","id":1},
+                |{"#type":"Content","annidatedContent":{"#type":"Content",
+                |"annidatedContent":{"#type":"Content","id":4},"id":3},"id":2}],
+                |"name":"Section1"},"otherSections":[]}
+            """.trimMargin().replace("\n", ""),
+            json,
+        )
+    }
+
+    @Test
+    fun nodeWithReferenceStreaming() {
+        val node = NodeWithReference(name = "nodeWithReference", reference = ReferenceByName(name = "self"))
+        val writer = StringWriter()
+        JsonGenerator().generateJSONWithStreaming(node, JsonWriter(writer))
+        val json = writer.toString()
+        assertEquals(
+            """{
+            |"#type":"com.strumenta.kolasu.serialization.NodeWithReference",
+            |"children":[],
+            |"name":"nodeWithReference",
+            |"reference":{
+            |"name":"self"
+            |}
+            |}
+            """.trimMargin().replace("\n", ""),
+            json,
+        )
+    }
+
+    @Test
+    fun nodeWithReferenceStreamingShortNames() {
+        val node = NodeWithReference(name = "nodeWithReference", reference = ReferenceByName(name = "self"))
+        val writer = StringWriter()
+        JsonGenerator().generateJSONWithStreaming(root = node, writer = JsonWriter(writer), shortClassNames = true)
+        val json = writer.toString()
+        assertEquals(
+            """{
+            |"#type":"NodeWithReference",
+            |"children":[],
+            |"name":"nodeWithReference",
+            |"reference":{
+            |"name":"self"
+            |}
+            |}
+            """.trimMargin().replace("\n", ""),
+            json,
+        )
+    }
+
+    @Test
+    fun duplicatePropertiesStreaming() {
+        val node = NodeOverridingName("foo")
+        val writer = StringWriter()
+        JsonGenerator().generateJSONWithStreaming(root = node, writer = JsonWriter(writer))
+        val json = writer.toString()
+        assertEquals(
+            """{"#type":"com.strumenta.kolasu.model.NodeOverridingName","name":"foo"}
+            """.trimMargin().replace("\n", ""),
+            json,
+        )
+    }
+
+    @Test
+    fun duplicatePropertiesStreamingShortNames() {
+        val node = NodeOverridingName("foo")
+        val writer = StringWriter()
+        JsonGenerator().generateJSONWithStreaming(root = node, writer = JsonWriter(writer), shortClassNames = true)
+        val json = writer.toString()
+        assertEquals(
+            """{"#type":"NodeOverridingName","name":"foo"}
+            """.trimMargin().replace("\n", ""),
+            json,
+        )
+    }
+
+    @Test
     fun duplicatePropertiesInheritedByInterface() {
         val json = JsonGenerator().generateString(NodeOverridingName("foo"))
         assertEquals(
