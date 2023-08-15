@@ -38,7 +38,11 @@ class JsonDeserializer {
             when {
                 Node::class.java.isAssignableFrom(rawClass) -> {
                     val className = json.asJsonObject[JSON_TYPE_KEY].asString
-                    val actualClass = Class.forName(className)
+                    val actualClass = try {
+                        Class.forName(className)
+                    } catch (ex: ClassNotFoundException) {
+                        Class.forName(rawClass.`package`.name + "." + className)
+                    }
                     return deserialize(actualClass.asSubclass(Node::class.java), json.asJsonObject)
                 }
                 Collection::class.java.isAssignableFrom(rawClass) -> {
