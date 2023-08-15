@@ -218,6 +218,29 @@ class JsonGenerationTest {
     }
 
     @Test
+    fun streamingANullRoot() {
+        val originalResult: Result<MyRoot> = Result(
+            listOf(
+                Issue(
+                    IssueType.LEXICAL,
+                    "foo",
+                    position = Position(Point(1, 10), Point(4, 540)),
+                ),
+            ),
+            null,
+        )
+        val writer = StringWriter()
+        JsonGenerator().generateJSONWithStreaming(result = originalResult, writer = JsonWriter(writer), shortClassNames = true)
+        val json = writer.toString()
+        assertEquals(
+            """{"issues":[{"type":"LEXICAL","message":"foo","severity":"ERROR","position":{"description":"Position(start=Line 1, Column 10,
+               | end=Line 4, Column 540)","start":{"line":1,"column":10},"end":{"line":4,"column":540}}}]}
+            """.trimMargin().replace("\n", ""),
+            json,
+        )
+    }
+
+    @Test
     fun duplicatePropertiesInheritedByInterface() {
         val json = JsonGenerator().generateString(NodeOverridingName("foo"))
         assertEquals(

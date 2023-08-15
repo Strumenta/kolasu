@@ -127,17 +127,17 @@ class JsonGenerator {
         writer.beginArray()
         result.issues.forEach { it.toJsonStreaming(writer) }
         writer.endArray()
-        writer.name("root")
         if (result.root == null) {
-            writer.nullValue()
+            // do nothing for consistency with non-streaming JSON generation
         } else {
+            writer.name("root")
             generateJSONWithStreaming(result.root, writer, shortClassNames)
         }
         writer.endObject()
     }
 
     fun generateJSONWithStreaming(root: Node, writer: JsonWriter, shortClassNames: Boolean = false) {
-        val gson = gsonBuilder.setPrettyPrinting().create()
+        val gson = gsonBuilder.create()
         gson.toJson(
             generateJSON(
                 root = root,
@@ -374,6 +374,8 @@ private fun Issue.toJsonStreaming(writer: JsonWriter) {
     writer.value(this.type.name)
     writer.name("message")
     writer.value(this.message)
+    writer.name("severity")
+    writer.value(this.severity.name)
     writer.name("position")
     if (this.position == null) {
         writer.nullValue()
