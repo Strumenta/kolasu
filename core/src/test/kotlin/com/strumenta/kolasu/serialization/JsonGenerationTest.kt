@@ -230,7 +230,11 @@ class JsonGenerationTest {
             null,
         )
         val writer = StringWriter()
-        JsonGenerator().generateJSONWithStreaming(result = originalResult, writer = JsonWriter(writer), shortClassNames = true)
+        JsonGenerator().generateJSONWithStreaming(
+            result = originalResult,
+            writer = JsonWriter(writer),
+            shortClassNames = true
+        )
         val json = writer.toString()
         assertEquals(
             """{"issues":[{"type":"LEXICAL","message":"foo","severity":"ERROR","position":{"description":"Position(start=Line 1, Column 10,
