@@ -41,7 +41,19 @@ class JsonDeserializer {
                     val actualClass = try {
                         Class.forName(className)
                     } catch (ex: ClassNotFoundException) {
-                        Class.forName(rawClass.`package`.name + "." + className)
+                        // This handles only the case when the serialized JSON used the simple name
+                        // rather than the canonical name for indicating the type of the serialized object.
+                        // The rawClass is the class we are expecting,
+                        // while className is the type in the JSON serialization.
+                        // These two types could be different: rawClass could be a sealed or abstract type,
+                        // while className could be a compatible concrete class.
+                        // So, when className is a simple name and we cannot resolve it directly,
+                        // we need to get the package name of the rawClass and apply it to className.
+                        Class.forName(
+                            "${rawClass.canonicalName.substring(
+                                0, rawClass.canonicalName.lastIndexOf('.') + 1
+                            )}$className"
+                        )
                     }
                     return deserialize(actualClass.asSubclass(Node::class.java), json.asJsonObject)
                 }

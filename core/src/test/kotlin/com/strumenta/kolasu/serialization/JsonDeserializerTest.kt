@@ -115,7 +115,11 @@ class JsonDeserializerTest {
             null,
         )
         val writer = StringWriter()
-        JsonGenerator().generateJSONWithStreaming(result = originalResult, writer = JsonWriter(writer), shortClassNames = false)
+        JsonGenerator().generateJSONWithStreaming(
+            result = originalResult,
+            writer = JsonWriter(writer),
+            shortClassNames = false
+        )
         val json = writer.toString()
         val deserialized: Result<MyRoot> = JsonDeserializer().deserializeResult(MyRoot::class.java, json)
         assertEquals(originalResult, deserialized)
@@ -134,7 +138,11 @@ class JsonDeserializerTest {
             null,
         )
         val writer = StringWriter()
-        JsonGenerator().generateJSONWithStreaming(result = originalResult, writer = JsonWriter(writer), shortClassNames = true)
+        JsonGenerator().generateJSONWithStreaming(
+            result = originalResult,
+            writer = JsonWriter(writer),
+            shortClassNames = true
+        )
         val json = writer.toString()
         val deserialized: Result<MyRoot> = JsonDeserializer().deserializeResult(MyRoot::class.java, json)
         assertEquals(originalResult, deserialized)
