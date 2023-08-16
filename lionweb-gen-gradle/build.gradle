@@ -31,11 +31,14 @@ buildConfig {
 }
 
 gradlePlugin {
+    website.set("https://github.com/strumenta/kolasu")
+    vcsUrl.set("https://github.com/strumenta/kolasu.git")
     plugins {
         create("lionwebGenGradlePlugin") {
             id = lionwebGenGradlePluginID as String
             displayName = "Kolasu LionWeb Gen"
             description = "Kolasu LionWeb Gen"
+            tags.set(["parsing", "ast", "starlasu", "lionweb"])
             implementationClass = "com.strumenta.kolasu.lionwebgen.LionWebGradlePlugin"
         }
     }
