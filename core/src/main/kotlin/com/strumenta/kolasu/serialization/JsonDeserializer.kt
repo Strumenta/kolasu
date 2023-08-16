@@ -78,7 +78,15 @@ class JsonDeserializer {
                     if (json.isJsonObject) {
                         if (json.asJsonObject.has(JSON_TYPE_KEY)) {
                             val type = json.asJsonObject.get(JSON_TYPE_KEY).asString
-                            val clazz = Class.forName(type)
+                            val clazz = try {
+                                Class.forName(type)
+                            } catch (ex: ClassNotFoundException) {
+                                Class.forName(
+                                    "${rawClass.canonicalName.substring(
+                                        0, rawClass.canonicalName.lastIndexOf('.') + 1
+                                    )}$type"
+                                )
+                            }
                             if (clazz == null) {
                                 throw IllegalStateException("Unable to find class $type")
                             } else {
