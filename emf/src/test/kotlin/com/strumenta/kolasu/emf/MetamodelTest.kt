@@ -1,9 +1,6 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.NodeType
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.*
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
@@ -16,12 +13,13 @@ import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-sealed class Statement : Node()
-sealed class Expression : Node()
+sealed class Statement : Node(), com.strumenta.kolasu.model.Statement
+sealed class Expression : Node(), com.strumenta.kolasu.model.Expression
 enum class Visibility {
     PUBLIC, PRIVATE
 }
-class VarDeclaration(var visibility: Visibility, var name: String, var initialValue: Expression) : Statement()
+class VarDeclaration(var visibility: Visibility, var name: String, var initialValue: Expression) :
+    Statement(), EntityDeclaration
 class StringLiteral(var value: String) : Expression()
 class LocalDateTimeLiteral(var value: LocalDateTime) : Expression()
 data class CompilationUnit(val statements: List<Statement>?) : Node()
@@ -75,7 +73,14 @@ class MetamodelTest {
         metaRes.load(null)
         assertEquals(1, metaRes.contents.size)
         assertTrue(metaRes.contents[0] is EPackage)
-        checkEPackage(metaRes.contents[0] as EPackage)
+        val loadedPkg = metaRes.contents[0] as EPackage
+        checkEPackage(loadedPkg)
+
+        val statementClass: EClass = ePackage.eClassifiers.find { it.name == "Statement" } as EClass
+        val statementInterface = statementClass.eSuperTypes.find { it.name == "Statement" } as EClass
+        assertTrue(statementInterface.isInterface)
+        assertEquals("StrumentaLanguageSupport", statementInterface.ePackage.name)
+        assertTrue(statementInterface.isSuperTypeOf(statementClass))
     }
 
     private fun checkEPackage(ePackage: EPackage) {
@@ -107,7 +112,7 @@ class MetamodelTest {
 
         val sl: EClass = ePackage.eClassifiers.find { it.name == "StringLiteral" } as EClass
         assertEquals(
-            3, sl.eAllSuperTypes.size,
+            4, sl.eAllSuperTypes.size,
             sl.eAllSuperTypes.joinToString(", ") { it.name }
         )
         assertEquals(1, sl.eSuperTypes.size)
