@@ -245,8 +245,11 @@ fun <N : Any> KProperty1<N, *>.asContainment(): Containment {
         this.returnType.isMarkedNullable -> Multiplicity.OPTIONAL
         else -> Multiplicity.SINGULAR
     }
-    val type = if (multiplicity == Multiplicity.MANY) this.returnType.arguments[0].type!!.classifier as KClass<*>
-    else this.returnType.classifier as KClass<*>
+    val type = if (multiplicity == Multiplicity.MANY) {
+        this.returnType.arguments[0].type!!.classifier as KClass<*>
+    } else {
+        this.returnType.classifier as KClass<*>
+    }
     return Containment(this.name, multiplicity, type)
 }
 

@@ -14,7 +14,7 @@ data class BSymbol(override val name: String, val index: Int = 0) : Named
 data class USymbol(override val name: String? = null) : PossiblyNamed
 
 data class NodeOverridingName(
-    override var name: String,
+    override var name: String
 ) : Node(), Named
 
 open class BaseNode(open var attr1: Int) : Node()
@@ -92,7 +92,7 @@ class ModelTest {
     @test
     fun lookupSymbolByNameInLocal() {
         val scope = Scope(
-            parent = Scope().apply { define(ASymbol(name = "b")) },
+            parent = Scope().apply { define(ASymbol(name = "b")) }
         ).apply { this.define(ASymbol(name = "a")) }
         val expected = ASymbol(name = "a")
         val actual = scope.resolve(name = "a")
@@ -102,7 +102,7 @@ class ModelTest {
     @test
     fun lookupSymbolByNameInParent() {
         val scope = Scope(
-            parent = Scope().apply { define(ASymbol(name = "b")) },
+            parent = Scope().apply { define(ASymbol(name = "b")) }
         ).apply { define(ASymbol(name = "a")) }
         val expected = ASymbol(name = "b")
         val actual = scope.resolve(name = "b")
@@ -118,7 +118,7 @@ class ModelTest {
     @test
     fun lookupSymbolByNameAndTypeInLocal() {
         val scope = Scope(
-            parent = Scope().apply { define(BSymbol(name = "a")) },
+            parent = Scope().apply { define(BSymbol(name = "a")) }
         ).apply { define(ASymbol(name = "a")) }
         val expected = ASymbol(name = "a")
         val actual = scope.resolve(name = "a", type = ASymbol::class)
@@ -128,7 +128,7 @@ class ModelTest {
     @test
     fun lookupSymbolByNameAndTypeInParent() {
         val scope = Scope(
-            parent = Scope().apply { define(BSymbol(name = "a")) },
+            parent = Scope().apply { define(BSymbol(name = "a")) }
         ).apply { define(ASymbol(name = "a")) }
         val expected = BSymbol(name = "a")
         val actual = scope.resolve(name = "a", type = BSymbol::class)

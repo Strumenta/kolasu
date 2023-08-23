@@ -13,7 +13,6 @@ import org.antlr.v4.runtime.tree.TerminalNode
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
-import java.lang.reflect.Field
 import java.nio.charset.Charset
 import java.util.*
 import kotlin.reflect.full.memberFunctions
@@ -44,7 +43,9 @@ interface TokenFactory<T : KolasuToken> {
             antlrTerminals.sortBy { it.symbol.tokenIndex }
             val tokens = antlrTerminals.map { convertToken(it) }.toMutableList()
             LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime)
-        } else null
+        } else {
+            null
+        }
     }
 }
 
@@ -147,7 +148,6 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
      * Creates the first-stage parser.
      */
     protected open fun createParser(inputStream: CharStream, issues: MutableList<Issue>): P {
-
         val lexer = createANTLRLexer(inputStream)
         attachListeners(lexer, issues)
         val tokenStream = createTokenStream(lexer)
@@ -167,7 +167,8 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         if (lastToken.type != Token.EOF) {
             issues.add(
                 Issue(
-                    IssueType.SYNTACTIC, "The whole input was not consumed",
+                    IssueType.SYNTACTIC,
+                    "The whole input was not consumed",
                     position = lastToken!!.endPoint.asPosition
                 )
             )
@@ -265,8 +266,12 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         }
         val now = System.currentTimeMillis()
         return ParsingResult(
-            myIssues, ast, inputStream.getText(Interval(0, inputStream.index() + 1)),
-            null, firstStage, now - start
+            myIssues,
+            ast,
+            inputStream.getText(Interval(0, inputStream.index() + 1)),
+            null,
+            firstStage,
+            now - start
         )
     }
 

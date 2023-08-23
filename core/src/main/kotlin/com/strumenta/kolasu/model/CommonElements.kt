@@ -30,6 +30,7 @@ interface EntityDeclaration
 @NodeType
 interface PlaceholderElement {
     var placeholderName: String?
+
     @property:Internal
     val multiplePlaceholderElement: Boolean
 

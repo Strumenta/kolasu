@@ -18,7 +18,7 @@ class SequentialIdProvider(private var counter: Int = 0) : IdProvider {
 
 class OnlyReferencedIdProvider(
     private val root: Node,
-    private var idProvider: IdProvider = SequentialIdProvider(),
+    private var idProvider: IdProvider = SequentialIdProvider()
 ) : IdProvider {
 
     private val referencedElements: Set<PossiblyNamed> by lazy {

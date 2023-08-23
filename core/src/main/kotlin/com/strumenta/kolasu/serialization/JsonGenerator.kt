@@ -38,8 +38,9 @@ fun jsonArray(values: Iterator<Any?>): JsonArray {
 }
 
 private fun Any?.toJsonElement(): JsonElement {
-    if (this == null)
+    if (this == null) {
         return JsonNull.INSTANCE
+    }
 
     return when (this) {
         is JsonElement -> this
@@ -86,9 +87,11 @@ class JsonGenerator {
         shortClassNames: Boolean = false
     ): JsonElement {
         return nodeToJson(
-            root, shortClassNames,
+            root,
+            shortClassNames,
             withIds = withIds,
-            withOriginIds = withOriginIds, withDestinationIds = withDestinationIds
+            withOriginIds = withOriginIds,
+            withDestinationIds = withDestinationIds
         )
     }
 
@@ -276,7 +279,8 @@ class JsonGenerator {
                         jsonObject.add(
                             it.name,
                             nodeToJson(
-                                it.value as Node, shortClassNames,
+                                it.value as Node,
+                                shortClassNames,
                                 withIds = withIds,
                                 withOriginIds = withOriginIds,
                                 withDestinationIds = withDestinationIds

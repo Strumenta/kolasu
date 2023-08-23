@@ -23,6 +23,8 @@ class Unparser {
                     }
                 }
             template
-        } else null
+        } else {
+            null
+        }
     }
 }

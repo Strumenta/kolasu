@@ -9,7 +9,8 @@ class ASTCodeGeneratorTest {
     @Test
     fun printSimpleKotlinExpression() {
         val ex = KMethodCallExpression(
-            KThisExpression(), ReferenceByName("myMethod"),
+            KThisExpression(),
+            ReferenceByName("myMethod"),
             mutableListOf(KStringLiteral("abc"), KIntLiteral(123), KStringLiteral("qer"))
         )
         val code = KotlinPrinter().printToString(ex)
@@ -21,7 +22,7 @@ class ASTCodeGeneratorTest {
         val cu = KCompilationUnit(
             KPackageDecl("my.splendid.packag"),
             mutableListOf(KImport("my.imported.stuff")),
-            mutableListOf(KFunctionDeclaration("foo")),
+            mutableListOf(KFunctionDeclaration("foo"))
         )
         val code = KotlinPrinter().printToString(cu)
         assertEquals(
@@ -33,7 +34,7 @@ class ASTCodeGeneratorTest {
             |fun foo() {
             |}
             |
-        """.trimMargin(),
+            """.trimMargin(),
             code
         )
     }
@@ -41,7 +42,8 @@ class ASTCodeGeneratorTest {
     @Test
     fun printUsingNodePrinterOverrider() {
         val ex = KMethodCallExpression(
-            KThisExpression(), ReferenceByName("myMethod"),
+            KThisExpression(),
+            ReferenceByName("myMethod"),
             mutableListOf(KStringLiteral("abc"), KIntLiteral(123), KStringLiteral("qer"))
         )
         val code = KotlinPrinter().printToString(ex)

@@ -34,7 +34,7 @@ enum class IndicatorType(val range: IntRange) {
     RT(101..101),
     OC(102..102),
     OF(103..103),
-    OV(104..104),
+    OV(104..104)
     ;
 
     companion object {

@@ -54,7 +54,8 @@ class MetamodelTest {
     fun generateSimpleMetamodel() {
         val metamodelBuilder = MetamodelBuilder(
             "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm", "simplemm"
+            "https://strumenta.com/simplemm",
+            "simplemm"
         )
         metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
@@ -107,7 +108,8 @@ class MetamodelTest {
 
         val sl: EClass = ePackage.eClassifiers.find { it.name == "StringLiteral" } as EClass
         assertEquals(
-            3, sl.eAllSuperTypes.size,
+            3,
+            sl.eAllSuperTypes.size,
             sl.eAllSuperTypes.joinToString(", ") { it.name }
         )
         assertEquals(1, sl.eSuperTypes.size)
@@ -124,7 +126,8 @@ class MetamodelTest {
     fun generateSimpleMetamodelWithInterfaces() {
         val metamodelBuilder = MetamodelBuilder(
             "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm", "simplemm"
+            "https://strumenta.com/simplemm",
+            "simplemm"
         )
         metamodelBuilder.provideClass(AltCompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
@@ -144,7 +147,8 @@ class MetamodelTest {
     fun referenceByName() {
         val metamodelBuilder = MetamodelBuilder(
             "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm", "simplemm"
+            "https://strumenta.com/simplemm",
+            "simplemm"
         )
         metamodelBuilder.provideClass(NodeWithReference::class)
         val ePackage = metamodelBuilder.generate()
@@ -166,7 +170,8 @@ class MetamodelTest {
     fun internalClasses() {
         val metamodelBuilder = MetamodelBuilder(
             "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm", "simplemm"
+            "https://strumenta.com/simplemm",
+            "simplemm"
         )
         metamodelBuilder.provideClass(MyClassWithInternalClasses::class)
         val ePackage = metamodelBuilder.generate()

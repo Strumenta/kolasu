@@ -14,7 +14,7 @@ fun assertParseTreeStr(
     expectedMultiLineStr: String,
     root: ParserRuleContext,
     vocabulary: Vocabulary,
-    printParseTree: Boolean = true,
+    printParseTree: Boolean = true
 ) {
     val actualParseTree = toParseTreeModel(root, vocabulary).multiLineString()
     if (printParseTree) {
@@ -83,14 +83,14 @@ fun <N : Node> assertASTsAreEqual(
     expected: Node,
     actual: ParsingResult<N>,
     context: String = "<root>",
-    considerPosition: Boolean = false,
+    considerPosition: Boolean = false
 ) {
     assertEquals(0, actual.issues.size, actual.issues.toString())
     assertASTsAreEqual(
         expected = expected,
         actual = actual.root!!,
         context = context,
-        considerPosition = considerPosition,
+        considerPosition = considerPosition
     )
 }
 
@@ -121,19 +121,21 @@ fun assertASTsAreEqual(
                             assertEquals(
                                 actualPropValueCollection == null,
                                 expectedPropValueCollection == null,
-                                "$context.${expectedProperty.name} nullness",
+                                "$context.${expectedProperty.name} nullness"
                             )
                             if (actualPropValueCollection != null && expectedPropValueCollection != null) {
                                 assertEquals(
                                     expectedPropValueCollection?.size,
                                     actualPropValueCollection?.size,
-                                    "$context.${expectedProperty.name} length",
+                                    "$context.${expectedProperty.name} length"
                                 )
                                 val expectedIt = expectedPropValueCollection.iterator()
                                 val actualIt = actualPropValueCollection.iterator()
                                 for (i in expectedPropValueCollection.indices) {
                                     assertASTsAreEqual(
-                                        expectedIt.next(), actualIt.next(), "$context[$i]",
+                                        expectedIt.next(),
+                                        actualIt.next(),
+                                        "$context[$i]",
                                         considerPosition = considerPosition,
                                         useLightweightAttributeEquality = useLightweightAttributeEquality
                                     )
@@ -145,13 +147,13 @@ fun assertASTsAreEqual(
                             assertEquals<Any?>(
                                 expectedPropValue,
                                 actualPropValue,
-                                "$context.${expectedProperty.name}",
+                                "$context.${expectedProperty.name}"
                             )
                         } else if (expectedPropValue != null && actualPropValue == null) {
                             assertEquals<Any?>(
                                 expectedPropValue,
                                 actualPropValue,
-                                "$context.${expectedProperty.name}",
+                                "$context.${expectedProperty.name}"
                             )
                         } else if (expectedPropValue == null && actualPropValue == null) {
                             // that is ok
@@ -170,12 +172,12 @@ fun assertASTsAreEqual(
                         assertEquals(
                             expectedPropValue.name,
                             actualPropValue.name,
-                            "$context, comparing reference name of ${expectedProperty.name} of ${expected.nodeType}",
+                            "$context, comparing reference name of ${expectedProperty.name} of ${expected.nodeType}"
                         )
                         assertEquals(
                             expectedPropValue.referred?.toString(),
                             actualPropValue.referred?.toString(),
-                            "$context, comparing reference pointer ${expectedProperty.name} of ${expected.nodeType}",
+                            "$context, comparing reference pointer ${expectedProperty.name} of ${expected.nodeType}"
                         )
                     } else {
                         TODO()
@@ -185,13 +187,13 @@ fun assertASTsAreEqual(
                         assertEquals(
                             expectedPropValue?.toString(),
                             actualPropValue?.toString(),
-                            "$context, comparing property ${expectedProperty.name} of ${expected.nodeType}",
+                            "$context, comparing property ${expectedProperty.name} of ${expected.nodeType}"
                         )
                     } else {
                         assertEquals(
                             expectedPropValue,
                             actualPropValue,
-                            "$context, comparing property ${expectedProperty.name} of ${expected.nodeType}",
+                            "$context, comparing property ${expectedProperty.name} of ${expected.nodeType}"
                         )
                     }
                 }
@@ -202,7 +204,7 @@ fun assertASTsAreEqual(
     } else {
         fail(
             "$context: expected node of type ${expected.nodeType}, " +
-                "but found ${actual.nodeType}",
+                "but found ${actual.nodeType}"
         )
     }
 }

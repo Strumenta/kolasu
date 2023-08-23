@@ -1,10 +1,6 @@
 package com.strumenta.kolasu.emf.rpgast
 
-import com.smeup.rpgparser.parsing.*
-import com.smeup.rpgparser.parsing.ast.*
-import com.smeup.rpgparser.parsing.ast.AssignmentOperator.*
 import com.strumenta.kolasu.model.*
-import java.util.*
 
 data class ToAstConfiguration(
     val considerPosition: Boolean = true

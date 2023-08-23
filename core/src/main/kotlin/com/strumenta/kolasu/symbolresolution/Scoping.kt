@@ -17,7 +17,7 @@ import kotlin.reflect.full.isSubtypeOf
 data class Scope(
     var parent: Scope? = null,
     val symbolTable: SymbolTable = mutableMapOf(),
-    val ignoreCase: Boolean = false,
+    val ignoreCase: Boolean = false
 ) {
     fun define(symbol: PossiblyNamed) {
         this.symbolTable.computeIfAbsent(symbol.name.toSymbolTableKey()) { mutableListOf() }.add(symbol)
@@ -62,10 +62,10 @@ fun Node.referenceByNameProperties(): Collection<ReferenceByNameProperty> {
                 .isSubtypeOf(
                     ReferenceByName::class.createType(
                         arguments = listOf(
-                            KTypeProjection(variance = KVariance.OUT, type = PossiblyNamed::class.createType()),
+                            KTypeProjection(variance = KVariance.OUT, type = PossiblyNamed::class.createType())
                         ),
-                        nullable = true,
-                    ),
+                        nullable = true
+                    )
                 )
         }.map { it as ReferenceByNameProperty }
 }

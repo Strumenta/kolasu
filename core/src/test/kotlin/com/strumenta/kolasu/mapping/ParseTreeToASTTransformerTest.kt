@@ -258,7 +258,7 @@ class ParseTreeToASTTransformerTest {
                     "FOO",
                     mutableListOf(
                         EFeature("A", EStringType()),
-                        EFeature("B", EBooleanType()),
+                        EFeature("B", EBooleanType())
                     )
                 ),
                 EEntity(
@@ -266,7 +266,7 @@ class ParseTreeToASTTransformerTest {
                     mutableListOf(
                         EFeature("C", EEntityRefType(ReferenceByName("FOO")))
                     )
-                ),
+                )
             )
         )
         val actualAST = transformer.transform(
@@ -413,7 +413,7 @@ class EntTransformer(issues: MutableList<Issue> = mutableListOf()) :
         registerNodeFactory(EntCtx::class) { ctx -> Ent(ctx.name) }
             .withChild(Ent::features, EntCtx::features)
         registerNodeFactory(EntCtxFeature::class) { ctx -> EntFeature(name = ctx.name) }
-            .withChild(EntFeature::type, EntCtxFeature::type,)
+            .withChild(EntFeature::type, EntCtxFeature::type)
         this.registerNodeFactory(EntCtxStringType::class, EntStringType::class)
     }
 }

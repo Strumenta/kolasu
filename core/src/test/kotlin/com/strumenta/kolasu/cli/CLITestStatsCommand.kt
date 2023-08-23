@@ -27,7 +27,7 @@ class CLITestStatsCommand {
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -74,7 +74,7 @@ class CLITestStatsCommand {
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -126,7 +126,7 @@ totalErrors,0
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -160,7 +160,7 @@ totalErrors,0
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -203,7 +203,7 @@ totalErrors,0
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -253,7 +253,7 @@ total,6
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )
@@ -303,7 +303,7 @@ total,6
                                 mutableListOf(
                                     MyFieldDecl("f1"),
                                     MyFieldDecl("f2"),
-                                    MyFieldDecl("f3"),
+                                    MyFieldDecl("f3")
                                 )
                             )
                         )

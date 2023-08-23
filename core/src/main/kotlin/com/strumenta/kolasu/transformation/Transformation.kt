@@ -100,7 +100,7 @@ class NodeFactory<Source, Output : Node> {
      */
     fun withChild(
         targetProperty: KMutableProperty1<*, *>,
-        sourceAccessor: Source.() -> Any?,
+        sourceAccessor: Source.() -> Any?
     ): NodeFactory<Source, Output> = withChild(
         get = { source -> source.sourceAccessor() },
         set = (targetProperty as KMutableProperty1<Any, Any?>)::set,
@@ -115,7 +115,7 @@ class NodeFactory<Source, Output : Node> {
      */
     fun withChild(
         targetProperty: KProperty1<*, *>,
-        sourceAccessor: Source.() -> Any?,
+        sourceAccessor: Source.() -> Any?
     ): NodeFactory<Source, Output> = withChild<Any, Any>(
         get = { source -> source.sourceAccessor() },
         null,
@@ -342,7 +342,9 @@ open class ASTTransformer(
                 if (targetProp is KMutableProperty1 && mapped != null) {
                     val path = (mapped.path.ifEmpty { targetProp.name })
                     childNodeFactory = ChildNodeFactory(
-                        childKey, factory.getter(path), (targetProp as KMutableProperty1<Any, Any?>)::set
+                        childKey,
+                        factory.getter(path),
+                        (targetProp as KMutableProperty1<Any, Any?>)::set
                     )
                     factory.children[childKey] = childNodeFactory as ChildNodeFactory<Any, *, *>
                     setChild(childNodeFactory, source, node, pd)
@@ -571,8 +573,12 @@ open class ASTTransformer(
             val endIndex = qualifiedName.lastIndexOf('.')
             if (endIndex >= 0) {
                 qualifiedName.substring(0, endIndex)
-            } else ""
-        } else ""
+            } else {
+                ""
+            }
+        } else {
+            ""
+        }
         val set = _knownClasses.computeIfAbsent(packageName) { mutableSetOf() }
         set.add(target)
     }

@@ -84,7 +84,8 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                                 (value as List<Node>).forEach {
                                     sb.append(
                                         it.debugPrint(
-                                            indent + indentBlock + indentBlock, configuration
+                                            indent + indentBlock + indentBlock,
+                                            configuration
                                         )
                                     )
                                 }
@@ -94,7 +95,8 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                                 value.forEach {
                                     sb.append(
                                         it?.debugPrint(
-                                            indent + indentBlock + indentBlock, configuration
+                                            indent + indentBlock + indentBlock,
+                                            configuration
                                         )
                                     )
                                 }
@@ -112,7 +114,8 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                             sb.append("$indent$indentBlock${property.name} = [\n")
                             sb.append(
                                 value.debugPrint(
-                                    indent + indentBlock + indentBlock, configuration
+                                    indent + indentBlock + indentBlock,
+                                    configuration
                                 )
                             )
                             sb.append("$indent$indentBlock]\n")

@@ -51,7 +51,8 @@ class JsonDeserializer {
                         // we need to get the package name of the rawClass and apply it to className.
                         Class.forName(
                             "${rawClass.canonicalName.substring(
-                                0, rawClass.canonicalName.lastIndexOf('.') + 1
+                                0,
+                                rawClass.canonicalName.lastIndexOf('.') + 1
                             )}$className"
                         )
                     }
@@ -108,7 +109,8 @@ class JsonDeserializer {
                     args[p] = value
                 } catch (t: Throwable) {
                     throw RuntimeException(
-                        "Issue deserializing property ${p.name} of ${p.type}. JSON: ${jo.get(p.name)}", t
+                        "Issue deserializing property ${p.name} of ${p.type}. JSON: ${jo.get(p.name)}",
+                        t
                     )
                 }
             }

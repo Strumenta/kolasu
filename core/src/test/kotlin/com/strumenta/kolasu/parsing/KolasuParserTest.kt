@@ -47,7 +47,7 @@ class KolasuParserTest {
             """set a = 10
             |set b = ""
             |display c
-        """.trimMargin()
+            """.trimMargin()
         )
         assertNotNull(result)
         val lexingResult = parser.tokenFactory.extractTokens(result)
@@ -66,7 +66,7 @@ class KolasuParserTest {
             """set a = 10
             |set b = ""
             |display c
-        """.trimMargin()
+            """.trimMargin()
         )
         assertEquals(1, parser.cachesCounter)
     }

@@ -746,7 +746,7 @@ class EMFCLIToolTest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityFoo", mutableListOf()),
+                            MyEntityDecl("EntityFoo", mutableListOf())
                         )
                     )
                 )
@@ -754,7 +754,7 @@ class EMFCLIToolTest {
                     emptyList(),
                     MyCompilationUnit(
                         mutableListOf(
-                            MyEntityDecl("EntityBar", mutableListOf()),
+                            MyEntityDecl("EntityBar", mutableListOf())
                         )
                     )
                 )
