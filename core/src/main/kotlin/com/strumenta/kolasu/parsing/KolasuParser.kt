@@ -5,12 +5,15 @@ import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import org.antlr.v4.runtime.*
+import org.antlr.v4.runtime.atn.ATN
+import org.antlr.v4.runtime.dfa.DFA
 import org.antlr.v4.runtime.misc.Interval
 import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
+import java.lang.reflect.Field
 import java.nio.charset.Charset
 import java.util.*
 import kotlin.reflect.full.memberFunctions
@@ -144,6 +147,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
      * Creates the first-stage parser.
      */
     protected open fun createParser(inputStream: CharStream, issues: MutableList<Issue>): P {
+
         val lexer = createANTLRLexer(inputStream)
         attachListeners(lexer, issues)
         val tokenStream = createTokenStream(lexer)
@@ -208,6 +212,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         var lexingTime: Long? = null
         val time = measureTimeMillis {
             val parser = createParser(inputStream, issues)
+            countExecution(parser)
             if (measureLexingTime) {
                 val tokenStream = parser.inputStream
                 if (tokenStream is CommonTokenStream) {
@@ -291,5 +296,43 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
      */
     protected open fun assignParents(ast: R?) {
         ast?.assignParents()
+    }
+
+    private var executionCounter = 0
+    var cacheCycleSize = 500
+    var executionsToNextCacheClean = cacheCycleSize
+
+    private fun countExecution(parser: Parser) {
+        executionCounter++
+        executionsToNextCacheClean--
+        if (executionsToNextCacheClean <= 0) {
+            clearCaches(parser)
+        }
+    }
+
+    protected open fun clearCaches(parser: Parser) {
+        executionsToNextCacheClean = cacheCycleSize
+
+        fun actualClean(myClass: Class<*>) {
+            val _decisionToDFAField = myClass.declaredFields.find { it.name == "_decisionToDFA" }
+            val _ATNField = myClass.declaredFields.find { it.name == "_ATN" }
+            if (_decisionToDFAField != null && _ATNField != null) {
+                _decisionToDFAField.isAccessible = true
+                _ATNField.isAccessible = true
+                val _decisionToDFA = _decisionToDFAField.get(null) as Array<DFA>
+                val _ATN = _ATNField.get(null) as ATN
+                for (d in _decisionToDFA.indices) {
+                    _decisionToDFA[d] =
+                        DFA(_ATN.getDecisionState(d), d)
+                }
+            }
+        }
+
+        val lexer = parser.tokenStream.tokenSource as? Lexer
+        if (lexer != null) {
+            actualClean(lexer.javaClass)
+        }
+
+        actualClean(parser.javaClass)
     }
 }
