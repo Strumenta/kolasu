@@ -84,7 +84,8 @@ class JsonDeserializer {
                             } catch (ex: ClassNotFoundException) {
                                 Class.forName(
                                     "${rawClass.canonicalName.substring(
-                                        0, rawClass.canonicalName.lastIndexOf('.') + 1
+                                        0,
+                                        rawClass.canonicalName.lastIndexOf('.') + 1
                                     )}$type"
                                 )
                             }
