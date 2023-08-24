@@ -30,8 +30,8 @@ open class SimpleLangKolasuParser : KolasuParser<Node, SimpleLangParser, SimpleL
         source: Source?
     ): Node? = null
 
-    override fun clearCaches(parser: Parser) {
-        super.clearCaches(parser)
+    override fun clearCaches() {
+        super.clearCaches()
         cachesCounter++
     }
 
@@ -60,6 +60,12 @@ class KolasuParserTest {
     @Test
     fun clearCache() {
         val parser = SimpleLangKolasuParser()
+        parser.parse(
+            """set a = 10
+            |set b = ""
+            |display c
+            """.trimMargin()
+        )
         parser.executionsToNextCacheClean = 0
         assertEquals(0, parser.cachesCounter)
         parser.parse(
