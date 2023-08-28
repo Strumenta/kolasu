@@ -84,8 +84,11 @@ class LionWebModelConverter {
                         val kReference = kFeatures.find { it.name == feature.name }
                             as com.strumenta.kolasu.language.Reference
                         val kValue = kNode.getReference(kReference)
-                        val lwReferred: Node? = if (kValue.referred == null) null
-                        else nodesMapping.byA(kValue.referred!! as KNode)!!
+                        val lwReferred: Node? = if (kValue.referred == null) {
+                            null
+                        } else {
+                            nodesMapping.byA(kValue.referred!! as KNode)!!
+                        }
                         lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
                     }
                 }
@@ -221,12 +224,16 @@ class LionWebModelConverter {
                             } else {
                                 throw IllegalStateException()
                             }
-                            val kChild = if (lwChild == null) null else (
-                                nodesMapping.byB(lwChild)
-                                    ?: throw IllegalStateException(
-                                        "Unable to find Kolasu Node corresponding to $lwChild"
+                            val kChild = if (lwChild == null) {
+                                null
+                            } else {
+                                (
+                                    nodesMapping.byB(lwChild)
+                                        ?: throw IllegalStateException(
+                                            "Unable to find Kolasu Node corresponding to $lwChild"
+                                        )
                                     )
-                                )
+                            }
                             params[param] = kChild
                         }
                     }

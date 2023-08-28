@@ -202,7 +202,9 @@ class LionWebModelConverterTest {
         val ast = SimpleRoot(
             12345,
             mutableListOf(
-                a1, b2, a3
+                a1,
+                b2,
+                a3
             )
         )
         ast.assignParents()
@@ -263,7 +265,9 @@ class LionWebModelConverterTest {
         val expectedAST = SimpleRoot(
             12345,
             mutableListOf(
-                a1, b2, a3
+                a1,
+                b2,
+                a3
             )
         )
         expectedAST.assignParents()

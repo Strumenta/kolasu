@@ -57,7 +57,9 @@ class KotlinCodeProcessor {
         val disposable = Disposer.newDisposable()
         try {
             val env = KotlinCoreEnvironment.createForProduction(
-                disposable, CompilerConfiguration(), EnvironmentConfigFiles.JVM_CONFIG_FILES
+                disposable,
+                CompilerConfiguration(),
+                EnvironmentConfigFiles.JVM_CONFIG_FILES
             )
             val file = LightVirtualFile("temp.kt", KotlinFileType.INSTANCE, code)
             return PsiManager.getInstance(env.project).findFile(file) as KtFile

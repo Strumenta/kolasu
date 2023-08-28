@@ -12,7 +12,7 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class SimpleLangKolasuParser : KolasuParser<Node, SimpleLangParser, SimpleLangParser.CompilationUnitContext,
+open class SimpleLangKolasuParser : KolasuParser<Node, SimpleLangParser, SimpleLangParser.CompilationUnitContext,
     KolasuANTLRToken>(ANTLRTokenFactory()) {
     override fun createANTLRLexer(charStream: CharStream): Lexer {
         return SimpleLangLexer(charStream)
@@ -28,6 +28,13 @@ class SimpleLangKolasuParser : KolasuParser<Node, SimpleLangParser, SimpleLangPa
         issues: MutableList<Issue>,
         source: Source?
     ): Node? = null
+
+    override fun clearCaches() {
+        super.clearCaches()
+        cachesCounter++
+    }
+
+    public var cachesCounter = 0
 }
 
 class KolasuParserTest {
@@ -39,7 +46,7 @@ class KolasuParserTest {
             """set a = 10
             |set b = ""
             |display c
-        """.trimMargin()
+            """.trimMargin()
         )
         assertNotNull(result)
         val lexingResult = parser.tokenFactory.extractTokens(result)
@@ -47,5 +54,25 @@ class KolasuParserTest {
         assertEquals(11, lexingResult.tokens.size)
         val text = lexingResult.tokens.map { it.text }
         assertEquals(listOf("set", "a", "=", "10", "set", "b", "=", "\"\"", "display", "c", "<EOF>"), text)
+    }
+
+    @Test
+    fun clearCache() {
+        val parser = SimpleLangKolasuParser()
+        parser.parse(
+            """set a = 10
+            |set b = ""
+            |display c
+            """.trimMargin()
+        )
+        parser.executionsToNextCacheClean = 0
+        assertEquals(0, parser.cachesCounter)
+        parser.parse(
+            """set a = 10
+            |set b = ""
+            |display c
+            """.trimMargin()
+        )
+        assertEquals(1, parser.cachesCounter)
     }
 }

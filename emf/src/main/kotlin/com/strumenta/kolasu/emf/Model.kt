@@ -157,7 +157,9 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                 ePackage.eClassifiers.filterIsInstance<EClass>().find {
                     it.name == pdValue.javaClass.simpleName
                 }
-            } else null
+            } else {
+                null
+            }
             return when {
                 eClass != null -> {
                     pdValue!!.dataToEObject(ePackage)
@@ -434,10 +436,12 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
                             throw RuntimeException("Unable to map to EObject child $it in property $pd of $this", e)
                         }
                     }
-                } else try {
-                    eo.eSet(esf, toValue(ec.ePackage, pd.value, mapping))
-                } catch (e: Exception) {
-                    throw RuntimeException("Unable to set property $pd. Structural feature: $esf", e)
+                } else {
+                    try {
+                        eo.eSet(esf, toValue(ec.ePackage, pd.value, mapping))
+                    } catch (e: Exception) {
+                        throw RuntimeException("Unable to set property $pd. Structural feature: $esf", e)
+                    }
                 }
             }
         }

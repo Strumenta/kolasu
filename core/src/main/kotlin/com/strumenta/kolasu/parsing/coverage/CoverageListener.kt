@@ -109,7 +109,9 @@ open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths
         return if (path.elements.isNotEmpty()) {
             val last = path.elements.last()
             last.rule && last.symbol == ruleIndex
-        } else false
+        } else {
+            false
+        }
     }
 
     private fun addUncoveredPaths(state: Int = parser!!.state) {
@@ -160,7 +162,9 @@ open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths
                 }
             }
             true
-        } else false
+        } else {
+            false
+        }
     }
 
     override fun exitEveryRule(ctx: ParserRuleContext) {

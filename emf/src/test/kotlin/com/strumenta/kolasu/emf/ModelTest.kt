@@ -36,7 +36,7 @@ class ModelTest {
             listOf(
                 VarDeclaration(Visibility.PUBLIC, "a", StringLiteral("foo")),
                 VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar")),
-                VarDeclaration(Visibility.PRIVATE, "c", LocalDateTimeLiteral(LocalDateTime.now())),
+                VarDeclaration(Visibility.PRIVATE, "c", LocalDateTimeLiteral(LocalDateTime.now()))
             )
         ).withPosition(Position(Point(1, 0), Point(1, 1)))
         val nsURI = "https://strumenta.com/simplemm"
@@ -186,7 +186,8 @@ class ModelTest {
     fun cyclicReferenceByNameOnSingleReference() {
         val metamodelBuilder = MetamodelBuilder(
             "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm", "simplemm"
+            "https://strumenta.com/simplemm",
+            "simplemm"
         )
         metamodelBuilder.provideClass(NodeWithReference::class)
         val ePackage = metamodelBuilder.generate()
@@ -219,7 +220,8 @@ class ModelTest {
     fun cyclicReferenceByNameOnMultipleReference() {
         val metamodelBuilder = MetamodelBuilder(
             "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm", "simplemm"
+            "https://strumenta.com/simplemm",
+            "simplemm"
         )
         metamodelBuilder.provideClass(NodeWithReference::class)
         val ePackage = metamodelBuilder.generate()
@@ -282,7 +284,8 @@ class ModelTest {
     fun forwardAndBackwardReferences() {
         val metamodelBuilder = MetamodelBuilder(
             "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm", "simplemm"
+            "https://strumenta.com/simplemm",
+            "simplemm"
         )
         metamodelBuilder.provideClass(NodeWithForwardReference::class)
         val ePackage = metamodelBuilder.generate()
@@ -371,7 +374,8 @@ class ModelTest {
         val ast = MySimpleLangCu().withParseTreeNode(pt)
         val metamodelBuilder = MetamodelBuilder(
             "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm", "simplemm"
+            "https://strumenta.com/simplemm",
+            "simplemm"
         )
         metamodelBuilder.provideClass(MySimpleLangCu::class)
         val ePackage = metamodelBuilder.generate()
@@ -402,7 +406,8 @@ class ModelTest {
         val ast = MySimpleLangCu().withOrigin(someOtherNode)
         val metamodelBuilder = MetamodelBuilder(
             "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm", "simplemm"
+            "https://strumenta.com/simplemm",
+            "simplemm"
         )
         metamodelBuilder.provideClass(MySimpleLangCu::class)
         metamodelBuilder.provideClass(MyRoot::class)
@@ -432,7 +437,8 @@ class ModelTest {
     fun handlesGenericNodes() {
         val metamodelBuilder = MetamodelBuilder(
             "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm", "simplemm"
+            "https://strumenta.com/simplemm",
+            "simplemm"
         )
         val ePackage = metamodelBuilder.generate()
         val res = ResourceImpl()

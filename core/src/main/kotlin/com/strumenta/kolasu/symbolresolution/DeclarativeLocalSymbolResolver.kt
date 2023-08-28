@@ -61,7 +61,7 @@ data class DeclarativeLocalSymbolResolver(val issues: MutableList<Issue> = mutab
 
     inline fun <reified ContextType : Node> scopeFor(
         nodeType: KClass<*>,
-        crossinline scopeFunction: (ContextType) -> Scope?,
+        crossinline scopeFunction: (ContextType) -> Scope?
     ) {
         this.classScopeDefinitions.computeIfAbsent(nodeType) { mutableListOf() }
             .add(
@@ -69,14 +69,14 @@ data class DeclarativeLocalSymbolResolver(val issues: MutableList<Issue> = mutab
                     contextType = ContextType::class,
                     scopeFunction = { context: Node ->
                         if (context is ContextType) scopeFunction(context) else null
-                    },
-                ),
+                    }
+                )
             )
     }
 
     inline fun <reified ContextType : Node> scopeFor(
         reference: ReferenceByNameProperty,
-        crossinline scopeDefinition: (ContextType) -> Scope?,
+        crossinline scopeDefinition: (ContextType) -> Scope?
     ) {
         this.propertyScopeDefinitions.computeIfAbsent(reference) { mutableListOf() }
             .add(
@@ -84,13 +84,13 @@ data class DeclarativeLocalSymbolResolver(val issues: MutableList<Issue> = mutab
                     contextType = ContextType::class,
                     scopeFunction = { context: Node ->
                         if (context is ContextType) scopeDefinition(context) else null
-                    },
-                ),
+                    }
+                )
             )
     }
 }
 
 fun symbolResolver(
     issues: MutableList<Issue> = mutableListOf(),
-    init: DeclarativeLocalSymbolResolver.() -> Unit,
+    init: DeclarativeLocalSymbolResolver.() -> Unit
 ) = DeclarativeLocalSymbolResolver(issues).apply(init)

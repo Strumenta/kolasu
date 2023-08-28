@@ -22,7 +22,7 @@ typealias ParserInstantiator<P> = Function<File, P?>
 abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
     val parserInstantiator: ParserInstantiator<P>,
     help: String = "",
-    name: String? = null,
+    name: String? = null
 ) :
     CliktCommand(help = help, name = name) {
     protected val inputs by argument().file(mustExist = true).multiple()

@@ -22,7 +22,10 @@ class TranspilationTrace<S : Node, T : Node>(
         targetAST: T,
         transpilationIssues: List<Issue> = emptyList()
     ) : this(
-        originalCode, generatedCode,
-        Result(emptyList(), sourceAST), Result(emptyList(), targetAST), transpilationIssues
+        originalCode,
+        generatedCode,
+        Result(emptyList(), sourceAST),
+        Result(emptyList(), targetAST),
+        transpilationIssues
     )
 }

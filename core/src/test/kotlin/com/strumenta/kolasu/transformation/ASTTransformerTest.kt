@@ -159,7 +159,8 @@ class ASTTransformerTest {
                     addIssue(
                         "Illegal types for sum operation. Only integer values are allowed. " +
                             "Found: (${it.left.type?.name ?: "null"}, ${it.right.type?.name ?: "null"})",
-                        IssueSeverity.ERROR, it.position
+                        IssueSeverity.ERROR,
+                        it.position
                     )
                 }
             }
@@ -170,7 +171,8 @@ class ASTTransformerTest {
                     addIssue(
                         "Illegal types for concat operation. Only string values are allowed. " +
                             "Found: (${it.left.type?.name ?: "null"}, ${it.right.type?.name ?: "null"})",
-                        IssueSeverity.ERROR, it.position
+                        IssueSeverity.ERROR,
+                        it.position
                     )
                 }
             }
@@ -186,7 +188,7 @@ class ASTTransformerTest {
             myTransformer.transform(
                 TypedSum(
                     TypedLiteral("1", Type.INT),
-                    TypedLiteral("1", Type.INT),
+                    TypedLiteral("1", Type.INT)
                 )
             )!!
         )
@@ -201,7 +203,7 @@ class ASTTransformerTest {
             myTransformer.transform(
                 TypedConcat(
                     TypedLiteral("test", Type.STR),
-                    TypedLiteral("test", Type.STR),
+                    TypedLiteral("test", Type.STR)
                 )
             )!!
         )
@@ -216,7 +218,7 @@ class ASTTransformerTest {
             myTransformer.transform(
                 TypedSum(
                     TypedLiteral("1", Type.INT),
-                    TypedLiteral("test", Type.STR),
+                    TypedLiteral("test", Type.STR)
                 )
             )!!
         )
@@ -238,7 +240,7 @@ class ASTTransformerTest {
             myTransformer.transform(
                 TypedConcat(
                     TypedLiteral("1", Type.INT),
-                    TypedLiteral("test", Type.STR),
+                    TypedLiteral("test", Type.STR)
                 )
             )!!
         )

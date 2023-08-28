@@ -5,6 +5,8 @@ import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import org.antlr.v4.runtime.*
+import org.antlr.v4.runtime.atn.ParserATNSimulator
+import org.antlr.v4.runtime.atn.PredictionContextCache
 import org.antlr.v4.runtime.misc.Interval
 import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
@@ -41,7 +43,9 @@ interface TokenFactory<T : KolasuToken> {
             antlrTerminals.sortBy { it.symbol.tokenIndex }
             val tokens = antlrTerminals.map { convertToken(it) }.toMutableList()
             LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime)
-        } else null
+        } else {
+            null
+        }
     }
 }
 
@@ -109,6 +113,8 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
     tokenFactory: TokenFactory<T>
 ) : KolasuANTLRLexer<T>(tokenFactory), ASTParser<R> {
 
+    protected var predictionContextCache = PredictionContextCache()
+
     /**
      * Creates the first-stage parser.
      */
@@ -148,6 +154,9 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         attachListeners(lexer, issues)
         val tokenStream = createTokenStream(lexer)
         val parser: P = createANTLRParser(tokenStream)
+        // Assign interpreter to avoid caching DFA states indefinitely across executions
+        parser.interpreter =
+            ParserATNSimulator(parser, parser.atn, parser.interpreter.decisionToDFA, predictionContextCache)
         attachListeners(parser, issues)
         return parser
     }
@@ -163,7 +172,8 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         if (lastToken.type != Token.EOF) {
             issues.add(
                 Issue(
-                    IssueType.SYNTACTIC, "The whole input was not consumed",
+                    IssueType.SYNTACTIC,
+                    "The whole input was not consumed",
                     position = lastToken!!.endPoint.asPosition
                 )
             )
@@ -208,6 +218,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         var lexingTime: Long? = null
         val time = measureTimeMillis {
             val parser = createParser(inputStream, issues)
+            countExecution(parser)
             if (measureLexingTime) {
                 val tokenStream = parser.inputStream
                 if (tokenStream is CommonTokenStream) {
@@ -260,8 +271,12 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         }
         val now = System.currentTimeMillis()
         return ParsingResult(
-            myIssues, ast, inputStream.getText(Interval(0, inputStream.index() + 1)),
-            null, firstStage, now - start
+            myIssues,
+            ast,
+            inputStream.getText(Interval(0, inputStream.index() + 1)),
+            null,
+            firstStage,
+            now - start
         )
     }
 
@@ -291,5 +306,34 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
      */
     protected open fun assignParents(ast: R?) {
         ast?.assignParents()
+    }
+
+    protected fun shouldWeClearCaches(): Boolean {
+        return executionsToNextCacheClean <= 0
+    }
+
+    protected var executionCounter = 0
+    var cacheCycleSize = 500
+    var executionsToNextCacheClean = cacheCycleSize
+
+    protected fun considerClearCaches() {
+        if (shouldWeClearCaches()) {
+            clearCaches()
+        }
+    }
+
+    protected open fun countExecution(parser: Parser) {
+        executionCounter++
+        executionsToNextCacheClean--
+        considerClearCaches()
+    }
+
+    open fun clearCaches() {
+        executionsToNextCacheClean = cacheCycleSize
+        val lexer = createANTLRLexer(CharStreams.fromString(""))
+        lexer.interpreter.clearDFA()
+        val parser = createANTLRParser(createTokenStream(lexer))
+        parser.interpreter.clearDFA()
+        predictionContextCache = PredictionContextCache()
     }
 }
