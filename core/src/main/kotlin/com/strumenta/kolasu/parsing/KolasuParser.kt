@@ -308,16 +308,24 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         ast?.assignParents()
     }
 
+    protected fun shouldWeClearCaches(): Boolean {
+        return executionsToNextCacheClean <= 0
+    }
+
     protected var executionCounter = 0
     var cacheCycleSize = 500
     var executionsToNextCacheClean = cacheCycleSize
 
+    protected fun considerClearCaches() {
+        if (shouldWeClearCaches()) {
+            clearCaches()
+        }
+    }
+
     protected open fun countExecution(parser: Parser) {
         executionCounter++
         executionsToNextCacheClean--
-        if (executionsToNextCacheClean <= 0) {
-            clearCaches()
-        }
+        considerClearCaches()
     }
 
     open fun clearCaches() {
