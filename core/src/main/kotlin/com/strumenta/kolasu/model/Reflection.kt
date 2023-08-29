@@ -267,7 +267,7 @@ fun <N : Any> KProperty1<N, *>.asReference(): Reference {
 fun <N : Any> KProperty1<N, *>.asAttribute(): Attribute {
     val optional = when {
         (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
-            throw IllegalStateException()
+            throw IllegalStateException("Attributes with a Collection type are not allowed (property $this)")
         }
         this.returnType.isMarkedNullable -> true
         else -> false
