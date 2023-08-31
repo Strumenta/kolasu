@@ -28,6 +28,13 @@ class SimpleLangKolasuParser : KolasuANTLRParser<Node, SimpleLangParser, SimpleL
         issues: MutableList<Issue>,
         source: Source?
     ): Node? = null
+
+    override fun clearCaches() {
+        super.clearCaches()
+        cachesCounter++
+    }
+
+    public var cachesCounter = 0
 }
 
 class KolasuParserTest {
@@ -47,5 +54,25 @@ class KolasuParserTest {
         assertEquals(11, lexingResult.tokens.size)
         val text = lexingResult.tokens.map { it.text }
         assertEquals(listOf("set", "a", "=", "10", "set", "b", "=", "\"\"", "display", "c", "<EOF>"), text)
+    }
+
+    @Test
+    fun clearCache() {
+        val parser = SimpleLangKolasuParser()
+        parser.parse(
+            """set a = 10
+            |set b = ""
+            |display c
+            """.trimMargin()
+        )
+        parser.executionsToNextCacheClean = 0
+        assertEquals(0, parser.cachesCounter)
+        parser.parse(
+            """set a = 10
+            |set b = ""
+            |display c
+            """.trimMargin()
+        )
+        assertEquals(1, parser.cachesCounter)
     }
 }

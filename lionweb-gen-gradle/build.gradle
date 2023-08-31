@@ -28,14 +28,18 @@ buildConfig {
     buildConfigField("String", "PLUGIN_GROUP", "\"${project.group}\"")
     buildConfigField("String", "PLUGIN_NAME", "\"${project.name}\"")
     buildConfigField("String", "PLUGIN_VERSION", "\"${project.version}\"")
+    buildConfigField("String", "LIONCORE_VERSION", "\"${project.lionwebVersion}\"")
 }
 
 gradlePlugin {
+    website.set("https://github.com/strumenta/kolasu")
+    vcsUrl.set("https://github.com/strumenta/kolasu.git")
     plugins {
         create("lionwebGenGradlePlugin") {
             id = lionwebGenGradlePluginID as String
             displayName = "Kolasu LionWeb Gen"
             description = "Kolasu LionWeb Gen"
+            tags.set(["parsing", "ast", "starlasu", "lionweb"])
             implementationClass = "com.strumenta.kolasu.lionwebgen.LionWebGradlePlugin"
         }
     }
@@ -47,4 +51,18 @@ tasks.named("compileKotlin") {
 
 test {
     useJUnitPlatform()
+}
+
+tasks.findByName("dokkaJavadoc").dependsOn("generateBuildConfig")
+tasks.findByName("dokkaJavadoc").dependsOn(":core:compileKotlin")
+tasks.findByName("dokkaJavadoc").dependsOn(":emf:compileKotlin")
+tasks.findByName("dokkaJavadoc").dependsOn(":lionweb:jar")
+tasks.findByName("dokkaJavadoc").dependsOn(":lionweb-gen:jar")
+
+java {
+    sourceCompatibility = "$jvm_version"
+    targetCompatibility = "$jvm_version"
+    registerFeature('cli') {
+        usingSourceSet(sourceSets.main)
+    }
 }

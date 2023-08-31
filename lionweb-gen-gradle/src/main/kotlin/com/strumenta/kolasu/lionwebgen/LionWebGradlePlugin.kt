@@ -36,11 +36,13 @@ class LionWebGradlePlugin : Plugin<Project> {
         return project.tasks.create(genASTClasses) {
             it.group = tasksGroup
             it.description = "Generate Kolasu ASTs from LionWeb languages"
+            it.inputs.files(configuration.languages.get())
+            it.outputs.dir(configuration.outdir.get())
             it.doLast {
                 println("LIonWeb AST Classes generation task - started")
                 println("  languages: ${configuration.languages.get()}")
                 configuration.languages.get().forEach { languageFile ->
-                    println("prcessing languageFile $languageFile")
+                    println("processing languageFile $languageFile")
                     when (languageFile.extension) {
                         "json" -> {
                             val jsonser = JsonSerialization.getStandardSerialization()
@@ -75,12 +77,16 @@ class LionWebGradlePlugin : Plugin<Project> {
             it.group = tasksGroup
             it.dependsOn("compileKotlin")
             it.doLast {
-                println("export packages: ${configuration.exportPackages.get()}")
-                configuration.exportPackages.get().forEach { packageName ->
-                    project.javaexec { jes ->
-                        jes.classpath = project.sourceSets.getByName("main").runtimeClasspath
-                        jes.mainClass.set("$packageName.LanguageKt")
-                        jes.args = mutableListOf(lionwebLanguageFile(project, packageName).absolutePath)
+                if (configuration.exportPackages.get().isEmpty()) {
+                    project.logger.warn("executing $genLanguages task but no export packages defined")
+                } else {
+                    configuration.exportPackages.get().forEach { packageName ->
+                        project.logger.lifecycle("generating LionWeb language for package $packageName")
+                        project.javaexec { jes ->
+                            jes.classpath = project.sourceSets.getByName("main").runtimeClasspath
+                            jes.mainClass.set("${packageName}.Language")
+                            jes.args = mutableListOf(lionwebLanguageFile(project, packageName).absolutePath)
+                        }
                     }
                 }
             }
@@ -119,7 +125,7 @@ class LionWebGradlePlugin : Plugin<Project> {
         ksp.arg("lionwebgendir", File(project.buildDir, "lionwebgen").absolutePath)
         ksp.arg("file", kspFile.absolutePath)
 
-        val prepareKsp = project.tasks.create("prepareKsp") {
+        val prepareKsp = project.tasks.create("prepareKspForLionWebGen") {
             it.doFirst {
                 val exportPackagesStr = configuration.exportPackages.get().let { it.joinToString(",") }
                 kspFile.parentFile.mkdirs()
@@ -139,20 +145,20 @@ class LionWebGradlePlugin : Plugin<Project> {
         }
 
         project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).forEach {
-            it.source(
-                File(project.buildDir, "lionweb-gen"),
-                File(project.rootDir, "src${File.separator}main${File.separator}kotlin")
-            )
-            it.dependsOn(genASTClasses)
+            if (it.name == "kotlinCompile") {
+                it.source(
+                    File(project.buildDir, "lionweb-gen"),
+                    File(project.rootDir, "src${File.separator}main${File.separator}kotlin")
+                )
+                it.dependsOn(genASTClasses)
+            }
         }
     }
 
     private fun addDependencies(project: Project) {
         fun addKolasuModule(moduleName: String) {
-            project.dependencies.add(
-                "implementation",
-                "com.strumenta.kolasu:kolasu-$moduleName:${project.kolasuVersion}"
-            )
+            project.dependencies.add("api",
+                "com.strumenta.kolasu:kolasu-$moduleName:${project.kolasuVersion}")
         }
 
         addKolasuModule("core")
@@ -160,12 +166,9 @@ class LionWebGradlePlugin : Plugin<Project> {
         addKolasuModule("lionweb")
         addKolasuModule("lionweb-gen")
         project.dependencies.add("ksp", "com.strumenta.kolasu:kolasu-lionweb-ksp:${project.kolasuVersion}")
-        project.dependencies.add("implementation", "com.github.ajalt.clikt:clikt:3.5.0")
 
-        // We need to use this one to avoid an issue with Gson
-        project.dependencies.add(
-            "implementation",
-            "io.lionweb.lioncore-java:lioncore-java-core:${project.lionwebVersion}"
-        )
+        project.dependencies.add("api", "com.github.ajalt.clikt:clikt:3.5.0")
+        project.dependencies.add("api", "io.lionweb.lioncore-java:lioncore-java-core:${project.lionwebVersion}")
+
     }
 }

@@ -60,6 +60,7 @@ internal class TraversingStructurallyTest {
             Item("6", specifiedRange = range(13, 3, 13, 9))
         ),
         specifiedRange = range(1, 1, 14, 1)
+
     )
 
     @Test

@@ -3,7 +3,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.dokka")
-    id("org.jlleitschuh.gradle.ktlint") version "11.3.2"
+    id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
     id("maven-publish")
     id("signing")
 
@@ -117,7 +117,7 @@ subprojects {
 }
 
 release {
-    buildTasks.set(listOf("publish"))
+    buildTasks.set(listOf("publish", ":lionweb-gen-gradle:publishPlugins"))
     git {
         requireBranch.set("master")
         pushToRemote.set("origin")
@@ -125,5 +125,6 @@ release {
 }
 
 tasks.wrapper {
-    gradleVersion = "8.1.1"
+    gradleVersion = "8.2.1"
+    distributionType = Wrapper.DistributionType.ALL
 }

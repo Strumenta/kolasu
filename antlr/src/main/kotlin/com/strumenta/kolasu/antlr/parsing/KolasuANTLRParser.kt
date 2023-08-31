@@ -24,6 +24,8 @@ import org.antlr.v4.runtime.RecognitionException
 import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.TokenStream
+import org.antlr.v4.runtime.atn.ParserATNSimulator
+import org.antlr.v4.runtime.atn.PredictionContextCache
 import org.antlr.v4.runtime.misc.Interval
 import java.io.File
 import java.io.FileInputStream
@@ -41,6 +43,8 @@ import kotlin.system.measureTimeMillis
 abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken>(
     tokenFactory: TokenFactory<T>
 ) : KolasuANTLRLexer<T>(tokenFactory), ASTParser<R> {
+
+    protected var predictionContextCache = PredictionContextCache()
 
     /**
      * Creates the first-stage parser.
@@ -81,6 +85,9 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
         attachListeners(lexer, issues)
         val tokenStream = createTokenStream(lexer)
         val parser: P = createANTLRParser(tokenStream)
+        // Assign interpreter to avoid caching DFA states indefinitely across executions
+        parser.interpreter =
+            ParserATNSimulator(parser, parser.atn, parser.interpreter.decisionToDFA, predictionContextCache)
         attachListeners(parser, issues)
         return parser
     }
@@ -142,6 +149,7 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
         var lexingTime: Long? = null
         val time = measureTimeMillis {
             val parser = createParser(inputStream, issues)
+            countExecution(parser)
             if (measureLexingTime) {
                 val tokenStream = parser.inputStream
                 if (tokenStream is CommonTokenStream) {
@@ -239,6 +247,35 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
      */
     protected open fun assignParents(ast: R?) {
         ast?.assignParents()
+    }
+
+    protected fun shouldWeClearCaches(): Boolean {
+        return executionsToNextCacheClean <= 0
+    }
+
+    protected var executionCounter = 0
+    var cacheCycleSize = 500
+    var executionsToNextCacheClean = cacheCycleSize
+
+    protected fun considerClearCaches() {
+        if (shouldWeClearCaches()) {
+            clearCaches()
+        }
+    }
+
+    protected open fun countExecution(parser: Parser) {
+        executionCounter++
+        executionsToNextCacheClean--
+        considerClearCaches()
+    }
+
+    open fun clearCaches() {
+        executionsToNextCacheClean = cacheCycleSize
+        val lexer = createANTLRLexer(CharStreams.fromString(""))
+        lexer.interpreter.clearDFA()
+        val parser = createANTLRParser(createTokenStream(lexer))
+        parser.interpreter.clearDFA()
+        predictionContextCache = PredictionContextCache()
     }
 }
 

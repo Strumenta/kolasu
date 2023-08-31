@@ -20,7 +20,11 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
     class LanguageDef(val packageName: String) {
         val classes = mutableListOf<KSClassDeclaration>()
 
-        fun dependencies(): Dependencies {
+        override fun toString(): String {
+            return "LanguageDef(packageName=$packageName,classes=$classes)"
+        }
+
+        fun dependencies() : Dependencies {
             val usedFiles = this.classes.mapNotNull { it.containingFile }.toSet().toTypedArray()
             val dependencies = Dependencies(true, *usedFiles)
             return dependencies
@@ -28,23 +32,28 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
 
         fun write(os: OutputStream) {
             val buf = PrintWriter(os)
-            buf.println(
-                """
+            buf.println("""
+                    @file:JvmName("Language")
                     package $packageName
                     
                     import com.strumenta.kolasu.lionweb.LionWebLanguageGeneratorCommand
-                    import com.strumenta.kolasu.lionweb.KolasuLanguage
-                    import com.strumenta.kolasu.lionweb.LionWebLanguageExporter
+                    import com.strumenta.kolasu.language.KolasuLanguage
+                    import com.strumenta.kolasu.lionweb.LionWebLanguageConverter
+                    import com.strumenta.kolasu.lionweb.LionWebModelConverter
                     import io.lionweb.lioncore.java.language.Language
 
-                    val kLanguage = KolasuLanguage("$packageName").apply { 
+                    private val kolasuLanguage = KolasuLanguage("$packageName").apply { 
                         ${classes.joinToString("\n        ") { "addClass(${it.simpleName.asString()}::class)" }}
                     }
                     
                     val lwLanguage : Language by lazy {
-                        val importer = LionWebLanguageExporter()
-                        importer.export(kLanguage)
+                        val importer = LionWebLanguageConverter()
+                        importer.exportToLionWeb(kolasuLanguage)
                     }
+                    
+                    fun LionWebModelConverter.consider${packageName.split(".").last().capitalize()}() {
+                        this.exportLanguageToLionWeb(kolasuLanguage)
+                    }       
 
                     fun main(args: Array<String>) {
                         LionWebLanguageGeneratorCommand(lwLanguage).main(args)
@@ -55,6 +64,7 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
         }
     }
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        environment.logger.warn("PROCESSING START")
         val kspFile = File(environment.options["file"] as String)
         if (!kspFile.exists()) {
             throw IllegalStateException("The KSP configuration file at $kspFile does not exist")
@@ -83,6 +93,7 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
                 }
             }
         }
+        environment.logger.warn("PROCESSING languagesByPackage=$languagesByPackage")
 
         if (!generated) {
             languagesByPackage.values.forEach { languageDef ->

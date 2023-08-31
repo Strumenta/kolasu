@@ -125,3 +125,7 @@ configurations.all {
         }
     }
 }
+
+tasks.findByName("dokkaJavadoc").dependsOn(":core:compileKotlin")
+tasks.findByName("dokkaJavadoc").dependsOn(":emf:compileKotlin")
+tasks.findByName("dokkaJavadoc").dependsOn(":lionweb:jar")
