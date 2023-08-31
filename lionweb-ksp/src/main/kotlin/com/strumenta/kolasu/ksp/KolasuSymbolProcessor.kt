@@ -39,6 +39,7 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
                     import com.strumenta.kolasu.lionweb.LionWebLanguageGeneratorCommand
                     import com.strumenta.kolasu.language.KolasuLanguage
                     import com.strumenta.kolasu.lionweb.LionWebLanguageConverter
+                    import com.strumenta.kolasu.lionweb.LionWebModelConverter
                     import io.lionweb.lioncore.java.language.Language
 
                     private val kolasuLanguage = KolasuLanguage("$packageName").apply { 
@@ -49,6 +50,10 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
                         val importer = LionWebLanguageConverter()
                         importer.exportToLionWeb(kolasuLanguage)
                     }
+                    
+                    fun LionWebModelConverter.consider${packageName.split(".").last().capitalize()}() {
+                        this.exportLanguageToLionWeb(kolasuLanguage)
+                    }       
 
                     fun main(args: Array<String>) {
                         LionWebLanguageGeneratorCommand(lwLanguage).main(args)
