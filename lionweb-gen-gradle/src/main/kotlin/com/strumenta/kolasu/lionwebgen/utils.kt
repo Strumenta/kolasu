@@ -24,4 +24,4 @@ val Project.kolasuVersion
     get() = project.propertyValue("kolasuVersion", BuildConfig.PLUGIN_VERSION)
 
 val Project.lionwebVersion
-    get() = project.propertyValue("lionwebVersion", "0.0.18")
+    get() = project.propertyValue("lionwebVersion", BuildConfig.LIONCORE_VERSION)

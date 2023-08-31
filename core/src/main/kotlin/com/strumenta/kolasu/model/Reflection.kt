@@ -10,6 +10,7 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.withNullability
 
 fun <T : Node> T.relevantMemberProperties(withPosition: Boolean = false, withNodeType: Boolean = false):
     List<KProperty1<T, *>> {
@@ -272,7 +273,7 @@ fun <N : Any> KProperty1<N, *>.asAttribute(): Attribute {
         this.returnType.isMarkedNullable -> true
         else -> false
     }
-    return Attribute(this.name, optional, this.returnType)
+    return Attribute(this.name, optional, this.returnType.withNullability(false))
 }
 
 private val featuresCache = mutableMapOf<KClass<*>, List<Feature>>()

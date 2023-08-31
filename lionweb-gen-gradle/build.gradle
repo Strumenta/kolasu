@@ -28,6 +28,7 @@ buildConfig {
     buildConfigField("String", "PLUGIN_GROUP", "\"${project.group}\"")
     buildConfigField("String", "PLUGIN_NAME", "\"${project.name}\"")
     buildConfigField("String", "PLUGIN_VERSION", "\"${project.version}\"")
+    buildConfigField("String", "LIONCORE_VERSION", "\"${project.lionwebVersion}\"")
 }
 
 gradlePlugin {

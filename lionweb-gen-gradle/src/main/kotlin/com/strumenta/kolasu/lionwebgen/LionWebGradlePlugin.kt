@@ -73,12 +73,16 @@ class LionWebGradlePlugin : Plugin<Project> {
             it.group = tasksGroup
             it.dependsOn("compileKotlin")
             it.doLast {
-                println("export packages: ${configuration.exportPackages.get()}")
-                configuration.exportPackages.get().forEach { packageName ->
-                    project.javaexec { jes ->
-                        jes.classpath = project.sourceSets.getByName("main").runtimeClasspath
-                        jes.mainClass.set("${packageName}.LanguageKt")
-                        jes.args = mutableListOf(lionwebLanguageFile(project, packageName).absolutePath)
+                if (configuration.exportPackages.get().isEmpty()) {
+                    project.logger.warn("executing $genLanguages task but no export packages defined")
+                } else {
+                    configuration.exportPackages.get().forEach { packageName ->
+                        project.logger.lifecycle("generating LionWeb language for package $packageName")
+                        project.javaexec { jes ->
+                            jes.classpath = project.sourceSets.getByName("main").runtimeClasspath
+                            jes.mainClass.set("${packageName}.Language")
+                            jes.args = mutableListOf(lionwebLanguageFile(project, packageName).absolutePath)
+                        }
                     }
                 }
             }
@@ -117,7 +121,7 @@ class LionWebGradlePlugin : Plugin<Project> {
         ksp.arg("lionwebgendir", File(project.buildDir, "lionwebgen").absolutePath)
         ksp.arg("file", kspFile.absolutePath)
 
-        val prepareKsp = project.tasks.create("prepareKsp") {
+        val prepareKsp = project.tasks.create("prepareKspForLionWebGen") {
             it.doFirst {
                 val exportPackagesStr = configuration.exportPackages.get().let { it.joinToString(",") }
                 kspFile.parentFile.mkdirs()
