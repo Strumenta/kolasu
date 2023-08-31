@@ -24,7 +24,7 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
             return "LanguageDef(packageName=$packageName,classes=$classes)"
         }
 
-        fun dependencies() : Dependencies {
+        fun dependencies(): Dependencies {
             val usedFiles = this.classes.mapNotNull { it.containingFile }.toSet().toTypedArray()
             val dependencies = Dependencies(true, *usedFiles)
             return dependencies
@@ -32,7 +32,8 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
 
         fun write(os: OutputStream) {
             val buf = PrintWriter(os)
-            buf.println("""
+            buf.println(
+                """
                     @file:JvmName("Language")
                     package $packageName
                     

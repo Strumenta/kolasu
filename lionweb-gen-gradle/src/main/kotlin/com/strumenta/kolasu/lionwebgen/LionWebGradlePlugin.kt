@@ -84,7 +84,7 @@ class LionWebGradlePlugin : Plugin<Project> {
                         project.logger.lifecycle("generating LionWeb language for package $packageName")
                         project.javaexec { jes ->
                             jes.classpath = project.sourceSets.getByName("main").runtimeClasspath
-                            jes.mainClass.set("${packageName}.Language")
+                            jes.mainClass.set("$packageName.Language")
                             jes.args = mutableListOf(lionwebLanguageFile(project, packageName).absolutePath)
                         }
                     }
@@ -157,8 +157,10 @@ class LionWebGradlePlugin : Plugin<Project> {
 
     private fun addDependencies(project: Project) {
         fun addKolasuModule(moduleName: String) {
-            project.dependencies.add("api",
-                "com.strumenta.kolasu:kolasu-$moduleName:${project.kolasuVersion}")
+            project.dependencies.add(
+                "api",
+                "com.strumenta.kolasu:kolasu-$moduleName:${project.kolasuVersion}"
+            )
         }
 
         addKolasuModule("core")
@@ -169,6 +171,5 @@ class LionWebGradlePlugin : Plugin<Project> {
 
         project.dependencies.add("api", "com.github.ajalt.clikt:clikt:3.5.0")
         project.dependencies.add("api", "io.lionweb.lioncore-java:lioncore-java-core:${project.lionwebVersion}")
-
     }
 }
