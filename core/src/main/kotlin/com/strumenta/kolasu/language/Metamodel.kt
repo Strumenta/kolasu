@@ -16,8 +16,10 @@ sealed class Feature {
 data class Attribute(override val name: String, val optional: Boolean, val type: KType) : Feature() {
 
     init {
-        require(!type.isMarkedNullable) { "The type should be specified as not nullable. " +
-                "The optional flag should be used to represent nullability" }
+        require(!type.isMarkedNullable) {
+            "The type should be specified as not nullable. " +
+                "The optional flag should be used to represent nullability"
+        }
     }
 
     override val multiplicity: Multiplicity
