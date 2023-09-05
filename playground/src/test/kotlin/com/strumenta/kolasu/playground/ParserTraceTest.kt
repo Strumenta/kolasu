@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.playground
 
 import com.strumenta.kolasu.emf.MetamodelsBuilder
+import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
@@ -22,6 +23,32 @@ class ParserTraceTest {
             "myp"
         )
         mm.provideClass(ANode::class)
+    }
+
+    @Test
+    fun serializeErrorNode() {
+        val tt = ParsingResult(
+            listOf(),
+            GenericErrorNode(Exception("foo")),
+            "ffoooo"
+        )
+        val writer = StringWriter()
+        tt.saveForPlayground(mm.resource!!, writer, "foo.json", "  ")
+        val trace = writer.toString()
+        assertEquals(
+            """{
+  "name": "foo.json",
+  "code": "ffoooo",
+  "ast": {
+    "eClass": "https://strumenta.com/starlasu/v2#//Result",
+    "root": {
+      "eClass": "https://strumenta.com/starlasu/v2#//GenericErrorNode",
+      "message": "Exception java.lang.Exception: foo"
+    }
+  }
+}""",
+            trace
+        )
     }
 
     @Test
