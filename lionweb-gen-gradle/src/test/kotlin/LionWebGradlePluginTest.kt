@@ -1,14 +1,14 @@
 import com.strumenta.kolasu.lionwebgen.BuildConfig
 import org.gradle.testkit.runner.GradleRunner
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.io.File
 import java.nio.file.Files
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 class LionWebGradlePluginTest {
     var projectDir: File? = null
 
-    @BeforeEach
+    @BeforeTest
     fun setup() {
         projectDir = Files.createTempDirectory("myBuildTest").toFile()
         projectDir!!.mkdirs()

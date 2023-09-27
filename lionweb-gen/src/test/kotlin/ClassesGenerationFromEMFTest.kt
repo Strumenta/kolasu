@@ -4,9 +4,9 @@ import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
 import kotlin.test.Ignore
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class ClassesGenerationFromEMFTest {
 
