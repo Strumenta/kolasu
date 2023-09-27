@@ -110,7 +110,7 @@ class LionWebLanguageConverterTest {
         assertEquals(false, simpleNodeBValue.isOptional)
         assertEquals(LionCoreBuiltins.getString(), simpleNodeBValue.type)
 
-        val validationResult = LanguageValidator().validateLanguage(lwLanguage)
+        val validationResult = LanguageValidator().validate(lwLanguage)
         assertEquals(true, validationResult.isSuccessful, validationResult.issues.toString())
     }
 }

@@ -5,9 +5,11 @@ import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import io.lionweb.lioncore.java.serialization.JsonSerialization
+import org.mkfl3x.jsondelta.JsonDelta
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 class LionWebModelConverterTest {
 
@@ -52,6 +54,7 @@ class LionWebModelConverterTest {
         }
       ],
       "references": [],
+      "annotations":[],
       "parent": null
     },
     {
@@ -64,9 +67,9 @@ class LionWebModelConverterTest {
       "properties": [
         {
           "property": {
-            "language": "LIonCore-builtins",
+            "language": "LionCore-builtins",
             "version": "1",
-            "key": "LIonCore-builtins-INamed-name"
+            "key": "LionCore-builtins-INamed-name"
           },
           "value": "A1"
         }
@@ -96,6 +99,7 @@ class LionWebModelConverterTest {
           ]
         }
       ],
+      "annotations":[],
       "parent": "UNKNOWN_SOURCE_root"
     },
     {
@@ -117,6 +121,7 @@ class LionWebModelConverterTest {
       ],
       "children": [],
       "references": [],
+      "annotations":[],
       "parent": "UNKNOWN_SOURCE_root"
     },
     {
@@ -129,9 +134,9 @@ class LionWebModelConverterTest {
       "properties": [
         {
           "property": {
-            "language": "LIonCore-builtins",
+            "language": "LionCore-builtins",
             "version": "1",
-            "key": "LIonCore-builtins-INamed-name"
+            "key": "LionCore-builtins-INamed-name"
           },
           "value": "A3"
         }
@@ -163,6 +168,7 @@ class LionWebModelConverterTest {
           ]
         }
       ],
+      "annotations":[],
       "parent": "UNKNOWN_SOURCE_root"
     },
     {
@@ -184,6 +190,7 @@ class LionWebModelConverterTest {
       ],
       "children": [],
       "references": [],
+      "annotations":[],
       "parent": "UNKNOWN_SOURCE_root_childrez_2"
     }
   ]
@@ -244,7 +251,9 @@ class LionWebModelConverterTest {
         assertSame(child1, refValue3[0].referred)
 
         val js = JsonSerialization.getStandardSerialization()
-        assertEquals(serialized, js.serializeTreeToJsonString(lwAST))
+
+        val report = JsonDelta().compare(serialized, js.serializeTreeToJsonString(lwAST))
+        assertTrue(report.success, message = "Mismatches: ${report.mismatches}")
     }
 
     @Test

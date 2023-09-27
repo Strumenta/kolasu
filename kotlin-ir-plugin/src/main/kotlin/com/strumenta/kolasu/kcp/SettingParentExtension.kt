@@ -35,6 +35,8 @@ import org.jetbrains.kotlin.ir.util.statements
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 
+object StarLasuGeneratedDeclarationKey : GeneratedDeclarationKey()
+
 /**
  * Set the parent appropriately when modifying a containment value.
  */
@@ -88,7 +90,7 @@ class SettingParentExtension(val pluginContext: IrPluginContext, val messageColl
                     val anonymousInitializerSymbolImpl = IrFactoryImpl.createAnonymousInitializer(
                         -1,
                         -1,
-                        IrDeclarationOrigin.GeneratedByPlugin(object : GeneratedDeclarationKey() {}),
+                        IrDeclarationOrigin.GeneratedByPlugin(StarLasuGeneratedDeclarationKey),
                         IrAnonymousInitializerSymbolImpl(),
                         false
                     )

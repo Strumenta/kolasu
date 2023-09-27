@@ -4,7 +4,6 @@ package com.strumenta.kolasu.kcp
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
-import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.FirIncompatiblePluginAPI
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
@@ -56,7 +55,7 @@ class FieldObservableExtension(val pluginContext: IrPluginContext) : IrElementTr
             val anonymousInitializerSymbolImpl = IrFactoryImpl.createAnonymousInitializer(
                 declaration.startOffset,
                 declaration.endOffset,
-                IrDeclarationOrigin.GeneratedByPlugin(object : GeneratedDeclarationKey() {}),
+                IrDeclarationOrigin.GeneratedByPlugin(StarLasuGeneratedDeclarationKey),
                 IrAnonymousInitializerSymbolImpl(),
                 false
             )
