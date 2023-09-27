@@ -113,7 +113,7 @@ class MetamodelTest {
 
         val sl: EClass = ePackage.eClassifiers.find { it.name == "StringLiteral" } as EClass
         assertEquals(
-            3,
+            4,
             sl.eAllSuperTypes.size,
             sl.eAllSuperTypes.joinToString(", ") { it.name }
         )
