@@ -39,6 +39,9 @@ import kotlin.system.measureTimeMillis
  * A complete description of a multi-stage ANTLR-based parser, from source code to AST.
  *
  * You should extend this class to implement the parts that are specific to your language.
+ *
+ * Note: instances of this class are thread-safe and they're meant to be reused. Do not create a new KolasuParser
+ * instance every time you need to parse some source code, or performance may suffer.
  */
 abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken>(
     tokenFactory: TokenFactory<T>

@@ -80,9 +80,17 @@ class KolasuLanguage(val qualifiedName: String) {
                 } else if (nodeProperty.isReference()) {
                     addClass(nodeProperty.referredType())
                 } else if (nodeProperty.isAttribute()) {
-                    val kClass = nodeProperty.asAttribute().type.classifier as? KClass<*>
-                    if (kClass != null && kClass.superclasses.contains(Enum::class)) {
-                        addEnumClass(kClass as KClass<out Enum<*>>)
+                    try {
+                        val attributeKClass = nodeProperty.asAttribute().type.classifier as? KClass<*>
+                        if (attributeKClass != null && attributeKClass.superclasses.contains(Enum::class)) {
+                            addEnumClass(attributeKClass as KClass<out Enum<*>>)
+                        }
+                    } catch (e: Exception) {
+                        throw RuntimeException(
+                            "Issue while examining kotlin class $kClass" +
+                                " and its property $nodeProperty",
+                            e
+                        )
                     }
                 }
             }

@@ -14,17 +14,13 @@ interface ErrorNode {
  * Generic implementation of [ErrorNode].
  */
 class GenericErrorNode(error: Exception? = null, message: String? = null) : Node(), ErrorNode {
-    override val message: String
-    init {
-        if (message != null) {
-            this.message = message
-        } else if (error != null) {
+    override val message: String = message
+        ?: if (error != null) {
             val msg = if (error.message != null) ": " + error.message else ""
-            this.message = "Exception ${error::class.qualifiedName}$msg"
+            "Exception ${error::class.qualifiedName}$msg"
         } else {
-            this.message = "Unspecified error node"
+            "Unspecified error node"
         }
-    }
 }
 
 fun Node.errors(): Sequence<ErrorNode> = this.walkDescendants(ErrorNode::class)
