@@ -247,8 +247,7 @@ class JsonGenerationTest {
         )
         val json = writer.toString()
         assertEquals(
-            """{"issues":[{"type":"LEXICAL","message":"foo","severity":"ERROR","position":{"description":"Position(start=Line 1, Column 10,
-               | end=Line 4, Column 540)","start":{"line":1,"column":10},"end":{"line":4,"column":540}}}]}
+            """{"issues":[{"type":"LEXICAL","message":"foo","range":{"description":"Range(start=Line 1, Column 10, end=Line 4, Column 540)","start":{"line":1,"column":10},"end":{"line":4,"column":540}},"severity":"ERROR"}]}
             """.trimMargin().replace("\n", ""),
             json
         )
