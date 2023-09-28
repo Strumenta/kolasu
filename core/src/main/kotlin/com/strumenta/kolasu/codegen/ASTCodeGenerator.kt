@@ -5,13 +5,13 @@ import java.io.File
 import kotlin.reflect.KClass
 
 /**
- * Transform an AST into code. This can be done on an AST obtained from parsing, or build programmatically.
+ * Transforms an AST into code. This can be done on an AST obtained from parsing, or built programmatically.
  * It would work also on AST obtained from parsing and then modified. It should be noted that it does not perform
  * lexical preservation: comments are lost, whitespace is re-organized. It is effectively equivalent to auto-formatting.
  *
  * The logic for printing the different elements of the language must be defined in subclasses. This logic could be
  * potentially expressed in a DSL, with multi-platform generators. It would permit to have code generators usable from
- * all the StarLasu platforms
+ * all the StarLasu platforms.
  */
 abstract class ASTCodeGenerator<R : Node> {
     protected val nodePrinters: MutableMap<KClass<*>, NodePrinter> = HashMap()
@@ -30,12 +30,15 @@ abstract class ASTCodeGenerator<R : Node> {
     }
 
     fun printToString(ast: R): String {
-        return PrinterOutput(this.nodePrinters, nodePrinterOverrider)
-            .apply { this.print(ast) }
-            .text()
+        return printerOutput().apply { this.print(ast, prefix, postfix) }.text()
     }
 
     fun printToFile(root: R, file: File) {
         file.writeText(printToString(root))
     }
+
+    open fun printerOutput() = PrinterOutput(this.nodePrinters, nodePrinterOverrider)
+
+    open val prefix: String get() = ""
+    open val postfix: String get() = ""
 }
