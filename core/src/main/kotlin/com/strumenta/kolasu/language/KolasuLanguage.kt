@@ -86,8 +86,10 @@ class KolasuLanguage(val qualifiedName: String) {
                             addEnumClass(attributeKClass as KClass<out Enum<*>>)
                         }
                     } catch (e: Exception) {
-                        throw RuntimeException("Issue while examining kotlin class $kClass" +
-                                " and its property $nodeProperty", e)
+                        throw RuntimeException(
+                            "Issue while examining kotlin class $kClass and its property $nodeProperty",
+                            e
+                        )
                     }
                 }
             }
