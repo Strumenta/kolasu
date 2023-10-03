@@ -31,14 +31,15 @@ abstract class ASTCodeGenerator<R : Node> {
 
     fun printToString(ast: R): String {
         val printerOutput = PrinterOutput(this.nodePrinters, nodePrinterOverrider)
-        return customizePrinter(printerOutput).apply { this.print(ast, prefix, postfix) }.text()
+        configurePrinter(printerOutput)
+        return printerOutput.apply { this.print(ast, prefix, postfix) }.text()
     }
 
     fun printToFile(root: R, file: File) {
         file.writeText(printToString(root))
     }
 
-    protected open fun customizePrinter(printerOutput: PrinterOutput): PrinterOutput = printerOutput
+    protected open fun configurePrinter(printerOutput: PrinterOutput) {}
 
     open val prefix: String get() = ""
     open val postfix: String get() = ""
