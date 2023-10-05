@@ -1,11 +1,22 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm'
+    id "maven-publish"
+    id "signing"
     id "org.jetbrains.dokka"
 }
 
 repositories {
     mavenCentral()
 }
+
+java {
+    sourceCompatibility = "$jvm_version"
+    targetCompatibility = "$jvm_version"
+    registerFeature('cli') {
+        usingSourceSet(sourceSets.main)
+    }
+}
+
 
 def completeKspVersion = kspVersion.contains("-") ? kspVersion : "${kotlin_version}-${kspVersion}"
 
@@ -86,10 +97,3 @@ signing {
 
 tasks.findByName("dokkaJavadoc").dependsOn(":core:compileKotlin")
 
-java {
-    sourceCompatibility = "$jvm_version"
-    targetCompatibility = "$jvm_version"
-    registerFeature('cli') {
-        usingSourceSet(sourceSets.main)
-    }
-}
