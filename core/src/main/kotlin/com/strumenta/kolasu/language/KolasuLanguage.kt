@@ -87,8 +87,7 @@ class KolasuLanguage(val qualifiedName: String) {
                         }
                     } catch (e: Exception) {
                         throw RuntimeException(
-                            "Issue while examining kotlin class $kClass" +
-                                " and its property $nodeProperty",
+                            "Issue while examining kotlin class $kClass and its property $nodeProperty",
                             e
                         )
                     }
