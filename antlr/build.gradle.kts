@@ -1,10 +1,11 @@
 plugins {
     id("antlr")
+    id("maven-publish")
+    id("signing")
 }
 
 val antlr_version = extra["antlr_version"]
 val kotlinVersion = extra["kotlinVersion"]
-val isReleaseVersion = !(version as String).endsWith("SNAPSHOT")
 
 dependencies {
     antlr("org.antlr:antlr4:$antlr_version")

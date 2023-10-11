@@ -55,7 +55,7 @@ fun PublishingExtension.addPublication(pubName: String, pubDescription: String, 
 
                 licenses {
                     license {
-                        name.set("Apache Licenve V2.0")
+                        name.set("Apache License V2.0")
                         url.set("https://www.apache.org/licenses/LICENSE-2.0")
                         distribution.set("repo")
                     }

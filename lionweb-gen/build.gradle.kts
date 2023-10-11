@@ -2,7 +2,6 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jlleitschuh.gradle.ktlint")
     id("maven-publish")
-    id("signing")
     id("org.jetbrains.dokka")
 }
 

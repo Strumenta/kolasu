@@ -22,8 +22,7 @@ allprojects {
     }
 }
 
-// val version = extra["kolasu_version"] as String
-val isReleaseVersion = !(version as String).endsWith("SNAPSHOT")
+val isReleaseVersion = !(version as String).endsWith("-SNAPSHOT")
 
 subprojects {
 
@@ -58,7 +57,7 @@ subprojects {
             named("main") {
                 includeNonPublic.set(true)
                 moduleName.set("kolasu-" + moduleName.get())
-                includes.from("README.md")
+                // includes.from("src/main/dokka/module.md")
             }
         }
     }
@@ -102,9 +101,8 @@ subprojects {
         }
     }
 
-    if (isReleaseVersion) {
-        tasks.withType(Sign::class) {
-        }
+    tasks.withType(Sign::class) {
+        enabled = isReleaseVersion
     }
 
     ktlint {

@@ -63,6 +63,14 @@ tasks.findByName("dokkaJavadoc")!!.dependsOn(":emf:compileKotlin")
 tasks.findByName("dokkaJavadoc")!!.dependsOn(":lionweb:jar")
 tasks.findByName("dokkaJavadoc")!!.dependsOn(":lionweb-gen:jar")
 
+afterEvaluate {
+    tasks {
+        named("generateMetadataFileForPluginMavenPublication") {
+            dependsOn("kdocJar")
+        }
+    }
+}
+
 // java {
 //    sourceCompatibility = "$jvm_version"
 //    targetCompatibility = "$jvm_version"
