@@ -292,7 +292,7 @@ class ASTTransformerTest {
     }
 
     @Test
-    fun testTransforingOneNodeToMany() {
+    fun testTransformingOneNodeToMany() {
         val transformer = ASTTransformer()
         transformer.registerNodeTransformer(BarRoot::class, BazRoot::class)
             .withChild(BazRoot::stmts, BarRoot::stmts)
