@@ -39,6 +39,7 @@ generateTestGrammarSource {
     arguments += ['-package', 'com.strumenta.simplelang']
     outputDirectory = new File("generated-test-src/antlr/main/com/strumenta/simplelang".toString())
 }
+runKtlintCheckOverMainSourceSet.dependsOn generateGrammarSource
 compileKotlin.dependsOn generateGrammarSource
 compileJava.dependsOn generateGrammarSource
 compileTestKotlin.dependsOn generateTestGrammarSource
