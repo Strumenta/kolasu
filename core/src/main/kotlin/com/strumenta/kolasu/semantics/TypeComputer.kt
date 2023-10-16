@@ -2,6 +2,7 @@ package com.strumenta.kolasu.semantics
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.utils.memoize
+import com.strumenta.kolasu.utils.sortBySubclassesFirst
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSuperclassOf
 
@@ -21,13 +22,8 @@ class TypeComputer(
         return node?.let {
             this.typingRules.keys
                 .filter { it.isSuperclassOf(node::class) }
-                .sortedWith { left, right ->
-                    when {
-                        left.isSuperclassOf(right) -> 1
-                        right.isSuperclassOf(left) -> -1
-                        else -> 0
-                    }
-                }.firstOrNull()?.let { this.typingRules[it] }?.invoke(node)
+                .sortBySubclassesFirst()
+                .firstOrNull()?.let { this.typingRules[it] }?.invoke(node)
         }
     }
 }
