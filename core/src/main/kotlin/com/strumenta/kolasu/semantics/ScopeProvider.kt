@@ -11,14 +11,17 @@ import kotlin.reflect.full.isSuperclassOf
 // instance
 
 class ScopeProvider(
-    private val scopeResolutionRules: MutableMap<String, MutableMap<KClass<out Node>, (Node) -> Scope>> = mutableMapOf(),
+    private val scopeResolutionRules: MutableMap<String,
+        MutableMap<KClass<out Node>, (Node) -> Scope>> = mutableMapOf(),
     private val scopeConstructionRules: MutableMap<KClass<out Node>, (Node) -> Scope> = mutableMapOf()
 ) {
     fun loadFrom(configuration: ScopeProviderConfiguration, semantics: Semantics) {
         configuration.scopeResolutionRules.mapValuesTo(this.scopeResolutionRules) {
-            (_, classToScopeResolutionRules) -> classToScopeResolutionRules
-                .mapValues { (_, scopeResolutionRule) -> { node : Node -> semantics.scopeResolutionRule(node) }
-            }.toMutableMap()
+                (_, classToScopeResolutionRules) ->
+            classToScopeResolutionRules
+                .mapValues { (_, scopeResolutionRule) ->
+                    { node: Node -> semantics.scopeResolutionRule(node) }
+                }.toMutableMap()
         }
         configuration.scopeConstructionRules.mapValuesTo(this.scopeConstructionRules) {
                 (_, scopeConstructionRule) ->
@@ -29,12 +32,14 @@ class ScopeProvider(
     fun scopeFor(referenceByName: KReferenceByName<out Node>, node: Node? = null): Scope {
         return node
             ?.let { this.scopeResolutionRules.getOrDefault(referenceByName.name, null) }
-            ?.let { it.keys
-                .filter { kClass -> kClass.isSuperclassOf(node::class) }
-                .sortBySubclassesFirst()
-                .firstOrNull()
-                ?.let { kClass -> it[kClass] }
-                ?.invoke(node) }
+            ?.let {
+                it.keys
+                    .filter { kClass -> kClass.isSuperclassOf(node::class) }
+                    .sortBySubclassesFirst()
+                    .firstOrNull()
+                    ?.let { kClass -> it[kClass] }
+                    ?.invoke(node)
+            }
             ?: Scope()
     }
 
@@ -51,7 +56,8 @@ class ScopeProvider(
 // configuration
 
 class ScopeProviderConfiguration(
-    val scopeResolutionRules: MutableMap<String, MutableMap<KClass<out Node>, Semantics.(Node) -> Scope>> = mutableMapOf(),
+    val scopeResolutionRules: MutableMap<String,
+        MutableMap<KClass<out Node>, Semantics.(Node) -> Scope>> = mutableMapOf(),
     val scopeConstructionRules: MutableMap<KClass<out Node>, Semantics.(Node) -> Scope> = mutableMapOf()
 ) {
     inline fun <reified N : Node> scopeFor(
@@ -60,9 +66,12 @@ class ScopeProviderConfiguration(
     ) {
         this.scopeResolutionRules
             .getOrPut(referenceByName.name) { mutableMapOf() }
-            .putIfAbsent(N::class, { semantics: Semantics, node: Node ->
-                if (node is N) semantics.scopeResolutionRule(node) else Scope()
-            }.memoize())
+            .putIfAbsent(
+                N::class,
+                { semantics: Semantics, node: Node ->
+                    if (node is N) semantics.scopeResolutionRule(node) else Scope()
+                }.memoize()
+            )
     }
 
     inline fun <reified N : Node> scopeFrom(
