@@ -2,13 +2,11 @@ package com.strumenta.kolasu.testing
 
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.parsing.ParsingResult
-import kotlin.test.assertEquals
-import kotlin.test.fail
 import com.strumenta.kolasu.traversing.walkChildren
-import org.antlr.v4.runtime.ParserRuleContext
-import org.antlr.v4.runtime.Vocabulary
 import kotlin.reflect.KClass
 import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.fail
 
 class IgnoreChildren<N : Node> : List<N> {
     override val size: Int
