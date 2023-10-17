@@ -120,6 +120,7 @@ class ResultTest {
     "message" : "An info",
     "severity" : "INFO"
   }, {
+    "type" : "TRANSLATION",
     "message" : "Translation issue"
   } ]
 }""",
