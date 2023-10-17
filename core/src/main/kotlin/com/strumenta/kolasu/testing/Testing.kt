@@ -1,11 +1,14 @@
 package com.strumenta.kolasu.testing
 
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.PropertyType
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.parsing.ParsingResult
 import kotlin.test.assertEquals
 import kotlin.test.fail
+import com.strumenta.kolasu.traversing.walkChildren
+import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.Vocabulary
+import kotlin.reflect.KClass
+import kotlin.test.*
 
 class IgnoreChildren<N : Node> : List<N> {
     override val size: Int
@@ -191,4 +194,34 @@ fun assertASTsAreEqual(
                 "but found ${actual.nodeType}"
         )
     }
+}
+
+fun Node.assertReferencesResolved(forProperty: KReferenceByName<out Node>) {
+    this.kReferenceByNameProperties()
+        .filter { it == forProperty }
+        .mapNotNull { it.get(this) }
+        .forEach { assertTrue { (it as ReferenceByName<*>).isResolved } }
+    this.walkChildren().forEach { it.assertReferencesResolved(forProperty = forProperty) }
+}
+
+fun Node.assertReferencesResolved(withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class) {
+    this.kReferenceByNameProperties(targetClass = withReturnType)
+        .mapNotNull { it.get(this) }
+        .forEach { assertTrue { (it as ReferenceByName<*>).isResolved } }
+    this.walkChildren().forEach { it.assertReferencesResolved(withReturnType = withReturnType) }
+}
+
+fun Node.assertReferencesNotResolved(forProperty: KReferenceByName<out Node>) {
+    this.kReferenceByNameProperties()
+        .filter { it == forProperty }
+        .mapNotNull { it.get(this) }
+        .forEach { assertFalse { (it as ReferenceByName<*>).isResolved } }
+    this.walkChildren().forEach { it.assertReferencesNotResolved(forProperty = forProperty) }
+}
+
+fun Node.assertReferencesNotResolved(withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class) {
+    this.kReferenceByNameProperties(targetClass = withReturnType)
+        .mapNotNull { it.get(this) }
+        .forEach { assertFalse { (it as ReferenceByName<*>).isResolved } }
+    this.walkChildren().forEach { it.assertReferencesNotResolved(withReturnType = withReturnType) }
 }

@@ -1,18 +1,15 @@
-package com.strumenta.kolasu.symbolresolution
+package com.strumenta.kolasu.semantics
 
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.PossiblyNamed
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-data class TestNode(override val name: String?) : Node(), PossiblyNamed
+class ScopeTest {
 
-class ScopingTest {
     @Test
     fun testScopeWithIgnoreCase() {
-        val node = TestNode(name = "TestNode")
-        val scope = Scope(ignoreCase = true).apply { define(node) }
+        val node = ClassDecl("TestNode")
+        val scope = scope(ignoreCase = true) { define(node) }
         assertEquals(node, scope.resolve(name = "TestNode"))
         assertEquals(node, scope.resolve(name = "testnode"))
         assertEquals(node, scope.resolve(name = "testNode"))
@@ -21,8 +18,8 @@ class ScopingTest {
 
     @Test
     fun testScopeWithoutIgnoreCase() {
-        val node = TestNode(name = "TestNode")
-        val scope = Scope(ignoreCase = false).apply { define(node) }
+        val node = ClassDecl(name = "TestNode")
+        val scope = scope(ignoreCase = false) { define(node) }
         assertEquals(node, scope.resolve(name = "TestNode"))
         assertNull(scope.resolve(name = "testnode"))
         assertNull(scope.resolve(name = "testNode"))

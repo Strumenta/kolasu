@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.symbolresolution.Scope
+import com.strumenta.kolasu.semantics.Scope
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

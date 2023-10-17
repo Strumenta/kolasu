@@ -32,9 +32,10 @@ class JsonGenerationTest {
     fun generateJsonOfResultWithIssues() {
         val result: Result<Node> = Result(
             listOf(
-                Issue(IssueType.SYNTACTIC, "An error"),
+                Issue(IssueType.SYNTACTIC, "An error", position = pos(1, 2, 3, 4)),
                 Issue(IssueType.LEXICAL, "A warning", severity = IssueSeverity.WARNING),
-                Issue(IssueType.SEMANTIC, "An info", severity = IssueSeverity.INFO)
+                Issue(IssueType.SEMANTIC, "An info", severity = IssueSeverity.INFO),
+                Issue(IssueType.TRANSLATION, "Translation issue")
             ),
             null
         )
@@ -45,7 +46,18 @@ class JsonGenerationTest {
     {
       "type": "SYNTACTIC",
       "message": "An error",
-      "severity": "ERROR"
+      "severity": "ERROR",
+      "position": {
+        "description": "Position(start\u003dLine 1, Column 2, end\u003dLine 3, Column 4)",
+        "start": {
+          "line": 1,
+          "column": 2
+        },
+        "end": {
+          "line": 3,
+          "column": 4
+        }
+      }
     },
     {
       "type": "LEXICAL",
@@ -56,6 +68,11 @@ class JsonGenerationTest {
       "type": "SEMANTIC",
       "message": "An info",
       "severity": "INFO"
+    },
+    {
+      "type": "TRANSLATION",
+      "message": "Translation issue",
+      "severity": "ERROR"
     }
   ]
 }""",

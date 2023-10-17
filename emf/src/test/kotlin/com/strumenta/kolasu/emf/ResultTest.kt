@@ -1,9 +1,12 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.emf.serialization.JsonGenerator
+import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.model.range
 import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.EList
@@ -72,5 +75,55 @@ class ResultTest {
             val stmts = eObject.eGet(cuClass.getEStructuralFeature("statements")) as EList<*>
             assertEquals(2, stmts.size)
         }
+    }
+
+    @Test fun `serialization of issues`() {
+        val nsURI = "https://strumenta.com/simplemm"
+        val metamodelBuilder = MetamodelBuilder(
+            packageName(CompilationUnit::class),
+            nsURI,
+            "simplemm"
+        )
+        val ePackage = metamodelBuilder.generate()
+
+        val result: Result<Node> = Result(
+            listOf(
+                Issue(IssueType.SYNTACTIC, "An error", range = range(1, 2, 3, 4)),
+                Issue(IssueType.LEXICAL, "A warning", severity = IssueSeverity.WARNING),
+                Issue(IssueType.SEMANTIC, "An info", severity = IssueSeverity.INFO),
+                Issue(IssueType.TRANSLATION, "Translation issue")
+            ),
+            null
+        )
+        val emfString = JsonGenerator().generateEMFString(result, ePackage)
+        assertEquals(
+            """{
+  "eClass" : "https://strumenta.com/starlasu/v2#//Result",
+  "issues" : [ {
+    "type" : "SYNTACTIC",
+    "message" : "An error",
+    "position" : {
+      "start" : {
+        "line" : 1,
+        "column" : 2
+      },
+      "end" : {
+        "line" : 3,
+        "column" : 4
+      }
+    }
+  }, {
+    "message" : "A warning",
+    "severity" : "WARNING"
+  }, {
+    "type" : "SEMANTIC",
+    "message" : "An info",
+    "severity" : "INFO"
+  }, {
+    "message" : "Translation issue"
+  } ]
+}""",
+            emfString
+        )
     }
 }

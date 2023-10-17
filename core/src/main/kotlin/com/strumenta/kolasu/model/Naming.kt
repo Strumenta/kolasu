@@ -5,6 +5,9 @@ import com.strumenta.kolasu.model.observable.ReferencedToAdded
 import com.strumenta.kolasu.model.observable.ReferencedToRemoved
 import io.reactivex.rxjava3.subjects.PublishSubject
 import java.io.Serializable
+import kotlin.reflect.*
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.isSubtypeOf
 
 /**
  * An entity that can have a name
@@ -135,3 +138,32 @@ fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : Po
         true
     }
 }
+
+/**
+ * Typealias representing reference properties.
+ **/
+typealias KReferenceByName<S> = KProperty1<S, ReferenceByName<out PossiblyNamed>?>
+
+/**
+ * Builds a type representation for a reference
+ **/
+fun kReferenceByNameType(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class): KType {
+    return ReferenceByName::class.createType(
+        arguments = listOf(KTypeProjection(variance = KVariance.OUT, type = targetClass.createType())),
+        nullable = true
+    )
+}
+
+/**
+ * Retrieves the referred type for a given reference property.
+ **/
+@Suppress("unchecked_cast")
+fun KReferenceByName<*>.getReferredType(): KClass<out PossiblyNamed> {
+    return this.returnType.arguments[0].type!!.classifier!! as KClass<out PossiblyNamed>
+}
+
+/**
+ * Retrieves all reference properties for a given node.
+ **/
+fun Node.kReferenceByNameProperties(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class) =
+    this.nodeProperties.filter { it.returnType.isSubtypeOf(kReferenceByNameType(targetClass)) }
