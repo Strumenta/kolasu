@@ -48,8 +48,8 @@ class JsonGenerationTest {
       "type": "SYNTACTIC",
       "message": "An error",
       "severity": "ERROR",
-      "position": {
-        "description": "Position(start\u003dLine 1, Column 2, end\u003dLine 3, Column 4)",
+      "range": {
+        "description": "Range(start\u003dLine 1, Column 2, end\u003dLine 3, Column 4)",
         "start": {
           "line": 1,
           "column": 2
