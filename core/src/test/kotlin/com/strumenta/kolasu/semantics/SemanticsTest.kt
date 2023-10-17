@@ -73,7 +73,7 @@ class SemanticsTest {
         symbolResolver {
             // scope resolution rules
             scopeFor(ClassDecl::superclass) {
-                Scope().apply {
+                scope {
                     it.findAncestorOfType(CompilationUnit::class.java)?.content
                         ?.filterIsInstance<ClassDecl>()
                         ?.filter { classDecl -> classDecl.name != it.name }
@@ -81,36 +81,36 @@ class SemanticsTest {
                 }
             }
             scopeFor(FeatureDecl::type) {
-                Scope().apply { it.findAncestorOfType(CompilationUnit::class.java)?.content?.forEach(this::define) }
+                scope { it.findAncestorOfType(CompilationUnit::class.java)?.content?.forEach(this::define) }
             }
             scopeFor(OperationDecl::returns) {
-                Scope().apply { it.findAncestorOfType(CompilationUnit::class.java)?.content?.forEach(this::define) }
+                scope { it.findAncestorOfType(CompilationUnit::class.java)?.content?.forEach(this::define) }
             }
             scopeFor(ParameterDecl::type) {
-                Scope().apply { it.findAncestorOfType(CompilationUnit::class.java)?.content?.forEach(this::define) }
+                scope { it.findAncestorOfType(CompilationUnit::class.java)?.content?.forEach(this::define) }
             }
             scopeFor(Variable::type) {
-                Scope().apply { it.findAncestorOfType(CompilationUnit::class.java)?.content?.forEach(this::define) }
+                scope { it.findAncestorOfType(CompilationUnit::class.java)?.content?.forEach(this::define) }
             }
             scopeFor(RefExpr::symbol) {
                 if (it.context != null) {
                     symbolResolver.scopeFrom(typeComputer.typeFor(it.context))
                 } else {
-                    Scope().apply {
+                    scope {
                         it.findAncestorOfType(CompilationUnit::class.java)
                             ?.processNodesOfType(SymbolNode::class.java, this::define)
                     }
                 }
             }
             scopeFor(CallExpr::operation) {
-                Scope().apply {
+                scope {
                     it.findAncestorOfType(ClassDecl::class.java)
                         ?.operations?.forEach(this::define)
                 }
             }
             // scope construction rules
             scopeFrom(ClassDecl::class) {
-                Scope().apply {
+                scope {
                     it.operations.forEach(this::define)
                     it.features.forEach(this::define)
                     parent = symbolResolver.scopeFrom(

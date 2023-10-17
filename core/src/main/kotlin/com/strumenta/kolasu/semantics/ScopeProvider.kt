@@ -116,3 +116,7 @@ data class Scope(
         else -> throw IllegalArgumentException("The given symbol must have a name")
     }
 }
+
+fun scope(ignoreCase: Boolean = false, init: Scope.() -> Unit): Scope {
+    return Scope(ignoreCase = ignoreCase).apply(init)
+}
