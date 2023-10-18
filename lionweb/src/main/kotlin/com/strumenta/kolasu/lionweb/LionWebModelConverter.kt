@@ -120,7 +120,7 @@ class LionWebModelConverter {
     fun unserializeToNodes(json: String, useDynamicNodesIfNeeded: Boolean = true): List<LWNode> {
         val js = JsonSerialization.getStandardSerialization()
         languageConverter.knownLWLanguages().forEach {
-            js.conceptResolver.registerLanguage(it)
+            js.classifierResolver.registerLanguage(it)
         }
         if (useDynamicNodesIfNeeded) {
             js.enableDynamicNodes()

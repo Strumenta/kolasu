@@ -1,7 +1,7 @@
 import com.strumenta.kolasu.lionweb.ASTGenerator
 import com.strumenta.kolasu.lionweb.LWLanguage
 import com.strumenta.kolasu.lionweb.StarLasuLWLanguage
-import io.lionweb.lioncore.java.language.ConceptInterface
+import io.lionweb.lioncore.java.language.Interface
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
@@ -15,7 +15,7 @@ class ASTGeneratorTest {
     fun allASTClassesAreGeneratedAsExpected() {
         val inputStream = this.javaClass.getResourceAsStream("/properties-language.json")
         val jsonser = JsonSerialization.getStandardSerialization()
-        jsonser.nodeResolver.addTree(StarLasuLWLanguage)
+        jsonser.instanceResolver.addTree(StarLasuLWLanguage)
         val propertiesLanguage = jsonser.unserializeToNodes(inputStream).first() as Language
         val generated = ASTGenerator("com.strumenta.properties", propertiesLanguage).generateClasses()
         assertEquals(1, generated.size)
@@ -69,7 +69,7 @@ public data class StringValue(
     fun generateInterface() {
         val dummyLanguage = LWLanguage()
         dummyLanguage.addElement(
-            ConceptInterface().apply {
+            Interface().apply {
                 name = "MyInterface"
                 key = "MyKey"
                 addFeature(Property.createRequired("someFlag", LionCoreBuiltins.getBoolean()))

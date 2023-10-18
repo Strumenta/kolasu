@@ -46,7 +46,7 @@ class LionWebGradlePlugin : Plugin<Project> {
                     when (languageFile.extension) {
                         "json" -> {
                             val jsonser = JsonSerialization.getStandardSerialization()
-                            jsonser.nodeResolver.addTree(StarLasuLWLanguage)
+                            jsonser.instanceResolver.addTree(StarLasuLWLanguage)
                             val language = jsonser.unserializeToNodes(FileInputStream(languageFile)).first() as Language
                             val existingKotlinClasses = KotlinCodeProcessor().classesDeclaredInDir(project.file("src/main/kotlin"))
 

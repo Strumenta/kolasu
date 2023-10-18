@@ -45,8 +45,8 @@ class LionWebLanguageConverterTest {
         val simpleDecl = lwLanguage.getConceptByName("SimpleDecl")!!
         val simpleNodeA = lwLanguage.getConceptByName("SimpleNodeA")!!
         val simpleNodeB = lwLanguage.getConceptByName("SimpleNodeB")!!
-        val myRelevantInterface = lwLanguage.getConceptInterfaceByName("MyRelevantInterface")!!
-        assertNull(lwLanguage.getConceptInterfaceByName("MyIrrelevantInterface"))
+        val myRelevantInterface = lwLanguage.getInterfaceByName("MyRelevantInterface")!!
+        assertNull(lwLanguage.getInterfaceByName("MyIrrelevantInterface"))
 
         assertEquals("SimpleRoot", simpleRoot.name)
         assertSame(lwLanguage, simpleRoot.language)
@@ -110,7 +110,7 @@ class LionWebLanguageConverterTest {
         assertEquals(false, simpleNodeBValue.isOptional)
         assertEquals(LionCoreBuiltins.getString(), simpleNodeBValue.type)
 
-        val validationResult = LanguageValidator().validateLanguage(lwLanguage)
+        val validationResult = LanguageValidator().validate(lwLanguage)
         assertEquals(true, validationResult.isSuccessful, validationResult.issues.toString())
     }
 }
