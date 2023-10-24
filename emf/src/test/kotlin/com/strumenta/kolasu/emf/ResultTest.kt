@@ -96,7 +96,8 @@ class ResultTest {
             null
         )
         val emfString = JsonGenerator().generateEMFString(result, ePackage)
-        assertEquals("""{
+        assertEquals(
+            """{
   "eClass" : "https://strumenta.com/starlasu/v2#//Result",
   "issues" : [ {
     "type" : "SYNTACTIC",
@@ -121,6 +122,8 @@ class ResultTest {
   }, {
     "message" : "Translation issue"
   } ]
-}""", emfString)
+}""",
+            emfString
+        )
     }
 }

@@ -13,9 +13,9 @@ import com.strumenta.kolasu.model.isConceptInterface
 import com.strumenta.kolasu.model.isMarkedAsNodeType
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.language.ConceptInterface
 import io.lionweb.lioncore.java.language.DataType
 import io.lionweb.lioncore.java.language.Enumeration
+import io.lionweb.lioncore.java.language.Interface
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
 import kotlin.reflect.KClass
@@ -54,7 +54,7 @@ class LionWebLanguageConverter {
                 concept.isAbstract = astClass.isAbstract || astClass.isSealed
                 registerMapping(astClass, concept)
             } else if (astClass.isConceptInterface) {
-                val conceptInterface = ConceptInterface(lionwebLanguage, astClass.simpleName)
+                val conceptInterface = Interface(lionwebLanguage, astClass.simpleName)
                 conceptInterface.key = lionwebLanguage.key + "_" + conceptInterface.name
                 conceptInterface.id = lionwebLanguage.id + "_" + conceptInterface.name
                 registerMapping(astClass, conceptInterface)
@@ -66,11 +66,11 @@ class LionWebLanguageConverter {
             val featuresContainer = astClassesAndClassifiers.byA(astClass)
 
             if (astClass.java.isInterface) {
-                val conceptInterface = featuresContainer as ConceptInterface
+                val conceptInterface = featuresContainer as Interface
                 val superInterfaces = astClass.supertypes.map { it.classifier as KClass<*> }
                     .filter { it.java.isInterface }
                 superInterfaces.filter { it.isMarkedAsNodeType() }.forEach {
-                    conceptInterface.addExtendedInterface(correspondingConceptInterface(it))
+                    conceptInterface.addExtendedInterface(correspondingInterface(it))
                 }
             } else {
                 val concept = featuresContainer as Concept
@@ -83,7 +83,7 @@ class LionWebLanguageConverter {
                 }
                 val interfaces = astClass.supertypes.map { it.classifier as KClass<*> }.filter { it.java.isInterface }
                 interfaces.filter { it.isMarkedAsNodeType() }.forEach {
-                    concept.addImplementedInterface(correspondingConceptInterface(it))
+                    concept.addImplementedInterface(correspondingInterface(it))
                 }
             }
             astClass.declaredFeatures().forEach {
@@ -188,8 +188,8 @@ class LionWebLanguageConverter {
         return classesAndEnumerations.asToBsMap
     }
 
-    fun correspondingConceptInterface(kClass: KClass<*>): ConceptInterface {
-        return toLWClassifier(kClass) as ConceptInterface
+    fun correspondingInterface(kClass: KClass<*>): Interface {
+        return toLWClassifier(kClass) as Interface
     }
 
     fun correspondingConcept(kClass: KClass<*>): Concept {

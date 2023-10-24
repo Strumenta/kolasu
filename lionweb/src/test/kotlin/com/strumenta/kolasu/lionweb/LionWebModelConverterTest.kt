@@ -12,7 +12,7 @@ import kotlin.test.assertSame
 class LionWebModelConverterTest {
 
     val serialized = """{
-  "serializationFormatVersion": "1",
+  "serializationFormatVersion": "2023.1",
   "languages": [
     {
       "version": "1",
@@ -22,7 +22,7 @@ class LionWebModelConverterTest {
   "nodes": [
     {
       "id": "UNKNOWN_SOURCE_root",
-      "concept": {
+      "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
         "key": "com-strumenta-SimpleLang_SimpleRoot"
@@ -52,11 +52,12 @@ class LionWebModelConverterTest {
         }
       ],
       "references": [],
+      "annotations": [],
       "parent": null
     },
     {
       "id": "UNKNOWN_SOURCE_root_childrez_0",
-      "concept": {
+      "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
         "key": "com-strumenta-SimpleLang_SimpleNodeA"
@@ -64,9 +65,9 @@ class LionWebModelConverterTest {
       "properties": [
         {
           "property": {
-            "language": "LIonCore-builtins",
-            "version": "1",
-            "key": "LIonCore-builtins-INamed-name"
+            "language": "LionCore-builtins",
+            "version": "2023.1",
+            "key": "LionCore-builtins-INamed-name"
           },
           "value": "A1"
         }
@@ -96,11 +97,12 @@ class LionWebModelConverterTest {
           ]
         }
       ],
+      "annotations": [],
       "parent": "UNKNOWN_SOURCE_root"
     },
     {
       "id": "UNKNOWN_SOURCE_root_childrez_1",
-      "concept": {
+      "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
         "key": "com-strumenta-SimpleLang_SimpleNodeB"
@@ -117,11 +119,12 @@ class LionWebModelConverterTest {
       ],
       "children": [],
       "references": [],
+      "annotations": [],
       "parent": "UNKNOWN_SOURCE_root"
     },
     {
       "id": "UNKNOWN_SOURCE_root_childrez_2",
-      "concept": {
+      "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
         "key": "com-strumenta-SimpleLang_SimpleNodeA"
@@ -129,9 +132,9 @@ class LionWebModelConverterTest {
       "properties": [
         {
           "property": {
-            "language": "LIonCore-builtins",
-            "version": "1",
-            "key": "LIonCore-builtins-INamed-name"
+            "language": "LionCore-builtins",
+            "version": "2023.1",
+            "key": "LionCore-builtins-INamed-name"
           },
           "value": "A3"
         }
@@ -163,11 +166,12 @@ class LionWebModelConverterTest {
           ]
         }
       ],
+      "annotations": [],
       "parent": "UNKNOWN_SOURCE_root"
     },
     {
       "id": "UNKNOWN_SOURCE_root_childrez_2_child",
-      "concept": {
+      "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
         "key": "com-strumenta-SimpleLang_SimpleNodeB"
@@ -184,6 +188,7 @@ class LionWebModelConverterTest {
       ],
       "children": [],
       "references": [],
+      "annotations": [],
       "parent": "UNKNOWN_SOURCE_root_childrez_2"
     }
   ]
@@ -244,7 +249,7 @@ class LionWebModelConverterTest {
         assertSame(child1, refValue3[0].referred)
 
         val js = JsonSerialization.getStandardSerialization()
-        assertEquals(serialized, js.serializeTreeToJsonString(lwAST))
+        assertJSONsAreEqual(serialized, js.serializeTreeToJsonString(lwAST))
     }
 
     @Test

@@ -9,7 +9,7 @@ class ScopeTest {
     @Test
     fun testScopeWithIgnoreCase() {
         val node = ClassDecl("TestNode")
-        val scope = Scope(ignoreCase = true).apply { define(node) }
+        val scope = scope(ignoreCase = true) { define(node) }
         assertEquals(node, scope.resolve(name = "TestNode"))
         assertEquals(node, scope.resolve(name = "testnode"))
         assertEquals(node, scope.resolve(name = "testNode"))
@@ -19,7 +19,7 @@ class ScopeTest {
     @Test
     fun testScopeWithoutIgnoreCase() {
         val node = ClassDecl(name = "TestNode")
-        val scope = Scope(ignoreCase = false).apply { define(node) }
+        val scope = scope(ignoreCase = false) { define(node) }
         assertEquals(node, scope.resolve(name = "TestNode"))
         assertNull(scope.resolve(name = "testnode"))
         assertNull(scope.resolve(name = "testNode"))
