@@ -155,14 +155,33 @@ class PrinterOutput(
         ast.destination = TextFileDestination(position = nodePositionInGeneratedCode)
     }
 
-    fun <T : Node> printList(elements: List<T>, separator: String = ", ") {
+    fun <T : Node> printList(elements: List<T>, separator: String = ", ", printer: (T) -> Unit) {
         var i = 0
         while (i < elements.size) {
             if (i != 0) {
                 print(separator)
             }
-            print(elements[i])
+            printer(elements[i])
             i += 1
+        }
+    }
+
+    fun <T : Node> printList(elements: List<T>, separator: String = ", ") {
+        printList(elements, separator) { el -> print(el) }
+    }
+
+    fun <T : Node> printList(
+        prefix: String,
+        elements: List<T>,
+        postfix: String,
+        printEvenIfEmpty: Boolean = false,
+        separator: String = ", ",
+        printer: (T) -> Unit
+    ) {
+        if (elements.isNotEmpty() || printEvenIfEmpty) {
+            print(prefix)
+            printList(elements, separator, printer)
+            print(postfix)
         }
     }
 
@@ -173,11 +192,7 @@ class PrinterOutput(
         printEvenIfEmpty: Boolean = false,
         separator: String = ", "
     ) {
-        if (elements.isNotEmpty() || printEvenIfEmpty) {
-            print(prefix)
-            printList(elements, separator)
-            print(postfix)
-        }
+        printList(prefix, elements, postfix, printEvenIfEmpty, separator) { el -> print(el) }
     }
 
     fun printOneOf(vararg alternatives: Node?) {
