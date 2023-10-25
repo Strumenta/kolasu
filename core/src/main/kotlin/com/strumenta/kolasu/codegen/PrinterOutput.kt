@@ -121,11 +121,7 @@ class PrinterOutput(
         print(prefix)
         val printer = getPrinter(ast)
         associate(ast) {
-            try {
-                printer.print(this, ast)
-            } catch (e: Throwable) {
-                throw RuntimeException("Issue occurred while printing $ast", e)
-            }
+            printer.print(this, ast)
         }
         print(postfix)
     }
