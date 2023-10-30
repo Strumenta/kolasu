@@ -47,7 +47,7 @@ class LionWebGradlePlugin : Plugin<Project> {
                         "json" -> {
                             val jsonser = JsonSerialization.getStandardSerialization()
                             jsonser.instanceResolver.addTree(StarLasuLWLanguage)
-                            val language = jsonser.unserializeToNodes(FileInputStream(languageFile)).first() as Language
+                            val language = jsonser.deserializeToNodes(FileInputStream(languageFile)).first() as Language
                             val existingKotlinClasses = KotlinCodeProcessor().classesDeclaredInDir(project.file("src/main/kotlin"))
 
                             val ktFiles = ASTGenerator(configuration.importPackageNames.get()[language.name] ?: language.name, language)
@@ -163,7 +163,7 @@ class LionWebGradlePlugin : Plugin<Project> {
         addKolasuModule("lionweb-gen")
         project.dependencies.add("ksp", "com.strumenta.kolasu:kolasu-lionweb-ksp:${project.kolasuVersion}")
         project.dependencies.add("api", "com.github.ajalt.clikt:clikt:3.5.0")
-        project.dependencies.add("api", "io.lionweb.lioncore-java:lioncore-java-core:${project.lionwebVersion}")
+        project.dependencies.add("api", "io.lionweb.lionweb-java:lionweb-java-core:${project.lionwebVersion}")
     }
 
 }

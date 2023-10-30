@@ -37,7 +37,7 @@ class LionWebModelConverterTest {
           "value": "12345"
         }
       ],
-      "children": [
+      "containments": [
         {
           "containment": {
             "language": "com-strumenta-SimpleLang",
@@ -72,7 +72,7 @@ class LionWebModelConverterTest {
           "value": "A1"
         }
       ],
-      "children": [
+      "containments": [
         {
           "containment": {
             "language": "com-strumenta-SimpleLang",
@@ -117,7 +117,7 @@ class LionWebModelConverterTest {
           "value": "some magic value"
         }
       ],
-      "children": [],
+      "containments": [],
       "references": [],
       "annotations": [],
       "parent": "UNKNOWN_SOURCE_root"
@@ -139,7 +139,7 @@ class LionWebModelConverterTest {
           "value": "A3"
         }
       ],
-      "children": [
+      "containments": [
         {
           "containment": {
             "language": "com-strumenta-SimpleLang",
@@ -186,7 +186,7 @@ class LionWebModelConverterTest {
           "value": "some other value"
         }
       ],
-      "children": [],
+      "containments": [],
       "references": [],
       "annotations": [],
       "parent": "UNKNOWN_SOURCE_root_childrez_2"
@@ -259,7 +259,7 @@ class LionWebModelConverterTest {
             addClass(SimpleRoot::class)
         }
         mConverter.exportLanguageToLionWeb(kLanguage)
-        val lwAST = mConverter.unserializeToNodes(serialized).first()
+        val lwAST = mConverter.deserializeToNodes(serialized).first()
         val kAST = mConverter.importModelFromLionWeb(lwAST)
 
         val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
