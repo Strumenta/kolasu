@@ -21,7 +21,7 @@ dependencies {
     cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testImplementation "com.google.code.gson:gson:$gson_version"
-    api("io.lionweb.lioncore-java:lioncore-java-core:$lionwebVersion")
+    api("io.lionweb.lionweb-java:lionweb-java-core:$lionwebVersion")
     api(project(":core"))
 }
 
