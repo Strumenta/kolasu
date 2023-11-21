@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.model.PropertyTypeDescription
+import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.isANode
 import com.strumenta.kolasu.model.processProperties
 import org.eclipse.emf.ecore.*
@@ -197,13 +198,15 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                     // do not process inherited properties
                     val valueType = prop.valueType
                     if (prop.provideNodes) {
-                        registerReference(prop, valueType, eClass)
+                        registerReference(prop, valueType, eClass, true)
+                    } else if (prop.valueType == ReferenceByName::class) {
+                        registerReference(prop, valueType, eClass, false)
                     } else {
                         val nullable = prop.valueType.isMarkedNullable
                         val dataType = provideDataType(prop.valueType.withNullability(false))
                         if (dataType == null) {
                             // We can treat it like a class
-                            registerReference(prop, valueType, eClass)
+                            registerReference(prop, valueType, eClass, true)
                         } else {
                             val ea = EcoreFactory.eINSTANCE.createEAttribute()
                             ea.name = prop.name
@@ -229,7 +232,8 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
     private fun registerReference(
         prop: PropertyTypeDescription,
         valueType: KType,
-        eClass: EClass
+        eClass: EClass,
+        containment: Boolean
     ) {
         if (valueType.classifier is KClass<*> && (valueType.classifier as KClass<*>).isSubclassOf(Collection::class)) {
             throw IllegalStateException("We do not support references to lists. EClass $eClass, property $prop")
@@ -244,7 +248,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             ec.lowerBound = 0
             ec.upperBound = 1
         }
-        ec.isContainment = true
+        ec.isContainment = containment
         // No type parameters on methods should be allowed elsewhere and only the type parameters
         // on the class should be visible. We are not expecting containing classes to expose
         // type parameters
