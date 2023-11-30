@@ -244,6 +244,9 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             ec.lowerBound = 0
             ec.upperBound = 1
         }
+        // Note: it's the reference that's a child here, not the referred object.
+        // We represent references as ReferenceByName instances, so that we can also retain information about
+        // the name of the referred node in case the reference couldn't be resolved.
         ec.isContainment = true
         // No type parameters on methods should be allowed elsewhere and only the type parameters
         // on the class should be visible. We are not expecting containing classes to expose
