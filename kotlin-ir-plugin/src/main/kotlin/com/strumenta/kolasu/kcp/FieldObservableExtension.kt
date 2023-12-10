@@ -26,6 +26,7 @@ import org.jetbrains.kotlin.ir.symbols.impl.IrAnonymousInitializerSymbolImpl
 import org.jetbrains.kotlin.ir.util.allParameters
 import org.jetbrains.kotlin.ir.util.parentAsClass
 import org.jetbrains.kotlin.ir.util.statements
+import org.jetbrains.kotlin.ir.util.toIrConst
 import org.jetbrains.kotlin.name.FqName
 
 object AutoObserveReferenceOrigin : IrDeclarationOriginImpl("AutoObserveReference", true)
