@@ -56,10 +56,26 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                             typeSpec.modifiers.add(KModifier.SEALED)
                         }
                         if (element.allFeatures().isNotEmpty() && !element.isAbstract) {
-                            typeSpec.modifiers.add(KModifier.DATA)
+                            val hasSubclasses = language.elements.filterIsInstance<Concept>().any {
+                                it.extendedConcept == element
+                            }
+                            // if it has subclasses it needs to be open, to be extended
+                            if (hasSubclasses) {
+                                typeSpec.modifiers.add(KModifier.OPEN)
+                            } else {
+                                typeSpec.modifiers.add(KModifier.DATA)
+                            }
+                        }
+                        if (element.allFeatures().isEmpty() && !element.isAbstract) {
+                            val hasSubclasses = language.elements.filterIsInstance<Concept>().any {
+                                it.extendedConcept == element
+                            }
+                            if (hasSubclasses) {
+                                typeSpec.modifiers.add(KModifier.OPEN)
+                            }
                         }
                         if (element.extendedConcept == null) {
-                            throw IllegalStateException()
+                            typeSpec.superclass(ClassName.bestGuess(Node::class.qualifiedName!!))
                         } else {
                             typeSpec.superclass(typeName(element.extendedConcept!!))
                             (element.extendedConcept as Concept).allFeatures().forEach {
@@ -204,7 +220,7 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                 Named::class.java.asTypeName()
             }
             classifier.language == this.language -> {
-                ClassName.bestGuess("$packageName.${classifier.name}")
+                ClassName(packageName, classifier.name!!)
             }
             else -> {
                 TODO("Classifier $classifier. ID ${classifier.id}, NODE id: ${LionCoreBuiltins.getNode().id}")

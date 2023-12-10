@@ -31,26 +31,13 @@ annotation class Mapped(val path: String = "")
 /**
  * Transformer that, given a tree node, will instantiate the corresponding transformed node.
  */
-class NodeTransformer<Source, Output : Node> {
-    val constructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> List<Output>
-    var children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf()
-    var finalizer: (Output) -> Unit = {}
-    var skipChildren: Boolean = false
+class NodeTransformer<Source, Output : Node>(
+    val constructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> List<Output>,
+    var children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
+    var finalizer: (Output) -> Unit = {},
+    var skipChildren: Boolean = false,
     var childrenSetAtConstruction: Boolean = false
-
-    constructor(
-        constructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> List<Output>,
-        children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
-        finalizer: (Output) -> Unit = {},
-        skipChildren: Boolean = false,
-        childrenSetAtConstruction: Boolean = false
-    ) {
-        this.constructor = constructor
-        this.children = children
-        this.finalizer = finalizer
-        this.skipChildren = skipChildren
-        this.childrenSetAtConstruction = childrenSetAtConstruction
-    }
+) {
 
     companion object {
         fun <Source, Output : Node> single(
@@ -373,7 +360,7 @@ open class ASTTransformer(
         val childFactory = childNodeTransformer as ChildNodeTransformer<Any, Any, Any>
         val childrenSource = childFactory.get(getSource(node, source))
         val child: Any? = if (pd.multiple) {
-            (childrenSource as List<*>).map { transformIntoNodes(it, node) }.flatten()
+            (childrenSource as List<*>).map { transformIntoNodes(it, node) }.flatten() ?: listOf<Node>()
         } else {
             transform(childrenSource, node)
         }

@@ -16,7 +16,7 @@ class ASTGeneratorTest {
         val inputStream = this.javaClass.getResourceAsStream("/properties-language.json")
         val jsonser = JsonSerialization.getStandardSerialization()
         jsonser.instanceResolver.addTree(StarLasuLWLanguage)
-        val propertiesLanguage = jsonser.unserializeToNodes(inputStream).first() as Language
+        val propertiesLanguage = jsonser.deserializeToNodes(inputStream).first() as Language
         val generated = ASTGenerator("com.strumenta.properties", propertiesLanguage).generateClasses()
         assertEquals(1, generated.size)
         assertEquals(

@@ -8,9 +8,29 @@ import kotlin.test.*
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
-class IgnoreChildren<N : Node> : List<N> {
+class IgnoreChildren<N : Node> : MutableList<N> {
     override val size: Int
         get() = TODO("Not yet implemented")
+
+    override fun clear() {
+        TODO("Not yet implemented")
+    }
+
+    override fun addAll(elements: Collection<N>): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun addAll(index: Int, elements: Collection<N>): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun add(index: Int, element: N) {
+        TODO("Not yet implemented")
+    }
+
+    override fun add(element: N): Boolean {
+        TODO("Not yet implemented")
+    }
 
     override fun contains(element: N): Boolean {
         TODO("Not yet implemented")
@@ -32,7 +52,7 @@ class IgnoreChildren<N : Node> : List<N> {
         TODO("Not yet implemented")
     }
 
-    override fun iterator(): Iterator<N> {
+    override fun iterator(): MutableIterator<N> {
         TODO("Not yet implemented")
     }
 
@@ -40,15 +60,35 @@ class IgnoreChildren<N : Node> : List<N> {
         TODO("Not yet implemented")
     }
 
-    override fun listIterator(): ListIterator<N> {
+    override fun listIterator(): MutableListIterator<N> {
         TODO("Not yet implemented")
     }
 
-    override fun listIterator(index: Int): ListIterator<N> {
+    override fun listIterator(index: Int): MutableListIterator<N> {
         TODO("Not yet implemented")
     }
 
-    override fun subList(fromIndex: Int, toIndex: Int): List<N> {
+    override fun removeAt(index: Int): N {
+        TODO("Not yet implemented")
+    }
+
+    override fun set(index: Int, element: N): N {
+        TODO("Not yet implemented")
+    }
+
+    override fun retainAll(elements: Collection<N>): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun removeAll(elements: Collection<N>): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun remove(element: N): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun subList(fromIndex: Int, toIndex: Int): MutableList<N> {
         TODO("Not yet implemented")
     }
 }

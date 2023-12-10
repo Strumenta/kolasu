@@ -115,9 +115,9 @@ class LionWebModelConverter {
     }
 
     /**
-     * Unserialize nodes, taking into accaount the known languages.
+     * Deserialize nodes, taking into accaount the known languages.
      */
-    fun unserializeToNodes(json: String, useDynamicNodesIfNeeded: Boolean = true): List<LWNode> {
+    fun deserializeToNodes(json: String, useDynamicNodesIfNeeded: Boolean = true): List<LWNode> {
         val js = JsonSerialization.getStandardSerialization()
         languageConverter.knownLWLanguages().forEach {
             js.classifierResolver.registerLanguage(it)
@@ -125,7 +125,7 @@ class LionWebModelConverter {
         if (useDynamicNodesIfNeeded) {
             js.enableDynamicNodes()
         }
-        return js.unserializeToNodes(json)
+        return js.deserializeToNodes(json)
     }
 
     /**
