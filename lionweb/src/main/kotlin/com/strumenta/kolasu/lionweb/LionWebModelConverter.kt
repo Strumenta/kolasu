@@ -49,13 +49,13 @@ class LionWebModelConverter {
         this.languageConverter.associateLanguages(lwLanguage, kolasuLanguage)
     }
 
-    fun exportModelToLionWeb(kolasuTree: KNode): LWNode {
+    fun exportModelToLionWeb(kolasuTree: KNode, customSourceId: String? = null): LWNode {
         if (nodesMapping.containsA(kolasuTree)) {
             return nodesMapping.byA(kolasuTree)!!
         }
         kolasuTree.walk().forEach { kNode ->
             if (!nodesMapping.containsA(kNode)) {
-                val lwNode = DynamicNode(nodeID(kNode), findConcept(kNode))
+                val lwNode = DynamicNode(nodeID(kNode, customSourceId), findConcept(kNode))
                 associateNodes(kNode, lwNode)
             }
         }
@@ -264,8 +264,8 @@ class LionWebModelConverter {
         return languageConverter.correspondingConcept(kNode.javaClass.kotlin)
     }
 
-    private fun nodeID(kNode: com.strumenta.kolasu.model.Node): String {
-        return "${kNode.source.id}_${kNode.positionalID}"
+    private fun nodeID(kNode: com.strumenta.kolasu.model.Node, customSourceId: String? = null): String {
+        return "${customSourceId ?: kNode.source.id}_${kNode.positionalID}"
     }
 
     private fun associateNodes(kNode: KNode, lwNode: LWNode) {
