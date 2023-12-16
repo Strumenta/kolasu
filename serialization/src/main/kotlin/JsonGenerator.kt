@@ -359,9 +359,18 @@ private fun Any?.toJsonStreaming(writer: JsonWriter) {
         is String -> writer.value(this)
         is Number -> writer.value(this)
         is Boolean -> writer.value(this)
+        is Range -> this.toJsonStreaming(writer)
         else -> writer.value(this.toString())
     }
 }
+
+//fun Range.toJsonStreaming(writer: JsonWriter)  {
+//    return jsonObject(
+//        "description" to this.toString(),
+//        "start" to this.start.toJson(),
+//        "end" to this.end.toJson()
+//    )
+//}
 
 fun Issue.toJson(): JsonElement {
     return jsonObject(

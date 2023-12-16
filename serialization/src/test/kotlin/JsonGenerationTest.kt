@@ -231,7 +231,7 @@ class JsonGenerationTest {
         JsonGenerator().generateJSONWithStreaming(root = node, writer = JsonWriter(writer))
         val json = writer.toString()
         assertEquals(
-            """{"#type":"com.strumenta.kolasu.model.NodeOverridingName","name":"foo"}
+            """{"#type":"com.strumenta.kolasu.serialization.NodeOverridingName","name":"foo"}
             """.trimMargin().replace("\n", ""),
             json
         )
@@ -281,7 +281,7 @@ class JsonGenerationTest {
         val json = JsonGenerator().generateString(NodeOverridingName("foo"))
         assertEquals(
             """{
-  "#type": "com.strumenta.kolasu.model.NodeOverridingName",
+  "#type": "com.strumenta.kolasu.serialization.NodeOverridingName",
   "name": "foo"
 }""",
             json
@@ -293,7 +293,7 @@ class JsonGenerationTest {
         val json = JsonGenerator().generateString(ExtNode(123))
         assertEquals(
             """{
-  "#type": "com.strumenta.kolasu.model.ExtNode",
+  "#type": "com.strumenta.kolasu.serialization.ExtNode",
   "attr1": 123
 }""",
             json
@@ -389,16 +389,16 @@ class JsonGenerationTest {
                 "b"
               ],
               "someChild": {
-                "#type": "com.strumenta.kolasu.model.BaseNode",
+                "#type": "com.strumenta.kolasu.serialization.BaseNode",
                 "attr1": 456
               },
               "someChildren": [
                 {
-                  "#type": "com.strumenta.kolasu.model.BaseNode",
+                  "#type": "com.strumenta.kolasu.serialization.BaseNode",
                   "attr1": 78
                 },
                 {
-                  "#type": "com.strumenta.kolasu.model.BaseNode",
+                  "#type": "com.strumenta.kolasu.serialization.BaseNode",
                   "attr1": 90
                 }
               ]
