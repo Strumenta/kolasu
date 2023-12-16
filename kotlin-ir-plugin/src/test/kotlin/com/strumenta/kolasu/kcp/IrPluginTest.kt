@@ -12,13 +12,6 @@ import java.io.File
 import java.net.URLClassLoader
 import kotlin.test.assertEquals
 
-val CompilationResultWithClassLoader.classLoader
-    get() = URLClassLoader(
-        // Include the original classpaths and the output directory to be able to load classes from dependencies.
-        classpaths.plus(outputDirectory).map { it.toURI().toURL() }.toTypedArray(),
-        this::class.java.classLoader
-    )
-
 fun CompilationResultWithClassLoader.assertHasMessage(regex: Regex) {
     val messageLines = this.messages.lines()
     assert(messageLines.any { regex.matches(it) })
@@ -465,6 +458,13 @@ data class CompilationResultWithClassLoader(
         get() = compilationResult.messages
     val exitCode: KotlinCompilation.ExitCode
         get() = compilationResult.exitCode
+
+    // It is important to REUSE the classloader and not re-create it
+    val classLoader = URLClassLoader(
+        // Include the original classpaths and the output directory to be able to load classes from dependencies.
+        classpaths.plus(outputDirectory).map { it.toURI().toURL() }.toTypedArray(),
+        this::class.java.classLoader
+    )
 }
 
 fun compile(
