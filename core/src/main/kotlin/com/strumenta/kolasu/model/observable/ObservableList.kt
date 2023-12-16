@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.model.observable
 
-import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.subjects.PublishSubject
+import com.badoo.reaktive.observable.ObservableObserver
+import com.badoo.reaktive.subject.publish.PublishSubject
 
 sealed class ListNotification<E>
 
@@ -10,7 +10,7 @@ data class ListRemoval<E>(val removed: E) : ListNotification<E>()
 
 class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
     MutableList<E> by base {
-    val changes = PublishSubject.create<ListNotification<E>>()
+    val changes = PublishSubject<ListNotification<E>>()
 
     override fun addAll(elements: Collection<E>): Boolean {
         var modified = false
@@ -71,7 +71,7 @@ class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
         }
     }
 
-    fun subscribe(observer: Observer<in ListNotification<E>>) {
+    fun subscribe(observer: ObservableObserver<in ListNotification<E>>) {
         changes.subscribe(observer)
     }
 }

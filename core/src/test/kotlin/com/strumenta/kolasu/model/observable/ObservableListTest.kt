@@ -1,11 +1,11 @@
 package com.strumenta.kolasu.model.observable
 
-import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.disposables.Disposable
+import com.badoo.reaktive.disposable.Disposable
+import com.badoo.reaktive.observable.ObservableObserver
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class MyListObserver : Observer<ListNotification<Int>> {
+class MyListObserver : ObservableObserver<ListNotification<Int>> {
     val observations = mutableListOf<String>()
 
     override fun onSubscribe(d: Disposable) {
