@@ -19,7 +19,6 @@ import org.junit.Test
 import java.io.StringWriter
 import kotlin.test.assertEquals
 
-
 data class NodeOverridingName(
     override var name: String
 ) : Node(), Named
