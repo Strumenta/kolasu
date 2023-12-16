@@ -1,5 +1,7 @@
-package com.strumenta.kolasu.model
+package com.strumenta.kolasu.serialization
 
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.serialization.IdProvider
 import com.strumenta.kolasu.serialization.NodeWithReference
 import com.strumenta.kolasu.serialization.computeIds
@@ -8,6 +10,11 @@ import com.strumenta.kolasu.traversing.walkLeavesFirst
 import org.junit.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+
+data class A(val s: String) : Node()
+data class B(val a: A, val manyAs: List<A>) : Node()
+
+
 
 class IndexingTest {
 

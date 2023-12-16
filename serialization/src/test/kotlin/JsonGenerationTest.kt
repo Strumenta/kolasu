@@ -1,11 +1,9 @@
 package com.strumenta.kolasu.serialization
 
 import com.google.gson.stream.JsonWriter
-import com.strumenta.kolasu.model.BaseNode
-import com.strumenta.kolasu.model.ExtNode
 import com.strumenta.kolasu.model.Multiplicity
+import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.NodeOverridingName
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.PropertyDescription
@@ -20,6 +18,14 @@ import com.strumenta.kolasu.validation.Result
 import org.junit.Test
 import java.io.StringWriter
 import kotlin.test.assertEquals
+
+
+data class NodeOverridingName(
+    override var name: String
+) : Node(), Named
+
+open class BaseNode(open var attr1: Int) : Node()
+data class ExtNode(override var attr1: Int) : BaseNode(attr1)
 
 data class NodeWithReference(
     override val name: String? = null,

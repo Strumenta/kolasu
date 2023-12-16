@@ -1,25 +1,35 @@
-@file:OptIn(ExperimentalCompilerApi::class)
+@file:OptIn(ExperimentalCompilerApi::class, ExperimentalCompilerApi::class)
 
 package com.strumenta.kolasu.kcp
 
+import com.tschuchort.compiletesting.CompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Test
+import java.io.File
+import java.net.URLClassLoader
 import kotlin.test.assertEquals
 
-fun KotlinCompilation.Result.assertHasMessage(regex: Regex) {
+val CompilationResultWithClassLoader.classLoader
+    get() = URLClassLoader(
+        // Include the original classpaths and the output directory to be able to load classes from dependencies.
+        classpaths.plus(outputDirectory).map { it.toURI().toURL() }.toTypedArray(),
+        this::class.java.classLoader
+    )
+
+fun CompilationResultWithClassLoader.assertHasMessage(regex: Regex) {
     val messageLines = this.messages.lines()
     assert(messageLines.any { regex.matches(it) })
 }
 
-fun KotlinCompilation.Result.assertHasMessage(msg: String) {
+fun CompilationResultWithClassLoader.assertHasMessage(msg: String) {
     val messageLines = this.messages.lines()
     assert(messageLines.any { msg.equals(it) })
 }
 
-fun KotlinCompilation.Result.assertHasNotMessage(regex: Regex) {
+fun CompilationResultWithClassLoader.assertHasNotMessage(regex: Regex) {
     val messageLines = this.messages.lines()
     assert(messageLines.none { regex.matches(it) })
 }
@@ -410,7 +420,7 @@ fun main() {
         result.invokeMainMethod("mytest.MainKt")
     }
 
-    private fun KotlinCompilation.Result.invokeMainMethod(className: String) {
+    private fun CompilationResultWithClassLoader.invokeMainMethod(className: String) {
         val mainKt = this.classLoader.loadClass(className)
         val mainMethod = mainKt.methods.find { it.name == "main" }
             ?: throw IllegalArgumentException("Main method not found in compiled code")
@@ -431,21 +441,35 @@ fun main() {
     }
 }
 
+@ExperimentalCompilerApi
 fun compile(
     sourceFiles: List<SourceFile>,
     plugin: CompilerPluginRegistrar = StarLasuComponentRegistrar()
-): KotlinCompilation.Result {
-    return KotlinCompilation().apply {
+): CompilationResultWithClassLoader {
+    val kotlinCompilation = KotlinCompilation().apply {
         sources = sourceFiles
-        useIR = true
+        // useIR = true
         compilerPluginRegistrars = listOf(plugin)
         inheritClassPath = true
-    }.compile()
+    }
+    val result = kotlinCompilation.compile()
+    return CompilationResultWithClassLoader(result, kotlinCompilation.classpaths, kotlinCompilation.classesDir)
+}
+
+data class CompilationResultWithClassLoader(
+    val compilationResult: CompilationResult,
+    val classpaths: kotlin.collections.List<java.io.File>,
+    val outputDirectory: File
+) {
+    val messages: String
+        get() = compilationResult.messages
+    val exitCode: KotlinCompilation.ExitCode
+        get() = compilationResult.exitCode
 }
 
 fun compile(
     sourceFile: SourceFile,
     plugin: CompilerPluginRegistrar = StarLasuComponentRegistrar()
-): KotlinCompilation.Result {
+): CompilationResultWithClassLoader {
     return compile(listOf(sourceFile), plugin)
 }
