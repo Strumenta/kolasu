@@ -2,7 +2,6 @@
 
 package com.strumenta.kolasu.kcp
 
-import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext

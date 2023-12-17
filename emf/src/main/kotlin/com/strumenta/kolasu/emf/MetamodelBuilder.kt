@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.PropertyTypeDescription
 import com.strumenta.kolasu.model.isANode
 import com.strumenta.kolasu.model.processProperties

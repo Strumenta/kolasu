@@ -2,7 +2,6 @@
 
 package com.strumenta.kolasu.kcp
 
-import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Node
 import org.jetbrains.kotlin.backend.common.extensions.FirIncompatiblePluginAPI
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension

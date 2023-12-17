@@ -4,7 +4,6 @@ import com.strumenta.kolasu.model.EntityDeclaration
 import com.strumenta.kolasu.model.ErrorNode
 import com.strumenta.kolasu.model.Expression
 import com.strumenta.kolasu.model.GenericErrorNode
-import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.PlaceholderElement
