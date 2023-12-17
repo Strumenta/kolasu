@@ -1,8 +1,9 @@
-@file:OptIn(FirIncompatiblePluginAPI::class, ObsoleteDescriptorBasedAPI::class)
+@file:OptIn(FirIncompatiblePluginAPI::class, ObsoleteDescriptorBasedAPI::class, ObsoleteDescriptorBasedAPI::class)
 
 package com.strumenta.kolasu.kcp
 
 import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.FirIncompatiblePluginAPI
@@ -36,9 +37,10 @@ object AutoObserveReferenceOrigin : IrDeclarationOriginImpl("AutoObserveReferenc
 class FieldObservableExtension(val pluginContext: IrPluginContext) : IrElementTransformerVoidWithContext() {
 
     val notifyOfPropertyChange: IrSimpleFunctionSymbol = pluginContext.referenceFunctions(
-        FqName("${INode::class.qualifiedName}.notifyOfPropertyChange")
+        FqName("${Node::class.qualifiedName}.notifyOfPropertyChange")
     ).single()
 
+    @OptIn(ObsoleteDescriptorBasedAPI::class)
     override fun visitPropertyNew(declaration: IrProperty): IrStatement {
         if (declaration.declareReference()) {
             //     init {

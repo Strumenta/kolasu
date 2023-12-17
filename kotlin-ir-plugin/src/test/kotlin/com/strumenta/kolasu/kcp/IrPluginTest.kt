@@ -1,25 +1,28 @@
-@file:OptIn(ExperimentalCompilerApi::class)
+@file:OptIn(ExperimentalCompilerApi::class, ExperimentalCompilerApi::class)
 
 package com.strumenta.kolasu.kcp
 
+import com.tschuchort.compiletesting.CompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Test
+import java.io.File
+import java.net.URLClassLoader
 import kotlin.test.assertEquals
 
-fun KotlinCompilation.Result.assertHasMessage(regex: Regex) {
+fun CompilationResultWithClassLoader.assertHasMessage(regex: Regex) {
     val messageLines = this.messages.lines()
     assert(messageLines.any { regex.matches(it) })
 }
 
-fun KotlinCompilation.Result.assertHasMessage(msg: String) {
+fun CompilationResultWithClassLoader.assertHasMessage(msg: String) {
     val messageLines = this.messages.lines()
     assert(messageLines.any { msg.equals(it) })
 }
 
-fun KotlinCompilation.Result.assertHasNotMessage(regex: Regex) {
+fun CompilationResultWithClassLoader.assertHasNotMessage(regex: Regex) {
     val messageLines = this.messages.lines()
     assert(messageLines.none { regex.matches(it) })
 }
@@ -111,6 +114,7 @@ fun main() {
           package mytest
 
           import com.strumenta.kolasu.model.Node
+          import com.strumenta.kolasu.model.INode
           import com.strumenta.kolasu.model.observable.SimpleNodeObserver
 
     data class MyNode(var p1: Int) : Node()
@@ -126,7 +130,7 @@ var p2 : Int = 0
 object MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
     override fun <V : Any?>onAttributeChange(
-        node: Node,
+        node: INode,
         attributeName: String,
         oldValue: V,
         newValue: V
@@ -149,7 +153,7 @@ fun main() {
 """
             )
         )
-        result.assertHasMessage(Regex("i: file:///[a-zA-Z0-9/\\-.]*:5:5 AST class mytest.MyNode identified"))
+        result.assertHasMessage(Regex("i: file:///[a-zA-Z0-9/\\-.]*:6:6 AST class mytest.MyNode identified"))
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
@@ -276,6 +280,7 @@ fun main() {
                 """
           package mytest
 
+          import com.strumenta.kolasu.model.INode
           import com.strumenta.kolasu.model.Node
           import com.strumenta.kolasu.model.observable.ObservableList
           import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
@@ -292,30 +297,30 @@ data class NodeWithReference(val ref: ReferenceByName<NamedNode>, val id: Int) :
 
 class MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
-    override fun <V> onAttributeChange(node: Node, attributeName: String, oldValue: V, newValue: V) {
+    override fun <V> onAttributeChange(node: INode, attributeName: String, oldValue: V, newValue: V) {
         observations.add("${'$'}attributeName: ${'$'}oldValue -> ${'$'}newValue")
     }
 
-    override fun onChildAdded(node: Node, containmentName: String, added: Node) {
+    override fun onChildAdded(node: INode, containmentName: String, added: INode) {
         observations.add("${'$'}containmentName: added ${'$'}added")
     }
 
-    override fun onChildRemoved(node: Node, containmentName: String, removed: Node) {
+    override fun onChildRemoved(node: INode, containmentName: String, removed: INode) {
         observations.add("${'$'}containmentName: removed ${'$'}removed")
     }
 
-    override fun onReferenceSet(node: Node, referenceName: String, oldReferredNode: Node?, newReferredNode: Node?) {
+    override fun onReferenceSet(node: INode, referenceName: String, oldReferredNode: INode?, newReferredNode: INode?) {
         val oldName = if (oldReferredNode == null) "null" else (oldReferredNode as? Named)?.name ?: "<UNKNOWN>"
         val newName = if (newReferredNode == null) "null" else (newReferredNode as? Named)?.name ?: "<UNKNOWN>"
         observations.add("${'$'}referenceName: changed from ${'$'}oldName to ${'$'}newName")
     }
 
-    override fun onReferringAdded(node: Node, referenceName: String, referring: Node) {
+    override fun onReferringAdded(node: INode, referenceName: String, referring: INode) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
         observations.add("${'$'}myName is now referred to by ${'$'}referring.${'$'}referenceName")
     }
 
-    override fun onReferringRemoved(node: Node, referenceName: String, referring: Node) {
+    override fun onReferringRemoved(node: INode, referenceName: String, referring: INode) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
         observations.add("${'$'}myName is not referred anymore by ${'$'}referring.${'$'}referenceName")
     }
@@ -410,7 +415,7 @@ fun main() {
         result.invokeMainMethod("mytest.MainKt")
     }
 
-    private fun KotlinCompilation.Result.invokeMainMethod(className: String) {
+    private fun CompilationResultWithClassLoader.invokeMainMethod(className: String) {
         val mainKt = this.classLoader.loadClass(className)
         val mainMethod = mainKt.methods.find { it.name == "main" }
             ?: throw IllegalArgumentException("Main method not found in compiled code")
@@ -434,18 +439,38 @@ fun main() {
 fun compile(
     sourceFiles: List<SourceFile>,
     plugin: CompilerPluginRegistrar = StarLasuComponentRegistrar()
-): KotlinCompilation.Result {
-    return KotlinCompilation().apply {
+): CompilationResultWithClassLoader {
+    val kotlinCompilation = KotlinCompilation().apply {
         sources = sourceFiles
-        useIR = true
+        // useIR = true
         compilerPluginRegistrars = listOf(plugin)
         inheritClassPath = true
-    }.compile()
+    }
+    val result = kotlinCompilation.compile()
+    return CompilationResultWithClassLoader(result, kotlinCompilation.classpaths, kotlinCompilation.classesDir)
+}
+
+data class CompilationResultWithClassLoader(
+    val compilationResult: CompilationResult,
+    val classpaths: kotlin.collections.List<java.io.File>,
+    val outputDirectory: File
+) {
+    val messages: String
+        get() = compilationResult.messages
+    val exitCode: KotlinCompilation.ExitCode
+        get() = compilationResult.exitCode
+
+    // It is important to REUSE the classloader and not re-create it
+    val classLoader = URLClassLoader(
+        // Include the original classpaths and the output directory to be able to load classes from dependencies.
+        classpaths.plus(outputDirectory).map { it.toURI().toURL() }.toTypedArray(),
+        this::class.java.classLoader
+    )
 }
 
 fun compile(
     sourceFile: SourceFile,
     plugin: CompilerPluginRegistrar = StarLasuComponentRegistrar()
-): KotlinCompilation.Result {
+): CompilationResultWithClassLoader {
     return compile(listOf(sourceFile), plugin)
 }

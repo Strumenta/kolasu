@@ -3,6 +3,7 @@
 package com.strumenta.kolasu.kcp
 
 import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.Node
 import org.jetbrains.kotlin.backend.common.extensions.FirIncompatiblePluginAPI
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
@@ -37,7 +38,7 @@ class StarLasuIrGenerationExtension(
         moduleFragment.files.forEach { irFile ->
             irFile.declarations.filterIsInstance(IrClass::class.java).forEach { irClass ->
                 val isASTNode = irClass.getAllSuperclasses().any {
-                    it.kotlinFqName.toString() == INode::class.qualifiedName
+                    it.kotlinFqName.toString() == Node::class.qualifiedName
                 }
                 if (isASTNode) {
                     messageCollector.report(
