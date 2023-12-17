@@ -2,7 +2,7 @@ package com.strumenta.kolasu.antlr.mapping
 
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.antlr.parsing.withParseTreeNode
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.transformation.ASTTransformer
@@ -27,7 +27,7 @@ open class ParseTreeToASTTransformer(
      * it also assigns the parseTreeNode to the AST node so that it can keep track of its range.
      * However, a node transformer can override the parseTreeNode of the nodes it creates (but not the parent).
      */
-    override fun transformIntoNodes(source: Any?, parent: Node?): List<Node> {
+    override fun transformIntoNodes(source: Any?, parent: INode?): List<INode> {
         val transformed = super.transformIntoNodes(source, parent)
         return transformed.map { node ->
             if (source is ParserRuleContext) {
@@ -41,7 +41,7 @@ open class ParseTreeToASTTransformer(
         }.flatten()
     }
 
-    override fun getSource(node: Node, source: Any): Any {
+    override fun getSource(node: INode, source: Any): Any {
         val origin = node.origin
         return if (origin is ParseTreeOrigin) origin.parseTree else source
     }
@@ -57,18 +57,18 @@ open class ParseTreeToASTTransformer(
      */
     fun <P : ParserRuleContext> registerNodeTransformerUnwrappingChild(
         kclass: KClass<P>
-    ): NodeTransformer<P, Node> = registerNodeTransformer(kclass) { source, transformer, _ ->
+    ): NodeTransformer<P, INode> = registerNodeTransformer(kclass) { source, transformer, _ ->
         val nodeChildren = source.children.filterIsInstance<ParserRuleContext>()
         require(nodeChildren.size == 1) {
             "Node $source (${source.javaClass}) has ${nodeChildren.size} " +
                 "node children: $nodeChildren"
         }
-        transformer.transform(nodeChildren[0]) as Node
+        transformer.transform(nodeChildren[0]) as INode
     }
 
     /**
      * Alternative to registerNodeFactoryUnwrappingChild(KClass) which is slightly more concise.
      */
     inline fun <reified P : ParserRuleContext> registerNodeFactoryUnwrappingChild():
-        NodeTransformer<P, Node> = registerNodeTransformerUnwrappingChild(P::class)
+        NodeTransformer<P, INode> = registerNodeTransformerUnwrappingChild(P::class)
 }

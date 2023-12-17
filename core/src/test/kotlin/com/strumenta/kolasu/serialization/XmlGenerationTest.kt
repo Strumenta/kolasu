@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.serialization
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.validation.Issue
@@ -127,7 +127,7 @@ class XmlGenerationTest {
                 range = Range(Point(10, 1), Point(12, 3))
             )
         )
-        val result = Result<Node>(issues, null)
+        val result = Result<INode>(issues, null)
         val serialized = XMLGenerator().generateString(result)
         assertEquals(
             """<?xml version="1.0" encoding="UTF-8" standalone="no"?>

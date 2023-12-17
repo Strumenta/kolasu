@@ -8,7 +8,7 @@ import kotlin.test.*
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
-class IgnoreChildren<N : Node> : MutableList<N> {
+class IgnoreChildren<N : INode> : MutableList<N> {
     override val size: Int
         get() = TODO("Not yet implemented")
 
@@ -96,7 +96,7 @@ class IgnoreChildren<N : Node> : MutableList<N> {
 class ASTDifferenceException(val context: String, val expected: Any, val actual: Any) :
     Exception("$context: expecting $expected, actual $actual")
 
-fun <T : Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: ParsingResult<T>) {
+fun <T : INode> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: ParsingResult<T>) {
     assertEquals(expected.issues, actual.issues)
     assertEquals(expected.root != null, actual.root != null)
     if (expected.root != null) {
@@ -104,8 +104,8 @@ fun <T : Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: 
     }
 }
 
-fun <N : Node> assertASTsAreEqual(
-    expected: Node,
+fun <N : INode> assertASTsAreEqual(
+    expected: INode,
     actual: ParsingResult<N>,
     context: String = "<root>",
     considerRange: Boolean = false
@@ -120,8 +120,8 @@ fun <N : Node> assertASTsAreEqual(
 }
 
 fun assertASTsAreEqual(
-    expected: Node,
-    actual: Node,
+    expected: INode,
+    actual: INode,
     context: String = "<root>",
     considerRange: Boolean = false,
     useLightweightAttributeEquality: Boolean = false
@@ -141,8 +141,8 @@ fun assertASTsAreEqual(
                         if (expectedPropValue is IgnoreChildren<*>) {
                             // Nothing to do
                         } else {
-                            val actualPropValueCollection = actualPropValue?.let { it as Collection<Node> }
-                            val expectedPropValueCollection = expectedPropValue?.let { it as Collection<Node> }
+                            val actualPropValueCollection = actualPropValue?.let { it as Collection<INode> }
+                            val expectedPropValueCollection = expectedPropValue?.let { it as Collection<INode> }
                             assertEquals(
                                 actualPropValueCollection == null,
                                 expectedPropValueCollection == null,
@@ -184,8 +184,8 @@ fun assertASTsAreEqual(
                             // that is ok
                         } else {
                             assertASTsAreEqual(
-                                expectedPropValue as Node,
-                                actualPropValue as Node,
+                                expectedPropValue as INode,
+                                actualPropValue as INode,
                                 context = "$context.${expectedProperty.name}",
                                 considerRange = considerRange,
                                 useLightweightAttributeEquality = useLightweightAttributeEquality
@@ -234,7 +234,7 @@ fun assertASTsAreEqual(
     }
 }
 
-fun Node.assertReferencesResolved(forProperty: KReferenceByName<out Node>) {
+fun INode.assertReferencesResolved(forProperty: KReferenceByName<out INode>) {
     this.kReferenceByNameProperties()
         .filter { it == forProperty }
         .mapNotNull { it.get(this) }
@@ -242,14 +242,14 @@ fun Node.assertReferencesResolved(forProperty: KReferenceByName<out Node>) {
     this.walkChildren().forEach { it.assertReferencesResolved(forProperty = forProperty) }
 }
 
-fun Node.assertReferencesResolved(withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class) {
+fun INode.assertReferencesResolved(withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class) {
     this.kReferenceByNameProperties(targetClass = withReturnType)
         .mapNotNull { it.get(this) }
         .forEach { assertTrue { (it as ReferenceByName<*>).isResolved } }
     this.walkChildren().forEach { it.assertReferencesResolved(withReturnType = withReturnType) }
 }
 
-fun Node.assertReferencesNotResolved(forProperty: KReferenceByName<out Node>) {
+fun INode.assertReferencesNotResolved(forProperty: KReferenceByName<out INode>) {
     this.kReferenceByNameProperties()
         .filter { it == forProperty }
         .mapNotNull { it.get(this) }
@@ -257,7 +257,7 @@ fun Node.assertReferencesNotResolved(forProperty: KReferenceByName<out Node>) {
     this.walkChildren().forEach { it.assertReferencesNotResolved(forProperty = forProperty) }
 }
 
-fun Node.assertReferencesNotResolved(withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class) {
+fun INode.assertReferencesNotResolved(withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class) {
     this.kReferenceByNameProperties(targetClass = withReturnType)
         .mapNotNull { it.get(this) }
         .forEach { assertFalse { (it as ReferenceByName<*>).isResolved } }

@@ -2,6 +2,7 @@ package com.strumenta.kolasu.antlr.mapping
 
 import com.strumenta.kolasu.antlr.parsing.withParseTreeNode
 import com.strumenta.kolasu.model.GenericErrorNode
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.PossiblyNamed
@@ -36,7 +37,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-data class CU(val specifiedRange: Range? = null, var statements: List<Node> = listOf()) : Node(specifiedRange)
+data class CU(val specifiedRange: Range? = null, var statements: List<INode> = listOf()) : Node(specifiedRange)
 data class DisplayIntStatement(val specifiedRange: Range? = null, val value: Int) : Node(specifiedRange)
 data class SetStatement(val specifiedRange: Range? = null, var variable: String = "", val value: Int = 0) :
     Node(specifiedRange)

@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.playground
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 
@@ -8,7 +8,7 @@ import com.strumenta.kolasu.validation.Result
  * A transpilation trace can be visualized to demonstrate how the transpiler work.
  * This represents a single file being transpiled into a singl file.
  */
-class TranspilationTrace<S : Node, T : Node>(
+class TranspilationTrace<S : INode, T : INode>(
     val originalCode: String,
     val generatedCode: String,
     val sourceResult: Result<S>,

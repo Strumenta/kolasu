@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.emf.serialization.JsonGenerator
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.range
@@ -86,7 +86,7 @@ class ResultTest {
         )
         val ePackage = metamodelBuilder.generate()
 
-        val result: Result<Node> = Result(
+        val result: Result<INode> = Result(
             listOf(
                 Issue(IssueType.SYNTACTIC, "An error", range = range(1, 2, 3, 4)),
                 Issue(IssueType.LEXICAL, "A warning", severity = IssueSeverity.WARNING),

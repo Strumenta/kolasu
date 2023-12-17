@@ -8,7 +8,7 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.IssueSeverity
@@ -19,7 +19,7 @@ import kotlin.system.exitProcess
 
 typealias ParserInstantiator<P> = Function<File, P?>
 
-abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
+abstract class ASTProcessingCommand<R : INode, P : ASTParser<R>>(
     val parserInstantiator: ParserInstantiator<P>,
     help: String = "",
     name: String? = null

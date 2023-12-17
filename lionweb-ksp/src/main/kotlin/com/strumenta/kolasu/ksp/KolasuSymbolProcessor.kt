@@ -7,7 +7,7 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintWriter
@@ -84,7 +84,7 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
             ksFile.declarations.forEach { ksDeclaration ->
                 if (ksDeclaration is KSClassDeclaration) {
                     val isNodeDecl = ksDeclaration.getAllSuperTypes().any {
-                        it.declaration.qualifiedName?.asString() == Node::class.qualifiedName
+                        it.declaration.qualifiedName?.asString() == INode::class.qualifiedName
                     }
                     if (isNodeDecl) {
                         languagesByPackage.computeIfAbsent(packageName) {

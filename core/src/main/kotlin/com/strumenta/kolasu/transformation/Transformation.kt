@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.transformation
 
 import com.strumenta.kolasu.model.GenericErrorNode
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.NodeOrigin
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.PropertyTypeDescription
@@ -31,7 +31,7 @@ annotation class Mapped(val path: String = "")
 /**
  * Transformer that, given a tree node, will instantiate the corresponding transformed node.
  */
-class NodeTransformer<Source, Output : Node>(
+class NodeTransformer<Source, Output : INode>(
     val constructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> List<Output>,
     var children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
     var finalizer: (Output) -> Unit = {},
@@ -40,7 +40,7 @@ class NodeTransformer<Source, Output : Node>(
 ) {
 
     companion object {
-        fun <Source, Output : Node> single(
+        fun <Source, Output : INode> single(
             singleConstructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> Output?,
             children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
             finalizer: (Output) -> Unit = {},
@@ -263,13 +263,13 @@ open class ASTTransformer(
      * This ensures that the generated value is a single Node or null.
      */
     @JvmOverloads
-    fun transform(source: Any?, parent: Node? = null): Node? {
+    fun transform(source: Any?, parent: INode? = null): INode? {
         val result = transformIntoNodes(source, parent)
         return when (result.size) {
             0 -> null
             1 -> {
                 val node = result.first()
-                require(node is Node)
+                require(node is INode)
                 node
             }
             else -> throw IllegalStateException(
@@ -282,15 +282,15 @@ open class ASTTransformer(
      * Performs the transformation of a node and, recursively, its descendants.
      */
     @JvmOverloads
-    open fun transformIntoNodes(source: Any?, parent: Node? = null): List<Node> {
+    open fun transformIntoNodes(source: Any?, parent: INode? = null): List<INode> {
         if (source == null) {
             return emptyList()
         }
         if (source is Collection<*>) {
             throw Error("Mapping error: received collection when value was expected")
         }
-        val transformer = getNodeTransformer<Any, Node>(source::class as KClass<Any>)
-        val nodes: List<Node>
+        val transformer = getNodeTransformer<Any, INode>(source::class as KClass<Any>)
+        val nodes: List<INode>
         if (transformer != null) {
             nodes = makeNodes(transformer, source, allowGenericNode = allowGenericNode)
             if (!transformer.skipChildren && !transformer.childrenSetAtConstruction) {
@@ -319,13 +319,13 @@ open class ASTTransformer(
     }
 
     private fun setChildren(
-        transformer: NodeTransformer<Any, Node>,
+        transformer: NodeTransformer<Any, INode>,
         source: Any,
-        node: Node
+        node: INode
     ) {
         node::class.processProperties { pd ->
             val childKey = node::class.qualifiedName + "#" + pd.name
-            var childNodeTransformer = transformer.getChildNodeTransformer<Node, Any, Any>(node::class, pd.name)
+            var childNodeTransformer = transformer.getChildNodeTransformer<INode, Any, Any>(node::class, pd.name)
             if (childNodeTransformer != null) {
                 if (childNodeTransformer != NO_CHILD_NODE) {
                     setChild(childNodeTransformer, source, node, pd)
@@ -354,13 +354,13 @@ open class ASTTransformer(
     protected open fun setChild(
         childNodeTransformer: ChildNodeTransformer<*, *, *>,
         source: Any,
-        node: Node,
+        node: INode,
         pd: PropertyTypeDescription
     ) {
         val childFactory = childNodeTransformer as ChildNodeTransformer<Any, Any, Any>
         val childrenSource = childFactory.get(getSource(node, source))
         val child: Any? = if (pd.multiple) {
-            (childrenSource as List<*>).map { transformIntoNodes(it, node) }.flatten() ?: listOf<Node>()
+            (childrenSource as List<*>).map { transformIntoNodes(it, node) }.flatten() ?: listOf<INode>()
         } else {
             transform(childrenSource, node)
         }
@@ -371,15 +371,15 @@ open class ASTTransformer(
         }
     }
 
-    protected open fun getSource(node: Node, source: Any): Any {
+    protected open fun getSource(node: INode, source: Any): Any {
         return source
     }
 
-    protected open fun <S : Any, T : Node> makeNodes(
+    protected open fun <S : Any, T : INode> makeNodes(
         transformer: NodeTransformer<S, T>,
         source: S,
         allowGenericNode: Boolean = true
-    ): List<Node> {
+    ): List<INode> {
         val nodes = try {
             transformer.constructor(source, this, transformer)
         } catch (e: Exception) {
@@ -397,7 +397,7 @@ open class ASTTransformer(
         return nodes
     }
 
-    protected open fun <S : Any, T : Node> getNodeTransformer(kClass: KClass<S>): NodeTransformer<S, T>? {
+    protected open fun <S : Any, T : INode> getNodeTransformer(kClass: KClass<S>): NodeTransformer<S, T>? {
         val nodeTransformer = nodeTransformers[kClass]
         if (nodeTransformer != null) {
             return nodeTransformer as NodeTransformer<S, T>
@@ -415,7 +415,7 @@ open class ASTTransformer(
         return null
     }
 
-    fun <S : Any, T : Node> registerNodeTransformer(
+    fun <S : Any, T : INode> registerNodeTransformer(
         kclass: KClass<S>,
         transformer: (S, ASTTransformer, NodeTransformer<S, T>) -> T?
     ): NodeTransformer<S, T> {
@@ -424,7 +424,7 @@ open class ASTTransformer(
         return nodeTransformer
     }
 
-    fun <S : Any, T : Node> registerMultipleNodeTransformer(
+    fun <S : Any, T : INode> registerMultipleNodeTransformer(
         kclass: KClass<S>,
         transformer: (S, ASTTransformer, NodeTransformer<S, T>) -> List<T>
     ): NodeTransformer<S, T> {
@@ -433,7 +433,7 @@ open class ASTTransformer(
         return nodeTransformer
     }
 
-    fun <S : Any, T : Node> registerNodeTransformer(
+    fun <S : Any, T : INode> registerNodeTransformer(
         kclass: KClass<S>,
         transformer: (S, ASTTransformer) -> T?
     ): NodeTransformer<S, T> = registerNodeTransformer(kclass) { source, transformer, _ ->
@@ -443,35 +443,35 @@ open class ASTTransformer(
         )
     }
 
-    fun <S : Any, T : Node> registerMultipleNodeTransformer(kclass: KClass<S>, factory: (S) -> List<T>):
+    fun <S : Any, T : INode> registerMultipleNodeTransformer(kclass: KClass<S>, factory: (S) -> List<T>):
         NodeTransformer<S, T> =
         registerMultipleNodeTransformer(kclass) { input, _, _ -> factory(input) }
 
-    inline fun <reified S : Any, reified T : Node> registerNodeTransformer(): NodeTransformer<S, T> {
+    inline fun <reified S : Any, reified T : INode> registerNodeTransformer(): NodeTransformer<S, T> {
         return registerNodeTransformer(S::class, T::class)
     }
 
-    inline fun <reified S : Any, T : Node> registerNodeTransformer(
+    inline fun <reified S : Any, T : INode> registerNodeTransformer(
         crossinline transformer: S.(ASTTransformer) -> T?
     ): NodeTransformer<S, T> = registerNodeTransformer(S::class) { source, transformer, _ ->
         source.transformer(transformer)
     }
 
-    fun <S : Any, T : Node> registerNodeTransformer(kclass: KClass<S>, transformer: (S) -> T?): NodeTransformer<S, T> =
+    fun <S : Any, T : INode> registerNodeTransformer(kclass: KClass<S>, transformer: (S) -> T?): NodeTransformer<S, T> =
         registerNodeTransformer(kclass) { input, _, _ -> transformer(input) }
 
     /**
      * Define the origin of the node as the source, but only if source is a Node, otherwise
      * this method does not do anything.
      */
-    private fun <N : Node>N.settingNodeOrigin(source: Any): N {
-        if (source is Node) {
+    private fun <N : INode>N.settingNodeOrigin(source: Any): N {
+        if (source is INode) {
             this.origin = NodeOrigin(source)
         }
         return this
     }
 
-    inline fun <reified S : Any> notTranslateDirectly(): NodeTransformer<S, Node> = registerNodeTransformer<S, Node> {
+    inline fun <reified S : Any> notTranslateDirectly(): NodeTransformer<S, INode> = registerNodeTransformer<S, INode> {
         throw java.lang.IllegalStateException(
             "A Node of this type (${this.javaClass.canonicalName}) should never be translated directly. " +
                 "It is expected that the container will not delegate the translation of this node but it will " +
@@ -479,7 +479,7 @@ open class ASTTransformer(
         )
     }
 
-    fun <S : Any, T : Node> registerNodeTransformer(
+    fun <S : Any, T : INode> registerNodeTransformer(
         source: KClass<S>,
         target: KClass<T>,
         parameterConverters: List<ParameterConverter> = emptyList()
@@ -587,7 +587,7 @@ open class ASTTransformer(
         return nodeTransformer
     }
 
-    fun <T : Node> registerIdentityTransformation(nodeClass: KClass<T>) =
+    fun <T : INode> registerIdentityTransformation(nodeClass: KClass<T>) =
         registerNodeTransformer(nodeClass) { node -> node }.skipChildren()
 
     private fun registerKnownClass(target: KClass<*>) {

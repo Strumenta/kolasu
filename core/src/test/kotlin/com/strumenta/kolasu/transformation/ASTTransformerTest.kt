@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.transformation
 
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeOrigin
 import com.strumenta.kolasu.model.Range
@@ -13,7 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-data class CU(val specifiedRange: Range? = null, var statements: List<Node> = listOf()) : Node(specifiedRange)
+data class CU(val specifiedRange: Range? = null, var statements: List<INode> = listOf()) : Node(specifiedRange)
 data class DisplayIntStatement(val specifiedRange: Range? = null, val value: Int) : Node(specifiedRange)
 data class SetStatement(val specifiedRange: Range? = null, var variable: String = "", val value: Int = 0) :
     Node(specifiedRange)
@@ -306,7 +307,7 @@ class ASTTransformerTest {
                 BarStmt("b")
             )
         )
-        val transformed = transformer.transform(original) as Node
+        val transformed = transformer.transform(original) as INode
         assertTrue { transformed.hasValidParents() }
         assertEquals(transformed.origin, NodeOrigin(original))
         assertASTsAreEqual(

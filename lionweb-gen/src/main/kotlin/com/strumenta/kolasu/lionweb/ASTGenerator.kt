@@ -10,8 +10,8 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeType
 import com.strumenta.kolasu.model.ReferenceByName
 import io.lionweb.lioncore.java.language.Classifier
@@ -75,7 +75,7 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                             }
                         }
                         if (element.extendedConcept == null) {
-                            typeSpec.superclass(ClassName.bestGuess(Node::class.qualifiedName!!))
+                            typeSpec.superclass(ClassName.bestGuess(INode::class.qualifiedName!!))
                         } else {
                             typeSpec.superclass(typeName(element.extendedConcept!!))
                             (element.extendedConcept as Concept).allFeatures().forEach {
@@ -211,10 +211,10 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
     private fun typeName(classifier: Classifier<*>): TypeName {
         return when {
             classifier.id == StarLasuLWLanguage.ASTNode.id -> {
-                Node::class.java.asTypeName()
+                INode::class.java.asTypeName()
             }
             classifier.id == LionCoreBuiltins.getNode().id -> {
-                Node::class.java.asTypeName()
+                INode::class.java.asTypeName()
             }
             classifier.id == LionCoreBuiltins.getINamed().id -> {
                 Named::class.java.asTypeName()

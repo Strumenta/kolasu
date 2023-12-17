@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.codegen
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.START_POINT
 import com.strumenta.kolasu.model.TextFileDestination
@@ -11,7 +11,7 @@ import kotlin.reflect.full.superclasses
  * Know how to print a single node type.
  */
 fun interface NodePrinter {
-    fun print(output: PrinterOutput, ast: Node)
+    fun print(output: PrinterOutput, ast: INode)
 }
 
 /**
@@ -20,7 +20,7 @@ fun interface NodePrinter {
  */
 class PrinterOutput(
     private val nodePrinters: Map<KClass<*>, NodePrinter>,
-    private var nodePrinterOverrider: (node: Node) -> NodePrinter? = { _ -> null }
+    private var nodePrinterOverrider: (node: INode) -> NodePrinter? = { _ -> null }
 ) {
     private val sb = StringBuilder()
     private var currentPoint = START_POINT
@@ -92,7 +92,7 @@ class PrinterOutput(
         print(postfix)
     }
 
-    private fun findPrinter(ast: Node, kclass: KClass<*>): NodePrinter? {
+    private fun findPrinter(ast: INode, kclass: KClass<*>): NodePrinter? {
         val overrider = nodePrinterOverrider(ast)
         if (overrider != null) {
             return overrider
@@ -108,12 +108,12 @@ class PrinterOutput(
         return null
     }
 
-    private fun getPrinter(ast: Node, kclass: KClass<*> = ast::class): NodePrinter {
+    private fun getPrinter(ast: INode, kclass: KClass<*> = ast::class): NodePrinter {
         val printer = findPrinter(ast, kclass)
         return printer ?: throw java.lang.IllegalArgumentException("Unable to print $ast")
     }
 
-    fun print(ast: Node?, prefix: String = "", postfix: String = "") {
+    fun print(ast: INode?, prefix: String = "", postfix: String = "") {
         if (ast == null) {
             return
         }
@@ -125,7 +125,7 @@ class PrinterOutput(
         print(postfix)
     }
 
-    fun println(ast: Node?, prefix: String = "", postfix: String = "") {
+    fun println(ast: INode?, prefix: String = "", postfix: String = "") {
         print(ast, prefix, postfix + "\n")
     }
 
@@ -142,7 +142,7 @@ class PrinterOutput(
         indentationLevel--
     }
 
-    fun associate(ast: Node, generation: PrinterOutput.() -> Unit) {
+    fun associate(ast: INode, generation: PrinterOutput.() -> Unit) {
         val startPoint = currentPoint
         generation()
         val endPoint = currentPoint
@@ -150,7 +150,7 @@ class PrinterOutput(
         ast.destinations += TextFileDestination(range = nodeRangeInGeneratedCode)
     }
 
-    fun <T : Node> printList(elements: List<T>, separator: String = ", ", elementPrinter: (T) -> Unit) {
+    fun <T : INode> printList(elements: List<T>, separator: String = ", ", elementPrinter: (T) -> Unit) {
         var i = 0
         while (i < elements.size) {
             if (i != 0) {
@@ -161,11 +161,11 @@ class PrinterOutput(
         }
     }
 
-    fun <T : Node> printList(elements: List<T>, separator: String = ", ") {
+    fun <T : INode> printList(elements: List<T>, separator: String = ", ") {
         printList(elements, separator) { el -> print(el) }
     }
 
-    fun <T : Node> printList(
+    fun <T : INode> printList(
         prefix: String,
         elements: List<T>,
         postfix: String,
@@ -180,7 +180,7 @@ class PrinterOutput(
         }
     }
 
-    fun <T : Node> printList(
+    fun <T : INode> printList(
         prefix: String,
         elements: List<T>,
         postfix: String,
@@ -190,7 +190,7 @@ class PrinterOutput(
         printList(prefix, elements, postfix, printEvenIfEmpty, separator) { el -> print(el) }
     }
 
-    fun printOneOf(vararg alternatives: Node?) {
+    fun printOneOf(vararg alternatives: INode?) {
         val notNull = alternatives.filterNotNull()
         if (notNull.size != 1) {
             throw IllegalStateException(

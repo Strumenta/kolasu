@@ -6,17 +6,17 @@ import kotlin.reflect.KVisibility
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 
-fun <N : Node> N.withRange(range: Range?): N {
+fun <N : INode> N.withRange(range: Range?): N {
     this.range = range
     return this
 }
 
-fun <N : Node> N.withOrigin(origin: Origin?): N {
+fun <N : INode> N.withOrigin(origin: Origin?): N {
     this.origin = if (origin == NodeOrigin(this)) { null } else { origin }
     return this
 }
 
-fun <N : Node> N.withOrigin(node: Node): N {
+fun <N : INode> N.withOrigin(node: INode): N {
     this.origin = if (node == this) { null } else { NodeOrigin(node) }
     return this
 }
@@ -34,7 +34,7 @@ val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
 /**
  * @return all properties of this node that are considered AST properties.
  */
-val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
+val <T : INode> T.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.nodeProperties
 
 /**

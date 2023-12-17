@@ -190,7 +190,7 @@ class ProcessingTest {
             )
         )
 
-        val nodesProcessed = HashSet<Node>()
+        val nodesProcessed = HashSet<INode>()
 
         assertEquals(
             expectedTransformedTree,

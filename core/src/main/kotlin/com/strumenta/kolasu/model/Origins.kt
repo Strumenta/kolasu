@@ -17,7 +17,7 @@ data class CompositeOrigin(
     override val sourceText: String?
 ) : Origin, Serializable
 
-data class NodeOrigin(val node: Node) : Origin {
+data class NodeOrigin(val node: INode) : Origin {
     override var range: Range?
         get() = node.range
         set(value) {

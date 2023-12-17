@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.playground
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 
@@ -9,7 +9,7 @@ import com.strumenta.kolasu.validation.Result
  * This transpilation trace represent a set of files being transformed in a second set of files.
  */
 class WorkspaceTranspilationTrace {
-    data class WorkspaceFile(val path: String, val code: String, val result: Result<Node>)
+    data class WorkspaceFile(val path: String, val code: String, val result: Result<INode>)
 
     val originalFiles: MutableList<WorkspaceFile> = mutableListOf()
     val generatedFiles: MutableList<WorkspaceFile> = mutableListOf()

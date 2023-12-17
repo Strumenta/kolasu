@@ -14,23 +14,23 @@ class SymbolResolver(
     }
 
     @Suppress("unchecked_cast")
-    fun resolve(node: Node) {
-        node.kReferenceByNameProperties().forEach { this.resolve(it as KReferenceByName<out Node>, node) }
+    fun resolve(node: INode) {
+        node.kReferenceByNameProperties().forEach { this.resolve(it as KReferenceByName<out INode>, node) }
         node.walkChildren().forEach(this::resolve)
     }
 
     @Suppress("unchecked_cast")
-    fun resolve(property: KReferenceByName<out Node>, node: Node) {
+    fun resolve(property: KReferenceByName<out INode>, node: INode) {
         (node.properties.find { it.name == property.name }?.value as ReferenceByName<PossiblyNamed>?)?.apply {
             this.referred = scopeProvider.scopeFor(property, node).resolve(this.name, property.getReferredType())
         }
     }
 
-    fun scopeFor(property: KReferenceByName<out Node>, node: Node? = null): Scope {
+    fun scopeFor(property: KReferenceByName<out INode>, node: INode? = null): Scope {
         return this.scopeProvider.scopeFor(property, node)
     }
 
-    fun scopeFrom(node: Node? = null): Scope {
+    fun scopeFrom(node: INode? = null): Scope {
         return this.scopeProvider.scopeFrom(node)
     }
 }
@@ -40,12 +40,12 @@ class SymbolResolver(
 class SymbolResolverConfiguration(
     val scopeProvider: ScopeProviderConfiguration = ScopeProviderConfiguration()
 ) {
-    inline fun <reified N : Node> scopeFor(
+    inline fun <reified N : INode> scopeFor(
         referenceByName: KReferenceByName<N>,
         crossinline scopeResolutionRule: Semantics.(N) -> Scope
     ) = this.scopeProvider.scopeFor(referenceByName, scopeResolutionRule)
 
-    inline fun <reified N : Node> scopeFrom(
+    inline fun <reified N : INode> scopeFrom(
         nodeType: KClass<N>,
         crossinline scopeConstructionRule: Semantics.(N) -> Scope
     ) = this.scopeProvider.scopeFrom(nodeType, scopeConstructionRule)

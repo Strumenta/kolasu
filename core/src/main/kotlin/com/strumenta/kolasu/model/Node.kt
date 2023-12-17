@@ -9,25 +9,22 @@ import com.strumenta.kolasu.model.observable.NodeNotification
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.subjects.PublishSubject
 import java.io.Serializable
-import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty1
-
-typealias NodeObserver = Observer<in NodeNotification<in Node>>
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
-open class Node() : Serializable {
+open class Node() : INode, Serializable {
 
     @property:Internal
-    val changes = PublishSubject.create<NodeNotification<in Node>>()
+    override val changes = PublishSubject.create<NodeNotification<in INode>>()
 
     @Internal
     private val annotations: MutableList<Annotation> = mutableListOf()
 
     @Internal
-    val destinations = mutableListOf<Destination>()
+    override val destinations = mutableListOf<Destination>()
 
     constructor(range: Range?) : this() {
         this.range = range
@@ -38,14 +35,14 @@ open class Node() : Serializable {
     }
 
     @Internal
-    open val nodeType: String
+    override val nodeType: String
         get() = this::class.qualifiedName!!
 
     /**
      * The properties of this AST nodes, including attributes, children, and references.
      */
     @property:Internal
-    open val properties: List<PropertyDescription>
+    override val properties: List<PropertyDescription>
         get() = try {
             nodeProperties.map { PropertyDescription.buildFor(it, this) }
         } catch (e: Throwable) {
@@ -66,13 +63,13 @@ open class Node() : Serializable {
      * The origin from which this AST Node has been generated, if any.
      */
     @property:Internal
-    var origin: Origin? = null
+    override var origin: Origin? = null
 
     /**
      * The parent node, if any.
      */
     @property:Internal
-    var parent: Node? = null
+    override var parent: INode? = null
 
     /**
      * The range of this node in the source text.
@@ -80,7 +77,7 @@ open class Node() : Serializable {
      * Otherwise, the value of this property is the range of the origin, if any.
      */
     @property:Internal
-    var range: Range?
+    override var range: Range?
         get() = origin?.range
         set(value) {
             if (origin == null) {
@@ -93,30 +90,14 @@ open class Node() : Serializable {
         }
 
     @property:Internal
-    val source: Source?
+    override val source: Source?
         get() = origin?.source
-
-    /**
-     * Tests whether the given range is contained in the interval represented by this object.
-     * @param range the range
-     */
-    fun contains(range: Range?): Boolean {
-        return this.range?.contains(range) ?: false
-    }
-
-    /**
-     * Tests whether the given range overlaps the interval represented by this object.
-     * @param range the range
-     */
-    fun overlaps(range: Range?): Boolean {
-        return this.range?.overlaps(range) ?: false
-    }
 
     /**
      * The source text for this node
      */
     @Internal
-    val sourceText: String?
+    override val sourceText: String?
         get() = origin?.sourceText
 
     /**
@@ -133,25 +114,10 @@ open class Node() : Serializable {
     }
 
     @Internal
-    val allAnnotations: List<Annotation>
+    override val allAnnotations: List<Annotation>
         get() = annotations
 
-    fun <I : Annotation>annotationsByType(kClass: KClass<I>): List<I> {
-        return annotations.filterIsInstance(kClass.java)
-    }
-
-    fun <I : Annotation>getSingleAnnotation(kClass: KClass<I>): I? {
-        val instances = annotations.filterIsInstance(kClass.java)
-        return if (instances.isEmpty()) {
-            null
-        } else if (instances.size == 1) {
-            instances.first()
-        } else {
-            throw IllegalStateException("More than one instance of $kClass found")
-        }
-    }
-
-    fun <A : Annotation>addAnnotation(annotation: A): A {
+    override fun <A : Annotation>addAnnotation(annotation: A): A {
         if (annotation.annotatedNode != null) {
             throw java.lang.IllegalStateException("Annotation already attached")
         }
@@ -163,51 +129,47 @@ open class Node() : Serializable {
         return annotation
     }
 
-    fun removeAnnotation(annotation: Annotation) {
+    override fun removeAnnotation(annotation: Annotation) {
         require(annotation.annotatedNode == this)
         annotations.remove(annotation)
         annotation.detach()
     }
 
-    fun hasAnnotation(annotation: Annotation): Boolean {
-        return annotations.contains(annotation)
-    }
-
-    fun getChildren(containment: Containment): List<Node> {
+    override fun getChildren(containment: Containment): List<INode> {
         return when (val rawValue = nodeProperties.find { it.name == containment.name }!!.get(this)) {
             null -> {
                 emptyList()
             }
 
             is List<*> -> {
-                rawValue as List<Node>
+                rawValue as List<INode>
             }
 
             else -> {
-                listOf(rawValue as Node)
+                listOf(rawValue as INode)
             }
         }
     }
 
-    fun getReference(reference: Reference): ReferenceByName<*> {
+    override fun getReference(reference: Reference): ReferenceByName<*> {
         val rawValue = nodeProperties.find { it.name == reference.name }!!.get(this)
         return rawValue as ReferenceByName<*>
     }
 
-    fun getAttributeValue(attribute: Attribute): Any? {
+    override fun getAttributeValue(attribute: Attribute): Any? {
         return nodeProperties.find { it.name == attribute.name }!!.get(this)
     }
 
-    fun <T : Any?>setAttribute(attributeName: String, value: T) {
+    override fun <T : Any?>setAttribute(attributeName: String, value: T) {
         val prop = nodeProperties.find { it.name == attributeName } as KMutableProperty<T>
         prop.setter.call(this, value)
     }
-    fun <T : Any?>getAttribute(attributeName: String): T {
+    override fun <T : Any?>getAttribute(attributeName: String): T {
         val prop = nodeProperties.find { it.name == attributeName }!!
         return prop.call(this) as T
     }
 
-    fun <T : Node>getContainment(containmentName: String): List<T> {
+    override fun <T : INode>getContainment(containmentName: String): List<T> {
         val prop = nodeProperties.find { it.name == containmentName }!!
         return when (val res = prop.call(this)) {
             null -> {
@@ -224,7 +186,7 @@ open class Node() : Serializable {
         }
     }
 
-    fun <T : Node>addToContainment(containmentName: String, child: T) {
+    override fun <T : INode>addToContainment(containmentName: String, child: T) {
         val prop = nodeProperties.find { it.name == containmentName }!!
         val value = prop.call(this)
         if (value is List<*>) {
@@ -233,7 +195,7 @@ open class Node() : Serializable {
             (prop as KMutableProperty<T>).setter.call(this, child)
         }
     }
-    fun <T : Node>removeFromContainment(containmentName: String, child: T) {
+    override fun <T : INode>removeFromContainment(containmentName: String, child: T) {
         val prop = nodeProperties.find { it.name == containmentName }!!
         val value = prop.call(this)
         if (value is List<*>) {
@@ -245,16 +207,16 @@ open class Node() : Serializable {
         }
     }
 
-    fun <T : PossiblyNamed>getReference(referenceName: String): ReferenceByName<T> {
-        val prop = nodeProperties.find { it.name == referenceName } as KProperty1<Node, ReferenceByName<T>>
+    override fun <T : PossiblyNamed>getReference(referenceName: String): ReferenceByName<T> {
+        val prop = nodeProperties.find { it.name == referenceName } as KProperty1<INode, ReferenceByName<T>>
         return prop.call(this)
     }
-    fun <T : PossiblyNamed>setReferenceReferred(referenceName: String, referred: T) {
+    override fun <T : PossiblyNamed>setReferenceReferred(referenceName: String, referred: T) {
         val ref: ReferenceByName<T> = getReference(referenceName)
         ref.referred = referred
     }
 
-    fun subscribe(observer: Observer<NodeNotification<in Node>>) {
+    override fun subscribe(observer: Observer<NodeNotification<in INode>>) {
         this.changes.subscribe(observer)
     }
 }

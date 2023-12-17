@@ -2,7 +2,7 @@
 
 package com.strumenta.kolasu.kcp
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.ReferenceByName
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.FirIncompatiblePluginAPI
@@ -20,7 +20,6 @@ import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
-import org.jetbrains.kotlin.ir.interpreter.toIrConst
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrAnonymousInitializerSymbolImpl
 import org.jetbrains.kotlin.ir.util.allParameters
@@ -37,7 +36,7 @@ object AutoObserveReferenceOrigin : IrDeclarationOriginImpl("AutoObserveReferenc
 class FieldObservableExtension(val pluginContext: IrPluginContext) : IrElementTransformerVoidWithContext() {
 
     val notifyOfPropertyChange: IrSimpleFunctionSymbol = pluginContext.referenceFunctions(
-        FqName("${Node::class.qualifiedName}.notifyOfPropertyChange")
+        FqName("${INode::class.qualifiedName}.notifyOfPropertyChange")
     ).single()
 
     override fun visitPropertyNew(declaration: IrProperty): IrStatement {

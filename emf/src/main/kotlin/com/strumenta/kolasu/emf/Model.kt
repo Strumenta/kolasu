@@ -4,7 +4,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.model.Destination
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.NodeDestination
 import com.strumenta.kolasu.model.NodeOrigin
 import com.strumenta.kolasu.model.Origin
@@ -92,7 +92,7 @@ fun Range.toEObject(): EObject {
     return eo
 }
 
-fun <T : Node> com.strumenta.kolasu.validation.Result<T>.toEObject(astPackage: EPackage): EObject {
+fun <T : INode> com.strumenta.kolasu.validation.Result<T>.toEObject(astPackage: EPackage): EObject {
     val resultEO = makeResultEObject(this)
     val rootSF = resultEO.eClass().eAllStructuralFeatures.find { it.name == "root" }!!
     if (root != null) {
@@ -112,7 +112,7 @@ private fun makeResultEObject(result: Result<*>): EObject {
     return resultEO
 }
 
-fun <T : Node> Result<T>.toEObject(
+fun <T : INode> Result<T>.toEObject(
     resource: Resource,
     kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping()
 ): EObject {
@@ -195,7 +195,7 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                     // same EObject can be inserted in the containment relation where it belongs.
                     refEO.eSet(
                         refEC.getEStructuralFeature("referenced")!!,
-                        (pdValue.referred as? Node)?.getOrCreateEObject(ePackage, kolasuToEMFMapping)
+                        (pdValue.referred as? INode)?.getOrCreateEObject(ePackage, kolasuToEMFMapping)
                     )
                     refEO
                 }
@@ -203,10 +203,10 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                 pdValue is Result<*> -> {
                     val resEC = STARLASU_METAMODEL.getEClass("Result")
                     val resEO = STARLASU_METAMODEL.eFactoryInstance.create(resEC)
-                    if (pdValue.root is Node) {
+                    if (pdValue.root is INode) {
                         resEO.eSet(
                             resEC.getEStructuralFeature("root"),
-                            (pdValue.root as Node)
+                            (pdValue.root as INode)
                                 .getOrCreateEObject(ePackage, kolasuToEMFMapping)
                         )
                     } else {
@@ -277,13 +277,13 @@ fun Resource.findEClassJustInThisResource(klass: KClass<*>): EClass? {
 fun Resource.getEClass(klass: KClass<*>): EClass = this.findEClass(klass)
     ?: throw ClassNotFoundException(klass.qualifiedName)
 
-fun Node.toEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject =
+fun INode.toEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject =
     toEObject(ePackage.eResource(), mapping)
 
 /**
  * This method retrieves the EObject already built for this Node or create it if it does not exist.
  */
-fun Node.getOrCreateEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject =
+fun INode.getOrCreateEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject =
     getOrCreateEObject(ePackage.eResource(), mapping)
 
 fun EClass.instantiate(): EObject {
@@ -291,13 +291,13 @@ fun EClass.instantiate(): EObject {
 }
 
 class KolasuToEMFMapping {
-    private val nodeToEObjects = IdentityHashMap<Node, EObject>()
+    private val nodeToEObjects = IdentityHashMap<INode, EObject>()
 
-    fun associate(node: Node, eo: EObject) {
+    fun associate(node: INode, eo: EObject) {
         nodeToEObjects[node] = eo
     }
 
-    fun getAssociatedEObject(node: Node): EObject? {
+    fun getAssociatedEObject(node: INode): EObject? {
         return nodeToEObjects[node]
     }
 
@@ -306,7 +306,7 @@ class KolasuToEMFMapping {
      * Otherwise the EObject is created and returned. The same EObject is also stored and associated with the Node,
      * so that future calls to this method will return that EObject.
      */
-    fun getOrCreate(node: Node, eResource: Resource): EObject {
+    fun getOrCreate(node: INode, eResource: Resource): EObject {
         val existing = getAssociatedEObject(node)
         return if (existing != null) {
             existing
@@ -324,7 +324,7 @@ class KolasuToEMFMapping {
 /**
  * This method retrieves the EObject already built for this Node or create it if it does not exist.
  */
-fun Node.getOrCreateEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject {
+fun INode.getOrCreateEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject {
     return mapping.getOrCreate(this, eResource)
 }
 
@@ -418,7 +418,7 @@ private fun setDestination(
  *  - the [Kolasu metamodel package][STARLASU_METAMODEL]
  *  - every [EPackage] containing the definitions of the node classes in the tree.
  */
-fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject {
+fun INode.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject {
     try {
         val ec = eResource.getEClass(this::class)
         val eo = ec.ePackage.eFactoryInstance.create(ec)
@@ -440,7 +440,7 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
                     val elist = eo.eGet(esf) as MutableList<EObject?>
                     (pd.value as List<*>?)?.forEach {
                         try {
-                            val childEO = (it as Node?)?.getOrCreateEObject(eResource, mapping)
+                            val childEO = (it as INode?)?.getOrCreateEObject(eResource, mapping)
                             elist.add(childEO)
                         } catch (e: Exception) {
                             throw RuntimeException("Unable to map to EObject child $it in property $pd of $this", e)
@@ -450,7 +450,7 @@ fun Node.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEM
                     if (pd.value == null) {
                         eo.eSet(esf, null)
                     } else {
-                        eo.eSet(esf, (pd.value as Node).getOrCreateEObject(eResource, mapping))
+                        eo.eSet(esf, (pd.value as INode).getOrCreateEObject(eResource, mapping))
                     }
                 }
             } else {

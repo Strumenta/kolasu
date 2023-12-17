@@ -6,5 +6,5 @@ import kotlin.reflect.KClass
 
 typealias LWLanguage = Language
 typealias EnumKClass = KClass<out Enum<*>>
-typealias KNode = com.strumenta.kolasu.model.Node
+typealias KNode = com.strumenta.kolasu.model.INode
 typealias LWNode = Node

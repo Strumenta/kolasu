@@ -19,7 +19,7 @@ import kotlin.reflect.full.primaryConstructor
  * Kolasu does not see set/add/delete operations on the AST nodes,
  * so this function should be called manually after modifying the AST.
  */
-fun Node.assignParents() {
+fun INode.assignParents() {
     this.walkChildren().forEach {
         if (it == this) {
             throw java.lang.IllegalStateException("A node cannot be parent of itself: $this")
@@ -33,11 +33,11 @@ fun Node.assignParents() {
  * Recursively execute [operation] on [this] node, and all nodes below this node.
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
-fun Node.processNodes(operation: (Node) -> Unit, walker: ASTWalker = Node::walk) {
+fun INode.processNodes(operation: (INode) -> Unit, walker: ASTWalker = INode::walk) {
     walker.invoke(this).forEach(operation)
 }
 
-fun Node.invalidRanges(): Sequence<Node> = this.walk().filter {
+fun INode.invalidRanges(): Sequence<INode> = this.walk().filter {
     it.range == null || run {
         val parentPos = it.parent?.range
         // If the parent range is null, we can't say anything about this node's range
@@ -45,13 +45,13 @@ fun Node.invalidRanges(): Sequence<Node> = this.walk().filter {
     }
 }
 
-fun Node.findInvalidRange(): Node? = this.invalidRanges().firstOrNull()
+fun INode.findInvalidRange(): INode? = this.invalidRanges().firstOrNull()
 
-fun Node.hasValidParents(parent: Node? = this.parent): Boolean {
+fun INode.hasValidParents(parent: INode? = this.parent): Boolean {
     return this.parent == parent && this.children.all { it.hasValidParents(this) }
 }
 
-fun <T : Node> T.withParent(parent: Node?): T {
+fun <T : INode> T.withParent(parent: INode?): T {
     this.parent = parent
     return this
 }
@@ -62,7 +62,7 @@ fun <T : Node> T.withParent(parent: Node?): T {
  * @param propertyOperation the operation to perform on each property.
  */
 @JvmOverloads
-fun Node.processProperties(
+fun INode.processProperties(
     propertiesToIgnore: Set<String> = emptySet(),
     propertyOperation: (PropertyDescription) -> Unit
 ) {
@@ -89,7 +89,7 @@ fun <T : Any> Class<T>.processProperties(
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  * @return the first node in the AST for which the [predicate] is true. Null if none are found.
  */
-fun Node.find(predicate: (Node) -> Boolean, walker: ASTWalker = Node::walk): Node? {
+fun INode.find(predicate: (INode) -> Boolean, walker: ASTWalker = INode::walk): INode? {
     return walker.invoke(this).find(predicate)
 }
 
@@ -100,10 +100,10 @@ fun Node.find(predicate: (Node) -> Boolean, walker: ASTWalker = Node::walk): Nod
  *
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
-fun <T> Node.processNodesOfType(
+fun <T> INode.processNodesOfType(
     klass: Class<T>,
     operation: (T) -> Unit,
-    walker: ASTWalker = Node::walk
+    walker: ASTWalker = INode::walk
 ) {
     searchByType(klass, walker).forEach(operation)
 }
@@ -112,12 +112,12 @@ fun <T> Node.processNodesOfType(
  * Recursively execute [operation] on this node, and all nodes below this node.
  * Every node is informed about its [parent] node. (But not about the parent's parent!)
  */
-fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent: Node? = null) {
+fun INode.processConsideringDirectParent(operation: (INode, INode?) -> Unit, parent: INode? = null) {
     operation(this, parent)
     this.properties.forEach { p ->
         when (val v = p.value) {
-            is Node -> v.processConsideringDirectParent(operation, this)
-            is Collection<*> -> v.forEach { (it as? Node)?.processConsideringDirectParent(operation, this) }
+            is INode -> v.processConsideringDirectParent(operation, this)
+            is Collection<*> -> v.forEach { (it as? INode)?.processConsideringDirectParent(operation, this) }
         }
     }
 }
@@ -125,14 +125,14 @@ fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent
 /**
  * @return all direct children of this node.
  */
-val Node.children: List<Node>
+val INode.children: List<INode>
     get() {
-        val children = mutableListOf<Node>()
+        val children = mutableListOf<INode>()
         this.properties.forEach { p ->
             val v = p.value
             when (v) {
-                is Node -> children.add(v)
-                is Collection<*> -> v.forEach { if (it is Node) children.add(it) }
+                is INode -> children.add(v)
+                is Collection<*> -> v.forEach { if (it is INode) children.add(it) }
             }
         }
         return children
@@ -142,7 +142,7 @@ val Node.children: List<Node>
  * @return the next sibling node. Notice that children of a sibling collection are considered siblings
  * and not the collection itself.
  */
-val Node.nextSibling: Node?
+val INode.nextSibling: INode?
     get() {
         if (this.parent != null) {
             val siblings = this.parent!!.children
@@ -156,7 +156,7 @@ val Node.nextSibling: Node?
  * @return the previous sibling. Notice that children of a sibling collection are considered siblings
  * and not the collection itself.
  */
-val Node.previousSibling: Node?
+val INode.previousSibling: INode?
     get() {
         if (this.parent != null) {
             val siblings = this.parent!!.children
@@ -169,7 +169,7 @@ val Node.previousSibling: Node?
 /**
  * @return the next sibling node in the same property.
  */
-val Node.nextSamePropertySibling: Node?
+val INode.nextSamePropertySibling: INode?
     get() {
         if (this.parent != null) {
             val siblings = this.parent!!.properties.find { p ->
@@ -178,10 +178,10 @@ val Node.nextSamePropertySibling: Node?
                     is Collection<*> -> v.contains(this)
                     else -> false
                 }
-            }?.value as? Collection<*> ?: emptyList<Node>()
+            }?.value as? Collection<*> ?: emptyList<INode>()
 
             val index = siblings.indexOf(this)
-            return if (index == siblings.size - 1 || index == -1) null else siblings.elementAt(index + 1) as Node
+            return if (index == siblings.size - 1 || index == -1) null else siblings.elementAt(index + 1) as INode
         }
         return null
     }
@@ -189,7 +189,7 @@ val Node.nextSamePropertySibling: Node?
 /**
  * @return the previous sibling in the same property.
  */
-val Node.previousSamePropertySibling: Node?
+val INode.previousSamePropertySibling: INode?
     get() {
         if (this.parent != null) {
             val siblings = this.parent!!.properties.find { p ->
@@ -198,10 +198,10 @@ val Node.previousSamePropertySibling: Node?
                     is Collection<*> -> v.contains(this)
                     else -> false
                 }
-            }?.value as? Collection<*> ?: emptyList<Node>()
+            }?.value as? Collection<*> ?: emptyList<INode>()
 
             val index = siblings.indexOf(this)
-            return if (index == 0 || index == -1) null else siblings.elementAt(index - 1) as Node
+            return if (index == 0 || index == -1) null else siblings.elementAt(index - 1) as INode
         }
         return null
     }
@@ -209,7 +209,7 @@ val Node.previousSamePropertySibling: Node?
 /**
  * Return the property containing this Node, if any. Null should be returned for root nodes.
  */
-fun Node.containingProperty(): PropertyDescription? {
+fun INode.containingProperty(): PropertyDescription? {
     if (this.parent == null) {
         return null
     }
@@ -227,7 +227,7 @@ fun Node.containingProperty(): PropertyDescription? {
  * Return the index of this Node within the containing property. The return value is null for root nodes.
  * The index is always 0 for Nodes in singular containment properties.
  */
-fun Node.indexInContainingProperty(): Int? {
+fun INode.indexInContainingProperty(): Int? {
     val p = this.containingProperty()
     return if (p == null) {
         null
@@ -242,7 +242,7 @@ fun Node.indexInContainingProperty(): Int? {
  * @return the next sibling of the specified type. Notice that children of a sibling collection are considered siblings
  * and not the collection itself.
  */
-inline fun <reified T : Node> Node.nextSibling(): Node? {
+inline fun <reified T : INode> INode.nextSibling(): INode? {
     if (this.parent != null) {
         val siblings = this.parent!!.children
         return siblings.takeLast(siblings.size - 1 - siblings.indexOf(this)).firstOrNull { it is T }
@@ -254,7 +254,7 @@ inline fun <reified T : Node> Node.nextSibling(): Node? {
  * @return the previous sibling of the specified type. Notice that children of a sibling collection are considered siblings
  * and not the collection itself.
  */
-inline fun <reified T : Node> Node.previousSibling(): Node? {
+inline fun <reified T : INode> INode.previousSibling(): INode? {
     if (this.parent != null) {
         val siblings = this.parent!!.children
         return siblings.take(siblings.indexOf(this)).lastOrNull { it is T }
@@ -263,23 +263,23 @@ inline fun <reified T : Node> Node.previousSibling(): Node? {
 }
 
 // TODO reimplement using transformChildren
-fun Node.transformTree(
-    operation: (Node) -> Node,
+fun INode.transformTree(
+    operation: (INode) -> INode,
     inPlace: Boolean = false,
-    mutationsCache: IdentityHashMap<Node, Node> = IdentityHashMap<Node, Node>()
-): Node {
+    mutationsCache: IdentityHashMap<INode, INode> = IdentityHashMap<INode, INode>()
+): INode {
     if (inPlace) TODO()
     mutationsCache.computeIfAbsent(this) { operation(this) }
     val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { p ->
         when (val v = p.get(this)) {
-            is Node -> {
+            is INode -> {
                 val newValue = v.transformTree(operation, inPlace, mutationsCache)
                 if (newValue != v) changes[p.name] = newValue
             }
 
             is Collection<*> -> {
-                val newValue = v.map { if (it is Node) it.transformTree(operation, inPlace, mutationsCache) else it }
+                val newValue = v.map { if (it is INode) it.transformTree(operation, inPlace, mutationsCache) else it }
                 if (newValue != v) changes[p.name] = newValue
             }
         }
@@ -300,15 +300,15 @@ fun Node.transformTree(
     return mutationsCache.computeIfAbsent(instanceToTransform) { operation(instanceToTransform) }
 }
 
-class ImmutablePropertyException(property: KProperty<*>, node: Node) :
+class ImmutablePropertyException(property: KProperty<*>, node: INode) :
     RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
 // assumption: every MutableList in the AST contains Nodes.
 @Suppress("UNCHECKED_CAST")
-fun Node.transformChildren(operation: (Node) -> Node) {
+fun INode.transformChildren(operation: (INode) -> INode) {
     nodeProperties.forEach { property ->
         when (val value = property.get(this)) {
-            is Node -> {
+            is INode -> {
                 val newValue = operation(value)
                 if (newValue != value) {
                     if (property is KMutableProperty<*>) {
@@ -324,11 +324,11 @@ fun Node.transformChildren(operation: (Node) -> Node) {
                 if (value is List<*>) {
                     for (i in 0 until value.size) {
                         val element = value[i]
-                        if (element is Node) {
+                        if (element is INode) {
                             val newValue = operation(element)
                             if (newValue != element) {
                                 if (value is MutableList<*>) {
-                                    (value as MutableList<Node>)[i] = newValue
+                                    (value as MutableList<INode>)[i] = newValue
                                     newValue.parent = this
                                 } else {
                                     throw ImmutablePropertyException(property, element)
@@ -346,11 +346,11 @@ fun Node.transformChildren(operation: (Node) -> Node) {
     }
 }
 
-fun Node.mapChildren(operation: (Node) -> Node): Node {
+fun INode.mapChildren(operation: (INode) -> INode): INode {
     val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { property ->
         when (val value = property.get(this)) {
-            is Node -> {
+            is INode -> {
                 val newValue = operation(value)
                 if (newValue != value) {
                     changes[property.name] = newValue
@@ -358,7 +358,7 @@ fun Node.mapChildren(operation: (Node) -> Node): Node {
             }
 
             is Collection<*> -> {
-                val newValue = value.map { if (it is Node) operation(it) else it }
+                val newValue = value.map { if (it is INode) operation(it) else it }
                 if (newValue != value) {
                     changes[property.name] = newValue
                 }
@@ -383,12 +383,12 @@ fun Node.mapChildren(operation: (Node) -> Node): Node {
 
 /**
  * Replace [this] node with [other] (by modifying the children of the parent node.)
- * For this to work, [Node.assignParents] must have been called.
+ * For this to work, [INode.assignParents] must have been called.
  *
  * Note that we recognize the exact same Node, looking at its identity, not using
  * equality.
  */
-fun Node.replaceWith(other: Node) {
+fun INode.replaceWith(other: INode) {
     if (this.parent == null) {
         throw IllegalStateException("Parent not set")
     }
@@ -400,7 +400,7 @@ fun Node.replaceWith(other: Node) {
  * When found, it is removed, and in its place the [newNodes] are inserted.
  * When not found, an [IllegalStateException] is thrown.
  */
-fun Node.replaceWithSeveral(oldNode: Node, newNodes: List<Node>) {
+fun INode.replaceWithSeveral(oldNode: INode, newNodes: List<INode>) {
     findMutableListContainingChild(oldNode) { nodeList, index ->
         nodeList.replaceWithSeveral(index, newNodes)
         oldNode.parent = null
@@ -413,7 +413,7 @@ fun Node.replaceWithSeveral(oldNode: Node, newNodes: List<Node>) {
  * When found, it is removed.
  * When not found, an [IllegalStateException] is thrown.
  */
-fun Node.removeFromList(targetNode: Node) {
+fun INode.removeFromList(targetNode: INode) {
     findMutableListContainingChild(targetNode) { nodeList, index ->
         nodeList.removeAt(index)
         targetNode.parent = null
@@ -425,7 +425,7 @@ fun Node.removeFromList(targetNode: Node) {
  * When found, [newNodes] are inserted before it.
  * When not found, an [IllegalStateException] is thrown.
  */
-fun Node.addSeveralBefore(targetNode: Node, newNodes: List<Node>) {
+fun INode.addSeveralBefore(targetNode: INode, newNodes: List<INode>) {
     findMutableListContainingChild(targetNode) { nodeList, index ->
         nodeList.addSeveralBefore(index, newNodes)
         newNodes.forEach { node -> node.parent = this }
@@ -437,7 +437,7 @@ fun Node.addSeveralBefore(targetNode: Node, newNodes: List<Node>) {
  * When found, [newNodes] are inserted after it.
  * When not found, an [IllegalStateException] is thrown.
  */
-fun Node.addSeveralAfter(targetNode: Node, newNodes: List<Node>) {
+fun INode.addSeveralAfter(targetNode: INode, newNodes: List<INode>) {
     findMutableListContainingChild(targetNode) { nodeList, index ->
         nodeList.addSeveralAfter(index, newNodes)
         newNodes.forEach { node -> node.parent = this }
@@ -448,9 +448,9 @@ fun Node.addSeveralAfter(targetNode: Node, newNodes: List<Node>) {
  * Supports functions that manipulate a list of child nodes by finding [targetNode] in the [MutableList]s of nodes contained in [this] node.
  */
 @Suppress("UNCHECKED_CAST") // assumption: a MutableList with a Node in it is a MutableList<Node>
-private fun Node.findMutableListContainingChild(
-    targetNode: Node,
-    whenFoundDo: (nodeList: MutableList<Node>, index: Int) -> Unit
+private fun INode.findMutableListContainingChild(
+    targetNode: INode,
+    whenFoundDo: (nodeList: MutableList<INode>, index: Int) -> Unit
 ) {
     relevantMemberProperties().forEach { property ->
         when (val value = property.get(this)) {
@@ -458,7 +458,7 @@ private fun Node.findMutableListContainingChild(
                 for (i in 0 until value.size) {
                     // We want to find a particular child, not just one which is equal to it
                     if (value[i] === targetNode) {
-                        whenFoundDo(value as MutableList<Node>, i)
+                        whenFoundDo(value as MutableList<INode>, i)
                         return
                     }
                 }
@@ -472,33 +472,33 @@ private fun Node.findMutableListContainingChild(
  * Replaces [this] node with any amount of other nodes if it is in a [MutableList].
  * <p/>Looks for [this] in the lists of nodes in the parent node.
  * When found, [this] is removed, and in its place [newNodes] are inserted.
- * For this to work, [Node.assignParents] must have been called.
+ * For this to work, [INode.assignParents] must have been called.
  */
-fun Node.replaceWithSeveral(newNodes: List<Node>) {
+fun INode.replaceWithSeveral(newNodes: List<INode>) {
     parent?.replaceWithSeveral(this, newNodes) ?: throw IllegalStateException("Parent not set")
 }
 
 /**
  * Inserts the [newNodes] before [this] node if it is in a [MutableList].
- * For this to work, [Node.assignParents] must have been called.
+ * For this to work, [INode.assignParents] must have been called.
  */
-fun Node.addSeveralBefore(newNodes: List<Node>) {
+fun INode.addSeveralBefore(newNodes: List<INode>) {
     parent?.addSeveralBefore(this, newNodes) ?: throw IllegalStateException("Parent not set")
 }
 
 /**
  * Inserts the [newNodes] after [this] node if it is in a [MutableList].
- * For this to work, [Node.assignParents] must have been called.
+ * For this to work, [INode.assignParents] must have been called.
  */
-fun Node.addSeveralAfter(newNodes: List<Node>) {
+fun INode.addSeveralAfter(newNodes: List<INode>) {
     parent?.addSeveralAfter(this, newNodes) ?: throw IllegalStateException("Parent not set")
 }
 
 /**
  * Removes [this] node from the parent if it is in a [MutableList].
- * For this to work, [Node.assignParents] must have been called.
+ * For this to work, [INode.assignParents] must have been called.
  */
-fun Node.removeFromList() {
+fun INode.removeFromList() {
     parent?.removeFromList(this) ?: throw IllegalStateException("Parent not set")
 }
 

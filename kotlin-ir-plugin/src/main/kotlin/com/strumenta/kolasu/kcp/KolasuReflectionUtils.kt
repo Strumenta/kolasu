@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.kcp
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.ReferenceByName
 import org.jetbrains.kotlin.backend.jvm.ir.getIoFile
 import org.jetbrains.kotlin.backend.jvm.ir.psiElement
@@ -68,7 +68,7 @@ fun IrProperty.declareReference(): Boolean {
 @ObsoleteDescriptorBasedAPI
 fun IrType.isSingleContainment(): Boolean {
     return if (this is IrSimpleType) {
-        this.isAssignableTo(Node::class)
+        this.isAssignableTo(INode::class)
     } else {
         false
     }
@@ -76,7 +76,7 @@ fun IrType.isSingleContainment(): Boolean {
 
 @ObsoleteDescriptorBasedAPI
 fun IrType.isSingleAttribute(): Boolean {
-    return !this.isAssignableTo(Collection::class) && !this.isAssignableTo(Node::class)
+    return !this.isAssignableTo(Collection::class) && !this.isAssignableTo(INode::class)
 }
 
 @ObsoleteDescriptorBasedAPI

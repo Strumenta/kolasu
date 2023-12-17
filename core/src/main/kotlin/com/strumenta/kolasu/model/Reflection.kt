@@ -12,14 +12,14 @@ import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.withNullability
 
-fun <T : Node> T.relevantMemberProperties(withRange: Boolean = false, withNodeType: Boolean = false):
+fun <T : INode> T.relevantMemberProperties(withRange: Boolean = false, withNodeType: Boolean = false):
     List<KProperty1<T, *>> {
     val list = this::class.nodeProperties.map { it as KProperty1<T, *> }.toMutableList()
     if (withRange) {
-        list.add(Node::range as KProperty1<T, *>)
+        list.add(INode::range as KProperty1<T, *>)
     }
     if (withNodeType) {
-        list.add(Node::nodeType as KProperty1<T, *>)
+        list.add(INode::nodeType as KProperty1<T, *>)
     }
     return list.toList()
 }
@@ -60,9 +60,9 @@ data class PropertyDescription(
         }
         return if (provideNodes) {
             if (multiplicity == Multiplicity.MANY) {
-                "[${(value as Collection<Node>).joinToString(",") { it.nodeType }}]"
+                "[${(value as Collection<INode>).joinToString(",") { it.nodeType }}]"
             } else {
-                "${(value as Node).nodeType}(...)"
+                "${(value as INode).nodeType}(...)"
             }
         } else {
             if (multiplicity == Multiplicity.MANY) {
@@ -78,18 +78,18 @@ data class PropertyDescription(
 
     companion object {
 
-        fun <N : Node> multiple(property: KProperty1<N, *>): Boolean {
+        fun <N : INode> multiple(property: KProperty1<N, *>): Boolean {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             return (classifier?.isSubclassOf(Collection::class) == true)
         }
 
-        fun <N : Node> optional(property: KProperty1<N, *>): Boolean {
+        fun <N : INode> optional(property: KProperty1<N, *>): Boolean {
             val propertyType = property.returnType
             return !multiple(property) && propertyType.isMarkedNullable
         }
 
-        fun <N : Node> multiplicity(property: KProperty1<N, *>): Multiplicity {
+        fun <N : INode> multiplicity(property: KProperty1<N, *>): Multiplicity {
             return when {
                 multiple(property) -> Multiplicity.MANY
                 optional(property) -> Multiplicity.OPTIONAL
@@ -97,7 +97,7 @@ data class PropertyDescription(
             }
         }
 
-        fun <N : Node> providesNodes(property: KProperty1<N, *>): Boolean {
+        fun <N : INode> providesNodes(property: KProperty1<N, *>): Boolean {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             return if (multiple(property)) {
@@ -107,7 +107,7 @@ data class PropertyDescription(
             }
         }
 
-        fun <N : Node> buildFor(property: KProperty1<N, *>, node: Node): PropertyDescription {
+        fun <N : INode> buildFor(property: KProperty1<N, *>, node: INode): PropertyDescription {
             val multiplicity = multiplicity(property)
             val provideNodes = providesNodes(property)
             return PropertyDescription(
@@ -146,7 +146,7 @@ private fun providesNodes(kclass: KClass<*>?): Boolean {
  * @return can [this] class be considered an AST node?
  */
 fun KClass<*>.isANode(): Boolean {
-    return this.isSubclassOf(Node::class) || this.isMarkedAsNodeType()
+    return this.isSubclassOf(INode::class) || this.isMarkedAsNodeType()
 }
 
 val KClass<*>.isConcept: Boolean
@@ -210,9 +210,9 @@ private fun providesNodes(kTypeProjection: KTypeProjection): Boolean {
 
 fun <N : Any> KProperty1<N, *>.isContainment(): Boolean {
     return if ((this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
-        providesNodes(this.returnType.arguments[0].type!!.classifier as KClass<out Node>)
+        providesNodes(this.returnType.arguments[0].type!!.classifier as KClass<out INode>)
     } else {
-        providesNodes(this.returnType.classifier as KClass<out Node>)
+        providesNodes(this.returnType.classifier as KClass<out INode>)
     }
 }
 
@@ -224,18 +224,18 @@ fun <N : Any> KProperty1<N, *>.isAttribute(): Boolean {
     return !isContainment() && !isReference()
 }
 
-fun <N : Node> KProperty1<N, *>.containedType(): KClass<out Node> {
+fun <N : INode> KProperty1<N, *>.containedType(): KClass<out INode> {
     require(isContainment())
     return if ((this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
-        this.returnType.arguments[0].type!!.classifier as KClass<out Node>
+        this.returnType.arguments[0].type!!.classifier as KClass<out INode>
     } else {
-        this.returnType.classifier as KClass<out Node>
+        this.returnType.classifier as KClass<out INode>
     }
 }
 
-fun <N : Node> KProperty1<N, *>.referredType(): KClass<out Node> {
+fun <N : INode> KProperty1<N, *>.referredType(): KClass<out INode> {
     require(isReference())
-    return this.returnType.arguments[0].type!!.classifier as KClass<out Node>
+    return this.returnType.arguments[0].type!!.classifier as KClass<out INode>
 }
 
 fun <N : Any> KProperty1<N, *>.asContainment(): Containment {

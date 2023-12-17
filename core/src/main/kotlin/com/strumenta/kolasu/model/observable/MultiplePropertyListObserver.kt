@@ -1,10 +1,10 @@
 package com.strumenta.kolasu.model.observable
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
 
-class MultiplePropertyListObserver<C : Node, E : Node>(
+class MultiplePropertyListObserver<C : INode, E : INode>(
     val container: C,
     val containmentName: String
 ) : Observer<ListNotification<E>> {

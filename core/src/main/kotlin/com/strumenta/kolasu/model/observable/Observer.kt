@@ -1,60 +1,60 @@
 package com.strumenta.kolasu.model.observable
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
 
-sealed class NodeNotification<N : Node> {
+sealed class NodeNotification<N : INode> {
     abstract val node: N
 }
-data class AttributeChangedNotification<N : Node, V : Any?>(
+data class AttributeChangedNotification<N : INode, V : Any?>(
     override val node: N,
     val attributeName: String,
     val oldValue: V,
     val newValue: V
 ) : NodeNotification<N>()
 
-data class ChildAdded<N : Node>(
+data class ChildAdded<N : INode>(
     override val node: N,
     val containmentName: String,
-    val child: Node
+    val child: INode
 ) : NodeNotification<N>()
 
-data class ChildRemoved<N : Node>(
+data class ChildRemoved<N : INode>(
     override val node: N,
     val containmentName: String,
-    val child: Node
+    val child: INode
 ) : NodeNotification<N>()
 
-data class ReferenceSet<N : Node>(
+data class ReferenceSet<N : INode>(
     override val node: N,
     val referenceName: String,
-    val oldReferredNode: Node?,
-    val newReferredNode: Node?
+    val oldReferredNode: INode?,
+    val newReferredNode: INode?
 ) : NodeNotification<N>()
 
-data class ReferencedToAdded<N : Node>(
+data class ReferencedToAdded<N : INode>(
     override val node: N,
     val referenceName: String,
-    val referringNode: Node
+    val referringNode: INode
 ) : NodeNotification<N>()
 
-data class ReferencedToRemoved<N : Node>(
+data class ReferencedToRemoved<N : INode>(
     override val node: N,
     val referenceName: String,
-    val referringNode: Node
+    val referringNode: INode
 ) : NodeNotification<N>()
 
-open class SimpleNodeObserver : Observer<NodeNotification<in Node>> {
-    open fun <V : Any?>onAttributeChange(node: Node, attributeName: String, oldValue: V, newValue: V) {}
+open class SimpleNodeObserver : Observer<NodeNotification<in INode>> {
+    open fun <V : Any?>onAttributeChange(node: INode, attributeName: String, oldValue: V, newValue: V) {}
 
-    open fun onChildAdded(node: Node, containmentName: String, added: Node) {}
-    open fun onChildRemoved(node: Node, containmentName: String, removed: Node) {}
+    open fun onChildAdded(node: INode, containmentName: String, added: INode) {}
+    open fun onChildRemoved(node: INode, containmentName: String, removed: INode) {}
 
-    open fun onReferenceSet(node: Node, referenceName: String, oldReferredNode: Node?, newReferredNode: Node?) {}
+    open fun onReferenceSet(node: INode, referenceName: String, oldReferredNode: INode?, newReferredNode: INode?) {}
 
-    open fun onReferringAdded(node: Node, referenceName: String, referring: Node) {}
-    open fun onReferringRemoved(node: Node, referenceName: String, referring: Node) {}
+    open fun onReferringAdded(node: INode, referenceName: String, referring: INode) {}
+    open fun onReferringRemoved(node: INode, referenceName: String, referring: INode) {}
 
     override fun onSubscribe(d: Disposable) {
     }
@@ -65,28 +65,32 @@ open class SimpleNodeObserver : Observer<NodeNotification<in Node>> {
     override fun onComplete() {
     }
 
-    override fun onNext(notification: NodeNotification<in Node>) {
+    override fun onNext(notification: NodeNotification<in INode>) {
         when (notification) {
-            is AttributeChangedNotification<Node, *> -> onAttributeChange(
+            is AttributeChangedNotification<INode, *> -> onAttributeChange(
                 notification.node,
                 notification.attributeName,
                 notification.oldValue,
                 notification.newValue
             )
-            is ChildAdded<Node> -> onChildAdded(notification.node, notification.containmentName, notification.child)
-            is ChildRemoved<Node> -> onChildRemoved(notification.node, notification.containmentName, notification.child)
-            is ReferenceSet<Node> -> onReferenceSet(
+            is ChildAdded<INode> -> onChildAdded(notification.node, notification.containmentName, notification.child)
+            is ChildRemoved<INode> -> onChildRemoved(
+                notification.node,
+                notification.containmentName,
+                notification.child
+            )
+            is ReferenceSet<INode> -> onReferenceSet(
                 notification.node,
                 notification.referenceName,
                 notification.oldReferredNode,
                 notification.newReferredNode
             )
-            is ReferencedToAdded<Node> -> onReferringAdded(
+            is ReferencedToAdded<INode> -> onReferringAdded(
                 notification.node,
                 notification.referenceName,
                 notification.referringNode
             )
-            is ReferencedToRemoved<Node> -> onReferringRemoved(
+            is ReferencedToRemoved<INode> -> onReferringRemoved(
                 notification.node,
                 notification.referenceName,
                 notification.referringNode

@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.javalib;
 
-import com.strumenta.kolasu.model.Node;
+import com.strumenta.kolasu.model.INode;
 import com.strumenta.kolasu.model.Processing;
 import com.strumenta.kolasu.traversing.ProcessingStructurally;
 import org.junit.Test;
@@ -39,7 +39,7 @@ public class TraversingTest {
 
     @Test
     public void testWalk() {
-        List<Node> nodes = Traversing.walk(cu).collect(Collectors.toList());
+        List<INode> nodes = Traversing.walk(cu).collect(Collectors.toList());
         assertEquals(Arrays.asList(cu, a1, b1, b2, a2, b3), nodes);
     }
 }

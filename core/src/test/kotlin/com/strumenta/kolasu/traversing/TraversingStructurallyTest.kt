@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.traversing
 
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.assignParents
@@ -14,14 +15,14 @@ import kotlin.test.fail
 internal class TraversingStructurallyTest {
     class Box(
         val name: String,
-        val contents: List<Node> = listOf(),
-        val set: Set<Node> = setOf(),
+        val contents: List<INode> = listOf(),
+        val set: Set<INode> = setOf(),
         specifiedRange: Range? = null
     ) : Node(specifiedRange)
 
     class Item(val name: String, specifiedRange: Range? = null) : Node(specifiedRange)
 
-    private fun printSequence(sequence: Sequence<Node>): String {
+    private fun printSequence(sequence: Sequence<INode>): String {
         return sequence.map {
             when (it) {
                 is Box -> it.name
@@ -105,9 +106,9 @@ internal class TraversingStructurallyTest {
         val numberOfGrandChildren = 10
         for (i in 0..numberOfChildren) {
             val nChildren = (0..numberOfGrandChildren).random()
-            val children = mutableListOf<Node>()
+            val children = mutableListOf<INode>()
             for (b in 0..nChildren) {
-                val grandChildren = mutableListOf<Node>()
+                val grandChildren = mutableListOf<INode>()
                 for (c in 0..(0..numberOfGrandChildren).random()) {
                     grandChildren.add(Item(getRandomString(8)))
                     nodes += 1

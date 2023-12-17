@@ -1,13 +1,13 @@
 package com.strumenta.kolasu.emf.rpgast
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Range
 
 data class ToAstConfiguration(
     val considerRange: Boolean = true
 )
 
-fun List<Node>.range(): Range? {
+fun List<INode>.range(): Range? {
     val start = this.asSequence().map { it.range?.start }.filterNotNull().sorted().toList()
     val end = this.asSequence().map { it.range?.end }.filterNotNull().sorted().toList()
     return if (start.isEmpty() || end.isEmpty()) {

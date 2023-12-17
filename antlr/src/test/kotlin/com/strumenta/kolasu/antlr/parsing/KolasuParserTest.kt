@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.antlr.parsing
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.simplelang.SimpleLangLexer
@@ -12,7 +12,7 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class SimpleLangKolasuParser : KolasuANTLRParser<Node, SimpleLangParser, SimpleLangParser.CompilationUnitContext,
+class SimpleLangKolasuParser : KolasuANTLRParser<INode, SimpleLangParser, SimpleLangParser.CompilationUnitContext,
     KolasuANTLRToken>(ANTLRTokenFactory()) {
     override fun createANTLRLexer(charStream: CharStream): Lexer {
         return SimpleLangLexer(charStream)
@@ -27,7 +27,7 @@ class SimpleLangKolasuParser : KolasuANTLRParser<Node, SimpleLangParser, SimpleL
         considerRange: Boolean,
         issues: MutableList<Issue>,
         source: Source?
-    ): Node? = null
+    ): INode? = null
 
     override fun clearCaches() {
         super.clearCaches()

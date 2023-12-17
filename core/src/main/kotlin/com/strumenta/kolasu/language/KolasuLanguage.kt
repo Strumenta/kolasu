@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.language
 
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.asAttribute
@@ -47,6 +48,7 @@ class KolasuLanguage(val qualifiedName: String) {
         val kClass = superType.classifier as? KClass<*>
         when (kClass) {
             null -> Unit
+            INode::class -> Unit
             Node::class -> Unit
             Named::class -> Unit
             Any::class -> Unit
@@ -56,15 +58,15 @@ class KolasuLanguage(val qualifiedName: String) {
                         addInterfaceClass(kClass)
                     }
                 } else {
-                    if (kClass.isSubclassOf(Node::class)) {
-                        addClass(kClass as KClass<out Node>)
+                    if (kClass.isSubclassOf(INode::class)) {
+                        addClass(kClass as KClass<out INode>)
                     }
                 }
             }
         }
     }
 
-    fun <N : Node> addClass(kClass: KClass<N>): Boolean {
+    fun <N : INode> addClass(kClass: KClass<N>): Boolean {
         if (!_astClasses.contains(kClass) && _astClasses.add(kClass)) {
             kClass.supertypes.forEach { superType ->
                 processSuperType(superType)

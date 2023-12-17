@@ -47,7 +47,7 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
 
     var referred: N? = null
         set(value) {
-            require(value is Node || value == null) {
+            require(value is INode || value == null) {
                 "We cannot enforce it statically but only Node should be referred to. Instead $value was assigned " +
                     "(class: ${value?.javaClass})"
             }
@@ -55,10 +55,10 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
             field = value
         }
 
-    private var container: Node? = null
+    private var container: INode? = null
     private var referenceName: String? = null
 
-    fun setContainer(node: Node, referenceName: String) {
+    fun setContainer(node: INode, referenceName: String) {
         if (container == node) {
             return
         }
@@ -66,15 +66,15 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
             throw IllegalStateException("$this is already contained in $container as ${this.referenceName}")
         }
         changes.map {
-            ReferenceSet(node, referenceName, it.oldValue as Node?, it.newValue as Node?)
+            ReferenceSet(node, referenceName, it.oldValue as INode?, it.newValue as INode?)
         }.subscribe(node.changes)
         changes
             .filter { it.oldValue != null }
-            .map { ReferencedToRemoved(it.oldValue as Node, referenceName, node) }
+            .map { ReferencedToRemoved(it.oldValue as INode, referenceName, node) }
             .subscribe { it.node.changes.onNext(it) }
         changes
             .filter { it.newValue != null }
-            .map { ReferencedToAdded(it.newValue as Node, referenceName, node) }
+            .map { ReferencedToAdded(it.newValue as INode, referenceName, node) }
             .subscribe { it.node.changes.onNext(it) }
         container = node
         this.referenceName = referenceName
@@ -165,5 +165,5 @@ fun KReferenceByName<*>.getReferredType(): KClass<out PossiblyNamed> {
 /**
  * Retrieves all reference properties for a given node.
  **/
-fun Node.kReferenceByNameProperties(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class) =
+fun INode.kReferenceByNameProperties(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class) =
     this.nodeProperties.filter { it.returnType.isSubtypeOf(kReferenceByNameType(targetClass)) }

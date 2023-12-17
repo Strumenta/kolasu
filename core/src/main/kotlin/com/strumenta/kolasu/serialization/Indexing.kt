@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.serialization
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.traversing.ASTWalker
@@ -8,17 +8,17 @@ import com.strumenta.kolasu.traversing.walk
 import java.util.IdentityHashMap
 
 fun interface IdProvider {
-    fun getId(node: Node): String?
+    fun getId(node: INode): String?
 }
 
 class SequentialIdProvider(private var counter: Int = 0) : IdProvider {
-    override fun getId(node: Node): String? {
+    override fun getId(node: INode): String? {
         return "${this.counter++}"
     }
 }
 
 class OnlyReferencedIdProvider(
-    private val root: Node,
+    private val root: INode,
     private var idProvider: IdProvider = SequentialIdProvider()
 ) : IdProvider {
 
@@ -29,7 +29,7 @@ class OnlyReferencedIdProvider(
         }.toSet()
     }
 
-    override fun getId(node: Node): String? {
+    override fun getId(node: INode): String? {
         return this.referencedElements.find { referencedElement -> referencedElement == node }
             ?.let { idProvider.getId(node) }
     }
@@ -41,11 +41,11 @@ class OnlyReferencedIdProvider(
  * For post-order traversal, take "walkLeavesFirst".
  * @return walks the whole AST starting from the given node and associates each visited node with a generated id
  **/
-fun Node.computeIds(
-    walker: ASTWalker = Node::walk,
+fun INode.computeIds(
+    walker: ASTWalker = INode::walk,
     idProvider: IdProvider = SequentialIdProvider()
-): IdentityHashMap<Node, String> {
-    val idsMap = IdentityHashMap<Node, String>()
+): IdentityHashMap<INode, String> {
+    val idsMap = IdentityHashMap<INode, String>()
     walker.invoke(this).forEach {
         val id = idProvider.getId(it)
         if (id != null) idsMap[it] = id
@@ -53,7 +53,7 @@ fun Node.computeIds(
     return idsMap
 }
 
-fun Node.computeIdsForReferencedNodes(
-    walker: ASTWalker = Node::walk,
+fun INode.computeIdsForReferencedNodes(
+    walker: ASTWalker = INode::walk,
     idProvider: IdProvider = OnlyReferencedIdProvider(this)
-): IdentityHashMap<Node, String> = computeIds(walker, idProvider)
+): IdentityHashMap<INode, String> = computeIds(walker, idProvider)

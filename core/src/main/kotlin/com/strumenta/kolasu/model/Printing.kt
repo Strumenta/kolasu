@@ -16,7 +16,7 @@ data class DebugPrintConfiguration constructor(
     var indentBlock: String = "  "
 )
 
-private fun Node.showSingleAttribute(
+private fun INode.showSingleAttribute(
     indent: String,
     sb: StringBuilder,
     propertyName: String,
@@ -32,7 +32,7 @@ fun Any?.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
     return sb.toString()
 }
 
-fun <N : Node> ParsingResult<N>.debugPrint(
+fun <N : INode> ParsingResult<N>.debugPrint(
     indent: String = "",
     configuration: DebugPrintConfiguration = DebugPrintConfiguration()
 ): String {
@@ -53,7 +53,7 @@ fun <N : Node> ParsingResult<N>.debugPrint(
 }
 
 @JvmOverloads
-fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration = DebugPrintConfiguration()): String {
+fun INode.debugPrint(indent: String = "", configuration: DebugPrintConfiguration = DebugPrintConfiguration()): String {
     val indentBlock = configuration.indentBlock
     val sb = StringBuilder()
     if (this.relevantMemberProperties(withRange = configuration.forceShowRange).isEmpty()) {
@@ -81,7 +81,7 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                             val paramType = mt.actualTypeArguments[0]
                             if (paramType is Class<*> && paramType.kotlin.isANode()) {
                                 sb.append("$indent$indentBlock${property.name} = [\n")
-                                (value as List<Node>).forEach {
+                                (value as List<INode>).forEach {
                                     sb.append(
                                         it.debugPrint(
                                             indent + indentBlock + indentBlock,
@@ -110,7 +110,7 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                     if (value == null && configuration.skipNull) {
                         // nothing to do
                     } else {
-                        if (value is Node) {
+                        if (value is INode) {
                             sb.append("$indent$indentBlock${property.name} = [\n")
                             sb.append(
                                 value.debugPrint(

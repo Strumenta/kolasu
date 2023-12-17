@@ -14,13 +14,13 @@ import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.createResource
 import com.strumenta.kolasu.emf.saveMetamodel
 import com.strumenta.kolasu.emf.saveModel
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import java.io.File
 
-class EMFModelCommand<R : Node, P>(parserInstantiator: ParserInstantiator<P>) :
+class EMFModelCommand<R : INode, P>(parserInstantiator: ParserInstantiator<P>) :
     ASTProcessingCommand<R, P>(
         parserInstantiator,
         help = "Parses a file and exports the AST to an EMF (XMI) file.",

@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.antlr.mapping
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.children
@@ -63,7 +63,7 @@ object TrivialFactoryOfParseTreeToASTNodeTransformer {
         }
     }
 
-    inline fun <S : RuleContext, reified T : Node> trivialTransformer(vararg nameConversions: Pair<String, String>): (
+    inline fun <S : RuleContext, reified T : INode> trivialTransformer(vararg nameConversions: Pair<String, String>): (
         S,
         ASTTransformer
     ) -> T? {
@@ -107,7 +107,7 @@ object TrivialFactoryOfParseTreeToASTNodeTransformer {
     }
 }
 
-inline fun <reified S : RuleContext, reified T : Node> ASTTransformer.registerTrivialPTtoASTConversion(
+inline fun <reified S : RuleContext, reified T : INode> ASTTransformer.registerTrivialPTtoASTConversion(
     vararg nameConversions: Pair<String, String>
 ) {
     this.registerNodeTransformer(
@@ -116,7 +116,7 @@ inline fun <reified S : RuleContext, reified T : Node> ASTTransformer.registerTr
     )
 }
 
-inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer.registerTrivialPTtoASTConversion(
+inline fun <reified S : RuleContext, reified T : INode> ParseTreeToASTTransformer.registerTrivialPTtoASTConversion(
     vararg nameConversions: Pair<KCallable<*>, KCallable<*>>
 ) {
     return this.registerTrivialPTtoASTConversion<S, T>(
@@ -125,7 +125,7 @@ inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer
     )
 }
 
-inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer.unwrap(wrappingMember: KCallable<*>) {
+inline fun <reified S : RuleContext, reified T : INode> ParseTreeToASTTransformer.unwrap(wrappingMember: KCallable<*>) {
     this.registerNodeTransformer(S::class) { parseTreeNode, astTransformer ->
         val wrapped = wrappingMember.call(parseTreeNode)
         astTransformer.transform(wrapped) as T?

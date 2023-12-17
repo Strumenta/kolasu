@@ -23,6 +23,6 @@ class GenericErrorNode(error: Exception? = null, message: String? = null) : Node
         }
 }
 
-fun Node.errors(): Sequence<ErrorNode> = this.walkDescendants(ErrorNode::class)
+fun INode.errors(): Sequence<ErrorNode> = this.walkDescendants(ErrorNode::class)
 
-fun Node.findError(): ErrorNode? = this.errors().firstOrNull()
+fun INode.findError(): ErrorNode? = this.errors().firstOrNull()
