@@ -7,6 +7,7 @@ import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.declaredFeatures
 import com.strumenta.kolasu.model.isConcept
 import com.strumenta.kolasu.model.isConceptInterface
@@ -34,6 +35,7 @@ class LionWebLanguageConverter {
         val starLasuKLanguage = KolasuLanguage(StarLasuLWLanguage.name)
         languages.associate(starLasuKLanguage, StarLasuLWLanguage)
         registerMapping(INode::class, StarLasuLWLanguage.ASTNode)
+        registerMapping(Node::class, StarLasuLWLanguage.ASTNode)
         registerMapping(Named::class, LionCoreBuiltins.getINamed())
     }
 
