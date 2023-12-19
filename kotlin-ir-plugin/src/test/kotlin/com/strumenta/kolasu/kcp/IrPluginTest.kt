@@ -436,6 +436,7 @@ fun main() {
     }
 }
 
+@ExperimentalCompilerApi
 fun compile(
     sourceFiles: List<SourceFile>,
     plugin: CompilerPluginRegistrar = StarLasuComponentRegistrar()

@@ -125,7 +125,7 @@ private fun INode.toXML(role: String, document: Document): Element {
             if (it.provideNodes) {
                 element.addChild((it.value as INode).toXML(it.name, document))
             } else {
-                element.addAttribute(it.name, it.value)
+                element.addAttribute(it.name, it.value!!)
             }
         }
     }

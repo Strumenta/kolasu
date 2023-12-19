@@ -1,13 +1,13 @@
 package com.strumenta.kolasu.model.observable
 
+import com.badoo.reaktive.disposable.Disposable
+import com.badoo.reaktive.observable.ObservableObserver
 import com.strumenta.kolasu.model.INode
-import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.disposables.Disposable
 
 class MultiplePropertyListObserver<C : INode, E : INode>(
     val container: C,
     val containmentName: String
-) : Observer<ListNotification<E>> {
+) : ObservableObserver<ListNotification<E>> {
     private fun added(e: E) {
         e.parent = container
         container.changes.onNext(ChildAdded(container, containmentName, e))

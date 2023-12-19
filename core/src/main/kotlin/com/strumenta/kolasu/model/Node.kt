@@ -1,13 +1,13 @@
 package com.strumenta.kolasu.model
 
+import com.badoo.reaktive.observable.ObservableObserver
+import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.model.annotations.Annotation
 import com.strumenta.kolasu.model.observable.AttributeChangedNotification
 import com.strumenta.kolasu.model.observable.NodeNotification
-import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.subjects.PublishSubject
 import java.io.Serializable
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty1
@@ -18,7 +18,7 @@ import kotlin.reflect.KProperty1
 open class Node() : INode, Serializable {
 
     @property:Internal
-    override val changes = PublishSubject.create<NodeNotification<in INode>>()
+    override val changes = PublishSubject<NodeNotification<in INode>>()
 
     @Internal
     private val annotations: MutableList<Annotation> = mutableListOf()
@@ -216,7 +216,7 @@ open class Node() : INode, Serializable {
         ref.referred = referred
     }
 
-    override fun subscribe(observer: Observer<NodeNotification<in INode>>) {
+    override fun subscribe(observer: ObservableObserver<NodeNotification<in INode>>) {
         this.changes.subscribe(observer)
     }
 }

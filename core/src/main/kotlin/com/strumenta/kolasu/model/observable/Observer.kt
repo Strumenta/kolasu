@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.model.observable
 
+import com.badoo.reaktive.disposable.Disposable
+import com.badoo.reaktive.observable.ObservableObserver
 import com.strumenta.kolasu.model.INode
-import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.disposables.Disposable
 
 sealed class NodeNotification<N : INode> {
     abstract val node: N
@@ -45,7 +45,7 @@ data class ReferencedToRemoved<N : INode>(
     val referringNode: INode
 ) : NodeNotification<N>()
 
-open class SimpleNodeObserver : Observer<NodeNotification<in INode>> {
+open class SimpleNodeObserver : ObservableObserver<NodeNotification<in INode>> {
     open fun <V : Any?>onAttributeChange(node: INode, attributeName: String, oldValue: V, newValue: V) {}
 
     open fun onChildAdded(node: INode, containmentName: String, added: INode) {}

@@ -15,7 +15,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
     testImplementation("com.google.code.gson:gson:$gson_version")
     testImplementation("io.github.mkfl3x:json-delta:1.3")
-    implementation("io.lionweb.lionweb-java:lionweb-java-core:$lionwebVersion")
+    implementation("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebVersion")
     api(project(":core"))
 }
 

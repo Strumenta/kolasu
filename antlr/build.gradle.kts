@@ -49,3 +49,15 @@ tasks.named("sourcesJar") {
 tasks.named("runKtlintCheckOverMainSourceSet") {
     dependsOn("generateGrammarSource")
 }
+
+tasks.named("runKtlintCheckOverTestSourceSet") {
+    dependsOn("generateTestGrammarSource")
+}
+
+tasks.named("runKtlintFormatOverMainSourceSet") {
+    dependsOn("generateGrammarSource")
+}
+
+tasks.named("runKtlintFormatOverTestSourceSet") {
+    dependsOn("generateTestGrammarSource")
+}

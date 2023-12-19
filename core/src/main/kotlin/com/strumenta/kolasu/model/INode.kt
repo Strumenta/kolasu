@@ -1,15 +1,15 @@
 package com.strumenta.kolasu.model
 
+import com.badoo.reaktive.observable.ObservableObserver
+import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.model.annotations.Annotation
 import com.strumenta.kolasu.model.observable.NodeNotification
-import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.subjects.PublishSubject
 import kotlin.reflect.KClass
 
-typealias NodeObserver = Observer<in NodeNotification<in INode>>
+typealias NodeObserver = ObservableObserver<in NodeNotification<in INode>>
 
 interface INode {
 
@@ -116,5 +116,5 @@ interface INode {
     fun <T : PossiblyNamed>getReference(referenceName: String): ReferenceByName<T>
     fun <T : PossiblyNamed>setReferenceReferred(referenceName: String, referred: T)
 
-    fun subscribe(observer: Observer<NodeNotification<in INode>>)
+    fun subscribe(observer: ObservableObserver<NodeNotification<in INode>>)
 }
