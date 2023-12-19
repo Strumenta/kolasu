@@ -1,19 +1,19 @@
 package com.strumenta.kolasu.model
 
+import com.badoo.reaktive.observable.ObservableObserver
+import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.model.annotations.Annotation
 import com.strumenta.kolasu.model.observable.AttributeChangedNotification
 import com.strumenta.kolasu.model.observable.NodeNotification
-import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.subjects.PublishSubject
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty1
 
-typealias NodeObserver = Observer<in NodeNotification<in Node>>
+typealias NodeObserver = ObservableObserver<in NodeNotification<in Node>>
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
@@ -21,7 +21,7 @@ typealias NodeObserver = Observer<in NodeNotification<in Node>>
 open class Node() : Serializable {
 
     @property:Internal
-    val changes = PublishSubject.create<NodeNotification<in Node>>()
+    val changes = PublishSubject<NodeNotification<in Node>>()
 
     @Internal
     private val annotations: MutableList<Annotation> = mutableListOf()
@@ -254,7 +254,7 @@ open class Node() : Serializable {
         ref.referred = referred
     }
 
-    fun subscribe(observer: Observer<NodeNotification<in Node>>) {
+    fun subscribe(observer: ObservableObserver<NodeNotification<in Node>>) {
         this.changes.subscribe(observer)
     }
 }

@@ -10,6 +10,7 @@ val clikt_version = extra["clikt_version"]
 dependencies {
     antlr("org.antlr:antlr4:$antlr_version")
     api(project(":core"))
+    api(project(":cli"))
     api(project(":antlr"))
     api("org.eclipse.emf:org.eclipse.emf.common:2.23.0")
     api("org.eclipse.emf:org.eclipse.emf.ecore:2.25.0")

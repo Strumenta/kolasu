@@ -1,9 +1,14 @@
 package com.strumenta.kolasu.model
 
+import com.badoo.reaktive.disposable.Disposable
+import com.badoo.reaktive.observable.ObservableObserver
+import com.badoo.reaktive.observable.filter
+import com.badoo.reaktive.observable.map
+import com.badoo.reaktive.subject.getObserver
+import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.model.observable.ReferenceSet
 import com.strumenta.kolasu.model.observable.ReferencedToAdded
 import com.strumenta.kolasu.model.observable.ReferencedToRemoved
-import io.reactivex.rxjava3.subjects.PublishSubject
 import java.io.Serializable
 import kotlin.reflect.*
 import kotlin.reflect.full.createType
@@ -43,7 +48,7 @@ data class ReferenceChangeNotification<N : PossiblyNamed>(val oldValue: N?, val 
 class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
     Serializable where N : PossiblyNamed {
 
-    val changes = PublishSubject.create<ReferenceChangeNotification<N>>()
+    val changes = PublishSubject<ReferenceChangeNotification<N>>()
 
     var referred: N? = null
         set(value) {
@@ -58,6 +63,11 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
     private var container: Node? = null
     private var referenceName: String? = null
 
+    /**
+     * When we instantiate the reference by name, we wired it so that changes to the reference by name will
+     * be propagated to the owner of the reference, so that the observers of the owner will be notified
+     * of changes in the reference.
+     */
     fun setContainer(node: Node, referenceName: String) {
         if (container == node) {
             return
@@ -66,16 +76,47 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
             throw IllegalStateException("$this is already contained in $container as ${this.referenceName}")
         }
         changes.map {
+            // When the reference is changed, we propagate it to the container
             ReferenceSet(node, referenceName, it.oldValue as Node?, it.newValue as Node?)
-        }.subscribe(node.changes)
+        }.subscribe(node.changes.getObserver { })
         changes
             .filter { it.oldValue != null }
             .map { ReferencedToRemoved(it.oldValue as Node, referenceName, node) }
-            .subscribe { it.node.changes.onNext(it) }
+            .subscribe(object : ObservableObserver<ReferencedToRemoved<Node>> {
+                override fun onComplete() {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onError(error: Throwable) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onNext(value: ReferencedToRemoved<Node>) {
+                    value.node.changes.onNext(value)
+                }
+
+                override fun onSubscribe(disposable: Disposable) {
+                }
+            })
         changes
             .filter { it.newValue != null }
             .map { ReferencedToAdded(it.newValue as Node, referenceName, node) }
-            .subscribe { it.node.changes.onNext(it) }
+            .subscribe(object : ObservableObserver<ReferencedToAdded<Node>> {
+                override fun onComplete() {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onError(error: Throwable) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onNext(value: ReferencedToAdded<Node>) {
+                    value.node.changes.onNext(value)
+                }
+
+                override fun onSubscribe(disposable: Disposable) {
+                }
+            })
         container = node
         this.referenceName = referenceName
     }

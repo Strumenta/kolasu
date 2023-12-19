@@ -134,7 +134,7 @@ class JsonGenerator {
             // do nothing for consistency with non-streaming JSON generation
         } else {
             writer.name("root")
-            generateJSONWithStreaming(result.root, writer, shortClassNames)
+            generateJSONWithStreaming(result.root!!, writer, shortClassNames)
         }
         writer.endObject()
     }
@@ -217,10 +217,10 @@ class JsonGenerator {
         }
 
     private fun computeIds(result: Result<out Node>): IdentityHashMap<Node, String> =
-        if (result.root != null) computeIds(result.root) else IdentityHashMap()
+        if (result.root != null) computeIds(result.root!!) else IdentityHashMap()
 
     private fun computeIds(result: ParsingResult<out Node>): IdentityHashMap<Node, String> =
-        if (result.root != null) computeIds(result.root) else IdentityHashMap()
+        if (result.root != null) computeIds(result.root!!) else IdentityHashMap()
 
     private fun nodeToJson(
         node: Node,
@@ -359,6 +359,7 @@ private fun Any?.toJsonStreaming(writer: JsonWriter) {
         is String -> writer.value(this)
         is Number -> writer.value(this)
         is Boolean -> writer.value(this)
+        is Range -> this.toJsonStreaming(writer)
         else -> writer.value(this.toString())
     }
 }
