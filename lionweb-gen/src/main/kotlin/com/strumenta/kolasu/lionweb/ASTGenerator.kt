@@ -66,11 +66,11 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                                 typeSpec.modifiers.add(KModifier.DATA)
                             }
                         }
-                        if(element.allFeatures().isEmpty() && !element.isAbstract) {
+                        if (element.allFeatures().isEmpty() && !element.isAbstract) {
                             val hasSubclasses = language.elements.filterIsInstance<Concept>().any {
                                 it.extendedConcept == element
                             }
-                            if(hasSubclasses) {
+                            if (hasSubclasses) {
                                 typeSpec.modifiers.add(KModifier.OPEN)
                             }
                         }
