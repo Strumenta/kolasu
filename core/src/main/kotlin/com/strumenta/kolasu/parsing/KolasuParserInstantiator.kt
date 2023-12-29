@@ -8,4 +8,5 @@ import java.io.File
  */
 interface KolasuParserInstantiator {
     fun instantiate(fileToParse: File): KolasuParser<*, *, *, *>
+    fun instantiate(code: String): KolasuParser<*, *, *, *>
 }
