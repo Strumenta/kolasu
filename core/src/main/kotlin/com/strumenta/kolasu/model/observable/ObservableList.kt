@@ -5,11 +5,17 @@ import com.badoo.reaktive.subject.publish.PublishSubject
 
 sealed class ListNotification<E>
 
-data class ListAddition<E>(val added: E) : ListNotification<E>()
-data class ListRemoval<E>(val removed: E) : ListNotification<E>()
+data class ListAddition<E>(
+    val added: E,
+) : ListNotification<E>()
 
-class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
-    MutableList<E> by base {
+data class ListRemoval<E>(
+    val removed: E,
+) : ListNotification<E>()
+
+class ObservableList<E>(
+    private val base: MutableList<E> = mutableListOf(),
+) : MutableList<E> by base {
     val changes = PublishSubject<ListNotification<E>>()
 
     override fun addAll(elements: Collection<E>): Boolean {
@@ -20,7 +26,10 @@ class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
         return modified
     }
 
-    override fun addAll(index: Int, elements: Collection<E>): Boolean {
+    override fun addAll(
+        index: Int,
+        elements: Collection<E>,
+    ): Boolean {
         var currIndex = index
         for (element in elements) {
             add(currIndex, element)
@@ -29,7 +38,10 @@ class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
         return true
     }
 
-    override fun add(index: Int, element: E) {
+    override fun add(
+        index: Int,
+        element: E,
+    ) {
         base.add(index, element)
         changes.onNext(ListAddition(element))
     }
@@ -49,7 +61,10 @@ class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
         return element
     }
 
-    override fun set(index: Int, element: E): E {
+    override fun set(
+        index: Int,
+        element: E,
+    ): E {
         val oldElement = base.set(index, element)
         changes.onNext(ListRemoval(oldElement))
         changes.onNext(ListAddition(element))
@@ -62,14 +77,13 @@ class ObservableList<E>(private val base: MutableList<E> = mutableListOf()) :
         return changed
     }
 
-    override fun remove(element: E): Boolean {
-        return if (base.remove(element)) {
+    override fun remove(element: E): Boolean =
+        if (base.remove(element)) {
             changes.onNext(ListRemoval(element))
             true
         } else {
             false
         }
-    }
 
     fun subscribe(observer: ObservableObserver<in ListNotification<E>>) {
         changes.subscribe(observer)

@@ -27,13 +27,18 @@ import io.lionweb.lioncore.java.language.Reference
 import org.jetbrains.kotlin.konan.file.File
 import java.lang.UnsupportedOperationException
 
-data class KotlinFile(val path: String, val code: String)
+data class KotlinFile(
+    val path: String,
+    val code: String,
+)
 
 /**
  * This class generates Kotlin code for a given LionWeb Language.
  */
-class ASTGenerator(val packageName: String, val language: LWLanguage) {
-
+class ASTGenerator(
+    val packageName: String,
+    val language: LWLanguage,
+) {
     fun generateClasses(existingKotlinClasses: Set<String> = emptySet()): Set<KotlinFile> {
         val fileSpecBuilder = FileSpec.builder(packageName, "${language.name}AST.kt")
         language.elements.forEach { element ->
@@ -41,24 +46,26 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                 is Concept -> {
                     val typeSpec = TypeSpec.classBuilder(element.name!!)
                     typeSpec.addAnnotation(
-                        AnnotationSpec.builder(LionWebAssociation::class.java)
+                        AnnotationSpec
+                            .builder(LionWebAssociation::class.java)
                             .addMember("key = \"${element.key}\"")
-                            .build()
+                            .build(),
                     )
                     val fqName = "$packageName.${element.name!!}"
                     if (fqName in existingKotlinClasses) {
                         println("    Skipping ${element.name} as a Kotlin class with that name already exist")
                         fileSpecBuilder.addFileComment(
-                            "Skipping ${element.name} as a Kotlin class with that name already exist"
+                            "Skipping ${element.name} as a Kotlin class with that name already exist",
                         )
                     } else {
                         if (element.isAbstract) {
                             typeSpec.modifiers.add(KModifier.SEALED)
                         }
                         if (element.allFeatures().isNotEmpty() && !element.isAbstract) {
-                            val hasSubclasses = language.elements.filterIsInstance<Concept>().any {
-                                it.extendedConcept == element
-                            }
+                            val hasSubclasses =
+                                language.elements.filterIsInstance<Concept>().any {
+                                    it.extendedConcept == element
+                                }
                             // if it has subclasses it needs to be open, to be extended
                             if (hasSubclasses) {
                                 typeSpec.modifiers.add(KModifier.OPEN)
@@ -67,9 +74,10 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                             }
                         }
                         if (element.allFeatures().isEmpty() && !element.isAbstract) {
-                            val hasSubclasses = language.elements.filterIsInstance<Concept>().any {
-                                it.extendedConcept == element
-                            }
+                            val hasSubclasses =
+                                language.elements.filterIsInstance<Concept>().any {
+                                    it.extendedConcept == element
+                                }
                             if (hasSubclasses) {
                                 typeSpec.modifiers.add(KModifier.OPEN)
                             }
@@ -101,9 +109,10 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                 is Enumeration -> {
                     val typeSpec = TypeSpec.enumBuilder(element.name!!)
                     typeSpec.addAnnotation(
-                        AnnotationSpec.builder(LionWebAssociation::class.java)
+                        AnnotationSpec
+                            .builder(LionWebAssociation::class.java)
                             .addMember("key = \"${element.key}\"")
-                            .build()
+                            .build(),
                     )
                     element.literals.forEach {
                         typeSpec.addEnumConstant(it.name!!)
@@ -113,19 +122,21 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                 is Interface -> {
                     val typeSpec = TypeSpec.interfaceBuilder(element.name!!)
                     typeSpec.addAnnotation(
-                        AnnotationSpec.builder(LionWebAssociation::class.java)
+                        AnnotationSpec
+                            .builder(LionWebAssociation::class.java)
                             .addMember("key = \"${element.key}\"")
-                            .build()
+                            .build(),
                     )
                     typeSpec.addAnnotation(
-                        AnnotationSpec.builder(NodeType::class.java)
-                            .build()
+                        AnnotationSpec
+                            .builder(NodeType::class.java)
+                            .build(),
                     )
                     val fqName = "$packageName.${element.name!!}"
                     if (fqName in existingKotlinClasses) {
                         println("    Skipping ${element.name} as a Kotlin interface with that name already exist")
                         fileSpecBuilder.addFileComment(
-                            "Skipping ${element.name} as a Kotlin interface with that name already exist"
+                            "Skipping ${element.name} as a Kotlin interface with that name already exist",
                         )
                     } else {
                         element.extendedInterfaces.forEach {
@@ -138,16 +149,18 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                     }
                 }
                 else -> throw UnsupportedOperationException(
-                    "We do not know how to convert to Kolasu this element: $element"
+                    "We do not know how to convert to Kolasu this element: $element",
                 )
             }
         }
-        val path = if (packageName.isNullOrEmpty()) {
-            "AST.kt"
-        } else {
-            packageName.split(".")
-                .joinToString(File.separator) + File.separator + "AST.kt"
-        }
+        val path =
+            if (packageName.isNullOrEmpty()) {
+                "AST.kt"
+            } else {
+                packageName
+                    .split(".")
+                    .joinToString(File.separator) + File.separator + "AST.kt"
+            }
         val file = KotlinFile(path = path, fileSpecBuilder.build().toString())
         return setOf(file)
     }
@@ -157,7 +170,7 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
         constructor: FunSpec.Builder?,
         typeSpec: TypeSpec.Builder,
         inherited: Boolean,
-        sealed: Boolean
+        sealed: Boolean,
     ) {
         val modifiers = mutableListOf<KModifier>()
         if (inherited) {
@@ -171,9 +184,12 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                 val type = typeName(feature.type!!)
                 constructor?.addParameter(feature.name!!, type)
                 typeSpec.addProperty(
-                    PropertySpec.builder(feature.name!!, type)
+                    PropertySpec
+                        .builder(feature.name!!, type)
                         .addModifiers(modifiers)
-                        .mutable(true).initializer(feature.name!!).build()
+                        .mutable(true)
+                        .initializer(feature.name!!)
+                        .build(),
                 )
             }
 
@@ -185,9 +201,12 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                 }
                 constructor?.addParameter(feature.name!!, type)
                 typeSpec.addProperty(
-                    PropertySpec.builder(feature.name!!, type)
+                    PropertySpec
+                        .builder(feature.name!!, type)
                         .addModifiers(modifiers)
-                        .mutable(true).initializer(feature.name!!).build()
+                        .mutable(true)
+                        .initializer(feature.name!!)
+                        .build(),
                 )
             }
 
@@ -200,16 +219,19 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                 }
                 constructor?.addParameter(feature.name!!, type)
                 typeSpec.addProperty(
-                    PropertySpec.builder(feature.name!!, type)
+                    PropertySpec
+                        .builder(feature.name!!, type)
                         .addModifiers(modifiers)
-                        .mutable(true).initializer(feature.name!!).build()
+                        .mutable(true)
+                        .initializer(feature.name!!)
+                        .build(),
                 )
             }
         }
     }
 
-    private fun typeName(classifier: Classifier<*>): TypeName {
-        return when {
+    private fun typeName(classifier: Classifier<*>): TypeName =
+        when {
             classifier.id == StarLasuLWLanguage.ASTNode.id -> {
                 Node::class.java.asTypeName()
             }
@@ -226,10 +248,9 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                 TODO("Classifier $classifier. ID ${classifier.id}, NODE id: ${LionCoreBuiltins.getNode().id}")
             }
         }
-    }
 
-    private fun typeName(dataType: DataType<*>): TypeName {
-        return when {
+    private fun typeName(dataType: DataType<*>): TypeName =
+        when {
             dataType == LionCoreBuiltins.getString() -> {
                 ClassName.bestGuess("kotlin.String")
             }
@@ -246,5 +267,4 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                 TODO("DataType: $dataType")
             }
         }
-    }
 }

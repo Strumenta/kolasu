@@ -43,11 +43,12 @@ private fun createTranspilationMetamodel(): EPackage {
         addContainment("issues", issue, 0, -1)
     }
 
-    val workspaceFile = ePackage.createEClass("WorkspaceFile").apply {
-        addAttribute("path", string, 1, 1)
-        addAttribute("code", string, 1, 1)
-        addContainment("result", result, 1, 1)
-    }
+    val workspaceFile =
+        ePackage.createEClass("WorkspaceFile").apply {
+            addAttribute("path", string, 1, 1)
+            addAttribute("code", string, 1, 1)
+            addContainment("result", result, 1, 1)
+        }
 
     ePackage.createEClass("WorkspaceTranspilationTrace").apply {
         addContainment("originalFiles", workspaceFile, 1, -1)
@@ -84,7 +85,10 @@ fun <S : Node, T : Node> TranspilationTrace<S, T>.toEObject(resource: Resource):
     return transpilationTraceEO
 }
 
-fun WorkspaceTranspilationTrace.WorkspaceFile.toEObject(resource: Resource, mapping: KolasuToEMFMapping): EObject {
+fun WorkspaceTranspilationTrace.WorkspaceFile.toEObject(
+    resource: Resource,
+    mapping: KolasuToEMFMapping,
+): EObject {
     val workspaceFileEO = makeWorkspaceFileEObject()
     workspaceFileEO.setStringAttribute("path", this.path)
     workspaceFileEO.setStringAttribute("code", this.code)
@@ -98,18 +102,21 @@ fun WorkspaceTranspilationTrace.toEObject(resource: Resource): EObject {
 
     transpilationTraceEO.setMultipleContainment(
         "originalFiles",
-        this.originalFiles.map { it.toEObject(resource, mapping) }
+        this.originalFiles.map { it.toEObject(resource, mapping) },
     )
     transpilationTraceEO.setMultipleContainment(
         "generatedFiles",
-        this.generatedFiles.map { it.toEObject(resource, mapping) }
+        this.generatedFiles.map { it.toEObject(resource, mapping) },
     )
 
     transpilationTraceEO.setMultipleContainment("issues", this.transpilationIssues.map { it.toEObject() })
     return transpilationTraceEO
 }
 
-fun <S : Node, T : Node> TranspilationTrace<S, T>.saveAsJson(name: String, vararg ePackages: EPackage): String {
+fun <S : Node, T : Node> TranspilationTrace<S, T>.saveAsJson(
+    name: String,
+    vararg ePackages: EPackage,
+): String {
     val resourceSet = createResourceSet()
     val resource = resourceSet.createResource(URI.createURI(name))
     ePackages.forEach {
@@ -124,7 +131,10 @@ fun <S : Node, T : Node> TranspilationTrace<S, T>.saveAsJson(name: String, varar
     return output.toString(Charsets.UTF_8.name())
 }
 
-fun WorkspaceTranspilationTrace.saveAsJson(name: String, vararg ePackages: EPackage): String {
+fun WorkspaceTranspilationTrace.saveAsJson(
+    name: String,
+    vararg ePackages: EPackage,
+): String {
     val resourceSet = createResourceSet()
     val resource = resourceSet.createResource(URI.createURI(name))
     ePackages.forEach {

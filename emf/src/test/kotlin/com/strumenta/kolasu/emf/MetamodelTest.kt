@@ -1,6 +1,10 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.EntityDeclaration
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeType
+import com.strumenta.kolasu.model.ReferenceByName
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
@@ -13,48 +17,79 @@ import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-sealed class Statement : Node(), com.strumenta.kolasu.model.Statement
-sealed class Expression : Node(), com.strumenta.kolasu.model.Expression
+sealed class Statement :
+    Node(),
+    com.strumenta.kolasu.model.Statement
+
+sealed class Expression :
+    Node(),
+    com.strumenta.kolasu.model.Expression
+
 enum class Visibility {
-    PUBLIC, PRIVATE
+    PUBLIC,
+    PRIVATE,
 }
-class VarDeclaration(var visibility: Visibility, var name: String, var initialValue: Expression) :
-    Statement(), EntityDeclaration
-class StringLiteral(var value: String) : Expression()
-class LocalDateTimeLiteral(var value: LocalDateTime) : Expression()
-data class CompilationUnit(val statements: List<Statement>?) : Node()
+
+class VarDeclaration(
+    var visibility: Visibility,
+    var name: String,
+    var initialValue: Expression,
+) : Statement(),
+    EntityDeclaration
+
+class StringLiteral(
+    var value: String,
+) : Expression()
+
+class LocalDateTimeLiteral(
+    var value: LocalDateTime,
+) : Expression()
+
+data class CompilationUnit(
+    val statements: List<Statement>?,
+) : Node()
 
 @NodeType
 interface SomeInterface
-data class AltCompilationUnit(val elements: List<SomeInterface>) : Node()
+
+data class AltCompilationUnit(
+    val elements: List<SomeInterface>,
+) : Node()
 
 data class NodeWithReference(
     override val name: String,
     val singlePointer: ReferenceByName<NodeWithReference>,
-    val pointers: MutableList<ReferenceByName<NodeWithReference>>
-) : Node(), Named
+    val pointers: MutableList<ReferenceByName<NodeWithReference>>,
+) : Node(),
+    Named
 
 data class NodeWithForwardReference(
     override val name: String,
     val myChildren: MutableList<NodeWithForwardReference> = mutableListOf(),
-    var pointer: ReferenceByName<NodeWithForwardReference>? = null
-) : Node(), Named
+    var pointer: ReferenceByName<NodeWithForwardReference>? = null,
+) : Node(),
+    Named
 
 class MetamodelTest {
-
     private fun temporaryFile(suffix: String): File {
-        val f = kotlin.io.path.createTempFile(suffix = suffix).toFile()
+        val f =
+            kotlin
+                .io
+                .path
+                .createTempFile(suffix = suffix)
+                .toFile()
         f.deleteOnExit()
         return f
     }
 
     @Test
     fun generateSimpleMetamodel() {
-        val metamodelBuilder = MetamodelBuilder(
-            "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm",
-            "simplemm"
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                "com.strumenta.kolasu.emf",
+                "https://strumenta.com/simplemm",
+                "simplemm",
+            )
         metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
 
@@ -93,19 +128,23 @@ class MetamodelTest {
         assertEquals(0, cu.eAllAttributes.size)
         assertEquals(
             setOf("position", "destination", "statements", "origin"),
-            cu.eAllContainments.map { it.name }.toSet()
+            cu.eAllContainments.map { it.name }.toSet(),
         )
         assertEquals(
             setOf("position", "destination", "origin", "statements"),
-            cu.eAllReferences.map {
-                it.name
-            }.toSet()
+            cu
+                .eAllReferences
+                .map {
+                    it.name
+                }.toSet(),
         )
         assertEquals(
             setOf("position", "destination", "origin", "statements"),
-            cu.eAllStructuralFeatures.map {
-                it.name
-            }.toSet()
+            cu
+                .eAllStructuralFeatures
+                .map {
+                    it.name
+                }.toSet(),
         )
 
         val e: EClass = ePackage.eClassifiers.find { it.name == "Expression" } as EClass
@@ -115,7 +154,7 @@ class MetamodelTest {
         assertEquals(
             4,
             sl.eAllSuperTypes.size,
-            sl.eAllSuperTypes.joinToString(", ") { it.name }
+            sl.eAllSuperTypes.joinToString(", ") { it.name },
         )
         assertEquals(1, sl.eSuperTypes.size)
         assertEquals(1, sl.eAttributes.size)
@@ -129,11 +168,12 @@ class MetamodelTest {
 
     @Test
     fun generateSimpleMetamodelWithInterfaces() {
-        val metamodelBuilder = MetamodelBuilder(
-            "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm",
-            "simplemm"
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                "com.strumenta.kolasu.emf",
+                "https://strumenta.com/simplemm",
+                "simplemm",
+            )
         metamodelBuilder.provideClass(AltCompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
         ePackage.saveEcore(File("simplemm.ecore"))
@@ -141,20 +181,21 @@ class MetamodelTest {
         assertEquals("com.strumenta.kolasu.emf", ePackage.name)
         assertEquals(2, ePackage.eClassifiers.size)
 
-        val AltCompilationUnit: EClass = ePackage.eClassifiers.find { it.name == "AltCompilationUnit" } as EClass
-        assertEquals(false, AltCompilationUnit.isInterface)
+        val altCompilationUnit: EClass = ePackage.eClassifiers.find { it.name == "AltCompilationUnit" } as EClass
+        assertEquals(false, altCompilationUnit.isInterface)
 
-        val SomeInterface: EClass = ePackage.eClassifiers.find { it.name == "SomeInterface" } as EClass
-        assertEquals(true, SomeInterface.isInterface)
+        val someInterface: EClass = ePackage.eClassifiers.find { it.name == "SomeInterface" } as EClass
+        assertEquals(true, someInterface.isInterface)
     }
 
     @Test
     fun referenceByName() {
-        val metamodelBuilder = MetamodelBuilder(
-            "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm",
-            "simplemm"
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                "com.strumenta.kolasu.emf",
+                "https://strumenta.com/simplemm",
+                "simplemm",
+            )
         metamodelBuilder.provideClass(NodeWithReference::class)
         val ePackage = metamodelBuilder.generate()
         assertEquals("com.strumenta.kolasu.emf", ePackage.name)
@@ -173,19 +214,20 @@ class MetamodelTest {
 
     @Test
     fun internalClasses() {
-        val metamodelBuilder = MetamodelBuilder(
-            "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm",
-            "simplemm"
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                "com.strumenta.kolasu.emf",
+                "https://strumenta.com/simplemm",
+                "simplemm",
+            )
         metamodelBuilder.provideClass(MyClassWithInternalClasses::class)
         val ePackage = metamodelBuilder.generate()
         assertEquals("com.strumenta.kolasu.emf", ePackage.name)
         assertEquals(2, ePackage.eClassifiers.size)
-        val MyClassWithInternalClasses = ePackage.eClassifiers[0]
-        val Internal = ePackage.eClassifiers[1]
-        assertEquals("MyClassWithInternalClasses", MyClassWithInternalClasses.name)
-        assertEquals("MyClassWithInternalClasses.Internal", Internal.name)
+        val myClassWithInternalClasses = ePackage.eClassifiers[0]
+        val internal = ePackage.eClassifiers[1]
+        assertEquals("MyClassWithInternalClasses", myClassWithInternalClasses.name)
+        assertEquals("MyClassWithInternalClasses.Internal", internal.name)
     }
 }
 

@@ -12,23 +12,29 @@ import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.traversing.findAncestorOfType
 
 class DBFile
+
 class Record
+
 class Result
 
 interface StatementThatCanDefineData {
     fun dataDefinition(): List<InStatementDataDefinition>
 }
 
-enum class AssignmentOperator(val text: String) {
+enum class AssignmentOperator(
+    val text: String,
+) {
     NORMAL_ASSIGNMENT("="),
     PLUS_ASSIGNMENT("+="),
     MINUS_ASSIGNMENT("-="),
     MULT_ASSIGNMENT("*="),
     DIVIDE_ASSIGNMENT("/="),
-    EXP_ASSIGNMENT("**=");
+    EXP_ASSIGNMENT("**="),
 }
 
-abstract class Statement(specifiedRange: Range? = null) : Node(specifiedRange) {
+abstract class Statement(
+    specifiedRange: Range? = null,
+) : Node(specifiedRange) {
     open fun simpleDescription() = "Issue executing ${javaClass.simpleName} at line ${startLine()}."
 }
 
@@ -50,15 +56,15 @@ fun List<Statement>.explode(): List<Statement> {
 
 data class ExecuteSubroutine(
     var subroutine: ReferenceByName<Subroutine>,
-    val specifiedRange: Range? = null
+    val specifiedRange: Range? = null,
 ) : Statement(specifiedRange)
 
 data class SelectStmt(
     var cases: List<SelectCase>,
     var other: SelectOtherClause? = null,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), CompositeStatement {
-
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    CompositeStatement {
     override val body: List<Statement>
         get() {
             val result = mutableListOf<Statement>()
@@ -70,22 +76,25 @@ data class SelectStmt(
         }
 }
 
-data class SelectOtherClause(override val body: List<Statement>, val specifiedRange: Range? = null) :
-    Node(
-        specifiedRange
+data class SelectOtherClause(
+    override val body: List<Statement>,
+    val specifiedRange: Range? = null,
+) : Node(
+        specifiedRange,
     ),
     CompositeStatement
 
 data class SelectCase(
     val condition: Expression,
     override val body: List<Statement>,
-    val specifiedRange: Range? = null
-) : Node(specifiedRange), CompositeStatement
+    val specifiedRange: Range? = null,
+) : Node(specifiedRange),
+    CompositeStatement
 
 data class EvalFlags(
     val halfAdjust: Boolean = false,
     val maximumNumberOfDigitsRule: Boolean = false,
-    val resultDecimalPositionRule: Boolean = false
+    val resultDecimalPositionRule: Boolean = false,
 )
 
 data class EvalStmt(
@@ -93,41 +102,38 @@ data class EvalStmt(
     var expression: Expression,
     val operator: AssignmentOperator = AssignmentOperator.NORMAL_ASSIGNMENT,
     val flags: EvalFlags = EvalFlags(),
-    val specifiedRange: Range? = null
-) :
-    Statement(specifiedRange)
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange)
 
 data class SubDurStmt(
     val factor1: Expression?,
     val target: AssignableExpression,
     val factor2: Expression,
     val durationCode: DurationCode,
-    val specifiedRange: Range? = null
-) :
-    Statement(specifiedRange)
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange)
 
 data class MoveStmt(
     val target: AssignableExpression,
     var expression: Expression,
-    val specifiedRange: Range? = null
-) :
-    Statement(specifiedRange)
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange)
 
 data class MoveAStmt(
     val operationExtender: String?,
     val target: AssignableExpression,
     var expression: Expression,
-    val specifiedRange: Range? = null
-) :
-    Statement(specifiedRange)
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange)
 
 data class MoveLStmt(
     val operationExtender: String?,
     val target: AssignableExpression,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
     var expression: Expression,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), StatementThatCanDefineData {
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         if (dataDefinition != null) {
             return listOf(dataDefinition)
@@ -137,173 +143,221 @@ data class MoveLStmt(
 }
 
 abstract class AbstractReadEqualStmt(
-    @Transient open val searchArg: Expression? = null, // Factor1
-    @Transient open val name: String = "", // Factor 2
+    @Transient open val searchArg: Expression? = null,
+    @Transient open val name: String = "",
     specifiedRange: Range? = null,
-    private val logPref: String
-
+    private val logPref: String,
 ) : Statement(specifiedRange) {
-
-    abstract fun read(dbFile: DBFile, kList: List<String>? = null): Result
+    abstract fun read(
+        dbFile: DBFile,
+        kList: List<String>? = null,
+    ): Result
 }
 
 abstract class AbstractReadStmt(
-    @Transient open val name: String = "", // Factor 2
+    @Transient open val name: String = "",
     specifiedRange: Range? = null,
-    private val logPref: String
+    private val logPref: String,
 ) : Statement(specifiedRange) {
-
     abstract fun readOp(dbFile: DBFile): Result
 }
 
 abstract class AbstractStoreStmt(
-    @Transient open val name: String = "", // Factor 2
+    @Transient open val name: String = "",
     specifiedRange: Range? = null,
-    private val logPref: String
+    private val logPref: String,
 ) : Statement(specifiedRange) {
-
-    abstract fun store(dbFile: DBFile, record: Record): Result
+    abstract fun store(
+        dbFile: DBFile,
+        record: Record,
+    ): Result
 }
 
 abstract class AbstractSetStmt(
     // this one is a dummy expression needed to initialize because of "transient" annotation
-    @Transient open val searchArg: Expression = StringLiteral(""), // Factor1
-    @Transient open val name: String = "", // Factor 2
+    @Transient open val searchArg: Expression = StringLiteral(""),
+    @Transient open val name: String = "",
     specifiedRange: Range? = null,
-    private val logPref: String = ""
+    private val logPref: String = "",
 ) : Statement(specifiedRange) {
-
-    abstract fun set(dbFile: DBFile, kList: List<String>): Boolean
+    abstract fun set(
+        dbFile: DBFile,
+        kList: List<String>,
+    ): Boolean
 }
 
 // TODO add other parameters
 
 data class ChainStmt(
-    override val searchArg: Expression, // Factor1
-    override val name: String, // Factor 2
-    val specifiedRange: Range? = null
+    override val searchArg: Expression,
+    override val name: String,
+    val specifiedRange: Range? = null,
 ) : AbstractReadEqualStmt(searchArg, name, specifiedRange, "CHAIN") {
-    override fun read(dbFile: DBFile, kList: List<String>?): Result = Result()
+    override fun read(
+        dbFile: DBFile,
+        kList: List<String>?,
+    ): Result = Result()
 }
 
 data class ReadEqualStmt(
     override val searchArg: Expression?,
     override val name: String,
-    val specifiedRange: Range? = null
+    val specifiedRange: Range? = null,
 ) : AbstractReadEqualStmt(
-    searchArg = searchArg,
-    name = name,
-    specifiedRange = specifiedRange,
-    logPref = "READE"
-) {
-
-    override fun read(dbFile: DBFile, kList: List<String>?): Result = Result()
+        searchArg = searchArg,
+        name = name,
+        specifiedRange = specifiedRange,
+        logPref = "READE",
+    ) {
+    override fun read(
+        dbFile: DBFile,
+        kList: List<String>?,
+    ): Result = Result()
 }
 
 data class ReadPreviousEqualStmt(
     override val searchArg: Expression?,
     override val name: String,
-    val specifiedRange: Range? = null
+    val specifiedRange: Range? = null,
 ) : AbstractReadEqualStmt(
-    searchArg = searchArg,
-    name = name,
-    specifiedRange = specifiedRange,
-    logPref = "READPE"
-) {
-
-    override fun read(dbFile: DBFile, kList: List<String>?): Result = Result()
+        searchArg = searchArg,
+        name = name,
+        specifiedRange = specifiedRange,
+        logPref = "READPE",
+    ) {
+    override fun read(
+        dbFile: DBFile,
+        kList: List<String>?,
+    ): Result = Result()
 }
 
-data class ReadStmt(override val name: String, val specifiedRange: Range?) : AbstractReadStmt(
-    name,
-    specifiedRange,
-    "READ"
-) {
+data class ReadStmt(
+    override val name: String,
+    val specifiedRange: Range?,
+) : AbstractReadStmt(
+        name,
+        specifiedRange,
+        "READ",
+    ) {
     override fun readOp(dbFile: DBFile) = Result()
 }
 
-data class ReadPreviousStmt(override val name: String, val specifiedRange: Range?) : AbstractReadStmt(
-    name,
-    specifiedRange,
-    "READP"
-) {
+data class ReadPreviousStmt(
+    override val name: String,
+    val specifiedRange: Range?,
+) : AbstractReadStmt(
+        name,
+        specifiedRange,
+        "READP",
+    ) {
     override fun readOp(dbFile: DBFile) = Result()
 }
 
-data class WriteStmt(override val name: String, val specifiedRange: Range?) : AbstractStoreStmt(
-    name = name,
-    specifiedRange = specifiedRange,
-    logPref = "WRITE"
-) {
-    override fun store(dbFile: DBFile, record: Record) = Result()
+data class WriteStmt(
+    override val name: String,
+    val specifiedRange: Range?,
+) : AbstractStoreStmt(
+        name = name,
+        specifiedRange = specifiedRange,
+        logPref = "WRITE",
+    ) {
+    override fun store(
+        dbFile: DBFile,
+        record: Record,
+    ) = Result()
 }
 
-data class UpdateStmt(override val name: String, val specifiedRange: Range?) : AbstractStoreStmt(
-    name = name,
-    specifiedRange = specifiedRange,
-    logPref = "UPDATE"
-) {
-    override fun store(dbFile: DBFile, record: Record) = Result()
+data class UpdateStmt(
+    override val name: String,
+    val specifiedRange: Range?,
+) : AbstractStoreStmt(
+        name = name,
+        specifiedRange = specifiedRange,
+        logPref = "UPDATE",
+    ) {
+    override fun store(
+        dbFile: DBFile,
+        record: Record,
+    ) = Result()
 }
 
-data class DeleteStmt(override val name: String, val specifiedRange: Range?) : AbstractStoreStmt(
-    name = name,
-    specifiedRange = specifiedRange,
-    logPref = "DELETE"
-) {
-    override fun store(dbFile: DBFile, record: Record) = Result()
+data class DeleteStmt(
+    override val name: String,
+    val specifiedRange: Range?,
+) : AbstractStoreStmt(
+        name = name,
+        specifiedRange = specifiedRange,
+        logPref = "DELETE",
+    ) {
+    override fun store(
+        dbFile: DBFile,
+        record: Record,
+    ) = Result()
 }
 
 data class SetllStmt(
     override val searchArg: Expression,
     override val name: String,
-    val specifiedRange: Range?
+    val specifiedRange: Range?,
 ) : AbstractSetStmt(
-    searchArg = searchArg,
-    name = name,
-    specifiedRange = specifiedRange,
-    logPref = "SETLL"
-) {
-    override fun set(dbFile: DBFile, kList: List<String>) = true
+        searchArg = searchArg,
+        name = name,
+        specifiedRange = specifiedRange,
+        logPref = "SETLL",
+    ) {
+    override fun set(
+        dbFile: DBFile,
+        kList: List<String>,
+    ) = true
 }
 
 data class SetgtStmt(
     override val searchArg: Expression,
     override val name: String,
-    val specifiedRange: Range?
+    val specifiedRange: Range?,
 ) : AbstractSetStmt(searchArg = searchArg, name = name, specifiedRange = specifiedRange, logPref = "SETGT") {
-
-    override fun set(dbFile: DBFile, kList: List<String>) = true
+    override fun set(
+        dbFile: DBFile,
+        kList: List<String>,
+    ) = true
 }
 
 data class CheckStmt(
-    val comparatorString: Expression, // Factor1
+    val comparatorString: Expression,
     val baseString: Expression,
     val start: Int = 1,
     val wrongCharPosition: AssignableExpression?,
-    val specifiedRange: Range? = null
+    val specifiedRange: Range? = null,
 ) : Statement(specifiedRange)
 
 data class CallStmt(
     val expression: Expression,
     val params: List<PlistParam>,
     val errorIndicator: IndicatorKey? = null,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), StatementThatCanDefineData {
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
-        return params.mapNotNull() {
+        return params.mapNotNull {
             it.dataDefinition
         }
     }
 }
 
-data class KListStmt(val name: String, val fields: List<String>, val specifiedRange: Range?) :
-    Statement(
-        specifiedRange
+data class KListStmt(
+    val name: String,
+    val fields: List<String>,
+    val specifiedRange: Range?,
+) : Statement(
+        specifiedRange,
     ),
     StatementThatCanDefineData {
     companion object {
-        operator fun invoke(name: String, fields: List<String>, specifiedRange: Range? = null): KListStmt {
+        operator fun invoke(
+            name: String,
+            fields: List<String>,
+            specifiedRange: Range? = null,
+        ): KListStmt {
             return KListStmt(name.uppercase(), fields, specifiedRange)
         }
     }
@@ -316,52 +370,62 @@ data class IfStmt(
     override val body: List<Statement>,
     val elseIfClauses: List<ElseIfClause> = emptyList(),
     val elseClause: ElseClause? = null,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), CompositeStatement
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    CompositeStatement
 
-data class ElseClause(override val body: List<Statement>, val specifiedRange: Range? = null) :
-    Node(
-        specifiedRange
+data class ElseClause(
+    override val body: List<Statement>,
+    val specifiedRange: Range? = null,
+) : Node(
+        specifiedRange,
     ),
     CompositeStatement
 
 data class ElseIfClause(
     val condition: Expression,
     override val body: List<Statement>,
-    val specifiedRange: Range? = null
-) : Node(specifiedRange), CompositeStatement
+    val specifiedRange: Range? = null,
+) : Node(specifiedRange),
+    CompositeStatement
 
 data class SetStmt(
     val valueSet: ValueSet,
     val indicators: List<AssignableExpression>,
-    val specifiedRange: Range? = null
+    val specifiedRange: Range? = null,
 ) : Statement(specifiedRange) {
     enum class ValueSet {
         ON,
-        OFF
+        OFF,
     }
 }
 
-data class ReturnStmt(val expression: Expression?, val specifiedRange: Range? = null) : Statement(
-    specifiedRange
-)
+data class ReturnStmt(
+    val expression: Expression?,
+    val specifiedRange: Range? = null,
+) : Statement(
+        specifiedRange,
+    )
 
 // A Plist is a list of parameters
 
 data class PlistStmt(
     val params: List<PlistParam>,
     val isEntry: Boolean,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), StatementThatCanDefineData {
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         val allDataDefinitions = params.mapNotNull { it.dataDefinition }
         // We do not want params in plist to shadow existing data definitions
         // They are implicit data definitions only when explicit data definitions are not present
-        val filtered = allDataDefinitions.filter { paramDataDef ->
-            val containingCU = this.findAncestorOfType(CompilationUnit::class.java)
-                ?: throw IllegalStateException("Not contained in a CU")
-            containingCU.dataDefinitions.none { it.name == paramDataDef.name }
-        }
+        val filtered =
+            allDataDefinitions.filter { paramDataDef ->
+                val containingCU =
+                    this.findAncestorOfType(CompilationUnit::class.java)
+                        ?: throw IllegalStateException("Not contained in a CU")
+                containingCU.dataDefinitions.none { it.name == paramDataDef.name }
+            }
         return filtered
     }
 }
@@ -369,14 +433,15 @@ data class PlistStmt(
 data class PlistParam(
     val param: ReferenceByName<AbstractDataDefinition>,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
-    val specifiedRange: Range? = null
+    val specifiedRange: Range? = null,
 ) : Node(specifiedRange)
 
 data class ClearStmt(
     val value: Expression,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), StatementThatCanDefineData {
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         if (dataDefinition != null) {
             return listOf(dataDefinition)
@@ -388,11 +453,13 @@ data class ClearStmt(
 data class DefineStmt(
     val originalName: String,
     val newVarName: String,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), StatementThatCanDefineData {
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
-        val containingCU = this.findAncestorOfType(CompilationUnit::class.java)
-            ?: return emptyList()
+        val containingCU =
+            this.findAncestorOfType(CompilationUnit::class.java)
+                ?: return emptyList()
 
         var originalDataDefinition = containingCU.dataDefinitions.find { it.name == originalName }
         // If definition was not found as a 'standalone' 'D spec' declaration,
@@ -409,8 +476,10 @@ data class DefineStmt(
             return listOf(InStatementDataDefinition(newVarName, originalDataDefinition.type, specifiedRange))
         } else {
             val inStatementDataDefinition =
-                containingCU.main.stmts
-                    .filterIsInstance(StatementThatCanDefineData::class.java)
+                containingCU
+                    .main
+                    .stmts
+                    .filterIsInstance<StatementThatCanDefineData>()
                     .filter { it != this }
                     .asSequence()
                     .map(StatementThatCanDefineData::dataDefinition)
@@ -433,23 +502,24 @@ interface WithRightIndicators {
 data class RightIndicators(
     override val hi: IndicatorKey?,
     override val lo: IndicatorKey?,
-    override val eq: IndicatorKey?
+    override val eq: IndicatorKey?,
 ) : WithRightIndicators
 
 data class CompStmt(
     val left: Expression,
     val right: Expression,
     val rightIndicators: WithRightIndicators,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), WithRightIndicators by rightIndicators
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    WithRightIndicators by rightIndicators
 
 data class ZAddStmt(
     val target: AssignableExpression,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
     var expression: Expression,
-    val specifiedRange: Range? = null
-) :
-    Statement(specifiedRange), StatementThatCanDefineData {
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         if (dataDefinition != null) {
             return listOf(dataDefinition)
@@ -463,7 +533,7 @@ data class MultStmt(
     val halfAdjust: Boolean = false,
     val factor1: Expression?,
     val factor2: Expression,
-    val specifiedRange: Range? = null
+    val specifiedRange: Range? = null,
 ) : Statement(specifiedRange)
 
 data class DivStmt(
@@ -471,7 +541,7 @@ data class DivStmt(
     val halfAdjust: Boolean = false,
     val factor1: Expression?,
     val factor2: Expression,
-    val specifiedRange: Range? = null
+    val specifiedRange: Range? = null,
 ) : Statement(specifiedRange)
 
 data class AddStmt(
@@ -479,8 +549,9 @@ data class AddStmt(
     val result: AssignableExpression,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
     val right: Expression,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), StatementThatCanDefineData {
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         if (dataDefinition != null) {
             return listOf(dataDefinition)
@@ -497,8 +568,9 @@ data class ZSubStmt(
     val target: AssignableExpression,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
     var expression: Expression,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), StatementThatCanDefineData {
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         if (dataDefinition != null) {
             return listOf(dataDefinition)
@@ -512,8 +584,9 @@ data class SubStmt(
     val result: AssignableExpression,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
     val right: Expression,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), StatementThatCanDefineData {
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         if (dataDefinition != null) {
             return listOf(dataDefinition)
@@ -528,13 +601,13 @@ data class SubStmt(
 
 data class TimeStmt(
     val value: Expression,
-    val specifiedRange: Range? = null
+    val specifiedRange: Range? = null,
 ) : Statement(specifiedRange)
 
 data class DisplayStmt(
     val factor1: Expression?,
     val response: Expression?,
-    val specifiedRange: Range? = null
+    val specifiedRange: Range? = null,
 ) : Statement(specifiedRange)
 
 data class DoStmt(
@@ -542,34 +615,51 @@ data class DoStmt(
     val index: AssignableExpression?,
     override val body: List<Statement>,
     val startLimit: Expression = IntLiteral(1),
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), CompositeStatement
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    CompositeStatement
 
 data class DowStmt(
     val endExpression: Expression,
     override val body: List<Statement>,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), CompositeStatement
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    CompositeStatement
 
 data class DouStmt(
     val endExpression: Expression,
     override val body: List<Statement>,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), CompositeStatement
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    CompositeStatement
 
-data class LeaveSrStmt(val specifiedRange: Range? = null) : Statement(specifiedRange)
+data class LeaveSrStmt(
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange)
 
-data class LeaveStmt(val specifiedRange: Range? = null) : Statement(specifiedRange)
+data class LeaveStmt(
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange)
 
-data class IterStmt(val specifiedRange: Range? = null) : Statement(specifiedRange)
+data class IterStmt(
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange)
 
-data class OtherStmt(val specifiedRange: Range? = null) : Statement(specifiedRange)
+data class OtherStmt(
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange)
 
-data class TagStmt constructor(val tag: String, val specifiedRange: Range? = null) : Statement(
-    specifiedRange
-)
+data class TagStmt(
+    val tag: String,
+    val specifiedRange: Range? = null,
+) : Statement(
+        specifiedRange,
+    )
 
-data class GotoStmt(val tag: String, val specifiedRange: Range? = null) : Statement(specifiedRange)
+data class GotoStmt(
+    val tag: String,
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange)
 
 data class CabStmt(
     val factor1: Expression,
@@ -577,8 +667,9 @@ data class CabStmt(
     val comparison: ComparisonOperator?,
     val tag: String,
     val rightIndicators: WithRightIndicators,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), WithRightIndicators by rightIndicators
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    WithRightIndicators by rightIndicators
 
 data class ForStmt(
     var init: Expression,
@@ -586,8 +677,9 @@ data class ForStmt(
     val byValue: Expression,
     val downward: Boolean = false,
     override val body: List<Statement>,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), CompositeStatement {
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    CompositeStatement {
     fun iterDataDefinition(): AbstractDataDefinition {
         if (init is AssignmentExpr) {
             if ((init as AssignmentExpr).target is DataRefExpr) {
@@ -606,24 +698,28 @@ data class ForStmt(
 * of the array to be sorted followed by the subfield to be used as a key for the sort.
 */
 
-data class SortAStmt(val target: Expression, val specifiedRange: Range? = null) : Statement(
-    specifiedRange
-)
+data class SortAStmt(
+    val target: Expression,
+    val specifiedRange: Range? = null,
+) : Statement(
+        specifiedRange,
+    )
 
 data class CatStmt(
     val left: Expression?,
     val right: Expression,
     val target: AssignableExpression,
     val blanksInBetween: Int,
-    val specifiedRange: Range? = null
+    val specifiedRange: Range? = null,
 ) : Statement(specifiedRange)
 
 data class LookupStmt(
     val left: Expression,
     val right: Expression,
     val rightIndicators: WithRightIndicators,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), WithRightIndicators by rightIndicators
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    WithRightIndicators by rightIndicators
 
 data class ScanStmt(
     val left: Expression,
@@ -632,16 +728,19 @@ data class ScanStmt(
     val startPosition: Int,
     val target: AssignableExpression,
     val rightIndicators: WithRightIndicators,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), WithRightIndicators by rightIndicators
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    WithRightIndicators by rightIndicators
 
 data class XFootStmt(
     val left: Expression,
     val result: AssignableExpression,
     val rightIndicators: WithRightIndicators,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
-    val specifiedRange: Range? = null
-) : Statement(specifiedRange), WithRightIndicators by rightIndicators, StatementThatCanDefineData {
+    val specifiedRange: Range? = null,
+) : Statement(specifiedRange),
+    WithRightIndicators by rightIndicators,
+    StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
         if (dataDefinition != null) {
             return listOf(dataDefinition)

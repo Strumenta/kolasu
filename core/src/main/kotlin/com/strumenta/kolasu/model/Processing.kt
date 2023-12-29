@@ -7,7 +7,7 @@ import com.strumenta.kolasu.traversing.children
 import com.strumenta.kolasu.traversing.searchByType
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.traversing.walkChildren
-import java.util.*
+import java.util.IdentityHashMap
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty
@@ -33,17 +33,22 @@ fun Node.assignParents() {
  * Recursively execute [operation] on [this] node, and all nodes below this node.
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
-fun Node.processNodes(operation: (Node) -> Unit, walker: ASTWalker = Node::walk) {
+fun Node.processNodes(
+    operation: (Node) -> Unit,
+    walker: ASTWalker = Node::walk,
+) {
     walker.invoke(this).forEach(operation)
 }
 
-fun Node.invalidRanges(): Sequence<Node> = this.walk().filter {
-    it.range == null || run {
-        val parentPos = it.parent?.range
-        // If the parent range is null, we can't say anything about this node's range
-        (parentPos != null && !(parentPos.contains(it.range!!.start) && parentPos.contains(it.range!!.end)))
+fun Node.invalidRanges(): Sequence<Node> =
+    this.walk().filter {
+        it.range == null ||
+            run {
+                val parentPos = it.parent?.range
+                // If the parent range is null, we can't say anything about this node's range
+                (parentPos != null && !(parentPos.contains(it.range!!.start) && parentPos.contains(it.range!!.end)))
+            }
     }
-}
 
 fun Node.findInvalidRange(): Node? = this.invalidRanges().firstOrNull()
 
@@ -64,7 +69,7 @@ fun <T : Node> T.withParent(parent: Node?): T {
 @JvmOverloads
 fun Node.processProperties(
     propertiesToIgnore: Set<String> = emptySet(),
-    propertyOperation: (PropertyDescription) -> Unit
+    propertyOperation: (PropertyDescription) -> Unit,
 ) {
     this.properties.filter { it.name !in propertiesToIgnore }.forEach {
         try {
@@ -82,14 +87,17 @@ fun Node.processProperties(
  */
 fun <T : Any> Class<T>.processProperties(
     propertiesToIgnore: Set<String> = emptySet(),
-    propertyTypeOperation: (PropertyTypeDescription) -> Unit
+    propertyTypeOperation: (PropertyTypeDescription) -> Unit,
 ) = kotlin.processProperties(propertiesToIgnore, propertyTypeOperation)
 
 /**
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  * @return the first node in the AST for which the [predicate] is true. Null if none are found.
  */
-fun Node.find(predicate: (Node) -> Boolean, walker: ASTWalker = Node::walk): Node? {
+fun Node.find(
+    predicate: (Node) -> Boolean,
+    walker: ASTWalker = Node::walk,
+): Node? {
     return walker.invoke(this).find(predicate)
 }
 
@@ -103,7 +111,7 @@ fun Node.find(predicate: (Node) -> Boolean, walker: ASTWalker = Node::walk): Nod
 fun <T> Node.processNodesOfType(
     klass: Class<T>,
     operation: (T) -> Unit,
-    walker: ASTWalker = Node::walk
+    walker: ASTWalker = Node::walk,
 ) {
     searchByType(klass, walker).forEach(operation)
 }
@@ -112,7 +120,10 @@ fun <T> Node.processNodesOfType(
  * Recursively execute [operation] on this node, and all nodes below this node.
  * Every node is informed about its [parent] node. (But not about the parent's parent!)
  */
-fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent: Node? = null) {
+fun Node.processConsideringDirectParent(
+    operation: (Node, Node?) -> Unit,
+    parent: Node? = null,
+) {
     operation(this, parent)
     this.properties.forEach { p ->
         when (val v = p.value) {
@@ -129,8 +140,7 @@ val Node.children: List<Node>
     get() {
         val children = mutableListOf<Node>()
         this.properties.forEach { p ->
-            val v = p.value
-            when (v) {
+            when (val v = p.value) {
                 is Node -> children.add(v)
                 is Collection<*> -> v.forEach { if (it is Node) children.add(it) }
             }
@@ -172,13 +182,16 @@ val Node.previousSibling: Node?
 val Node.nextSamePropertySibling: Node?
     get() {
         if (this.parent != null) {
-            val siblings = this.parent!!.properties.find { p ->
-                val v = p.value
-                when (v) {
-                    is Collection<*> -> v.contains(this)
-                    else -> false
-                }
-            }?.value as? Collection<*> ?: emptyList<Node>()
+            val siblings =
+                this
+                    .parent!!
+                    .properties
+                    .find { p ->
+                        when (val v = p.value) {
+                            is Collection<*> -> v.contains(this)
+                            else -> false
+                        }
+                    }?.value as? Collection<*> ?: emptyList<Node>()
 
             val index = siblings.indexOf(this)
             return if (index == siblings.size - 1 || index == -1) null else siblings.elementAt(index + 1) as Node
@@ -192,13 +205,16 @@ val Node.nextSamePropertySibling: Node?
 val Node.previousSamePropertySibling: Node?
     get() {
         if (this.parent != null) {
-            val siblings = this.parent!!.properties.find { p ->
-                val v = p.value
-                when (v) {
-                    is Collection<*> -> v.contains(this)
-                    else -> false
-                }
-            }?.value as? Collection<*> ?: emptyList<Node>()
+            val siblings =
+                this
+                    .parent!!
+                    .properties
+                    .find { p ->
+                        when (val v = p.value) {
+                            is Collection<*> -> v.contains(this)
+                            else -> false
+                        }
+                    }?.value as? Collection<*> ?: emptyList<Node>()
 
             val index = siblings.indexOf(this)
             return if (index == 0 || index == -1) null else siblings.elementAt(index - 1) as Node
@@ -214,8 +230,7 @@ fun Node.containingProperty(): PropertyDescription? {
         return null
     }
     return this.parent!!.properties.find { p ->
-        val v = p.value
-        when (v) {
+        when (val v = p.value) {
             is Collection<*> -> v.contains(this)
             this -> true
             else -> false
@@ -266,7 +281,7 @@ inline fun <reified T : Node> Node.previousSibling(): Node? {
 fun Node.transformTree(
     operation: (Node) -> Node,
     inPlace: Boolean = false,
-    mutationsCache: IdentityHashMap<Node, Node> = IdentityHashMap<Node, Node>()
+    mutationsCache: IdentityHashMap<Node, Node> = IdentityHashMap<Node, Node>(),
 ): Node {
     if (inPlace) TODO()
     mutationsCache.computeIfAbsent(this) { operation(this) }
@@ -292,7 +307,13 @@ fun Node.transformTree(
             if (changes.containsKey(param.name)) {
                 params[param] = changes[param.name]
             } else {
-                params[param] = this.javaClass.kotlin.memberProperties.find { param.name == it.name }!!.get(this)
+                params[param] =
+                    this
+                        .javaClass
+                        .kotlin
+                        .memberProperties
+                        .find { param.name == it.name }!!
+                        .get(this)
             }
         }
         instanceToTransform = constructor.callBy(params)
@@ -300,8 +321,10 @@ fun Node.transformTree(
     return mutationsCache.computeIfAbsent(instanceToTransform) { operation(instanceToTransform) }
 }
 
-class ImmutablePropertyException(property: KProperty<*>, node: Node) :
-    RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
+class ImmutablePropertyException(
+    property: KProperty<*>,
+    node: Node,
+) : RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
 // assumption: every MutableList in the AST contains Nodes.
 @Suppress("UNCHECKED_CAST")
@@ -338,7 +361,7 @@ fun Node.transformChildren(operation: (Node) -> Node) {
                     }
                 } else {
                     throw UnsupportedOperationException(
-                        "Only modifications in a List and MutableList are supported, not ${value::class}"
+                        "Only modifications in a List and MutableList are supported, not ${value::class}",
                     )
                 }
             }
@@ -373,7 +396,13 @@ fun Node.mapChildren(operation: (Node) -> Node): Node {
             if (changes.containsKey(param.name)) {
                 params[param] = changes[param.name]
             } else {
-                params[param] = this.javaClass.kotlin.memberProperties.find { param.name == it.name }!!.get(this)
+                params[param] =
+                    this
+                        .javaClass
+                        .kotlin
+                        .memberProperties
+                        .find { param.name == it.name }!!
+                        .get(this)
             }
         }
         instanceToTransform = constructor.callBy(params)
@@ -400,7 +429,10 @@ fun Node.replaceWith(other: Node) {
  * When found, it is removed, and in its place the [newNodes] are inserted.
  * When not found, an [IllegalStateException] is thrown.
  */
-fun Node.replaceWithSeveral(oldNode: Node, newNodes: List<Node>) {
+fun Node.replaceWithSeveral(
+    oldNode: Node,
+    newNodes: List<Node>,
+) {
     findMutableListContainingChild(oldNode) { nodeList, index ->
         nodeList.replaceWithSeveral(index, newNodes)
         oldNode.parent = null
@@ -425,7 +457,10 @@ fun Node.removeFromList(targetNode: Node) {
  * When found, [newNodes] are inserted before it.
  * When not found, an [IllegalStateException] is thrown.
  */
-fun Node.addSeveralBefore(targetNode: Node, newNodes: List<Node>) {
+fun Node.addSeveralBefore(
+    targetNode: Node,
+    newNodes: List<Node>,
+) {
     findMutableListContainingChild(targetNode) { nodeList, index ->
         nodeList.addSeveralBefore(index, newNodes)
         newNodes.forEach { node -> node.parent = this }
@@ -437,7 +472,10 @@ fun Node.addSeveralBefore(targetNode: Node, newNodes: List<Node>) {
  * When found, [newNodes] are inserted after it.
  * When not found, an [IllegalStateException] is thrown.
  */
-fun Node.addSeveralAfter(targetNode: Node, newNodes: List<Node>) {
+fun Node.addSeveralAfter(
+    targetNode: Node,
+    newNodes: List<Node>,
+) {
     findMutableListContainingChild(targetNode) { nodeList, index ->
         nodeList.addSeveralAfter(index, newNodes)
         newNodes.forEach { node -> node.parent = this }
@@ -450,7 +488,7 @@ fun Node.addSeveralAfter(targetNode: Node, newNodes: List<Node>) {
 @Suppress("UNCHECKED_CAST") // assumption: a MutableList with a Node in it is a MutableList<Node>
 private fun Node.findMutableListContainingChild(
     targetNode: Node,
-    whenFoundDo: (nodeList: MutableList<Node>, index: Int) -> Unit
+    whenFoundDo: (nodeList: MutableList<Node>, index: Int) -> Unit,
 ) {
     relevantMemberProperties().forEach { property ->
         when (val value = property.get(this)) {
@@ -505,7 +543,10 @@ fun Node.removeFromList() {
 /**
  * Replaces the element at [index] with [replacements].
  */
-fun <T> MutableList<T>.replaceWithSeveral(index: Int, replacements: List<T>) {
+fun <T> MutableList<T>.replaceWithSeveral(
+    index: Int,
+    replacements: List<T>,
+) {
     removeAt(index)
     addAll(index, replacements)
 }
@@ -513,13 +554,19 @@ fun <T> MutableList<T>.replaceWithSeveral(index: Int, replacements: List<T>) {
 /**
  * Replaces the element at [index] with [additions].
  */
-fun <T> MutableList<T>.addSeveralBefore(index: Int, additions: List<T>) {
+fun <T> MutableList<T>.addSeveralBefore(
+    index: Int,
+    additions: List<T>,
+) {
     addAll(index, additions)
 }
 
 /**
  * Replaces the element at [index] with [additions].
  */
-fun <T> MutableList<T>.addSeveralAfter(index: Int, additions: List<T>) {
+fun <T> MutableList<T>.addSeveralAfter(
+    index: Int,
+    additions: List<T>,
+) {
     addAll(index + 1, additions)
 }

@@ -14,7 +14,10 @@ sealed class ParseTreeElement {
 /**
  * Representation of the information contained in a Parse Tree terminal or leaf.
  */
-class ParseTreeLeaf(val type: String, val text: String) : ParseTreeElement() {
+class ParseTreeLeaf(
+    val type: String,
+    val text: String,
+) : ParseTreeElement() {
     override fun toString(): String {
         return "T:$type[$text]"
     }
@@ -25,8 +28,11 @@ class ParseTreeLeaf(val type: String, val text: String) : ParseTreeElement() {
 /**
  * Representation of the information contained in a Parse Tree non-terminal or node.
  */
-class ParseTreeNode(val name: String) : ParseTreeElement() {
+class ParseTreeNode(
+    val name: String,
+) : ParseTreeElement() {
     val children = mutableListOf<ParseTreeElement>()
+
     fun child(c: ParseTreeElement): ParseTreeNode {
         children.add(c)
         return this
@@ -47,7 +53,10 @@ class ParseTreeNode(val name: String) : ParseTreeElement() {
 /**
  * Given an actual parse-tree produced by ANTLR, it creates a Parse Tree model.
  */
-fun toParseTreeModel(node: ParserRuleContext, vocabulary: Vocabulary): ParseTreeNode {
+fun toParseTreeModel(
+    node: ParserRuleContext,
+    vocabulary: Vocabulary,
+): ParseTreeNode {
     val res = ParseTreeNode(node.javaClass.simpleName.removeSuffix("Context"))
     node.children?.forEach { c ->
         when (c) {

@@ -13,65 +13,125 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-data class CU(val specifiedRange: Range? = null, var statements: List<Node> = listOf()) : Node(specifiedRange)
-data class DisplayIntStatement(val specifiedRange: Range? = null, val value: Int) : Node(specifiedRange)
-data class SetStatement(val specifiedRange: Range? = null, var variable: String = "", val value: Int = 0) :
-    Node(specifiedRange)
+data class CU(
+    val specifiedRange: Range? = null,
+    var statements: List<Node> = listOf(),
+) : Node(specifiedRange)
+
+data class DisplayIntStatement(
+    val specifiedRange: Range? = null,
+    val value: Int,
+) : Node(specifiedRange)
+
+data class SetStatement(
+    val specifiedRange: Range? = null,
+    var variable: String = "",
+    val value: Int = 0,
+) : Node(specifiedRange)
 
 enum class Operator {
-    PLUS, MULT
+    PLUS,
+    MULT,
 }
 
 sealed class Expression : Node()
-data class IntLiteral(val value: Int) : Expression()
-data class GenericBinaryExpression(val operator: Operator, val left: Expression, val right: Expression) : Node()
-data class Mult(val left: Expression, val right: Expression) : Node()
-data class Sum(val left: Expression, val right: Expression) : Node()
+
+data class IntLiteral(
+    val value: Int,
+) : Expression()
+
+data class GenericBinaryExpression(
+    val operator: Operator,
+    val left: Expression,
+    val right: Expression,
+) : Node()
+
+data class Mult(
+    val left: Expression,
+    val right: Expression,
+) : Node()
+
+data class Sum(
+    val left: Expression,
+    val right: Expression,
+) : Node()
 
 sealed class ALangExpression : Node()
-data class ALangIntLiteral(val value: Int) : ALangExpression()
-data class ALangSum(val left: ALangExpression, val right: ALangExpression) : ALangExpression()
-data class ALangMult(val left: ALangExpression, val right: ALangExpression) : ALangExpression()
+
+data class ALangIntLiteral(
+    val value: Int,
+) : ALangExpression()
+
+data class ALangSum(
+    val left: ALangExpression,
+    val right: ALangExpression,
+) : ALangExpression()
+
+data class ALangMult(
+    val left: ALangExpression,
+    val right: ALangExpression,
+) : ALangExpression()
 
 sealed class BLangExpression : Node()
-data class BLangIntLiteral(val value: Int) : BLangExpression()
-data class BLangSum(val left: BLangExpression, val right: BLangExpression) : BLangExpression()
-data class BLangMult(val left: BLangExpression, val right: BLangExpression) : BLangExpression()
+
+data class BLangIntLiteral(
+    val value: Int,
+) : BLangExpression()
+
+data class BLangSum(
+    val left: BLangExpression,
+    val right: BLangExpression,
+) : BLangExpression()
+
+data class BLangMult(
+    val left: BLangExpression,
+    val right: BLangExpression,
+) : BLangExpression()
 
 enum class Type {
-    INT, STR
+    INT,
+    STR,
 }
 
-sealed class TypedExpression(open var type: Type? = null) : Node()
-data class TypedLiteral(var value: String, override var type: Type?) : TypedExpression(type)
+sealed class TypedExpression(
+    open var type: Type? = null,
+) : Node()
+
+data class TypedLiteral(
+    var value: String,
+    override var type: Type?,
+) : TypedExpression(type)
+
 data class TypedSum(
     var left: TypedExpression,
     var right: TypedExpression,
-    override var type: Type? = null
+    override var type: Type? = null,
 ) : TypedExpression(type)
 
 data class TypedConcat(
     var left: TypedExpression,
     var right: TypedExpression,
-    override var type: Type? = null
+    override var type: Type? = null,
 ) : TypedExpression(type)
 
 class ASTTransformerTest {
-
     @Test
     fun testIdentitiyTransformer() {
         val transformer = ASTTransformer()
-        transformer.registerNodeTransformer(CU::class, CU::class)
+        transformer
+            .registerNodeTransformer(CU::class, CU::class)
             .withChild(CU::statements, CU::statements)
         transformer.registerIdentityTransformation(DisplayIntStatement::class)
         transformer.registerIdentityTransformation(SetStatement::class)
 
-        val cu = CU(
-            statements = listOf(
-                SetStatement(variable = "foo", value = 123),
-                DisplayIntStatement(value = 456)
+        val cu =
+            CU(
+                statements =
+                    listOf(
+                        SetStatement(variable = "foo", value = 123),
+                        DisplayIntStatement(value = 456),
+                    ),
             )
-        )
         val transformedCU = transformer.transform(cu)!!
         assertASTsAreEqual(cu, transformedCU, considerRange = true)
         assertTrue { transformedCU.hasValidParents() }
@@ -83,28 +143,31 @@ class ASTTransformerTest {
      */
     @Test
     fun translateBinaryExpression() {
-        val myTransformer = ASTTransformer(allowGenericNode = false).apply {
-            registerNodeTransformer(GenericBinaryExpression::class) { source: GenericBinaryExpression ->
-                when (source.operator) {
-                    Operator.MULT -> Mult(
-                        transform(source.left) as Expression,
-                        transform(source.right) as Expression
-                    )
-                    Operator.PLUS -> Sum(
-                        transform(source.left) as Expression,
-                        transform(source.right) as Expression
-                    )
+        val myTransformer =
+            ASTTransformer(allowGenericNode = false).apply {
+                registerNodeTransformer(GenericBinaryExpression::class) { source: GenericBinaryExpression ->
+                    when (source.operator) {
+                        Operator.MULT ->
+                            Mult(
+                                transform(source.left) as Expression,
+                                transform(source.right) as Expression,
+                            )
+                        Operator.PLUS ->
+                            Sum(
+                                transform(source.left) as Expression,
+                                transform(source.right) as Expression,
+                            )
+                    }
                 }
+                registerIdentityTransformation(IntLiteral::class)
             }
-            registerIdentityTransformation(IntLiteral::class)
-        }
         assertASTsAreEqual(
             Mult(IntLiteral(7), IntLiteral(8)),
-            myTransformer.transform(GenericBinaryExpression(Operator.MULT, IntLiteral(7), IntLiteral(8)))!!
+            myTransformer.transform(GenericBinaryExpression(Operator.MULT, IntLiteral(7), IntLiteral(8)))!!,
         )
         assertASTsAreEqual(
             Sum(IntLiteral(7), IntLiteral(8)),
-            myTransformer.transform(GenericBinaryExpression(Operator.PLUS, IntLiteral(7), IntLiteral(8)))!!
+            myTransformer.transform(GenericBinaryExpression(Operator.PLUS, IntLiteral(7), IntLiteral(8)))!!,
         )
     }
 
@@ -113,32 +176,35 @@ class ASTTransformerTest {
      */
     @Test
     fun translateAcrossLanguages() {
-        val myTransformer = ASTTransformer(allowGenericNode = false).apply {
-            registerNodeTransformer(ALangIntLiteral::class) { source: ALangIntLiteral -> BLangIntLiteral(source.value) }
-            registerNodeTransformer(ALangSum::class) { source: ALangSum ->
-                BLangSum(transform(source.left) as BLangExpression, transform(source.right) as BLangExpression)
+        val myTransformer =
+            ASTTransformer(allowGenericNode = false).apply {
+                registerNodeTransformer(
+                    ALangIntLiteral::class,
+                ) { source: ALangIntLiteral -> BLangIntLiteral(source.value) }
+                registerNodeTransformer(ALangSum::class) { source: ALangSum ->
+                    BLangSum(transform(source.left) as BLangExpression, transform(source.right) as BLangExpression)
+                }
+                registerNodeTransformer(ALangMult::class) { source: ALangMult ->
+                    BLangMult(transform(source.left) as BLangExpression, transform(source.right) as BLangExpression)
+                }
             }
-            registerNodeTransformer(ALangMult::class) { source: ALangMult ->
-                BLangMult(transform(source.left) as BLangExpression, transform(source.right) as BLangExpression)
-            }
-        }
         assertASTsAreEqual(
             BLangMult(
                 BLangSum(
                     BLangIntLiteral(1),
-                    BLangMult(BLangIntLiteral(2), BLangIntLiteral(3))
+                    BLangMult(BLangIntLiteral(2), BLangIntLiteral(3)),
                 ),
-                BLangIntLiteral(4)
+                BLangIntLiteral(4),
             ),
             myTransformer.transform(
                 ALangMult(
                     ALangSum(
                         ALangIntLiteral(1),
-                        ALangMult(ALangIntLiteral(2), ALangIntLiteral(3))
+                        ALangMult(ALangIntLiteral(2), ALangIntLiteral(3)),
                     ),
-                    ALangIntLiteral(4)
-                )
-            )!!
+                    ALangIntLiteral(4),
+                ),
+            )!!,
         )
     }
 
@@ -147,46 +213,47 @@ class ASTTransformerTest {
      */
     @Test
     fun computeTypes() {
-        val myTransformer = ASTTransformer(allowGenericNode = false).apply {
-            registerIdentityTransformation(TypedSum::class).withFinalizer {
-                if (it.left.type == Type.INT && it.right.type == Type.INT) {
-                    it.type = Type.INT
-                } else {
-                    addIssue(
-                        "Illegal types for sum operation. Only integer values are allowed. " +
-                            "Found: (${it.left.type?.name ?: "null"}, ${it.right.type?.name ?: "null"})",
-                        IssueSeverity.ERROR,
-                        it.range
-                    )
+        val myTransformer =
+            ASTTransformer(allowGenericNode = false).apply {
+                registerIdentityTransformation(TypedSum::class).withFinalizer {
+                    if (it.left.type == Type.INT && it.right.type == Type.INT) {
+                        it.type = Type.INT
+                    } else {
+                        addIssue(
+                            "Illegal types for sum operation. Only integer values are allowed. " +
+                                "Found: (${it.left.type?.name ?: "null"}, ${it.right.type?.name ?: "null"})",
+                            IssueSeverity.ERROR,
+                            it.range,
+                        )
+                    }
                 }
-            }
-            registerIdentityTransformation(TypedConcat::class).withFinalizer {
-                if (it.left.type == Type.STR && it.right.type == Type.STR) {
-                    it.type = Type.STR
-                } else {
-                    addIssue(
-                        "Illegal types for concat operation. Only string values are allowed. " +
-                            "Found: (${it.left.type?.name ?: "null"}, ${it.right.type?.name ?: "null"})",
-                        IssueSeverity.ERROR,
-                        it.range
-                    )
+                registerIdentityTransformation(TypedConcat::class).withFinalizer {
+                    if (it.left.type == Type.STR && it.right.type == Type.STR) {
+                        it.type = Type.STR
+                    } else {
+                        addIssue(
+                            "Illegal types for concat operation. Only string values are allowed. " +
+                                "Found: (${it.left.type?.name ?: "null"}, ${it.right.type?.name ?: "null"})",
+                            IssueSeverity.ERROR,
+                            it.range,
+                        )
+                    }
                 }
+                registerIdentityTransformation(TypedLiteral::class)
             }
-            registerIdentityTransformation(TypedLiteral::class)
-        }
         // sum - legal
         assertASTsAreEqual(
             TypedSum(
                 TypedLiteral("1", Type.INT),
                 TypedLiteral("1", Type.INT),
-                Type.INT
+                Type.INT,
             ),
             myTransformer.transform(
                 TypedSum(
                     TypedLiteral("1", Type.INT),
-                    TypedLiteral("1", Type.INT)
-                )
-            )!!
+                    TypedLiteral("1", Type.INT),
+                ),
+            )!!,
         )
         assertEquals(0, myTransformer.issues.size)
         // concat - legal
@@ -194,14 +261,14 @@ class ASTTransformerTest {
             TypedConcat(
                 TypedLiteral("test", Type.STR),
                 TypedLiteral("test", Type.STR),
-                Type.STR
+                Type.STR,
             ),
             myTransformer.transform(
                 TypedConcat(
                     TypedLiteral("test", Type.STR),
-                    TypedLiteral("test", Type.STR)
-                )
-            )!!
+                    TypedLiteral("test", Type.STR),
+                ),
+            )!!,
         )
         assertEquals(0, myTransformer.issues.size)
         // sum - error
@@ -209,61 +276,64 @@ class ASTTransformerTest {
             TypedSum(
                 TypedLiteral("1", Type.INT),
                 TypedLiteral("test", Type.STR),
-                null
+                null,
             ),
             myTransformer.transform(
                 TypedSum(
                     TypedLiteral("1", Type.INT),
-                    TypedLiteral("test", Type.STR)
-                )
-            )!!
+                    TypedLiteral("test", Type.STR),
+                ),
+            )!!,
         )
         assertEquals(1, myTransformer.issues.size)
         assertEquals(
             Issue.semantic(
                 "Illegal types for sum operation. Only integer values are allowed. Found: (INT, STR)",
-                IssueSeverity.ERROR
+                IssueSeverity.ERROR,
             ),
-            myTransformer.issues[0]
+            myTransformer.issues[0],
         )
         // concat - error
         assertASTsAreEqual(
             TypedConcat(
                 TypedLiteral("1", Type.INT),
                 TypedLiteral("test", Type.STR),
-                null
+                null,
             ),
             myTransformer.transform(
                 TypedConcat(
                     TypedLiteral("1", Type.INT),
-                    TypedLiteral("test", Type.STR)
-                )
-            )!!
+                    TypedLiteral("test", Type.STR),
+                ),
+            )!!,
         )
         assertEquals(2, myTransformer.issues.size)
         assertEquals(
             Issue.semantic(
                 "Illegal types for concat operation. Only string values are allowed. Found: (INT, STR)",
-                IssueSeverity.ERROR
+                IssueSeverity.ERROR,
             ),
-            myTransformer.issues[1]
+            myTransformer.issues[1],
         )
     }
 
     @Test
     fun testDroppingNodes() {
         val transformer = ASTTransformer()
-        transformer.registerNodeTransformer(CU::class, CU::class)
+        transformer
+            .registerNodeTransformer(CU::class, CU::class)
             .withChild(CU::statements, CU::statements)
         transformer.registerNodeTransformer(DisplayIntStatement::class) { _ -> null }
         transformer.registerIdentityTransformation(SetStatement::class)
 
-        val cu = CU(
-            statements = listOf(
-                DisplayIntStatement(value = 456),
-                SetStatement(variable = "foo", value = 123)
+        val cu =
+            CU(
+                statements =
+                    listOf(
+                        DisplayIntStatement(value = 456),
+                        SetStatement(variable = "foo", value = 123),
+                    ),
             )
-        )
         val transformedCU = transformer.transform(cu)!! as CU
         assertTrue { transformedCU.hasValidParents() }
         assertEquals(transformedCU.origin, NodeOrigin(cu))
@@ -274,17 +344,20 @@ class ASTTransformerTest {
     @Test
     fun testNestedOrigin() {
         val transformer = ASTTransformer()
-        transformer.registerNodeTransformer(CU::class, CU::class)
+        transformer
+            .registerNodeTransformer(CU::class, CU::class)
             .withChild(CU::statements, CU::statements)
         transformer.registerNodeTransformer(DisplayIntStatement::class) { s ->
             s.withOrigin(GenericNode())
         }
 
-        val cu = CU(
-            statements = listOf(
-                DisplayIntStatement(value = 456)
+        val cu =
+            CU(
+                statements =
+                    listOf(
+                        DisplayIntStatement(value = 456),
+                    ),
             )
-        )
         val transformedCU = transformer.transform(cu)!! as CU
         assertTrue { transformedCU.hasValidParents() }
         assertEquals(transformedCU.origin, NodeOrigin(cu))
@@ -294,18 +367,21 @@ class ASTTransformerTest {
     @Test
     fun testTransformingOneNodeToMany() {
         val transformer = ASTTransformer()
-        transformer.registerNodeTransformer(BarRoot::class, BazRoot::class)
+        transformer
+            .registerNodeTransformer(BarRoot::class, BazRoot::class)
             .withChild(BazRoot::stmts, BarRoot::stmts)
         transformer.registerMultipleNodeTransformer(BarStmt::class) { s ->
             listOf(BazStmt("${s.desc}-1"), BazStmt("${s.desc}-2"))
         }
 
-        val original = BarRoot(
-            stmts = mutableListOf(
-                BarStmt("a"),
-                BarStmt("b")
+        val original =
+            BarRoot(
+                stmts =
+                    mutableListOf(
+                        BarStmt("a"),
+                        BarStmt("b"),
+                    ),
             )
-        )
         val transformed = transformer.transform(original) as Node
         assertTrue { transformed.hasValidParents() }
         assertEquals(transformed.origin, NodeOrigin(original))
@@ -315,17 +391,26 @@ class ASTTransformerTest {
                     BazStmt("a-1"),
                     BazStmt("a-2"),
                     BazStmt("b-1"),
-                    BazStmt("b-2")
-                )
+                    BazStmt("b-2"),
+                ),
             ),
-            transformed
+            transformed,
         )
     }
 }
 
-data class BazRoot(var stmts: MutableList<BazStmt> = mutableListOf()) : Node()
+data class BazRoot(
+    var stmts: MutableList<BazStmt> = mutableListOf(),
+) : Node()
 
-data class BazStmt(val desc: String) : Node()
+data class BazStmt(
+    val desc: String,
+) : Node()
 
-data class BarRoot(var stmts: MutableList<BarStmt> = mutableListOf()) : Node()
-data class BarStmt(val desc: String) : Node()
+data class BarRoot(
+    var stmts: MutableList<BarStmt> = mutableListOf(),
+) : Node()
+
+data class BarStmt(
+    val desc: String,
+) : Node()

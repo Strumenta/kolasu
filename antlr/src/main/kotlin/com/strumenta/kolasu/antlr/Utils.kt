@@ -7,14 +7,18 @@ import com.strumenta.kolasu.model.SimpleOrigin
 /**
  * Remove links to the ParseTree, in order to save memory.
  */
-fun Node.detachFromParseTree(keepRange: Boolean = true, keepSourceText: Boolean = false) {
+fun Node.detachFromParseTree(
+    keepRange: Boolean = true,
+    keepSourceText: Boolean = false,
+) {
     val existingOrigin = origin
     if (existingOrigin is ParseTreeOrigin) {
         if (keepRange || keepSourceText) {
-            this.origin = SimpleOrigin(
-                if (keepRange) existingOrigin.range else null,
-                if (keepSourceText) existingOrigin.sourceText else null
-            )
+            this.origin =
+                SimpleOrigin(
+                    if (keepRange) existingOrigin.range else null,
+                    if (keepSourceText) existingOrigin.sourceText else null,
+                )
         } else {
             this.origin = null
         }

@@ -3,17 +3,23 @@ package com.strumenta.kolasu.emf
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
-import java.util.*
+import java.util.LinkedList
 import kotlin.reflect.KClass
 
 /**
  * This class is a composite around MetamodelBuilder which permits to build EPackages from Kotlin packages of classes
  * which has relations among them.
  */
-class MetamodelsBuilder(val resource: Resource? = null) {
+class MetamodelsBuilder(
+    val resource: Resource? = null,
+) {
     internal val singleMetamodelsBuilders = LinkedList<MetamodelBuilder>()
 
-    fun addMetamodel(packageName: String, nsURI: String, nsPrefix: String) {
+    fun addMetamodel(
+        packageName: String,
+        nsURI: String,
+        nsPrefix: String,
+    ) {
         val smb = MetamodelBuilder(packageName, nsURI, nsPrefix, resource)
         smb.container = this
         singleMetamodelsBuilders.add(smb)
@@ -28,7 +34,5 @@ class MetamodelsBuilder(val resource: Resource? = null) {
         throw IllegalArgumentException("Unable to provide EClass for ${kClass.qualifiedName}")
     }
 
-    fun generate(): List<EPackage> {
-        return singleMetamodelsBuilders.map { it.generate() }
-    }
+    fun generate(): List<EPackage> = singleMetamodelsBuilders.map { it.generate() }
 }

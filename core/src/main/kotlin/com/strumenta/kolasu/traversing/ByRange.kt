@@ -14,7 +14,10 @@ import com.strumenta.kolasu.model.Range
  * @see searchByRange
  */
 @JvmOverloads
-fun Node.findByRange(range: Range, selfContained: Boolean = false): Node? {
+fun Node.findByRange(
+    range: Range,
+    selfContained: Boolean = false,
+): Node? {
     return this.searchByRange(range, selfContained).lastOrNull()
 }
 
@@ -27,7 +30,10 @@ fun Node.findByRange(range: Range, selfContained: Boolean = false): Node? {
  * @return all nodes containing the given [range] using depth-first search. Empty list if none are found.
  */
 @JvmOverloads
-fun Node.searchByRange(range: Range, selfContained: Boolean = false): Sequence<Node> {
+fun Node.searchByRange(
+    range: Range,
+    selfContained: Boolean = false,
+): Sequence<Node> {
     val contains = this.contains(range)
     if (!selfContained || contains) {
         if (children.isEmpty()) {
@@ -54,23 +60,21 @@ fun Node.searchByRange(range: Range, selfContained: Boolean = false): Sequence<N
  * @param range the range within which the walk should remain
  * @return walks the AST within the given [range] starting from this node, depth-first.
  */
-fun Node.walkWithin(range: Range): Sequence<Node> {
-    return if (range.contains(this)) {
+fun Node.walkWithin(range: Range): Sequence<Node> =
+    if (range.contains(this)) {
         sequenceOf(this) + this.children.walkWithin(range)
     } else if (this.overlaps(range)) {
         this.children.walkWithin(range)
     } else {
         emptySequence()
     }
-}
 
 /**
  * @param range the range within which the walk should remain
  * @return walks the AST within the given [range] starting from each node
  * and concatenates all results in a single sequence
  */
-fun List<Node>.walkWithin(range: Range): Sequence<Node> {
-    return this
+fun List<Node>.walkWithin(range: Range): Sequence<Node> =
+    this
         .map { it.walkWithin(range) }
         .reduceOrNull { previous, current -> previous + current } ?: emptySequence()
-}

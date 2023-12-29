@@ -12,24 +12,36 @@ fun <N : Node> N.withRange(range: Range?): N {
 }
 
 fun <N : Node> N.withOrigin(origin: Origin?): N {
-    this.origin = if (origin == NodeOrigin(this)) { null } else { origin }
+    this.origin =
+        if (origin == NodeOrigin(this)) {
+            null
+        } else {
+            origin
+        }
     return this
 }
 
 fun <N : Node> N.withOrigin(node: Node): N {
-    this.origin = if (node == this) { null } else { NodeOrigin(node) }
+    this.origin =
+        if (node == this) {
+            null
+        } else {
+            NodeOrigin(node)
+        }
     return this
 }
 
 val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.kotlin.nodeProperties
 val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
-    get() = memberProperties.asSequence()
-        .filter { it.visibility == KVisibility.PUBLIC }
-        .filter { it.findAnnotation<Derived>() == null }
-        .filter { it.findAnnotation<Internal>() == null }
-        .filter { it.findAnnotation<Link>() == null }
-        .toList()
+    get() =
+        memberProperties
+            .asSequence()
+            .filter { it.visibility == KVisibility.PUBLIC }
+            .filter { it.findAnnotation<Derived>() == null }
+            .filter { it.findAnnotation<Internal>() == null }
+            .filter { it.findAnnotation<Link>() == null }
+            .toList()
 
 /**
  * @return all properties of this node that are considered AST properties.
@@ -61,5 +73,5 @@ annotation class Link
 /**
  * Use this to mark something that does not inherit from Node as a node, so it will be included in the AST.
  */
-// TODO remove
+@Deprecated("Planned for removal")
 annotation class NodeType

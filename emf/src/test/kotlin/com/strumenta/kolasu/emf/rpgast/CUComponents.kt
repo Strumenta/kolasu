@@ -8,6 +8,7 @@ import com.strumenta.kolasu.model.Derived
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Range
+
 // This file contains the AST nodes at the highest level:
 // from the CompilationUnit (which represents the whole file)
 // to its main components
@@ -19,24 +20,25 @@ data class CompilationUnit(
     val subroutines: List<Subroutine>,
     val compileTimeArrays: List<CompileTimeArray>,
     val directives: List<Directive>,
-    val specifiedRange: Range??
+    val specifiedRange: Range??,
 ) : Node(specifiedRange) {
-
     companion object {
-        fun empty() = CompilationUnit(
-            emptyList(),
-            emptyList(),
-            MainBody(emptyList(), null),
-            emptyList(),
-            emptyList(),
-            emptyList(),
-            null
-        )
+        fun empty() =
+            CompilationUnit(
+                emptyList(),
+                emptyList(),
+                MainBody(emptyList(), null),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                null,
+            )
     }
 
     val entryPlist: PlistStmt?
-        get() = main.stmts.plist()
-            ?: subroutines.mapNotNull { it.stmts.plist() }.firstOrNull()
+        get() =
+            main.stmts.plist()
+                ?: subroutines.mapNotNull { it.stmts.plist() }.firstOrNull()
 
     private val inStatementsDataDefinitions = mutableListOf<InStatementDataDefinition>()
 
@@ -59,8 +61,9 @@ data class CompilationUnit(
             return _allDataDefinitions
         }
 
-    private fun checkDuplicatedDataDefinition(dataDefinitions: List<AbstractDataDefinition>):
-        List<AbstractDataDefinition> {
+    private fun checkDuplicatedDataDefinition(
+        dataDefinitions: List<AbstractDataDefinition>,
+    ): List<AbstractDataDefinition> {
         val dataDefinitionMap = mutableMapOf<String, AbstractDataDefinition>()
         return dataDefinitions.filter {
             val dataDefinition = dataDefinitionMap[it.name]
@@ -78,25 +81,28 @@ data class CompilationUnit(
 
     fun hasDataDefinition(name: String) = dataDefinitions.any { it.name.equals(name, ignoreCase = true) }
 
-    fun getDataDefinition(name: String) = dataDefinitions.firstOrNull() { it.name.equals(name, ignoreCase = true) }
-        ?: throw IllegalArgumentException("Data definition $name was not found")
+    fun getDataDefinition(name: String) =
+        dataDefinitions.firstOrNull { it.name.equals(name, ignoreCase = true) }
+            ?: throw IllegalArgumentException("Data definition $name was not found")
 
-    fun getDataOrFieldDefinition(name: String) = dataDefinitions.firstOrNull() {
-        it.name.equals(name, ignoreCase = true)
-    }
-        ?: dataDefinitions.mapNotNull { it.fields.find { it.name.equals(name, ignoreCase = true) } }.firstOrNull()
-        ?: throw IllegalArgumentException("Data or field definition $name was not found")
+    fun getDataOrFieldDefinition(name: String) =
+        dataDefinitions.firstOrNull {
+            it.name.equals(name, ignoreCase = true)
+        }
+            ?: dataDefinitions.mapNotNull { it.fields.find { it.name.equals(name, ignoreCase = true) } }.firstOrNull()
+            ?: throw IllegalArgumentException("Data or field definition $name was not found")
 
     fun hasAnyDataDefinition(name: String) = allDataDefinitions.any { it.name.equals(name, ignoreCase = true) }
 
     fun getAnyDataDefinition(name: String) = allDataDefinitions.first { it.name.equals(name, ignoreCase = true) }
 
     fun compileTimeArray(name: String): CompileTimeArray {
-        fun firstCompileTimeArray() = if (compileTimeArrays.isNotEmpty()) {
-            compileTimeArrays[0]
-        } else {
-            CompileTimeArray("", emptyList())
-        }
+        fun firstCompileTimeArray() =
+            if (compileTimeArrays.isNotEmpty()) {
+                compileTimeArrays[0]
+            } else {
+                CompileTimeArray("", emptyList())
+            }
         return compileTimeArrays.firstOrNull { it.name.equals(name, ignoreCase = true) } ?: firstCompileTimeArray()
     }
 
@@ -105,30 +111,39 @@ data class CompilationUnit(
     fun getFileDefinition(name: String) = fileDefinitions.first { it.name.equals(name, ignoreCase = true) }
 }
 
-data class MainBody(val stmts: List<Statement>, val specifiedRange: Range? = null) : Node(
-    specifiedRange
-)
+data class MainBody(
+    val stmts: List<Statement>,
+    val specifiedRange: Range? = null,
+) : Node(
+        specifiedRange,
+    )
 
 data class Subroutine(
     override val name: String,
     val stmts: List<Statement>,
     val tag: String? = null,
-    val specifiedRange: Range? = null
-) : Named, Node(specifiedRange)
+    val specifiedRange: Range? = null,
+) : Node(specifiedRange),
+    Named
 
-data class Function(override val name: String, val specifiedRange: Range? = null) : Named, Node(
-    specifiedRange
-)
+data class Function(
+    override val name: String,
+    val specifiedRange: Range? = null,
+) : Node(
+        specifiedRange,
+    ),
+    Named
 
 data class CompileTimeArray(
     override val name: String,
     val lines: List<String>,
-    val specifiedRange: Range? = null
-) : Named, Node(specifiedRange)
+    val specifiedRange: Range? = null,
+) : Node(specifiedRange),
+    Named
 
 enum class DataWrapUpChoice {
     LR,
-    RT
+    RT,
 }
 
 // A PList is a list of parameters

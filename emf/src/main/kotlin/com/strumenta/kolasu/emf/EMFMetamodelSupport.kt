@@ -15,21 +15,25 @@ import org.eclipse.emf.ecore.xmi.XMIResource
 import java.io.IOException
 
 interface EMFMetamodelSupport {
-    fun generateMetamodel(resource: Resource, includingKolasuMetamodel: Boolean = true)
+    fun generateMetamodel(
+        resource: Resource,
+        includingKolasuMetamodel: Boolean = true,
+    )
 }
 
 val INCLUDE_KOLASU = EMFMetamodelSupport::class.qualifiedName + ".includeKolasu"
 val RESET_URI = EMFMetamodelSupport::class.qualifiedName + ".resetURI"
 
-val DEFAULT_OPTIONS_FOR_METAMODEL = mapOf(
-    Pair(XMIResource.OPTION_SCHEMA_LOCATION, true),
-    Pair(INCLUDE_KOLASU, false),
-    Pair(RESET_URI, true)
-)
+val DEFAULT_OPTIONS_FOR_METAMODEL =
+    mapOf(
+        Pair(XMIResource.OPTION_SCHEMA_LOCATION, true),
+        Pair(INCLUDE_KOLASU, false),
+        Pair(RESET_URI, true),
+    )
 
 fun EMFMetamodelSupport.saveMetamodel(
     target: URI,
-    options: Map<String, Boolean> = DEFAULT_OPTIONS_FOR_METAMODEL
+    options: Map<String, Boolean> = DEFAULT_OPTIONS_FOR_METAMODEL,
 ): Resource {
     val resource =
         createResource(target)
@@ -46,19 +50,20 @@ fun ParsingResult<*>.saveModel(
     metamodelResource: Resource,
     target: URI,
     includeMetamodel: Boolean = true,
-    options: Map<String, Boolean>? = null
+    options: Map<String, Boolean>? = null,
 ): Resource {
     val resource =
         metamodelResource.resourceSet.createResource(target)
             ?: throw IOException("Unsupported destination: $target")
     val simplifiedResult = Result(issues, root)
     var eObject: EObject?
-    eObject = if (includeMetamodel) {
-        resource.contents.addAll(metamodelResource.contents)
-        simplifiedResult.toEObject(resource)
-    } else {
-        simplifiedResult.toEObject(metamodelResource)
-    }
+    eObject =
+        if (includeMetamodel) {
+            resource.contents.addAll(metamodelResource.contents)
+            simplifiedResult.toEObject(resource)
+        } else {
+            simplifiedResult.toEObject(metamodelResource)
+        }
     resource.contents.add(eObject)
     resource.save(options)
     return resource
@@ -71,14 +76,17 @@ fun ParsingResult<*>.saveModel(
  * its EMF representation.
  */
 abstract class EcoreEnabledParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken>(
-    tokenFactory: TokenFactory<T>
-) : KolasuANTLRParser<R, P, C, T>(tokenFactory), EMFMetamodelSupport {
-
+    tokenFactory: TokenFactory<T>,
+) : KolasuANTLRParser<R, P, C, T>(tokenFactory),
+    EMFMetamodelSupport {
     /**
      * Generates the metamodel. The standard Kolasu metamodel [EPackage][org.eclipse.emf.ecore.EPackage] is included.
      * It does not actually save the resource.
      */
-    override fun generateMetamodel(resource: Resource, includingKolasuMetamodel: Boolean) {
+    override fun generateMetamodel(
+        resource: Resource,
+        includingKolasuMetamodel: Boolean,
+    ) {
         if (includingKolasuMetamodel) {
             resource.contents.add(STARLASU_METAMODEL)
         }

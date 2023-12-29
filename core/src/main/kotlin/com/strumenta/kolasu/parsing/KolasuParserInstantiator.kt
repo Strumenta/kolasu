@@ -8,5 +8,6 @@ import java.io.File
  */
 interface KolasuParserInstantiator {
     fun instantiate(fileToParse: File): ASTParser<*>
+
     fun instantiate(code: String): ASTParser<*>
 }

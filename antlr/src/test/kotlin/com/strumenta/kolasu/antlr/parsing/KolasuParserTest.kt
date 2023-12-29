@@ -12,21 +12,22 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class SimpleLangKolasuParser : KolasuANTLRParser<Node, SimpleLangParser, SimpleLangParser.CompilationUnitContext,
-    KolasuANTLRToken>(ANTLRTokenFactory()) {
-    override fun createANTLRLexer(charStream: CharStream): Lexer {
-        return SimpleLangLexer(charStream)
-    }
+class SimpleLangKolasuParser :
+    KolasuANTLRParser<
+        Node,
+        SimpleLangParser,
+        SimpleLangParser.CompilationUnitContext,
+        KolasuANTLRToken,
+        >(ANTLRTokenFactory()) {
+    override fun createANTLRLexer(charStream: CharStream): Lexer = SimpleLangLexer(charStream)
 
-    override fun createANTLRParser(tokenStream: TokenStream): SimpleLangParser {
-        return SimpleLangParser(tokenStream)
-    }
+    override fun createANTLRParser(tokenStream: TokenStream): SimpleLangParser = SimpleLangParser(tokenStream)
 
     override fun parseTreeToAst(
         parseTreeRoot: SimpleLangParser.CompilationUnitContext,
         considerRange: Boolean,
         issues: MutableList<Issue>,
-        source: Source?
+        source: Source?,
     ): Node? = null
 
     override fun clearCaches() {
@@ -38,16 +39,16 @@ class SimpleLangKolasuParser : KolasuANTLRParser<Node, SimpleLangParser, SimpleL
 }
 
 class KolasuParserTest {
-
     @Test
     fun testLexing() {
         val parser = SimpleLangKolasuParser()
-        val result = parser.parseFirstStage(
-            """set a = 10
+        val result =
+            parser.parseFirstStage(
+                """set a = 10
             |set b = ""
             |display c
-            """.trimMargin()
-        )
+                """.trimMargin(),
+            )
         assertNotNull(result)
         val lexingResult = parser.tokenFactory.extractTokens(result)
         assertNotNull(lexingResult)
@@ -63,7 +64,7 @@ class KolasuParserTest {
             """set a = 10
             |set b = ""
             |display c
-            """.trimMargin()
+            """.trimMargin(),
         )
         parser.executionsToNextCacheClean = 0
         assertEquals(0, parser.cachesCounter)
@@ -71,7 +72,7 @@ class KolasuParserTest {
             """set a = 10
             |set b = ""
             |display c
-            """.trimMargin()
+            """.trimMargin(),
         )
         assertEquals(1, parser.cachesCounter)
     }

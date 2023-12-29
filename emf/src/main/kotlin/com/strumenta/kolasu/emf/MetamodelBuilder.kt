@@ -14,7 +14,7 @@ import org.eclipse.emf.ecore.ETypedElement
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.Resource
 import java.io.Serializable
-import java.util.*
+import java.util.LinkedList
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeParameter
@@ -27,11 +27,16 @@ import kotlin.reflect.full.withNullability
 private val KClass<*>.packageName: String?
     get() {
         val isInternal = this.java.name.contains('$')
-        val qname = if (isInternal) {
-            this.java.name.split("$").first()
-        } else {
-            this.qualifiedName ?: throw IllegalStateException("The class has no qualified name: $this")
-        }
+        val qname =
+            if (isInternal) {
+                this
+                    .java
+                    .name
+                    .split("$")
+                    .first()
+            } else {
+                this.qualifiedName ?: throw IllegalStateException("The class has no qualified name: $this")
+            }
         return if (qname == this.simpleName) {
             null
         } else {
@@ -49,9 +54,12 @@ private val KClass<*>.packageName: String?
 /**
  * When building multiple related EPackages use MetamodelsBuilder instead.
  */
-class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, resource: Resource? = null) :
-    ClassifiersProvider {
-
+class MetamodelBuilder(
+    packageName: String,
+    nsURI: String,
+    nsPrefix: String,
+    resource: Resource? = null,
+) : ClassifiersProvider {
     private val ePackage: EPackage = EcoreFactory.eINSTANCE.createEPackage()
     private val eClasses = HashMap<KClass<*>, EClass>()
     private val dataTypes = HashMap<KType, EDataType>()
@@ -174,7 +182,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             }
             throw Error(
                 "This class does not belong to this EPackage: ${kClass.qualifiedName}. " +
-                    "This EPackage: ${this.ePackage.name}"
+                    "This EPackage: ${this.ePackage.name}",
             )
         }
 
@@ -198,7 +206,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
                     // TODO consider bounds, taking in account that in Kotlin we have variance (in/out)
                     // which may not exactly correspond to how bounds work in EMF
                     name = kTypeParameter.name
-                }
+                },
             )
         }
 
@@ -251,7 +259,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
     private fun registerReference(
         prop: PropertyTypeDescription,
         valueType: KType,
-        eClass: EClass
+        eClass: EClass,
     ) {
         if (valueType.classifier is KClass<*> && (valueType.classifier as KClass<*>).isSubclassOf(Collection::class)) {
             throw IllegalStateException("We do not support references to lists. EClass $eClass, property $prop")
@@ -310,30 +318,32 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
     private fun setType(
         element: ETypedElement,
         valueType: KType,
-        visibleTypeParameters: Map<String, ETypeParameter>
+        visibleTypeParameters: Map<String, ETypeParameter>,
     ) {
         when (val classifier = valueType.classifier) {
             is KClass<*> -> {
                 if (classifier.typeParameters.isEmpty()) {
                     element.eType = provideClass(classifier)
                 } else {
-                    element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
-                        eClassifier = provideClass(classifier)
-                        require(classifier.typeParameters.size == valueType.arguments.size)
-                        eTypeArguments.addAll(
-                            valueType.arguments.map {
-                                provideType(it)
-                            }
-                        )
-                    }
+                    element.eGenericType =
+                        EcoreFactory.eINSTANCE.createEGenericType().apply {
+                            eClassifier = provideClass(classifier)
+                            require(classifier.typeParameters.size == valueType.arguments.size)
+                            eTypeArguments.addAll(
+                                valueType.arguments.map {
+                                    provideType(it)
+                                },
+                            )
+                        }
                 }
             }
 
             is KTypeParameter -> {
-                element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
-                    eTypeParameter = visibleTypeParameters[classifier.name]
-                        ?: throw IllegalStateException("Type parameter not found")
-                }
+                element.eGenericType =
+                    EcoreFactory.eINSTANCE.createEGenericType().apply {
+                        eTypeParameter = visibleTypeParameters[classifier.name]
+                            ?: throw IllegalStateException("Type parameter not found")
+                    }
             }
 
             else -> throw Error("Not a valid classifier: $classifier")
@@ -343,12 +353,15 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
     private fun ensureClassifierNameIsNotUsed(classifier: EClassifier) {
         if (ePackage.hasClassifierNamed(classifier.name)) {
             throw IllegalStateException(
-                "There is already a Classifier named ${classifier.name}: ${ePackage.classifierByName(classifier.name)}"
+                "There is already a Classifier named ${classifier.name}: ${ePackage.classifierByName(classifier.name)}",
             )
         }
     }
 
-    private fun registerKClassForEClass(kClass: KClass<*>, eClass: EClass) {
+    private fun registerKClassForEClass(
+        kClass: KClass<*>,
+        eClass: EClass,
+    ) {
         if (eClasses.containsKey(kClass)) {
             require(eClasses[kClass] == eClass)
         } else {
@@ -401,7 +414,5 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
 
     private val queue = LinkedList<KClass<*>>()
 
-    fun generate(): EPackage {
-        return ePackage
-    }
+    fun generate(): EPackage = ePackage
 }

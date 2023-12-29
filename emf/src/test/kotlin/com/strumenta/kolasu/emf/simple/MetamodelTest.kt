@@ -1,8 +1,7 @@
 package com.strumenta.kolasu.emf.simple
 
 class MetamodelTest {
-
-//    @Test
+    //    @Test
 //    fun generateSimpleMetamodel() {
 //        val metamodelBuilder = MetamodelBuilder("com.strumenta.kolasu.emf.simple", "https://strumenta.com/simplemm2", "simplemm2")
 //        metamodelBuilder.provideClass(DataDefinition::class)

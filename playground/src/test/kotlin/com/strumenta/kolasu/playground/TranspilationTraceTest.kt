@@ -11,22 +11,23 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class TranspilationTraceTest {
-
-    val mm = MetamodelBuilder(
-        "com.strumenta.kolasu.playground",
-        "http://mypackage.com",
-        "myp"
-    ).apply { provideClass(ANode::class) }.generate()
+    val mm =
+        MetamodelBuilder(
+            "com.strumenta.kolasu.playground",
+            "http://mypackage.com",
+            "myp",
+        ).apply { provideClass(ANode::class) }.generate()
 
     @Test
     fun serializeTranslationIssues() {
-        val tt = TranspilationTrace(
-            "a:1",
-            "b:2",
-            ANode("a", 1),
-            ANode("b", 2),
-            listOf(Issue(IssueType.TRANSLATION, "some issue", IssueSeverity.WARNING))
-        )
+        val tt =
+            TranspilationTrace(
+                "a:1",
+                "b:2",
+                ANode("a", 1),
+                ANode("b", 2),
+                listOf(Issue(IssueType.TRANSLATION, "some issue", IssueSeverity.WARNING)),
+            )
         assertEquals(
             """{
   "eClass" : "https://strumenta.com/starlasu/transpilation/v2#//TranspilationTrace",
@@ -52,18 +53,19 @@ class TranspilationTraceTest {
     "severity" : "WARNING"
   } ]
 }""",
-            tt.saveAsJson("foo.json", mm)
+            tt.saveAsJson("foo.json", mm),
         )
     }
 
     @Test
     fun serializeSourceIssues() {
-        val tt = TranspilationTrace(
-            "a:1",
-            "b:2",
-            Result(listOf(Issue(IssueType.SYNTACTIC, "some issue", IssueSeverity.WARNING)), ANode("a", 1)),
-            Result(emptyList(), ANode("b", 2))
-        )
+        val tt =
+            TranspilationTrace(
+                "a:1",
+                "b:2",
+                Result(listOf(Issue(IssueType.SYNTACTIC, "some issue", IssueSeverity.WARNING)), ANode("a", 1)),
+                Result(emptyList(), ANode("b", 2)),
+            )
         assertEquals(
             """{
   "eClass" : "https://strumenta.com/starlasu/transpilation/v2#//TranspilationTrace",
@@ -89,18 +91,19 @@ class TranspilationTraceTest {
   },
   "generatedCode" : "b:2"
 }""",
-            tt.saveAsJson("foo.json", mm)
+            tt.saveAsJson("foo.json", mm),
         )
     }
 
     @Test
     fun serializeTargetIssues() {
-        val tt = TranspilationTrace(
-            "a:1",
-            "b:2",
-            Result(emptyList(), ANode("a", 1)),
-            Result(listOf(Issue(IssueType.SYNTACTIC, "some issue", IssueSeverity.WARNING)), ANode("b", 2))
-        )
+        val tt =
+            TranspilationTrace(
+                "a:1",
+                "b:2",
+                Result(emptyList(), ANode("a", 1)),
+                Result(listOf(Issue(IssueType.SYNTACTIC, "some issue", IssueSeverity.WARNING)), ANode("b", 2)),
+            )
         assertEquals(
             """{
   "eClass" : "https://strumenta.com/starlasu/transpilation/v2#//TranspilationTrace",
@@ -126,7 +129,7 @@ class TranspilationTraceTest {
   },
   "generatedCode" : "b:2"
 }""",
-            tt.saveAsJson("foo.json", mm)
+            tt.saveAsJson("foo.json", mm),
         )
     }
 
@@ -136,12 +139,13 @@ class TranspilationTraceTest {
         val bRoot = ANode("b", 2)
         aRoot.destinations += bRoot
         bRoot.withOrigin(aRoot)
-        val tt = TranspilationTrace(
-            "a:1",
-            "b:2",
-            Result(emptyList(), aRoot),
-            Result(emptyList(), bRoot)
-        )
+        val tt =
+            TranspilationTrace(
+                "a:1",
+                "b:2",
+                Result(emptyList(), aRoot),
+                Result(emptyList(), bRoot),
+            )
         assertEquals(
             """{
   "eClass" : "https://strumenta.com/starlasu/transpilation/v2#//TranspilationTrace",
@@ -176,7 +180,7 @@ class TranspilationTraceTest {
   },
   "generatedCode" : "b:2"
 }""",
-            tt.saveAsJson("foo.json", mm)
+            tt.saveAsJson("foo.json", mm),
         )
     }
 }

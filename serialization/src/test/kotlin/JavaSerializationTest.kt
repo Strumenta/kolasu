@@ -17,7 +17,7 @@ class JavaSerializationTest {
         val baos = ByteArrayOutputStream()
         ObjectOutputStream(baos).use {
             it.writeObject(
-                Issue.syntactic("issue", range = range(1, 2, 3, 4))
+                Issue.syntactic("issue", range = range(1, 2, 3, 4)),
             )
         }
         ObjectInputStream(ByteArrayInputStream(baos.toByteArray())).use {

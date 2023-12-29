@@ -13,7 +13,7 @@ data class DebugPrintConfiguration constructor(
     var skipNull: Boolean = false,
     var forceShowRange: Boolean = false,
     val hide: MutableList<String> = mutableListOf(),
-    var indentBlock: String = "  "
+    var indentBlock: String = "  ",
 )
 
 private fun Node.showSingleAttribute(
@@ -21,12 +21,15 @@ private fun Node.showSingleAttribute(
     sb: StringBuilder,
     propertyName: String,
     value: Any?,
-    configuration: DebugPrintConfiguration = DebugPrintConfiguration()
+    configuration: DebugPrintConfiguration = DebugPrintConfiguration(),
 ) {
     sb.append("$indent${configuration.indentBlock}$propertyName = ${value}\n")
 }
 
-fun Any?.debugPrint(indent: String = "", configuration: DebugPrintConfiguration = DebugPrintConfiguration()): String {
+fun Any?.debugPrint(
+    indent: String = "",
+    configuration: DebugPrintConfiguration = DebugPrintConfiguration(),
+): String {
     val sb = StringBuilder()
     sb.append("$indent${this}\n")
     return sb.toString()
@@ -34,7 +37,7 @@ fun Any?.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
 
 fun <N : Node> ParsingResult<N>.debugPrint(
     indent: String = "",
-    configuration: DebugPrintConfiguration = DebugPrintConfiguration()
+    configuration: DebugPrintConfiguration = DebugPrintConfiguration(),
 ): String {
     val indentBlock = configuration.indentBlock
     val sb = StringBuilder()
@@ -53,7 +56,10 @@ fun <N : Node> ParsingResult<N>.debugPrint(
 }
 
 @JvmOverloads
-fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration = DebugPrintConfiguration()): String {
+fun Node.debugPrint(
+    indent: String = "",
+    configuration: DebugPrintConfiguration = DebugPrintConfiguration(),
+): String {
     val indentBlock = configuration.indentBlock
     val sb = StringBuilder()
     if (this.relevantMemberProperties(withRange = configuration.forceShowRange).isEmpty()) {
@@ -85,8 +91,8 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                                     sb.append(
                                         it.debugPrint(
                                             indent + indentBlock + indentBlock,
-                                            configuration
-                                        )
+                                            configuration,
+                                        ),
                                     )
                                 }
                                 sb.append("$indent$indentBlock]\n")
@@ -96,8 +102,8 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                                     sb.append(
                                         it?.debugPrint(
                                             indent + indentBlock + indentBlock,
-                                            configuration
-                                        )
+                                            configuration,
+                                        ),
                                     )
                                 }
                                 sb.append("$indent$indentBlock]\n")
@@ -115,8 +121,8 @@ fun Node.debugPrint(indent: String = "", configuration: DebugPrintConfiguration 
                             sb.append(
                                 value.debugPrint(
                                     indent + indentBlock + indentBlock,
-                                    configuration
-                                )
+                                    configuration,
+                                ),
                             )
                             sb.append("$indent$indentBlock]\n")
                         } else {

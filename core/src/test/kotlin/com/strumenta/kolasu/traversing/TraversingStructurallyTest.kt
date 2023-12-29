@@ -16,52 +16,56 @@ internal class TraversingStructurallyTest {
         val name: String,
         val contents: List<Node> = listOf(),
         val set: Set<Node> = setOf(),
-        specifiedRange: Range? = null
+        specifiedRange: Range? = null,
     ) : Node(specifiedRange)
 
-    class Item(val name: String, specifiedRange: Range? = null) : Node(specifiedRange)
+    class Item(
+        val name: String,
+        specifiedRange: Range? = null,
+    ) : Node(specifiedRange)
 
     private fun printSequence(sequence: Sequence<Node>): String {
-        return sequence.map {
-            when (it) {
-                is Box -> it.name
-                is Item -> it.name
-                else -> fail("")
-            }
-        }.joinToString()
+        return sequence
+            .map {
+                when (it) {
+                    is Box -> it.name
+                    is Item -> it.name
+                    else -> fail("")
+                }
+            }.joinToString()
     }
 
-    private val testCase = Box(
-        "root",
-        listOf(
-            Box(
-                "first",
-                listOf(
-                    Item("1", specifiedRange = range(3, 6, 3, 12))
+    private val testCase =
+        Box(
+            "root",
+            listOf(
+                Box(
+                    "first",
+                    listOf(
+                        Item("1", specifiedRange = range(3, 6, 3, 12)),
+                    ),
+                    specifiedRange = range(2, 3, 4, 3),
                 ),
-                specifiedRange = range(2, 3, 4, 3)
-            ),
-            Item("2", specifiedRange = range(5, 3, 5, 9)),
-            Box(
-                "big",
-                listOf(
-                    Box(
-                        "small",
-                        listOf(
-                            Item("3", specifiedRange = range(8, 7, 8, 13)),
-                            Item("4", specifiedRange = range(9, 7, 9, 13)),
-                            Item("5", specifiedRange = range(10, 7, 10, 13))
+                Item("2", specifiedRange = range(5, 3, 5, 9)),
+                Box(
+                    "big",
+                    listOf(
+                        Box(
+                            "small",
+                            listOf(
+                                Item("3", specifiedRange = range(8, 7, 8, 13)),
+                                Item("4", specifiedRange = range(9, 7, 9, 13)),
+                                Item("5", specifiedRange = range(10, 7, 10, 13)),
+                            ),
+                            specifiedRange = range(7, 5, 11, 5),
                         ),
-                        specifiedRange = range(7, 5, 11, 5)
-                    )
+                    ),
+                    specifiedRange = range(6, 3, 12, 3),
                 ),
-                specifiedRange = range(6, 3, 12, 3)
+                Item("6", specifiedRange = range(13, 3, 13, 9)),
             ),
-            Item("6", specifiedRange = range(13, 3, 13, 9))
-        ),
-        specifiedRange = range(1, 1, 14, 1)
-
-    )
+            specifiedRange = range(1, 1, 14, 1),
+        )
 
     @Test
     fun walkDepthFirst() {
@@ -122,32 +126,37 @@ internal class TraversingStructurallyTest {
         root.assignParents()
 
         val countedNodesList: MutableList<Int> = mutableListOf()
-        val walkTime = measureTimeMillis {
-            var countedNodes = 0
-            root.walk().forEach { countedNodes++ }
-            countedNodesList.add(countedNodes)
-        }
-        val walkTimeTwo = measureTimeMillis {
-            var countedNodes = 0
-            root.walk().forEach { countedNodes++ }
-            countedNodesList.add(countedNodes)
-        }
+        val walkTime =
+            measureTimeMillis {
+                var countedNodes = 0
+                root.walk().forEach { countedNodes++ }
+                countedNodesList.add(countedNodes)
+            }
+        val walkTimeTwo =
+            measureTimeMillis {
+                var countedNodes = 0
+                root.walk().forEach { countedNodes++ }
+                countedNodesList.add(countedNodes)
+            }
         val fw = FastWalker(root)
-        val walkTimeFast = measureTimeMillis {
-            var countedNodes = 0
-            fw.walk().forEach { countedNodes++ }
-            countedNodesList.add(countedNodes)
-        }
-        val walkTimeFastTwo = measureTimeMillis {
-            var countedNodes = 0
-            fw.walk().forEach { countedNodes++ }
-            countedNodesList.add(countedNodes)
-        }
-        val walkTimeFastThree = measureTimeMillis {
-            var countedNodes = 0
-            fw.walk().forEach { countedNodes++ }
-            countedNodesList.add(countedNodes)
-        }
+        val walkTimeFast =
+            measureTimeMillis {
+                var countedNodes = 0
+                fw.walk().forEach { countedNodes++ }
+                countedNodesList.add(countedNodes)
+            }
+        val walkTimeFastTwo =
+            measureTimeMillis {
+                var countedNodes = 0
+                fw.walk().forEach { countedNodes++ }
+                countedNodesList.add(countedNodes)
+            }
+        val walkTimeFastThree =
+            measureTimeMillis {
+                var countedNodes = 0
+                fw.walk().forEach { countedNodes++ }
+                countedNodesList.add(countedNodes)
+            }
         countedNodesList.forEach {
             assertEquals(nodes, it)
         }
@@ -160,46 +169,53 @@ internal class TraversingStructurallyTest {
     @Test
     fun walkSet() {
         // Note: we use hashSetOf() specifically because it doesn't guarantee traversal order
-        val testCase = Box(
-            "root",
-            set = hashSetOf(
-                Box(
-                    "first",
-                    set = hashSetOf(
-                        Item("1", specifiedRange = range(3, 6, 3, 12))
-                    ),
-                    specifiedRange = range(2, 3, 4, 3)
-                ),
-                Item("2", specifiedRange = range(5, 3, 5, 9)),
-                Box(
-                    "big",
-                    set = hashSetOf(
+        val testCase =
+            Box(
+                "root",
+                set =
+                    hashSetOf(
                         Box(
-                            "small",
-                            set = hashSetOf(
-                                Item("3", specifiedRange = range(8, 7, 8, 13)),
-                                Item("4", specifiedRange = range(9, 7, 9, 13)),
-                                Item("5", specifiedRange = range(10, 7, 10, 13))
-                            ),
-                            specifiedRange = range(7, 5, 11, 5)
-                        )
+                            "first",
+                            set =
+                                hashSetOf(
+                                    Item("1", specifiedRange = range(3, 6, 3, 12)),
+                                ),
+                            specifiedRange = range(2, 3, 4, 3),
+                        ),
+                        Item("2", specifiedRange = range(5, 3, 5, 9)),
+                        Box(
+                            "big",
+                            set =
+                                hashSetOf(
+                                    Box(
+                                        "small",
+                                        set =
+                                            hashSetOf(
+                                                Item("3", specifiedRange = range(8, 7, 8, 13)),
+                                                Item("4", specifiedRange = range(9, 7, 9, 13)),
+                                                Item("5", specifiedRange = range(10, 7, 10, 13)),
+                                            ),
+                                        specifiedRange = range(7, 5, 11, 5),
+                                    ),
+                                ),
+                            specifiedRange = range(6, 3, 12, 3),
+                        ),
+                        Item("6", specifiedRange = range(13, 3, 13, 9)),
                     ),
-                    specifiedRange = range(6, 3, 12, 3)
-                ),
-                Item("6", specifiedRange = range(13, 3, 13, 9))
-            ),
-            specifiedRange = range(1, 1, 14, 1)
-        )
+                specifiedRange = range(1, 1, 14, 1),
+            )
         val set = mutableSetOf<String>()
-        testCase.walk().map {
-            when (it) {
-                is Box -> it.name
-                is Item -> it.name
-                else -> fail("")
+        testCase
+            .walk()
+            .map {
+                when (it) {
+                    is Box -> it.name
+                    is Item -> it.name
+                    else -> fail("")
+                }
+            }.forEach {
+                set.add(it)
             }
-        }.forEach {
-            set.add(it)
-        }
         assertEquals(setOf("root", "first", "1", "2", "big", "small", "3", "4", "5", "6"), set)
     }
 }

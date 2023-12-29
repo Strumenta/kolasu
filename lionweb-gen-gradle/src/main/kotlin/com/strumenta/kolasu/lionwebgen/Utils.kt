@@ -6,13 +6,15 @@ import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.SourceSetContainer
 
-fun Project.propertyValue(name: String, defaultValue: String? = null): String {
-    return if (project.extra.has(name)) {
+fun Project.propertyValue(
+    name: String,
+    defaultValue: String? = null,
+): String =
+    if (project.extra.has(name)) {
         project.extra[name] as String
     } else {
         defaultValue ?: throw GradleException("Property $name is required")
     }
-}
 
 val Project.extra: ExtraPropertiesExtension
     get() = (this as ExtensionAware).extensions.getByName("ext") as ExtraPropertiesExtension

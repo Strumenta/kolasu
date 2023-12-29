@@ -22,9 +22,8 @@ typealias ParserInstantiator<P> = Function<File, P?>
 abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
     val parserInstantiator: ParserInstantiator<P>,
     help: String = "",
-    name: String? = null
-) :
-    CliktCommand(help = help, name = name) {
+    name: String? = null,
+) : CliktCommand(help = help, name = name) {
     protected val inputs by argument().file(mustExist = true).multiple()
 
     protected val charset by option("--charset", "-c")
@@ -49,6 +48,7 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
 
     protected open fun initializeRun() {
     }
+
     protected open fun finalizeRun() {
     }
 
@@ -59,10 +59,23 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
         return parserInstantiator.apply(input)
     }
 
-    protected abstract fun processResult(input: File, relativePath: String, result: ParsingResult<R>, parser: P)
-    protected abstract fun processException(input: File, relativePath: String, e: Exception)
+    protected abstract fun processResult(
+        input: File,
+        relativePath: String,
+        result: ParsingResult<R>,
+        parser: P,
+    )
 
-    private fun processSourceFile(input: File, relativePath: String) {
+    protected abstract fun processException(
+        input: File,
+        relativePath: String,
+        e: Exception,
+    )
+
+    private fun processSourceFile(
+        input: File,
+        relativePath: String,
+    ) {
         try {
             val parser = instantiateParser(input)
             if (parser == null) {
@@ -97,7 +110,11 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
         }
     }
 
-    private fun processInput(input: File, explicit: Boolean = false, relativePath: String) {
+    private fun processInput(
+        input: File,
+        explicit: Boolean = false,
+        relativePath: String,
+    ) {
         if (input.isDirectory) {
             input.listFiles()?.forEach {
                 processInput(it, relativePath = relativePath + File.separator + it.name)
@@ -109,7 +126,7 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
                 echo(
                     "The provided input is neither a file or a directory, we will ignore it: " +
                         "${input.absolutePath}",
-                    trailingNewline = true
+                    trailingNewline = true,
                 )
             } else {
                 // ignore silently

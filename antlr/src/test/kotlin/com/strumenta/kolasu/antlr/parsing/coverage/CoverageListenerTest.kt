@@ -10,7 +10,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class CoverageListenerTest {
-
     @Test
     fun initiallyEmpty() {
         val coverage = CoverageListener()
@@ -32,13 +31,17 @@ class CoverageListenerTest {
         assertCoverage(coverage, 57, 59)
     }
 
-    private fun assertCoverage(coverage: CoverageListener, expectedUncovered: Int, expectedPaths: Int) {
+    private fun assertCoverage(
+        coverage: CoverageListener,
+        expectedUncovered: Int,
+        expectedPaths: Int,
+    ) {
         assertEquals(expectedUncovered, coverage.uncoveredPaths().size)
         assertEquals(expectedPaths, coverage.paths.size)
         assertTrue {
             abs(
                 (expectedPaths.toDouble() - expectedUncovered.toDouble()) /
-                    expectedPaths.toDouble() - coverage.percentage() / 100.0
+                    expectedPaths.toDouble() - coverage.percentage() / 100.0,
             ) < .00001
         }
     }
@@ -58,8 +61,8 @@ class CoverageListenerTest {
                     "statement > INPUT",
                     "expression > DEC_LIT",
                     "expression > STRING_LIT",
-                    "expression > BOOLEAN_LIT"
-                )
+                    "expression > BOOLEAN_LIT",
+                ),
             )
         }
         assertCoverage(coverage, 53, 63)
@@ -78,8 +81,8 @@ class CoverageListenerTest {
                 listOf(
                     "statement > INPUT",
                     "expression > STRING_LIT",
-                    "expression > BOOLEAN_LIT"
-                )
+                    "expression > BOOLEAN_LIT",
+                ),
             )
         }
         assertCoverage(coverage, 50, 63)
@@ -103,8 +106,8 @@ class CoverageListenerTest {
                     "expression > BOOLEAN_LIT",
                     "expression > MINUS",
                     "expression > MULT",
-                    "expression > DIV"
-                )
+                    "expression > DIV",
+                ),
             )
         }
         assertCoverage(coverage, 59, 71)
@@ -126,8 +129,8 @@ class CoverageListenerTest {
                     "expression > STRING_LIT",
                     "expression > BOOLEAN_LIT",
                     "expression > MULT",
-                    "expression > DIV"
-                )
+                    "expression > DIV",
+                ),
             )
         }
         assertCoverage(coverage, 56, 71)

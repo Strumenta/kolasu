@@ -45,11 +45,17 @@ class LionWebModelConverter {
         return languageConverter.exportToLionWeb(kolasuLanguage)
     }
 
-    fun associateLanguages(lwLanguage: Language, kolasuLanguage: KolasuLanguage) {
+    fun associateLanguages(
+        lwLanguage: Language,
+        kolasuLanguage: KolasuLanguage,
+    ) {
         this.languageConverter.associateLanguages(lwLanguage, kolasuLanguage)
     }
 
-    fun exportModelToLionWeb(kolasuTree: KNode, customSourceId: String? = null): LWNode {
+    fun exportModelToLionWeb(
+        kolasuTree: KNode,
+        customSourceId: String? = null,
+    ): LWNode {
         if (nodesMapping.containsA(kolasuTree)) {
             return nodesMapping.byA(kolasuTree)!!
         }
@@ -65,15 +71,17 @@ class LionWebModelConverter {
             lwNode.concept.allFeatures().forEach { feature ->
                 when (feature) {
                     is Property -> {
-                        val kAttribute = kFeatures.find { it.name == feature.name }
-                            as? com.strumenta.kolasu.language.Attribute
-                            ?: throw IllegalArgumentException("Property ${feature.name} not found in $kNode")
+                        val kAttribute =
+                            kFeatures.find { it.name == feature.name }
+                                as? com.strumenta.kolasu.language.Attribute
+                                ?: throw IllegalArgumentException("Property ${feature.name} not found in $kNode")
                         val kValue = kNode.getAttributeValue(kAttribute)
                         lwNode.setPropertyValue(feature, kValue)
                     }
                     is Containment -> {
-                        val kContainment = kFeatures.find { it.name == feature.name }
-                            as com.strumenta.kolasu.language.Containment
+                        val kContainment =
+                            kFeatures.find { it.name == feature.name }
+                                as com.strumenta.kolasu.language.Containment
                         val kValue = kNode.getChildren(kContainment)
                         kValue.forEach { kChild ->
                             val lwChild = nodesMapping.byA(kChild)!!
@@ -81,14 +89,16 @@ class LionWebModelConverter {
                         }
                     }
                     is Reference -> {
-                        val kReference = kFeatures.find { it.name == feature.name }
-                            as com.strumenta.kolasu.language.Reference
+                        val kReference =
+                            kFeatures.find { it.name == feature.name }
+                                as com.strumenta.kolasu.language.Reference
                         val kValue = kNode.getReference(kReference)
-                        val lwReferred: Node? = if (kValue.referred == null) {
-                            null
-                        } else {
-                            nodesMapping.byA(kValue.referred!! as KNode)!!
-                        }
+                        val lwReferred: Node? =
+                            if (kValue.referred == null) {
+                                null
+                            } else {
+                                nodesMapping.byA(kValue.referred!! as KNode)!!
+                            }
                         lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
                     }
                 }
@@ -101,8 +111,9 @@ class LionWebModelConverter {
     fun importModelFromLionWeb(lwTree: LWNode): KNode {
         val referencesPostponer = ReferencesPostponer()
         lwTree.thisAndAllDescendants().reversed().forEach { lwNode ->
-            val kClass = languageConverter.correspondingKolasuClass(lwNode.concept)
-                ?: throw RuntimeException("We do not have StarLasu AST class for LIonWeb Concept ${lwNode.concept}")
+            val kClass =
+                languageConverter.correspondingKolasuClass(lwNode.concept)
+                    ?: throw RuntimeException("We do not have StarLasu AST class for LIonWeb Concept ${lwNode.concept}")
             val kNode: com.strumenta.kolasu.model.Node = instantiate(kClass, lwNode, referencesPostponer)
             associateNodes(kNode, lwNode)
         }
@@ -117,7 +128,10 @@ class LionWebModelConverter {
     /**
      * Deserialize nodes, taking into accaount the known languages.
      */
-    fun deserializeToNodes(json: String, useDynamicNodesIfNeeded: Boolean = true): List<LWNode> {
+    fun deserializeToNodes(
+        json: String,
+        useDynamicNodesIfNeeded: Boolean = true,
+    ): List<LWNode> {
         val js = JsonSerialization.getStandardSerialization()
         languageConverter.knownLWLanguages().forEach {
             js.classifierResolver.registerLanguage(it)
@@ -134,7 +148,10 @@ class LionWebModelConverter {
     private class ReferencesPostponer {
         private val values = IdentityHashMap<ReferenceByName<PossiblyNamed>, LWNode?>()
 
-        fun registerPostponedReference(referenceByName: ReferenceByName<PossiblyNamed>, referred: LWNode?) {
+        fun registerPostponedReference(
+            referenceByName: ReferenceByName<PossiblyNamed>,
+            referred: LWNode?,
+        ) {
             values[referenceByName] = referred
         }
 
@@ -149,19 +166,23 @@ class LionWebModelConverter {
         }
     }
 
-    private fun instantiate(kClass: KClass<*>, data: Node, referencesPostponer: ReferencesPostponer):
-        com.strumenta.kolasu.model.Node {
-        val constructor: KFunction<Any> = when {
-            kClass.constructors.size == 1 -> {
-                kClass.constructors.first()
+    private fun instantiate(
+        kClass: KClass<*>,
+        data: Node,
+        referencesPostponer: ReferencesPostponer,
+    ): com.strumenta.kolasu.model.Node {
+        val constructor: KFunction<Any> =
+            when {
+                kClass.constructors.size == 1 -> {
+                    kClass.constructors.first()
+                }
+                kClass.primaryConstructor != null -> {
+                    kClass.primaryConstructor!!
+                }
+                else -> {
+                    TODO()
+                }
             }
-            kClass.primaryConstructor != null -> {
-                kClass.primaryConstructor!!
-            }
-            else -> {
-                TODO()
-            }
-        }
 
         val params = mutableMapOf<KParameter, Any?>()
         constructor.parameters.forEach { param ->
@@ -174,14 +195,20 @@ class LionWebModelConverter {
                         val propValue = data.getPropertyValue(feature)
                         if (propValue is DynamicEnumerationValue) {
                             val enumeration = propValue.enumeration
-                            val kClass: KClass<out Enum<*>>? = languageConverter
-                                .getEnumerationsToKolasuClassesMapping()[enumeration] as? KClass<out Enum<*>>
+                            val kClass: KClass<out Enum<*>>? =
+                                languageConverter
+                                    .getEnumerationsToKolasuClassesMapping()[enumeration] as? KClass<out Enum<*>>
                             if (kClass == null) {
                                 throw IllegalStateException("Cannot find Kolasu class for Enumeration $enumeration")
                             }
-                            val entries = kClass.java.methods.find {
-                                it.name == "getEntries"
-                            }!!.invoke(null) as List<Any>
+                            val entries =
+                                kClass
+                                    .java
+                                    .methods
+                                    .find {
+                                        it.name == "getEntries"
+                                    }!!
+                                    .invoke(null) as List<Any>
                             // val entriesProp = kClass.memberProperties.find { it.name == "entries" }
                             // val fields = kClass.java.declaredFields.filter { Modifier.isStatic(it.modifiers) }.map { it.get(null) }
                             val nameProp = kClass.memberProperties.find { it.name == "name" }!! as KProperty1<Any, *>
@@ -222,29 +249,31 @@ class LionWebModelConverter {
                         } else {
                             // Given we navigate the tree in reverse the child should have been already
                             // instantiated
-                            val lwChild: Node? = when (lwChildren.size) {
-                                0 -> {
+                            val lwChild: Node? =
+                                when (lwChildren.size) {
+                                    0 -> {
+                                        null
+                                    }
+
+                                    1 -> {
+                                        lwChildren.first()
+                                    }
+
+                                    else -> {
+                                        throw IllegalStateException()
+                                    }
+                                }
+                            val kChild =
+                                if (lwChild == null) {
                                     null
-                                }
-
-                                1 -> {
-                                    lwChildren.first()
-                                }
-
-                                else -> {
-                                    throw IllegalStateException()
-                                }
-                            }
-                            val kChild = if (lwChild == null) {
-                                null
-                            } else {
-                                (
-                                    nodesMapping.byB(lwChild)
-                                        ?: throw IllegalStateException(
-                                            "Unable to find Kolasu Node corresponding to $lwChild"
-                                        )
+                                } else {
+                                    (
+                                        nodesMapping.byB(lwChild)
+                                            ?: throw IllegalStateException(
+                                                "Unable to find Kolasu Node corresponding to $lwChild",
+                                            )
                                     )
-                            }
+                                }
                             params[param] = kChild
                         }
                     }
@@ -264,11 +293,17 @@ class LionWebModelConverter {
         return languageConverter.correspondingConcept(kNode.javaClass.kotlin)
     }
 
-    private fun nodeID(kNode: com.strumenta.kolasu.model.Node, customSourceId: String? = null): String {
+    private fun nodeID(
+        kNode: com.strumenta.kolasu.model.Node,
+        customSourceId: String? = null,
+    ): String {
         return "${customSourceId ?: kNode.source.id}_${kNode.positionalID}"
     }
 
-    private fun associateNodes(kNode: KNode, lwNode: LWNode) {
+    private fun associateNodes(
+        kNode: KNode,
+        lwNode: LWNode,
+    ) {
         nodesMapping.associate(kNode, lwNode)
     }
 }

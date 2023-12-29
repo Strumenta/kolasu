@@ -34,11 +34,14 @@ object AutoObserveReferenceOrigin : IrDeclarationOriginImpl("AutoObserveReferenc
 /**
  * Make a certain field observable.
  */
-class FieldObservableExtension(val pluginContext: IrPluginContext) : IrElementTransformerVoidWithContext() {
-
-    val notifyOfPropertyChange: IrSimpleFunctionSymbol = pluginContext.referenceFunctions(
-        FqName("${Node::class.qualifiedName}.notifyOfPropertyChange")
-    ).single()
+class FieldObservableExtension(
+    val pluginContext: IrPluginContext,
+) : IrElementTransformerVoidWithContext() {
+    val notifyOfPropertyChange: IrSimpleFunctionSymbol =
+        pluginContext
+            .referenceFunctions(
+                FqName("${Node::class.qualifiedName}.notifyOfPropertyChange"),
+            ).single()
 
     override fun visitPropertyNew(declaration: IrProperty): IrStatement {
         if (declaration.declareReference()) {
@@ -46,36 +49,40 @@ class FieldObservableExtension(val pluginContext: IrPluginContext) : IrElementTr
             //        ref.setContainer(this, "ref")
             //    }
 
-            val referenceByNameSetContainerMethod = pluginContext.referenceFunctions(
-                FqName("${ReferenceByName::class.qualifiedName}.setContainer")
-            ).single()
+            val referenceByNameSetContainerMethod =
+                pluginContext
+                    .referenceFunctions(
+                        FqName("${ReferenceByName::class.qualifiedName}.setContainer"),
+                    ).single()
 
             val propertyGetter = declaration.getter!!
             val irClass = declaration.parentAsClass
 
-            val anonymousInitializerSymbolImpl = IrFactoryImpl.createAnonymousInitializer(
-                declaration.startOffset,
-                declaration.endOffset,
-                IrDeclarationOrigin.GeneratedByPlugin(StarLasuGeneratedDeclarationKey),
-                IrAnonymousInitializerSymbolImpl(),
-                false
-            )
+            val anonymousInitializerSymbolImpl =
+                IrFactoryImpl.createAnonymousInitializer(
+                    declaration.startOffset,
+                    declaration.endOffset,
+                    IrDeclarationOrigin.GeneratedByPlugin(StarLasuGeneratedDeclarationKey),
+                    IrAnonymousInitializerSymbolImpl(),
+                    false,
+                )
             anonymousInitializerSymbolImpl.body =
                 DeclarationIrBuilder(pluginContext, anonymousInitializerSymbolImpl.symbol).irBlockBody(
-                    IrFactoryImpl.createBlockBody(-1, -1)
+                    IrFactoryImpl.createBlockBody(-1, -1),
                 ) {
                     +irCall(referenceByNameSetContainerMethod).apply {
                         val thisValue = irClass.thisReceiver!!
                         // dispatchReceiver: p5 -> this.getP5()
-                        dispatchReceiver = irCall(propertyGetter).apply {
-                            dispatchReceiver = irGet(thisValue)
-                        }
+                        dispatchReceiver =
+                            irCall(propertyGetter).apply {
+                                dispatchReceiver = irGet(thisValue)
+                            }
                         // passing "this"
                         putValueArgument(0, irGet(thisValue))
                         // passing the name of the reference
                         putValueArgument(
                             1,
-                            declaration.name.identifier.toIrConst(pluginContext.irBuiltIns.stringType)
+                            declaration.name.identifier.toIrConst(pluginContext.irBuiltIns.stringType),
                         )
                     }
                 }
@@ -93,7 +100,7 @@ class FieldObservableExtension(val pluginContext: IrPluginContext) : IrElementTr
                             pluginContext.irBuiltIns.unitType,
                             valueArgumentsCount = 3,
                             typeArgumentsCount = 0,
-                            origin = IrStatementOrigin.INVOKE
+                            origin = IrStatementOrigin.INVOKE,
                         ).apply {
                             val thisParameter: IrValueParameter = declaration.setter!!.allParameters[0]
                             val valueParameter: IrValueParameter = declaration.setter!!.allParameters[1]

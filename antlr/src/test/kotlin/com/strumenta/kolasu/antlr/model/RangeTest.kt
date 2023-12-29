@@ -13,10 +13,11 @@ import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.test.assertEquals
 import org.junit.Test as test
 
-data class MySetStatement(val specifiedRange: Range? = null) : Node(specifiedRange)
+data class MySetStatement(
+    val specifiedRange: Range? = null,
+) : Node(specifiedRange)
 
 class RangeTest {
-
     @test
     fun parserRuleContextRange() {
         val code = "set foo = 123"

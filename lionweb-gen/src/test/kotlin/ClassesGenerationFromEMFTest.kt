@@ -9,7 +9,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ClassesGenerationFromEMFTest {
-
     private fun loadEPackage(name: String): EPackage {
         val inputStream = this.javaClass.getResourceAsStream("/$name.ecore")
         requireNotNull(inputStream)

@@ -6,10 +6,11 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.junit.Test as test
 
-data class MySetStatement(val specifiedRange: Range? = null) : Node(specifiedRange)
+data class MySetStatement(
+    val specifiedRange: Range? = null,
+) : Node(specifiedRange)
 
 class RangeTest {
-
     @test fun offset() {
         val code =
             """this is some code

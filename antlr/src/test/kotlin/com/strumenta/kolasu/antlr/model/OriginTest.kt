@@ -17,12 +17,12 @@ import kotlin.test.assertNull
 import org.junit.Test as test
 
 class OriginTest {
-
     @test fun parseTreeOriginRange() {
-        val code = """set a = 1 + 2
+        val code =
+            """set a = 1 + 2
             |input c is string
             |display 2 * 3
-        """.trimMargin()
+            """.trimMargin()
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
         val parseTreeRoot = parser.compilationUnit()
@@ -54,10 +54,11 @@ class OriginTest {
     }
 
     @test fun parseTreeOriginsSourceText() {
-        val code = """set a = 1 + 2
+        val code =
+            """set a = 1 + 2
             |input c is string
             |display 2 * 3
-        """.trimMargin()
+            """.trimMargin()
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
         val parseTreeRoot = parser.compilationUnit()

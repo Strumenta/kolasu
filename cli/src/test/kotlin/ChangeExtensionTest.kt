@@ -5,7 +5,6 @@ import java.io.File
 import kotlin.test.assertEquals
 
 class ChangeExtensionTest {
-
     @Test
     fun noExtension() {
         assertEquals(File("a.xml"), File("a").changeExtension("xml"))

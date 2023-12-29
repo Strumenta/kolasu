@@ -10,7 +10,7 @@ plugins {
 val kspVersion = extra["kspVersion"] as String
 val kotlinVersion = extra["kotlinVersion"] as String
 val lionwebVersion = extra["lionwebVersion"] as String
-val gson_version = extra["gson_version"] as String
+val gsonVersion = extra["gson_version"] as String
 val completeKspVersion = if (kspVersion.contains("-")) kspVersion else "$kotlinVersion-$kspVersion"
 val lionwebGenGradlePluginID = extra["lionwebGenGradlePluginID"] as String
 
@@ -22,7 +22,7 @@ dependencies {
     api(project(":lionweb-gen"))
     testImplementation(project(":lionweb-ksp"))
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
-    implementation("com.google.code.gson:gson:$gson_version")
+    implementation("com.google.code.gson:gson:$gsonVersion")
     implementation("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$completeKspVersion")
 }
 
@@ -40,7 +40,7 @@ gradlePlugin {
     vcsUrl.set("https://github.com/strumenta/kolasu.git")
     plugins {
         create("lionwebGenGradlePlugin") {
-            id = lionwebGenGradlePluginID as String
+            id = lionwebGenGradlePluginID
             displayName = "Kolasu LionWeb Gen"
             description = "Kolasu LionWeb Gen"
             tags.set(listOf("parsing", "ast", "starlasu", "lionweb"))

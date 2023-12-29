@@ -6,7 +6,7 @@ import com.strumenta.kolasu.model.Node
 
 class MultiplePropertyListObserver<C : Node, E : Node>(
     val container: C,
-    val containmentName: String
+    val containmentName: String,
 ) : ObservableObserver<ListNotification<E>> {
     private fun added(e: E) {
         e.parent = container

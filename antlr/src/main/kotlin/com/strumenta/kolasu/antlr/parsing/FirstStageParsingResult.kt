@@ -11,7 +11,7 @@ class FirstStageParsingResult<C : ParserRuleContext>(
     code: String? = null,
     val incompleteNode: Node? = null,
     val time: Long? = null,
-    val lexingTime: Long? = null
+    val lexingTime: Long? = null,
 ) : CodeProcessingResult<C>(issues, root, code) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

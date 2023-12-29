@@ -21,9 +21,8 @@ class PlaygroundExampleGenerator<R : Node>(
     val parser: EcoreEnabledParser<R, *, *, *>,
     val directory: File,
     val failOnError: Boolean = true,
-    resourceURI: URI = URI.createURI("")
+    resourceURI: URI = URI.createURI(""),
 ) {
-
     val resource = createResource(resourceURI)!!
 
     fun generateMetamodel() {
@@ -38,11 +37,17 @@ class PlaygroundExampleGenerator<R : Node>(
         generateExample(file.nameWithoutExtension, file.readText())
     }
 
-    fun generateExample(name: String, file: File) {
+    fun generateExample(
+        name: String,
+        file: File,
+    ) {
         generateExample(name, file.readText())
     }
 
-    fun generateExample(name: String, code: String) {
+    fun generateExample(
+        name: String,
+        code: String,
+    ) {
         val parsingResult = parser.parse(code)
         if (!parsingResult.isCorrect && failOnError) {
             throw ExampleGenerationFailure(parsingResult, "Cannot generate examples from code with errors")
@@ -55,13 +60,16 @@ class PlaygroundExampleGenerator<R : Node>(
     }
 }
 
-class ExampleGenerationFailure(val result: ParsingResult<*>, message: String) : RuntimeException(message)
+class ExampleGenerationFailure(
+    val result: ParsingResult<*>,
+    message: String,
+) : RuntimeException(message)
 
-fun <N : Node>ParsingResult<N>.saveForPlayground(
+fun <N : Node> ParsingResult<N>.saveForPlayground(
     resource: Resource,
     writer: Writer,
     name: String,
-    indent: String = ""
+    indent: String = "",
 ) {
     val simplifiedResult: Result<N> = Result(issues, root)
     val eObject = simplifiedResult.toEObject(resource)

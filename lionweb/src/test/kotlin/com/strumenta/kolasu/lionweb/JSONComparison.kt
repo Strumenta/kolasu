@@ -6,11 +6,19 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlin.test.assertEquals
 
-fun assertJSONsAreEqual(expected: String, actual: String, context: String = "<ROOT>") {
+fun assertJSONsAreEqual(
+    expected: String,
+    actual: String,
+    context: String = "<ROOT>",
+) {
     assertJSONsAreEqual(JsonParser.parseString(expected), JsonParser.parseString(actual), context)
 }
 
-fun assertJSONsAreEqual(expected: JsonElement, actual: JsonElement, context: String = "<ROOT>") {
+fun assertJSONsAreEqual(
+    expected: JsonElement,
+    actual: JsonElement,
+    context: String = "<ROOT>",
+) {
     if (expected is JsonObject && actual is JsonObject) {
         val ejo = expected.asJsonObject
         val ajo = actual.asJsonObject

@@ -42,9 +42,10 @@ object StarLasuGeneratedDeclarationKey : GeneratedDeclarationKey()
  * Set the parent appropriately when modifying a containment value.
  */
 @OptIn(ObsoleteDescriptorBasedAPI::class)
-class SettingParentExtension(val pluginContext: IrPluginContext, val messageCollector: MessageCollector) :
-    IrElementTransformerVoidWithContext() {
-
+class SettingParentExtension(
+    val pluginContext: IrPluginContext,
+    val messageCollector: MessageCollector,
+) : IrElementTransformerVoidWithContext() {
     override fun visitPropertyNew(declaration: IrProperty): IrStatement {
         val prevBody = declaration.setter?.body
         if (prevBody != null && declaration.setter!!.origin == IrDeclarationOrigin.DEFAULT_PROPERTY_ACCESSOR) {
@@ -61,9 +62,10 @@ class SettingParentExtension(val pluginContext: IrPluginContext, val messageColl
                             for (statement in prevBody.statements) +statement
 
                             val parentPropertySymbol =
-                                pluginContext.referenceProperties(
-                                    FqName("${propertyTypeClassSymbol.descriptor.fqNameOrNull()}.parent")
-                                ).single()
+                                pluginContext
+                                    .referenceProperties(
+                                        FqName("${propertyTypeClassSymbol.descriptor.fqNameOrNull()}.parent"),
+                                    ).single()
                             val parentSetter = parentPropertySymbol.owner.setter!!
                             // TODO remove from previous parent: field?.removeChild(this)
                             // value?.parent = this -> if (value != null) {value.parent = this}
@@ -72,7 +74,7 @@ class SettingParentExtension(val pluginContext: IrPluginContext, val messageColl
                                 irCall(parentSetter).apply {
                                     this.dispatchReceiver = irGet(valueParameter)
                                     this.putValueArgument(0, irGet(thisParameter))
-                                }
+                                },
                             )
                         }
             } else if (declaration.declareMultipleContainment()) {
@@ -82,32 +84,38 @@ class SettingParentExtension(val pluginContext: IrPluginContext, val messageColl
                     //    init {
                     //        p5.registerObserver(MultiplePropertyListObserver(this, "p5"))
                     //    }
-                    val registerObserver = pluginContext.referenceFunctions(
-                        FqName("${ObservableList::class.qualifiedName}.subscribe")
-                    ).single()
+                    val registerObserver =
+                        pluginContext
+                            .referenceFunctions(
+                                FqName("${ObservableList::class.qualifiedName}.subscribe"),
+                            ).single()
 
                     val propertyGetter = declaration.getter!!
 
-                    val anonymousInitializerSymbolImpl = IrFactoryImpl.createAnonymousInitializer(
-                        -1,
-                        -1,
-                        IrDeclarationOrigin.GeneratedByPlugin(StarLasuGeneratedDeclarationKey),
-                        IrAnonymousInitializerSymbolImpl(),
-                        false
-                    )
+                    val anonymousInitializerSymbolImpl =
+                        IrFactoryImpl.createAnonymousInitializer(
+                            -1,
+                            -1,
+                            IrDeclarationOrigin.GeneratedByPlugin(StarLasuGeneratedDeclarationKey),
+                            IrAnonymousInitializerSymbolImpl(),
+                            false,
+                        )
                     anonymousInitializerSymbolImpl.body =
                         DeclarationIrBuilder(pluginContext, anonymousInitializerSymbolImpl.symbol).irBlockBody(
-                            IrFactoryImpl.createBlockBody(-1, -1)
+                            IrFactoryImpl.createBlockBody(-1, -1),
                         ) {
                             +irCall(registerObserver).apply {
                                 val thisValue = irClass.thisReceiver!!
-                                val multiplePropertyListObserverConstructor = pluginContext.referenceConstructors(
-                                    FqName(MultiplePropertyListObserver::class.qualifiedName!!)
-                                ).single()
+                                val multiplePropertyListObserverConstructor =
+                                    pluginContext
+                                        .referenceConstructors(
+                                            FqName(MultiplePropertyListObserver::class.qualifiedName!!),
+                                        ).single()
                                 // dispatchReceiver: p5 -> this.getP5()
-                                dispatchReceiver = irCall(propertyGetter).apply {
-                                    dispatchReceiver = irGet(thisValue)
-                                }
+                                dispatchReceiver =
+                                    irCall(propertyGetter).apply {
+                                        dispatchReceiver = irGet(thisValue)
+                                    }
                                 // MultiplePropertyListObserver(this, "p5")
                                 putValueArgument(
                                     0,
@@ -115,9 +123,9 @@ class SettingParentExtension(val pluginContext: IrPluginContext, val messageColl
                                         putValueArgument(0, irGet(thisValue))
                                         putValueArgument(
                                             1,
-                                            declaration.name.identifier.toIrConst(pluginContext.irBuiltIns.stringType)
+                                            declaration.name.identifier.toIrConst(pluginContext.irBuiltIns.stringType),
                                         )
-                                    }
+                                    },
                                 )
                             }
                         }
@@ -126,7 +134,7 @@ class SettingParentExtension(val pluginContext: IrPluginContext, val messageColl
                 } else {
                     messageCollector.report(
                         CompilerMessageSeverity.ERROR,
-                        "AST Nodes should use ObservableLists (see ${declaration.fqNameWhenAvailable!!})"
+                        "AST Nodes should use ObservableLists (see ${declaration.fqNameWhenAvailable!!})",
                     )
                 }
             }

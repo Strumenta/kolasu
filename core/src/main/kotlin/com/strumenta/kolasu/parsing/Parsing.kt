@@ -23,7 +23,7 @@ import java.nio.charset.Charset
 open class CodeProcessingResult<D>(
     val issues: List<Issue>,
     val data: D?,
-    val code: String? = null
+    val code: String? = null,
 ) : Serializable {
     val isCorrect: Boolean
         get() = issues.none { it.severity != IssueSeverity.INFO }
@@ -47,7 +47,9 @@ open class CodeProcessingResult<D>(
     }
 }
 
-data class TokenCategory(val type: String) {
+data class TokenCategory(
+    val type: String,
+) {
     companion object {
         val COMMENT = TokenCategory("Comment")
         val KEYWORD = TokenCategory("Keyword")
@@ -63,7 +65,7 @@ data class TokenCategory(val type: String) {
 open class KolasuToken(
     open val category: TokenCategory,
     open val range: Range,
-    open val text: String
+    open val text: String,
 ) : Serializable
 
 /**
@@ -73,9 +75,8 @@ class LexingResult<T : KolasuToken>(
     issues: List<Issue>,
     val tokens: List<T>,
     code: String? = null,
-    val time: Long? = null
+    val time: Long? = null,
 ) : CodeProcessingResult<List<T>>(issues, tokens, code) {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is LexingResult<*>) return false
@@ -98,9 +99,8 @@ open class ParsingResult<RootNode : Node>(
     val root: RootNode?,
     code: String? = null,
     val incompleteNode: Node? = null,
-    val time: Long? = null
+    val time: Long? = null,
 ) : CodeProcessingResult<RootNode>(issues, root, code) {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ParsingResult<*>) return false
@@ -125,12 +125,13 @@ open class ParsingResult<RootNode : Node>(
 fun String.toStream(charset: Charset = Charsets.UTF_8) = ByteArrayInputStream(toByteArray(charset))
 
 interface KolasuLexer<T : KolasuToken> : Serializable {
-
     /**
      * Performs "lexing" on the given code string, i.e., it breaks it into tokens.
      */
-    fun lex(code: String, onlyFromDefaultChannel: Boolean = true) =
-        lex(code.byteInputStream(Charsets.UTF_8), Charsets.UTF_8, onlyFromDefaultChannel)
+    fun lex(
+        code: String,
+        onlyFromDefaultChannel: Boolean = true,
+    ) = lex(code.byteInputStream(Charsets.UTF_8), Charsets.UTF_8, onlyFromDefaultChannel)
 
     /**
      * Performs "lexing" on the given code string, i.e., it breaks it into tokens.
@@ -143,13 +144,16 @@ interface KolasuLexer<T : KolasuToken> : Serializable {
     fun lex(
         inputStream: InputStream,
         charset: Charset = Charsets.UTF_8,
-        onlyFromDefaultChannel: Boolean = true
+        onlyFromDefaultChannel: Boolean = true,
     ): LexingResult<T>
 
     /**
      * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.
      */
-    fun lex(inputStream: InputStream, charset: Charset = Charsets.UTF_8) = lex(inputStream, charset, true)
+    fun lex(
+        inputStream: InputStream,
+        charset: Charset = Charsets.UTF_8,
+    ) = lex(inputStream, charset, true)
 
     /**
      * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.

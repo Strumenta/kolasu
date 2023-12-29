@@ -8,7 +8,7 @@ fun assertParseTreeStr(
     expectedMultiLineStr: String,
     root: ParserRuleContext,
     vocabulary: Vocabulary,
-    printParseTree: Boolean = true
+    printParseTree: Boolean = true,
 ) {
     val actualParseTree = toParseTreeModel(root, vocabulary).multiLineString()
     if (printParseTree) {

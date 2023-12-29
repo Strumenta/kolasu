@@ -4,7 +4,10 @@ import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EPackage
 import java.io.File
 
-fun EPackage.saveEcore(ecoreFile: File, restoringURI: Boolean = true) {
+fun EPackage.saveEcore(
+    ecoreFile: File,
+    restoringURI: Boolean = true,
+) {
     val startURI = this.eResource().uri
     val resource = createResource(URI.createFileURI(ecoreFile.absolutePath))!!
     resource.contents.add(this)

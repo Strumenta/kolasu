@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.codegen
 
 class KotlinPrinter : ASTCodeGenerator<KCompilationUnit>() {
-
     override fun registerRecordPrinters() {
         recordPrinter<KCompilationUnit> {
             print(it.packageDecl)

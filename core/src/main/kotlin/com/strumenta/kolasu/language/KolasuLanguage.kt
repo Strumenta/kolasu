@@ -19,7 +19,9 @@ import kotlin.reflect.full.superclasses
  * There is no explicit Language defined in Kolasu, it is just a bunch of AST classes.
  * We create this Class to represent that collection of AST classes.
  */
-class KolasuLanguage(val qualifiedName: String) {
+class KolasuLanguage(
+    val qualifiedName: String,
+) {
     val astClasses: List<KClass<*>>
         get() = _astClasses
     val enumClasses: List<KClass<out Enum<*>>>
@@ -88,7 +90,7 @@ class KolasuLanguage(val qualifiedName: String) {
                     } catch (e: Exception) {
                         throw RuntimeException(
                             "Issue while examining kotlin class $kClass and its property $nodeProperty",
-                            e
+                            e,
                         )
                     }
                 }
@@ -100,5 +102,6 @@ class KolasuLanguage(val qualifiedName: String) {
     }
 
     fun findASTClass(name: String): KClass<*>? = astClasses.find { it.simpleName == name }
+
     fun findEnumClass(name: String): KClass<out Enum<*>>? = enumClasses.find { it.simpleName == name }
 }

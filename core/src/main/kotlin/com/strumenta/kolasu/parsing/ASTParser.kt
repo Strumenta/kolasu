@@ -8,8 +8,10 @@ import java.io.File
 import java.io.InputStream
 import java.nio.charset.Charset
 
-private fun inputStreamToString(inputStream: InputStream, charset: Charset = Charsets.UTF_8): String =
-    inputStream.bufferedReader(charset).use(BufferedReader::readText)
+private fun inputStreamToString(
+    inputStream: InputStream,
+    charset: Charset = Charsets.UTF_8,
+): String = inputStream.bufferedReader(charset).use(BufferedReader::readText)
 
 interface ASTParser<R : Node> {
     /**
@@ -27,24 +29,26 @@ interface ASTParser<R : Node> {
         charset: Charset = Charsets.UTF_8,
         considerRange: Boolean = true,
         measureLexingTime: Boolean = false,
-        source: Source? = null
-    ): ParsingResult<R> =
-        parse(inputStreamToString(inputStream, charset), considerRange, measureLexingTime, source)
+        source: Source? = null,
+    ): ParsingResult<R> = parse(inputStreamToString(inputStream, charset), considerRange, measureLexingTime, source)
 
     fun parse(
         code: String,
         considerRange: Boolean = true,
         measureLexingTime: Boolean = false,
-        source: Source? = null
+        source: Source? = null,
     ): ParsingResult<R>
 
-    fun parse(code: String, considerRange: Boolean = true, measureLexingTime: Boolean = false): ParsingResult<R> =
-        parse(code, considerRange, measureLexingTime, StringSource(code))
+    fun parse(
+        code: String,
+        considerRange: Boolean = true,
+        measureLexingTime: Boolean = false,
+    ): ParsingResult<R> = parse(code, considerRange, measureLexingTime, StringSource(code))
 
     fun parse(
         file: File,
         charset: Charset = Charsets.UTF_8,
         considerRange: Boolean = true,
-        measureLexingTime: Boolean = false
+        measureLexingTime: Boolean = false,
     ): ParsingResult<R>
 }

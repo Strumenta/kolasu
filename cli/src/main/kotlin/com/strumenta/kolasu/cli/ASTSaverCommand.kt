@@ -20,16 +20,17 @@ import java.io.StringWriter
  * This command prints the AST on the console or on file.
  * The formats are the debugging format, JSON, XML, or EMF-JSON.
  */
-class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInstantiator<P>) :
-    ASTProcessingCommand<R, P>(
+class ASTSaverCommand<R : Node, P : ASTParser<R>>(
+    parserInstantiator: ParserInstantiator<P>,
+) : ASTProcessingCommand<R, P>(
         parserInstantiator,
         help = "Parse files and save the ASTs in the chosen format.",
-        name = "ast"
+        name = "ast",
     ) {
-
     private val outputFormat by option("--format", "-f")
         .help("Pick the format to serialize ASTs: json (default), xml, json-emf, or debug-format")
-        .choice("json", "xml", "debug-format").default("json")
+        .choice("json", "xml", "debug-format")
+        .default("json")
     private val outputDirectory by option("--output", "-o")
         .file()
         .help("Directory where to store the output. By default the current directory is used")
@@ -38,7 +39,11 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
         .help("ASTs are not saved on file but they are instead printed on the screen")
         .flag(default = false)
 
-    override fun processException(input: File, relativePath: String, e: Exception) {
+    override fun processException(
+        input: File,
+        relativePath: String,
+        e: Exception,
+    ) {
         echo("A problem prevented from processing ${input.absolutePath}", err = true, trailingNewline = true)
         val sw = StringWriter()
         val pw = PrintWriter(sw)
@@ -50,14 +55,20 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
         }
     }
 
-    override fun processResult(input: File, relativePath: String, result: ParsingResult<R>, parser: P) {
+    override fun processResult(
+        input: File,
+        relativePath: String,
+        result: ParsingResult<R>,
+        parser: P,
+    ) {
         var targetFile: File? = null
         if (!print) {
-            val extension = when (outputFormat) {
-                "json", "xml" -> outputFormat
-                "debug-format" -> "txt"
-                else -> TODO()
-            }
+            val extension =
+                when (outputFormat) {
+                    "json", "xml" -> outputFormat
+                    "debug-format" -> "txt"
+                    else -> TODO()
+                }
             targetFile = File(this.outputDirectory.absolutePath + File.separator + relativePath + "." + extension)
             val targetFileParent = targetFile.parentFile
             targetFileParent.absoluteFile.mkdirs()
@@ -68,7 +79,7 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
                     if (verbose) {
                         echo(
                             " -> generating AST for $relativePath (from ${input.absolutePath})",
-                            trailingNewline = true
+                            trailingNewline = true,
                         )
                     }
                     echo(JsonGenerator().generateString(result), trailingNewline = true)
@@ -84,7 +95,7 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
                     if (verbose) {
                         echo(
                             " -> generating AST for $relativePath (from ${input.absolutePath})",
-                            trailingNewline = true
+                            trailingNewline = true,
                         )
                     }
                     echo(XMLGenerator().generateString(result.toResult()), trailingNewline = true)
@@ -100,7 +111,7 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
                     if (verbose) {
                         echo(
                             " -> generating AST for $relativePath (from ${input.absolutePath})",
-                            trailingNewline = true
+                            trailingNewline = true,
                         )
                     }
                     echo(result.debugPrint(), trailingNewline = true)

@@ -18,8 +18,7 @@ typealias NodeObserver = ObservableObserver<in NodeNotification<in Node>>
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
-open class Node() : Serializable {
-
+open class Node : Serializable {
     @property:Internal
     val changes = PublishSubject<NodeNotification<in Node>>()
 
@@ -28,6 +27,8 @@ open class Node() : Serializable {
 
     @Internal
     val destinations = mutableListOf<Destination>()
+
+    constructor()
 
     constructor(range: Range?) : this() {
         this.range = range
@@ -46,21 +47,22 @@ open class Node() : Serializable {
      */
     @property:Internal
     open val properties: List<PropertyDescription>
-        get() = try {
-            nodeProperties.map { PropertyDescription.buildFor(it, this) }
-        } catch (e: Throwable) {
-            throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
-        }.also { properties ->
-            val alreadyFound = mutableSetOf<String>()
-            properties.forEach { property ->
-                val name = property.name
-                if (alreadyFound.contains(name)) {
-                    throw IllegalStateException("Duplicate property with name $name")
-                } else {
-                    alreadyFound.add(name)
+        get() =
+            try {
+                nodeProperties.map { PropertyDescription.buildFor(it, this) }
+            } catch (e: Throwable) {
+                throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
+            }.also { properties ->
+                val alreadyFound = mutableSetOf<String>()
+                properties.forEach { property ->
+                    val name = property.name
+                    if (alreadyFound.contains(name)) {
+                        throw IllegalStateException("Duplicate property with name $name")
+                    } else {
+                        alreadyFound.add(name)
+                    }
                 }
             }
-        }
 
     /**
      * The origin from which this AST Node has been generated, if any.
@@ -128,7 +130,11 @@ open class Node() : Serializable {
         return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
     }
 
-    protected fun notifyOfPropertyChange(propertyName: String, oldValue: Any?, newValue: Any?) {
+    protected fun notifyOfPropertyChange(
+        propertyName: String,
+        oldValue: Any?,
+        newValue: Any?,
+    ) {
         changes.onNext(AttributeChangedNotification(this, propertyName, oldValue, newValue))
     }
 
@@ -136,11 +142,11 @@ open class Node() : Serializable {
     val allAnnotations: List<Annotation>
         get() = annotations
 
-    fun <I : Annotation>annotationsByType(kClass: KClass<I>): List<I> {
+    fun <I : Annotation> annotationsByType(kClass: KClass<I>): List<I> {
         return annotations.filterIsInstance(kClass.java)
     }
 
-    fun <I : Annotation>getSingleAnnotation(kClass: KClass<I>): I? {
+    fun <I : Annotation> getSingleAnnotation(kClass: KClass<I>): I? {
         val instances = annotations.filterIsInstance(kClass.java)
         return if (instances.isEmpty()) {
             null
@@ -151,7 +157,7 @@ open class Node() : Serializable {
         }
     }
 
-    fun <A : Annotation>addAnnotation(annotation: A): A {
+    fun <A : Annotation> addAnnotation(annotation: A): A {
         if (annotation.annotatedNode != null) {
             throw java.lang.IllegalStateException("Annotation already attached")
         }
@@ -198,16 +204,20 @@ open class Node() : Serializable {
         return nodeProperties.find { it.name == attribute.name }!!.get(this)
     }
 
-    fun <T : Any?>setAttribute(attributeName: String, value: T) {
+    fun <T : Any?> setAttribute(
+        attributeName: String,
+        value: T,
+    ) {
         val prop = nodeProperties.find { it.name == attributeName } as KMutableProperty<T>
         prop.setter.call(this, value)
     }
-    fun <T : Any?>getAttribute(attributeName: String): T {
+
+    fun <T : Any?> getAttribute(attributeName: String): T {
         val prop = nodeProperties.find { it.name == attributeName }!!
         return prop.call(this) as T
     }
 
-    fun <T : Node>getContainment(containmentName: String): List<T> {
+    fun <T : Node> getContainment(containmentName: String): List<T> {
         val prop = nodeProperties.find { it.name == containmentName }!!
         return when (val res = prop.call(this)) {
             null -> {
@@ -224,7 +234,10 @@ open class Node() : Serializable {
         }
     }
 
-    fun <T : Node>addToContainment(containmentName: String, child: T) {
+    fun <T : Node> addToContainment(
+        containmentName: String,
+        child: T,
+    ) {
         val prop = nodeProperties.find { it.name == containmentName }!!
         val value = prop.call(this)
         if (value is List<*>) {
@@ -233,7 +246,11 @@ open class Node() : Serializable {
             (prop as KMutableProperty<T>).setter.call(this, child)
         }
     }
-    fun <T : Node>removeFromContainment(containmentName: String, child: T) {
+
+    fun <T : Node> removeFromContainment(
+        containmentName: String,
+        child: T,
+    ) {
         val prop = nodeProperties.find { it.name == containmentName }!!
         val value = prop.call(this)
         if (value is List<*>) {
@@ -245,11 +262,15 @@ open class Node() : Serializable {
         }
     }
 
-    fun <T : PossiblyNamed>getReference(referenceName: String): ReferenceByName<T> {
+    fun <T : PossiblyNamed> getReference(referenceName: String): ReferenceByName<T> {
         val prop = nodeProperties.find { it.name == referenceName } as KProperty1<Node, ReferenceByName<T>>
         return prop.call(this)
     }
-    fun <T : PossiblyNamed>setReferenceReferred(referenceName: String, referred: T) {
+
+    fun <T : PossiblyNamed> setReferenceReferred(
+        referenceName: String,
+        referred: T,
+    ) {
         val ref: ReferenceByName<T> = getReference(referenceName)
         ref.referred = referred
     }

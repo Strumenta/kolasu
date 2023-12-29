@@ -22,7 +22,7 @@ class LionWebGradlePluginTest {
                 id("com.google.devtools.ksp") version "1.8.22-1.0.11"
                 id("${BuildConfig.PLUGIN_ID}") version "${BuildConfig.PLUGIN_VERSION}"
             }
-        """
+        """,
         )
 
         val runner = GradleRunner.create()
@@ -35,8 +35,15 @@ class LionWebGradlePluginTest {
 
     @Test
     fun `generatePropertiesLanguage`() {
-        projectDir!!.resolve("properties-language.json")
-            .writeText(this.javaClass.getResourceAsStream("/properties-language.json").bufferedReader().readText())
+        projectDir!!
+            .resolve("properties-language.json")
+            .writeText(
+                this
+                    .javaClass
+                    .getResourceAsStream("/properties-language.json")
+                    .bufferedReader()
+                    .readText(),
+            )
         projectDir!!.resolve("build.gradle.kts").writeText(
             """plugins {
                 id("org.jetbrains.kotlin.jvm") version "1.8.22"
@@ -48,7 +55,7 @@ class LionWebGradlePluginTest {
               importPackageNames.set(mutableMapOf("io.lionweb.Properties" to "com.strumenta.foo"))
               languages.add(file("properties-language.json"))
             }
-        """
+        """,
         )
 
         val runner = GradleRunner.create()

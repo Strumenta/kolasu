@@ -30,27 +30,31 @@ fun CompilationResultWithClassLoader.assertHasNotMessage(regex: Regex) {
 class IrPluginTest {
     @Test
     fun `IR plugin success`() {
-        val result = compile(
-            sourceFile = SourceFile.kotlin(
-                "main.kt",
-                """
+        val result =
+            compile(
+                sourceFile =
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
 fun main() {
   println(debug())
 }
 
 fun debug() = "Hello, World!"
-"""
+""",
+                    ),
             )
-        )
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
     }
 
     @Test
     fun `An AST Class`() {
-        val result = compile(
-            sourceFile = SourceFile.kotlin(
-                "main.kt",
-                """
+        val result =
+            compile(
+                sourceFile =
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
           import com.strumenta.kolasu.model.Node
 
     data class MyNode(var p1: Int) : Node()
@@ -60,9 +64,9 @@ fun main() {
   n.p1 = 2
 }
 
-"""
+""",
+                    ),
             )
-        )
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
     }
 
@@ -76,10 +80,12 @@ fun main() {
 
     @Test
     fun `An AST Class should have var properties`() {
-        val result = compile(
-            sourceFile = SourceFile.kotlin(
-                "main.kt",
-                """
+        val result =
+            compile(
+                sourceFile =
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
           import com.strumenta.kolasu.model.Node
 
     data class MyNode(val p1: Int, var p2: String) : Node()
@@ -89,17 +95,17 @@ fun main() {
   n.p2 = "bar"
 }
 
-"""
+""",
+                    ),
             )
+        result.assertHasMessage(
+            Regex("i: file:///[a-zA-Z0-9/\\-.]*:[0-9]+:[0-9]+ AST class MyNode identified"),
         )
         result.assertHasMessage(
-            Regex("i: file:///[a-zA-Z0-9/\\-.]*:[0-9]+:[0-9]+ AST class MyNode identified")
-        )
-        result.assertHasMessage(
-            Regex("w: file:///[a-zA-Z0-9/\\-.]*:[0-9]+:[0-9]+ Value param MyNode.p1 is not assignable")
+            Regex("w: file:///[a-zA-Z0-9/\\-.]*:[0-9]+:[0-9]+ Value param MyNode.p1 is not assignable"),
         )
         result.assertHasNotMessage(
-            Regex("w: file:///[a-zA-Z0-9/\\-.]*:[0-9]+:[0-9]+ Value param MyNode.p2 is not assignable")
+            Regex("w: file:///[a-zA-Z0-9/\\-.]*:[0-9]+:[0-9]+ Value param MyNode.p2 is not assignable"),
         )
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
@@ -107,10 +113,12 @@ fun main() {
 
     @Test
     fun `make node really observable`() {
-        val result = compile(
-            sourceFile = SourceFile.kotlin(
-                "main.kt",
-                """
+        val result =
+            compile(
+                sourceFile =
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
           package mytest
 
           import com.strumenta.kolasu.model.Node
@@ -149,9 +157,9 @@ fun main() {
   f.p2 = 4
 }
 
-"""
+""",
+                    ),
             )
-        )
         result.assertHasMessage(Regex("i: file:///[a-zA-Z0-9/\\-.]*:5:5 AST class mytest.MyNode identified"))
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
@@ -160,18 +168,24 @@ fun main() {
         mainKt.methods.find { it.name == "main" }!!.invoke(null)
         val myObserverClass = result.classLoader.loadClass("mytest.MyObserver")
         val myObserver = myObserverClass.fields.find { it.name == "INSTANCE" }!!.get(null)
-        val observations = myObserverClass.methods.find {
-            it.name == "getObservations"
-        }!!.invoke(myObserver) as List<String>
+        val observations =
+            myObserverClass
+                .methods
+                .find {
+                    it.name == "getObservations"
+                }!!
+                .invoke(myObserver) as List<String>
         assertEquals(listOf("p1: 1 -> 2", "p1: 2 -> 3", "p2: 0 -> 4"), observations)
     }
 
     @Test
     fun `auto set parent for single containment`() {
-        val result = compile(
-            sourceFile = SourceFile.kotlin(
-                "main.kt",
-                """
+        val result =
+            compile(
+                sourceFile =
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
           package mytest
 
           import com.strumenta.kolasu.model.Node
@@ -188,9 +202,9 @@ fun main() {
   require(n2.parent == n1) { "n2.parent does not change from null" }
 }
 
-"""
+""",
+                    ),
             )
-        )
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
         result.invokeMainMethod("mytest.MainKt")
@@ -198,10 +212,12 @@ fun main() {
 
     @Test
     fun `force to use ObservableLists`() {
-        val result = compile(
-            sourceFile = SourceFile.kotlin(
-                "main.kt",
-                """
+        val result =
+            compile(
+                sourceFile =
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
           package mytest
 
           import com.strumenta.kolasu.model.Node
@@ -225,19 +241,21 @@ fun main() {
   require(n3.parent == n1) { "n3.parent does not change from null" }
 }
 
-"""
+""",
+                    ),
             )
-        )
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         result.assertHasMessage("e: AST Nodes should use ObservableLists (see mytest.MyNode.p4)")
     }
 
     @Test
     fun `auto set parent for multiple containment`() {
-        val result = compile(
-            sourceFile = SourceFile.kotlin(
-                "main.kt",
-                """
+        val result =
+            compile(
+                sourceFile =
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
           package mytest
 
           import com.strumenta.kolasu.model.Node
@@ -263,9 +281,9 @@ fun main() {
   require(n3.parent == n1) { "n3.parent does not change from null" }
 }
 
-"""
+""",
+                    ),
             )
-        )
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
         result.invokeMainMethod("mytest.MainKt")
@@ -273,10 +291,12 @@ fun main() {
 
     @Test
     fun `references are auto-observed`() {
-        val result = compile(
-            sourceFile = SourceFile.kotlin(
-                "main.kt",
-                """
+        val result =
+            compile(
+                sourceFile =
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
           package mytest
 
           import com.strumenta.kolasu.model.Node
@@ -405,9 +425,9 @@ fun main() {
         assertEquals(listOf(), obsB.observations)
 }
 
-"""
+""",
+                    ),
             )
-        )
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
         result.invokeMainMethod("mytest.MainKt")
@@ -415,8 +435,9 @@ fun main() {
 
     private fun CompilationResultWithClassLoader.invokeMainMethod(className: String) {
         val mainKt = this.classLoader.loadClass(className)
-        val mainMethod = mainKt.methods.find { it.name == "main" }
-            ?: throw IllegalArgumentException("Main method not found in compiled code")
+        val mainMethod =
+            mainKt.methods.find { it.name == "main" }
+                ?: throw IllegalArgumentException("Main method not found in compiled code")
         when (mainMethod.parameterCount) {
             0 -> {
                 mainMethod.invoke(null)
@@ -427,7 +448,7 @@ fun main() {
             else -> {
                 throw IllegalStateException(
                     "The main method found expect these parameters: ${mainMethod.parameters}. " +
-                        "Main method: $mainMethod"
+                        "Main method: $mainMethod",
                 )
             }
         }
@@ -437,14 +458,15 @@ fun main() {
 @ExperimentalCompilerApi
 fun compile(
     sourceFiles: List<SourceFile>,
-    plugin: CompilerPluginRegistrar = StarLasuComponentRegistrar()
+    plugin: CompilerPluginRegistrar = StarLasuComponentRegistrar(),
 ): CompilationResultWithClassLoader {
-    val kotlinCompilation = KotlinCompilation().apply {
-        sources = sourceFiles
-        // useIR = true
-        compilerPluginRegistrars = listOf(plugin)
-        inheritClassPath = true
-    }
+    val kotlinCompilation =
+        KotlinCompilation().apply {
+            sources = sourceFiles
+            // useIR = true
+            compilerPluginRegistrars = listOf(plugin)
+            inheritClassPath = true
+        }
     val result = kotlinCompilation.compile()
     return CompilationResultWithClassLoader(result, kotlinCompilation.classpaths, kotlinCompilation.classesDir)
 }
@@ -452,7 +474,7 @@ fun compile(
 data class CompilationResultWithClassLoader(
     val compilationResult: CompilationResult,
     val classpaths: kotlin.collections.List<java.io.File>,
-    val outputDirectory: File
+    val outputDirectory: File,
 ) {
     val messages: String
         get() = compilationResult.messages
@@ -460,16 +482,15 @@ data class CompilationResultWithClassLoader(
         get() = compilationResult.exitCode
 
     // It is important to REUSE the classloader and not re-create it
-    val classLoader = URLClassLoader(
-        // Include the original classpaths and the output directory to be able to load classes from dependencies.
-        classpaths.plus(outputDirectory).map { it.toURI().toURL() }.toTypedArray(),
-        this::class.java.classLoader
-    )
+    val classLoader =
+        URLClassLoader(
+            // Include the original classpaths and the output directory to be able to load classes from dependencies.
+            classpaths.plus(outputDirectory).map { it.toURI().toURL() }.toTypedArray(),
+            this::class.java.classLoader,
+        )
 }
 
 fun compile(
     sourceFile: SourceFile,
-    plugin: CompilerPluginRegistrar = StarLasuComponentRegistrar()
-): CompilationResultWithClassLoader {
-    return compile(listOf(sourceFile), plugin)
-}
+    plugin: CompilerPluginRegistrar = StarLasuComponentRegistrar(),
+): CompilationResultWithClassLoader = compile(listOf(sourceFile), plugin)

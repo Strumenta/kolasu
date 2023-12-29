@@ -6,7 +6,9 @@ import com.github.ajalt.clikt.parameters.types.file
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 
-class LionWebLanguageGeneratorCommand(val language: Language) : CliktCommand() {
+class LionWebLanguageGeneratorCommand(
+    val language: Language,
+) : CliktCommand() {
     val languageFile by argument().file(canBeDir = false)
 
     override fun run() {
