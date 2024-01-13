@@ -33,7 +33,10 @@ import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.parentAsClass
 import org.jetbrains.kotlin.ir.util.statements
 import org.jetbrains.kotlin.ir.util.toIrConst
+import org.jetbrains.kotlin.name.CallableId
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 
 object StarLasuGeneratedDeclarationKey : GeneratedDeclarationKey()
@@ -64,7 +67,11 @@ class SettingParentExtension(
                             val parentPropertySymbol =
                                 pluginContext
                                     .referenceProperties(
-                                        FqName("${propertyTypeClassSymbol.descriptor.fqNameOrNull()}.parent"),
+                                        CallableId(
+                                            ClassId.topLevel(propertyTypeClassSymbol.descriptor.fqNameOrNull()!!),
+                                            Name
+                                                .identifier("parent"),
+                                        ),
                                     ).single()
                             val parentSetter = parentPropertySymbol.owner.setter!!
                             // TODO remove from previous parent: field?.removeChild(this)
@@ -87,7 +94,10 @@ class SettingParentExtension(
                     val registerObserver =
                         pluginContext
                             .referenceFunctions(
-                                FqName("${ObservableList::class.qualifiedName}.subscribe"),
+                                CallableId(
+                                    ClassId.topLevel(FqName(ObservableList::class.qualifiedName!!)),
+                                    Name.identifier("subscribe"),
+                                ),
                             ).single()
 
                     val propertyGetter = declaration.getter!!
@@ -108,9 +118,8 @@ class SettingParentExtension(
                                 val thisValue = irClass.thisReceiver!!
                                 val multiplePropertyListObserverConstructor =
                                     pluginContext
-                                        .referenceConstructors(
-                                            FqName(MultiplePropertyListObserver::class.qualifiedName!!),
-                                        ).single()
+                                        .referenceConstructors(MultiplePropertyListObserver::class)
+                                        .single()
                                 // dispatchReceiver: p5 -> this.getP5()
                                 dispatchReceiver =
                                     irCall(propertyGetter).apply {

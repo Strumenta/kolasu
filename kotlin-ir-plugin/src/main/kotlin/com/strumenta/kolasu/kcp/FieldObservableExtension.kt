@@ -40,7 +40,8 @@ class FieldObservableExtension(
     val pluginContext: IrPluginContext,
 ) : IrElementTransformerVoidWithContext() {
     val notifyOfPropertyChange: IrSimpleFunctionSymbol by lazy {
-        val callableId = CallableId(ClassId.topLevel(FqName(Node::class.qualifiedName!!)), Name.identifier("notifyOfPropertyChange"))
+        val callableId =
+            CallableId(ClassId.topLevel(FqName(Node::class.qualifiedName!!)), Name.identifier("notifyOfPropertyChange"))
         pluginContext
             .referenceFunctions(
                 callableId,
@@ -56,7 +57,8 @@ class FieldObservableExtension(
             val referenceByNameSetContainerMethod =
                 pluginContext
                     .referenceFunctions(
-                        FqName("${ReferenceByName::class.qualifiedName}.setContainer"),
+                        ReferenceByName::class,
+                        "setContainer",
                     ).single()
 
             val propertyGetter = declaration.getter!!
