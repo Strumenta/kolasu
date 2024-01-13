@@ -17,6 +17,8 @@ dependencies {
     testImplementation("io.github.mkfl3x:json-delta:1.3")
     implementation("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebVersion")
     api(project(":core"))
+
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
 }
 
 publishing {

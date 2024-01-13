@@ -1,5 +1,8 @@
+val kotlinVersion = extra["kotlinVersion"]
+
 dependencies {
     implementation("org.redundent:kotlin-xml-builder:1.9.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation(libs.gson)
 
     implementation(project(":core"))

@@ -22,6 +22,7 @@ dependencies {
     api("com.github.ajalt.clikt:clikt:$cliktVersion")
 
     testImplementation("org.antlr:antlr4-runtime:$antlrVersion")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
 }
 
 fun Project.useAntlrInTests(packageName: String) {

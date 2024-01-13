@@ -1,6 +1,8 @@
+val kotlinVersion = extra["kotlinVersion"]
+
 dependencies {
-    // api("io.reactivex.rxjava3:rxjava:3.1.1")
     api("com.badoo.reaktive:reaktive:2.0.1")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
 }
 
 publishing {
