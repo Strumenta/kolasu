@@ -26,7 +26,10 @@ import org.jetbrains.kotlin.ir.util.allParameters
 import org.jetbrains.kotlin.ir.util.parentAsClass
 import org.jetbrains.kotlin.ir.util.statements
 import org.jetbrains.kotlin.ir.util.toIrConst
+import org.jetbrains.kotlin.name.CallableId
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.Name
 
 // object AutoObserveReferenceOrigin : IrDeclarationOriginImpl("AutoObserveReference", true)
 
@@ -36,11 +39,13 @@ import org.jetbrains.kotlin.name.FqName
 class FieldObservableExtension(
     val pluginContext: IrPluginContext,
 ) : IrElementTransformerVoidWithContext() {
-    val notifyOfPropertyChange: IrSimpleFunctionSymbol =
+    val notifyOfPropertyChange: IrSimpleFunctionSymbol by lazy {
+        val callableId = CallableId(ClassId.topLevel(FqName(Node::class.qualifiedName!!)), Name.identifier("notifyOfPropertyChange"))
         pluginContext
             .referenceFunctions(
-                FqName("${Node::class.qualifiedName}.notifyOfPropertyChange"),
+                callableId,
             ).single()
+    }
 
     override fun visitPropertyNew(declaration: IrProperty): IrStatement {
         if (declaration.declareReference()) {
