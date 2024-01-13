@@ -38,7 +38,8 @@ val IrDeclarationBase.compilerSourceLocation: CompilerMessageSourceLocation?
     }
 
 fun IrValueParameter.isVal(): Boolean {
-    return this.psiElement!!.firstChild.text == "val"
+    val text = this.file.getIoFile()!!.readText().substring(this.startOffset, this.endOffset).trim()
+    return text.startsWith("val ")
 }
 
 @ObsoleteDescriptorBasedAPI
