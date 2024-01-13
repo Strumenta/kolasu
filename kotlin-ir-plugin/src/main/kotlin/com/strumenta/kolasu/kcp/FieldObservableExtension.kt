@@ -15,7 +15,6 @@ import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOriginImpl
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
@@ -29,7 +28,7 @@ import org.jetbrains.kotlin.ir.util.statements
 import org.jetbrains.kotlin.ir.util.toIrConst
 import org.jetbrains.kotlin.name.FqName
 
-object AutoObserveReferenceOrigin : IrDeclarationOriginImpl("AutoObserveReference", true)
+// object AutoObserveReferenceOrigin : IrDeclarationOriginImpl("AutoObserveReference", true)
 
 /**
  * Make a certain field observable.
