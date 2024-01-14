@@ -29,22 +29,28 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-data class NodeFoo(val name: String) : Node()
-class MyRoot(val foo: Int) : Node(), Statement
+data class NodeFoo(
+    val name: String,
+) : Node()
 
-class MySimpleLangCu() : Node()
+class MyRoot(
+    val foo: Int,
+) : Node(),
+    Statement
+
+class MySimpleLangCu : Node()
 
 class ModelTest {
-
     @Test
     fun generateSimpleModel() {
-        val cu = CompilationUnit(
-            listOf(
-                VarDeclaration(Visibility.PUBLIC, "a", StringLiteral("foo")),
-                VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar")),
-                VarDeclaration(Visibility.PRIVATE, "c", LocalDateTimeLiteral(LocalDateTime.now()))
-            )
-        ).withRange(Range(Point(1, 0), Point(1, 1)))
+        val cu =
+            CompilationUnit(
+                listOf(
+                    VarDeclaration(Visibility.PUBLIC, "a", StringLiteral("foo")),
+                    VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar")),
+                    VarDeclaration(Visibility.PRIVATE, "c", LocalDateTimeLiteral(LocalDateTime.now())),
+                ),
+            ).withRange(Range(Point(1, 0), Point(1, 1)))
         val nsURI = "https://strumenta.com/simplemm"
         val metamodelBuilder = MetamodelBuilder(packageName(CompilationUnit::class), nsURI, "simplemm")
         metamodelBuilder.provideClass(CompilationUnit::class)
@@ -119,10 +125,11 @@ class ModelTest {
     fun originIsSerialized() {
         val n1 = NodeFoo("abc")
         val n2 = NodeFoo("def").withOrigin(n1)
-        val ePackage = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo")
-            .apply {
-                provideClass(NodeFoo::class)
-            }.generate()
+        val ePackage =
+            MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo")
+                .apply {
+                    provideClass(NodeFoo::class)
+                }.generate()
         val mapping = KolasuToEMFMapping()
         val eo1 = n1.toEObject(ePackage, mapping)
         val eo2 = n2.toEObject(ePackage, mapping)
@@ -131,18 +138,21 @@ class ModelTest {
         assertEquals(
             "abc",
             ((eo2.eGet("origin") as EObject).eGet("node") as EObject)
-                .eGet("name")
+                .eGet("name"),
         )
     }
 
     @Test
     fun destinationIsSerialized() {
-        val n1 = NodeFoo("abc").apply {
-            destinations += TextFileDestination(Range(Point(1, 8), Point(7, 4)))
-        }
-        val ePackage = MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo").apply {
-            provideClass(NodeFoo::class)
-        }.generate()
+        val n1 =
+            NodeFoo("abc").apply {
+                destinations += TextFileDestination(Range(Point(1, 8), Point(7, 4)))
+            }
+        val ePackage =
+            MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo")
+                .apply {
+                    provideClass(NodeFoo::class)
+                }.generate()
         val eo1 = n1.toEObject(ePackage)
         val eo2Destination = eo1.eGet("destination")
         assertEquals(true, eo2Destination is EObject)
@@ -183,16 +193,24 @@ class ModelTest {
         val r1 = MyRoot(124)
         val eo1 = r1.toEObject(res)
         println(eo1.eClass().eSuperTypes)
-        assertEquals(setOf("ASTNode", "Statement"), eo1.eClass().eSuperTypes.map { it.name }.toSet())
+        assertEquals(
+            setOf("ASTNode", "Statement"),
+            eo1
+                .eClass()
+                .eSuperTypes
+                .map { it.name }
+                .toSet(),
+        )
     }
 
     @Test
     fun cyclicReferenceByNameOnSingleReference() {
-        val metamodelBuilder = MetamodelBuilder(
-            "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm",
-            "simplemm"
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                "com.strumenta.kolasu.emf",
+                "https://strumenta.com/simplemm",
+                "simplemm",
+            )
         metamodelBuilder.provideClass(NodeWithReference::class)
         val ePackage = metamodelBuilder.generate()
 
@@ -216,17 +234,18 @@ class ModelTest {
     }
   }
 }""",
-            eo1.saveAsJson()
+            eo1.saveAsJson(),
         )
     }
 
     @Test
     fun cyclicReferenceByNameOnMultipleReference() {
-        val metamodelBuilder = MetamodelBuilder(
-            "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm",
-            "simplemm"
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                "com.strumenta.kolasu.emf",
+                "https://strumenta.com/simplemm",
+                "simplemm",
+            )
         metamodelBuilder.provideClass(NodeWithReference::class)
         val ePackage = metamodelBuilder.generate()
 
@@ -280,17 +299,18 @@ class ModelTest {
     "name" : "foo"
   }
 }""",
-            eo1.saveAsJson()
+            eo1.saveAsJson(),
         )
     }
 
     @Test
     fun forwardAndBackwardReferences() {
-        val metamodelBuilder = MetamodelBuilder(
-            "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm",
-            "simplemm"
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                "com.strumenta.kolasu.emf",
+                "https://strumenta.com/simplemm",
+                "simplemm",
+            )
         metamodelBuilder.provideClass(NodeWithForwardReference::class)
         val ePackage = metamodelBuilder.generate()
 
@@ -366,21 +386,23 @@ class ModelTest {
     }
   }
 }""",
-            eoA.saveAsJson()
+            eoA.saveAsJson(),
         )
     }
 
     @Test
     fun saveToJSONWithParseTreeOrigin() {
         // We verify the ParseTreeOrigin is not saved, but the range is
-        val pt = SimpleLangParser(CommonTokenStream(SimpleLangLexer(CharStreams.fromString("input A is string"))))
-            .compilationUnit()
+        val pt =
+            SimpleLangParser(CommonTokenStream(SimpleLangLexer(CharStreams.fromString("input A is string"))))
+                .compilationUnit()
         val ast = MySimpleLangCu().withParseTreeNode(pt)
-        val metamodelBuilder = MetamodelBuilder(
-            "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm",
-            "simplemm"
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                "com.strumenta.kolasu.emf",
+                "https://strumenta.com/simplemm",
+                "simplemm",
+            )
         metamodelBuilder.provideClass(MySimpleLangCu::class)
         val ePackage = metamodelBuilder.generate()
 
@@ -400,7 +422,7 @@ class ModelTest {
     }
   }
 }""",
-            eo.saveAsJson()
+            eo.saveAsJson(),
         )
     }
 
@@ -408,11 +430,12 @@ class ModelTest {
     fun saveToJSONNodeOrigin() {
         val someOtherNode = MyRoot(123)
         val ast = MySimpleLangCu().withOrigin(someOtherNode)
-        val metamodelBuilder = MetamodelBuilder(
-            "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm",
-            "simplemm"
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                "com.strumenta.kolasu.emf",
+                "https://strumenta.com/simplemm",
+                "simplemm",
+            )
         metamodelBuilder.provideClass(MySimpleLangCu::class)
         metamodelBuilder.provideClass(MyRoot::class)
         val ePackage = metamodelBuilder.generate()
@@ -433,17 +456,18 @@ class ModelTest {
     }
   }
 }""",
-            eo2.saveAsJson()
+            eo2.saveAsJson(),
         )
     }
 
     @Test
     fun handlesGenericNodes() {
-        val metamodelBuilder = MetamodelBuilder(
-            "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm",
-            "simplemm"
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                "com.strumenta.kolasu.emf",
+                "https://strumenta.com/simplemm",
+                "simplemm",
+            )
         val ePackage = metamodelBuilder.generate()
         val res = ResourceImpl()
         res.contents.add(ePackage)
@@ -453,7 +477,7 @@ class ModelTest {
             """{
   "eClass" : "https://strumenta.com/starlasu/v2#//GenericNode"
 }""",
-            gn.saveAsJson()
+            gn.saveAsJson(),
         )
     }
 }

@@ -44,9 +44,9 @@ import kotlin.system.measureTimeMillis
  * instance every time you need to parse some source code, or performance may suffer.
  */
 abstract class KolasuANTLRParser<R : INode, P : Parser, C : ParserRuleContext, T : KolasuToken>(
-    tokenFactory: TokenFactory<T>
-) : KolasuANTLRLexer<T>(tokenFactory), ASTParser<R> {
-
+    tokenFactory: TokenFactory<T>,
+) : KolasuANTLRLexer<T>(tokenFactory),
+    ASTParser<R> {
     protected var predictionContextCache = PredictionContextCache()
 
     /**
@@ -73,17 +73,23 @@ abstract class KolasuANTLRParser<R : INode, P : Parser, C : ParserRuleContext, T
         parseTreeRoot: C,
         considerRange: Boolean = true,
         issues: MutableList<Issue>,
-        source: Source? = null
+        source: Source? = null,
     ): R?
 
-    protected open fun attachListeners(parser: P, issues: MutableList<Issue>) {
+    protected open fun attachListeners(
+        parser: P,
+        issues: MutableList<Issue>,
+    ) {
         parser.injectErrorCollectorInParser(issues)
     }
 
     /**
      * Creates the first-stage parser.
      */
-    protected open fun createParser(inputStream: CharStream, issues: MutableList<Issue>): P {
+    protected open fun createParser(
+        inputStream: CharStream,
+        issues: MutableList<Issue>,
+    ): P {
         val lexer = createANTLRLexer(inputStream)
         attachListeners(lexer, issues)
         val tokenStream = createTokenStream(lexer)
@@ -101,15 +107,19 @@ abstract class KolasuANTLRParser<R : INode, P : Parser, C : ParserRuleContext, T
      * Checks the parse tree for correctness. If you're concerned about performance, you may want to override this to
      * do nothing.
      */
-    protected open fun verifyParseTree(parser: Parser, issues: MutableList<Issue>, root: ParserRuleContext) {
+    protected open fun verifyParseTree(
+        parser: Parser,
+        issues: MutableList<Issue>,
+        root: ParserRuleContext,
+    ) {
         val lastToken = parser.tokenStream.get(parser.tokenStream.index())
         if (lastToken.type != Token.EOF) {
             issues.add(
                 Issue(
                     IssueType.SYNTACTIC,
                     "The whole input was not consumed",
-                    range = lastToken!!.endPoint.asRange
-                )
+                    range = lastToken!!.endPoint.asRange,
+                ),
             )
         }
 
@@ -123,12 +133,15 @@ abstract class KolasuANTLRParser<R : INode, P : Parser, C : ParserRuleContext, T
             {
                 val message = "Error node found (token: ${it.symbol?.text})"
                 issues.add(Issue.syntactic(message, range = it.toRange()))
-            }
+            },
         )
     }
 
     @JvmOverloads
-    fun parseFirstStage(code: String, measureLexingTime: Boolean = false): FirstStageParsingResult<C> {
+    fun parseFirstStage(
+        code: String,
+        measureLexingTime: Boolean = false,
+    ): FirstStageParsingResult<C> {
         return parseFirstStage(CharStreams.fromString(code), measureLexingTime)
     }
 
@@ -136,7 +149,7 @@ abstract class KolasuANTLRParser<R : INode, P : Parser, C : ParserRuleContext, T
     fun parseFirstStage(
         inputStream: InputStream,
         charset: Charset = Charsets.UTF_8,
-        measureLexingTime: Boolean = false
+        measureLexingTime: Boolean = false,
     ): FirstStageParsingResult<C> {
         return parseFirstStage(CharStreams.fromStream(inputStream, charset), measureLexingTime)
     }
@@ -146,36 +159,46 @@ abstract class KolasuANTLRParser<R : INode, P : Parser, C : ParserRuleContext, T
      * the [parse] method, that returns an AST which is simpler to use and query.
      */
     @JvmOverloads
-    fun parseFirstStage(inputStream: CharStream, measureLexingTime: Boolean = false): FirstStageParsingResult<C> {
+    fun parseFirstStage(
+        inputStream: CharStream,
+        measureLexingTime: Boolean = false,
+    ): FirstStageParsingResult<C> {
         val issues = LinkedList<Issue>()
         var root: C?
         var lexingTime: Long? = null
-        val time = measureTimeMillis {
-            val parser = createParser(inputStream, issues)
-            countExecution(parser)
-            if (measureLexingTime) {
-                val tokenStream = parser.inputStream
-                if (tokenStream is CommonTokenStream) {
-                    lexingTime = measureTimeMillis {
-                        tokenStream.fill()
-                        tokenStream.seek(0)
+        val time =
+            measureTimeMillis {
+                val parser = createParser(inputStream, issues)
+                countExecution(parser)
+                if (measureLexingTime) {
+                    val tokenStream = parser.inputStream
+                    if (tokenStream is CommonTokenStream) {
+                        lexingTime =
+                            measureTimeMillis {
+                                tokenStream.fill()
+                                tokenStream.seek(0)
+                            }
                     }
                 }
+                root = invokeRootRule(parser)
+                if (root != null) {
+                    verifyParseTree(parser, issues, root!!)
+                }
             }
-            root = invokeRootRule(parser)
-            if (root != null) {
-                verifyParseTree(parser, issues, root!!)
-            }
-        }
         return FirstStageParsingResult(issues, root, null, null, time, lexingTime)
     }
 
     @JvmOverloads
-    fun parseFirstStage(file: File, charset: Charset = Charsets.UTF_8, measureLexingTime: Boolean = false):
-        FirstStageParsingResult<C> =
-        parseFirstStage(FileInputStream(file), charset, measureLexingTime)
+    fun parseFirstStage(
+        file: File,
+        charset: Charset = Charsets.UTF_8,
+        measureLexingTime: Boolean = false,
+    ): FirstStageParsingResult<C> = parseFirstStage(FileInputStream(file), charset, measureLexingTime)
 
-    protected open fun postProcessAst(ast: R, issues: MutableList<Issue>): R {
+    protected open fun postProcessAst(
+        ast: R,
+        issues: MutableList<Issue>,
+    ): R {
         return ast
     }
 
@@ -183,7 +206,7 @@ abstract class KolasuANTLRParser<R : INode, P : Parser, C : ParserRuleContext, T
         code: String,
         considerRange: Boolean,
         measureLexingTime: Boolean,
-        source: Source?
+        source: Source?,
     ): ParsingResultWithFirstStage<R, C> {
         val inputStream = CharStreams.fromString(code)
         return parse(inputStream, considerRange, measureLexingTime, source)
@@ -194,7 +217,7 @@ abstract class KolasuANTLRParser<R : INode, P : Parser, C : ParserRuleContext, T
         inputStream: CharStream,
         considerRange: Boolean = true,
         measureLexingTime: Boolean = false,
-        source: Source? = null
+        source: Source? = null,
     ): ParsingResultWithFirstStage<R, C> {
         val start = System.currentTimeMillis()
         val firstStage = parseFirstStage(inputStream, measureLexingTime)
@@ -214,7 +237,7 @@ abstract class KolasuANTLRParser<R : INode, P : Parser, C : ParserRuleContext, T
             inputStream.getText(Interval(0, inputStream.index() + 1)),
             null,
             now - start,
-            firstStage
+            firstStage,
         )
     }
 
@@ -222,14 +245,14 @@ abstract class KolasuANTLRParser<R : INode, P : Parser, C : ParserRuleContext, T
         file: File,
         charset: Charset,
         considerRange: Boolean,
-        measureLexingTime: Boolean
+        measureLexingTime: Boolean,
     ): ParsingResult<R> =
         parse(
             FileInputStream(file),
             charset,
             considerRange = considerRange,
             measureLexingTime = measureLexingTime,
-            FileSource(file)
+            FileSource(file),
         )
 
     // For convenient use from Java
@@ -239,7 +262,7 @@ abstract class KolasuANTLRParser<R : INode, P : Parser, C : ParserRuleContext, T
     fun processProperties(
         node: INode,
         propertyOperation: (PropertyDescription) -> Unit,
-        propertiesToIgnore: Set<String> = emptySet()
+        propertiesToIgnore: Set<String> = emptySet(),
     ) = node.processProperties(propertiesToIgnore, propertyOperation)
 
     /**
@@ -252,9 +275,7 @@ abstract class KolasuANTLRParser<R : INode, P : Parser, C : ParserRuleContext, T
         ast?.assignParents()
     }
 
-    protected fun shouldWeClearCaches(): Boolean {
-        return executionsToNextCacheClean <= 0
-    }
+    protected fun shouldWeClearCaches(): Boolean = executionsToNextCacheClean <= 0
 
     protected var executionCounter = 0
     var cacheCycleSize = 500
@@ -284,24 +305,26 @@ abstract class KolasuANTLRParser<R : INode, P : Parser, C : ParserRuleContext, T
 
 fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
     this.removeErrorListeners()
-    this.addErrorListener(object : BaseErrorListener() {
-        override fun syntaxError(
-            p0: Recognizer<*, *>?,
-            p1: Any?,
-            line: Int,
-            charPositionInLine: Int,
-            errorMessage: String?,
-            p5: RecognitionException?
-        ) {
-            issues.add(
-                Issue(
-                    IssueType.SYNTACTIC,
-                    errorMessage ?: "unspecified",
-                    range = Point(line, charPositionInLine).asRange
+    this.addErrorListener(
+        object : BaseErrorListener() {
+            override fun syntaxError(
+                p0: Recognizer<*, *>?,
+                p1: Any?,
+                line: Int,
+                charPositionInLine: Int,
+                errorMessage: String?,
+                p5: RecognitionException?,
+            ) {
+                issues.add(
+                    Issue(
+                        IssueType.SYNTACTIC,
+                        errorMessage ?: "unspecified",
+                        range = Point(line, charPositionInLine).asRange,
+                    ),
                 )
-            )
-        }
-    })
+            }
+        },
+    )
 }
 
 class ParsingResultWithFirstStage<RootNode : INode, P : ParserRuleContext>(
@@ -310,5 +333,5 @@ class ParsingResultWithFirstStage<RootNode : INode, P : ParserRuleContext>(
     code: String? = null,
     incompleteNode: INode? = null,
     time: Long? = null,
-    val firstStage: FirstStageParsingResult<P>
+    val firstStage: FirstStageParsingResult<P>,
 ) : ParsingResult<RootNode>(issues, root, code, incompleteNode, time)

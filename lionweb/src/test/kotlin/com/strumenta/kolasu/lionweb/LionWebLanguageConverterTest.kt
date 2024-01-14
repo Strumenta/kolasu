@@ -12,30 +12,38 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
-data class SimpleRoot(val id: Int, val childrez: MutableList<SimpleDecl>) : Node()
+data class SimpleRoot(
+    val id: Int,
+    val childrez: MutableList<SimpleDecl>,
+) : Node()
 
 sealed class SimpleDecl : Node()
 
 data class SimpleNodeA(
     override val name: String,
     val ref: ReferenceByName<SimpleNodeA>,
-    val child: SimpleNodeB?
-) : Named, SimpleDecl(), MyRelevantInterface, MyIrrelevantInterface
+    val child: SimpleNodeB?,
+) : SimpleDecl(),
+    Named,
+    MyRelevantInterface,
+    MyIrrelevantInterface
 
 interface MyIrrelevantInterface
 
 @NodeType
 interface MyRelevantInterface
 
-data class SimpleNodeB(val value: String) : SimpleDecl()
+data class SimpleNodeB(
+    val value: String,
+) : SimpleDecl()
 
 class LionWebLanguageConverterTest {
-
     @Test
     fun exportSimpleLanguage() {
-        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
-            addClass(SimpleRoot::class)
-        }
+        val kLanguage =
+            KolasuLanguage("com.strumenta.SimpleLang").apply {
+                addClass(SimpleRoot::class)
+            }
         assertEquals(5, kLanguage.astClasses.size)
         val lwLanguage = LionWebLanguageConverter().exportToLionWeb(kLanguage)
         assertEquals("1", lwLanguage.version)
@@ -83,7 +91,7 @@ class LionWebLanguageConverterTest {
 
         assertEquals(
             true,
-            LionCoreBuiltins.getINamed().getPropertyByName("name") in simpleNodeA.allFeatures()
+            LionCoreBuiltins.getINamed().getPropertyByName("name") in simpleNodeA.allFeatures(),
         )
 
         val simpleNodeARef = simpleNodeA.getReferenceByName("ref")!!

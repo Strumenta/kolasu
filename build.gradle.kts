@@ -9,7 +9,7 @@ plugins {
 
     id("java-library")
     id("net.researchgate.release") version "3.0.2"
-    id("org.jetbrains.kotlinx.kover") version "0.7.1" apply(false)
+    id("org.jetbrains.kotlinx.kover") version "0.7.1" apply (false)
 }
 
 allprojects {
@@ -101,7 +101,7 @@ subprojects {
         }
     }
 
-    val jvm_version = extra["jvm_version"]!! as String
+    val jvmVersion = extra["jvm_version"]!! as String
 
     tasks
         .withType(
@@ -113,7 +113,7 @@ subprojects {
                 .KotlinCompile::class,
         ).all {
             kotlinOptions {
-                jvmTarget = "$jvm_version"
+                jvmTarget = "$jvmVersion"
             }
         }
 

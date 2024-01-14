@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class ScopeTest {
-
     @Test
     fun testScopeWithIgnoreCase() {
         val node = ClassDecl("TestNode")

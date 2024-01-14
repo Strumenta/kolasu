@@ -29,56 +29,65 @@ import kotlin.reflect.KType
 
 interface EDataTypeHandler {
     fun canHandle(ktype: KType): Boolean
+
     fun toDataType(ktype: KType): EDataType
+
     fun external(): Boolean
 }
 
 interface EClassTypeHandler {
-    fun canHandle(ktype: KType): Boolean {
-        return if (ktype.classifier is KClass<*>) {
+    fun canHandle(ktype: KType): Boolean =
+        if (ktype.classifier is KClass<*>) {
             canHandle(ktype.classifier as KClass<*>)
         } else {
             false
         }
-    }
 
     fun canHandle(kclass: KClass<*>): Boolean
-    fun toEClass(kclass: KClass<*>, eClassProvider: ClassifiersProvider): EClass
+
+    fun toEClass(
+        kclass: KClass<*>,
+        eClassProvider: ClassifiersProvider,
+    ): EClass
+
     fun external(): Boolean
 }
 
 interface ClassifiersProvider {
-    fun isDataType(ktype: KType): Boolean {
-        return try {
+    fun isDataType(ktype: KType): Boolean =
+        try {
             provideDataType(ktype)
             true
         } catch (e: Exception) {
             false
         }
-    }
 
     fun provideClass(kClass: KClass<*>): EClass
+
     fun provideDataType(ktype: KType): EDataType?
 }
 
-class KolasuClassHandler(val kolasuKClass: KClass<*>, val kolasuEClass: EClass) : EClassTypeHandler {
+class KolasuClassHandler(
+    val kolasuKClass: KClass<*>,
+    val kolasuEClass: EClass,
+) : EClassTypeHandler {
     override fun canHandle(kclass: KClass<*>): Boolean = kclass == kolasuKClass
 
-    override fun toEClass(kclass: KClass<*>, eClassProvider: ClassifiersProvider): EClass {
-        return kolasuEClass
-    }
+    override fun toEClass(
+        kclass: KClass<*>,
+        eClassProvider: ClassifiersProvider,
+    ): EClass = kolasuEClass
 
     override fun external(): Boolean = true
 }
 
-class KolasuDataTypeHandler(val kolasuKClass: KClass<*>, val kolasuDataType: EDataType) : EDataTypeHandler {
-    override fun canHandle(ktype: KType): Boolean {
-        return ktype.classifier == kolasuKClass && ktype.arguments.isEmpty()
-    }
+class KolasuDataTypeHandler(
+    val kolasuKClass: KClass<*>,
+    val kolasuDataType: EDataType,
+) : EDataTypeHandler {
+    override fun canHandle(ktype: KType): Boolean = ktype.classifier == kolasuKClass && ktype.arguments.isEmpty()
 
-    override fun toDataType(ktype: KType): EDataType {
-        return kolasuDataType
-    }
+    override fun toDataType(ktype: KType): EDataType = kolasuDataType
 
     override fun external(): Boolean = true
 }
@@ -98,26 +107,30 @@ val ResultHandler = KolasuClassHandler(Result::class, STARLASU_METAMODEL.getECla
 
 val StatementHandler = KolasuClassHandler(Statement::class, STARLASU_METAMODEL.getEClass("Statement"))
 val ExpressionHandler = KolasuClassHandler(Expression::class, STARLASU_METAMODEL.getEClass("Expression"))
-val EntityDeclarationHandler = KolasuClassHandler(
-    EntityDeclaration::class,
-    STARLASU_METAMODEL
-        .getEClass("EntityDeclaration")
-)
-val PlaceholderElementHandler = KolasuClassHandler(
-    PlaceholderElement::class,
-    STARLASU_METAMODEL
-        .getEClass("PlaceholderElement")
-)
+val EntityDeclarationHandler =
+    KolasuClassHandler(
+        EntityDeclaration::class,
+        STARLASU_METAMODEL
+            .getEClass("EntityDeclaration"),
+    )
+val PlaceholderElementHandler =
+    KolasuClassHandler(
+        PlaceholderElement::class,
+        STARLASU_METAMODEL
+            .getEClass("PlaceholderElement"),
+    )
 
 val ErrorNodeHandler = KolasuClassHandler(ErrorNode::class, STARLASU_METAMODEL.getEClass("ErrorNode"))
-val GenericErrorNodeHandler = KolasuClassHandler(
-    GenericErrorNode::class,
-    STARLASU_METAMODEL.getEClass("GenericErrorNode")
-)
-val GenericNodeHandler = KolasuClassHandler(
-    GenericNode::class,
-    STARLASU_METAMODEL.getEClass("GenericNode")
-)
+val GenericErrorNodeHandler =
+    KolasuClassHandler(
+        GenericErrorNode::class,
+        STARLASU_METAMODEL.getEClass("GenericErrorNode"),
+    )
+val GenericNodeHandler =
+    KolasuClassHandler(
+        GenericNode::class,
+        STARLASU_METAMODEL.getEClass("GenericNode"),
+    )
 
 val StringHandler = KolasuDataTypeHandler(String::class, EcorePackage.eINSTANCE.eString)
 val CharHandler = KolasuDataTypeHandler(Char::class, EcorePackage.eINSTANCE.eChar)
@@ -134,33 +147,36 @@ val KClass<*>.eClassifierName: String
     get() = this.java.eClassifierName
 
 val Class<*>.eClassifierName: String
-    get() = if (this.enclosingClass != null) {
-        "${this.enclosingClass.simpleName}.${this.simpleName}"
-    } else {
-        this.simpleName
-    }
+    get() =
+        if (this.enclosingClass != null) {
+            "${this.enclosingClass.simpleName}.${this.simpleName}"
+        } else {
+            this.simpleName
+        }
 
-class ResourceClassTypeHandler(val resource: Resource, val ownPackage: EPackage) : EClassTypeHandler {
+class ResourceClassTypeHandler(
+    val resource: Resource,
+    val ownPackage: EPackage,
+) : EClassTypeHandler {
     override fun canHandle(kclass: KClass<*>): Boolean = getPackage(packageName(kclass)) != null
 
     private fun getPackage(packageName: String): EPackage? =
         resource.contents.find { it is EPackage && it != ownPackage && it.name == packageName } as EPackage?
 
-    override fun toEClass(kclass: KClass<*>, eClassProvider: ClassifiersProvider): EClass {
-        return getPackage(packageName(kclass))!!.eClassifiers.find {
+    override fun toEClass(
+        kclass: KClass<*>,
+        eClassProvider: ClassifiersProvider,
+    ): EClass =
+        getPackage(packageName(kclass))!!.eClassifiers.find {
             it is EClass && it.name == kclass.simpleName
         } as EClass? ?: throw NoClassDefFoundError(kclass.qualifiedName)
-    }
 
     override fun external(): Boolean = true
 }
 
-internal fun EPackage.hasClassifierNamed(name: String): Boolean {
-    return this.eClassifiers.any { it.name == name }
-}
+internal fun EPackage.hasClassifierNamed(name: String): Boolean = this.eClassifiers.any { it.name == name }
 
-internal fun EPackage.classifierByName(name: String): EClassifier {
-    return this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException(
-        "No classifier named $name was found"
+internal fun EPackage.classifierByName(name: String): EClassifier =
+    this.eClassifiers.find { it.name == name } ?: throw IllegalArgumentException(
+        "No classifier named $name was found",
     )
-}

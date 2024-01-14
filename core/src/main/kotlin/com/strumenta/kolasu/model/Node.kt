@@ -15,8 +15,9 @@ import kotlin.reflect.KProperty1
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
-open class Node() : INode, Serializable {
-
+open class Node :
+    INode,
+    Serializable {
     @property:Internal
     override val changes = PublishSubject<NodeNotification<in INode>>()
 
@@ -43,21 +44,22 @@ open class Node() : INode, Serializable {
      */
     @property:Internal
     override val properties: List<PropertyDescription>
-        get() = try {
-            nodeProperties.map { PropertyDescription.buildFor(it, this) }
-        } catch (e: Throwable) {
-            throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
-        }.also { properties ->
-            val alreadyFound = mutableSetOf<String>()
-            properties.forEach { property ->
-                val name = property.name
-                if (alreadyFound.contains(name)) {
-                    throw IllegalStateException("Duplicate property with name $name")
-                } else {
-                    alreadyFound.add(name)
+        get() =
+            try {
+                nodeProperties.map { PropertyDescription.buildFor(it, this) }
+            } catch (e: Throwable) {
+                throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
+            }.also { properties ->
+                val alreadyFound = mutableSetOf<String>()
+                properties.forEach { property ->
+                    val name = property.name
+                    if (alreadyFound.contains(name)) {
+                        throw IllegalStateException("Duplicate property with name $name")
+                    } else {
+                        alreadyFound.add(name)
+                    }
                 }
             }
-        }
 
     /**
      * The origin from which this AST Node has been generated, if any.
@@ -109,7 +111,11 @@ open class Node() : INode, Serializable {
         return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
     }
 
-    protected fun notifyOfPropertyChange(propertyName: String, oldValue: Any?, newValue: Any?) {
+    protected fun notifyOfPropertyChange(
+        propertyName: String,
+        oldValue: Any?,
+        newValue: Any?,
+    ) {
         changes.onNext(AttributeChangedNotification(this, propertyName, oldValue, newValue))
     }
 
@@ -117,7 +123,7 @@ open class Node() : INode, Serializable {
     override val allAnnotations: List<Annotation>
         get() = annotations
 
-    override fun <A : Annotation>addAnnotation(annotation: A): A {
+    override fun <A : Annotation> addAnnotation(annotation: A): A {
         if (annotation.annotatedNode != null) {
             throw java.lang.IllegalStateException("Annotation already attached")
         }
@@ -160,16 +166,20 @@ open class Node() : INode, Serializable {
         return nodeProperties.find { it.name == attribute.name }!!.get(this)
     }
 
-    override fun <T : Any?>setAttribute(attributeName: String, value: T) {
+    override fun <T : Any?> setAttribute(
+        attributeName: String,
+        value: T,
+    ) {
         val prop = nodeProperties.find { it.name == attributeName } as KMutableProperty<T>
         prop.setter.call(this, value)
     }
-    override fun <T : Any?>getAttribute(attributeName: String): T {
+
+    override fun <T : Any?> getAttribute(attributeName: String): T {
         val prop = nodeProperties.find { it.name == attributeName }!!
         return prop.call(this) as T
     }
 
-    override fun <T : INode>getContainment(containmentName: String): List<T> {
+    override fun <T : INode> getContainment(containmentName: String): List<T> {
         val prop = nodeProperties.find { it.name == containmentName }!!
         return when (val res = prop.call(this)) {
             null -> {
@@ -186,7 +196,10 @@ open class Node() : INode, Serializable {
         }
     }
 
-    override fun <T : INode>addToContainment(containmentName: String, child: T) {
+    override fun <T : INode> addToContainment(
+        containmentName: String,
+        child: T,
+    ) {
         val prop = nodeProperties.find { it.name == containmentName }!!
         val value = prop.call(this)
         if (value is List<*>) {
@@ -195,7 +208,11 @@ open class Node() : INode, Serializable {
             (prop as KMutableProperty<T>).setter.call(this, child)
         }
     }
-    override fun <T : INode>removeFromContainment(containmentName: String, child: T) {
+
+    override fun <T : INode> removeFromContainment(
+        containmentName: String,
+        child: T,
+    ) {
         val prop = nodeProperties.find { it.name == containmentName }!!
         val value = prop.call(this)
         if (value is List<*>) {
@@ -207,11 +224,15 @@ open class Node() : INode, Serializable {
         }
     }
 
-    override fun <T : PossiblyNamed>getReference(referenceName: String): ReferenceByName<T> {
+    override fun <T : PossiblyNamed> getReference(referenceName: String): ReferenceByName<T> {
         val prop = nodeProperties.find { it.name == referenceName } as KProperty1<INode, ReferenceByName<T>>
         return prop.call(this)
     }
-    override fun <T : PossiblyNamed>setReferenceReferred(referenceName: String, referred: T) {
+
+    override fun <T : PossiblyNamed> setReferenceReferred(
+        referenceName: String,
+        referred: T,
+    ) {
         val ref: ReferenceByName<T> = getReference(referenceName)
         ref.referred = referred
     }

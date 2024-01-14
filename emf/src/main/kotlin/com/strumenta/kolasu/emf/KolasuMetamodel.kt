@@ -21,69 +21,80 @@ private fun createStarlasuMetamodel(): EPackage {
     val intDT = EcorePackage.eINSTANCE.eInt
     val stringDT = EcorePackage.eINSTANCE.eString
 
-    val localDate = ePackage.createEClass("LocalDate").apply {
-        addAttribute("year", intDT, 1, 1)
-        addAttribute("month", intDT, 1, 1)
-        addAttribute("dayOfMonth", intDT, 1, 1)
-    }
-    val localTime = ePackage.createEClass("LocalTime").apply {
-        addAttribute("hour", intDT, 1, 1)
-        addAttribute("minute", intDT, 1, 1)
-        addAttribute("second", intDT, 1, 1)
-        addAttribute("nanosecond", intDT, 1, 1)
-    }
-    val localDateTime = ePackage.createEClass("LocalDateTime").apply {
-        addContainment("date", localDate, 1, 1)
-        addContainment("time", localTime, 1, 1)
-    }
+    val localDate =
+        ePackage.createEClass("LocalDate").apply {
+            addAttribute("year", intDT, 1, 1)
+            addAttribute("month", intDT, 1, 1)
+            addAttribute("dayOfMonth", intDT, 1, 1)
+        }
+    val localTime =
+        ePackage.createEClass("LocalTime").apply {
+            addAttribute("hour", intDT, 1, 1)
+            addAttribute("minute", intDT, 1, 1)
+            addAttribute("second", intDT, 1, 1)
+            addAttribute("nanosecond", intDT, 1, 1)
+        }
+    val localDateTime =
+        ePackage.createEClass("LocalDateTime").apply {
+            addContainment("date", localDate, 1, 1)
+            addContainment("time", localTime, 1, 1)
+        }
 
-    val point = ePackage.createEClass("Point").apply {
-        addAttribute("line", intDT, 1, 1)
-        addAttribute("column", intDT, 1, 1)
-    }
-    val position = ePackage.createEClass("Position").apply {
-        addContainment("start", point, 1, 1)
-        addContainment("end", point, 1, 1)
-    }
+    val point =
+        ePackage.createEClass("Point").apply {
+            addAttribute("line", intDT, 1, 1)
+            addAttribute("column", intDT, 1, 1)
+        }
+    val position =
+        ePackage.createEClass("Position").apply {
+            addContainment("start", point, 1, 1)
+            addContainment("end", point, 1, 1)
+        }
     val origin = ePackage.createEClass("Origin", isAbstract = true)
     val destination = ePackage.createEClass("Destination", isAbstract = true)
-    val nodeDestination = ePackage.createEClass("NodeDestination").apply {
-        eSuperTypes.add(destination)
-    }
-    val textFileDestination = ePackage.createEClass("TextFileDestination").apply {
-        eSuperTypes.add(destination)
-        addContainment("position", position, 0, 1)
-    }
-    val astNode = ePackage.createEClass("ASTNode").apply {
-        this.isAbstract = true
-        this.eSuperTypes.add(origin)
-        addContainment("position", position, 0, 1)
-        addContainment("origin", origin, 0, 1)
-        addContainment("destination", destination, 0, 1)
-    }
+    val nodeDestination =
+        ePackage.createEClass("NodeDestination").apply {
+            eSuperTypes.add(destination)
+        }
+    val textFileDestination =
+        ePackage.createEClass("TextFileDestination").apply {
+            eSuperTypes.add(destination)
+            addContainment("position", position, 0, 1)
+        }
+    val astNode =
+        ePackage.createEClass("ASTNode").apply {
+            this.isAbstract = true
+            this.eSuperTypes.add(origin)
+            addContainment("position", position, 0, 1)
+            addContainment("origin", origin, 0, 1)
+            addContainment("destination", destination, 0, 1)
+        }
     nodeDestination.apply {
         addReference("node", astNode, 1, 1)
     }
-    val parseTreeOrigin = ePackage.createEClass("ParseTreeOrigin").apply {
-        this.isAbstract = false
-        this.eSuperTypes.add(origin)
-        addContainment("position", position, 0, 1)
-    }
+    val parseTreeOrigin =
+        ePackage.createEClass("ParseTreeOrigin").apply {
+            this.isAbstract = false
+            this.eSuperTypes.add(origin)
+            addContainment("position", position, 0, 1)
+        }
     // We need this as a wrapper around the Node, as the ASTNode.Origin link is a containment link
     // (otherwise parseTreeOrigin would be orphan), but we want to use a reference, so we use a containment link
     // to a node holding a reference. The node holding a reference is NodeOrigin
-    val nodeOrigin = ePackage.createEClass("NodeOrigin").apply {
-        this.isAbstract = false
-        this.eSuperTypes.add(origin)
-        addReference("node", astNode, 1, 1)
-    }
+    val nodeOrigin =
+        ePackage.createEClass("NodeOrigin").apply {
+            this.isAbstract = false
+            this.eSuperTypes.add(origin)
+            addReference("node", astNode, 1, 1)
+        }
 
-    val simpleOrigin = ePackage.createEClass("SimpleOrigin").apply {
-        this.isAbstract = false
-        this.eSuperTypes.add(origin)
-        addAttribute("sourceText", stringDT, 0, 1)
-        addContainment("position", position, 0, 1)
-    }
+    val simpleOrigin =
+        ePackage.createEClass("SimpleOrigin").apply {
+            this.isAbstract = false
+            this.eSuperTypes.add(origin)
+            addAttribute("sourceText", stringDT, 0, 1)
+            addContainment("position", position, 0, 1)
+        }
 
     ePackage.createEClass("Statement").apply {
         this.isInterface = true
@@ -109,51 +120,58 @@ private fun createStarlasuMetamodel(): EPackage {
     issueSeverity.addAllLiterals(IssueSeverity::class)
     ePackage.eClassifiers.add(issueSeverity)
 
-    val issue = ePackage.createEClass("Issue").apply {
-        addAttribute("type", issueType, 1, 1)
-        addAttribute("message", stringDT, 1, 1)
-        addAttribute("severity", issueSeverity, 0, 1)
-        addContainment("position", position, 0, 1)
-    }
+    val issue =
+        ePackage.createEClass("Issue").apply {
+            addAttribute("type", issueType, 1, 1)
+            addAttribute("message", stringDT, 1, 1)
+            addAttribute("severity", issueSeverity, 0, 1)
+            addContainment("position", position, 0, 1)
+        }
 
-    val possiblyNamed = ePackage.createEClass("PossiblyNamed").apply {
-        isInterface = true
+    val possiblyNamed =
+        ePackage.createEClass("PossiblyNamed").apply {
+            isInterface = true
 
-        addAttribute("name", stringDT, 0, 1)
-    }
-    val named = ePackage.createEClass("Named").apply {
-        isInterface = true
-        eSuperTypes.add(possiblyNamed)
-        // We cannot override name to just change the lower bound to be 1, as EMF does not support that
-    }
+            addAttribute("name", stringDT, 0, 1)
+        }
+    val named =
+        ePackage.createEClass("Named").apply {
+            isInterface = true
+            eSuperTypes.add(possiblyNamed)
+            // We cannot override name to just change the lower bound to be 1, as EMF does not support that
+        }
 
-    val referenceByName = ePackage.createEClass("ReferenceByName").apply {
-        val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
-            name = "N"
-            eBounds.add(
-                EcoreFactory.eINSTANCE.createEGenericType().apply {
-                    eClassifier = astNode
+    val referenceByName =
+        ePackage.createEClass("ReferenceByName").apply {
+            val typeParameter =
+                EcoreFactory.eINSTANCE.createETypeParameter().apply {
+                    name = "N"
+                    eBounds.add(
+                        EcoreFactory.eINSTANCE.createEGenericType().apply {
+                            eClassifier = astNode
+                        },
+                    )
                 }
-            )
-        }
-        this.eTypeParameters.add(typeParameter)
-        val rootContainment = EcoreFactory.eINSTANCE.createEReference()
-        rootContainment.name = "referenced"
-        rootContainment.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
-            eTypeParameter = typeParameter
-        }
-        rootContainment.isContainment = false
-        rootContainment.lowerBound = 0
-        rootContainment.upperBound = 1
+            this.eTypeParameters.add(typeParameter)
+            val rootContainment = EcoreFactory.eINSTANCE.createEReference()
+            rootContainment.name = "referenced"
+            rootContainment.eGenericType =
+                EcoreFactory.eINSTANCE.createEGenericType().apply {
+                    eTypeParameter = typeParameter
+                }
+            rootContainment.isContainment = false
+            rootContainment.lowerBound = 0
+            rootContainment.upperBound = 1
 
-        addAttribute("name", stringDT, 1, 1)
-        this.eStructuralFeatures.add(rootContainment)
-    }
+            addAttribute("name", stringDT, 1, 1)
+            this.eStructuralFeatures.add(rootContainment)
+        }
 
-    val errorNode = ePackage.createEClass("ErrorNode").apply {
-        isInterface = true
-        addAttribute("message", stringDT, 1, 1)
-    }
+    val errorNode =
+        ePackage.createEClass("ErrorNode").apply {
+            isInterface = true
+            addAttribute("message", stringDT, 1, 1)
+        }
     ePackage.createEClass("GenericErrorNode").apply {
         eSuperTypes.add(astNode)
         eSuperTypes.add(errorNode)
@@ -162,28 +180,31 @@ private fun createStarlasuMetamodel(): EPackage {
         eSuperTypes.add(astNode)
     }
 
-    val result = ePackage.createEClass("Result").apply {
-        val typeParameter = EcoreFactory.eINSTANCE.createETypeParameter().apply {
-            this.name = "CU"
-            this.eBounds.add(
-                EcoreFactory.eINSTANCE.createEGenericType().apply {
-                    this.eClassifier = astNode
+    val result =
+        ePackage.createEClass("Result").apply {
+            val typeParameter =
+                EcoreFactory.eINSTANCE.createETypeParameter().apply {
+                    this.name = "CU"
+                    this.eBounds.add(
+                        EcoreFactory.eINSTANCE.createEGenericType().apply {
+                            this.eClassifier = astNode
+                        },
+                    )
                 }
-            )
-        }
-        this.eTypeParameters.add(typeParameter)
-        val rootContainment = EcoreFactory.eINSTANCE.createEReference()
-        rootContainment.name = "root"
-        rootContainment.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
-            this.eTypeParameter = typeParameter
-        }
-        rootContainment.isContainment = true
-        rootContainment.lowerBound = 0
-        rootContainment.upperBound = 1
-        this.eStructuralFeatures.add(rootContainment)
+            this.eTypeParameters.add(typeParameter)
+            val rootContainment = EcoreFactory.eINSTANCE.createEReference()
+            rootContainment.name = "root"
+            rootContainment.eGenericType =
+                EcoreFactory.eINSTANCE.createEGenericType().apply {
+                    this.eTypeParameter = typeParameter
+                }
+            rootContainment.isContainment = true
+            rootContainment.lowerBound = 0
+            rootContainment.upperBound = 1
+            this.eStructuralFeatures.add(rootContainment)
 
-        addContainment("issues", issue, 0, -1)
-    }
+            addContainment("issues", issue, 0, -1)
+        }
 
     return ePackage
 }

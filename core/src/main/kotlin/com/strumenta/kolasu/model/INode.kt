@@ -12,7 +12,6 @@ import kotlin.reflect.KClass
 typealias NodeObserver = ObservableObserver<in NodeNotification<in INode>>
 
 interface INode {
-
     @property:Internal
     val changes: PublishSubject<NodeNotification<in INode>>
 
@@ -76,11 +75,11 @@ interface INode {
     @Internal
     val allAnnotations: List<Annotation>
 
-    fun <I : Annotation>annotationsByType(kClass: KClass<I>): List<I> {
+    fun <I : Annotation> annotationsByType(kClass: KClass<I>): List<I> {
         return allAnnotations.filterIsInstance(kClass.java)
     }
 
-    fun <I : Annotation>getSingleAnnotation(kClass: KClass<I>): I? {
+    fun <I : Annotation> getSingleAnnotation(kClass: KClass<I>): I? {
         val instances = allAnnotations.filterIsInstance(kClass.java)
         return if (instances.isEmpty()) {
             null
@@ -91,13 +90,11 @@ interface INode {
         }
     }
 
-    fun <A : Annotation>addAnnotation(annotation: A): A
+    fun <A : Annotation> addAnnotation(annotation: A): A
 
     fun removeAnnotation(annotation: Annotation)
 
-    fun hasAnnotation(annotation: Annotation): Boolean {
-        return allAnnotations.contains(annotation)
-    }
+    fun hasAnnotation(annotation: Annotation): Boolean = allAnnotations.contains(annotation)
 
     fun getChildren(containment: Containment): List<INode>
 
@@ -105,16 +102,31 @@ interface INode {
 
     fun getAttributeValue(attribute: Attribute): Any?
 
-    fun <T : Any?>setAttribute(attributeName: String, value: T)
-    fun <T : Any?>getAttribute(attributeName: String): T
+    fun <T : Any?> setAttribute(
+        attributeName: String,
+        value: T,
+    )
 
-    fun <T : INode>getContainment(containmentName: String): List<T>
+    fun <T : Any?> getAttribute(attributeName: String): T
 
-    fun <T : INode>addToContainment(containmentName: String, child: T)
-    fun <T : INode>removeFromContainment(containmentName: String, child: T)
+    fun <T : INode> getContainment(containmentName: String): List<T>
 
-    fun <T : PossiblyNamed>getReference(referenceName: String): ReferenceByName<T>
-    fun <T : PossiblyNamed>setReferenceReferred(referenceName: String, referred: T)
+    fun <T : INode> addToContainment(
+        containmentName: String,
+        child: T,
+    )
+
+    fun <T : INode> removeFromContainment(
+        containmentName: String,
+        child: T,
+    )
+
+    fun <T : PossiblyNamed> getReference(referenceName: String): ReferenceByName<T>
+
+    fun <T : PossiblyNamed> setReferenceReferred(
+        referenceName: String,
+        referred: T,
+    )
 
     fun subscribe(observer: ObservableObserver<NodeNotification<in INode>>)
 }

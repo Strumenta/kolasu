@@ -14,10 +14,16 @@ import com.strumenta.kolasu.validation.IssueSeverity
 import java.io.File
 
 interface StatsCollector {
-    fun registerException(input: File, e: Exception) {
+    fun registerException(
+        input: File,
+        e: Exception,
+    ) {
     }
 
-    fun registerResult(input: File, result: ParsingResult<out INode>)
+    fun registerResult(
+        input: File,
+        result: ParsingResult<out INode>,
+    )
 
     fun print(println: (s: String) -> Unit = ::println)
 
@@ -38,12 +44,18 @@ class GlobalStatsCollector : StatsCollector {
         get() = filesProcessedSuccessfully - filesWithErrors
     private var totalErrors: Int = 0
 
-    override fun registerException(input: File, e: Exception) {
+    override fun registerException(
+        input: File,
+        e: Exception,
+    ) {
         filesProcessed += 1
         filesWithExceptions += 1
     }
 
-    override fun registerResult(input: File, result: ParsingResult<out INode>) {
+    override fun registerResult(
+        input: File,
+        result: ParsingResult<out INode>,
+    ) {
         filesProcessed += 1
         val errors = result.issues.filter { it.severity == IssueSeverity.ERROR }.count()
         if (errors > 0) {
@@ -84,13 +96,21 @@ class GlobalStatsCollector : StatsCollector {
         get() = File("global-stats.csv")
 }
 
-class NodeStatsCollector(val simpleNames: Boolean) : StatsCollector {
+class NodeStatsCollector(
+    val simpleNames: Boolean,
+) : StatsCollector {
     private val nodePrevalence = HashMap<String, Int>()
 
-    override fun registerException(input: File, e: Exception) {
+    override fun registerException(
+        input: File,
+        e: Exception,
+    ) {
     }
 
-    override fun registerResult(input: File, result: ParsingResult<out INode>) {
+    override fun registerResult(
+        input: File,
+        result: ParsingResult<out INode>,
+    ) {
         result.root?.apply {
             nodePrevalence[this.nodeType] = nodePrevalence.getOrDefault(this.nodeType, 0) + 1
             walkDescendants().forEach {
@@ -148,7 +168,10 @@ class ErrorStatsCollector : StatsCollector {
         println("")
     }
 
-    override fun registerResult(input: File, result: ParsingResult<out INode>) {
+    override fun registerResult(
+        input: File,
+        result: ParsingResult<out INode>,
+    ) {
         val errors = result.issues.filter { it.severity == IssueSeverity.ERROR }
         errors.forEach { error ->
             val message = canonizeMessage(error.message)
@@ -156,9 +179,7 @@ class ErrorStatsCollector : StatsCollector {
         }
     }
 
-    private fun canonizeMessage(message: String): String {
-        return message.replace("[0-9]", "*")
-    }
+    private fun canonizeMessage(message: String): String = message.replace("[0-9]", "*")
 
     override fun saveToCSV() {
         println("# Errors prevalence")
@@ -183,13 +204,13 @@ class ErrorStatsCollector : StatsCollector {
 /**
  * Command to calcualte statistics on the ASTs produced and print them.
  */
-class StatsCommand<R : INode, P : ASTParser<R>>(parserInstantiator: ParserInstantiator<P>) :
-    ASTProcessingCommand<R, P>(
+class StatsCommand<R : INode, P : ASTParser<R>>(
+    parserInstantiator: ParserInstantiator<P>,
+) : ASTProcessingCommand<R, P>(
         parserInstantiator,
         help = "Produced various stats on parsing.",
-        name = "stats"
+        name = "stats",
     ) {
-
     private val printStats by option("--stats", "-s")
         .help("Print statistics on the number of files parsed correctly")
         .flag("--no-stats", "-ns", default = true)
@@ -235,13 +256,22 @@ class StatsCommand<R : INode, P : ASTParser<R>>(parserInstantiator: ParserInstan
         }
     }
 
-    override fun processException(input: File, relativePath: String, e: Exception) {
+    override fun processException(
+        input: File,
+        relativePath: String,
+        e: Exception,
+    ) {
         collectors.forEach {
             it.registerException(input, e)
         }
     }
 
-    override fun processResult(input: File, relativePath: String, result: ParsingResult<R>, parser: P) {
+    override fun processResult(
+        input: File,
+        relativePath: String,
+        result: ParsingResult<R>,
+        parser: P,
+    ) {
         collectors.forEach {
             it.registerResult(input, result)
         }

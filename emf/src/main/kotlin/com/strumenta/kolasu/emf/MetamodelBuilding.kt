@@ -29,7 +29,10 @@ fun EEnum.addLiteral(name: String) {
     this.eLiterals.add(newLiteral)
 }
 
-fun EPackage.createEClass(name: String, isAbstract: Boolean = false): EClass {
+fun EPackage.createEClass(
+    name: String,
+    isAbstract: Boolean = false,
+): EClass {
     val eClass = EcoreFactory.eINSTANCE.createEClass()
     eClass.name = name
     eClass.isAbstract = isAbstract
@@ -37,7 +40,12 @@ fun EPackage.createEClass(name: String, isAbstract: Boolean = false): EClass {
     return eClass
 }
 
-fun EClass.addContainment(name: String, type: EClass, min: Int, max: Int): EReference {
+fun EClass.addContainment(
+    name: String,
+    type: EClass,
+    min: Int,
+    max: Int,
+): EReference {
     val eReference = EcoreFactory.eINSTANCE.createEReference()
     eReference.isContainment = true
     eReference.name = name
@@ -48,7 +56,12 @@ fun EClass.addContainment(name: String, type: EClass, min: Int, max: Int): ERefe
     return eReference
 }
 
-fun EClass.addReference(name: String, type: EClass, min: Int, max: Int): EReference {
+fun EClass.addReference(
+    name: String,
+    type: EClass,
+    min: Int,
+    max: Int,
+): EReference {
     val eReference = EcoreFactory.eINSTANCE.createEReference()
     eReference.isContainment = false
     eReference.name = name
@@ -59,7 +72,12 @@ fun EClass.addReference(name: String, type: EClass, min: Int, max: Int): ERefere
     return eReference
 }
 
-fun EClass.addAttribute(name: String, type: EDataType, min: Int, max: Int): EAttribute {
+fun EClass.addAttribute(
+    name: String,
+    type: EDataType,
+    min: Int,
+    max: Int,
+): EAttribute {
     val eAttribute = EcoreFactory.eINSTANCE.createEAttribute()
     eAttribute.name = name
     eAttribute.eType = type
@@ -74,20 +92,25 @@ fun EPackage.setResourceURI(uri: String) {
     resource.contents.add(this)
 }
 
-fun KolasuLanguage.toEPackage(nsUri: String? = null, nsPrefix: String? = null): EPackage {
+fun KolasuLanguage.toEPackage(
+    nsUri: String? = null,
+    nsPrefix: String? = null,
+): EPackage {
     val qualifiedNameParts = this.qualifiedName.split(".")
-    val nsUriCalc = nsUri ?: if (qualifiedNameParts.size >= 3) {
-        "https://${qualifiedNameParts[1]}.${qualifiedNameParts[0]}/" +
-            qualifiedName.removePrefix("${qualifiedNameParts[0]}.${qualifiedNameParts[1]}.")
-    } else {
-        "https://strumenta.com/${this.qualifiedName}"
-    }
+    val nsUriCalc =
+        nsUri ?: if (qualifiedNameParts.size >= 3) {
+            "https://${qualifiedNameParts[1]}.${qualifiedNameParts[0]}/" +
+                qualifiedName.removePrefix("${qualifiedNameParts[0]}.${qualifiedNameParts[1]}.")
+        } else {
+            "https://strumenta.com/${this.qualifiedName}"
+        }
 
-    val mmBuilder = MetamodelBuilder(
-        this.qualifiedName,
-        nsUriCalc,
-        nsPrefix ?: this.simpleName
-    )
+    val mmBuilder =
+        MetamodelBuilder(
+            this.qualifiedName,
+            nsUriCalc,
+            nsPrefix ?: this.simpleName,
+        )
     this.astClasses.forEach {
         mmBuilder.provideClass(it)
     }

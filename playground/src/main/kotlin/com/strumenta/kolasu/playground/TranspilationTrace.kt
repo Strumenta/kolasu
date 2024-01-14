@@ -13,19 +13,19 @@ class TranspilationTrace<S : INode, T : INode>(
     val generatedCode: String,
     val sourceResult: Result<S>,
     val targetResult: Result<T>,
-    val transpilationIssues: List<Issue> = emptyList()
+    val transpilationIssues: List<Issue> = emptyList(),
 ) {
     constructor(
         originalCode: String,
         generatedCode: String,
         sourceAST: S,
         targetAST: T,
-        transpilationIssues: List<Issue> = emptyList()
+        transpilationIssues: List<Issue> = emptyList(),
     ) : this(
         originalCode,
         generatedCode,
         Result(emptyList(), sourceAST),
         Result(emptyList(), targetAST),
-        transpilationIssues
+        transpilationIssues,
     )
 }

@@ -13,7 +13,10 @@ import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 import java.io.ByteArrayOutputStream
 
 class JsonGenerator {
-    fun generateEMFString(result: Result<out INode>, astPackage: EPackage): String {
+    fun generateEMFString(
+        result: Result<out INode>,
+        astPackage: EPackage,
+    ): String {
         val uri: URI = URI.createFileURI("dummy-URI.json") ?: throw IllegalStateException("URI not created")
         var resourceSet: ResourceSet = ResourceSetImpl()
         resourceSet.resourceFactoryRegistry.contentTypeToFactoryMap["application/json"] = JsonResourceFactory()
@@ -21,8 +24,9 @@ class JsonGenerator {
         val resource: Resource = resourceSet.createResource(uri)
         resourceSet = resource.resourceSet ?: throw IllegalStateException("no resource set")
         val starlasuURI = STARLASU_METAMODEL.nsURI ?: throw IllegalStateException("no starlasu URI")
-        val starlasuResource = resourceSet.createResource(URI.createURI(starlasuURI), "application/json")
-            ?: throw IllegalStateException("starlasuResource is null")
+        val starlasuResource =
+            resourceSet.createResource(URI.createURI(starlasuURI), "application/json")
+                ?: throw IllegalStateException("starlasuResource is null")
         starlasuResource.contents.add(STARLASU_METAMODEL)
         val pkgResource = resource.resourceSet.createResource(URI.createURI(astPackage.nsURI), "application/json")
         pkgResource.contents.add(astPackage)

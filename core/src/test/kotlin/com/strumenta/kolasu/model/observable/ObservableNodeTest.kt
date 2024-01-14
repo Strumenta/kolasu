@@ -15,48 +15,83 @@ class MyObservableNode : Node() {
         }
 }
 
-class MyObserver(val description: String? = null) : SimpleNodeObserver() {
+class MyObserver(
+    val description: String? = null,
+) : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
-    override fun <V> onAttributeChange(node: INode, attributeName: String, oldValue: V, newValue: V) {
+
+    override fun <V> onAttributeChange(
+        node: INode,
+        attributeName: String,
+        oldValue: V,
+        newValue: V,
+    ) {
         observations.add("$attributeName: $oldValue -> $newValue")
     }
 
-    override fun onChildAdded(node: INode, containmentName: String, added: INode) {
+    override fun onChildAdded(
+        node: INode,
+        containmentName: String,
+        added: INode,
+    ) {
         observations.add("$containmentName: added $added")
     }
 
-    override fun onChildRemoved(node: INode, containmentName: String, removed: INode) {
+    override fun onChildRemoved(
+        node: INode,
+        containmentName: String,
+        removed: INode,
+    ) {
         observations.add("$containmentName: removed $removed")
     }
 
-    override fun onReferenceSet(node: INode, referenceName: String, oldReferredNode: INode?, newReferredNode: INode?) {
+    override fun onReferenceSet(
+        node: INode,
+        referenceName: String,
+        oldReferredNode: INode?,
+        newReferredNode: INode?,
+    ) {
         val oldName = if (oldReferredNode == null) "null" else (oldReferredNode as? Named)?.name ?: "<UNKNOWN>"
         val newName = if (newReferredNode == null) "null" else (newReferredNode as? Named)?.name ?: "<UNKNOWN>"
         observations.add("$referenceName: changed from $oldName to $newName")
     }
 
-    override fun onReferringAdded(node: INode, referenceName: String, referring: INode) {
+    override fun onReferringAdded(
+        node: INode,
+        referenceName: String,
+        referring: INode,
+    ) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
         observations.add("$myName is now referred to by $referring.$referenceName")
     }
 
-    override fun onReferringRemoved(node: INode, referenceName: String, referring: INode) {
+    override fun onReferringRemoved(
+        node: INode,
+        referenceName: String,
+        referring: INode,
+    ) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
         observations.add("$myName is not referred anymore by $referring.$referenceName")
     }
 }
 
 class MyObservableNodeMP : Node() {
-
     val p5 = ObservableList<MyObservableNodeMP>()
+
     init {
         p5.subscribe(MultiplePropertyListObserver(this, "p5"))
     }
 }
 
-data class NamedNode(override val name: String) : Node(), Named
+data class NamedNode(
+    override val name: String,
+) : Node(),
+    Named
 
-data class NodeWithReference(val ref: ReferenceByName<NamedNode>, val id: Int) : Node() {
+data class NodeWithReference(
+    val ref: ReferenceByName<NamedNode>,
+    val id: Int,
+) : Node() {
     init {
         ref.setContainer(this, "ref")
     }
@@ -96,7 +131,7 @@ class ObservableNodeTest {
         assertEquals(null, n3.parent)
         assertEquals(
             listOf("p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])"),
-            obs.observations
+            obs.observations,
         )
 
         n1.p5.add(n3)
@@ -106,9 +141,9 @@ class ObservableNodeTest {
         assertEquals(
             listOf(
                 "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])",
-                "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])"
+                "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])",
             ),
-            obs.observations
+            obs.observations,
         )
 
         n1.p5.remove(n2)
@@ -119,9 +154,9 @@ class ObservableNodeTest {
             listOf(
                 "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])",
                 "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])",
-                "p5: removed com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])"
+                "p5: removed com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])",
             ),
-            obs.observations
+            obs.observations,
         )
 
         n1.p5.remove(n2)
@@ -132,9 +167,9 @@ class ObservableNodeTest {
             listOf(
                 "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])",
                 "p5: added com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])",
-                "p5: removed com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])"
+                "p5: removed com.strumenta.kolasu.model.observable.MyObservableNodeMP(p5=[])",
             ),
-            obs.observations
+            obs.observations,
         )
     }
 
@@ -168,9 +203,9 @@ class ObservableNodeTest {
         assertEquals(
             listOf(
                 "a is now referred to by com.strumenta.kolasu.model.observable." +
-                    "NodeWithReference(id=1, ref=Ref(foo)[Unsolved]).ref"
+                    "NodeWithReference(id=1, ref=Ref(foo)[Unsolved]).ref",
             ),
-            obsA.observations
+            obsA.observations,
         )
         assertEquals(listOf(), obsB.observations)
         clearObservations()
@@ -181,16 +216,16 @@ class ObservableNodeTest {
         assertEquals(
             listOf(
                 "a is not referred anymore by com.strumenta.kolasu.model.observable." +
-                    "NodeWithReference(id=1, ref=Ref(foo)[Solved]).ref"
+                    "NodeWithReference(id=1, ref=Ref(foo)[Solved]).ref",
             ),
-            obsA.observations
+            obsA.observations,
         )
         assertEquals(
             listOf(
                 "b is now referred to by com.strumenta.kolasu.model.observable." +
-                    "NodeWithReference(id=1, ref=Ref(foo)[Solved]).ref"
+                    "NodeWithReference(id=1, ref=Ref(foo)[Solved]).ref",
             ),
-            obsB.observations
+            obsB.observations,
         )
         clearObservations()
 
@@ -201,9 +236,9 @@ class ObservableNodeTest {
         assertEquals(
             listOf(
                 "b is not referred anymore by com.strumenta.kolasu.model.observable." +
-                    "NodeWithReference(id=1, ref=Ref(foo)[Solved]).ref"
+                    "NodeWithReference(id=1, ref=Ref(foo)[Solved]).ref",
             ),
-            obsB.observations
+            obsB.observations,
         )
         clearObservations()
 
@@ -213,9 +248,9 @@ class ObservableNodeTest {
         assertEquals(
             listOf(
                 "a is now referred to by com.strumenta.kolasu.model.observable." +
-                    "NodeWithReference(id=2, ref=Ref(bar)[Unsolved]).ref"
+                    "NodeWithReference(id=2, ref=Ref(bar)[Unsolved]).ref",
             ),
-            obsA.observations
+            obsA.observations,
         )
         assertEquals(listOf(), obsB.observations)
     }

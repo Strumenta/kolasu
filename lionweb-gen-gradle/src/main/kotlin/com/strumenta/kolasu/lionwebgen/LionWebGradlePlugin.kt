@@ -18,7 +18,6 @@ val genLanguages = "generateLanguages"
 val kspPlugin = "com.google.devtools.ksp"
 
 class LionWebGradlePlugin : Plugin<Project> {
-
     override fun apply(project: Project) {
         if (!project.plugins.hasPlugin(kspPlugin)) {
             project.logger.warn("Please ensure to configure plugin \"$kspPlugin\"")
@@ -32,7 +31,10 @@ class LionWebGradlePlugin : Plugin<Project> {
         createGenLanguagesTask(project, configuration)
     }
 
-    private fun createGenASTClassesTask(project: Project, configuration: LionWebGradleExtension): Task {
+    private fun createGenASTClassesTask(
+        project: Project,
+        configuration: LionWebGradleExtension,
+    ): Task {
         return project.tasks.create(genASTClasses) {
             it.group = tasksGroup
             it.description = "Generate Kolasu ASTs from LionWeb languages"
@@ -48,14 +50,16 @@ class LionWebGradlePlugin : Plugin<Project> {
                             val jsonser = JsonSerialization.getStandardSerialization()
                             jsonser.instanceResolver.addTree(StarLasuLWLanguage)
                             val language = jsonser.deserializeToNodes(FileInputStream(languageFile)).first() as Language
-                            val existingKotlinClasses = KotlinCodeProcessor().classesDeclaredInDir(
-                                project.file("src/main/kotlin")
-                            )
+                            val existingKotlinClasses =
+                                KotlinCodeProcessor().classesDeclaredInDir(
+                                    project.file("src/main/kotlin"),
+                                )
 
-                            val ktFiles = ASTGenerator(
-                                configuration.importPackageNames.get()[language.name] ?: language.name,
-                                language
-                            ).generateClasses(existingKotlinClasses)
+                            val ktFiles =
+                                ASTGenerator(
+                                    configuration.importPackageNames.get()[language.name] ?: language.name,
+                                    language,
+                                ).generateClasses(existingKotlinClasses)
                             ktFiles.forEach { ktFile ->
                                 val file = File(configuration.outdir.get(), ktFile.path)
                                 file.parentFile.mkdirs()
@@ -70,7 +74,10 @@ class LionWebGradlePlugin : Plugin<Project> {
         }
     }
 
-    private fun createGenLanguagesTask(project: Project, configuration: LionWebGradleExtension): Task {
+    private fun createGenLanguagesTask(
+        project: Project,
+        configuration: LionWebGradleExtension,
+    ): Task {
         return project.tasks.create(genLanguages) { it ->
             it.description = "Generate LionWeb languages from Kolasu ASTs"
             it.group = tasksGroup
@@ -102,35 +109,44 @@ class LionWebGradlePlugin : Plugin<Project> {
         if (srcMainLionweb.exists() && srcMainLionweb.isDirectory) {
             configuration.languages.convention(
                 srcMainLionweb.listFiles { _, name -> name != null && (name.endsWith(".json")) }?.toList()
-                    ?: emptyList()
+                    ?: emptyList(),
             )
         }
         configuration.exportPackages.convention(mutableListOf())
         return configuration
     }
 
-    private fun lionwebLanguageFile(project: Project, packageName: String): File {
-        return File(project.buildDir, "lionwebgen${File.separator}$packageName.json")
-    }
+    private fun lionwebLanguageFile(
+        project: Project,
+        packageName: String,
+    ): File =
+        File(
+            project.buildDir,
+            "lionwebgen${File.separator}$packageName.json",
+        )
 
     /**
      * Configure KSP, so that it executes the KSP agent according to the configuration we specify.
      * In particular we communicate with KSP through a file (see kspFile). We use it to instruct the KSP agent about
      * paths to use.
      */
-    private fun configureKsp(project: Project, configuration: LionWebGradleExtension) {
+    private fun configureKsp(
+        project: Project,
+        configuration: LionWebGradleExtension,
+    ) {
         val ksp = project.extensions.findByName("ksp") as KspExtension
         val kspFile = File(project.buildDir, "lionwebgen${File.separator}kspconf.txt")
         ksp.arg("lionwebgendir", File(project.buildDir, "lionwebgen").absolutePath)
         ksp.arg("file", kspFile.absolutePath)
 
-        val prepareKsp = project.tasks.create("prepareKspForLionWebGen") {
-            it.doFirst {
-                val exportPackagesStr = configuration.exportPackages.get().let { it.joinToString(",") }
-                kspFile.parentFile.mkdirs()
-                kspFile.writeText("exportPackages=$exportPackagesStr\n")
+        val prepareKsp =
+            project.tasks.create("prepareKspForLionWebGen") {
+                it.doFirst {
+                    val exportPackagesStr = configuration.exportPackages.get().let { it.joinToString(",") }
+                    kspFile.parentFile.mkdirs()
+                    kspFile.writeText("exportPackages=$exportPackagesStr\n")
+                }
             }
-        }
         project.tasks.getByName("compileKotlin").dependsOn(prepareKsp)
     }
 
@@ -143,22 +159,31 @@ class LionWebGradlePlugin : Plugin<Project> {
             it.java.srcDir(File(project.buildDir, "lionweb-gen"))
         }
 
-        project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).forEach {
-            if (it.name == "kotlinCompile") {
-                it.source(
-                    File(project.buildDir, "lionweb-gen"),
-                    File(project.rootDir, "src${File.separator}main${File.separator}kotlin")
-                )
-                it.dependsOn(genASTClasses)
+        project
+            .tasks
+            .withType(
+                org
+                    .jetbrains
+                    .kotlin
+                    .gradle
+                    .tasks
+                    .KotlinCompile::class.java,
+            ).forEach {
+                if (it.name == "kotlinCompile") {
+                    it.source(
+                        File(project.buildDir, "lionweb-gen"),
+                        File(project.rootDir, "src${File.separator}main${File.separator}kotlin"),
+                    )
+                    it.dependsOn(genASTClasses)
+                }
             }
-        }
     }
 
     private fun addDependencies(project: Project) {
         fun addKolasuModule(moduleName: String) {
             project.dependencies.add(
                 "api",
-                "com.strumenta.kolasu:kolasu-$moduleName:${project.kolasuVersion}"
+                "com.strumenta.kolasu:kolasu-$moduleName:${project.kolasuVersion}",
             )
         }
 

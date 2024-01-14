@@ -8,15 +8,20 @@ import org.junit.Test
 data class MyBigNode(
     override val name: String,
     val foo: MySmallNode? = null,
-    val bars: List<MyOtherNode> = emptyList()
-) : Node(), Named
+    val bars: List<MyOtherNode> = emptyList(),
+) : Node(),
+    Named
 
-data class MySmallNode(val value: Long) : Node()
+data class MySmallNode(
+    val value: Long,
+) : Node()
 
-data class MyOtherNode(val flag: Boolean, val s: String) : Node()
+data class MyOtherNode(
+    val flag: Boolean,
+    val s: String,
+) : Node()
 
 class AssertionsTest {
-
     @Test
     fun comparingTwoSimpleNodesWhichAreEqual() {
         assertASTsAreEqual(MyBigNode("a"), MyBigNode("a"))
@@ -52,20 +57,22 @@ class AssertionsTest {
         assertASTsAreEqual(
             MyBigNode(
                 "a",
-                bars = listOf(
-                    MyOtherNode(false, "z1"),
-                    MyOtherNode(true, "z2"),
-                    MyOtherNode(false, "z3")
-                )
+                bars =
+                    listOf(
+                        MyOtherNode(false, "z1"),
+                        MyOtherNode(true, "z2"),
+                        MyOtherNode(false, "z3"),
+                    ),
             ),
             MyBigNode(
                 "a",
-                bars = listOf(
-                    MyOtherNode(false, "z1"),
-                    MyOtherNode(true, "z2"),
-                    MyOtherNode(false, "z3")
-                )
-            )
+                bars =
+                    listOf(
+                        MyOtherNode(false, "z1"),
+                        MyOtherNode(true, "z2"),
+                        MyOtherNode(false, "z3"),
+                    ),
+            ),
         )
     }
 
@@ -74,20 +81,22 @@ class AssertionsTest {
         assertASTsAreEqual(
             MyBigNode(
                 "a",
-                bars = listOf(
-                    MyOtherNode(false, "z1"),
-                    MyOtherNode(true, "z2"),
-                    MyOtherNode(false, "z3")
-                )
+                bars =
+                    listOf(
+                        MyOtherNode(false, "z1"),
+                        MyOtherNode(true, "z2"),
+                        MyOtherNode(false, "z3"),
+                    ),
             ),
             MyBigNode(
                 "a",
-                bars = listOf(
-                    MyOtherNode(false, "z1"),
-                    MyOtherNode(false, "z2"),
-                    MyOtherNode(false, "z3")
-                )
-            )
+                bars =
+                    listOf(
+                        MyOtherNode(false, "z1"),
+                        MyOtherNode(false, "z2"),
+                        MyOtherNode(false, "z3"),
+                    ),
+            ),
         )
     }
 
@@ -96,19 +105,21 @@ class AssertionsTest {
         assertASTsAreEqual(
             MyBigNode(
                 "a",
-                bars = listOf(
-                    MyOtherNode(false, "z1"),
-                    MyOtherNode(true, "z2"),
-                    MyOtherNode(false, "z3")
-                )
+                bars =
+                    listOf(
+                        MyOtherNode(false, "z1"),
+                        MyOtherNode(true, "z2"),
+                        MyOtherNode(false, "z3"),
+                    ),
             ),
             MyBigNode(
                 "a",
-                bars = listOf(
-                    MyOtherNode(false, "z1"),
-                    MyOtherNode(false, "z3")
-                )
-            )
+                bars =
+                    listOf(
+                        MyOtherNode(false, "z1"),
+                        MyOtherNode(false, "z3"),
+                    ),
+            ),
         )
     }
 
@@ -117,19 +128,21 @@ class AssertionsTest {
         assertASTsAreEqual(
             MyBigNode(
                 "a",
-                bars = listOf(
-                    MyOtherNode(false, "z1"),
-                    MyOtherNode(true, "z2")
-                )
+                bars =
+                    listOf(
+                        MyOtherNode(false, "z1"),
+                        MyOtherNode(true, "z2"),
+                    ),
             ),
             MyBigNode(
                 "a",
-                bars = listOf(
-                    MyOtherNode(false, "z1"),
-                    MyOtherNode(true, "z2"),
-                    MyOtherNode(false, "z3")
-                )
-            )
+                bars =
+                    listOf(
+                        MyOtherNode(false, "z1"),
+                        MyOtherNode(true, "z2"),
+                        MyOtherNode(false, "z3"),
+                    ),
+            ),
         )
     }
 
@@ -139,12 +152,13 @@ class AssertionsTest {
             MyBigNode("a", bars = IgnoreChildren()),
             MyBigNode(
                 "a",
-                bars = listOf(
-                    MyOtherNode(false, "z1"),
-                    MyOtherNode(true, "z2"),
-                    MyOtherNode(false, "z3")
-                )
-            )
+                bars =
+                    listOf(
+                        MyOtherNode(false, "z1"),
+                        MyOtherNode(true, "z2"),
+                        MyOtherNode(false, "z3"),
+                    ),
+            ),
         )
     }
 }

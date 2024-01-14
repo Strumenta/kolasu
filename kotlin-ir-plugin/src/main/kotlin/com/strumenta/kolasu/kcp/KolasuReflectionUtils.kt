@@ -33,7 +33,7 @@ val IrDeclarationBase.compilerSourceLocation: CompilerMessageSourceLocation?
             StringUtil.offsetToLineNumber(fileText, this.startOffset),
             StringUtil.offsetToLineNumber(fileText, this.endOffset),
             StringUtil.offsetToLineNumber(fileText, this.endOffset),
-            null
+            null,
         )
     }
 
@@ -91,8 +91,8 @@ fun IrProperty.declareMultipleContainment(): Boolean {
 }
 
 @ObsoleteDescriptorBasedAPI
-fun IrType.isAssignableTo(kClass: KClass<*>): Boolean {
-    return if (this is IrSimpleType) {
+fun IrType.isAssignableTo(kClass: KClass<*>): Boolean =
+    if (this is IrSimpleType) {
         this.classFqName.toString() == kClass.qualifiedName ||
             this.classifier.descriptor.getAllSuperClassifiers().any {
                 it.fqNameOrNull()?.toString() == kClass.qualifiedName
@@ -100,4 +100,3 @@ fun IrType.isAssignableTo(kClass: KClass<*>): Boolean {
     } else {
         false
     }
-}

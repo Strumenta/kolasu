@@ -37,7 +37,7 @@ import com.strumenta.kolasu.parsing.ASTParser
  */
 class CLITool<R : INode, P : ASTParser<R>>(
     parserInstantiator: ParserInstantiator<P>,
-    replacedConsole: CliktConsole? = null
+    replacedConsole: CliktConsole? = null,
 ) : CliktCommand(invokeWithoutSubcommand = false) {
     init {
         subcommands(ASTSaverCommand(parserInstantiator), StatsCommand(parserInstantiator))

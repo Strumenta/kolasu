@@ -9,38 +9,47 @@ import kotlin.reflect.full.isSuperclassOf
 // instance
 
 class TypeComputer(
-    private val typingRules: MutableMap<KClass<out INode>, (INode) -> INode?> = mutableMapOf()
+    private val typingRules: MutableMap<KClass<out INode>, (INode) -> INode?> = mutableMapOf(),
 ) {
-    fun loadFrom(configuration: TypeComputerConfiguration, semantics: Semantics) {
-        configuration.typingRules.mapValuesTo(this.typingRules) {
-                (_, typingRule) ->
+    fun loadFrom(
+        configuration: TypeComputerConfiguration,
+        semantics: Semantics,
+    ) {
+        configuration.typingRules.mapValuesTo(this.typingRules) { (_, typingRule) ->
             { node: INode -> semantics.typingRule(node) }
         }
     }
 
-    fun typeFor(node: INode? = null): INode? {
-        return node?.let {
-            this.typingRules.keys
+    fun typeFor(node: INode? = null): INode? =
+        node?.let {
+            this
+                .typingRules
+                .keys
                 .filter { it.isSuperclassOf(node::class) }
                 .sortBySubclassesFirst()
-                .firstOrNull()?.let { this.typingRules[it] }?.invoke(node)
+                .firstOrNull()
+                ?.let { this.typingRules[it] }
+                ?.invoke(node)
         }
-    }
 }
 
 // configuration
 
 class TypeComputerConfiguration(
-    val typingRules: MutableMap<KClass<out INode>, Semantics.(INode) -> INode?> = mutableMapOf(
-        INode::class to { it }
-    )
+    val typingRules: MutableMap<KClass<out INode>, Semantics.(INode) -> INode?> =
+        mutableMapOf(
+            INode::class to { it },
+        ),
 ) {
-    inline fun <reified N : INode> typeFor(nodeType: KClass<N>, crossinline typingRule: Semantics.(N) -> INode?) {
+    inline fun <reified N : INode> typeFor(
+        nodeType: KClass<N>,
+        crossinline typingRule: Semantics.(N) -> INode?,
+    ) {
         this.typingRules.putIfAbsent(
             nodeType,
             { semantics: Semantics, node: INode ->
                 if (node is N) semantics.typingRule(node) else null
-            }.memoize()
+            }.memoize(),
         )
     }
 }

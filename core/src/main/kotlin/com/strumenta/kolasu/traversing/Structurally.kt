@@ -3,7 +3,8 @@
 package com.strumenta.kolasu.traversing
 
 import com.strumenta.kolasu.model.INode
-import java.util.*
+import java.util.ArrayDeque
+import java.util.WeakHashMap
 import kotlin.reflect.KClass
 
 /**
@@ -117,7 +118,10 @@ fun INode.walkDescendants(walker: ASTWalker = INode::walk): Sequence<INode> {
 }
 
 @JvmOverloads
-fun <N : Any> INode.walkDescendants(type: KClass<N>, walker: ASTWalker = INode::walk): Sequence<N> {
+fun <N : Any> INode.walkDescendants(
+    type: KClass<N>,
+    walker: ASTWalker = INode::walk,
+): Sequence<N> {
     return walkDescendants(walker).filterIsInstance(type.java)
 }
 
@@ -143,7 +147,7 @@ val INode.children: List<INode>
 @JvmOverloads
 fun <T> INode.searchByType(
     klass: Class<T>,
-    walker: ASTWalker = INode::walk
+    walker: ASTWalker = INode::walk,
 ) = walker.invoke(this).filterIsInstance(klass)
 
 /**
@@ -152,7 +156,10 @@ fun <T> INode.searchByType(
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  * @return all nodes in this AST (sub)tree that are instances of, or extend [klass].
  */
-fun <T> INode.collectByType(klass: Class<T>, walker: ASTWalker = INode::walk): List<T> {
+fun <T> INode.collectByType(
+    klass: Class<T>,
+    walker: ASTWalker = INode::walk,
+): List<T> {
     return walker.invoke(this).filterIsInstance(klass).toList()
 }
 
@@ -161,7 +168,9 @@ fun <T> INode.collectByType(klass: Class<T>, walker: ASTWalker = INode::walk): L
  * The first walk will take the same time of a normal walk.
  * This walker will ignore any change to the nodes.
  */
-class FastWalker(val node: INode) {
+class FastWalker(
+    val node: INode,
+) {
     private val childrenMap: WeakHashMap<INode, List<INode>> = WeakHashMap<INode, List<INode>>()
 
     private fun getChildren(child: INode): List<INode> {

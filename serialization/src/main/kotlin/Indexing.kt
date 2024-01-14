@@ -11,7 +11,9 @@ fun interface IdProvider {
     fun getId(node: INode): String?
 }
 
-class SequentialIdProvider(private var counter: Int = 0) : IdProvider {
+class SequentialIdProvider(
+    private var counter: Int = 0,
+) : IdProvider {
     override fun getId(node: INode): String? {
         return "${this.counter++}"
     }
@@ -19,18 +21,24 @@ class SequentialIdProvider(private var counter: Int = 0) : IdProvider {
 
 class OnlyReferencedIdProvider(
     private val root: INode,
-    private var idProvider: IdProvider = SequentialIdProvider()
+    private var idProvider: IdProvider = SequentialIdProvider(),
 ) : IdProvider {
-
     private val referencedElements: Set<PossiblyNamed> by lazy {
-        this.root.walk().flatMap { node ->
-            node.properties.filter { property -> property.value is ReferenceByName<*> }
-                .mapNotNull { property -> (property.value as ReferenceByName<*>).referred }
-        }.toSet()
+        this
+            .root
+            .walk()
+            .flatMap { node ->
+                node
+                    .properties
+                    .filter { property -> property.value is ReferenceByName<*> }
+                    .mapNotNull { property -> (property.value as ReferenceByName<*>).referred }
+            }.toSet()
     }
 
     override fun getId(node: INode): String? {
-        return this.referencedElements.find { referencedElement -> referencedElement == node }
+        return this
+            .referencedElements
+            .find { referencedElement -> referencedElement == node }
             ?.let { idProvider.getId(node) }
     }
 }
@@ -43,7 +51,7 @@ class OnlyReferencedIdProvider(
  **/
 fun INode.computeIds(
     walker: ASTWalker = INode::walk,
-    idProvider: IdProvider = SequentialIdProvider()
+    idProvider: IdProvider = SequentialIdProvider(),
 ): IdentityHashMap<INode, String> {
     val idsMap = IdentityHashMap<INode, String>()
     walker.invoke(this).forEach {
@@ -55,5 +63,5 @@ fun INode.computeIds(
 
 fun INode.computeIdsForReferencedNodes(
     walker: ASTWalker = INode::walk,
-    idProvider: IdProvider = OnlyReferencedIdProvider(this)
+    idProvider: IdProvider = OnlyReferencedIdProvider(this),
 ): IdentityHashMap<INode, String> = computeIds(walker, idProvider)

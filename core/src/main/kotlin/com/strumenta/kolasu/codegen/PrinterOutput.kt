@@ -11,7 +11,10 @@ import kotlin.reflect.full.superclasses
  * Know how to print a single node type.
  */
 fun interface NodePrinter {
-    fun print(output: PrinterOutput, ast: INode)
+    fun print(
+        output: PrinterOutput,
+        ast: INode,
+    )
 }
 
 /**
@@ -20,7 +23,7 @@ fun interface NodePrinter {
  */
 class PrinterOutput(
     private val nodePrinters: Map<KClass<*>, NodePrinter>,
-    private var nodePrinterOverrider: (node: INode) -> NodePrinter? = { _ -> null }
+    private var nodePrinterOverrider: (node: INode) -> NodePrinter? = { _ -> null },
 ) {
     private val sb = StringBuilder()
     private var currentPoint = START_POINT
@@ -42,13 +45,19 @@ class PrinterOutput(
         onNewLine = true
     }
 
-    fun printFlag(flag: Boolean, text: String) {
+    fun printFlag(
+        flag: Boolean,
+        text: String,
+    ) {
         if (flag) {
             print(text)
         }
     }
 
-    fun print(text: String, allowMultiLine: Boolean = false) {
+    fun print(
+        text: String,
+        allowMultiLine: Boolean = false,
+    ) {
         if (text.isEmpty()) {
             return
         }
@@ -83,7 +92,11 @@ class PrinterOutput(
         }
     }
 
-    fun print(text: String?, prefix: String = "", postfix: String = "") {
+    fun print(
+        text: String?,
+        prefix: String = "",
+        postfix: String = "",
+    ) {
         if (text == null) {
             return
         }
@@ -92,7 +105,10 @@ class PrinterOutput(
         print(postfix)
     }
 
-    private fun findPrinter(ast: INode, kclass: KClass<*>): NodePrinter? {
+    private fun findPrinter(
+        ast: INode,
+        kclass: KClass<*>,
+    ): NodePrinter? {
         val overrider = nodePrinterOverrider(ast)
         if (overrider != null) {
             return overrider
@@ -108,12 +124,19 @@ class PrinterOutput(
         return null
     }
 
-    private fun getPrinter(ast: INode, kclass: KClass<*> = ast::class): NodePrinter {
+    private fun getPrinter(
+        ast: INode,
+        kclass: KClass<*> = ast::class,
+    ): NodePrinter {
         val printer = findPrinter(ast, kclass)
         return printer ?: throw java.lang.IllegalArgumentException("Unable to print $ast")
     }
 
-    fun print(ast: INode?, prefix: String = "", postfix: String = "") {
+    fun print(
+        ast: INode?,
+        prefix: String = "",
+        postfix: String = "",
+    ) {
         if (ast == null) {
             return
         }
@@ -125,7 +148,11 @@ class PrinterOutput(
         print(postfix)
     }
 
-    fun println(ast: INode?, prefix: String = "", postfix: String = "") {
+    fun println(
+        ast: INode?,
+        prefix: String = "",
+        postfix: String = "",
+    ) {
         print(ast, prefix, postfix + "\n")
     }
 
@@ -142,7 +169,10 @@ class PrinterOutput(
         indentationLevel--
     }
 
-    fun associate(ast: INode, generation: PrinterOutput.() -> Unit) {
+    fun associate(
+        ast: INode,
+        generation: PrinterOutput.() -> Unit,
+    ) {
         val startPoint = currentPoint
         generation()
         val endPoint = currentPoint
@@ -150,7 +180,11 @@ class PrinterOutput(
         ast.destinations += TextFileDestination(range = nodeRangeInGeneratedCode)
     }
 
-    fun <T : INode> printList(elements: List<T>, separator: String = ", ", elementPrinter: (T) -> Unit) {
+    fun <T : INode> printList(
+        elements: List<T>,
+        separator: String = ", ",
+        elementPrinter: (T) -> Unit,
+    ) {
         var i = 0
         while (i < elements.size) {
             if (i != 0) {
@@ -161,7 +195,10 @@ class PrinterOutput(
         }
     }
 
-    fun <T : INode> printList(elements: List<T>, separator: String = ", ") {
+    fun <T : INode> printList(
+        elements: List<T>,
+        separator: String = ", ",
+    ) {
         printList(elements, separator) { el -> print(el) }
     }
 
@@ -171,7 +208,7 @@ class PrinterOutput(
         postfix: String,
         printEvenIfEmpty: Boolean = false,
         separator: String = ", ",
-        elementPrinter: (T) -> Unit
+        elementPrinter: (T) -> Unit,
     ) {
         if (elements.isNotEmpty() || printEvenIfEmpty) {
             print(prefix)
@@ -185,7 +222,7 @@ class PrinterOutput(
         elements: List<T>,
         postfix: String,
         printEvenIfEmpty: Boolean = false,
-        separator: String = ", "
+        separator: String = ", ",
     ) {
         printList(prefix, elements, postfix, printEvenIfEmpty, separator) { el -> print(el) }
     }
@@ -195,7 +232,7 @@ class PrinterOutput(
         if (notNull.size != 1) {
             throw IllegalStateException(
                 "Expected exactly one alternative to be not null. " +
-                    "Not null alternatives: $notNull"
+                    "Not null alternatives: $notNull",
             )
         }
         print(notNull.first())

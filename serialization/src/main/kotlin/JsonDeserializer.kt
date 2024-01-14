@@ -12,10 +12,8 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
-import java.lang.IllegalStateException
-import java.lang.UnsupportedOperationException
 import java.lang.reflect.InvocationTargetException
-import java.util.*
+import java.util.LinkedList
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -24,14 +22,19 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaType
 
 class JsonDeserializer {
-
     private val gsonBuilder = GsonBuilder()
 
-    fun registerCustomDeserializer(type: KType, serializer: com.google.gson.JsonDeserializer<*>) {
+    fun registerCustomDeserializer(
+        type: KType,
+        serializer: com.google.gson.JsonDeserializer<*>,
+    ) {
         gsonBuilder.registerTypeAdapter(type.javaType, serializer)
     }
 
-    private fun deserializeType(typeToDeserialize: KType, json: JsonElement?): Any? {
+    private fun deserializeType(
+        typeToDeserialize: KType,
+        json: JsonElement?,
+    ): Any? {
         if (json == null) {
             return null
         }
@@ -40,24 +43,27 @@ class JsonDeserializer {
             when {
                 INode::class.java.isAssignableFrom(rawClass) -> {
                     val className = json.asJsonObject[JSON_TYPE_KEY].asString
-                    val actualClass = try {
-                        Class.forName(className)
-                    } catch (ex: ClassNotFoundException) {
-                        // This handles only the case when the serialized JSON used the simple name
-                        // rather than the canonical name for indicating the type of the serialized object.
-                        // The rawClass is the class we are expecting,
-                        // while className is the type in the JSON serialization.
-                        // These two types could be different: rawClass could be a sealed or abstract type,
-                        // while className could be a compatible concrete class.
-                        // So, when className is a simple name and we cannot resolve it directly,
-                        // we need to get the package name of the rawClass and apply it to className.
-                        Class.forName(
-                            "${rawClass.canonicalName.substring(
-                                0,
-                                rawClass.canonicalName.lastIndexOf('.') + 1
-                            )}$className"
-                        )
-                    }
+                    val actualClass =
+                        try {
+                            Class.forName(className)
+                        } catch (ex: ClassNotFoundException) {
+                            // This handles only the case when the serialized JSON used the simple name
+                            // rather than the canonical name for indicating the type of the serialized object.
+                            // The rawClass is the class we are expecting,
+                            // while className is the type in the JSON serialization.
+                            // These two types could be different: rawClass could be a sealed or abstract type,
+                            // while className could be a compatible concrete class.
+                            // So, when className is a simple name and we cannot resolve it directly,
+                            // we need to get the package name of the rawClass and apply it to className.
+                            Class.forName(
+                                "${
+                                    rawClass.canonicalName.substring(
+                                        0,
+                                        rawClass.canonicalName.lastIndexOf('.') + 1,
+                                    )
+                                }$className",
+                            )
+                        }
                     return deserialize(actualClass.asSubclass(INode::class.java), json.asJsonObject)
                 }
 
@@ -84,16 +90,19 @@ class JsonDeserializer {
                     if (json.isJsonObject) {
                         if (json.asJsonObject.has(JSON_TYPE_KEY)) {
                             val type = json.asJsonObject.get(JSON_TYPE_KEY).asString
-                            val clazz = try {
-                                Class.forName(type)
-                            } catch (ex: ClassNotFoundException) {
-                                Class.forName(
-                                    "${rawClass.canonicalName.substring(
-                                        0,
-                                        rawClass.canonicalName.lastIndexOf('.') + 1
-                                    )}$type"
-                                )
-                            }
+                            val clazz =
+                                try {
+                                    Class.forName(type)
+                                } catch (ex: ClassNotFoundException) {
+                                    Class.forName(
+                                        "${
+                                            rawClass.canonicalName.substring(
+                                                0,
+                                                rawClass.canonicalName.lastIndexOf('.') + 1,
+                                            )
+                                        }$type",
+                                    )
+                                }
                             if (clazz == null) {
                                 throw IllegalStateException("Unable to find class $type")
                             } else {
@@ -108,12 +117,18 @@ class JsonDeserializer {
         TODO()
     }
 
-    fun <T : INode> deserialize(clazz: Class<T>, json: String): T {
+    fun <T : INode> deserialize(
+        clazz: Class<T>,
+        json: String,
+    ): T {
         val jo = JsonParser().parse(json).asJsonObject
         return deserialize(clazz, jo)
     }
 
-    fun <T : INode> deserialize(clazz: Class<T>, jo: JsonObject): T {
+    fun <T : INode> deserialize(
+        clazz: Class<T>,
+        jo: JsonObject,
+    ): T {
         val instance: T?
         val primaryConstructor = clazz.kotlin.primaryConstructor
         if (primaryConstructor != null) {
@@ -125,7 +140,7 @@ class JsonDeserializer {
                 } catch (t: Throwable) {
                     throw RuntimeException(
                         "Issue deserializing property ${p.name} of ${p.type}. JSON: ${jo.get(p.name)}",
-                        t
+                        t,
                     )
                 }
             }
@@ -133,10 +148,12 @@ class JsonDeserializer {
                 instance = primaryConstructor.callBy(args)
             } catch (e: InvocationTargetException) {
                 throw RuntimeException(
-                    "Issue instantiating ${clazz.canonicalName} with args ${args.map {
-                        "${it.key.name}:${it.key.type} = ${it.value}"
-                    }.joinToString(", ")} by using constructor $primaryConstructor",
-                    e
+                    "Issue instantiating ${clazz.canonicalName} with args ${
+                        args.map {
+                            "${it.key.name}:${it.key.type} = ${it.value}"
+                        }.joinToString(", ")
+                    } by using constructor $primaryConstructor",
+                    e,
                 )
             }
         } else {
@@ -158,37 +175,47 @@ class JsonDeserializer {
         return instance ?: throw UnsupportedOperationException()
     }
 
-    fun <T : INode> deserializeResult(rootClass: Class<T>, json: String): Result<T> {
+    fun <T : INode> deserializeResult(
+        rootClass: Class<T>,
+        json: String,
+    ): Result<T> {
         val jo = JsonParser().parse(json).asJsonObject
-        val errors = jo["issues"].asJsonArray.map { it.asJsonObject }.map {
-            val type = IssueType.valueOf(it["type"].asString)
-            val message = it["message"].asString
-            val range = it["range"]?.asJsonObject?.decodeAsRange()
-            val severity = IssueSeverity.valueOf(it["severity"].asString)
-            Issue(type, message, severity = severity, range = range)
-        }
-        val root = if (jo.has("root")) {
-            deserialize(rootClass, jo["root"].asJsonObject)
-        } else {
-            null
-        }
+        val errors =
+            jo["issues"].asJsonArray.map { it.asJsonObject }.map {
+                val type = IssueType.valueOf(it["type"].asString)
+                val message = it["message"].asString
+                val range = it["range"]?.asJsonObject?.decodeAsRange()
+                val severity = IssueSeverity.valueOf(it["severity"].asString)
+                Issue(type, message, severity = severity, range = range)
+            }
+        val root =
+            if (jo.has("root")) {
+                deserialize(rootClass, jo["root"].asJsonObject)
+            } else {
+                null
+            }
 
         return Result(errors, root)
     }
 
-    fun <T : INode> deserializeParsingResult(rootClass: Class<T>, json: String): ParsingResult<T> {
+    fun <T : INode> deserializeParsingResult(
+        rootClass: Class<T>,
+        json: String,
+    ): ParsingResult<T> {
         val jo = JsonParser().parse(json).asJsonObject
-        val issues = jo["issues"].asJsonArray.map { it.asJsonObject }.map {
-            val type = IssueType.valueOf(it["type"].asString)
-            val message = it["message"].asString
-            val range = it["range"]?.asJsonObject?.decodeAsRange()
-            Issue(type, message, range = range)
-        }
-        val root = if (jo.has("root")) {
-            deserialize(rootClass, jo["root"].asJsonObject)
-        } else {
-            null
-        }
+        val issues =
+            jo["issues"].asJsonArray.map { it.asJsonObject }.map {
+                val type = IssueType.valueOf(it["type"].asString)
+                val message = it["message"].asString
+                val range = it["range"]?.asJsonObject?.decodeAsRange()
+                Issue(type, message, range = range)
+            }
+        val root =
+            if (jo.has("root")) {
+                deserialize(rootClass, jo["root"].asJsonObject)
+            } else {
+                null
+            }
 
         return ParsingResult(issues, root)
     }

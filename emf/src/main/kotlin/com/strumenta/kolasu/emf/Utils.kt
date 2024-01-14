@@ -10,18 +10,28 @@ import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.eclipse.emfcloud.jackson.resource.JsonResourceFactory
 
-fun EObject.setStringAttribute(propertyName: String, propertyValue: String) {
+fun EObject.setStringAttribute(
+    propertyName: String,
+    propertyValue: String,
+) {
     val structuralFeature = this.eClass().eAllStructuralFeatures.find { it.name == propertyName }!!
     this.eSet(structuralFeature, propertyValue)
 }
 
-fun EObject.setSingleContainment(propertyName: String, propertyValue: EObject) {
-    val structuralFeature = this.eClass().eAllStructuralFeatures.find { it.name == propertyName }
-        ?: throw IllegalArgumentException("Property $propertyName not found in EClass ${this.eClass()}")
+fun EObject.setSingleContainment(
+    propertyName: String,
+    propertyValue: EObject,
+) {
+    val structuralFeature =
+        this.eClass().eAllStructuralFeatures.find { it.name == propertyName }
+            ?: throw IllegalArgumentException("Property $propertyName not found in EClass ${this.eClass()}")
     this.eSet(structuralFeature, propertyValue)
 }
 
-fun EObject.setMultipleContainment(propertyName: String, propertyValue: List<EObject>) {
+fun EObject.setMultipleContainment(
+    propertyName: String,
+    propertyValue: List<EObject>,
+) {
     val structuralFeature = this.eClass().eAllStructuralFeatures.find { it.name == propertyName }!!
     (this.eGet(structuralFeature) as EList<EObject>).addAll(propertyValue)
 }

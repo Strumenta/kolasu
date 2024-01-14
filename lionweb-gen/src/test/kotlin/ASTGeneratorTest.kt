@@ -10,7 +10,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ASTGeneratorTest {
-
     @Test
     fun allASTClassesAreGeneratedAsExpected() {
         val inputStream = this.javaClass.getResourceAsStream("/properties-language.json")
@@ -61,7 +60,7 @@ public data class IntValue(
 public data class StringValue(
   public var `value`: String,
 ) : Value()""".trim(),
-            generated.first().code.trim()
+            generated.first().code.trim(),
         )
     }
 
@@ -73,7 +72,7 @@ public data class StringValue(
                 name = "MyInterface"
                 key = "MyKey"
                 addFeature(Property.createRequired("someFlag", LionCoreBuiltins.getBoolean()))
-            }
+            },
         )
         val generated = ASTGenerator("com.strumenta.example", dummyLanguage).generateClasses()
         assertEquals(1, generated.size)
@@ -89,7 +88,7 @@ import kotlin.Boolean
 public interface MyInterface {
   public var someFlag: Boolean = someFlag
 }""".trim(),
-            generated.first().code.trim()
+            generated.first().code.trim(),
         )
     }
 }

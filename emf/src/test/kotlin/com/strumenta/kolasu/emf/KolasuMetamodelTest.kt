@@ -9,16 +9,22 @@ import kotlin.reflect.full.createType
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-data class ARoot(val nodes: List<ANodeWithAPair>) : Node()
+data class ARoot(
+    val nodes: List<ANodeWithAPair>,
+) : Node()
 
 data class ANodeWithAPair(
-    val p: Pair<String, Integer>
+    val p: Pair<String, Integer>,
 ) : Node()
 
 class KolasuMetamodelTest {
-
     private fun temporaryFile(suffix: String): File {
-        val f = kotlin.io.path.createTempFile(suffix = suffix).toFile()
+        val f =
+            kotlin
+                .io
+                .path
+                .createTempFile(suffix = suffix)
+                .toFile()
         f.deleteOnExit()
         return f
     }
@@ -35,21 +41,23 @@ class KolasuMetamodelTest {
 
         val resource = createResource(mmuri) ?: throw IOException("Unsupported destination: $mmuri")
 
-        val dependencyMetamodelBuilder = MetamodelBuilder(
-            "kotlin",
-            "https://strumenta.com/kotlin",
-            "kotlin",
-            resource
-        )
+        val dependencyMetamodelBuilder =
+            MetamodelBuilder(
+                "kotlin",
+                "https://strumenta.com/kotlin",
+                "kotlin",
+                resource,
+            )
         dependencyMetamodelBuilder.provideClass(Pair::class)
         dependencyMetamodelBuilder.generate()
 
-        val metamodelBuilder = MetamodelBuilder(
-            "com.strumenta.kolasu.emf",
-            "https://strumenta.com/simplemm",
-            "simplemm",
-            resource
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                "com.strumenta.kolasu.emf",
+                "https://strumenta.com/simplemm",
+                "simplemm",
+                resource,
+            )
         metamodelBuilder.provideClass(ANodeWithAPair::class)
         val ePackage = metamodelBuilder.generate()
 
@@ -129,7 +137,7 @@ class KolasuMetamodelTest {
     } ]
   } ]
 } ]""".replace("\n", System.lineSeparator()),
-            jsonFile.readText()
+            jsonFile.readText(),
         )
     }
 

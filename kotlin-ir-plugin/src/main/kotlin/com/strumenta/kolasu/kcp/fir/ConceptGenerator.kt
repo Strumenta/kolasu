@@ -31,7 +31,9 @@ import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
-class ConceptGenerator(session: FirSession) : FirDeclarationGenerationExtension(session) {
+class ConceptGenerator(
+    session: FirSession,
+) : FirDeclarationGenerationExtension(session) {
     companion object {
         val MY_CLASS_ID = ClassId(FqName.fromSegments(listOf("foo", "bar")), Name.identifier("MyClass"))
 
@@ -40,20 +42,22 @@ class ConceptGenerator(session: FirSession) : FirDeclarationGenerationExtension(
 
     override fun generateTopLevelClassLikeDeclaration(classId: ClassId): FirClassLikeSymbol<*>? {
         if (classId != MY_CLASS_ID) return null
-        val klass = buildRegularClass {
-            moduleData = session.moduleData
-            origin = Key.origin
-            status = FirResolvedDeclarationStatusImpl(
-                Visibilities.Public,
-                Modality.FINAL,
-                EffectiveVisibility.Public
-            )
-            classKind = ClassKind.CLASS
-            scopeProvider = session.kotlinScopeProvider
-            name = classId.shortClassName
-            symbol = FirRegularClassSymbol(classId)
-            superTypeRefs.add(session.builtinTypes.anyType)
-        }
+        val klass =
+            buildRegularClass {
+                moduleData = session.moduleData
+                origin = Key.origin
+                status =
+                    FirResolvedDeclarationStatusImpl(
+                        Visibilities.Public,
+                        Modality.FINAL,
+                        EffectiveVisibility.Public,
+                    )
+                classKind = ClassKind.CLASS
+                scopeProvider = session.kotlinScopeProvider
+                name = classId.shortClassName
+                symbol = FirRegularClassSymbol(classId)
+                superTypeRefs.add(session.builtinTypes.anyType)
+            }
         return klass.symbol
     }
 
@@ -65,45 +69,50 @@ class ConceptGenerator(session: FirSession) : FirDeclarationGenerationExtension(
     override fun generateConstructors(context: MemberGenerationContext): List<FirConstructorSymbol> {
         val classId = context.owner.classId
         require(classId == MY_CLASS_ID)
-        val constructor = buildPrimaryConstructor {
-            resolvePhase = FirResolvePhase.BODY_RESOLVE
-            moduleData = session.moduleData
-            origin = Key.origin
-            returnTypeRef = buildResolvedTypeRef {
-                type = classId.toConeType()
+        val constructor =
+            buildPrimaryConstructor {
+                resolvePhase = FirResolvePhase.BODY_RESOLVE
+                moduleData = session.moduleData
+                origin = Key.origin
+                returnTypeRef =
+                    buildResolvedTypeRef {
+                        type = classId.toConeType()
+                    }
+                status =
+                    FirResolvedDeclarationStatusImpl(
+                        Visibilities.Public,
+                        Modality.FINAL,
+                        EffectiveVisibility.Public,
+                    )
+                symbol = FirConstructorSymbol(classId)
+            }.also {
+                it.containingClassForStaticMemberAttr = ConeClassLikeLookupTagImpl(classId)
             }
-            status = FirResolvedDeclarationStatusImpl(
-                Visibilities.Public,
-                Modality.FINAL,
-                EffectiveVisibility.Public
-            )
-            symbol = FirConstructorSymbol(classId)
-        }.also {
-            it.containingClassForStaticMemberAttr = ConeClassLikeLookupTagImpl(classId)
-        }
         return listOf(constructor.symbol)
     }
 
     override fun generateFunctions(
         callableId: CallableId,
-        context: MemberGenerationContext?
+        context: MemberGenerationContext?,
     ): List<FirNamedFunctionSymbol> {
-        val function = buildSimpleFunction {
-            resolvePhase = FirResolvePhase.BODY_RESOLVE
-            moduleData = session.moduleData
-            origin = Key.origin
-            status = FirResolvedDeclarationStatusImpl(
-                Visibilities.Public,
-                Modality.FINAL,
-                EffectiveVisibility.Public
-            )
-            returnTypeRef = session.builtinTypes.stringType
-            name = callableId.callableName
-            symbol = FirNamedFunctionSymbol(callableId)
-            // it's better to use default type on corresponding firClass to handle type parameters
-            // but in this case we know that MyClass don't have any generics
-            dispatchReceiverType = callableId.classId?.toConeType()
-        }
+        val function =
+            buildSimpleFunction {
+                resolvePhase = FirResolvePhase.BODY_RESOLVE
+                moduleData = session.moduleData
+                origin = Key.origin
+                status =
+                    FirResolvedDeclarationStatusImpl(
+                        Visibilities.Public,
+                        Modality.FINAL,
+                        EffectiveVisibility.Public,
+                    )
+                returnTypeRef = session.builtinTypes.stringType
+                name = callableId.callableName
+                symbol = FirNamedFunctionSymbol(callableId)
+                // it's better to use default type on corresponding firClass to handle type parameters
+                // but in this case we know that MyClass don't have any generics
+                dispatchReceiverType = callableId.classId?.toConeType()
+            }
         return listOf(function.symbol)
     }
 
@@ -115,13 +124,9 @@ class ConceptGenerator(session: FirSession) : FirDeclarationGenerationExtension(
 //    }
 //  }
 
-    override fun getTopLevelClassIds(): Set<ClassId> {
-        return setOf(MY_CLASS_ID)
-    }
+    override fun getTopLevelClassIds(): Set<ClassId> = setOf(MY_CLASS_ID)
 
-    override fun hasPackage(packageFqName: FqName): Boolean {
-        return packageFqName == MY_CLASS_ID.packageFqName
-    }
+    override fun hasPackage(packageFqName: FqName): Boolean = packageFqName == MY_CLASS_ID.packageFqName
 
     object Key : GeneratedDeclarationKey()
 }

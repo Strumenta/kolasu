@@ -10,7 +10,11 @@ import com.strumenta.kolasu.model.observable.ReferenceSet
 import com.strumenta.kolasu.model.observable.ReferencedToAdded
 import com.strumenta.kolasu.model.observable.ReferencedToRemoved
 import java.io.Serializable
-import kotlin.reflect.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
+import kotlin.reflect.KType
+import kotlin.reflect.KTypeProjection
+import kotlin.reflect.KVariance
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubtypeOf
 
@@ -36,7 +40,10 @@ interface Named : PossiblyNamed {
     override val name: String
 }
 
-data class ReferenceChangeNotification<N : PossiblyNamed>(val oldValue: N?, val newValue: N?)
+data class ReferenceChangeNotification<N : PossiblyNamed>(
+    val oldValue: N?,
+    val newValue: N?,
+)
 
 /**
  * A reference associated by using a name.
@@ -45,9 +52,10 @@ data class ReferenceChangeNotification<N : PossiblyNamed>(val oldValue: N?, val 
  * This is not statically enforced as we may want to use some interface, which cannot extend Node.
  * However, this is enforced dynamically.
  */
-class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
-    Serializable where N : PossiblyNamed {
-
+class ReferenceByName<N>(
+    val name: String,
+    initialReferred: N? = null,
+) : Serializable where N : PossiblyNamed {
     val changes = PublishSubject<ReferenceChangeNotification<N>>()
 
     var referred: N? = null
@@ -68,55 +76,63 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
      * be propagated to the owner of the reference, so that the observers of the owner will be notified
      * of changes in the reference.
      */
-    fun setContainer(node: INode, referenceName: String) {
+    fun setContainer(
+        node: INode,
+        referenceName: String,
+    ) {
         if (container == node) {
             return
         }
         if (container != null) {
             throw IllegalStateException("$this is already contained in $container as ${this.referenceName}")
         }
-        changes.map {
-            // When the reference is changed, we propagate it to the container
-            ReferenceSet(node, referenceName, it.oldValue as INode?, it.newValue as INode?)
-        }.subscribe(node.changes.getObserver { })
+        changes
+            .map {
+                // When the reference is changed, we propagate it to the container
+                ReferenceSet(node, referenceName, it.oldValue as INode?, it.newValue as INode?)
+            }.subscribe(node.changes.getObserver { })
         changes
             .filter { it.oldValue != null }
             .map { ReferencedToRemoved(it.oldValue as INode, referenceName, node) }
-            .subscribe(object : ObservableObserver<ReferencedToRemoved<INode>> {
-                override fun onComplete() {
-                    TODO("Not yet implemented")
-                }
+            .subscribe(
+                object : ObservableObserver<ReferencedToRemoved<INode>> {
+                    override fun onComplete() {
+                        TODO("Not yet implemented")
+                    }
 
-                override fun onError(error: Throwable) {
-                    TODO("Not yet implemented")
-                }
+                    override fun onError(error: Throwable) {
+                        TODO("Not yet implemented")
+                    }
 
-                override fun onNext(value: ReferencedToRemoved<INode>) {
-                    value.node.changes.onNext(value)
-                }
+                    override fun onNext(value: ReferencedToRemoved<INode>) {
+                        value.node.changes.onNext(value)
+                    }
 
-                override fun onSubscribe(disposable: Disposable) {
-                }
-            })
+                    override fun onSubscribe(disposable: Disposable) {
+                    }
+                },
+            )
         changes
             .filter { it.newValue != null }
             .map { ReferencedToAdded(it.newValue as INode, referenceName, node) }
-            .subscribe(object : ObservableObserver<ReferencedToAdded<INode>> {
-                override fun onComplete() {
-                    TODO("Not yet implemented")
-                }
+            .subscribe(
+                object : ObservableObserver<ReferencedToAdded<INode>> {
+                    override fun onComplete() {
+                        TODO("Not yet implemented")
+                    }
 
-                override fun onError(error: Throwable) {
-                    TODO("Not yet implemented")
-                }
+                    override fun onError(error: Throwable) {
+                        TODO("Not yet implemented")
+                    }
 
-                override fun onNext(value: ReferencedToAdded<INode>) {
-                    value.node.changes.onNext(value)
-                }
+                    override fun onNext(value: ReferencedToAdded<INode>) {
+                        value.node.changes.onNext(value)
+                    }
 
-                override fun onSubscribe(disposable: Disposable) {
-                }
-            })
+                    override fun onSubscribe(disposable: Disposable) {
+                    }
+                },
+            )
         container = node
         this.referenceName = referenceName
     }
@@ -157,7 +173,7 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) :
  */
 fun <N> ReferenceByName<N>.tryToResolve(
     candidates: Iterable<N>,
-    caseInsensitive: Boolean = false
+    caseInsensitive: Boolean = false,
 ): Boolean where N : PossiblyNamed {
     val res: N? = candidates.find { if (it.name == null) false else it.name.equals(this.name, caseInsensitive) }
     this.referred = res
@@ -171,14 +187,13 @@ fun <N> ReferenceByName<N>.tryToResolve(
  * @param possibleValue the candidate value.
  * @return true if the assignment has been performed
  */
-fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : PossiblyNamed {
-    return if (possibleValue == null) {
+fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : PossiblyNamed =
+    if (possibleValue == null) {
         false
     } else {
         this.referred = possibleValue
         true
     }
-}
 
 /**
  * Typealias representing reference properties.
@@ -188,20 +203,22 @@ typealias KReferenceByName<S> = KProperty1<S, ReferenceByName<out PossiblyNamed>
 /**
  * Builds a type representation for a reference
  **/
-fun kReferenceByNameType(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class): KType {
-    return ReferenceByName::class.createType(
+fun kReferenceByNameType(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class): KType =
+    ReferenceByName::class.createType(
         arguments = listOf(KTypeProjection(variance = KVariance.OUT, type = targetClass.createType())),
-        nullable = true
+        nullable = true,
     )
-}
 
 /**
  * Retrieves the referred type for a given reference property.
  **/
 @Suppress("unchecked_cast")
-fun KReferenceByName<*>.getReferredType(): KClass<out PossiblyNamed> {
-    return this.returnType.arguments[0].type!!.classifier!! as KClass<out PossiblyNamed>
-}
+fun KReferenceByName<*>.getReferredType(): KClass<out PossiblyNamed> =
+    this
+        .returnType
+        .arguments[0]
+        .type!!
+        .classifier!! as KClass<out PossiblyNamed>
 
 /**
  * Retrieves all reference properties for a given node.

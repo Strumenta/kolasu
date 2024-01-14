@@ -1,16 +1,26 @@
 package com.strumenta.kolasu.model
 
 import org.junit.Test
-import java.util.*
+import java.util.LinkedList
 import kotlin.test.assertEquals
 
-data class Foo1(val name: String) : Node()
-data class Foo2(val names: List<String>) : Node()
-data class Foo3(val foo: Foo1) : Node()
-data class Foo4(val foos: List<Foo1>?) : Node()
+data class Foo1(
+    val name: String,
+) : Node()
+
+data class Foo2(
+    val names: List<String>,
+) : Node()
+
+data class Foo3(
+    val foo: Foo1,
+) : Node()
+
+data class Foo4(
+    val foos: List<Foo1>?,
+) : Node()
 
 class PropertyDescriptionTest {
-
     @Test
     fun buildForNotNodeSingleProperty() {
         val list = LinkedList<PropertyDescription>()
@@ -25,9 +35,9 @@ class PropertyDescriptionTest {
                 false,
                 Multiplicity.SINGULAR,
                 "gino",
-                PropertyType.ATTRIBUTE
+                PropertyType.ATTRIBUTE,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -45,9 +55,9 @@ class PropertyDescriptionTest {
                 false,
                 Multiplicity.MANY,
                 listOf("gino", "pino"),
-                PropertyType.ATTRIBUTE
+                PropertyType.ATTRIBUTE,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -65,9 +75,9 @@ class PropertyDescriptionTest {
                 true,
                 Multiplicity.SINGULAR,
                 Foo1("gino"),
-                PropertyType.CONTAINMENT
+                PropertyType.CONTAINMENT,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -85,9 +95,9 @@ class PropertyDescriptionTest {
                 true,
                 Multiplicity.MANY,
                 listOf(Foo1("gino")),
-                PropertyType.CONTAINMENT
+                PropertyType.CONTAINMENT,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -105,9 +115,9 @@ class PropertyDescriptionTest {
                 true,
                 Multiplicity.MANY,
                 emptyList<Foo1>(),
-                PropertyType.CONTAINMENT
+                PropertyType.CONTAINMENT,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -125,9 +135,9 @@ class PropertyDescriptionTest {
                 true,
                 Multiplicity.MANY,
                 null,
-                PropertyType.CONTAINMENT
+                PropertyType.CONTAINMENT,
             ),
-            list[0]
+            list[0],
         )
     }
 }

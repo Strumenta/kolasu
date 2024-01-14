@@ -22,31 +22,33 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ResultTest {
-
     @Test
     fun generateSimpleModelResult() {
-        val cu = CompilationUnit(
-            listOf(
-                VarDeclaration(Visibility.PUBLIC, "a", StringLiteral("foo")),
-                VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar"))
+        val cu =
+            CompilationUnit(
+                listOf(
+                    VarDeclaration(Visibility.PUBLIC, "a", StringLiteral("foo")),
+                    VarDeclaration(Visibility.PRIVATE, "b", StringLiteral("bar")),
+                ),
             )
-        )
         val nsURI = "https://strumenta.com/simplemm"
-        val metamodelBuilder = MetamodelBuilder(
-            packageName(CompilationUnit::class),
-            nsURI,
-            "simplemm"
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                packageName(CompilationUnit::class),
+                nsURI,
+                "simplemm",
+            )
         metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
 
-        val result = Result(
-            listOf(
-                Issue(IssueType.LEXICAL, "lex", range = Range(Point(1, 1), Point(2, 10))),
-                Issue(IssueType.SEMANTIC, "foo")
-            ),
-            cu
-        )
+        val result =
+            Result(
+                listOf(
+                    Issue(IssueType.LEXICAL, "lex", range = Range(Point(1, 1), Point(2, 10))),
+                    Issue(IssueType.SEMANTIC, "foo"),
+                ),
+                cu,
+            )
 
         val eo = result.toEObject(ePackage)
         val emfString = JsonGenerator().generateEMFString(result, ePackage)
@@ -77,24 +79,27 @@ class ResultTest {
         }
     }
 
-    @Test fun `serialization of issues`() {
+    @Test
+    fun `serialization of issues`() {
         val nsURI = "https://strumenta.com/simplemm"
-        val metamodelBuilder = MetamodelBuilder(
-            packageName(CompilationUnit::class),
-            nsURI,
-            "simplemm"
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                packageName(CompilationUnit::class),
+                nsURI,
+                "simplemm",
+            )
         val ePackage = metamodelBuilder.generate()
 
-        val result: Result<INode> = Result(
-            listOf(
-                Issue(IssueType.SYNTACTIC, "An error", range = range(1, 2, 3, 4)),
-                Issue(IssueType.LEXICAL, "A warning", severity = IssueSeverity.WARNING),
-                Issue(IssueType.SEMANTIC, "An info", severity = IssueSeverity.INFO),
-                Issue(IssueType.TRANSLATION, "Translation issue")
-            ),
-            null
-        )
+        val result: Result<INode> =
+            Result(
+                listOf(
+                    Issue(IssueType.SYNTACTIC, "An error", range = range(1, 2, 3, 4)),
+                    Issue(IssueType.LEXICAL, "A warning", severity = IssueSeverity.WARNING),
+                    Issue(IssueType.SEMANTIC, "An info", severity = IssueSeverity.INFO),
+                    Issue(IssueType.TRANSLATION, "Translation issue"),
+                ),
+                null,
+            )
         val emfString = JsonGenerator().generateEMFString(result, ePackage)
         assertEquals(
             """{
@@ -124,7 +129,7 @@ class ResultTest {
     "message" : "Translation issue"
   } ]
 }""",
-            emfString
+            emfString,
         )
     }
 }

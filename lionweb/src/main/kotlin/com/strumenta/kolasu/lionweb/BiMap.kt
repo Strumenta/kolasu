@@ -13,14 +13,19 @@ class BiMap<A, B> {
     private val _asToBs = mutableMapOf<A, B>()
     private val _bsToAs = mutableMapOf<B, A>()
 
-    fun associate(a: A, b: B) {
+    fun associate(
+        a: A,
+        b: B,
+    ) {
         _asToBs[a] = b
         _bsToAs[b] = a
     }
 
     fun byA(a: A): B? = _asToBs[a]
+
     fun byB(b: B): A? = _bsToAs[b]
 
     fun containsA(a: A): Boolean = _asToBs.containsKey(a)
+
     fun containsB(b: B): Boolean = _bsToAs.containsKey(b)
 }

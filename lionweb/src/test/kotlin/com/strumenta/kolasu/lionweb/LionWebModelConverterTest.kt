@@ -12,7 +12,6 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class LionWebModelConverterTest {
-
     val serialized = """{
   "serializationFormatVersion": "2023.1",
   "languages": [
@@ -198,22 +197,24 @@ class LionWebModelConverterTest {
 
     @Test
     fun exportSimpleModel() {
-        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
-            addClass(SimpleRoot::class)
-        }
+        val kLanguage =
+            KolasuLanguage("com.strumenta.SimpleLang").apply {
+                addClass(SimpleRoot::class)
+            }
         val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
         a1.ref.referred = a1
         val b2 = SimpleNodeB("some magic value")
-        val b3_1 = SimpleNodeB("some other value")
-        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b3_1)
-        val ast = SimpleRoot(
-            12345,
-            mutableListOf(
-                a1,
-                b2,
-                a3
+        val b31 = SimpleNodeB("some other value")
+        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b31)
+        val ast =
+            SimpleRoot(
+                12345,
+                mutableListOf(
+                    a1,
+                    b2,
+                    a3,
+                ),
             )
-        )
         ast.assignParents()
 
         val exporter = LionWebModelConverter()
@@ -258,9 +259,10 @@ class LionWebModelConverterTest {
     @Test
     fun importSimpleModel() {
         val mConverter = LionWebModelConverter()
-        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
-            addClass(SimpleRoot::class)
-        }
+        val kLanguage =
+            KolasuLanguage("com.strumenta.SimpleLang").apply {
+                addClass(SimpleRoot::class)
+            }
         mConverter.exportLanguageToLionWeb(kLanguage)
         val lwAST = mConverter.deserializeToNodes(serialized).first()
         val kAST = mConverter.importModelFromLionWeb(lwAST)
@@ -268,16 +270,17 @@ class LionWebModelConverterTest {
         val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
         a1.ref.referred = a1
         val b2 = SimpleNodeB("some magic value")
-        val b3_1 = SimpleNodeB("some other value")
-        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b3_1)
-        val expectedAST = SimpleRoot(
-            12345,
-            mutableListOf(
-                a1,
-                b2,
-                a3
+        val b31 = SimpleNodeB("some other value")
+        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b31)
+        val expectedAST =
+            SimpleRoot(
+                12345,
+                mutableListOf(
+                    a1,
+                    b2,
+                    a3,
+                ),
             )
-        )
         expectedAST.assignParents()
 
         assertASTsAreEqual(expectedAST, kAST)

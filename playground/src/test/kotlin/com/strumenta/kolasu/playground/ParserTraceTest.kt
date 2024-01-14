@@ -15,25 +15,25 @@ import java.io.StringWriter
 import kotlin.test.assertEquals
 
 class ParserTraceTest {
-
     val mm = MetamodelsBuilder(JsonResource(URI.createFileURI("mm.json")))
 
     init {
         mm.addMetamodel(
             "com.strumenta.kolasu.playground",
             "http://mypackage.com",
-            "myp"
+            "myp",
         )
         mm.provideClass(ANode::class)
     }
 
     @Test
     fun serializeErrorNode() {
-        val tt = ParsingResult(
-            listOf(),
-            GenericErrorNode(Exception("foo")),
-            "ffoooo"
-        )
+        val tt =
+            ParsingResult(
+                listOf(),
+                GenericErrorNode(Exception("foo")),
+                "ffoooo",
+            )
         val writer = StringWriter()
         tt.saveForPlayground(mm.resource!!, writer, "foo.json", "  ")
         val trace = writer.toString()
@@ -49,18 +49,19 @@ class ParserTraceTest {
     }
   }
 }""",
-            trace
+            trace,
         )
     }
 
     @Test
     fun serializeIssues() {
-        val tt = ParsingResultWithFirstStage(
-            listOf(Issue(IssueType.TRANSLATION, "some issue", IssueSeverity.WARNING)),
-            ANode("a", 1),
-            "a:1",
-            firstStage = FirstStageParsingResult(emptyList(), null)
-        )
+        val tt =
+            ParsingResultWithFirstStage(
+                listOf(Issue(IssueType.TRANSLATION, "some issue", IssueSeverity.WARNING)),
+                ANode("a", 1),
+                "a:1",
+                firstStage = FirstStageParsingResult(emptyList(), null),
+            )
         val writer = StringWriter()
         tt.saveForPlayground(mm.resource!!, writer, "foo.json", "  ")
         val trace = writer.toString()
@@ -84,7 +85,7 @@ class ParserTraceTest {
     ]
   }
 }""",
-            trace
+            trace,
         )
     }
 }

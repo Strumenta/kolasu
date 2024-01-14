@@ -1,7 +1,7 @@
 root = true
 
 [*.{kt,kts}]
-max_line_length=120
+max_line_length = 120
 ktlint_code_style = ktlint_official
 ktlint_standard = enabled
 ktlint_experimental = enabled

@@ -20,11 +20,12 @@ import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import java.io.File
 
-class EMFModelCommand<R : INode, P>(parserInstantiator: ParserInstantiator<P>) :
-    ASTProcessingCommand<R, P>(
+class EMFModelCommand<R : INode, P>(
+    parserInstantiator: ParserInstantiator<P>,
+) : ASTProcessingCommand<R, P>(
         parserInstantiator,
         help = "Parses a file and exports the AST to an EMF (XMI) file.",
-        name = "model"
+        name = "model",
     ) where P : EcoreEnabledParser<R, *, *, *> {
     val metamodel by option("--metamodel")
     val outputDirectory by option("--output", "-o")
@@ -39,13 +40,23 @@ class EMFModelCommand<R : INode, P>(parserInstantiator: ParserInstantiator<P>) :
         // Nothing to do
     }
 
-    override fun processException(input: File, relativePath: String, e: Exception) {
+    override fun processException(
+        input: File,
+        relativePath: String,
+        e: Exception,
+    ) {
         // Nothing to do
     }
 
-    override fun processResult(input: File, relativePath: String, result: ParsingResult<R>, parser: P) {
-        val targetFile = File(this.outputDirectory.absolutePath + File.separator + relativePath)
-            .changeExtension("json")
+    override fun processResult(
+        input: File,
+        relativePath: String,
+        result: ParsingResult<R>,
+        parser: P,
+    ) {
+        val targetFile =
+            File(this.outputDirectory.absolutePath + File.separator + relativePath)
+                .changeExtension("json")
         val targetFileParent = targetFile.parentFile
         targetFileParent.absoluteFile.mkdirs()
 
@@ -62,13 +73,17 @@ class EMFModelCommand<R : INode, P>(parserInstantiator: ParserInstantiator<P>) :
         }
     }
 
-    private fun saveMetamodel(parser: EMFMetamodelSupport, target: File): Resource {
+    private fun saveMetamodel(
+        parser: EMFMetamodelSupport,
+        target: File,
+    ): Resource {
         val start = System.currentTimeMillis()
-        val metamodel = if (this.metamodel != null) {
-            File(this.metamodel!!)
-        } else {
-            File(target.parentFile, "metamodel." + (target.path.substring(target.path.lastIndexOf(".") + 1)))
-        }.absolutePath
+        val metamodel =
+            if (this.metamodel != null) {
+                File(this.metamodel!!)
+            } else {
+                File(target.parentFile, "metamodel." + (target.path.substring(target.path.lastIndexOf(".") + 1)))
+            }.absolutePath
         if (verbose) {
             echo("Saving metamodel to $metamodel... ")
         }
@@ -80,10 +95,11 @@ class EMFModelCommand<R : INode, P>(parserInstantiator: ParserInstantiator<P>) :
     }
 }
 
-class EMFMetaModelCommand(val metamodelSupport: EMFMetamodelSupport) :
-    CliktCommand(
+class EMFMetaModelCommand(
+    val metamodelSupport: EMFMetamodelSupport,
+) : CliktCommand(
         help = "Generate the metamodel for a language.",
-        name = "metamodel"
+        name = "metamodel",
     ) {
     val verbose by option("--verbose", "-v")
         .help("Print additional messages")

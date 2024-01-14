@@ -1,6 +1,9 @@
 package com.strumenta.kolasu.validation
 
-data class Result<C>(val issues: List<Issue>, val root: C?) {
+data class Result<C>(
+    val issues: List<Issue>,
+    val root: C?,
+) {
     val lexicalIssues
         get() = issues.filter { it.type == IssueType.LEXICAL }.toList()
     val syntacticIssues
@@ -17,14 +20,18 @@ data class Result<C>(val issues: List<Issue>, val root: C?) {
         get() = issues.isEmpty()
 
     companion object {
-        fun <C> exception(errorType: IssueType, e: Throwable): Result<C> {
-            val errors = listOf(
-                Issue(
-                    type = errorType,
-                    message = e.message ?: e.javaClass.simpleName,
-                    range = null
+        fun <C> exception(
+            errorType: IssueType,
+            e: Throwable,
+        ): Result<C> {
+            val errors =
+                listOf(
+                    Issue(
+                        type = errorType,
+                        message = e.message ?: e.javaClass.simpleName,
+                        range = null,
+                    ),
                 )
-            )
             return Result(errors, null)
         }
     }

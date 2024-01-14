@@ -14,7 +14,10 @@ import com.strumenta.kolasu.model.Range
  * @see searchByRange
  */
 @JvmOverloads
-fun INode.findByRange(range: Range, selfContained: Boolean = false): INode? {
+fun INode.findByRange(
+    range: Range,
+    selfContained: Boolean = false,
+): INode? {
     return this.searchByRange(range, selfContained).lastOrNull()
 }
 
@@ -27,7 +30,10 @@ fun INode.findByRange(range: Range, selfContained: Boolean = false): INode? {
  * @return all nodes containing the given [range] using depth-first search. Empty list if none are found.
  */
 @JvmOverloads
-fun INode.searchByRange(range: Range, selfContained: Boolean = false): Sequence<INode> {
+fun INode.searchByRange(
+    range: Range,
+    selfContained: Boolean = false,
+): Sequence<INode> {
     val contains = this.contains(range)
     if (!selfContained || contains) {
         if (children.isEmpty()) {
@@ -54,23 +60,21 @@ fun INode.searchByRange(range: Range, selfContained: Boolean = false): Sequence<
  * @param range the range within which the walk should remain
  * @return walks the AST within the given [range] starting from this node, depth-first.
  */
-fun INode.walkWithin(range: Range): Sequence<INode> {
-    return if (range.contains(this)) {
+fun INode.walkWithin(range: Range): Sequence<INode> =
+    if (range.contains(this)) {
         sequenceOf(this) + this.children.walkWithin(range)
     } else if (this.overlaps(range)) {
         this.children.walkWithin(range)
     } else {
         emptySequence()
     }
-}
 
 /**
  * @param range the range within which the walk should remain
  * @return walks the AST within the given [range] starting from each node
  * and concatenates all results in a single sequence
  */
-fun List<INode>.walkWithin(range: Range): Sequence<INode> {
-    return this
+fun List<INode>.walkWithin(range: Range): Sequence<INode> =
+    this
         .map { it.walkWithin(range) }
         .reduceOrNull { previous, current -> previous + current } ?: emptySequence()
-}

@@ -4,7 +4,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class RecognizeExistingASTClassesTest {
-
     @Test
     fun simpleCase() {
         val code = """package com.strumenta.props
@@ -54,9 +53,9 @@ public data class Property(
             setOf(
                 "com.strumenta.props.PropertiesFile",
                 "com.strumenta.props.SomeOtherClass",
-                "com.strumenta.props.Property"
+                "com.strumenta.props.Property",
             ),
-            existingClasses
+            existingClasses,
         )
 
         val existingASTClasses = KotlinCodeProcessor().classesDeclaredInFile(code)

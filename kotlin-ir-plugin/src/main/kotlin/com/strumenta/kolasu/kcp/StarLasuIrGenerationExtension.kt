@@ -16,16 +16,18 @@ import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 
 class StarLasuIrGenerationExtension(
-    private val messageCollector: MessageCollector
+    private val messageCollector: MessageCollector,
 ) : IrGenerationExtension {
-
-    private fun checkASTNode(irClass: IrClass, pluginContext: IrPluginContext) {
+    private fun checkASTNode(
+        irClass: IrClass,
+        pluginContext: IrPluginContext,
+    ) {
         irClass.primaryConstructor?.valueParameters?.forEach { param ->
             if (param.isVal() && (param.isSingleContainment() || param.isSingleAttribute())) {
                 messageCollector.report(
                     CompilerMessageSeverity.WARNING,
                     "Value param ${irClass.kotlinFqName}.${param.name} is not assignable",
-                    param.compilerSourceLocation
+                    param.compilerSourceLocation,
                 )
             }
         }
@@ -33,17 +35,21 @@ class StarLasuIrGenerationExtension(
         irClass.accept(SettingParentExtension(pluginContext, messageCollector), null)
     }
 
-    override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
+    override fun generate(
+        moduleFragment: IrModuleFragment,
+        pluginContext: IrPluginContext,
+    ) {
         moduleFragment.files.forEach { irFile ->
             irFile.declarations.filterIsInstance(IrClass::class.java).forEach { irClass ->
-                val isASTNode = irClass.getAllSuperclasses().any {
-                    it.kotlinFqName.toString() == Node::class.qualifiedName
-                }
+                val isASTNode =
+                    irClass.getAllSuperclasses().any {
+                        it.kotlinFqName.toString() == Node::class.qualifiedName
+                    }
                 if (isASTNode) {
                     messageCollector.report(
                         CompilerMessageSeverity.INFO,
                         "AST class ${irClass.kotlinFqName} identified",
-                        irClass.compilerSourceLocation
+                        irClass.compilerSourceLocation,
                     )
                     checkASTNode(irClass, pluginContext)
                 }

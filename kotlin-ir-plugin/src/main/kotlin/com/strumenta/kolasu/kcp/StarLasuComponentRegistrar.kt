@@ -14,7 +14,6 @@ import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 
 @AutoService(CompilerPluginRegistrar::class)
 class StarLasuComponentRegistrar : CompilerPluginRegistrar() {
-
     override val supportsK2: Boolean
         get() = false
 

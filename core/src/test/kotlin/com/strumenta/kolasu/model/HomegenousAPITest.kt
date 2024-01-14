@@ -3,16 +3,24 @@ package com.strumenta.kolasu.model
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class HNodeA(override var name: String) : Node(), Named
+class HNodeA(
+    override var name: String,
+) : Node(),
+    Named
 
-data class HNodeB(val nodes: MutableList<HNodeA> = mutableListOf()) : Node()
+data class HNodeB(
+    val nodes: MutableList<HNodeA> = mutableListOf(),
+) : Node()
 
-data class HNodeC(val ref: ReferenceByName<HNodeA>) : Node()
+data class HNodeC(
+    val ref: ReferenceByName<HNodeA>,
+) : Node()
 
-data class HNodeD(var node: HNodeA? = null) : Node()
+data class HNodeD(
+    var node: HNodeA? = null,
+) : Node()
 
 class HomogenousAPITest {
-
     @Test
     fun attributes() {
         val n1 = HNodeA("foo")

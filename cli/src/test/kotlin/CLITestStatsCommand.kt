@@ -17,22 +17,23 @@ class CLITestStatsCommand {
 
         val parserInstantiator = { file: File ->
             MyDummyParser().apply {
-                expectedResults[myFile.toFile()] = ParsingResult(
-                    emptyList(),
-                    MyCompilationUnit(
-                        mutableListOf(
-                            MyEntityDecl("Entity1", mutableListOf()),
-                            MyEntityDecl(
-                                "Entity2",
-                                mutableListOf(
-                                    MyFieldDecl("f1"),
-                                    MyFieldDecl("f2"),
-                                    MyFieldDecl("f3")
-                                )
-                            )
-                        )
+                expectedResults[myFile.toFile()] =
+                    ParsingResult(
+                        emptyList(),
+                        MyCompilationUnit(
+                            mutableListOf(
+                                MyEntityDecl("Entity1", mutableListOf()),
+                                MyEntityDecl(
+                                    "Entity2",
+                                    mutableListOf(
+                                        MyFieldDecl("f1"),
+                                        MyFieldDecl("f2"),
+                                        MyFieldDecl("f3"),
+                                    ),
+                                ),
+                            ),
+                        ),
                     )
-                )
             }
         }
         val console = CapturingCliktConsole()
@@ -50,7 +51,7 @@ class CLITestStatsCommand {
   processing completed with errors    : 0
   processing completed without errors : 1
   total number of errors              : 0""",
-            console.stdOutput.trim()
+            console.stdOutput.trim(),
         )
         assertEquals("", console.errOutput)
     }
@@ -64,22 +65,23 @@ class CLITestStatsCommand {
 
         val parserInstantiator = { file: File ->
             MyDummyParser().apply {
-                expectedResults[myFile.toFile()] = ParsingResult(
-                    emptyList(),
-                    MyCompilationUnit(
-                        mutableListOf(
-                            MyEntityDecl("Entity1", mutableListOf()),
-                            MyEntityDecl(
-                                "Entity2",
-                                mutableListOf(
-                                    MyFieldDecl("f1"),
-                                    MyFieldDecl("f2"),
-                                    MyFieldDecl("f3")
-                                )
-                            )
-                        )
+                expectedResults[myFile.toFile()] =
+                    ParsingResult(
+                        emptyList(),
+                        MyCompilationUnit(
+                            mutableListOf(
+                                MyEntityDecl("Entity1", mutableListOf()),
+                                MyEntityDecl(
+                                    "Entity2",
+                                    mutableListOf(
+                                        MyFieldDecl("f1"),
+                                        MyFieldDecl("f2"),
+                                        MyFieldDecl("f3"),
+                                    ),
+                                ),
+                            ),
+                        ),
                     )
-                )
             }
         }
         val console = CapturingCliktConsole()
@@ -87,7 +89,7 @@ class CLITestStatsCommand {
         cliTool.parse(arrayOf("stats", myFile.toString(), "--csv"))
         assertEquals(
             """Saving Global Stats to global-stats.csv""",
-            console.stdOutput.trim()
+            console.stdOutput.trim(),
         )
         assertEquals("", console.errOutput)
 
@@ -102,7 +104,7 @@ filesWithErrors,0
 filesWithoutErrors,1
 totalErrors,0
 """.lines(),
-            globalStatsFile.readText().lines()
+            globalStatsFile.readText().lines(),
         )
         globalStatsFile.delete()
     }
@@ -116,22 +118,23 @@ totalErrors,0
 
         val parserInstantiator = { file: File ->
             MyDummyParser().apply {
-                expectedResults[myFile.toFile()] = ParsingResult(
-                    emptyList(),
-                    MyCompilationUnit(
-                        mutableListOf(
-                            MyEntityDecl("Entity1", mutableListOf()),
-                            MyEntityDecl(
-                                "Entity2",
-                                mutableListOf(
-                                    MyFieldDecl("f1"),
-                                    MyFieldDecl("f2"),
-                                    MyFieldDecl("f3")
-                                )
-                            )
-                        )
+                expectedResults[myFile.toFile()] =
+                    ParsingResult(
+                        emptyList(),
+                        MyCompilationUnit(
+                            mutableListOf(
+                                MyEntityDecl("Entity1", mutableListOf()),
+                                MyEntityDecl(
+                                    "Entity2",
+                                    mutableListOf(
+                                        MyFieldDecl("f1"),
+                                        MyFieldDecl("f2"),
+                                        MyFieldDecl("f3"),
+                                    ),
+                                ),
+                            ),
+                        ),
                     )
-                )
             }
         }
         val console = CapturingCliktConsole()
@@ -150,22 +153,23 @@ totalErrors,0
 
         val parserInstantiator = { file: File ->
             MyDummyParser().apply {
-                expectedResults[myFile.toFile()] = ParsingResult(
-                    emptyList(),
-                    MyCompilationUnit(
-                        mutableListOf(
-                            MyEntityDecl("Entity1", mutableListOf()),
-                            MyEntityDecl(
-                                "Entity2",
-                                mutableListOf(
-                                    MyFieldDecl("f1"),
-                                    MyFieldDecl("f2"),
-                                    MyFieldDecl("f3")
-                                )
-                            )
-                        )
+                expectedResults[myFile.toFile()] =
+                    ParsingResult(
+                        emptyList(),
+                        MyCompilationUnit(
+                            mutableListOf(
+                                MyEntityDecl("Entity1", mutableListOf()),
+                                MyEntityDecl(
+                                    "Entity2",
+                                    mutableListOf(
+                                        MyFieldDecl("f1"),
+                                        MyFieldDecl("f2"),
+                                        MyFieldDecl("f3"),
+                                    ),
+                                ),
+                            ),
+                        ),
                     )
-                )
             }
         }
         val console = CapturingCliktConsole()
@@ -179,7 +183,7 @@ totalErrors,0
   com.strumenta.kolasu.cli.MyFieldDecl              : 3
 
   total number of nodes                             : 6""",
-            console.stdOutput.trim()
+            console.stdOutput.trim(),
         )
         assertEquals("", console.errOutput)
     }
@@ -193,22 +197,23 @@ totalErrors,0
 
         val parserInstantiator = { file: File ->
             MyDummyParser().apply {
-                expectedResults[myFile.toFile()] = ParsingResult(
-                    emptyList(),
-                    MyCompilationUnit(
-                        mutableListOf(
-                            MyEntityDecl("Entity1", mutableListOf()),
-                            MyEntityDecl(
-                                "Entity2",
-                                mutableListOf(
-                                    MyFieldDecl("f1"),
-                                    MyFieldDecl("f2"),
-                                    MyFieldDecl("f3")
-                                )
-                            )
-                        )
+                expectedResults[myFile.toFile()] =
+                    ParsingResult(
+                        emptyList(),
+                        MyCompilationUnit(
+                            mutableListOf(
+                                MyEntityDecl("Entity1", mutableListOf()),
+                                MyEntityDecl(
+                                    "Entity2",
+                                    mutableListOf(
+                                        MyFieldDecl("f1"),
+                                        MyFieldDecl("f2"),
+                                        MyFieldDecl("f3"),
+                                    ),
+                                ),
+                            ),
+                        ),
                     )
-                )
             }
         }
         val console = CapturingCliktConsole()
@@ -216,7 +221,7 @@ totalErrors,0
         cliTool.parse(arrayOf("stats", myFile.toString(), "--no-stats", "--node-stats", "--csv"))
         assertEquals(
             """Saving Node Stats to node-stats.csv""",
-            console.stdOutput.trim()
+            console.stdOutput.trim(),
         )
         assertEquals("", console.errOutput)
 
@@ -229,7 +234,7 @@ com.strumenta.kolasu.cli.MyEntityDecl,2
 com.strumenta.kolasu.cli.MyFieldDecl,3
 total,6
 """.lines(),
-            nodeStatsFile.readText().lines()
+            nodeStatsFile.readText().lines(),
         )
         nodeStatsFile.delete()
     }
@@ -243,22 +248,23 @@ total,6
 
         val parserInstantiator = { file: File ->
             MyDummyParser().apply {
-                expectedResults[myFile.toFile()] = ParsingResult(
-                    emptyList(),
-                    MyCompilationUnit(
-                        mutableListOf(
-                            MyEntityDecl("Entity1", mutableListOf()),
-                            MyEntityDecl(
-                                "Entity2",
-                                mutableListOf(
-                                    MyFieldDecl("f1"),
-                                    MyFieldDecl("f2"),
-                                    MyFieldDecl("f3")
-                                )
-                            )
-                        )
+                expectedResults[myFile.toFile()] =
+                    ParsingResult(
+                        emptyList(),
+                        MyCompilationUnit(
+                            mutableListOf(
+                                MyEntityDecl("Entity1", mutableListOf()),
+                                MyEntityDecl(
+                                    "Entity2",
+                                    mutableListOf(
+                                        MyFieldDecl("f1"),
+                                        MyFieldDecl("f2"),
+                                        MyFieldDecl("f3"),
+                                    ),
+                                ),
+                            ),
+                        ),
                     )
-                )
             }
         }
         val console = CapturingCliktConsole()
@@ -266,7 +272,7 @@ total,6
         cliTool.parse(arrayOf("stats", myFile.toString(), "--no-stats", "--node-stats", "--simple-names", "--csv"))
         assertEquals(
             """Saving Node Stats to node-stats.csv""",
-            console.stdOutput.trim()
+            console.stdOutput.trim(),
         )
         assertEquals("", console.errOutput)
 
@@ -279,7 +285,7 @@ MyEntityDecl,2
 MyFieldDecl,3
 total,6
 """.lines(),
-            nodeStatsFile.readText().lines()
+            nodeStatsFile.readText().lines(),
         )
         nodeStatsFile.delete()
     }
@@ -293,22 +299,23 @@ total,6
 
         val parserInstantiator = { file: File ->
             MyDummyParser().apply {
-                expectedResults[myFile.toFile()] = ParsingResult(
-                    emptyList(),
-                    MyCompilationUnit(
-                        mutableListOf(
-                            MyEntityDecl("Entity1", mutableListOf()),
-                            MyEntityDecl(
-                                "Entity2",
-                                mutableListOf(
-                                    MyFieldDecl("f1"),
-                                    MyFieldDecl("f2"),
-                                    MyFieldDecl("f3")
-                                )
-                            )
-                        )
+                expectedResults[myFile.toFile()] =
+                    ParsingResult(
+                        emptyList(),
+                        MyCompilationUnit(
+                            mutableListOf(
+                                MyEntityDecl("Entity1", mutableListOf()),
+                                MyEntityDecl(
+                                    "Entity2",
+                                    mutableListOf(
+                                        MyFieldDecl("f1"),
+                                        MyFieldDecl("f2"),
+                                        MyFieldDecl("f3"),
+                                    ),
+                                ),
+                            ),
+                        ),
                     )
-                )
             }
         }
         val console = CapturingCliktConsole()
@@ -322,7 +329,7 @@ total,6
   MyFieldDecl              : 3
 
   total number of nodes    : 6""",
-            console.stdOutput.trim()
+            console.stdOutput.trim(),
         )
         assertEquals("", console.errOutput)
     }

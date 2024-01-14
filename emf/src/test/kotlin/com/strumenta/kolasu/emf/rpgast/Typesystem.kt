@@ -47,10 +47,10 @@ sealed class Type {
     abstract val size: Int
 
     fun toArray(nElements: Int) = ArrayType(this, nElements)
+
     fun isArray() = this is ArrayType
-    open fun asArray(): ArrayType {
-        throw IllegalStateException("Not an ArrayType")
-    }
+
+    open fun asArray(): ArrayType = throw IllegalStateException("Not an ArrayType")
 
     open fun hasVariableSize() = false
 }
@@ -65,12 +65,18 @@ object KListType : Type() {
         get() = 0
 }
 
-data class DataStructureType(val fields: List<FieldType>, val elementSize: Int) : Type() {
+data class DataStructureType(
+    val fields: List<FieldType>,
+    val elementSize: Int,
+) : Type() {
     override val size: Int
         get() = elementSize
 }
 
-data class StringType(val length: Int, val varying: Boolean = false) : Type() {
+data class StringType(
+    val length: Int,
+    val varying: Boolean = false,
+) : Type() {
     override val size: Int
         get() = length
 }
@@ -106,7 +112,9 @@ object TimeStampType : Type() {
  * and very similar to a string.
  */
 
-data class CharacterType(val nChars: Int) : Type() {
+data class CharacterType(
+    val nChars: Int,
+) : Type() {
     override val size: Int
         get() = nChars
 }
@@ -124,12 +132,15 @@ infix fun Long.log(base: Int): Double {
     return (Math.log(this.toDouble()) / Math.log(base.toDouble()))
 }
 
-data class NumberType(val entireDigits: Int, val decimalDigits: Int, val rpgType: String? = "") : Type() {
-
+data class NumberType(
+    val entireDigits: Int,
+    val decimalDigits: Int,
+    val rpgType: String? = "",
+) : Type() {
     constructor(entireDigits: Int, decimalDigits: Int, rpgType: RpgType) : this(
         entireDigits,
         decimalDigits,
-        rpgType.rpgType
+        rpgType.rpgType,
     )
 
     init {
@@ -152,7 +163,7 @@ data class NumberType(val entireDigits: Int, val decimalDigits: Int, val rpgType
                         in 6..10 -> 4
                         in 11..20 -> 8
                         else -> throw IllegalStateException(
-                            "Only predefined length allowed for integer, signed or unsigned"
+                            "Only predefined length allowed for integer, signed or unsigned",
                         )
                     }
                 }
@@ -185,7 +196,11 @@ data class NumberType(val entireDigits: Int, val decimalDigits: Int, val rpgType
     }
 }
 
-data class ArrayType(val element: Type, val nElements: Int, val compileTimeRecordsPerLine: Int? = null) : Type() {
+data class ArrayType(
+    val element: Type,
+    val nElements: Int,
+    val compileTimeRecordsPerLine: Int? = null,
+) : Type() {
     var ascend: Boolean? = null
 
     override val size: Int
@@ -206,7 +221,10 @@ data class ArrayType(val element: Type, val nElements: Int, val compileTimeRecor
     fun compileTimeArray(): Boolean = compileTimeRecordsPerLine != null
 }
 
-data class FieldType(val name: String, val type: Type)
+data class FieldType(
+    val name: String,
+    val type: Type,
+)
 
 fun Expression.type(): Type {
     return when (this) {
@@ -266,7 +284,7 @@ fun Expression.type(): Type {
             if (leftType is NumberType && rightType is NumberType) {
                 return NumberType(
                     max(leftType.entireDigits, rightType.entireDigits),
-                    max(leftType.decimalDigits, rightType.decimalDigits)
+                    max(leftType.decimalDigits, rightType.decimalDigits),
                 )
             } else {
                 TODO("We do not know the type of a sum of types $leftType and $rightType")
@@ -319,11 +337,12 @@ fun Type.toDataStructureValue(value: Value): StringValue {
             // To date only 2 and 4 bytes are supported
             if (this.rpgType == RpgType.BINARY.rpgType) {
                 // Transform the numeric to an encoded string
-                val len = when (this.entireDigits) {
-                    in 1..4 -> 2
-                    in 5..9 -> 4
-                    else -> 8
-                }
+                val len =
+                    when (this.entireDigits) {
+                        in 1..4 -> 2
+                        in 5..9 -> 4
+                        else -> 8
+                    }
                 val encoded = encodeBinary(value.asDecimal().value, len)
                 // adjust the size to fit the target field
                 val fitted = encoded.padEnd(this.size)

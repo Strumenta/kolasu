@@ -29,6 +29,7 @@ interface TokenFactory<T : KolasuToken> {
 
     fun extractTokens(result: FirstStageParsingResult<*>): LexingResult<T>? {
         val antlrTerminals = mutableListOf<TerminalNode>()
+
         fun extractTokensFromParseTree(pt: ParseTree?) {
             if (pt is TerminalNode) {
                 antlrTerminals.add(pt)
@@ -55,12 +56,17 @@ class ANTLRTokenFactory : TokenFactory<KolasuANTLRToken> {
     override fun convertToken(t: Token): KolasuANTLRToken = KolasuANTLRToken(categoryOf(t), t)
 }
 
-abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<T>) : KolasuLexer<T> {
+abstract class KolasuANTLRLexer<T : KolasuToken>(
+    val tokenFactory: TokenFactory<T>,
+) : KolasuLexer<T> {
     /**
      * Creates the lexer.
      */
     @JvmOverloads
-    protected open fun createANTLRLexer(inputStream: InputStream, charset: Charset = Charsets.UTF_8): Lexer {
+    protected open fun createANTLRLexer(
+        inputStream: InputStream,
+        charset: Charset = Charsets.UTF_8,
+    ): Lexer {
         return createANTLRLexer(CharStreams.fromStream(inputStream, charset))
     }
 
@@ -72,38 +78,42 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<
     override fun lex(
         inputStream: InputStream,
         charset: Charset,
-        onlyFromDefaultChannel: Boolean
+        onlyFromDefaultChannel: Boolean,
     ): LexingResult<T> {
         val issues = mutableListOf<Issue>()
         val tokens = mutableListOf<T>()
         var last: Token? = null
-        val time = measureTimeMillis {
-            val lexer = createANTLRLexer(inputStream, charset)
-            attachListeners(lexer, issues)
-            do {
-                val t = lexer.nextToken()
-                if (t == null) {
-                    break
-                } else {
-                    if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
-                        tokens.add(tokenFactory.convertToken(t))
-                        last = t
+        val time =
+            measureTimeMillis {
+                val lexer = createANTLRLexer(inputStream, charset)
+                attachListeners(lexer, issues)
+                do {
+                    val t = lexer.nextToken()
+                    if (t == null) {
+                        break
+                    } else {
+                        if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
+                            tokens.add(tokenFactory.convertToken(t))
+                            last = t
+                        }
                     }
-                }
-            } while (t.type != Token.EOF)
+                } while (t.type != Token.EOF)
 
-            if (last != null && last!!.type != Token.EOF) {
-                val message = "The parser didn't consume the entire input"
-                issues.add(Issue(IssueType.SYNTACTIC, message, range = last!!.endPoint.asRange))
+                if (last != null && last!!.type != Token.EOF) {
+                    val message = "The parser didn't consume the entire input"
+                    issues.add(Issue(IssueType.SYNTACTIC, message, range = last!!.endPoint.asRange))
+                }
             }
-        }
 
         return LexingResult(issues, tokens, null, time)
     }
 
     protected open fun categoryOf(t: Token): TokenCategory = TokenCategory.PLAIN_TEXT
 
-    protected open fun attachListeners(lexer: Lexer, issues: MutableList<Issue>) {
+    protected open fun attachListeners(
+        lexer: Lexer,
+        issues: MutableList<Issue>,
+    ) {
         lexer.injectErrorCollectorInLexer(issues)
     }
 }
@@ -112,27 +122,31 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<
  * A [KolasuToken] generated from a [Token]. The [token] contains additional information that is specific to ANTLR,
  * such as type and channel.
  */
-data class KolasuANTLRToken(override val category: TokenCategory, val token: Token) :
-    KolasuToken(category, token.range, token.text)
+data class KolasuANTLRToken(
+    override val category: TokenCategory,
+    val token: Token,
+) : KolasuToken(category, token.range, token.text)
 
 fun Lexer.injectErrorCollectorInLexer(issues: MutableList<Issue>) {
     this.removeErrorListeners()
-    this.addErrorListener(object : BaseErrorListener() {
-        override fun syntaxError(
-            p0: Recognizer<*, *>?,
-            p1: Any?,
-            line: Int,
-            charPositionInLine: Int,
-            errorMessage: String?,
-            p5: RecognitionException?
-        ) {
-            issues.add(
-                Issue(
-                    IssueType.LEXICAL,
-                    errorMessage ?: "unspecified",
-                    range = Point(line, charPositionInLine).asRange
+    this.addErrorListener(
+        object : BaseErrorListener() {
+            override fun syntaxError(
+                p0: Recognizer<*, *>?,
+                p1: Any?,
+                line: Int,
+                charPositionInLine: Int,
+                errorMessage: String?,
+                p5: RecognitionException?,
+            ) {
+                issues.add(
+                    Issue(
+                        IssueType.LEXICAL,
+                        errorMessage ?: "unspecified",
+                        range = Point(line, charPositionInLine).asRange,
+                    ),
                 )
-            )
-        }
-    })
+            }
+        },
+    )
 }

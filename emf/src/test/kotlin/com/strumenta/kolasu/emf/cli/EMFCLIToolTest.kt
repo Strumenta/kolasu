@@ -26,13 +26,25 @@ import kotlin.io.path.pathString
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-data class MyCompilationUnit(val decls: List<MyEntityDecl>) : Node()
-data class MyEntityDecl(override var name: String, val fields: List<MyFieldDecl>) : Node(), Named
-data class MyFieldDecl(override var name: String) : Node(), Named
+data class MyCompilationUnit(
+    val decls: List<MyEntityDecl>,
+) : Node()
 
-class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleContext, KolasuANTLRToken>(
-    ANTLRTokenFactory()
-) {
+data class MyEntityDecl(
+    override var name: String,
+    val fields: List<MyFieldDecl>,
+) : Node(),
+    Named
+
+data class MyFieldDecl(
+    override var name: String,
+) : Node(),
+    Named
+
+class MyDummyParser :
+    EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleContext, KolasuANTLRToken>(
+        ANTLRTokenFactory(),
+    ) {
     override fun doGenerateMetamodel(resource: Resource) {
         val mmbuilder = MetamodelBuilder("com.strumenta.kolasu.emf.cli", "https://dummy.com/mm", "dm")
         mmbuilder.provideClass(MyCompilationUnit::class)
@@ -43,7 +55,7 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
     override fun parse(
         code: String,
         considerRange: Boolean,
-        measureLexingTime: Boolean
+        measureLexingTime: Boolean,
     ): ParsingResultWithFirstStage<MyCompilationUnit, ParserRuleContext> {
         TODO("Not yet implemented")
     }
@@ -60,7 +72,7 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
         parseTreeRoot: ParserRuleContext,
         considerRange: Boolean,
         issues: MutableList<Issue>,
-        source: Source?
+        source: Source?,
     ): MyCompilationUnit? {
         TODO("Not yet implemented")
     }
@@ -71,7 +83,7 @@ class MyDummyParser : EcoreEnabledParser<MyCompilationUnit, Parser, ParserRuleCo
         file: File,
         charset: Charset,
         considerPosition: Boolean,
-        measureLexingTime: Boolean
+        measureLexingTime: Boolean,
     ): ParsingResult<MyCompilationUnit> =
         expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
 }
@@ -83,7 +95,10 @@ class CapturingCliktConsole : CliktConsole {
     var stdOutput = ""
     var errOutput = ""
 
-    override fun print(text: String, error: Boolean) {
+    override fun print(
+        text: String,
+        error: Boolean,
+    ) {
         if (error) {
             errOutput += text
         } else {
@@ -91,7 +106,10 @@ class CapturingCliktConsole : CliktConsole {
         }
     }
 
-    override fun promptForLine(prompt: String, hideInput: Boolean): String? {
+    override fun promptForLine(
+        prompt: String,
+        hideInput: Boolean,
+    ): String? {
         TODO("Not yet implemented")
     }
 }
@@ -193,7 +211,7 @@ class EMFCLIToolTest {
     } ]
   } ]
 }""",
-            myFile.readText()
+            myFile.readText(),
         )
     }
 
@@ -726,7 +744,7 @@ class EMFCLIToolTest {
     } ]
   } ]
 } ]""",
-            myFile.readText()
+            myFile.readText(),
         )
     }
 
@@ -749,22 +767,24 @@ class EMFCLIToolTest {
 
         val parserInstantiator = { file: File ->
             MyDummyParser().apply {
-                expectedResults[myFile1] = ParsingResult(
-                    emptyList(),
-                    MyCompilationUnit(
-                        mutableListOf(
-                            MyEntityDecl("EntityFoo", mutableListOf())
-                        )
+                expectedResults[myFile1] =
+                    ParsingResult(
+                        emptyList(),
+                        MyCompilationUnit(
+                            mutableListOf(
+                                MyEntityDecl("EntityFoo", mutableListOf()),
+                            ),
+                        ),
                     )
-                )
-                expectedResults[myFile2] = ParsingResult(
-                    emptyList(),
-                    MyCompilationUnit(
-                        mutableListOf(
-                            MyEntityDecl("EntityBar", mutableListOf())
-                        )
+                expectedResults[myFile2] =
+                    ParsingResult(
+                        emptyList(),
+                        MyCompilationUnit(
+                            mutableListOf(
+                                MyEntityDecl("EntityBar", mutableListOf()),
+                            ),
+                        ),
                     )
-                )
             }
         }
         val mmSupport = MyDummyParser()
@@ -787,7 +807,7 @@ class EMFCLIToolTest {
     } ]
   }
 }""",
-            outMyFile1.readText()
+            outMyFile1.readText(),
         )
         assertEquals(
             """{
@@ -799,7 +819,7 @@ class EMFCLIToolTest {
     } ]
   }
 }""",
-            outMyFile2.readText()
+            outMyFile2.readText(),
         )
         assert(outMyFile2.exists())
     }

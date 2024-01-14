@@ -30,7 +30,7 @@ import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.*
+import java.util.IdentityHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
@@ -56,9 +56,9 @@ fun EPackage.getEDataType(name: String): EDataType {
 fun EPackage.getEEnum(javaClass: Class<*>): EEnum {
     return (
         this.eClassifiers.find { it.name == javaClass.eClassifierName } ?: throw IllegalArgumentException(
-            "Class not found: $javaClass"
+            "Class not found: $javaClass",
         )
-        ) as EEnum
+    ) as EEnum
 }
 
 fun Any.dataToEObject(ePackage: EPackage): EObject {
@@ -114,7 +114,7 @@ private fun makeResultEObject(result: Result<*>): EObject {
 
 fun <T : INode> Result<T>.toEObject(
     resource: Resource,
-    kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping()
+    kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping(),
 ): EObject {
     val resultEO = makeResultEObject(this)
     val rootSF = resultEO.eClass().eAllStructuralFeatures.find { it.name == "root" }!!
@@ -142,8 +142,11 @@ fun Issue.toEObject(): EObject {
     return eo
 }
 
-private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping()):
-    Any? {
+private fun toValue(
+    ePackage: EPackage,
+    value: Any?,
+    kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping(),
+): Any? {
     val pdValue: Any? = value
     when (pdValue) {
         is Enum<*> -> {
@@ -171,13 +174,14 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
 
         else -> {
             // this could be not a primitive value but a value that we mapped to an EClass
-            val eClass = if (pdValue != null) {
-                ePackage.eClassifiers.filterIsInstance<EClass>().find {
-                    it.name == pdValue.javaClass.simpleName
+            val eClass =
+                if (pdValue != null) {
+                    ePackage.eClassifiers.filterIsInstance<EClass>().find {
+                        it.name == pdValue.javaClass.simpleName
+                    }
+                } else {
+                    null
                 }
-            } else {
-                null
-            }
             return when {
                 eClass != null -> {
                     pdValue!!.dataToEObject(ePackage)
@@ -195,7 +199,7 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                     // same EObject can be inserted in the containment relation where it belongs.
                     refEO.eSet(
                         refEC.getEStructuralFeature("referenced")!!,
-                        (pdValue.referred as? INode)?.getOrCreateEObject(ePackage, kolasuToEMFMapping)
+                        (pdValue.referred as? INode)?.getOrCreateEObject(ePackage, kolasuToEMFMapping),
                     )
                     refEO
                 }
@@ -207,7 +211,7 @@ private fun toValue(ePackage: EPackage, value: Any?, kolasuToEMFMapping: KolasuT
                         resEO.eSet(
                             resEC.getEStructuralFeature("root"),
                             (pdValue.root as INode)
-                                .getOrCreateEObject(ePackage, kolasuToEMFMapping)
+                                .getOrCreateEObject(ePackage, kolasuToEMFMapping),
                         )
                     } else {
                         resEO.eSet(resEC.getEStructuralFeature("root"), toValue(ePackage, pdValue.root))
@@ -242,8 +246,7 @@ private fun toLocalDateObject(value: LocalDate): EObject {
     return eObject
 }
 
-fun packageName(klass: KClass<*>): String =
-    klass.qualifiedName!!.substring(0, klass.qualifiedName!!.lastIndexOf("."))
+fun packageName(klass: KClass<*>): String = klass.qualifiedName!!.substring(0, klass.qualifiedName!!.lastIndexOf("."))
 
 fun EPackage.findEClass(klass: KClass<*>): EClass? {
     return this.findEClass(klass.eClassifierName)
@@ -274,17 +277,22 @@ fun Resource.findEClassJustInThisResource(klass: KClass<*>): EClass? {
     return ePackage?.findEClass(klass)
 }
 
-fun Resource.getEClass(klass: KClass<*>): EClass = this.findEClass(klass)
-    ?: throw ClassNotFoundException(klass.qualifiedName)
+fun Resource.getEClass(klass: KClass<*>): EClass =
+    this.findEClass(klass)
+        ?: throw ClassNotFoundException(klass.qualifiedName)
 
-fun INode.toEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject =
-    toEObject(ePackage.eResource(), mapping)
+fun INode.toEObject(
+    ePackage: EPackage,
+    mapping: KolasuToEMFMapping = KolasuToEMFMapping(),
+): EObject = toEObject(ePackage.eResource(), mapping)
 
 /**
  * This method retrieves the EObject already built for this Node or create it if it does not exist.
  */
-fun INode.getOrCreateEObject(ePackage: EPackage, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject =
-    getOrCreateEObject(ePackage.eResource(), mapping)
+fun INode.getOrCreateEObject(
+    ePackage: EPackage,
+    mapping: KolasuToEMFMapping = KolasuToEMFMapping(),
+): EObject = getOrCreateEObject(ePackage.eResource(), mapping)
 
 fun EClass.instantiate(): EObject {
     return this.ePackage.eFactoryInstance.create(this)
@@ -293,7 +301,10 @@ fun EClass.instantiate(): EObject {
 class KolasuToEMFMapping {
     private val nodeToEObjects = IdentityHashMap<INode, EObject>()
 
-    fun associate(node: INode, eo: EObject) {
+    fun associate(
+        node: INode,
+        eo: EObject,
+    ) {
         nodeToEObjects[node] = eo
     }
 
@@ -306,7 +317,10 @@ class KolasuToEMFMapping {
      * Otherwise the EObject is created and returned. The same EObject is also stored and associated with the Node,
      * so that future calls to this method will return that EObject.
      */
-    fun getOrCreate(node: INode, eResource: Resource): EObject {
+    fun getOrCreate(
+        node: INode,
+        eResource: Resource,
+    ): EObject {
         val existing = getAssociatedEObject(node)
         return if (existing != null) {
             existing
@@ -324,7 +338,10 @@ class KolasuToEMFMapping {
 /**
  * This method retrieves the EObject already built for this Node or create it if it does not exist.
  */
-fun INode.getOrCreateEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject {
+fun INode.getOrCreateEObject(
+    eResource: Resource,
+    mapping: KolasuToEMFMapping = KolasuToEMFMapping(),
+): EObject {
     return mapping.getOrCreate(this, eResource)
 }
 
@@ -332,7 +349,7 @@ private fun setOrigin(
     eo: EObject,
     origin: Origin?,
     resource: Resource,
-    mapping: KolasuToEMFMapping = KolasuToEMFMapping()
+    mapping: KolasuToEMFMapping = KolasuToEMFMapping(),
 ) {
     if (origin == null) {
         return
@@ -344,10 +361,11 @@ private fun setOrigin(
             val nodeOriginClass = STARLASU_METAMODEL.getEClass("NodeOrigin")
             val nodeSF = nodeOriginClass.getEStructuralFeature("node")
             val nodeOrigin = nodeOriginClass.instantiate()
-            val eoCorrespondingToOrigin = mapping.getAssociatedEObject(origin.node) ?: throw IllegalStateException(
-                "No EObject mapped to origin $origin. " +
-                    "Mapping contains ${mapping.size} entries"
-            )
+            val eoCorrespondingToOrigin =
+                mapping.getAssociatedEObject(origin.node) ?: throw IllegalStateException(
+                    "No EObject mapped to origin $origin. " +
+                        "Mapping contains ${mapping.size} entries",
+                )
             nodeOrigin.eSet(nodeSF, eoCorrespondingToOrigin)
             eo.eSet(originSF, nodeOrigin)
         }
@@ -375,7 +393,7 @@ private fun setDestination(
     eo: EObject,
     destination: Destination?,
     eResource: Resource,
-    mapping: KolasuToEMFMapping = KolasuToEMFMapping()
+    mapping: KolasuToEMFMapping = KolasuToEMFMapping(),
 ) {
     val astNode = STARLASU_METAMODEL.getEClass("ASTNode")
     when (destination) {
@@ -395,8 +413,10 @@ private fun setDestination(
         is TextFileDestination -> {
             val textFileInstance = STARLASU_METAMODEL.getEClass("TextFileDestination").instantiate()
 
-            val positionSF = STARLASU_METAMODEL.getEClass("TextFileDestination")
-                .getEStructuralFeature("position")
+            val positionSF =
+                STARLASU_METAMODEL
+                    .getEClass("TextFileDestination")
+                    .getEStructuralFeature("position")
             textFileInstance.eSet(positionSF, destination.range?.toEObject())
 
             val destinationSF = astNode.getEStructuralFeature("destination")
@@ -405,7 +425,7 @@ private fun setDestination(
 
         else -> {
             throw IllegalStateException(
-                "Only destinations represented Nodes or TextFileDestinations are currently supported"
+                "Only destinations represented Nodes or TextFileDestinations are currently supported",
             )
         }
     }
@@ -418,7 +438,10 @@ private fun setDestination(
  *  - the [Kolasu metamodel package][STARLASU_METAMODEL]
  *  - every [EPackage] containing the definitions of the node classes in the tree.
  */
-fun INode.toEObject(eResource: Resource, mapping: KolasuToEMFMapping = KolasuToEMFMapping()): EObject {
+fun INode.toEObject(
+    eResource: Resource,
+    mapping: KolasuToEMFMapping = KolasuToEMFMapping(),
+): EObject {
     try {
         val ec = eResource.getEClass(this::class)
         val eo = ec.ePackage.eFactoryInstance.create(ec)
@@ -485,7 +508,10 @@ fun EObject.saveXMI(xmiFile: File) {
     resource.save(null)
 }
 
-fun EPackage.saveAsJson(jsonFile: File, restoringURI: Boolean = true) {
+fun EPackage.saveAsJson(
+    jsonFile: File,
+    restoringURI: Boolean = true,
+) {
     val startURI = this.eResource().uri
     (this as EObject).saveAsJson(jsonFile)
     if (restoringURI) {

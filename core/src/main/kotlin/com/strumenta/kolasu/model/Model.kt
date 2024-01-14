@@ -12,24 +12,36 @@ fun <N : INode> N.withRange(range: Range?): N {
 }
 
 fun <N : INode> N.withOrigin(origin: Origin?): N {
-    this.origin = if (origin == NodeOrigin(this)) { null } else { origin }
+    this.origin =
+        if (origin == NodeOrigin(this)) {
+            null
+        } else {
+            origin
+        }
     return this
 }
 
 fun <N : INode> N.withOrigin(node: INode): N {
-    this.origin = if (node == this) { null } else { NodeOrigin(node) }
+    this.origin =
+        if (node == this) {
+            null
+        } else {
+            NodeOrigin(node)
+        }
     return this
 }
 
 val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.kotlin.nodeProperties
 val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
-    get() = memberProperties.asSequence()
-        .filter { it.visibility == KVisibility.PUBLIC }
-        .filter { it.findAnnotation<Derived>() == null }
-        .filter { it.findAnnotation<Internal>() == null }
-        .filter { it.findAnnotation<Link>() == null }
-        .toList()
+    get() =
+        memberProperties
+            .asSequence()
+            .filter { it.visibility == KVisibility.PUBLIC }
+            .filter { it.findAnnotation<Derived>() == null }
+            .filter { it.findAnnotation<Internal>() == null }
+            .filter { it.findAnnotation<Link>() == null }
+            .toList()
 
 /**
  * @return all properties of this node that are considered AST properties.

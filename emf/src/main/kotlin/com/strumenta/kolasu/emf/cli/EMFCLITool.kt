@@ -12,7 +12,7 @@ import com.strumenta.kolasu.model.INode
 class EMFCLITool<R : INode, P>(
     parserInstantiator: ParserInstantiator<P>,
     metamodelSupport: EMFMetamodelSupport,
-    replacedConsole: CliktConsole? = null
+    replacedConsole: CliktConsole? = null,
 ) : CliktCommand(invokeWithoutSubcommand = false) where P : EcoreEnabledParser<R, *, *, *> {
     init {
         subcommands(EMFModelCommand(parserInstantiator), EMFMetaModelCommand(metamodelSupport))

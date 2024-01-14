@@ -4,56 +4,89 @@ import com.smeup.rpgparser.parsing.ast.CompilationUnit
 import java.math.BigDecimal
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.GregorianCalendar
+import java.util.LinkedList
 
 const val PAD_CHAR = ' '
 const val PAD_STRING = PAD_CHAR.toString()
 
 val DEFAULT_CHARSET = Charset.forName("Cp037")
 
-fun coerce(value: Value, type: Type): Value {
+fun coerce(
+    value: Value,
+    type: Type,
+): Value {
     return value
 }
 
 interface Value : Comparable<Value> {
     fun asInt(): IntValue = throw UnsupportedOperationException("${this.javaClass.simpleName} cannot be seen as an Int")
-    fun asDecimal(): DecimalValue = throw UnsupportedOperationException(
-        "${this.javaClass.simpleName} cannot be seen as an Decimal"
-    )
+
+    fun asDecimal(): DecimalValue =
+        throw UnsupportedOperationException(
+            "${this.javaClass.simpleName} cannot be seen as an Decimal",
+        )
+
     fun asString(): StringValue
+
     fun asBoolean(): BooleanValue = throw UnsupportedOperationException()
-    fun asTimeStamp(): TimeStampValue = throw UnsupportedOperationException(
-        "${this.javaClass.simpleName} cannot be seen as an TimeStamp - $this"
-    )
+
+    fun asTimeStamp(): TimeStampValue =
+        throw UnsupportedOperationException(
+            "${this.javaClass.simpleName} cannot be seen as an TimeStamp - $this",
+        )
+
     fun assignableTo(expectedType: Type): Boolean
+
     fun takeLast(n: Int): Value = TODO("takeLast not yet implemented for ${this.javaClass.simpleName}")
+
     fun takeFirst(n: Int): Value = TODO("takeFirst not yet implemented for ${this.javaClass.simpleName}")
-    fun take(from: Int, to: Int): Value = TODO("take not yet implemented for ${this.javaClass.simpleName}")
+
+    fun take(
+        from: Int,
+        to: Int,
+    ): Value = TODO("take not yet implemented for ${this.javaClass.simpleName}")
+
     fun concatenate(other: Value): Value = TODO("concatenate not yet implemented for ${this.javaClass.simpleName}")
+
     fun asArray(): ArrayValue = throw UnsupportedOperationException()
+
     fun render(): String = "Nope"
+
     fun copy(): Value
-    fun toArray(nElements: Int, elementType: Type): Value {
+
+    fun toArray(
+        nElements: Int,
+        elementType: Type,
+    ): Value {
         val elements = LinkedList<Value>()
         for (i in 1..nElements) {
             elements.add(coerce(this.copy(), elementType))
         }
         return ConcreteArrayValue(elements, elementType)
     }
+
     override operator fun compareTo(other: Value): Int = TODO("Cannot compare $this to $other")
 }
 
 abstract class NumberValue : Value {
     fun isNegative(): Boolean = bigDecimal < BigDecimal.ZERO
+
     fun abs(): NumberValue = if (isNegative()) negate() else this
+
     abstract fun negate(): NumberValue
+
     abstract fun increment(amount: Long): NumberValue
 
     abstract val bigDecimal: BigDecimal
 }
 
-data class StringValue(var value: String, val varying: Boolean = false) : Value {
-
+data class StringValue(
+    var value: String,
+    val varying: Boolean = false,
+) : Value {
     override fun assignableTo(expectedType: Type): Boolean {
         return when (expectedType) {
             is StringType -> expectedType.length >= value.length.toLong()
@@ -83,7 +116,11 @@ data class StringValue(var value: String, val varying: Boolean = false) : Value 
 
     companion object {
         fun blank(length: Int) = StringValue(" ".repeat(length))
-        fun padded(value: String, size: Int) = StringValue(value.padEnd(size, ' '))
+
+        fun padded(
+            value: String,
+            size: Int,
+        ) = StringValue(value.padEnd(size, ' '))
     }
 
     override fun equals(other: Any?): Boolean {
@@ -115,7 +152,11 @@ data class StringValue(var value: String, val varying: Boolean = false) : Value 
 
     override fun asTimeStamp(): TimeStampValue = TimeStampValue(value.asIsoDate())
 
-    fun setSubstring(startOffset: Int, endOffset: Int, substringValue: StringValue) {
+    fun setSubstring(
+        startOffset: Int,
+        endOffset: Int,
+        substringValue: StringValue,
+    ) {
         require(startOffset >= 0)
         require(startOffset <= value.length)
         require(endOffset >= startOffset)
@@ -126,7 +167,10 @@ data class StringValue(var value: String, val varying: Boolean = false) : Value 
         value = value.substring(0, startOffset) + substringValue.value + value.substring(endOffset)
     }
 
-    fun getSubstring(startOffset: Int, endOffset: Int): StringValue {
+    fun getSubstring(
+        startOffset: Int,
+        endOffset: Int,
+    ): StringValue {
         require(startOffset >= 0)
         require(startOffset <= value.length)
         require(endOffset >= startOffset)
@@ -137,7 +181,10 @@ data class StringValue(var value: String, val varying: Boolean = false) : Value 
         return StringValue(s)
     }
 
-    override fun take(from: Int, to: Int): Value {
+    override fun take(
+        from: Int,
+        to: Int,
+    ): Value {
         return getSubstring(from - 1, to)
     }
 
@@ -166,7 +213,11 @@ data class StringValue(var value: String, val varying: Boolean = false) : Value 
         return value.length
     }
 
-    fun compare(other: StringValue, charset: Charset?, descend: Boolean = false): Int {
+    fun compare(
+        other: StringValue,
+        charset: Charset?,
+        descend: Boolean = false,
+    ): Int {
         require(charset != null)
         if (this == other) return 0
         val bs1 = this.value.toByteArray(charset)
@@ -197,13 +248,17 @@ data class StringValue(var value: String, val varying: Boolean = false) : Value 
  * Cp0280   EBCDIC ITALIAN
  * See: https://www.ibm.com/support/knowledgecenter/SSLTBW_2.1.0/com.ibm.zos.v2r1.idad400/ccsids.htm
  */
-fun sortA(value: Value, charset: Charset) {
+fun sortA(
+    value: Value,
+    charset: Charset,
+) {
     when (value) {
         is ConcreteArrayValue -> {
             // TODO pass the correct charset to the default sorting algorithm
             // TODO ascending/descending
             value.elements.sort()
         }
+
         is ProjectedArrayValue -> {
             require(value.field.type is ArrayType)
             val strings = value.field.type.element is StringType
@@ -217,7 +272,7 @@ fun sortA(value: Value, charset: Charset) {
                             value.getElement(j).asString().compare(
                                 value.getElement(j + 1).asString(),
                                 charset,
-                                value.field.descend
+                                value.field.descend,
                             )
                         } else {
                             value.getElement(j).compareTo(value.getElement(j + 1)) * multiplier
@@ -238,9 +293,13 @@ fun sortA(value: Value, charset: Charset) {
     }
 }
 
-data class IntValue(val value: Long) : NumberValue() {
+data class IntValue(
+    val value: Long,
+) : NumberValue() {
     override val bigDecimal: BigDecimal by lazy { BigDecimal(value) }
+
     override fun negate(): NumberValue = IntValue(-value)
+
     override fun increment(amount: Long): NumberValue = this + IntValue(amount)
 
     override fun assignableTo(expectedType: Type): Boolean {
@@ -250,6 +309,7 @@ data class IntValue(val value: Long) : NumberValue() {
             is ArrayType -> {
                 expectedType.element is NumberType
             }
+
             else -> false
         }
     }
@@ -267,11 +327,17 @@ data class IntValue(val value: Long) : NumberValue() {
         return IntValue(lastDigits(value, n))
     }
 
-    private fun lastDigits(n: Long, digits: Int): Long {
+    private fun lastDigits(
+        n: Long,
+        digits: Int,
+    ): Long {
         return (n % Math.pow(10.0, digits.toDouble())).toLong()
     }
 
-    private fun firstDigits(n: Long, digits: Int): Long {
+    private fun firstDigits(
+        n: Long,
+        digits: Int,
+    ): Long {
         var localNr = n
         if (n < 0) {
             localNr = n * -1
@@ -283,7 +349,10 @@ data class IntValue(val value: Long) : NumberValue() {
         return localNr * java.lang.Long.signum(n)
     }
 
-    override fun take(from: Int, to: Int): Value =
+    override fun take(
+        from: Int,
+        to: Int,
+    ): Value =
         firstDigits(value, to)
             .let { lastDigits(it, (to - from) + 1) }
             .let(::IntValue)
@@ -314,11 +383,12 @@ data class IntValue(val value: Long) : NumberValue() {
 
     override fun copy(): IntValue = this
 
-    override operator fun compareTo(other: Value): Int = when (other) {
-        is IntValue -> value.compareTo(other.value)
-        is DecimalValue -> this.asDecimal().compareTo(other)
-        else -> super.compareTo(other)
-    }
+    override operator fun compareTo(other: Value): Int =
+        when (other) {
+            is IntValue -> value.compareTo(other.value)
+            is DecimalValue -> this.asDecimal().compareTo(other)
+            else -> super.compareTo(other)
+        }
 
     override fun asString(): StringValue {
         return StringValue(render())
@@ -331,8 +401,9 @@ data class IntValue(val value: Long) : NumberValue() {
     operator fun times(other: IntValue) = IntValue(this.bigDecimal.times(other.bigDecimal).longValueExact())
 }
 
-data class DecimalValue(val value: BigDecimal) : NumberValue() {
-
+data class DecimalValue(
+    val value: BigDecimal,
+) : NumberValue() {
     override val bigDecimal: BigDecimal
         get() = value
 
@@ -387,7 +458,9 @@ data class DecimalValue(val value: BigDecimal) : NumberValue() {
     }
 }
 
-data class BooleanValue private constructor(val value: Boolean) : Value {
+data class BooleanValue private constructor(
+    val value: Boolean,
+) : Value {
     override fun assignableTo(expectedType: Type): Boolean {
         return expectedType is BooleanType
     }
@@ -399,13 +472,16 @@ data class BooleanValue private constructor(val value: Boolean) : Value {
     companion object {
         val FALSE = BooleanValue(false)
         val TRUE = BooleanValue(true)
+
         operator fun invoke(value: Boolean) = if (value) TRUE else FALSE
     }
+
     override fun render(): String {
         return value.toString()
     }
 
     override fun copy(): BooleanValue = this
+
     override operator fun compareTo(other: Value): Int =
         when (other) {
             is BooleanValue -> value.compareTo(other.value)
@@ -413,7 +489,9 @@ data class BooleanValue private constructor(val value: Boolean) : Value {
         }
 }
 
-data class CharacterValue(val value: Array<Char>) : Value {
+data class CharacterValue(
+    val value: Array<Char>,
+) : Value {
     override fun assignableTo(expectedType: Type): Boolean {
         return expectedType is CharacterType
     }
@@ -440,7 +518,9 @@ data class CharacterValue(val value: Array<Char>) : Value {
     }
 }
 
-data class TimeStampValue(val value: Date) : Value {
+data class TimeStampValue(
+    val value: Date,
+) : Value {
     override fun assignableTo(expectedType: Type): Boolean {
         return expectedType is TimeStampType
     }
@@ -460,10 +540,18 @@ data class TimeStampValue(val value: Date) : Value {
 
 abstract class ArrayValue : Value {
     abstract fun arrayLength(): Int
+
     abstract fun elementSize(): Int
+
     fun totalSize() = elementSize() * arrayLength()
-    abstract fun setElement(index: Int, value: Value)
+
+    abstract fun setElement(
+        index: Int,
+        value: Value,
+    )
+
     abstract fun getElement(index: Int): Value
+
     fun elements(): List<Value> {
         val elements = LinkedList<Value>()
         for (i in 0 until (arrayLength())) {
@@ -491,9 +579,11 @@ abstract class ArrayValue : Value {
         }
         return false
     }
+
     override fun render(): String {
         return "Array(${elements().size})"
     }
+
     override fun asArray() = this
 
     fun areEquivalent(other: ArrayValue): Boolean {
@@ -532,7 +622,10 @@ abstract class ArrayValue : Value {
     }
 }
 
-data class ConcreteArrayValue(val elements: MutableList<Value>, override val elementType: Type) : ArrayValue() {
+data class ConcreteArrayValue(
+    val elements: MutableList<Value>,
+    override val elementType: Type,
+) : ArrayValue() {
     init {
         require(elementType !is ArrayType) {
             "An array can't contain another array"
@@ -543,7 +636,10 @@ data class ConcreteArrayValue(val elements: MutableList<Value>, override val ele
 
     override fun arrayLength() = elements.size
 
-    override fun setElement(index: Int, value: Value) {
+    override fun setElement(
+        index: Int,
+        value: Value,
+    ) {
         require(index >= 1)
         require(index <= arrayLength())
         if (!value.assignableTo(elementType)) {
@@ -621,8 +717,7 @@ object HiValValue : Value {
 
     override fun copy(): HiValValue = this
 
-    override operator fun compareTo(other: Value): Int =
-        if (other is HiValValue) 0 else 1
+    override operator fun compareTo(other: Value): Int = if (other is HiValValue) 0 else 1
 
     override fun asString(): StringValue {
         TODO("Not yet implemented")
@@ -643,8 +738,7 @@ object LowValValue : Value {
         return true
     }
 
-    override operator fun compareTo(other: Value): Int =
-        if (other is LowValValue) 0 else -1
+    override operator fun compareTo(other: Value): Int = if (other is LowValValue) 0 else -1
 
     override fun asString(): StringValue {
         TODO("Not yet implemented")
@@ -652,7 +746,6 @@ object LowValValue : Value {
 }
 
 object ZeroValue : Value {
-
     override fun copy(): Value {
         TODO("not implemented")
     }
@@ -671,7 +764,9 @@ object ZeroValue : Value {
     }
 }
 
-class AllValue(val charsToRepeat: String) : Value {
+class AllValue(
+    val charsToRepeat: String,
+) : Value {
     override fun assignableTo(expectedType: Type): Boolean {
         // FIXME
         return true
@@ -692,13 +787,16 @@ class ProjectedArrayValue(
     val field: FieldDefinition,
     val startOffset: Int,
     val step: Int,
-    val arrayLength: Int
+    val arrayLength: Int,
 ) : ArrayValue() {
     override val elementType: Type
         get() = (this.field.type as ArrayType).element
 
     companion object {
-        fun forData(containerValue: DataStructValue, data: FieldDefinition): ProjectedArrayValue {
+        fun forData(
+            containerValue: DataStructValue,
+            data: FieldDefinition,
+        ): ProjectedArrayValue {
             val stepSize = data.stepSize
             val arrayLength = data.declaredArrayInLine!!
             return ProjectedArrayValue(containerValue, data, data.startOffset, stepSize, arrayLength)
@@ -711,7 +809,10 @@ class ProjectedArrayValue(
 
     override fun arrayLength() = arrayLength
 
-    override fun setElement(index: Int, value: Value) {
+    override fun setElement(
+        index: Int,
+        value: Value,
+    ) {
         require(index >= 1)
         require(index <= arrayLength())
         require(value.assignableTo((field.type as ArrayType).element)) {
@@ -749,14 +850,19 @@ class ProjectedArrayValue(
     }
 }
 
-fun createArrayValue(elementType: Type, n: Int, creator: (Int) -> Value) = ConcreteArrayValue(
+fun createArrayValue(
+    elementType: Type,
+    n: Int,
+    creator: (Int) -> Value,
+) = ConcreteArrayValue(
     Array(n, creator).toMutableList(),
-    elementType
+    elementType,
 )
 
-fun List<Value>.asConcreteArrayValue(elementType: Type) = createArrayValue(elementType, size) {
-    this[it + 1]
-}
+fun List<Value>.asConcreteArrayValue(elementType: Type) =
+    createArrayValue(elementType, size) {
+        this[it + 1]
+    }
 
 fun blankString(length: Int) = StringValue(" ".repeat(length))
 
@@ -767,12 +873,13 @@ fun String.asValue() = StringValue(this)
 private const val FORMAT_DATE_ISO = "yyyy-MM-dd-HH.mm.ss.SSS"
 
 fun String.asIsoDate(): Date {
-    var dateString = if (length >= FORMAT_DATE_ISO.length) {
-        this.take(FORMAT_DATE_ISO.length)
-    } else {
-        // TODO
-        this + "-00.00.00.000"
-    }
+    var dateString =
+        if (length >= FORMAT_DATE_ISO.length) {
+            this.take(FORMAT_DATE_ISO.length)
+        } else {
+            // TODO
+            this + "-00.00.00.000"
+        }
     return SimpleDateFormat(FORMAT_DATE_ISO).parse(dateString)
 }
 
@@ -789,14 +896,17 @@ private fun NumberType.toRPGValue(iniz: Boolean): Value =
         RpgType.ZONED.rpgType, RpgType.PACKED.rpgType -> if (iniz) DecimalValue.ZERO else DecimalValue.ONE
         RpgType.BINARY.rpgType, RpgType.INTEGER.rpgType, RpgType.UNSIGNED.rpgType ->
             if (iniz) IntValue.ZERO else IntValue.ONE
+
         else -> TODO("Please handle RpgType $rpgType")
     }
 
 fun Type.blank(): Value {
     return when (this) {
-        is ArrayType -> createArrayValue(this.element, this.nElements) {
-            this.element.blank()
-        }
+        is ArrayType ->
+            createArrayValue(this.element, this.nElements) {
+                this.element.blank()
+            }
+
         is DataStructureType -> DataStructValue.blank(this.size)
         is StringType -> StringValue.blank(this.size)
         is NumberType -> IntValue(0)
@@ -814,7 +924,10 @@ fun Type.blank(): Value {
  * StringValue wrapper
  */
 
-data class DataStructValue(var value: String, private val optionalExternalLen: Int? = null) : Value {
+data class DataStructValue(
+    var value: String,
+    private val optionalExternalLen: Int? = null,
+) : Value {
     // We can't serialize a class with a var computed from another one because of a bug in the serialization plugin
     // See https://github.com/Kotlin/kotlinx.serialization/issues/133
     val len by lazy { optionalExternalLen ?: value.length }
@@ -836,7 +949,10 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
      * an array itself, so setting the field value requires an array value. In cases in which we
      * want to set a field of a single instance of the data structure we can use this method.
      */
-    fun setSingleField(field: FieldDefinition, value: Value) {
+    fun setSingleField(
+        field: FieldDefinition,
+        value: Value,
+    ) {
         try {
             val v = (field.type as ArrayType).element.toDataStructureValue(value)
             val startIndex = field.startOffset
@@ -847,7 +963,7 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
                 throw RuntimeException(
                     "Issue arose while setting field ${field.name}. Indexes: $startIndex to $endIndex. " +
                         "Field size: ${field.size}. Value: $value",
-                    e
+                    e,
                 )
             }
         } catch (e: Throwable) {
@@ -855,7 +971,10 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
         }
     }
 
-    fun set(field: FieldDefinition, value: Value) {
+    fun set(
+        field: FieldDefinition,
+        value: Value,
+    ) {
         val v = field.toDataStructureValue(value)
         val startIndex = field.startOffset
         val endIndex = field.startOffset + field.size
@@ -865,7 +984,7 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
             throw RuntimeException(
                 "Issue arose while setting field ${field.name}. Indexes: $startIndex to $endIndex. " +
                     "Field size: ${field.size}. Value: $value",
-                e
+                e,
             )
         }
     }
@@ -886,7 +1005,11 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
         return coerce(this.getSubstring(data.startOffset, data.endOffset), data.type.element)
     }
 
-    fun setSubstring(startOffset: Int, endOffset: Int, substringValue: StringValue) {
+    fun setSubstring(
+        startOffset: Int,
+        endOffset: Int,
+        substringValue: StringValue,
+    ) {
         require(startOffset >= 0)
         // Not clear this requirement
         if (startOffset >= value.length) {
@@ -909,7 +1032,10 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
         value = value.substring(0, startOffset) + substringValue.value + value.substring(endOffset)
     }
 
-    fun getSubstring(startOffset: Int, endOffset: Int): StringValue {
+    fun getSubstring(
+        startOffset: Int,
+        endOffset: Int,
+    ): StringValue {
         require(startOffset >= 0)
         require(startOffset <= value.length)
         require(endOffset >= startOffset)
@@ -930,14 +1056,17 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
          * @param dataStructName Name
          * @param values Initialization values
          * */
-        fun createInstance(compilationUnit: CompilationUnit, dataStructName: String, values: Map<String, Value>):
-            DataStructValue {
+        fun createInstance(
+            compilationUnit: CompilationUnit,
+            dataStructName: String,
+            values: Map<String, Value>,
+        ): DataStructValue {
             val dataStructureDefinition = compilationUnit.getDataDefinition(dataStructName)
             val newInstance = blank(dataStructureDefinition.type.size)
             values.forEach {
                 newInstance.set(
                     field = dataStructureDefinition.getFieldByName(it.key),
-                    value = it.value
+                    value = it.value,
                 )
             }
             return newInstance
@@ -963,16 +1092,18 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
         return builder.toString()
     }
 
-    fun isBlank(): Boolean {
-        return this.value.isBlank()
-    }
+    fun isBlank(): Boolean = this.value.isBlank()
 }
 
 fun Int.asValue() = IntValue(this.toLong())
+
 fun Boolean.asValue() = BooleanValue(this)
 
-fun areEquals(value1: Value, value2: Value): Boolean {
-    return when {
+fun areEquals(
+    value1: Value,
+    value2: Value,
+): Boolean =
+    when {
         value1 is DecimalValue && value2 is IntValue ||
             value1 is IntValue && value2 is DecimalValue -> {
             value1.asInt() == value2.asInt()
@@ -1006,6 +1137,7 @@ fun areEquals(value1: Value, value2: Value): Boolean {
             val v2 = value2.value.trimEnd()
             v1 == v2
         }
+
         value1 is StringValue && value2 is DataStructValue -> {
             val v1 = value1.value.trimEnd()
             val v2 = value2.asStringValue().trimEnd()
@@ -1016,6 +1148,6 @@ fun areEquals(value1: Value, value2: Value): Boolean {
         value1 is ProjectedArrayValue && value2 is StringValue -> {
             value1.asArray().getElement(1) == value2
         }
+
         else -> value1 == value2
     }
-}

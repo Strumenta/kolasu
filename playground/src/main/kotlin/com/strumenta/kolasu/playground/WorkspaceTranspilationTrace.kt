@@ -9,7 +9,11 @@ import com.strumenta.kolasu.validation.Result
  * This transpilation trace represent a set of files being transformed in a second set of files.
  */
 class WorkspaceTranspilationTrace {
-    data class WorkspaceFile(val path: String, val code: String, val result: Result<INode>)
+    data class WorkspaceFile(
+        val path: String,
+        val code: String,
+        val result: Result<INode>,
+    )
 
     val originalFiles: MutableList<WorkspaceFile> = mutableListOf()
     val generatedFiles: MutableList<WorkspaceFile> = mutableListOf()

@@ -24,9 +24,10 @@ abstract class ASTCodeGenerator<R : INode> {
     }
 
     protected inline fun <reified N1 : INode> recordPrinter(crossinline generation: PrinterOutput.(ast: N1) -> Unit) {
-        nodePrinters[N1::class] = NodePrinter { output: PrinterOutput, ast: INode ->
-            output.generation(ast as N1)
-        }
+        nodePrinters[N1::class] =
+            NodePrinter { output: PrinterOutput, ast: INode ->
+                output.generation(ast as N1)
+            }
     }
 
     fun printToString(ast: R): String {
@@ -35,7 +36,10 @@ abstract class ASTCodeGenerator<R : INode> {
         return printerOutput.apply { this.print(ast, prefix, postfix) }.text()
     }
 
-    fun printToFile(root: R, file: File) {
+    fun printToFile(
+        root: R,
+        file: File,
+    ) {
         file.writeText(printToString(root))
     }
 

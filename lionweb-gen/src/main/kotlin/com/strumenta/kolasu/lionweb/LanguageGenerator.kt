@@ -6,7 +6,10 @@ import com.strumenta.kolasu.emf.cli.KolasuLanguageGeneratorCommand
 import com.strumenta.kolasu.language.KolasuLanguage
 import io.lionweb.lioncore.java.language.Language
 
-class LanguageGenerator(kLanguage: KolasuLanguage, lwLanguage: Language? = null) : CliktCommand() {
+class LanguageGenerator(
+    kLanguage: KolasuLanguage,
+    lwLanguage: Language? = null,
+) : CliktCommand() {
     override fun run() = Unit
 
     init {

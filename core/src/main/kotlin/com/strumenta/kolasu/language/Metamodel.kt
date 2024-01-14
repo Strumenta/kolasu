@@ -13,8 +13,11 @@ sealed class Feature {
     abstract val multiplicity: Multiplicity
 }
 
-data class Attribute(override val name: String, val optional: Boolean, val type: KType) : Feature() {
-
+data class Attribute(
+    override val name: String,
+    val optional: Boolean,
+    val type: KType,
+) : Feature() {
     init {
         require(!type.isMarkedNullable) {
             "The type should be specified as not nullable. " +
@@ -30,7 +33,11 @@ sealed class Link : Feature() {
     abstract val type: KClass<*>
 }
 
-data class Reference(override val name: String, val optional: Boolean, override val type: KClass<*>) : Link() {
+data class Reference(
+    override val name: String,
+    val optional: Boolean,
+    override val type: KClass<*>,
+) : Link() {
     override val multiplicity: Multiplicity
         get() = if (optional) Multiplicity.OPTIONAL else Multiplicity.SINGULAR
 }
@@ -38,5 +45,5 @@ data class Reference(override val name: String, val optional: Boolean, override 
 data class Containment(
     override val name: String,
     override val multiplicity: Multiplicity,
-    override val type: KClass<*>
+    override val type: KClass<*>,
 ) : Link()

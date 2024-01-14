@@ -9,15 +9,22 @@ interface Origin {
         get() = range?.source
 }
 
-data class SimpleOrigin(override var range: Range?, override val sourceText: String? = null) : Origin, Serializable
+data class SimpleOrigin(
+    override var range: Range?,
+    override val sourceText: String? = null,
+) : Origin,
+    Serializable
 
 data class CompositeOrigin(
     val elements: List<Origin>,
     override var range: Range?,
-    override val sourceText: String?
-) : Origin, Serializable
+    override val sourceText: String?,
+) : Origin,
+    Serializable
 
-data class NodeOrigin(val node: INode) : Origin {
+data class NodeOrigin(
+    val node: INode,
+) : Origin {
     override var range: Range?
         get() = node.range
         set(value) {

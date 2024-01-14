@@ -8,11 +8,16 @@ import org.junit.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-data class A(val s: String) : Node()
-data class B(val a: A, val manyAs: List<A>) : Node()
+data class A(
+    val s: String,
+) : Node()
+
+data class B(
+    val a: A,
+    val manyAs: List<A>,
+) : Node()
 
 class IndexingTest {
-
     @Test
     fun computeIdsWithDefaultWalkerAndIdProvider() {
         val a1 = A(s = "a1")
@@ -47,14 +52,15 @@ class IndexingTest {
         val a2 = A(s = "a2")
         val a3 = A(s = "a3")
         val b1 = B(a = a1, manyAs = listOf(a2, a3))
-        val ids = b1.computeIds(
-            idProvider = object : IdProvider {
-                private var counter: Int = 0
-                override fun getId(node: INode): String? {
-                    return "custom_${this.counter++}"
-                }
-            }
-        )
+        val ids =
+            b1.computeIds(
+                idProvider =
+                    object : IdProvider {
+                        private var counter: Int = 0
+
+                        override fun getId(node: INode): String? = "custom_${this.counter++}"
+                    },
+            )
         assertEquals(4, ids.size)
         assertEquals(ids[b1], "custom_0")
         assertEquals(ids[a1], "custom_1")
@@ -68,15 +74,16 @@ class IndexingTest {
         val a2 = A(s = "a2")
         val a3 = A(s = "a3")
         val b1 = B(a = a1, manyAs = listOf(a2, a3))
-        val ids = b1.computeIds(
-            walker = INode::walkLeavesFirst,
-            idProvider = object : IdProvider {
-                private var counter: Int = 0
-                override fun getId(node: INode): String? {
-                    return "custom_${this.counter++}"
-                }
-            }
-        )
+        val ids =
+            b1.computeIds(
+                walker = INode::walkLeavesFirst,
+                idProvider =
+                    object : IdProvider {
+                        private var counter: Int = 0
+
+                        override fun getId(node: INode): String? = "custom_${this.counter++}"
+                    },
+            )
         assertEquals(4, ids.size)
         assertEquals(ids[a1], "custom_0")
         assertEquals(ids[a2], "custom_1")

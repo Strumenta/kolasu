@@ -6,16 +6,17 @@ import com.strumenta.kolasu.model.annotations.SingleAnnotation
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-data class DocumentationAnnotation(val text: String) :
-    SingleAnnotation()
+data class DocumentationAnnotation(
+    val text: String,
+) : SingleAnnotation()
 
-data class CommentAnnotation(val text: String) :
-    MultipleAnnotation()
+data class CommentAnnotation(
+    val text: String,
+) : MultipleAnnotation()
 
 class N1 : Node()
 
 class AnnotationsTest {
-
     @Test
     fun singleAnnotation() {
         val a = N1()

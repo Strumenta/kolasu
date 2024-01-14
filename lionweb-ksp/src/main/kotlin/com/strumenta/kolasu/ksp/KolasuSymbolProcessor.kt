@@ -11,13 +11,15 @@ import com.strumenta.kolasu.model.INode
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintWriter
-import java.lang.IllegalStateException
 
-class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : SymbolProcessor {
-
+class KolasuSymbolProcessor(
+    val environment: SymbolProcessorEnvironment,
+) : SymbolProcessor {
     var generated: Boolean = false
 
-    class LanguageDef(val packageName: String) {
+    class LanguageDef(
+        val packageName: String,
+    ) {
         val classes = mutableListOf<KSClassDeclaration>()
 
         override fun toString(): String {
@@ -25,7 +27,12 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
         }
 
         fun dependencies(): Dependencies {
-            val usedFiles = this.classes.mapNotNull { it.containingFile }.toSet().toTypedArray()
+            val usedFiles =
+                this
+                    .classes
+                    .mapNotNull { it.containingFile }
+                    .toSet()
+                    .toTypedArray()
             val dependencies = Dependencies(true, *usedFiles)
             return dependencies
         }
@@ -34,36 +41,37 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
             val buf = PrintWriter(os)
             buf.println(
                 """
-                    @file:JvmName("Language")
-                    package $packageName
-                    
-                    import com.strumenta.kolasu.lionweb.LionWebLanguageGeneratorCommand
-                    import com.strumenta.kolasu.language.KolasuLanguage
-                    import com.strumenta.kolasu.lionweb.LionWebLanguageConverter
-                    import com.strumenta.kolasu.lionweb.LionWebModelConverter
-                    import io.lionweb.lioncore.java.language.Language
+                @file:JvmName("Language")
+                package $packageName
+                
+                import com.strumenta.kolasu.lionweb.LionWebLanguageGeneratorCommand
+                import com.strumenta.kolasu.language.KolasuLanguage
+                import com.strumenta.kolasu.lionweb.LionWebLanguageConverter
+                import com.strumenta.kolasu.lionweb.LionWebModelConverter
+                import io.lionweb.lioncore.java.language.Language
 
-                    private val kolasuLanguage = KolasuLanguage("$packageName").apply { 
-                        ${classes.joinToString("\n        ") { "addClass(${it.simpleName.asString()}::class)" }}
-                    }
-                    
-                    val lwLanguage : Language by lazy {
-                        val importer = LionWebLanguageConverter()
-                        importer.exportToLionWeb(kolasuLanguage)
-                    }
-                    
-                    fun LionWebModelConverter.consider${packageName.split(".").last().capitalize()}() {
-                        this.exportLanguageToLionWeb(kolasuLanguage)
-                    }       
+                private val kolasuLanguage = KolasuLanguage("$packageName").apply { 
+                    ${classes.joinToString("\n        ") { "addClass(${it.simpleName.asString()}::class)" }}
+                }
+                
+                val lwLanguage : Language by lazy {
+                    val importer = LionWebLanguageConverter()
+                    importer.exportToLionWeb(kolasuLanguage)
+                }
+                
+                fun LionWebModelConverter.consider${packageName.split(".").last().capitalize()}() {
+                    this.exportLanguageToLionWeb(kolasuLanguage)
+                }       
 
-                    fun main(args: Array<String>) {
-                        LionWebLanguageGeneratorCommand(lwLanguage).main(args)
-                    }                    
-                """.trimIndent()
+                fun main(args: Array<String>) {
+                    LionWebLanguageGeneratorCommand(lwLanguage).main(args)
+                }                    
+                """.trimIndent(),
             )
             buf.flush()
         }
     }
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
         environment.logger.warn("PROCESSING START")
         val kspFile = File(environment.options["file"] as String)
@@ -83,13 +91,16 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
             val packageName = ksFile.packageName.asString()
             ksFile.declarations.forEach { ksDeclaration ->
                 if (ksDeclaration is KSClassDeclaration) {
-                    val isNodeDecl = ksDeclaration.getAllSuperTypes().any {
-                        it.declaration.qualifiedName?.asString() == INode::class.qualifiedName
-                    }
+                    val isNodeDecl =
+                        ksDeclaration.getAllSuperTypes().any {
+                            it.declaration.qualifiedName?.asString() == INode::class.qualifiedName
+                        }
                     if (isNodeDecl) {
-                        languagesByPackage.computeIfAbsent(packageName) {
-                            LanguageDef(packageName)
-                        }.classes.add(ksDeclaration)
+                        languagesByPackage
+                            .computeIfAbsent(packageName) {
+                                LanguageDef(packageName)
+                            }.classes
+                            .add(ksDeclaration)
                     }
                 }
             }
@@ -103,8 +114,8 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
                         languageDef.dependencies(),
                         languageDef.packageName,
                         "Language",
-                        "kt"
-                    )
+                        "kt",
+                    ),
                 )
             }
 

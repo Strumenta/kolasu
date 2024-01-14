@@ -18,7 +18,7 @@ import java.util.stream.StreamSupport;
 public class Traversing {
 
     private static <T> void consumeSequence(Sequence<T> sequence, Consumer<T> consumer) {
-        for (Iterator<T> it = sequence.iterator(); it.hasNext();) {
+        for (Iterator<T> it = sequence.iterator(); it.hasNext(); ) {
             consumer.accept(it.next());
         }
     }
@@ -94,7 +94,7 @@ public class Traversing {
      * Walks the AST within the given range starting from the given node
      * and returns the result as sequence to consume.
      *
-     * @param node     the node from which the walk should start
+     * @param node  the node from which the walk should start
      * @param range the range within which the walk should remain
      */
     public static <N> void walkWithin(INode node, Range range, Consumer<INode> consumer) {
@@ -105,7 +105,7 @@ public class Traversing {
      * Walks the AST within the given range starting from each give node
      * and concatenates all results in a single sequence to consume.
      *
-     * @param nodes    the nodes from which the walk should start
+     * @param nodes the nodes from which the walk should start
      * @param range the range within which the walk should remain
      */
     public static <N> void walkWithin(List<INode> nodes, Range range, Consumer<INode> consumer) {

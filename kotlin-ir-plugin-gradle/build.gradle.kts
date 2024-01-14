@@ -1,5 +1,3 @@
-
-
 plugins {
     id("java-gradle-plugin")
     kotlin("jvm")

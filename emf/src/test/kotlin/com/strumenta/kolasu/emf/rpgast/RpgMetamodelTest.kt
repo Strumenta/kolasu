@@ -1,8 +1,7 @@
 package com.strumenta.kolasu.emf.rpgast
 
 class RpgMetamodelTest {
-
-//    @Test
+    //    @Test
 //    fun generateSimpleMetamodel() {
 //        val metamodelBuilder = MetamodelBuilder(
 //            "com.smeup.rpgparser.parsing.ast",

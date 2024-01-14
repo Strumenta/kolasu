@@ -8,7 +8,9 @@ import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
 import java.math.BigDecimal
 
-abstract class Expression(specifiedRange: Range? = null) : Node(specifiedRange) {
+abstract class Expression(
+    specifiedRange: Range? = null,
+) : Node(specifiedRange) {
     open fun render(): String = this.javaClass.simpleName
 }
 
@@ -16,17 +18,25 @@ abstract class Expression(specifiedRange: Range? = null) : Node(specifiedRange) 
 // / Literals
 // /
 
-abstract class NumberLiteral(specifiedRange: Range? = null) : Expression(specifiedRange)
+abstract class NumberLiteral(
+    specifiedRange: Range? = null,
+) : Expression(specifiedRange)
 
-data class IntLiteral(val value: Long) : NumberLiteral() {
+data class IntLiteral(
+    val value: Long,
+) : NumberLiteral() {
     override fun render() = value.toString()
 }
 
-data class RealLiteral(val value: BigDecimal) : NumberLiteral() {
+data class RealLiteral(
+    val value: BigDecimal,
+) : NumberLiteral() {
     override fun render() = value.toString()
 }
 
-data class StringLiteral(val value: String) : Expression() {
+data class StringLiteral(
+    val value: String,
+) : Expression() {
     override fun render() = "\"$value\""
 }
 
@@ -34,67 +44,91 @@ data class StringLiteral(val value: String) : Expression() {
 // / Figurative constants
 // /
 
-abstract class FigurativeConstantRef(specifiedRange: Range? = null) : Expression(specifiedRange)
+abstract class FigurativeConstantRef(
+    specifiedRange: Range? = null,
+) : Expression(specifiedRange)
 
-data class BlanksRefExpr(val specifiedRange: Range? = null) : FigurativeConstantRef(specifiedRange)
+data class BlanksRefExpr(
+    val specifiedRange: Range? = null,
+) : FigurativeConstantRef(specifiedRange)
 
-data class OnRefExpr(val specifiedRange: Range? = null) : FigurativeConstantRef(specifiedRange)
+data class OnRefExpr(
+    val specifiedRange: Range? = null,
+) : FigurativeConstantRef(specifiedRange)
 
-data class OffRefExpr(val specifiedRange: Range? = null) : FigurativeConstantRef(specifiedRange)
+data class OffRefExpr(
+    val specifiedRange: Range? = null,
+) : FigurativeConstantRef(specifiedRange)
 
-data class HiValExpr(val specifiedRange: Range? = null) : FigurativeConstantRef(specifiedRange)
+data class HiValExpr(
+    val specifiedRange: Range? = null,
+) : FigurativeConstantRef(specifiedRange)
 
-data class LowValExpr(val specifiedRange: Range? = null) : FigurativeConstantRef(specifiedRange)
+data class LowValExpr(
+    val specifiedRange: Range? = null,
+) : FigurativeConstantRef(specifiedRange)
 
-data class ZeroExpr(val specifiedRange: Range? = null) : FigurativeConstantRef(specifiedRange)
+data class ZeroExpr(
+    val specifiedRange: Range? = null,
+) : FigurativeConstantRef(specifiedRange)
 
-data class AllExpr(val charsToRepeat: StringLiteral) :
-    FigurativeConstantRef()
+data class AllExpr(
+    val charsToRepeat: StringLiteral,
+) : FigurativeConstantRef()
 
 // /
 // / Comparisons
 // /
 
-data class EqualityExpr(var left: Expression, var right: Expression) : Expression() {
+data class EqualityExpr(
+    var left: Expression,
+    var right: Expression,
+) : Expression() {
     override fun render() = "${left.render()} = ${right.render()}"
 }
 
-data class AssignmentExpr(var target: AssignableExpression, var value: Expression) : Expression() {
+data class AssignmentExpr(
+    var target: AssignableExpression,
+    var value: Expression,
+) : Expression() {
     override fun render() = "${target.render()} = ${value.render()}"
 }
 
-data class GreaterThanExpr(var left: Expression, var right: Expression) : Expression() {
+data class GreaterThanExpr(
+    var left: Expression,
+    var right: Expression,
+) : Expression() {
     override fun render() = "${left.render()} > ${right.render()}"
 }
 
 data class GreaterEqualThanExpr(
     var left: Expression,
     var right: Expression,
-    val specifiedRange: Range? = null
-) :
-    Expression(specifiedRange) {
+    val specifiedRange: Range? = null,
+) : Expression(specifiedRange) {
     override fun render() = "${left.render()} >= ${right.render()}"
 }
 
-data class LessThanExpr(var left: Expression, var right: Expression) : Expression() {
+data class LessThanExpr(
+    var left: Expression,
+    var right: Expression,
+) : Expression() {
     override fun render() = "${left.render()} < ${right.render()}"
 }
 
 data class LessEqualThanExpr(
     var left: Expression,
     var right: Expression,
-    val specifiedRange: Range? = null
-) :
-    Expression(specifiedRange) {
+    val specifiedRange: Range? = null,
+) : Expression(specifiedRange) {
     override fun render() = "${left.render()} <= ${right.render()}"
 }
 
 data class DifferentThanExpr(
     var left: Expression,
     var right: Expression,
-    val specifiedRange: Range? = null
-) :
-    Expression(specifiedRange) {
+    val specifiedRange: Range? = null,
+) : Expression(specifiedRange) {
     override fun render() = "${left.render()} <> ${right.render()}"
 }
 
@@ -102,23 +136,23 @@ data class DifferentThanExpr(
 // / Logical operations
 // /
 
-data class NotExpr(val base: Expression) : Expression()
+data class NotExpr(
+    val base: Expression,
+) : Expression()
 
 data class LogicalOrExpr(
     var left: Expression,
     var right: Expression,
-    val specifiedRange: Range? = null
-) :
-    Expression(specifiedRange) {
+    val specifiedRange: Range? = null,
+) : Expression(specifiedRange) {
     override fun render() = "${left.render()} || ${right.render()}"
 }
 
 data class LogicalAndExpr(
     var left: Expression,
     var right: Expression,
-    val specifiedRange: Range? = null
-) :
-    Expression(specifiedRange) {
+    val specifiedRange: Range? = null,
+) : Expression(specifiedRange) {
     override fun render() = "${left.render()} && ${right.render()}"
 }
 
@@ -126,23 +160,38 @@ data class LogicalAndExpr(
 // / Arithmetic operations
 // /
 
-data class PlusExpr(var left: Expression, var right: Expression) : Expression() {
+data class PlusExpr(
+    var left: Expression,
+    var right: Expression,
+) : Expression() {
     override fun render() = "${left.render()} + ${right.render()}"
 }
 
-data class MinusExpr(var left: Expression, var right: Expression) : Expression() {
+data class MinusExpr(
+    var left: Expression,
+    var right: Expression,
+) : Expression() {
     override fun render() = "${left.render()} - ${right.render()}"
 }
 
-data class MultExpr(var left: Expression, var right: Expression) : Expression() {
+data class MultExpr(
+    var left: Expression,
+    var right: Expression,
+) : Expression() {
     override fun render() = "${left.render()} * ${right.render()}"
 }
 
-data class DivExpr(var left: Expression, var right: Expression) : Expression() {
+data class DivExpr(
+    var left: Expression,
+    var right: Expression,
+) : Expression() {
     override fun render() = "${left.render()} / ${right.render()}"
 }
 
-data class ExpExpr(var left: Expression, var right: Expression) : Expression() {
+data class ExpExpr(
+    var left: Expression,
+    var right: Expression,
+) : Expression() {
     override fun render() = "${left.render()} ** ${right.render()}"
 }
 
@@ -150,16 +199,16 @@ data class ExpExpr(var left: Expression, var right: Expression) : Expression() {
 // / Misc
 // /
 
-abstract class AssignableExpression(specifiedRange: Range? = null) : Expression(specifiedRange) {
+abstract class AssignableExpression(
+    specifiedRange: Range? = null,
+) : Expression(specifiedRange) {
     abstract fun size(): Int
 }
 
 data class DataRefExpr(
     val variable: ReferenceByName<AbstractDataDefinition>,
-    val specifiedRange: Range? = null
-) :
-    AssignableExpression(specifiedRange) {
-
+    val specifiedRange: Range? = null,
+) : AssignableExpression(specifiedRange) {
     init {
         require(!variable.name.startsWith("*")) {
             "This is not a valid variable name: '${variable.name}' - ${specifiedRange.atLine()}"
@@ -179,9 +228,7 @@ data class DataRefExpr(
         }
     }
 
-    override fun size(): Int {
-        return variable.referred!!.type.size
-    }
+    override fun size(): Int = variable.referred!!.type.size
 
     override fun render() = variable.name
 }
@@ -189,10 +236,8 @@ data class DataRefExpr(
 data class QualifiedAccessExpr(
     val container: Expression,
     val field: ReferenceByName<FieldDefinition>,
-    val specifiedRange: Range? = null
-) :
-    AssignableExpression(specifiedRange) {
-
+    val specifiedRange: Range? = null,
+) : AssignableExpression(specifiedRange) {
     init {
         require(field.name.isNotBlank()) { "The field name should not blank" }
         require(field.name.trim() == field.name) {
@@ -210,12 +255,10 @@ data class QualifiedAccessExpr(
 data class ArrayAccessExpr(
     val array: Expression,
     val index: Expression,
-    val specifiedRange: Range? = null
-) :
-    AssignableExpression(specifiedRange) {
-    override fun render(): String {
-        return "${this.array.render()}(${index.render()}))"
-    }
+    val specifiedRange: Range? = null,
+) : AssignableExpression(specifiedRange) {
+    override fun render(): String = "${this.array.render()}(${index.render()}))"
+
     override fun size(): Int {
         TODO("size")
     }
@@ -227,12 +270,14 @@ data class ArrayAccessExpr(
 data class FunctionCall(
     val function: ReferenceByName<Function>,
     val args: List<Expression>,
-    val specifiedRange: Range? = null
+    val specifiedRange: Range? = null,
 ) : Expression(specifiedRange)
 
 fun dataRefTo(dataDefinition: AbstractDataDefinition) =
     DataRefExpr(ReferenceByName(dataDefinition.name, dataDefinition))
 
-data class NumberOfElementsExpr(val value: Expression) : Expression() {
+data class NumberOfElementsExpr(
+    val value: Expression,
+) : Expression() {
     override fun render() = "%ELEM(${value.render()})"
 }

@@ -21,31 +21,38 @@ import java.io.StringWriter
 import kotlin.test.assertEquals
 
 data class NodeOverridingName(
-    override var name: String
-) : Node(), Named
+    override var name: String,
+) : Node(),
+    Named
 
-open class BaseNode(open var attr1: Int) : Node()
-data class ExtNode(override var attr1: Int) : BaseNode(attr1)
+open class BaseNode(
+    open var attr1: Int,
+) : Node()
+
+data class ExtNode(
+    override var attr1: Int,
+) : BaseNode(attr1)
 
 data class NodeWithReference(
     override val name: String? = null,
     val reference: ReferenceByName<NodeWithReference>? = null,
-    val children: MutableList<INode> = mutableListOf()
-) : Node(), PossiblyNamed
+    val children: MutableList<INode> = mutableListOf(),
+) : Node(),
+    PossiblyNamed
 
 class JsonGenerationTest {
-
     @Test
     fun generateJsonOfResultWithIssues() {
-        val result: Result<INode> = Result(
-            listOf(
-                Issue(IssueType.SYNTACTIC, "An error", range = range(1, 2, 3, 4)),
-                Issue(IssueType.LEXICAL, "A warning", severity = IssueSeverity.WARNING),
-                Issue(IssueType.SEMANTIC, "An info", severity = IssueSeverity.INFO),
-                Issue(IssueType.TRANSLATION, "Translation issue")
-            ),
-            null
-        )
+        val result: Result<INode> =
+            Result(
+                listOf(
+                    Issue(IssueType.SYNTACTIC, "An error", range = range(1, 2, 3, 4)),
+                    Issue(IssueType.LEXICAL, "A warning", severity = IssueSeverity.WARNING),
+                    Issue(IssueType.SEMANTIC, "An info", severity = IssueSeverity.INFO),
+                    Issue(IssueType.TRANSLATION, "Translation issue"),
+                ),
+                null,
+            )
         val json = JsonGenerator().generateString(result)
         assertEquals(
             """{
@@ -83,22 +90,24 @@ class JsonGenerationTest {
     }
   ]
 }""",
-            json
+            json,
         )
     }
 
     @Test
     fun generateJson() {
-        val myRoot = MyRoot(
-            mainSection = Section(
-                "Section1",
-                listOf(
-                    Content(1, null),
-                    Content(2, Content(3, Content(4, null)))
-                )
-            ),
-            otherSections = listOf()
-        )
+        val myRoot =
+            MyRoot(
+                mainSection =
+                    Section(
+                        "Section1",
+                        listOf(
+                            Content(1, null),
+                            Content(2, Content(3, Content(4, null))),
+                        ),
+                    ),
+                otherSections = listOf(),
+            )
         val json = JsonGenerator().generateString(myRoot)
         assertEquals(
             """{
@@ -127,22 +136,24 @@ class JsonGenerationTest {
   },
   "otherSections": []
 }""",
-            json
+            json,
         )
     }
 
     @Test
     fun generateJsonWithStreaming() {
-        val myRoot = MyRoot(
-            mainSection = Section(
-                "Section1",
-                listOf(
-                    Content(1, null),
-                    Content(2, Content(3, Content(4, null)))
-                )
-            ),
-            otherSections = listOf()
-        )
+        val myRoot =
+            MyRoot(
+                mainSection =
+                    Section(
+                        "Section1",
+                        listOf(
+                            Content(1, null),
+                            Content(2, Content(3, Content(4, null))),
+                        ),
+                    ),
+                otherSections = listOf(),
+            )
         val writer = StringWriter()
         JsonGenerator().generateJSONWithStreaming(myRoot, JsonWriter(writer))
         val json = writer.toString()
@@ -154,22 +165,24 @@ class JsonGenerationTest {
                 |"annidatedContent":{"#type":"com.strumenta.kolasu.serialization.Content","id":4},"id":3},"id":2}],
                 |"name":"Section1"},"otherSections":[]}
             """.trimMargin().replace("\n", ""),
-            json
+            json,
         )
     }
 
     @Test
     fun generateJsonWithStreamingShortNames() {
-        val myRoot = MyRoot(
-            mainSection = Section(
-                "Section1",
-                listOf(
-                    Content(1, null),
-                    Content(2, Content(3, Content(4, null)))
-                )
-            ),
-            otherSections = listOf()
-        )
+        val myRoot =
+            MyRoot(
+                mainSection =
+                    Section(
+                        "Section1",
+                        listOf(
+                            Content(1, null),
+                            Content(2, Content(3, Content(4, null))),
+                        ),
+                    ),
+                otherSections = listOf(),
+            )
         val writer = StringWriter()
         JsonGenerator().generateJSONWithStreaming(root = myRoot, writer = JsonWriter(writer), shortClassNames = true)
         val json = writer.toString()
@@ -181,7 +194,7 @@ class JsonGenerationTest {
                 |"annidatedContent":{"#type":"Content","id":4},"id":3},"id":2}],
                 |"name":"Section1"},"otherSections":[]}
             """.trimMargin().replace("\n", ""),
-            json
+            json,
         )
     }
 
@@ -201,7 +214,7 @@ class JsonGenerationTest {
             |}
             |}
             """.trimMargin().replace("\n", ""),
-            json
+            json,
         )
     }
 
@@ -221,7 +234,7 @@ class JsonGenerationTest {
             |}
             |}
             """.trimMargin().replace("\n", ""),
-            json
+            json,
         )
     }
 
@@ -234,7 +247,7 @@ class JsonGenerationTest {
         assertEquals(
             """{"#type":"com.strumenta.kolasu.serialization.NodeOverridingName","name":"foo"}
             """.trimMargin().replace("\n", ""),
-            json
+            json,
         )
     }
 
@@ -247,33 +260,35 @@ class JsonGenerationTest {
         assertEquals(
             """{"#type":"NodeOverridingName","name":"foo"}
             """.trimMargin().replace("\n", ""),
-            json
+            json,
         )
     }
 
     @Test
     fun streamingANullRoot() {
-        val originalResult: Result<MyRoot> = Result(
-            listOf(
-                Issue(
-                    IssueType.LEXICAL,
-                    "foo",
-                    range = Range(Point(1, 10), Point(4, 540))
-                )
-            ),
-            null
-        )
+        val originalResult: Result<MyRoot> =
+            Result(
+                listOf(
+                    Issue(
+                        IssueType.LEXICAL,
+                        "foo",
+                        range = Range(Point(1, 10), Point(4, 540)),
+                    ),
+                ),
+                null,
+            )
         val writer = StringWriter()
         JsonGenerator().generateJSONWithStreaming(
             result = originalResult,
             writer = JsonWriter(writer),
-            shortClassNames = true
+            shortClassNames = true,
         )
         val json = writer.toString()
         assertEquals(
             """{"issues":[{"type":"LEXICAL","message":"foo","range":{"description":"Range(start=Line 1, Column 10, end=Line 4, Column 540)","start":{"line":1,"column":10},"end":{"line":4,"column":540}},"severity":"ERROR"}]}
-            """.trimMargin().replace("\n", ""),
-            json
+            """.trimMargin()
+                .replace("\n", ""),
+            json,
         )
     }
 
@@ -285,7 +300,7 @@ class JsonGenerationTest {
   "#type": "com.strumenta.kolasu.serialization.NodeOverridingName",
   "name": "foo"
 }""",
-            json
+            json,
         )
     }
 
@@ -297,7 +312,7 @@ class JsonGenerationTest {
   "#type": "com.strumenta.kolasu.serialization.ExtNode",
   "attr1": 123
 }""",
-            json
+            json,
         )
     }
 
@@ -316,16 +331,17 @@ class JsonGenerationTest {
               }
             }
             """.trimIndent(),
-            json
+            json,
         )
     }
 
     @Test
     fun nodeWithResolvedReferencedByName() {
-        val node = NodeWithReference(
-            name = "nodeWithReference",
-            reference = ReferenceByName(name = "self")
-        ).apply { reference!!.referred = this }
+        val node =
+            NodeWithReference(
+                name = "nodeWithReference",
+                reference = ReferenceByName(name = "self"),
+            ).apply { reference!!.referred = this }
         val json = JsonGenerator().generateString(node, withIds = node.computeIdsForReferencedNodes())
         assertEquals(
             """
@@ -340,45 +356,46 @@ class JsonGenerationTest {
               }
             }
             """.trimIndent(),
-            json
+            json,
         )
     }
 
     @Test
     fun dynamicNode() {
-        val node = DynamicNode(
-            "com.strumenta.kolasu.test.Node",
-            listOf(
-                PropertyDescription(
-                    "someAttr",
-                    false,
-                    Multiplicity.SINGULAR,
-                    123,
-                    PropertyType.ATTRIBUTE
+        val node =
+            DynamicNode(
+                "com.strumenta.kolasu.test.Node",
+                listOf(
+                    PropertyDescription(
+                        "someAttr",
+                        false,
+                        Multiplicity.SINGULAR,
+                        123,
+                        PropertyType.ATTRIBUTE,
+                    ),
+                    PropertyDescription(
+                        "someListAttr",
+                        false,
+                        Multiplicity.MANY,
+                        listOf("a", "b"),
+                        PropertyType.ATTRIBUTE,
+                    ),
+                    PropertyDescription(
+                        "someChild",
+                        true,
+                        Multiplicity.SINGULAR,
+                        BaseNode(456),
+                        PropertyType.CONTAINMENT,
+                    ),
+                    PropertyDescription(
+                        "someChildren",
+                        true,
+                        Multiplicity.MANY,
+                        listOf(BaseNode(78), BaseNode(90)),
+                        PropertyType.CONTAINMENT,
+                    ),
                 ),
-                PropertyDescription(
-                    "someListAttr",
-                    false,
-                    Multiplicity.MANY,
-                    listOf("a", "b"),
-                    PropertyType.ATTRIBUTE
-                ),
-                PropertyDescription(
-                    "someChild",
-                    true,
-                    Multiplicity.SINGULAR,
-                    BaseNode(456),
-                    PropertyType.CONTAINMENT
-                ),
-                PropertyDescription(
-                    "someChildren",
-                    true,
-                    Multiplicity.MANY,
-                    listOf(BaseNode(78), BaseNode(90)),
-                    PropertyType.CONTAINMENT
-                )
             )
-        )
         val json = JsonGenerator().generateString(node, withIds = node.computeIdsForReferencedNodes())
         assertEquals(
             """
@@ -405,9 +422,12 @@ class JsonGenerationTest {
               ]
             }
             """.trimIndent(),
-            json
+            json,
         )
     }
 }
 
-data class DynamicNode(override val nodeType: String, override val properties: List<PropertyDescription>) : Node()
+data class DynamicNode(
+    override val nodeType: String,
+    override val properties: List<PropertyDescription>,
+) : Node()

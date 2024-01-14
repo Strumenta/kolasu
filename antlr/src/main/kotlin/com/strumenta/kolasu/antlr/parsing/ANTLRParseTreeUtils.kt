@@ -11,7 +11,6 @@ import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
-import kotlin.IllegalStateException
 import kotlin.reflect.KClass
 
 /**
@@ -21,7 +20,7 @@ import kotlin.reflect.KClass
 fun ParserRuleContext.processDescendantsAndErrors(
     operationOnParserRuleContext: (ParserRuleContext) -> Unit,
     operationOnError: (ErrorNode) -> Unit,
-    includingMe: Boolean = true
+    includingMe: Boolean = true,
 ) {
     if (includingMe) {
         operationOnParserRuleContext(this)
@@ -45,7 +44,13 @@ fun ParserRuleContext.getOriginalText(): String {
     if (a > b) {
         throw IllegalStateException("Start index should be less than or equal to the stop index. Start: $a, Stop: $b")
     }
-    val interval = org.antlr.v4.runtime.misc.Interval(a, b)
+    val interval =
+        org
+            .antlr
+            .v4
+            .runtime
+            .misc
+            .Interval(a, b)
     return this.start.inputStream.getText(interval)
 }
 
@@ -63,7 +68,13 @@ fun Token.getOriginalText(): String {
     if (a > b) {
         throw IllegalStateException("Start index should be less than or equal to the stop index. Start: $a, Stop: $b")
     }
-    val interval = org.antlr.v4.runtime.misc.Interval(a, b)
+    val interval =
+        org
+            .antlr
+            .v4
+            .runtime
+            .misc
+            .Interval(a, b)
     return this.inputStream.getText(interval)
 }
 
@@ -78,8 +89,10 @@ fun INode.getText(code: String): String? = range?.text(code)
  *
  * Note that this is NOT serializable as ParseTree elements are not Serializable.
  */
-class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = null) : Origin {
-
+class ParseTreeOrigin(
+    val parseTree: ParseTree,
+    override var source: Source? = null,
+) : Origin {
     private var rangeOverride: Range? = null
 
     override var range: Range?
@@ -109,7 +122,10 @@ class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = n
  *
  * Note that this, differently from Node.parseTreeNode, permits to specify also a Source.
  */
-fun <T : INode> T.withParseTreeNode(parseTree: ParseTree?, source: Source? = null): T {
+fun <T : INode> T.withParseTreeNode(
+    parseTree: ParseTree?,
+    source: Source? = null,
+): T {
     if (parseTree != null) {
         this.origin = ParseTreeOrigin(parseTree, source)
     }
@@ -157,45 +173,50 @@ val ParserRuleContext.range: Range
  * Returns the range of the receiver parser rule context.
  * @param considerRange if it's false, this method returns null.
  */
-fun ParserRuleContext.toRange(considerRange: Boolean = true, source: Source? = null): Range? {
-    return if (considerRange && start != null && stop != null) {
+fun ParserRuleContext.toRange(
+    considerRange: Boolean = true,
+    source: Source? = null,
+): Range? =
+    if (considerRange && start != null && stop != null) {
         val range = range
         if (source == null) range else Range(range.start, range.end, source)
     } else {
         null
     }
-}
 
-fun TerminalNode.toRange(considerRange: Boolean = true, source: Source? = null): Range? =
-    this.symbol.toRange(considerRange, source)
+fun TerminalNode.toRange(
+    considerRange: Boolean = true,
+    source: Source? = null,
+): Range? = this.symbol.toRange(considerRange, source)
 
-fun Token.toRange(considerRange: Boolean = true, source: Source? = null): Range? =
-    if (considerRange) Range(this.startPoint, this.endPoint, source) else null
+fun Token.toRange(
+    considerRange: Boolean = true,
+    source: Source? = null,
+): Range? = if (considerRange) Range(this.startPoint, this.endPoint, source) else null
 
-fun ParseTree.toRange(considerRange: Boolean = true, source: Source? = null): Range? {
-    return when (this) {
+fun ParseTree.toRange(
+    considerRange: Boolean = true,
+    source: Source? = null,
+): Range? =
+    when (this) {
         is TerminalNode -> this.toRange(considerRange, source)
         is ParserRuleContext -> this.toRange(considerRange, source)
         else -> null
     }
-}
 
 /**
  * Find the ancestor of the given element with the given class.
  */
-inline fun <reified T : RuleContext> RuleContext.ancestor(): T {
-    return this.ancestor(T::class)
-}
+inline fun <reified T : RuleContext> RuleContext.ancestor(): T = this.ancestor(T::class)
 
 /**
  * Find the ancestor of the given element with the given class.
  */
-fun <T : RuleContext> RuleContext.ancestor(kclass: KClass<T>): T {
-    return if (this.parent == null) {
+fun <T : RuleContext> RuleContext.ancestor(kclass: KClass<T>): T =
+    if (this.parent == null) {
         throw IllegalStateException("Cannot find ancestor of type $kclass")
     } else if (kclass.isInstance(this.parent)) {
         this.parent as T
     } else {
         this.parent.ancestor(kclass)
     }
-}
