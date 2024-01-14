@@ -11,7 +11,6 @@ import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.declaredFeatures
 import com.strumenta.kolasu.model.isConcept
 import com.strumenta.kolasu.model.isConceptInterface
-import com.strumenta.kolasu.model.isMarkedAsNodeType
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.DataType
@@ -22,6 +21,7 @@ import io.lionweb.lioncore.java.language.Property
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
+import kotlin.reflect.full.isSubclassOf
 
 /**
  * This class is able to convert between Kolasu and LionWeb languages, tracking the mapping.
@@ -74,8 +74,8 @@ class LionWebLanguageConverter {
                         .supertypes
                         .map { it.classifier as KClass<*> }
                         .filter { it.java.isInterface }
-                superInterfaces.filter { it.isMarkedAsNodeType() }.forEach {
-                    conceptInterface.addExtendedInterface(correspondingInterface(it))
+                superInterfaces.filter { it.isSubclassOf(NodeLike::class) }.forEach {
+                    correspondingInterfaceOrNull(it)?.let { interf -> conceptInterface.addExtendedInterface(interf) }
                 }
             } else {
                 val concept = featuresContainer as Concept
@@ -90,7 +90,7 @@ class LionWebLanguageConverter {
                     throw IllegalStateException()
                 }
                 val interfaces = astClass.supertypes.map { it.classifier as KClass<*> }.filter { it.java.isInterface }
-                interfaces.filter { it.isMarkedAsNodeType() }.forEach {
+                interfaces.filter { it.isSubclassOf(NodeLike::class) }.forEach {
                     concept.addImplementedInterface(correspondingInterface(it))
                 }
             }
@@ -216,7 +216,15 @@ class LionWebLanguageConverter {
     }
 
     fun correspondingInterface(kClass: KClass<*>): Interface {
-        return toLWClassifier(kClass) as Interface
+        return correspondingInterfaceOrNull(kClass) as Interface
+    }
+
+    /**
+     * If the KClass correspond to a class and not an interface null is returned.
+     * This is useful to handle NodeLike.
+     */
+    fun correspondingInterfaceOrNull(kClass: KClass<*>): Interface? {
+        return toLWClassifier(kClass) as? Interface
     }
 
     fun correspondingConcept(kClass: KClass<*>): Concept {

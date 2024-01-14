@@ -12,7 +12,7 @@ import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.NodeType
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
@@ -128,11 +128,7 @@ class ASTGenerator(
                             .addMember("key = \"${element.key}\"")
                             .build(),
                     )
-                    typeSpec.addAnnotation(
-                        AnnotationSpec
-                            .builder(NodeType::class.java)
-                            .build(),
-                    )
+                    typeSpec.addSuperinterface(NodeLike::class.java)
                     val fqName = "$packageName.${element.name!!}"
                     if (fqName in existingKotlinClasses) {
                         println("    Skipping ${element.name} as a Kotlin interface with that name already exist")

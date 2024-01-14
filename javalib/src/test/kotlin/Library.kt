@@ -1,15 +1,14 @@
 package com.strumenta.kolasu.javalib
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.NodeType
+import com.strumenta.kolasu.model.NodeLike
 
 data class Library(
     val books: List<Book>,
     val team: List<TeamMember> = emptyList(),
 ) : Node()
 
-@NodeType
-interface TeamMember
+interface TeamMember : NodeLike
 
 data class Book(
     val title: String,

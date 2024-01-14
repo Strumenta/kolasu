@@ -6,6 +6,7 @@ import com.strumenta.kolasu.model.Expression
 import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PlaceholderElement
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.Range
@@ -97,6 +98,7 @@ val LocalTimeHandler = KolasuClassHandler(LocalTime::class, STARLASU_METAMODEL.g
 val LocalDateTimeHandler = KolasuClassHandler(LocalDateTime::class, STARLASU_METAMODEL.getEClass("LocalDateTime"))
 
 val NodeHandler = KolasuClassHandler(Node::class, STARLASU_METAMODEL.getEClass("ASTNode"))
+val NodeLikeHandler = KolasuClassHandler(NodeLike::class, STARLASU_METAMODEL.getEClass("ASTNode"))
 val NamedHandler = KolasuClassHandler(Named::class, STARLASU_METAMODEL.getEClass("Named"))
 val RangeHandler = KolasuClassHandler(Range::class, STARLASU_METAMODEL.getEClass("Position"))
 val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, STARLASU_METAMODEL.getEClass("PossiblyNamed"))

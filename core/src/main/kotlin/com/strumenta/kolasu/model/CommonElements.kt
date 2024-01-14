@@ -1,16 +1,13 @@
 package com.strumenta.kolasu.model
 
-@NodeType
-interface Statement
+interface Statement : NodeLike
 
-@NodeType
-interface Expression
+interface Expression : NodeLike
 
 /**
  * This should be used for definitions of classes, interfaces, structures
  */
-@NodeType
-interface EntityDeclaration
+interface EntityDeclaration : NodeLike
 
 /**
  * PlaceholderElements can be used to represent elements in code matchers templates and code templates. They represent
@@ -27,8 +24,7 @@ interface EntityDeclaration
  * Conversely, in a code template the PlaceholderElement indicates where to insert parameters provided to populate the
  * template.
  */
-@NodeType
-interface PlaceholderElement {
+interface PlaceholderElement : NodeLike {
     var placeholderName: String?
 
     @property:Internal

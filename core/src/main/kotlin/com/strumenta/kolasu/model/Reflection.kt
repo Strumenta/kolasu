@@ -149,7 +149,7 @@ private fun providesNodes(kclass: KClass<*>?): Boolean {
  * @return can [this] class be considered an AST node?
  */
 fun KClass<*>.isANode(): Boolean {
-    return this.isSubclassOf(NodeLike::class) || this.isMarkedAsNodeType()
+    return this.isSubclassOf(NodeLike::class)
 }
 
 val KClass<*>.isConcept: Boolean
@@ -157,13 +157,6 @@ val KClass<*>.isConcept: Boolean
 
 val KClass<*>.isConceptInterface: Boolean
     get() = isANode() && this.java.isInterface
-
-/**
- * @return is [this] class annotated with NodeType?
- */
-fun KClass<*>.isMarkedAsNodeType(): Boolean {
-    return this.annotations.any { it.annotationClass == NodeType::class }
-}
 
 data class PropertyTypeDescription(
     val name: String,

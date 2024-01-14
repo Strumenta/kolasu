@@ -69,9 +69,3 @@ annotation class Derived
  * This will prevent them from being considered branches of the AST.
  */
 annotation class Link
-
-/**
- * Use this to mark something that does not inherit from Node as a node, so it will be included in the AST.
- */
-@Deprecated("Planned for removal")
-annotation class NodeType

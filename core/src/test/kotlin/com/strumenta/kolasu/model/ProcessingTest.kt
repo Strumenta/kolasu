@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.model
 
 import java.util.LinkedList
+import kotlin.reflect.full.isSubclassOf
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import org.junit.Test as test
@@ -33,8 +34,7 @@ data class DW(
     val manyAs: MutableList<AW>,
 ) : Node()
 
-@NodeType
-interface FooNodeType
+interface FooNodeType : NodeLike
 
 interface BarNotNodeType
 
@@ -72,8 +72,8 @@ data class ValueReference(
 class ProcessingTest {
     @test
     fun recognizeNodeType() {
-        assertEquals(true, FooNodeType::class.isMarkedAsNodeType())
-        assertEquals(false, BarNotNodeType::class.isMarkedAsNodeType())
+        assertEquals(true, FooNodeType::class.isSubclassOf(NodeLike::class))
+        assertEquals(false, BarNotNodeType::class.isSubclassOf(NodeLike::class))
 
         assertEquals(true, FooNodeType::class.isANode())
         assertEquals(false, BarNotNodeType::class.isANode())

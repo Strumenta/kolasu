@@ -3,7 +3,7 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.NodeType
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.utils.LanguageValidator
@@ -30,8 +30,7 @@ data class SimpleNodeA(
 
 interface MyIrrelevantInterface
 
-@NodeType
-interface MyRelevantInterface
+interface MyRelevantInterface : NodeLike
 
 data class SimpleNodeB(
     val value: String,

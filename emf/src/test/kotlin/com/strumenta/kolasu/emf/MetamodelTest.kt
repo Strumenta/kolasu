@@ -3,7 +3,7 @@ package com.strumenta.kolasu.emf
 import com.strumenta.kolasu.model.EntityDeclaration
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.NodeType
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
@@ -49,8 +49,7 @@ data class CompilationUnit(
     val statements: List<Statement>?,
 ) : Node()
 
-@NodeType
-interface SomeInterface
+interface SomeInterface : NodeLike
 
 data class AltCompilationUnit(
     val elements: List<SomeInterface>,

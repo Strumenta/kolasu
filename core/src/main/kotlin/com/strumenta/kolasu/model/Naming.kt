@@ -21,8 +21,7 @@ import kotlin.reflect.full.isSubtypeOf
 /**
  * An entity that can have a name
  */
-@NodeType
-interface PossiblyNamed {
+interface PossiblyNamed : NodeLike {
     /**
      * The optional name of the entity.
      */
@@ -32,7 +31,6 @@ interface PossiblyNamed {
 /**
  * An entity which has a name.
  */
-@NodeType
 interface Named : PossiblyNamed {
     /**
      * The mandatory name of the entity.
