@@ -4,13 +4,14 @@ plugins {
     id("signing")
 }
 
-val antlr_version = extra["antlr_version"]
+val antlrVersion = extra["antlr_version"]
 val kotlinVersion = extra["kotlinVersion"]
 
 dependencies {
-    antlr("org.antlr:antlr4:$antlr_version")
-    implementation("org.antlr:antlr4-runtime:$antlr_version")
+    antlr("org.antlr:antlr4:$antlrVersion")
+    implementation("org.antlr:antlr4-runtime:$antlrVersion")
     implementation(project(":core"))
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
 }
 
 fun Project.useAntlrInTests(packageName: String) {

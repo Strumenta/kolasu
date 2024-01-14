@@ -2,13 +2,13 @@ plugins {
     id("antlr")
 }
 
-val antlr_version = extra["antlr_version"]
+val antlrVersion = extra["antlr_version"]
 val kotlinVersion = extra["kotlinVersion"]
-val gson_version = extra["gson_version"]
-val clikt_version = extra["clikt_version"]
+val gsonVersion = extra["gson_version"]
+val cliktVersion = extra["clikt_version"]
 
 dependencies {
-    antlr("org.antlr:antlr4:$antlr_version")
+    antlr("org.antlr:antlr4:$antlrVersion")
     api(project(":core"))
     api(project(":cli"))
     api(project(":antlr"))
@@ -17,11 +17,12 @@ dependencies {
     api("org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.16.0")
     api("org.eclipse.emfcloud:emfjson-jackson:2.0.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
-    implementation("com.google.code.gson:gson:$gson_version")
+    implementation("com.google.code.gson:gson:$gsonVersion")
 
-    api("com.github.ajalt.clikt:clikt:$clikt_version")
+    api("com.github.ajalt.clikt:clikt:$cliktVersion")
 
-    testImplementation("org.antlr:antlr4-runtime:$antlr_version")
+    testImplementation("org.antlr:antlr4-runtime:$antlrVersion")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
 }
 
 fun Project.useAntlrInTests(packageName: String) {

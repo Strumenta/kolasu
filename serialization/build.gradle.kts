@@ -1,9 +1,9 @@
-val clikt_version = extra["clikt_version"]
-val gson_version = extra["gson_version"]
+val kotlinVersion = extra["kotlinVersion"]
 
 dependencies {
     implementation("org.redundent:kotlin-xml-builder:1.9.0")
-    implementation("com.google.code.gson:gson:$gson_version")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+    implementation(libs.gson)
 
     implementation(project(":core"))
 }

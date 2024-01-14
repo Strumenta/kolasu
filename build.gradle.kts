@@ -3,7 +3,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.dokka")
-    id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
+    alias(libs.plugins.ktlint)
     id("maven-publish")
     id("signing")
 
@@ -89,17 +89,33 @@ subprojects {
         testLogging {
             showStandardStreams = true
             showExceptions = true
-            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            exceptionFormat =
+                org
+                    .gradle
+                    .api
+                    .tasks
+                    .testing
+                    .logging
+                    .TestExceptionFormat
+                    .FULL
         }
     }
 
     val jvm_version = extra["jvm_version"]!! as String
 
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
-        kotlinOptions {
-            jvmTarget = "$jvm_version"
+    tasks
+        .withType(
+            org
+                .jetbrains
+                .kotlin
+                .gradle
+                .tasks
+                .KotlinCompile::class,
+        ).all {
+            kotlinOptions {
+                jvmTarget = "$jvm_version"
+            }
         }
-    }
 
     tasks.withType(Sign::class) {
         enabled = isReleaseVersion
@@ -108,7 +124,11 @@ subprojects {
     ktlint {
         filter {
             exclude { element ->
-                element.file.absolutePath.split(File.separator).contains("build")
+                element
+                    .file
+                    .absolutePath
+                    .split(File.separator)
+                    .contains("build")
             }
         }
     }

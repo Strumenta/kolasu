@@ -7,16 +7,18 @@ plugins {
 
 val lionwebVersion = extra["lionwebVersion"]
 val kotlinVersion = extra["kotlinVersion"]
-val clikt_version = extra["clikt_version"]
-val gson_version = extra["gson_version"]
+val cliktVersion = extra["clikt_version"]
+val gsonVersion = extra["gson_version"]
 
 dependencies {
-    implementation("com.github.ajalt.clikt:clikt:$clikt_version")
+    implementation("com.github.ajalt.clikt:clikt:$cliktVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
-    testImplementation("com.google.code.gson:gson:$gson_version")
+    testImplementation("com.google.code.gson:gson:$gsonVersion")
     testImplementation("io.github.mkfl3x:json-delta:1.3")
     implementation("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebVersion")
     api(project(":core"))
+
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
 }
 
 publishing {

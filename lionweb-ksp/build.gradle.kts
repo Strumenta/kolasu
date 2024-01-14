@@ -26,7 +26,7 @@ publishing {
     addPublication(
         "kolasu_lionweb_ksp",
         "Framework to work with AST and building languages. KSP plugin for LionWeb code generation",
-        project
+        project,
     )
 }
 

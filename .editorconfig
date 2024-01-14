@@ -6,4 +6,3 @@ ktlint_code_style = ktlint_official
 ktlint_standard = enabled
 ktlint_experimental = enabled
 ktlint_no-wildcard-imports = disabled
-ktlint_disabled_rules=no-wildcard-imports,experimental:argument-list-wrapping
