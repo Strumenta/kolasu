@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.traversing
 
-import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.range
 import kotlin.test.Test
@@ -12,7 +12,7 @@ import kotlin.test.fail
 internal class TraversingByRangeTest {
     class Box(
         val name: String,
-        val contents: List<INode>,
+        val contents: List<NodeLike>,
         specifiedRange: Range? = null,
     ) : Node(specifiedRange)
 
@@ -21,7 +21,7 @@ internal class TraversingByRangeTest {
         specifiedRange: Range? = null,
     ) : Node(specifiedRange)
 
-    private fun printSequence(sequence: Sequence<INode>): String =
+    private fun printSequence(sequence: Sequence<NodeLike>): String =
         sequence
             .map {
                 when (it) {

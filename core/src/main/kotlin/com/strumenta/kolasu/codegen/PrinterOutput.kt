@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.codegen
 
-import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.START_POINT
 import com.strumenta.kolasu.model.TextFileDestination
@@ -13,7 +13,7 @@ import kotlin.reflect.full.superclasses
 fun interface NodePrinter {
     fun print(
         output: PrinterOutput,
-        ast: INode,
+        ast: NodeLike,
     )
 }
 
@@ -23,7 +23,7 @@ fun interface NodePrinter {
  */
 class PrinterOutput(
     private val nodePrinters: Map<KClass<*>, NodePrinter>,
-    private var nodePrinterOverrider: (node: INode) -> NodePrinter? = { _ -> null },
+    private var nodePrinterOverrider: (node: NodeLike) -> NodePrinter? = { _ -> null },
 ) {
     private val sb = StringBuilder()
     private var currentPoint = START_POINT
@@ -106,7 +106,7 @@ class PrinterOutput(
     }
 
     private fun findPrinter(
-        ast: INode,
+        ast: NodeLike,
         kclass: KClass<*>,
     ): NodePrinter? {
         val overrider = nodePrinterOverrider(ast)
@@ -125,7 +125,7 @@ class PrinterOutput(
     }
 
     private fun getPrinter(
-        ast: INode,
+        ast: NodeLike,
         kclass: KClass<*> = ast::class,
     ): NodePrinter {
         val printer = findPrinter(ast, kclass)
@@ -133,7 +133,7 @@ class PrinterOutput(
     }
 
     fun print(
-        ast: INode?,
+        ast: NodeLike?,
         prefix: String = "",
         postfix: String = "",
     ) {
@@ -149,7 +149,7 @@ class PrinterOutput(
     }
 
     fun println(
-        ast: INode?,
+        ast: NodeLike?,
         prefix: String = "",
         postfix: String = "",
     ) {
@@ -170,7 +170,7 @@ class PrinterOutput(
     }
 
     fun associate(
-        ast: INode,
+        ast: NodeLike,
         generation: PrinterOutput.() -> Unit,
     ) {
         val startPoint = currentPoint
@@ -180,7 +180,7 @@ class PrinterOutput(
         ast.destinations += TextFileDestination(range = nodeRangeInGeneratedCode)
     }
 
-    fun <T : INode> printList(
+    fun <T : NodeLike> printList(
         elements: List<T>,
         separator: String = ", ",
         elementPrinter: (T) -> Unit,
@@ -195,14 +195,14 @@ class PrinterOutput(
         }
     }
 
-    fun <T : INode> printList(
+    fun <T : NodeLike> printList(
         elements: List<T>,
         separator: String = ", ",
     ) {
         printList(elements, separator) { el -> print(el) }
     }
 
-    fun <T : INode> printList(
+    fun <T : NodeLike> printList(
         prefix: String,
         elements: List<T>,
         postfix: String,
@@ -217,7 +217,7 @@ class PrinterOutput(
         }
     }
 
-    fun <T : INode> printList(
+    fun <T : NodeLike> printList(
         prefix: String,
         elements: List<T>,
         postfix: String,
@@ -227,7 +227,7 @@ class PrinterOutput(
         printList(prefix, elements, postfix, printEvenIfEmpty, separator) { el -> print(el) }
     }
 
-    fun printOneOf(vararg alternatives: INode?) {
+    fun printOneOf(vararg alternatives: NodeLike?) {
         val notNull = alternatives.filterNotNull()
         if (notNull.size != 1) {
             throw IllegalStateException(

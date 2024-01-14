@@ -122,7 +122,7 @@ fun main() {
           package mytest
 
           import com.strumenta.kolasu.model.Node
-          import com.strumenta.kolasu.model.INode
+          import com.strumenta.kolasu.model.NodeLike
           import com.strumenta.kolasu.model.observable.SimpleNodeObserver
 
     data class MyNode(var p1: Int) : Node()
@@ -138,7 +138,7 @@ var p2 : Int = 0
 object MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
     override fun <V : Any?>onAttributeChange(
-        node: INode,
+        node: NodeLike,
         attributeName: String,
         oldValue: V,
         newValue: V
@@ -300,7 +300,7 @@ fun main() {
                         """
           package mytest
 
-          import com.strumenta.kolasu.model.INode
+          import com.strumenta.kolasu.model.NodeLike
           import com.strumenta.kolasu.model.Node
           import com.strumenta.kolasu.model.observable.ObservableList
           import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
@@ -317,30 +317,30 @@ data class NodeWithReference(val ref: ReferenceByName<NamedNode>, val id: Int) :
 
 class MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
-    override fun <V> onAttributeChange(node: INode, attributeName: String, oldValue: V, newValue: V) {
+    override fun <V> onAttributeChange(node: NodeLike, attributeName: String, oldValue: V, newValue: V) {
         observations.add("${'$'}attributeName: ${'$'}oldValue -> ${'$'}newValue")
     }
 
-    override fun onChildAdded(node: INode, containmentName: String, added: INode) {
+    override fun onChildAdded(node: NodeLike, containmentName: String, added: NodeLike) {
         observations.add("${'$'}containmentName: added ${'$'}added")
     }
 
-    override fun onChildRemoved(node: INode, containmentName: String, removed: INode) {
+    override fun onChildRemoved(node: NodeLike, containmentName: String, removed: NodeLike) {
         observations.add("${'$'}containmentName: removed ${'$'}removed")
     }
 
-    override fun onReferenceSet(node: INode, referenceName: String, oldReferredNode: INode?, newReferredNode: INode?) {
+    override fun onReferenceSet(node: NodeLike, referenceName: String, oldReferredNode: NodeLike?, newReferredNode: NodeLike?) {
         val oldName = if (oldReferredNode == null) "null" else (oldReferredNode as? Named)?.name ?: "<UNKNOWN>"
         val newName = if (newReferredNode == null) "null" else (newReferredNode as? Named)?.name ?: "<UNKNOWN>"
         observations.add("${'$'}referenceName: changed from ${'$'}oldName to ${'$'}newName")
     }
 
-    override fun onReferringAdded(node: INode, referenceName: String, referring: INode) {
+    override fun onReferringAdded(node: NodeLike, referenceName: String, referring: NodeLike) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
         observations.add("${'$'}myName is now referred to by ${'$'}referring.${'$'}referenceName")
     }
 
-    override fun onReferringRemoved(node: INode, referenceName: String, referring: INode) {
+    override fun onReferringRemoved(node: NodeLike, referenceName: String, referring: NodeLike) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
         observations.add("${'$'}myName is not referred anymore by ${'$'}referring.${'$'}referenceName")
     }

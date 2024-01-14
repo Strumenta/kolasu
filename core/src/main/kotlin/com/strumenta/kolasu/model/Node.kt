@@ -16,10 +16,10 @@ import kotlin.reflect.KProperty1
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
 open class Node :
-    INode,
+    NodeLike,
     Serializable {
     @property:Internal
-    override val changes = PublishSubject<NodeNotification<in INode>>()
+    override val changes = PublishSubject<NodeNotification<in NodeLike>>()
 
     @Internal
     private val annotations: MutableList<Annotation> = mutableListOf()
@@ -73,7 +73,7 @@ open class Node :
      * The parent node, if any.
      */
     @property:Internal
-    override var parent: INode? = null
+    override var parent: NodeLike? = null
 
     /**
      * The range of this node in the source text.
@@ -143,18 +143,18 @@ open class Node :
         annotation.detach()
     }
 
-    override fun getChildren(containment: Containment): List<INode> {
+    override fun getChildren(containment: Containment): List<NodeLike> {
         return when (val rawValue = nodeProperties.find { it.name == containment.name }!!.get(this)) {
             null -> {
                 emptyList()
             }
 
             is List<*> -> {
-                rawValue as List<INode>
+                rawValue as List<NodeLike>
             }
 
             else -> {
-                listOf(rawValue as INode)
+                listOf(rawValue as NodeLike)
             }
         }
     }
@@ -181,7 +181,7 @@ open class Node :
         return prop.call(this) as T
     }
 
-    override fun <T : INode> getContainment(containmentName: String): List<T> {
+    override fun <T : NodeLike> getContainment(containmentName: String): List<T> {
         val prop = nodeProperties.find { it.name == containmentName }!!
         return when (val res = prop.call(this)) {
             null -> {
@@ -198,7 +198,7 @@ open class Node :
         }
     }
 
-    override fun <T : INode> addToContainment(
+    override fun <T : NodeLike> addToContainment(
         containmentName: String,
         child: T,
     ) {
@@ -211,7 +211,7 @@ open class Node :
         }
     }
 
-    override fun <T : INode> removeFromContainment(
+    override fun <T : NodeLike> removeFromContainment(
         containmentName: String,
         child: T,
     ) {
@@ -227,7 +227,7 @@ open class Node :
     }
 
     override fun <T : PossiblyNamed> getReference(referenceName: String): ReferenceByName<T> {
-        val prop = nodeProperties.find { it.name == referenceName } as KProperty1<INode, ReferenceByName<T>>
+        val prop = nodeProperties.find { it.name == referenceName } as KProperty1<NodeLike, ReferenceByName<T>>
         return prop.call(this)
     }
 
@@ -239,7 +239,7 @@ open class Node :
         ref.referred = referred
     }
 
-    override fun subscribe(observer: ObservableObserver<NodeNotification<in INode>>) {
+    override fun subscribe(observer: ObservableObserver<NodeNotification<in NodeLike>>) {
         this.changes.subscribe(observer)
     }
 }

@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.antlr.parsing
 
-import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.simplelang.SimpleLangLexer
@@ -14,7 +14,7 @@ import kotlin.test.assertNotNull
 
 class SimpleLangKolasuParser :
     KolasuANTLRParser<
-        INode,
+        NodeLike,
         SimpleLangParser,
         SimpleLangParser.CompilationUnitContext,
         KolasuANTLRToken,
@@ -28,7 +28,7 @@ class SimpleLangKolasuParser :
         considerRange: Boolean,
         issues: MutableList<Issue>,
         source: Source?,
-    ): INode? = null
+    ): NodeLike? = null
 
     override fun clearCaches() {
         super.clearCaches()

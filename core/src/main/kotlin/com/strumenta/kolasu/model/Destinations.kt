@@ -15,15 +15,15 @@ data class TextFileDestination(
     Serializable
 
 data class NodeDestination(
-    val node: INode,
+    val node: NodeLike,
 ) : Destination
 
-operator fun MutableList<Destination>.plusAssign(node: INode) {
+operator fun MutableList<Destination>.plusAssign(node: NodeLike) {
     this.add(NodeDestination(node))
 }
 
-operator fun MutableList<Destination>.minusAssign(node: INode) {
+operator fun MutableList<Destination>.minusAssign(node: NodeLike) {
     this.remove(NodeDestination(node))
 }
 
-operator fun List<Destination>.contains(node: INode): Boolean = NodeDestination(node) in this
+operator fun List<Destination>.contains(node: NodeLike): Boolean = NodeDestination(node) in this

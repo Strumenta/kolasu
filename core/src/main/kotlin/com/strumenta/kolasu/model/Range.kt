@@ -285,7 +285,7 @@ data class Range(
      * Tests whether the given node is contained in the interval represented by this object.
      * @param node the node
      */
-    fun contains(node: INode): Boolean = this.contains(node.range)
+    fun contains(node: NodeLike): Boolean = this.contains(node.range)
 
     /**
      * Tests whether the given range overlaps the interval represented by this object.
@@ -313,10 +313,10 @@ fun range(
     Point(endLine, endCol),
 )
 
-fun INode.isBefore(other: INode): Boolean = range!!.start.isBefore(other.range!!.start)
+fun NodeLike.isBefore(other: NodeLike): Boolean = range!!.start.isBefore(other.range!!.start)
 
-val INode.startLine: Int?
+val NodeLike.startLine: Int?
     get() = this.range?.start?.line
 
-val INode.endLine: Int?
+val NodeLike.endLine: Int?
     get() = this.range?.end?.line

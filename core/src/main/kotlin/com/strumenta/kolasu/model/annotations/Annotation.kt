@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.model.annotations
 
-import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Internal
+import com.strumenta.kolasu.model.NodeLike
 
 /**
  * Annotations are useful to attach additional data to nodes, without having to modify the node classes.
@@ -11,13 +11,13 @@ import com.strumenta.kolasu.model.Internal
  * Each Node will be aware of the annotations attach to itself.
  */
 sealed class Annotation {
-    var annotatedNode: INode? = null
+    var annotatedNode: NodeLike? = null
 
     /**
      * Attach the annotation to a specific node.
      * The annotation should not be already attached to any node, not even to the same node to which we are attaching it.
      */
-    fun attachTo(node: INode) {
+    fun attachTo(node: NodeLike) {
         require(annotatedNode == null)
         annotatedNode = node
     }

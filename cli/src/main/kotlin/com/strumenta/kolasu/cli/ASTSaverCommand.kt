@@ -6,7 +6,7 @@ import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.file
-import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.debugPrint
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
@@ -20,7 +20,7 @@ import java.io.StringWriter
  * This command prints the AST on the console or on file.
  * The formats are the debugging format, JSON, XML, or EMF-JSON.
  */
-class ASTSaverCommand<R : INode, P : ASTParser<R>>(
+class ASTSaverCommand<R : NodeLike, P : ASTParser<R>>(
     parserInstantiator: ParserInstantiator<P>,
 ) : ASTProcessingCommand<R, P>(
         parserInstantiator,

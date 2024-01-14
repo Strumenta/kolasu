@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.kcp
 
-import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
 import org.jetbrains.kotlin.backend.jvm.ir.getIoFile
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
@@ -74,7 +74,7 @@ fun IrProperty.declareReference(): Boolean {
 @ObsoleteDescriptorBasedAPI
 fun IrType.isSingleContainment(): Boolean {
     return if (this is IrSimpleType) {
-        this.isAssignableTo(INode::class)
+        this.isAssignableTo(NodeLike::class)
     } else {
         false
     }
@@ -82,7 +82,7 @@ fun IrType.isSingleContainment(): Boolean {
 
 @ObsoleteDescriptorBasedAPI
 fun IrType.isSingleAttribute(): Boolean {
-    return !this.isAssignableTo(Collection::class) && !this.isAssignableTo(INode::class)
+    return !this.isAssignableTo(Collection::class) && !this.isAssignableTo(NodeLike::class)
 }
 
 @ObsoleteDescriptorBasedAPI

@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.codegen
 
-import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.NodeLike
 import java.io.File
 import kotlin.reflect.KClass
 
@@ -13,9 +13,9 @@ import kotlin.reflect.KClass
  * potentially expressed in a DSL, with multi-platform generators. It would permit to have code generators usable from
  * all the StarLasu platforms.
  */
-abstract class ASTCodeGenerator<R : INode> {
+abstract class ASTCodeGenerator<R : NodeLike> {
     protected val nodePrinters: MutableMap<KClass<*>, NodePrinter> = HashMap()
-    var nodePrinterOverrider: (node: INode) -> NodePrinter? = { _ -> null }
+    var nodePrinterOverrider: (node: NodeLike) -> NodePrinter? = { _ -> null }
 
     protected abstract fun registerRecordPrinters()
 
@@ -23,9 +23,11 @@ abstract class ASTCodeGenerator<R : INode> {
         registerRecordPrinters()
     }
 
-    protected inline fun <reified N1 : INode> recordPrinter(crossinline generation: PrinterOutput.(ast: N1) -> Unit) {
+    protected inline fun <reified N1 : NodeLike> recordPrinter(
+        crossinline generation: PrinterOutput.(ast: N1) -> Unit,
+    ) {
         nodePrinters[N1::class] =
-            NodePrinter { output: PrinterOutput, ast: INode ->
+            NodePrinter { output: PrinterOutput, ast: NodeLike ->
                 output.generation(ast as N1)
             }
     }

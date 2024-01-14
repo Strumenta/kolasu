@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.playground
 
-import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 
@@ -12,7 +12,7 @@ class WorkspaceTranspilationTrace {
     data class WorkspaceFile(
         val path: String,
         val code: String,
-        val result: Result<INode>,
+        val result: Result<NodeLike>,
     )
 
     val originalFiles: MutableList<WorkspaceFile> = mutableListOf()

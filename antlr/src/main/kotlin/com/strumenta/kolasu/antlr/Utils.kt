@@ -1,13 +1,13 @@
 package com.strumenta.kolasu.antlr
 
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.SimpleOrigin
 
 /**
  * Remove links to the ParseTree, in order to save memory.
  */
-fun INode.detachFromParseTree(
+fun NodeLike.detachFromParseTree(
     keepRange: Boolean = true,
     keepSourceText: Boolean = false,
 ) {

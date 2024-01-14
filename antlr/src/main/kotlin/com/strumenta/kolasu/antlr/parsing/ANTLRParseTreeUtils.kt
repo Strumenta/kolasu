@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.antlr.parsing
 
-import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
@@ -81,7 +81,7 @@ fun Token.getOriginalText(): String {
 /**
  * Given the entire code, this returns the slice covered by this Node.
  */
-fun INode.getText(code: String): String? = range?.text(code)
+fun NodeLike.getText(code: String): String? = range?.text(code)
 
 /**
  * An Origin corresponding to a ParseTreeNode. This is used to indicate that an AST Node has been obtained
@@ -122,7 +122,7 @@ class ParseTreeOrigin(
  *
  * Note that this, differently from Node.parseTreeNode, permits to specify also a Source.
  */
-fun <T : INode> T.withParseTreeNode(
+fun <T : NodeLike> T.withParseTreeNode(
     parseTree: ParseTree?,
     source: Source? = null,
 ): T {
@@ -132,7 +132,7 @@ fun <T : INode> T.withParseTreeNode(
     return this
 }
 
-var INode.parseTreeNode: ParseTree?
+var NodeLike.parseTreeNode: ParseTree?
     get() {
         return (this.origin as? ParseTreeOrigin)?.parseTree
     }

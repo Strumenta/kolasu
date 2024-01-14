@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.codegen
 
-import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -55,7 +55,7 @@ class ASTCodeGeneratorTest {
         val codeWithNodePrinterOverrider =
             KotlinPrinter()
                 .also {
-                    it.nodePrinterOverrider = { n: INode ->
+                    it.nodePrinterOverrider = { n: NodeLike ->
                         when (n) {
                             is KStringLiteral -> NodePrinter { output, ast -> output.print("YYY") }
                             is KIntLiteral -> NodePrinter { output, ast -> output.print("XXX") }

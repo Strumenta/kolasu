@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.language
 
-import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.asAttribute
 import com.strumenta.kolasu.model.containedType
 import com.strumenta.kolasu.model.isAttribute
@@ -50,7 +50,7 @@ class KolasuLanguage(
         val kClass = superType.classifier as? KClass<*>
         when (kClass) {
             null -> Unit
-            INode::class -> Unit
+            NodeLike::class -> Unit
             Node::class -> Unit
             Named::class -> Unit
             Any::class -> Unit
@@ -60,15 +60,15 @@ class KolasuLanguage(
                         addInterfaceClass(kClass)
                     }
                 } else {
-                    if (kClass.isSubclassOf(INode::class)) {
-                        addClass(kClass as KClass<out INode>)
+                    if (kClass.isSubclassOf(NodeLike::class)) {
+                        addClass(kClass as KClass<out NodeLike>)
                     }
                 }
             }
         }
     }
 
-    fun <N : INode> addClass(kClass: KClass<N>): Boolean {
+    fun <N : NodeLike> addClass(kClass: KClass<N>): Boolean {
         if (!_astClasses.contains(kClass) && _astClasses.add(kClass)) {
             kClass.supertypes.forEach { superType ->
                 processSuperType(superType)

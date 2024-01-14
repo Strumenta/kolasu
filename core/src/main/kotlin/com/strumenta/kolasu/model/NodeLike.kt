@@ -9,11 +9,11 @@ import com.strumenta.kolasu.model.annotations.Annotation
 import com.strumenta.kolasu.model.observable.NodeNotification
 import kotlin.reflect.KClass
 
-typealias NodeObserver = ObservableObserver<in NodeNotification<in INode>>
+typealias NodeObserver = ObservableObserver<in NodeNotification<in NodeLike>>
 
-interface INode {
+interface NodeLike {
     @property:Internal
-    val changes: PublishSubject<NodeNotification<in INode>>
+    val changes: PublishSubject<NodeNotification<in NodeLike>>
 
     @Internal
     val destinations: MutableList<Destination>
@@ -37,7 +37,7 @@ interface INode {
      * The parent node, if any.
      */
     @property:Internal
-    var parent: INode?
+    var parent: NodeLike?
 
     /**
      * The range of this node in the source text.
@@ -96,7 +96,7 @@ interface INode {
 
     fun hasAnnotation(annotation: Annotation): Boolean = allAnnotations.contains(annotation)
 
-    fun getChildren(containment: Containment): List<INode>
+    fun getChildren(containment: Containment): List<NodeLike>
 
     fun getReference(reference: Reference): ReferenceByName<*>
 
@@ -109,14 +109,14 @@ interface INode {
 
     fun <T : Any?> getAttribute(attributeName: String): T
 
-    fun <T : INode> getContainment(containmentName: String): List<T>
+    fun <T : NodeLike> getContainment(containmentName: String): List<T>
 
-    fun <T : INode> addToContainment(
+    fun <T : NodeLike> addToContainment(
         containmentName: String,
         child: T,
     )
 
-    fun <T : INode> removeFromContainment(
+    fun <T : NodeLike> removeFromContainment(
         containmentName: String,
         child: T,
     )
@@ -128,5 +128,5 @@ interface INode {
         referred: T,
     )
 
-    fun subscribe(observer: ObservableObserver<NodeNotification<in INode>>)
+    fun subscribe(observer: ObservableObserver<NodeNotification<in NodeLike>>)
 }

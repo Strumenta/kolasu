@@ -232,7 +232,7 @@ class ProcessingTest {
                 ),
             )
 
-        val nodesProcessed = HashSet<INode>()
+        val nodesProcessed = HashSet<NodeLike>()
 
         assertEquals(
             expectedTransformedTree,

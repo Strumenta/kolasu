@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.serialization
 
-import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.processProperties
@@ -22,7 +22,7 @@ import javax.xml.transform.stream.StreamResult
  * It may be removed in future version of Kolasu.
  */
 class XMLGenerator {
-    fun generateXML(root: INode): Document {
+    fun generateXML(root: NodeLike): Document {
         val documentFactory = DocumentBuilderFactory.newInstance()
         val documentBuilder = documentFactory.newDocumentBuilder()
         val document = documentBuilder.newDocument()
@@ -30,7 +30,7 @@ class XMLGenerator {
         return document
     }
 
-    fun generateXML(result: Result<out INode>): Document {
+    fun generateXML(result: Result<out NodeLike>): Document {
         val documentFactory = DocumentBuilderFactory.newInstance()
         val documentBuilder = documentFactory.newDocumentBuilder()
         val document = documentBuilder.newDocument()
@@ -41,7 +41,7 @@ class XMLGenerator {
         return document
     }
 
-    fun generateString(root: INode): String {
+    fun generateString(root: NodeLike): String {
         val document = generateXML(root)
         return document.toXmlString()
     }
@@ -60,20 +60,20 @@ class XMLGenerator {
         return xmlString
     }
 
-    fun generateString(result: Result<out INode>): String {
+    fun generateString(result: Result<out NodeLike>): String {
         val document = generateXML(result)
         return document.toXmlString()
     }
 
     fun generateFile(
-        root: INode,
+        root: NodeLike,
         file: File,
     ) {
         File(file.toURI()).writeText(generateString(root))
     }
 
     fun generateFile(
-        result: Result<out INode>,
+        result: Result<out NodeLike>,
         file: File,
     ) {
         File(file.toURI()).writeText(generateString(result))
@@ -82,7 +82,7 @@ class XMLGenerator {
 
 private fun Element.addChildPossiblyEmpty(
     role: String,
-    node: INode?,
+    node: NodeLike?,
     document: Document,
 ) {
     if (node == null) {
@@ -94,7 +94,7 @@ private fun Element.addChildPossiblyEmpty(
 
 private fun Element.addListOfNodes(
     listName: String,
-    elements: Iterable<INode>,
+    elements: Iterable<NodeLike>,
     document: Document,
 ) {
     elements.forEach {
@@ -126,7 +126,7 @@ private fun Element.addNullChild(
     this.appendChild(element)
 }
 
-private fun INode.toXML(
+private fun NodeLike.toXML(
     role: String,
     document: Document,
 ): Element {
@@ -140,13 +140,13 @@ private fun INode.toXML(
             element.addNullChild(it.name, document)
         } else if (it.isMultiple) {
             if (it.provideNodes) {
-                element.addListOfNodes(it.name, (it.value as Collection<*>).map { it as INode }, document)
+                element.addListOfNodes(it.name, (it.value as Collection<*>).map { it as NodeLike }, document)
             } else {
                 element.addAttributesList(it.name, it.value as Collection<*>, document)
             }
         } else {
             if (it.provideNodes) {
-                element.addChild((it.value as INode).toXML(it.name, document))
+                element.addChild((it.value as NodeLike).toXML(it.name, document))
             } else {
                 element.addAttribute(it.name, it.value!!)
             }

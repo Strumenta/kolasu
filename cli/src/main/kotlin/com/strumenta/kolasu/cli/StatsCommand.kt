@@ -6,7 +6,7 @@ import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.split
 import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
-import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.traversing.walkDescendants
@@ -22,7 +22,7 @@ interface StatsCollector {
 
     fun registerResult(
         input: File,
-        result: ParsingResult<out INode>,
+        result: ParsingResult<out NodeLike>,
     )
 
     fun print(println: (s: String) -> Unit = ::println)
@@ -54,7 +54,7 @@ class GlobalStatsCollector : StatsCollector {
 
     override fun registerResult(
         input: File,
-        result: ParsingResult<out INode>,
+        result: ParsingResult<out NodeLike>,
     ) {
         filesProcessed += 1
         val errors = result.issues.filter { it.severity == IssueSeverity.ERROR }.count()
@@ -109,7 +109,7 @@ class NodeStatsCollector(
 
     override fun registerResult(
         input: File,
-        result: ParsingResult<out INode>,
+        result: ParsingResult<out NodeLike>,
     ) {
         result.root?.apply {
             nodePrevalence[this.nodeType] = nodePrevalence.getOrDefault(this.nodeType, 0) + 1
@@ -170,7 +170,7 @@ class ErrorStatsCollector : StatsCollector {
 
     override fun registerResult(
         input: File,
-        result: ParsingResult<out INode>,
+        result: ParsingResult<out NodeLike>,
     ) {
         val errors = result.issues.filter { it.severity == IssueSeverity.ERROR }
         errors.forEach { error ->
@@ -204,7 +204,7 @@ class ErrorStatsCollector : StatsCollector {
 /**
  * Command to calcualte statistics on the ASTs produced and print them.
  */
-class StatsCommand<R : INode, P : ASTParser<R>>(
+class StatsCommand<R : NodeLike, P : ASTParser<R>>(
     parserInstantiator: ParserInstantiator<P>,
 ) : ASTProcessingCommand<R, P>(
         parserInstantiator,

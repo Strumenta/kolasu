@@ -113,11 +113,11 @@ class LionWebModelConverter {
             val kClass =
                 languageConverter.correspondingKolasuClass(lwNode.concept)
                     ?: throw RuntimeException("We do not have StarLasu AST class for LIonWeb Concept ${lwNode.concept}")
-            val kNode: com.strumenta.kolasu.model.INode = instantiate(kClass, lwNode, referencesPostponer)
+            val kNode: com.strumenta.kolasu.model.NodeLike = instantiate(kClass, lwNode, referencesPostponer)
             associateNodes(kNode, lwNode)
         }
         lwTree.thisAndAllDescendants().forEach { lwNode ->
-            val kNode: com.strumenta.kolasu.model.INode = nodesMapping.byB(lwNode)!!
+            val kNode: com.strumenta.kolasu.model.NodeLike = nodesMapping.byB(lwNode)!!
             // TODO populate values not already set at construction time
         }
         referencesPostponer.populateReferences(nodesMapping)
@@ -169,7 +169,7 @@ class LionWebModelConverter {
         kClass: KClass<*>,
         data: Node,
         referencesPostponer: ReferencesPostponer,
-    ): com.strumenta.kolasu.model.INode {
+    ): com.strumenta.kolasu.model.NodeLike {
         val constructor: KFunction<Any> =
             when {
                 kClass.constructors.size == 1 -> {
@@ -284,18 +284,18 @@ class LionWebModelConverter {
             }
         }
         try {
-            return constructor.callBy(params) as com.strumenta.kolasu.model.INode
+            return constructor.callBy(params) as com.strumenta.kolasu.model.NodeLike
         } catch (e: ClassCastException) {
             throw RuntimeException("Issue instantiating using constructor $constructor with params $params", e)
         }
     }
 
-    private fun findConcept(kNode: com.strumenta.kolasu.model.INode): Concept {
+    private fun findConcept(kNode: com.strumenta.kolasu.model.NodeLike): Concept {
         return languageConverter.correspondingConcept(kNode.javaClass.kotlin)
     }
 
     private fun nodeID(
-        kNode: com.strumenta.kolasu.model.INode,
+        kNode: com.strumenta.kolasu.model.NodeLike,
         customSourceId: String? = null,
     ): String {
         return "${customSourceId ?: kNode.source.id}_${kNode.positionalID}"

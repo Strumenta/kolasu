@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.semantics
 
-import com.strumenta.kolasu.model.INode
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.utils.memoize
 import com.strumenta.kolasu.utils.sortBySubclassesFirst
 import kotlin.reflect.KClass
@@ -9,18 +9,18 @@ import kotlin.reflect.full.isSuperclassOf
 // instance
 
 class TypeComputer(
-    private val typingRules: MutableMap<KClass<out INode>, (INode) -> INode?> = mutableMapOf(),
+    private val typingRules: MutableMap<KClass<out NodeLike>, (NodeLike) -> NodeLike?> = mutableMapOf(),
 ) {
     fun loadFrom(
         configuration: TypeComputerConfiguration,
         semantics: Semantics,
     ) {
         configuration.typingRules.mapValuesTo(this.typingRules) { (_, typingRule) ->
-            { node: INode -> semantics.typingRule(node) }
+            { node: NodeLike -> semantics.typingRule(node) }
         }
     }
 
-    fun typeFor(node: INode? = null): INode? =
+    fun typeFor(node: NodeLike? = null): NodeLike? =
         node?.let {
             this
                 .typingRules
@@ -36,18 +36,18 @@ class TypeComputer(
 // configuration
 
 class TypeComputerConfiguration(
-    val typingRules: MutableMap<KClass<out INode>, Semantics.(INode) -> INode?> =
+    val typingRules: MutableMap<KClass<out NodeLike>, Semantics.(NodeLike) -> NodeLike?> =
         mutableMapOf(
-            INode::class to { it },
+            NodeLike::class to { it },
         ),
 ) {
-    inline fun <reified N : INode> typeFor(
+    inline fun <reified N : NodeLike> typeFor(
         nodeType: KClass<N>,
-        crossinline typingRule: Semantics.(N) -> INode?,
+        crossinline typingRule: Semantics.(N) -> NodeLike?,
     ) {
         this.typingRules.putIfAbsent(
             nodeType,
-            { semantics: Semantics, node: INode ->
+            { semantics: Semantics, node: NodeLike ->
                 if (node is N) semantics.typingRule(node) else null
             }.memoize(),
         )

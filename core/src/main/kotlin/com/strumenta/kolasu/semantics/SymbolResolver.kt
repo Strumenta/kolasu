@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.semantics
 
-import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.KReferenceByName
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.getReferredType
@@ -22,15 +22,15 @@ class SymbolResolver(
     }
 
     @Suppress("unchecked_cast")
-    fun resolve(node: INode) {
-        node.kReferenceByNameProperties().forEach { this.resolve(it as KReferenceByName<out INode>, node) }
+    fun resolve(node: NodeLike) {
+        node.kReferenceByNameProperties().forEach { this.resolve(it as KReferenceByName<out NodeLike>, node) }
         node.walkChildren().forEach(this::resolve)
     }
 
     @Suppress("unchecked_cast")
     fun resolve(
-        property: KReferenceByName<out INode>,
-        node: INode,
+        property: KReferenceByName<out NodeLike>,
+        node: NodeLike,
     ) {
         (node.properties.find { it.name == property.name }?.value as ReferenceByName<PossiblyNamed>?)?.apply {
             this.referred = scopeProvider.scopeFor(property, node).resolve(this.name, property.getReferredType())
@@ -38,11 +38,11 @@ class SymbolResolver(
     }
 
     fun scopeFor(
-        property: KReferenceByName<out INode>,
-        node: INode? = null,
+        property: KReferenceByName<out NodeLike>,
+        node: NodeLike? = null,
     ): Scope = this.scopeProvider.scopeFor(property, node)
 
-    fun scopeFrom(node: INode? = null): Scope = this.scopeProvider.scopeFrom(node)
+    fun scopeFrom(node: NodeLike? = null): Scope = this.scopeProvider.scopeFrom(node)
 }
 
 // configuration
@@ -50,12 +50,12 @@ class SymbolResolver(
 class SymbolResolverConfiguration(
     val scopeProvider: ScopeProviderConfiguration = ScopeProviderConfiguration(),
 ) {
-    inline fun <reified N : INode> scopeFor(
+    inline fun <reified N : NodeLike> scopeFor(
         referenceByName: KReferenceByName<N>,
         crossinline scopeResolutionRule: Semantics.(N) -> Scope,
     ) = this.scopeProvider.scopeFor(referenceByName, scopeResolutionRule)
 
-    inline fun <reified N : INode> scopeFrom(
+    inline fun <reified N : NodeLike> scopeFrom(
         nodeType: KClass<N>,
         crossinline scopeConstructionRule: Semantics.(N) -> Scope,
     ) = this.scopeProvider.scopeFrom(nodeType, scopeConstructionRule)
