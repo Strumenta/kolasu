@@ -16,7 +16,7 @@ data class DebugPrintConfiguration constructor(
     var indentBlock: String = "  ",
 )
 
-private fun Node.showSingleAttribute(
+private fun NodeLike.showSingleAttribute(
     indent: String,
     sb: StringBuilder,
     propertyName: String,
@@ -35,7 +35,7 @@ fun Any?.debugPrint(
     return sb.toString()
 }
 
-fun <N : Node> ParsingResult<N>.debugPrint(
+fun <N : NodeLike> ParsingResult<N>.debugPrint(
     indent: String = "",
     configuration: DebugPrintConfiguration = DebugPrintConfiguration(),
 ): String {
@@ -56,7 +56,7 @@ fun <N : Node> ParsingResult<N>.debugPrint(
 }
 
 @JvmOverloads
-fun Node.debugPrint(
+fun NodeLike.debugPrint(
     indent: String = "",
     configuration: DebugPrintConfiguration = DebugPrintConfiguration(),
 ): String {
@@ -87,7 +87,7 @@ fun Node.debugPrint(
                             val paramType = mt.actualTypeArguments[0]
                             if (paramType is Class<*> && paramType.kotlin.isANode()) {
                                 sb.append("$indent$indentBlock${property.name} = [\n")
-                                (value as List<Node>).forEach {
+                                (value as List<NodeLike>).forEach {
                                     sb.append(
                                         it.debugPrint(
                                             indent + indentBlock + indentBlock,
@@ -116,7 +116,7 @@ fun Node.debugPrint(
                     if (value == null && configuration.skipNull) {
                         // nothing to do
                     } else {
-                        if (value is Node) {
+                        if (value is NodeLike) {
                             sb.append("$indent$indentBlock${property.name} = [\n")
                             sb.append(
                                 value.debugPrint(

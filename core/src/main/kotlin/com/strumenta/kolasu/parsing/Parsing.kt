@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.parsing
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
@@ -94,11 +94,11 @@ class LexingResult<T : KolasuToken>(
     }
 }
 
-open class ParsingResult<RootNode : Node>(
+open class ParsingResult<RootNode : NodeLike>(
     issues: List<Issue>,
     val root: RootNode?,
     code: String? = null,
-    val incompleteNode: Node? = null,
+    val incompleteNode: NodeLike? = null,
     val time: Long? = null,
 ) : CodeProcessingResult<RootNode>(issues, root, code) {
     override fun equals(other: Any?): Boolean {

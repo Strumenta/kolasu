@@ -196,12 +196,15 @@ fun compareSources(
         sourceA == null && sourceB == null -> {
             0
         }
+
         sourceA == null && sourceB != null -> {
             -1
         }
+
         sourceA != null && sourceB == null -> {
             1
         }
+
         else -> {
             sourceA!!.compareTo(sourceB!!)
         }
@@ -282,7 +285,7 @@ data class Range(
      * Tests whether the given node is contained in the interval represented by this object.
      * @param node the node
      */
-    fun contains(node: Node): Boolean = this.contains(node.range)
+    fun contains(node: NodeLike): Boolean = this.contains(node.range)
 
     /**
      * Tests whether the given range overlaps the interval represented by this object.
@@ -310,10 +313,10 @@ fun range(
     Point(endLine, endCol),
 )
 
-fun Node.isBefore(other: Node): Boolean = range!!.start.isBefore(other.range!!.start)
+fun NodeLike.isBefore(other: NodeLike): Boolean = range!!.start.isBefore(other.range!!.start)
 
-val Node.startLine: Int?
+val NodeLike.startLine: Int?
     get() = this.range?.start?.line
 
-val Node.endLine: Int?
+val NodeLike.endLine: Int?
     get() = this.range?.end?.line

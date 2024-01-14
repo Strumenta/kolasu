@@ -6,7 +6,7 @@ import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.file
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.debugPrint
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
@@ -20,7 +20,7 @@ import java.io.StringWriter
  * This command prints the AST on the console or on file.
  * The formats are the debugging format, JSON, XML, or EMF-JSON.
  */
-class ASTSaverCommand<R : Node, P : ASTParser<R>>(
+class ASTSaverCommand<R : NodeLike, P : ASTParser<R>>(
     parserInstantiator: ParserInstantiator<P>,
 ) : ASTProcessingCommand<R, P>(
         parserInstantiator,
@@ -90,6 +90,7 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(
                     JsonGenerator().generateFile(result, targetFile!!)
                 }
             }
+
             "xml" -> {
                 if (print) {
                     if (verbose) {
@@ -106,6 +107,7 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(
                     XMLGenerator().generateFile(result.toResult(), targetFile!!)
                 }
             }
+
             "debug-format" -> {
                 if (print) {
                     if (verbose) {
@@ -122,6 +124,7 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(
                     targetFile!!.writeText(result.debugPrint())
                 }
             }
+
             else -> throw UnsupportedOperationException()
         }
     }

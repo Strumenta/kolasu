@@ -2,7 +2,7 @@ package com.strumenta.kolasu.antlr.mapping
 
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.antlr.parsing.withParseTreeNode
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.transformation.ASTTransformer
@@ -28,8 +28,8 @@ open class ParseTreeToASTTransformer(
      */
     override fun transformIntoNodes(
         source: Any?,
-        parent: Node?,
-    ): List<Node> {
+        parent: NodeLike?,
+    ): List<NodeLike> {
         val transformed = super.transformIntoNodes(source, parent)
         return transformed
             .map { node ->
@@ -45,7 +45,7 @@ open class ParseTreeToASTTransformer(
     }
 
     override fun getSource(
-        node: Node,
+        node: NodeLike,
         source: Any,
     ): Any {
         val origin = node.origin
@@ -59,19 +59,21 @@ open class ParseTreeToASTTransformer(
      * wrapper. When there is only a ParserRuleContext child we can transform
      * that child and return that result.
      */
-    fun <P : ParserRuleContext> registerNodeTransformerUnwrappingChild(kclass: KClass<P>): NodeTransformer<P, Node> =
+    fun <P : ParserRuleContext> registerNodeTransformerUnwrappingChild(
+        kclass: KClass<P>,
+    ): NodeTransformer<P, NodeLike> =
         registerNodeTransformer(kclass) { source, transformer, _ ->
             val nodeChildren = source.children.filterIsInstance<ParserRuleContext>()
             require(nodeChildren.size == 1) {
                 "Node $source (${source.javaClass}) has ${nodeChildren.size} " +
                     "node children: $nodeChildren"
             }
-            transformer.transform(nodeChildren[0]) as Node
+            transformer.transform(nodeChildren[0]) as NodeLike
         }
 
     /**
      * Alternative to registerNodeFactoryUnwrappingChild(KClass) which is slightly more concise.
      */
-    inline fun <reified P : ParserRuleContext> registerNodeFactoryUnwrappingChild(): NodeTransformer<P, Node> =
+    inline fun <reified P : ParserRuleContext> registerNodeFactoryUnwrappingChild(): NodeTransformer<P, NodeLike> =
         registerNodeTransformerUnwrappingChild(P::class)
 }

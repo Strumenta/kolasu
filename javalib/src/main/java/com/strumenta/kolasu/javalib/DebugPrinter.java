@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.javalib;
 
 import com.strumenta.kolasu.model.DebugPrintConfiguration;
-import com.strumenta.kolasu.model.Node;
+import com.strumenta.kolasu.model.NodeLike;
 import com.strumenta.kolasu.model.PrintingKt;
 
 /**
@@ -15,11 +15,11 @@ public class DebugPrinter {
         return this.configuration;
     }
 
-    public String printNodeToString(Node node) {
+    public String printNodeToString(NodeLike node) {
         return PrintingKt.debugPrint(node, "", configuration);
     }
 
-    public void printNodeOnConsole(Node node) {
+    public void printNodeOnConsole(NodeLike node) {
         System.out.println(printNodeToString(node));
     }
 }

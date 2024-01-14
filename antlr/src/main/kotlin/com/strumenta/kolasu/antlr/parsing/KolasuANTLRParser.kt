@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.antlr.parsing
 
 import com.strumenta.kolasu.model.FileSource
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.PropertyDescription
 import com.strumenta.kolasu.model.Source
@@ -43,7 +43,7 @@ import kotlin.system.measureTimeMillis
  * Note: instances of this class are thread-safe and they're meant to be reused. Do not create a new KolasuParser
  * instance every time you need to parse some source code, or performance may suffer.
  */
-abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken>(
+abstract class KolasuANTLRParser<R : NodeLike, P : Parser, C : ParserRuleContext, T : KolasuToken>(
     tokenFactory: TokenFactory<T>,
 ) : KolasuANTLRLexer<T>(tokenFactory),
     ASTParser<R> {
@@ -256,11 +256,11 @@ abstract class KolasuANTLRParser<R : Node, P : Parser, C : ParserRuleContext, T 
         )
 
     // For convenient use from Java
-    fun walk(node: Node) = node.walk()
+    fun walk(node: NodeLike) = node.walk()
 
     @JvmOverloads
     fun processProperties(
-        node: Node,
+        node: NodeLike,
         propertyOperation: (PropertyDescription) -> Unit,
         propertiesToIgnore: Set<String> = emptySet(),
     ) = node.processProperties(propertiesToIgnore, propertyOperation)
@@ -327,11 +327,11 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
     )
 }
 
-class ParsingResultWithFirstStage<RootNode : Node, P : ParserRuleContext>(
+class ParsingResultWithFirstStage<RootNode : NodeLike, P : ParserRuleContext>(
     issues: List<Issue>,
     root: RootNode?,
     code: String? = null,
-    incompleteNode: Node? = null,
+    incompleteNode: NodeLike? = null,
     time: Long? = null,
     val firstStage: FirstStageParsingResult<P>,
 ) : ParsingResult<RootNode>(issues, root, code, incompleteNode, time)

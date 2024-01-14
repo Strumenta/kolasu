@@ -7,9 +7,9 @@ import com.github.ajalt.clikt.output.CliktConsole
 import com.strumenta.kolasu.cli.ParserInstantiator
 import com.strumenta.kolasu.emf.EMFMetamodelSupport
 import com.strumenta.kolasu.emf.EcoreEnabledParser
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 
-class EMFCLITool<R : Node, P>(
+class EMFCLITool<R : NodeLike, P>(
     parserInstantiator: ParserInstantiator<P>,
     metamodelSupport: EMFMetamodelSupport,
     replacedConsole: CliktConsole? = null,

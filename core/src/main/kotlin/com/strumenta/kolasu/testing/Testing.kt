@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.testing
 
 import com.strumenta.kolasu.model.KReferenceByName
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.PropertyType
 import com.strumenta.kolasu.model.ReferenceByName
@@ -14,7 +14,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-class IgnoreChildren<N : Node> : MutableList<N> {
+class IgnoreChildren<N : NodeLike> : MutableList<N> {
     override val size: Int
         get() = TODO("Not yet implemented")
 
@@ -117,7 +117,7 @@ class ASTDifferenceException(
     val actual: Any,
 ) : Exception("$context: expecting $expected, actual $actual")
 
-fun <T : Node> assertParsingResultsAreEqual(
+fun <T : NodeLike> assertParsingResultsAreEqual(
     expected: ParsingResult<T>,
     actual: ParsingResult<T>,
 ) {
@@ -128,8 +128,8 @@ fun <T : Node> assertParsingResultsAreEqual(
     }
 }
 
-fun <N : Node> assertASTsAreEqual(
-    expected: Node,
+fun <N : NodeLike> assertASTsAreEqual(
+    expected: NodeLike,
     actual: ParsingResult<N>,
     context: String = "<root>",
     considerRange: Boolean = false,
@@ -144,8 +144,8 @@ fun <N : Node> assertASTsAreEqual(
 }
 
 fun assertASTsAreEqual(
-    expected: Node,
-    actual: Node,
+    expected: NodeLike,
+    actual: NodeLike,
     context: String = "<root>",
     considerRange: Boolean = false,
     useLightweightAttributeEquality: Boolean = false,
@@ -166,8 +166,8 @@ fun assertASTsAreEqual(
                         if (expectedPropValue is IgnoreChildren<*>) {
                             // Nothing to do
                         } else {
-                            val actualPropValueCollection = actualPropValue?.let { it as Collection<Node> }
-                            val expectedPropValueCollection = expectedPropValue?.let { it as Collection<Node> }
+                            val actualPropValueCollection = actualPropValue?.let { it as Collection<NodeLike> }
+                            val expectedPropValueCollection = expectedPropValue?.let { it as Collection<NodeLike> }
                             assertEquals(
                                 actualPropValueCollection == null,
                                 expectedPropValueCollection == null,
@@ -175,8 +175,8 @@ fun assertASTsAreEqual(
                             )
                             if (actualPropValueCollection != null && expectedPropValueCollection != null) {
                                 assertEquals(
-                                    expectedPropValueCollection.size,
-                                    actualPropValueCollection.size,
+                                    expectedPropValueCollection?.size,
+                                    actualPropValueCollection?.size,
                                     "$context.${expectedProperty.name} length",
                                 )
                                 val expectedIt = expectedPropValueCollection.iterator()
@@ -209,8 +209,8 @@ fun assertASTsAreEqual(
                             // that is ok
                         } else {
                             assertASTsAreEqual(
-                                expectedPropValue as Node,
-                                actualPropValue as Node,
+                                expectedPropValue as NodeLike,
+                                actualPropValue as NodeLike,
                                 context = "$context.${expectedProperty.name}",
                                 considerRange = considerRange,
                                 useLightweightAttributeEquality = useLightweightAttributeEquality,
@@ -259,7 +259,7 @@ fun assertASTsAreEqual(
     }
 }
 
-fun Node.assertReferencesResolved(forProperty: KReferenceByName<out Node>) {
+fun NodeLike.assertReferencesResolved(forProperty: KReferenceByName<out NodeLike>) {
     this
         .kReferenceByNameProperties()
         .filter { it == forProperty }
@@ -268,7 +268,7 @@ fun Node.assertReferencesResolved(forProperty: KReferenceByName<out Node>) {
     this.walkChildren().forEach { it.assertReferencesResolved(forProperty = forProperty) }
 }
 
-fun Node.assertReferencesResolved(withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class) {
+fun NodeLike.assertReferencesResolved(withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class) {
     this
         .kReferenceByNameProperties(targetClass = withReturnType)
         .mapNotNull { it.get(this) }
@@ -276,7 +276,7 @@ fun Node.assertReferencesResolved(withReturnType: KClass<out PossiblyNamed> = Po
     this.walkChildren().forEach { it.assertReferencesResolved(withReturnType = withReturnType) }
 }
 
-fun Node.assertReferencesNotResolved(forProperty: KReferenceByName<out Node>) {
+fun NodeLike.assertReferencesNotResolved(forProperty: KReferenceByName<out NodeLike>) {
     this
         .kReferenceByNameProperties()
         .filter { it == forProperty }
@@ -285,7 +285,7 @@ fun Node.assertReferencesNotResolved(forProperty: KReferenceByName<out Node>) {
     this.walkChildren().forEach { it.assertReferencesNotResolved(forProperty = forProperty) }
 }
 
-fun Node.assertReferencesNotResolved(withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class) {
+fun NodeLike.assertReferencesNotResolved(withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class) {
     this
         .kReferenceByNameProperties(targetClass = withReturnType)
         .mapNotNull { it.get(this) }

@@ -41,7 +41,8 @@ class RangeTest {
         assertEquals(Range(Point(1, 0), Point(1, 13)), mySetStatement.range)
     }
 
-    @test fun parserTreeRange() {
+    @test
+    fun parserTreeRange() {
         val code = "set foo = 123"
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))

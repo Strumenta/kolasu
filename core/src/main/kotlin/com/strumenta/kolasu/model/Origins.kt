@@ -23,7 +23,7 @@ data class CompositeOrigin(
     Serializable
 
 data class NodeOrigin(
-    val node: Node,
+    val node: NodeLike,
 ) : Origin {
     override var range: Range?
         get() = node.range

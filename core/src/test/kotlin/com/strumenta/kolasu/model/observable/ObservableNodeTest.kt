@@ -2,6 +2,7 @@ package com.strumenta.kolasu.model.observable
 
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,7 +21,7 @@ class MyObserver(
     val observations = mutableListOf<String>()
 
     override fun <V> onAttributeChange(
-        node: Node,
+        node: NodeLike,
         attributeName: String,
         oldValue: V,
         newValue: V,
@@ -29,26 +30,26 @@ class MyObserver(
     }
 
     override fun onChildAdded(
-        node: Node,
+        node: NodeLike,
         containmentName: String,
-        added: Node,
+        added: NodeLike,
     ) {
         observations.add("$containmentName: added $added")
     }
 
     override fun onChildRemoved(
-        node: Node,
+        node: NodeLike,
         containmentName: String,
-        removed: Node,
+        removed: NodeLike,
     ) {
         observations.add("$containmentName: removed $removed")
     }
 
     override fun onReferenceSet(
-        node: Node,
+        node: NodeLike,
         referenceName: String,
-        oldReferredNode: Node?,
-        newReferredNode: Node?,
+        oldReferredNode: NodeLike?,
+        newReferredNode: NodeLike?,
     ) {
         val oldName = if (oldReferredNode == null) "null" else (oldReferredNode as? Named)?.name ?: "<UNKNOWN>"
         val newName = if (newReferredNode == null) "null" else (newReferredNode as? Named)?.name ?: "<UNKNOWN>"
@@ -56,18 +57,18 @@ class MyObserver(
     }
 
     override fun onReferringAdded(
-        node: Node,
+        node: NodeLike,
         referenceName: String,
-        referring: Node,
+        referring: NodeLike,
     ) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
         observations.add("$myName is now referred to by $referring.$referenceName")
     }
 
     override fun onReferringRemoved(
-        node: Node,
+        node: NodeLike,
         referenceName: String,
-        referring: Node,
+        referring: NodeLike,
     ) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
         observations.add("$myName is not referred anymore by $referring.$referenceName")

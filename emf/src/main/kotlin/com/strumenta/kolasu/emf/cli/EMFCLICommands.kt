@@ -14,13 +14,13 @@ import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.createResource
 import com.strumenta.kolasu.emf.saveMetamodel
 import com.strumenta.kolasu.emf.saveModel
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import java.io.File
 
-class EMFModelCommand<R : Node, P>(
+class EMFModelCommand<R : NodeLike, P>(
     parserInstantiator: ParserInstantiator<P>,
 ) : ASTProcessingCommand<R, P>(
         parserInstantiator,

@@ -9,7 +9,7 @@ plugins {
 
     id("java-library")
     id("net.researchgate.release") version "3.0.2"
-    id("org.jetbrains.kotlinx.kover") version "0.7.1" apply(false)
+    id("org.jetbrains.kotlinx.kover") version "0.7.1" apply (false)
 }
 
 allprojects {

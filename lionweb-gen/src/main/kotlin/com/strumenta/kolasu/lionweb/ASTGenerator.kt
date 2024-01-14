@@ -25,7 +25,6 @@ import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
 import org.jetbrains.kotlin.konan.file.File
-import java.lang.UnsupportedOperationException
 
 data class KotlinFile(
     val path: String,
@@ -106,6 +105,7 @@ class ASTGenerator(
                         fileSpecBuilder.addType(typeSpec.build())
                     }
                 }
+
                 is Enumeration -> {
                     val typeSpec = TypeSpec.enumBuilder(element.name!!)
                     typeSpec.addAnnotation(
@@ -119,6 +119,7 @@ class ASTGenerator(
                     }
                     fileSpecBuilder.addType(typeSpec.build())
                 }
+
                 is Interface -> {
                     val typeSpec = TypeSpec.interfaceBuilder(element.name!!)
                     typeSpec.addAnnotation(
@@ -148,6 +149,7 @@ class ASTGenerator(
                         fileSpecBuilder.addType(typeSpec.build())
                     }
                 }
+
                 else -> throw UnsupportedOperationException(
                     "We do not know how to convert to Kolasu this element: $element",
                 )
@@ -235,15 +237,19 @@ class ASTGenerator(
             classifier.id == StarLasuLWLanguage.ASTNode.id -> {
                 Node::class.java.asTypeName()
             }
+
             classifier.id == LionCoreBuiltins.getNode().id -> {
                 Node::class.java.asTypeName()
             }
+
             classifier.id == LionCoreBuiltins.getINamed().id -> {
                 Named::class.java.asTypeName()
             }
+
             classifier.language == this.language -> {
                 ClassName(packageName, classifier.name!!)
             }
+
             else -> {
                 TODO("Classifier $classifier. ID ${classifier.id}, NODE id: ${LionCoreBuiltins.getNode().id}")
             }
@@ -254,15 +260,19 @@ class ASTGenerator(
             dataType == LionCoreBuiltins.getString() -> {
                 ClassName.bestGuess("kotlin.String")
             }
+
             dataType == LionCoreBuiltins.getBoolean() -> {
                 Boolean::class.java.asTypeName()
             }
+
             dataType == LionCoreBuiltins.getInteger() -> {
                 ClassName.bestGuess("kotlin.Int")
             }
+
             dataType.language == this.language -> {
                 ClassName.bestGuess("$packageName.${dataType.name}")
             }
+
             else -> {
                 TODO("DataType: $dataType")
             }

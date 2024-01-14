@@ -60,7 +60,7 @@ class ReferenceByName<N>(
 
     var referred: N? = null
         set(value) {
-            require(value is Node || value == null) {
+            require(value is NodeLike || value == null) {
                 "We cannot enforce it statically but only Node should be referred to. Instead $value was assigned " +
                     "(class: ${value?.javaClass})"
             }
@@ -68,7 +68,7 @@ class ReferenceByName<N>(
             field = value
         }
 
-    private var container: Node? = null
+    private var container: NodeLike? = null
     private var referenceName: String? = null
 
     /**
@@ -77,7 +77,7 @@ class ReferenceByName<N>(
      * of changes in the reference.
      */
     fun setContainer(
-        node: Node,
+        node: NodeLike,
         referenceName: String,
     ) {
         if (container == node) {
@@ -89,13 +89,13 @@ class ReferenceByName<N>(
         changes
             .map {
                 // When the reference is changed, we propagate it to the container
-                ReferenceSet(node, referenceName, it.oldValue as Node?, it.newValue as Node?)
+                ReferenceSet(node, referenceName, it.oldValue as NodeLike?, it.newValue as NodeLike?)
             }.subscribe(node.changes.getObserver { })
         changes
             .filter { it.oldValue != null }
-            .map { ReferencedToRemoved(it.oldValue as Node, referenceName, node) }
+            .map { ReferencedToRemoved(it.oldValue as NodeLike, referenceName, node) }
             .subscribe(
-                object : ObservableObserver<ReferencedToRemoved<Node>> {
+                object : ObservableObserver<ReferencedToRemoved<NodeLike>> {
                     override fun onComplete() {
                         TODO("Not yet implemented")
                     }
@@ -104,7 +104,7 @@ class ReferenceByName<N>(
                         TODO("Not yet implemented")
                     }
 
-                    override fun onNext(value: ReferencedToRemoved<Node>) {
+                    override fun onNext(value: ReferencedToRemoved<NodeLike>) {
                         value.node.changes.onNext(value)
                     }
 
@@ -114,9 +114,9 @@ class ReferenceByName<N>(
             )
         changes
             .filter { it.newValue != null }
-            .map { ReferencedToAdded(it.newValue as Node, referenceName, node) }
+            .map { ReferencedToAdded(it.newValue as NodeLike, referenceName, node) }
             .subscribe(
-                object : ObservableObserver<ReferencedToAdded<Node>> {
+                object : ObservableObserver<ReferencedToAdded<NodeLike>> {
                     override fun onComplete() {
                         TODO("Not yet implemented")
                     }
@@ -125,7 +125,7 @@ class ReferenceByName<N>(
                         TODO("Not yet implemented")
                     }
 
-                    override fun onNext(value: ReferencedToAdded<Node>) {
+                    override fun onNext(value: ReferencedToAdded<NodeLike>) {
                         value.node.changes.onNext(value)
                     }
 
@@ -223,5 +223,5 @@ fun KReferenceByName<*>.getReferredType(): KClass<out PossiblyNamed> =
 /**
  * Retrieves all reference properties for a given node.
  **/
-fun Node.kReferenceByNameProperties(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class) =
+fun NodeLike.kReferenceByNameProperties(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class) =
     this.nodeProperties.filter { it.returnType.isSubtypeOf(kReferenceByNameType(targetClass)) }

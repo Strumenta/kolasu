@@ -122,6 +122,7 @@ fun main() {
           package mytest
 
           import com.strumenta.kolasu.model.Node
+          import com.strumenta.kolasu.model.NodeLike
           import com.strumenta.kolasu.model.observable.SimpleNodeObserver
 
     data class MyNode(var p1: Int) : Node()
@@ -137,7 +138,7 @@ var p2 : Int = 0
 object MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
     override fun <V : Any?>onAttributeChange(
-        node: Node,
+        node: NodeLike,
         attributeName: String,
         oldValue: V,
         newValue: V
@@ -160,7 +161,7 @@ fun main() {
 """,
                     ),
             )
-        result.assertHasMessage(Regex("i: file:///[a-zA-Z0-9/\\-.]*:5:5 AST class mytest.MyNode identified"))
+        result.assertHasMessage(Regex("i: file:///[a-zA-Z0-9/\\-.]*:6:6 AST class mytest.MyNode identified"))
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
@@ -299,6 +300,7 @@ fun main() {
                         """
           package mytest
 
+          import com.strumenta.kolasu.model.NodeLike
           import com.strumenta.kolasu.model.Node
           import com.strumenta.kolasu.model.observable.ObservableList
           import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
@@ -315,30 +317,30 @@ data class NodeWithReference(val ref: ReferenceByName<NamedNode>, val id: Int) :
 
 class MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
-    override fun <V> onAttributeChange(node: Node, attributeName: String, oldValue: V, newValue: V) {
+    override fun <V> onAttributeChange(node: NodeLike, attributeName: String, oldValue: V, newValue: V) {
         observations.add("${'$'}attributeName: ${'$'}oldValue -> ${'$'}newValue")
     }
 
-    override fun onChildAdded(node: Node, containmentName: String, added: Node) {
+    override fun onChildAdded(node: NodeLike, containmentName: String, added: NodeLike) {
         observations.add("${'$'}containmentName: added ${'$'}added")
     }
 
-    override fun onChildRemoved(node: Node, containmentName: String, removed: Node) {
+    override fun onChildRemoved(node: NodeLike, containmentName: String, removed: NodeLike) {
         observations.add("${'$'}containmentName: removed ${'$'}removed")
     }
 
-    override fun onReferenceSet(node: Node, referenceName: String, oldReferredNode: Node?, newReferredNode: Node?) {
+    override fun onReferenceSet(node: NodeLike, referenceName: String, oldReferredNode: NodeLike?, newReferredNode: NodeLike?) {
         val oldName = if (oldReferredNode == null) "null" else (oldReferredNode as? Named)?.name ?: "<UNKNOWN>"
         val newName = if (newReferredNode == null) "null" else (newReferredNode as? Named)?.name ?: "<UNKNOWN>"
         observations.add("${'$'}referenceName: changed from ${'$'}oldName to ${'$'}newName")
     }
 
-    override fun onReferringAdded(node: Node, referenceName: String, referring: Node) {
+    override fun onReferringAdded(node: NodeLike, referenceName: String, referring: NodeLike) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
         observations.add("${'$'}myName is now referred to by ${'$'}referring.${'$'}referenceName")
     }
 
-    override fun onReferringRemoved(node: Node, referenceName: String, referring: Node) {
+    override fun onReferringRemoved(node: NodeLike, referenceName: String, referring: NodeLike) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
         observations.add("${'$'}myName is not referred anymore by ${'$'}referring.${'$'}referenceName")
     }
@@ -442,9 +444,11 @@ fun main() {
             0 -> {
                 mainMethod.invoke(null)
             }
+
             1 -> {
                 mainMethod.invoke(null, arrayOf<String>())
             }
+
             else -> {
                 throw IllegalStateException(
                     "The main method found expect these parameters: ${mainMethod.parameters}. " +

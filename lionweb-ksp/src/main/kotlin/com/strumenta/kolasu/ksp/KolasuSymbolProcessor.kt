@@ -7,11 +7,10 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintWriter
-import java.lang.IllegalStateException
 
 class KolasuSymbolProcessor(
     val environment: SymbolProcessorEnvironment,
@@ -94,7 +93,7 @@ class KolasuSymbolProcessor(
                 if (ksDeclaration is KSClassDeclaration) {
                     val isNodeDecl =
                         ksDeclaration.getAllSuperTypes().any {
-                            it.declaration.qualifiedName?.asString() == Node::class.qualifiedName
+                            it.declaration.qualifiedName?.asString() == NodeLike::class.qualifiedName
                         }
                     if (isNodeDecl) {
                         languagesByPackage

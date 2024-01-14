@@ -2,7 +2,7 @@ package com.strumenta.kolasu.emf.serialization
 
 import com.strumenta.kolasu.emf.STARLASU_METAMODEL
 import com.strumenta.kolasu.emf.toEObject
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EPackage
@@ -14,7 +14,7 @@ import java.io.ByteArrayOutputStream
 
 class JsonGenerator {
     fun generateEMFString(
-        result: Result<out Node>,
+        result: Result<out NodeLike>,
         astPackage: EPackage,
     ): String {
         val uri: URI = URI.createFileURI("dummy-URI.json") ?: throw IllegalStateException("URI not created")

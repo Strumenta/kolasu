@@ -19,10 +19,7 @@ import io.lionweb.lioncore.java.model.ReferenceValue
 import io.lionweb.lioncore.java.model.impl.DynamicEnumerationValue
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
-import java.lang.ClassCastException
-import java.lang.IllegalArgumentException
 import java.util.IdentityHashMap
-import kotlin.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -78,6 +75,7 @@ class LionWebModelConverter {
                         val kValue = kNode.getAttributeValue(kAttribute)
                         lwNode.setPropertyValue(feature, kValue)
                     }
+
                     is Containment -> {
                         val kContainment =
                             kFeatures.find { it.name == feature.name }
@@ -88,6 +86,7 @@ class LionWebModelConverter {
                             lwNode.addChild(feature, lwChild)
                         }
                     }
+
                     is Reference -> {
                         val kReference =
                             kFeatures.find { it.name == feature.name }
@@ -114,11 +113,11 @@ class LionWebModelConverter {
             val kClass =
                 languageConverter.correspondingKolasuClass(lwNode.concept)
                     ?: throw RuntimeException("We do not have StarLasu AST class for LIonWeb Concept ${lwNode.concept}")
-            val kNode: com.strumenta.kolasu.model.Node = instantiate(kClass, lwNode, referencesPostponer)
+            val kNode: com.strumenta.kolasu.model.NodeLike = instantiate(kClass, lwNode, referencesPostponer)
             associateNodes(kNode, lwNode)
         }
         lwTree.thisAndAllDescendants().forEach { lwNode ->
-            val kNode: com.strumenta.kolasu.model.Node = nodesMapping.byB(lwNode)!!
+            val kNode: com.strumenta.kolasu.model.NodeLike = nodesMapping.byB(lwNode)!!
             // TODO populate values not already set at construction time
         }
         referencesPostponer.populateReferences(nodesMapping)
@@ -170,15 +169,17 @@ class LionWebModelConverter {
         kClass: KClass<*>,
         data: Node,
         referencesPostponer: ReferencesPostponer,
-    ): com.strumenta.kolasu.model.Node {
+    ): com.strumenta.kolasu.model.NodeLike {
         val constructor: KFunction<Any> =
             when {
                 kClass.constructors.size == 1 -> {
                     kClass.constructors.first()
                 }
+
                 kClass.primaryConstructor != null -> {
                     kClass.primaryConstructor!!
                 }
+
                 else -> {
                     TODO()
                 }
@@ -283,18 +284,18 @@ class LionWebModelConverter {
             }
         }
         try {
-            return constructor.callBy(params) as com.strumenta.kolasu.model.Node
+            return constructor.callBy(params) as com.strumenta.kolasu.model.NodeLike
         } catch (e: ClassCastException) {
             throw RuntimeException("Issue instantiating using constructor $constructor with params $params", e)
         }
     }
 
-    private fun findConcept(kNode: com.strumenta.kolasu.model.Node): Concept {
+    private fun findConcept(kNode: com.strumenta.kolasu.model.NodeLike): Concept {
         return languageConverter.correspondingConcept(kNode.javaClass.kotlin)
     }
 
     private fun nodeID(
-        kNode: com.strumenta.kolasu.model.Node,
+        kNode: com.strumenta.kolasu.model.NodeLike,
         customSourceId: String? = null,
     ): String {
         return "${customSourceId ?: kNode.source.id}_${kNode.positionalID}"

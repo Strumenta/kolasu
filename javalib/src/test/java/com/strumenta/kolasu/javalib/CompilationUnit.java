@@ -9,6 +9,19 @@ import java.util.List;
 
 public class CompilationUnit extends Node {
 
+    private List<A> as = new LinkedList<>();
+
+    public List<A> getAs() {
+        return as;
+    }
+
+    @NotNull
+    @Override
+    @Internal
+    public List<PropertyDescription> getProperties() {
+        return Arrays.asList(new PropertyDescription("as", true, Multiplicity.MANY, getAs(), PropertyType.CONTAINMENT));
+    }
+
     public static class A extends Node {
         private List<B> bs = new LinkedList<>();
 
@@ -26,18 +39,5 @@ public class CompilationUnit extends Node {
 
     public static class B extends Node {
 
-    }
-
-    private List<A> as = new LinkedList<>();
-
-    public List<A> getAs() {
-        return as;
-    }
-
-    @NotNull
-    @Override
-    @Internal
-    public List<PropertyDescription> getProperties() {
-        return Arrays.asList(new PropertyDescription("as", true, Multiplicity.MANY, getAs(), PropertyType.CONTAINMENT));
     }
 }

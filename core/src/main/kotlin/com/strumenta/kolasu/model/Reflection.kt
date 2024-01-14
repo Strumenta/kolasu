@@ -12,16 +12,16 @@ import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.withNullability
 
-fun <T : Node> T.relevantMemberProperties(
+fun <T : NodeLike> T.relevantMemberProperties(
     withRange: Boolean = false,
     withNodeType: Boolean = false,
 ): List<KProperty1<T, *>> {
     val list = this::class.nodeProperties.map { it as KProperty1<T, *> }.toMutableList()
     if (withRange) {
-        list.add(Node::range as KProperty1<T, *>)
+        list.add(NodeLike::range as KProperty1<T, *>)
     }
     if (withNodeType) {
-        list.add(Node::nodeType as KProperty1<T, *>)
+        list.add(NodeLike::nodeType as KProperty1<T, *>)
     }
     return list.toList()
 }
@@ -61,9 +61,9 @@ data class PropertyDescription(
         }
         return if (provideNodes) {
             if (multiplicity == Multiplicity.MANY) {
-                "[${(value as Collection<Node>).joinToString(",") { it.nodeType }}]"
+                "[${(value as Collection<NodeLike>).joinToString(",") { it.nodeType }}]"
             } else {
-                "${(value as Node).nodeType}(...)"
+                "${(value as NodeLike).nodeType}(...)"
             }
         } else {
             if (multiplicity == Multiplicity.MANY) {
@@ -78,18 +78,18 @@ data class PropertyDescription(
         get() = multiplicity == Multiplicity.MANY
 
     companion object {
-        fun <N : Node> multiple(property: KProperty1<N, *>): Boolean {
+        fun <N : NodeLike> multiple(property: KProperty1<N, *>): Boolean {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             return (classifier?.isSubclassOf(Collection::class) == true)
         }
 
-        fun <N : Node> optional(property: KProperty1<N, *>): Boolean {
+        fun <N : NodeLike> optional(property: KProperty1<N, *>): Boolean {
             val propertyType = property.returnType
             return !multiple(property) && propertyType.isMarkedNullable
         }
 
-        fun <N : Node> multiplicity(property: KProperty1<N, *>): Multiplicity {
+        fun <N : NodeLike> multiplicity(property: KProperty1<N, *>): Multiplicity {
             return when {
                 multiple(property) -> Multiplicity.MANY
                 optional(property) -> Multiplicity.OPTIONAL
@@ -97,7 +97,7 @@ data class PropertyDescription(
             }
         }
 
-        fun <N : Node> providesNodes(property: KProperty1<N, *>): Boolean {
+        fun <N : NodeLike> providesNodes(property: KProperty1<N, *>): Boolean {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
             return if (multiple(property)) {
@@ -107,9 +107,9 @@ data class PropertyDescription(
             }
         }
 
-        fun <N : Node> buildFor(
+        fun <N : NodeLike> buildFor(
             property: KProperty1<N, *>,
-            node: Node,
+            node: NodeLike,
         ): PropertyDescription {
             val multiplicity = multiplicity(property)
             val provideNodes = providesNodes(property)
@@ -149,7 +149,7 @@ private fun providesNodes(kclass: KClass<*>?): Boolean {
  * @return can [this] class be considered an AST node?
  */
 fun KClass<*>.isANode(): Boolean {
-    return this.isSubclassOf(Node::class) || this.isMarkedAsNodeType()
+    return this.isSubclassOf(NodeLike::class) || this.isMarkedAsNodeType()
 }
 
 val KClass<*>.isConcept: Boolean
@@ -219,10 +219,10 @@ fun <N : Any> KProperty1<N, *>.isContainment(): Boolean {
                 .returnType
                 .arguments[0]
                 .type!!
-                .classifier as KClass<out Node>,
+                .classifier as KClass<out NodeLike>,
         )
     } else {
-        providesNodes(this.returnType.classifier as KClass<out Node>)
+        providesNodes(this.returnType.classifier as KClass<out NodeLike>)
     }
 }
 
@@ -234,26 +234,26 @@ fun <N : Any> KProperty1<N, *>.isAttribute(): Boolean {
     return !isContainment() && !isReference()
 }
 
-fun <N : Node> KProperty1<N, *>.containedType(): KClass<out Node> {
+fun <N : NodeLike> KProperty1<N, *>.containedType(): KClass<out NodeLike> {
     require(isContainment())
     return if ((this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
         this
             .returnType
             .arguments[0]
             .type!!
-            .classifier as KClass<out Node>
+            .classifier as KClass<out NodeLike>
     } else {
-        this.returnType.classifier as KClass<out Node>
+        this.returnType.classifier as KClass<out NodeLike>
     }
 }
 
-fun <N : Node> KProperty1<N, *>.referredType(): KClass<out Node> {
+fun <N : NodeLike> KProperty1<N, *>.referredType(): KClass<out NodeLike> {
     require(isReference())
     return this
         .returnType
         .arguments[0]
         .type!!
-        .classifier as KClass<out Node>
+        .classifier as KClass<out NodeLike>
 }
 
 fun <N : Any> KProperty1<N, *>.asContainment(): Containment {
@@ -262,6 +262,7 @@ fun <N : Any> KProperty1<N, *>.asContainment(): Containment {
             (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
                 Multiplicity.MANY
             }
+
             this.returnType.isMarkedNullable -> Multiplicity.OPTIONAL
             else -> Multiplicity.SINGULAR
         }
@@ -284,6 +285,7 @@ fun <N : Any> KProperty1<N, *>.asReference(): Reference {
             (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
                 throw IllegalStateException()
             }
+
             this.returnType.isMarkedNullable -> true
             else -> false
         }
@@ -304,6 +306,7 @@ fun <N : Any> KProperty1<N, *>.asAttribute(): Attribute {
             (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
                 throw IllegalStateException("Attributes with a Collection type are not allowed (property $this)")
             }
+
             this.returnType.isMarkedNullable -> true
             else -> false
         }

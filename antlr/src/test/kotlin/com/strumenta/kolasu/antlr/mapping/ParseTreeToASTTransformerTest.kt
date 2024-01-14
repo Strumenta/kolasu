@@ -4,6 +4,7 @@ import com.strumenta.kolasu.antlr.parsing.withParseTreeNode
 import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
@@ -38,7 +39,7 @@ import kotlin.test.assertTrue
 
 data class CU(
     val specifiedRange: Range? = null,
-    var statements: List<Node> = listOf(),
+    var statements: List<NodeLike> = listOf(),
 ) : Node(specifiedRange)
 
 data class DisplayIntStatement(

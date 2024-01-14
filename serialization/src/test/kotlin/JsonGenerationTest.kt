@@ -4,6 +4,7 @@ import com.google.gson.stream.JsonWriter
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.PropertyDescription
@@ -35,14 +36,14 @@ data class ExtNode(
 data class NodeWithReference(
     override val name: String? = null,
     val reference: ReferenceByName<NodeWithReference>? = null,
-    val children: MutableList<Node> = mutableListOf(),
+    val children: MutableList<NodeLike> = mutableListOf(),
 ) : Node(),
     PossiblyNamed
 
 class JsonGenerationTest {
     @Test
     fun generateJsonOfResultWithIssues() {
-        val result: Result<Node> =
+        val result: Result<NodeLike> =
             Result(
                 listOf(
                     Issue(IssueType.SYNTACTIC, "An error", range = range(1, 2, 3, 4)),

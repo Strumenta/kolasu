@@ -138,9 +138,11 @@ open class CoverageListener(
                         addUncoveredPath(PathElement(it.ruleIndex, true), it.target.stateNumber)
                     }
                 }
+
                 is AtomTransition -> {
                     addUncoveredPath(PathElement(it.label, false), it.target.stateNumber)
                 }
+
                 is SetTransition -> {
                     it.set.intervals.forEach { interval ->
                         for (i in interval.a..interval.b) {
@@ -148,6 +150,7 @@ open class CoverageListener(
                         }
                     }
                 }
+
                 else -> {
                     addUncoveredPaths(it.target.stateNumber)
                 }

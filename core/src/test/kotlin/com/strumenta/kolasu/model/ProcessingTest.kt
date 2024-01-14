@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.model
 
-import java.lang.UnsupportedOperationException
 import java.util.LinkedList
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
@@ -233,7 +232,7 @@ class ProcessingTest {
                 ),
             )
 
-        val nodesProcessed = HashSet<Node>()
+        val nodesProcessed = HashSet<NodeLike>()
 
         assertEquals(
             expectedTransformedTree,

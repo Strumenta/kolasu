@@ -11,7 +11,8 @@ data class MySetStatement(
 ) : Node(specifiedRange)
 
 class RangeTest {
-    @test fun offset() {
+    @test
+    fun offset() {
         val code =
             """this is some code
                      |second line
@@ -24,7 +25,8 @@ class RangeTest {
         assertFails { Point(4, 0).offset(code) }
     }
 
-    @test fun pointCompare() {
+    @test
+    fun pointCompare() {
         val p0 = START_POINT
         val p1 = Point(1, 1)
         val p2 = Point(1, 100)
@@ -61,7 +63,8 @@ class RangeTest {
         assertEquals(false, p1 > p3)
     }
 
-    @test fun isBefore() {
+    @test
+    fun isBefore() {
         val p0 = START_POINT
         val p1 = Point(1, 1)
         val p2 = Point(1, 100)
@@ -88,7 +91,8 @@ class RangeTest {
         assertEquals(false, p3.isBefore(p3))
     }
 
-    @test fun text() {
+    @test
+    fun text() {
         val code =
             """this is some code
                      |second line
@@ -142,7 +146,8 @@ class RangeTest {
         assertFalse("contains should return false with node after") { range.contains(after) }
     }
 
-    @test fun illegalRangeAccepted() {
+    @test
+    fun illegalRangeAccepted() {
         Range(Point(10, 1), Point(5, 2), validate = false)
     }
 

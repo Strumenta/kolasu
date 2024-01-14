@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.parsing
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.StringSource
 import java.io.BufferedReader
@@ -13,7 +13,7 @@ private fun inputStreamToString(
     charset: Charset = Charsets.UTF_8,
 ): String = inputStream.bufferedReader(charset).use(BufferedReader::readText)
 
-interface ASTParser<R : Node> {
+interface ASTParser<R : NodeLike> {
     /**
      * Parses source code, returning a result that includes an AST and a collection of parse issues (errors, warnings).
      * The parsing is done in accordance to the StarLasu methodology i.e. a first-stage parser builds a parse tree which

@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.emf.rpgast
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Range
 
 fun Any?.asNonNullString(): String = this?.toString() ?: ""
@@ -9,14 +9,14 @@ fun Range?.line() = this?.start?.line.asNonNullString()
 
 fun Range?.atLine() = this?.start?.line?.let { "line $it " } ?: ""
 
-fun Node?.startLine() =
+fun NodeLike?.startLine() =
     this
         ?.range
         ?.start
         ?.line
         .asNonNullString()
 
-fun Node?.endLine() =
+fun NodeLike?.endLine() =
     this
         ?.range
         ?.end

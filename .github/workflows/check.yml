@@ -1,6 +1,6 @@
 name: BuildAndTest
 
-on: [push]
+on: [ push ]
 
 jobs:
   build:
@@ -12,11 +12,11 @@ jobs:
     name: Java ${{ matrix.Java }} BuildAndTest
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Setup java
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'adopt'
-        java-version: ${{ matrix.java }}
-    - name: Test
-      run: ./gradlew check
+      - uses: actions/checkout@v1
+      - name: Setup java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: ${{ matrix.java }}
+      - name: Test
+        run: ./gradlew check

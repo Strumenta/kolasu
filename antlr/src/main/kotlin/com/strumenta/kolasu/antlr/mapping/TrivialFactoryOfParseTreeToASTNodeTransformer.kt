@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.antlr.mapping
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.children
@@ -26,12 +26,15 @@ object TrivialFactoryOfParseTreeToASTNodeTransformer {
             ReferenceByName::class -> {
                 ReferenceByName<PossiblyNamed>(name = text)
             }
+
             String::class -> {
                 text
             }
+
             Int::class -> {
                 text.toInt()
             }
+
             else -> {
                 TODO()
             }
@@ -47,30 +50,36 @@ object TrivialFactoryOfParseTreeToASTNodeTransformer {
             is Token -> {
                 return convertString(value.text, astTransformer, expectedType)
             }
+
             is List<*> -> {
                 return value.map { convert(it, astTransformer, expectedType.arguments[0].type!!) }
             }
+
             is ParserRuleContext -> {
                 return when (expectedType) {
                     String::class.createType(), String::class.createType(nullable = true) -> {
                         value.text
                     }
+
                     else -> {
                         astTransformer.transform(value)
                     }
                 }
             }
+
             null -> {
                 return null
             }
+
             is TerminalNode -> {
                 return convertString(value.text, astTransformer, expectedType)
             }
+
             else -> TODO("value $value (${value.javaClass})")
         }
     }
 
-    inline fun <S : RuleContext, reified T : Node> trivialTransformer(
+    inline fun <S : RuleContext, reified T : NodeLike> trivialTransformer(
         vararg nameConversions: Pair<String, String>,
     ): (
         S,
@@ -123,7 +132,7 @@ object TrivialFactoryOfParseTreeToASTNodeTransformer {
         }
 }
 
-inline fun <reified S : RuleContext, reified T : Node> ASTTransformer.registerTrivialPTtoASTConversion(
+inline fun <reified S : RuleContext, reified T : NodeLike> ASTTransformer.registerTrivialPTtoASTConversion(
     vararg nameConversions: Pair<String, String>,
 ) {
     this.registerNodeTransformer(
@@ -132,7 +141,7 @@ inline fun <reified S : RuleContext, reified T : Node> ASTTransformer.registerTr
     )
 }
 
-inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer.registerTrivialPTtoASTConversion(
+inline fun <reified S : RuleContext, reified T : NodeLike> ParseTreeToASTTransformer.registerTrivialPTtoASTConversion(
     vararg nameConversions: Pair<KCallable<*>, KCallable<*>>,
 ) = this.registerTrivialPTtoASTConversion<S, T>(
     *nameConversions
@@ -140,7 +149,9 @@ inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer
         .toTypedArray(),
 )
 
-inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer.unwrap(wrappingMember: KCallable<*>) {
+inline fun <reified S : RuleContext, reified T : NodeLike> ParseTreeToASTTransformer.unwrap(
+    wrappingMember: KCallable<*>,
+) {
     this.registerNodeTransformer(S::class) { parseTreeNode, astTransformer ->
         val wrapped = wrappingMember.call(parseTreeNode)
         astTransformer.transform(wrapped) as T?

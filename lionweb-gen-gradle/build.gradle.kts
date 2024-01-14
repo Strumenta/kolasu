@@ -70,11 +70,3 @@ afterEvaluate {
         }
     }
 }
-
-// java {
-//    sourceCompatibility = "$jvm_version"
-//    targetCompatibility = "$jvm_version"
-//    registerFeature("cli") {
-//        usingSourceSet(sourceSets.main)
-//    }
-// }

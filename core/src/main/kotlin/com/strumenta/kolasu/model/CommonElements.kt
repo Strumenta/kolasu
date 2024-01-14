@@ -41,5 +41,5 @@ interface PlaceholderElement {
      * should be passed to this method. For example, if a certain PlaceholderElement is used to match a sequence of three
      * statements S1, S2, and S3, all of them should be passed, one by one, as parameters of this method.
      */
-    fun applicableTo(node: Node): Boolean = true
+    fun applicableTo(node: NodeLike): Boolean = true
 }

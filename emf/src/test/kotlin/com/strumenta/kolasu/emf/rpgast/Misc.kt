@@ -1,13 +1,13 @@
 package com.strumenta.kolasu.emf.rpgast
 
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Range
 
 data class ToAstConfiguration(
     val considerRange: Boolean = true,
 )
 
-fun List<Node>.range(): Range? {
+fun List<NodeLike>.range(): Range? {
     val start =
         this
             .asSequence()

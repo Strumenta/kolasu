@@ -19,7 +19,7 @@ import kotlin.reflect.full.primaryConstructor
  * Kolasu does not see set/add/delete operations on the AST nodes,
  * so this function should be called manually after modifying the AST.
  */
-fun Node.assignParents() {
+fun NodeLike.assignParents() {
     this.walkChildren().forEach {
         if (it == this) {
             throw java.lang.IllegalStateException("A node cannot be parent of itself: $this")
@@ -33,14 +33,14 @@ fun Node.assignParents() {
  * Recursively execute [operation] on [this] node, and all nodes below this node.
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
-fun Node.processNodes(
-    operation: (Node) -> Unit,
-    walker: ASTWalker = Node::walk,
+fun NodeLike.processNodes(
+    operation: (NodeLike) -> Unit,
+    walker: ASTWalker = NodeLike::walk,
 ) {
     walker.invoke(this).forEach(operation)
 }
 
-fun Node.invalidRanges(): Sequence<Node> =
+fun NodeLike.invalidRanges(): Sequence<NodeLike> =
     this.walk().filter {
         it.range == null ||
             run {
@@ -50,13 +50,13 @@ fun Node.invalidRanges(): Sequence<Node> =
             }
     }
 
-fun Node.findInvalidRange(): Node? = this.invalidRanges().firstOrNull()
+fun NodeLike.findInvalidRange(): NodeLike? = this.invalidRanges().firstOrNull()
 
-fun Node.hasValidParents(parent: Node? = this.parent): Boolean {
+fun NodeLike.hasValidParents(parent: NodeLike? = this.parent): Boolean {
     return this.parent == parent && this.children.all { it.hasValidParents(this) }
 }
 
-fun <T : Node> T.withParent(parent: Node?): T {
+fun <T : NodeLike> T.withParent(parent: NodeLike?): T {
     this.parent = parent
     return this
 }
@@ -67,7 +67,7 @@ fun <T : Node> T.withParent(parent: Node?): T {
  * @param propertyOperation the operation to perform on each property.
  */
 @JvmOverloads
-fun Node.processProperties(
+fun NodeLike.processProperties(
     propertiesToIgnore: Set<String> = emptySet(),
     propertyOperation: (PropertyDescription) -> Unit,
 ) {
@@ -94,10 +94,10 @@ fun <T : Any> Class<T>.processProperties(
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  * @return the first node in the AST for which the [predicate] is true. Null if none are found.
  */
-fun Node.find(
-    predicate: (Node) -> Boolean,
-    walker: ASTWalker = Node::walk,
-): Node? {
+fun NodeLike.find(
+    predicate: (NodeLike) -> Boolean,
+    walker: ASTWalker = NodeLike::walk,
+): NodeLike? {
     return walker.invoke(this).find(predicate)
 }
 
@@ -108,10 +108,10 @@ fun Node.find(
  *
  * @param walker the function that generates the nodes to operate on in the desired sequence.
  */
-fun <T> Node.processNodesOfType(
+fun <T> NodeLike.processNodesOfType(
     klass: Class<T>,
     operation: (T) -> Unit,
-    walker: ASTWalker = Node::walk,
+    walker: ASTWalker = NodeLike::walk,
 ) {
     searchByType(klass, walker).forEach(operation)
 }
@@ -120,15 +120,15 @@ fun <T> Node.processNodesOfType(
  * Recursively execute [operation] on this node, and all nodes below this node.
  * Every node is informed about its [parent] node. (But not about the parent's parent!)
  */
-fun Node.processConsideringDirectParent(
-    operation: (Node, Node?) -> Unit,
-    parent: Node? = null,
+fun NodeLike.processConsideringDirectParent(
+    operation: (NodeLike, NodeLike?) -> Unit,
+    parent: NodeLike? = null,
 ) {
     operation(this, parent)
     this.properties.forEach { p ->
         when (val v = p.value) {
-            is Node -> v.processConsideringDirectParent(operation, this)
-            is Collection<*> -> v.forEach { (it as? Node)?.processConsideringDirectParent(operation, this) }
+            is NodeLike -> v.processConsideringDirectParent(operation, this)
+            is Collection<*> -> v.forEach { (it as? NodeLike)?.processConsideringDirectParent(operation, this) }
         }
     }
 }
@@ -136,13 +136,14 @@ fun Node.processConsideringDirectParent(
 /**
  * @return all direct children of this node.
  */
-val Node.children: List<Node>
+val NodeLike.children: List<NodeLike>
     get() {
-        val children = mutableListOf<Node>()
+        val children = mutableListOf<NodeLike>()
         this.properties.forEach { p ->
-            when (val v = p.value) {
-                is Node -> children.add(v)
-                is Collection<*> -> v.forEach { if (it is Node) children.add(it) }
+            val v = p.value
+            when (v) {
+                is NodeLike -> children.add(v)
+                is Collection<*> -> v.forEach { if (it is NodeLike) children.add(it) }
             }
         }
         return children
@@ -152,7 +153,7 @@ val Node.children: List<Node>
  * @return the next sibling node. Notice that children of a sibling collection are considered siblings
  * and not the collection itself.
  */
-val Node.nextSibling: Node?
+val NodeLike.nextSibling: NodeLike?
     get() {
         if (this.parent != null) {
             val siblings = this.parent!!.children
@@ -166,7 +167,7 @@ val Node.nextSibling: Node?
  * @return the previous sibling. Notice that children of a sibling collection are considered siblings
  * and not the collection itself.
  */
-val Node.previousSibling: Node?
+val NodeLike.previousSibling: NodeLike?
     get() {
         if (this.parent != null) {
             val siblings = this.parent!!.children
@@ -179,7 +180,7 @@ val Node.previousSibling: Node?
 /**
  * @return the next sibling node in the same property.
  */
-val Node.nextSamePropertySibling: Node?
+val NodeLike.nextSamePropertySibling: NodeLike?
     get() {
         if (this.parent != null) {
             val siblings =
@@ -187,14 +188,15 @@ val Node.nextSamePropertySibling: Node?
                     .parent!!
                     .properties
                     .find { p ->
-                        when (val v = p.value) {
+                        val v = p.value
+                        when (v) {
                             is Collection<*> -> v.contains(this)
                             else -> false
                         }
-                    }?.value as? Collection<*> ?: emptyList<Node>()
+                    }?.value as? Collection<*> ?: emptyList<NodeLike>()
 
             val index = siblings.indexOf(this)
-            return if (index == siblings.size - 1 || index == -1) null else siblings.elementAt(index + 1) as Node
+            return if (index == siblings.size - 1 || index == -1) null else siblings.elementAt(index + 1) as NodeLike
         }
         return null
     }
@@ -202,7 +204,7 @@ val Node.nextSamePropertySibling: Node?
 /**
  * @return the previous sibling in the same property.
  */
-val Node.previousSamePropertySibling: Node?
+val NodeLike.previousSamePropertySibling: NodeLike?
     get() {
         if (this.parent != null) {
             val siblings =
@@ -210,14 +212,15 @@ val Node.previousSamePropertySibling: Node?
                     .parent!!
                     .properties
                     .find { p ->
-                        when (val v = p.value) {
+                        val v = p.value
+                        when (v) {
                             is Collection<*> -> v.contains(this)
                             else -> false
                         }
-                    }?.value as? Collection<*> ?: emptyList<Node>()
+                    }?.value as? Collection<*> ?: emptyList<NodeLike>()
 
             val index = siblings.indexOf(this)
-            return if (index == 0 || index == -1) null else siblings.elementAt(index - 1) as Node
+            return if (index == 0 || index == -1) null else siblings.elementAt(index - 1) as NodeLike
         }
         return null
     }
@@ -225,7 +228,7 @@ val Node.previousSamePropertySibling: Node?
 /**
  * Return the property containing this Node, if any. Null should be returned for root nodes.
  */
-fun Node.containingProperty(): PropertyDescription? {
+fun NodeLike.containingProperty(): PropertyDescription? {
     if (this.parent == null) {
         return null
     }
@@ -242,7 +245,7 @@ fun Node.containingProperty(): PropertyDescription? {
  * Return the index of this Node within the containing property. The return value is null for root nodes.
  * The index is always 0 for Nodes in singular containment properties.
  */
-fun Node.indexInContainingProperty(): Int? {
+fun NodeLike.indexInContainingProperty(): Int? {
     val p = this.containingProperty()
     return if (p == null) {
         null
@@ -257,7 +260,7 @@ fun Node.indexInContainingProperty(): Int? {
  * @return the next sibling of the specified type. Notice that children of a sibling collection are considered siblings
  * and not the collection itself.
  */
-inline fun <reified T : Node> Node.nextSibling(): Node? {
+inline fun <reified T : NodeLike> NodeLike.nextSibling(): NodeLike? {
     if (this.parent != null) {
         val siblings = this.parent!!.children
         return siblings.takeLast(siblings.size - 1 - siblings.indexOf(this)).firstOrNull { it is T }
@@ -269,7 +272,7 @@ inline fun <reified T : Node> Node.nextSibling(): Node? {
  * @return the previous sibling of the specified type. Notice that children of a sibling collection are considered siblings
  * and not the collection itself.
  */
-inline fun <reified T : Node> Node.previousSibling(): Node? {
+inline fun <reified T : NodeLike> NodeLike.previousSibling(): NodeLike? {
     if (this.parent != null) {
         val siblings = this.parent!!.children
         return siblings.take(siblings.indexOf(this)).lastOrNull { it is T }
@@ -278,23 +281,34 @@ inline fun <reified T : Node> Node.previousSibling(): Node? {
 }
 
 // TODO reimplement using transformChildren
-fun Node.transformTree(
-    operation: (Node) -> Node,
+fun NodeLike.transformTree(
+    operation: (NodeLike) -> NodeLike,
     inPlace: Boolean = false,
-    mutationsCache: IdentityHashMap<Node, Node> = IdentityHashMap<Node, Node>(),
-): Node {
+    mutationsCache: IdentityHashMap<NodeLike, NodeLike> = IdentityHashMap<NodeLike, NodeLike>(),
+): NodeLike {
     if (inPlace) TODO()
     mutationsCache.computeIfAbsent(this) { operation(this) }
     val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { p ->
         when (val v = p.get(this)) {
-            is Node -> {
+            is NodeLike -> {
                 val newValue = v.transformTree(operation, inPlace, mutationsCache)
                 if (newValue != v) changes[p.name] = newValue
             }
 
             is Collection<*> -> {
-                val newValue = v.map { if (it is Node) it.transformTree(operation, inPlace, mutationsCache) else it }
+                val newValue =
+                    v.map {
+                        if (it is NodeLike) {
+                            it.transformTree(
+                                operation,
+                                inPlace,
+                                mutationsCache,
+                            )
+                        } else {
+                            it
+                        }
+                    }
                 if (newValue != v) changes[p.name] = newValue
             }
         }
@@ -323,15 +337,15 @@ fun Node.transformTree(
 
 class ImmutablePropertyException(
     property: KProperty<*>,
-    node: Node,
+    node: NodeLike,
 ) : RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
 // assumption: every MutableList in the AST contains Nodes.
 @Suppress("UNCHECKED_CAST")
-fun Node.transformChildren(operation: (Node) -> Node) {
+fun NodeLike.transformChildren(operation: (NodeLike) -> NodeLike) {
     nodeProperties.forEach { property ->
         when (val value = property.get(this)) {
-            is Node -> {
+            is NodeLike -> {
                 val newValue = operation(value)
                 if (newValue != value) {
                     if (property is KMutableProperty<*>) {
@@ -347,11 +361,11 @@ fun Node.transformChildren(operation: (Node) -> Node) {
                 if (value is List<*>) {
                     for (i in 0 until value.size) {
                         val element = value[i]
-                        if (element is Node) {
+                        if (element is NodeLike) {
                             val newValue = operation(element)
                             if (newValue != element) {
                                 if (value is MutableList<*>) {
-                                    (value as MutableList<Node>)[i] = newValue
+                                    (value as MutableList<NodeLike>)[i] = newValue
                                     newValue.parent = this
                                 } else {
                                     throw ImmutablePropertyException(property, element)
@@ -369,11 +383,11 @@ fun Node.transformChildren(operation: (Node) -> Node) {
     }
 }
 
-fun Node.mapChildren(operation: (Node) -> Node): Node {
+fun NodeLike.mapChildren(operation: (NodeLike) -> NodeLike): NodeLike {
     val changes = mutableMapOf<String, Any>()
     relevantMemberProperties().forEach { property ->
         when (val value = property.get(this)) {
-            is Node -> {
+            is NodeLike -> {
                 val newValue = operation(value)
                 if (newValue != value) {
                     changes[property.name] = newValue
@@ -381,7 +395,7 @@ fun Node.mapChildren(operation: (Node) -> Node): Node {
             }
 
             is Collection<*> -> {
-                val newValue = value.map { if (it is Node) operation(it) else it }
+                val newValue = value.map { if (it is NodeLike) operation(it) else it }
                 if (newValue != value) {
                     changes[property.name] = newValue
                 }
@@ -412,12 +426,12 @@ fun Node.mapChildren(operation: (Node) -> Node): Node {
 
 /**
  * Replace [this] node with [other] (by modifying the children of the parent node.)
- * For this to work, [Node.assignParents] must have been called.
+ * For this to work, [NodeLike.assignParents] must have been called.
  *
  * Note that we recognize the exact same Node, looking at its identity, not using
  * equality.
  */
-fun Node.replaceWith(other: Node) {
+fun NodeLike.replaceWith(other: NodeLike) {
     if (this.parent == null) {
         throw IllegalStateException("Parent not set")
     }
@@ -429,9 +443,9 @@ fun Node.replaceWith(other: Node) {
  * When found, it is removed, and in its place the [newNodes] are inserted.
  * When not found, an [IllegalStateException] is thrown.
  */
-fun Node.replaceWithSeveral(
-    oldNode: Node,
-    newNodes: List<Node>,
+fun NodeLike.replaceWithSeveral(
+    oldNode: NodeLike,
+    newNodes: List<NodeLike>,
 ) {
     findMutableListContainingChild(oldNode) { nodeList, index ->
         nodeList.replaceWithSeveral(index, newNodes)
@@ -445,7 +459,7 @@ fun Node.replaceWithSeveral(
  * When found, it is removed.
  * When not found, an [IllegalStateException] is thrown.
  */
-fun Node.removeFromList(targetNode: Node) {
+fun NodeLike.removeFromList(targetNode: NodeLike) {
     findMutableListContainingChild(targetNode) { nodeList, index ->
         nodeList.removeAt(index)
         targetNode.parent = null
@@ -457,9 +471,9 @@ fun Node.removeFromList(targetNode: Node) {
  * When found, [newNodes] are inserted before it.
  * When not found, an [IllegalStateException] is thrown.
  */
-fun Node.addSeveralBefore(
-    targetNode: Node,
-    newNodes: List<Node>,
+fun NodeLike.addSeveralBefore(
+    targetNode: NodeLike,
+    newNodes: List<NodeLike>,
 ) {
     findMutableListContainingChild(targetNode) { nodeList, index ->
         nodeList.addSeveralBefore(index, newNodes)
@@ -472,9 +486,9 @@ fun Node.addSeveralBefore(
  * When found, [newNodes] are inserted after it.
  * When not found, an [IllegalStateException] is thrown.
  */
-fun Node.addSeveralAfter(
-    targetNode: Node,
-    newNodes: List<Node>,
+fun NodeLike.addSeveralAfter(
+    targetNode: NodeLike,
+    newNodes: List<NodeLike>,
 ) {
     findMutableListContainingChild(targetNode) { nodeList, index ->
         nodeList.addSeveralAfter(index, newNodes)
@@ -486,9 +500,9 @@ fun Node.addSeveralAfter(
  * Supports functions that manipulate a list of child nodes by finding [targetNode] in the [MutableList]s of nodes contained in [this] node.
  */
 @Suppress("UNCHECKED_CAST") // assumption: a MutableList with a Node in it is a MutableList<Node>
-private fun Node.findMutableListContainingChild(
-    targetNode: Node,
-    whenFoundDo: (nodeList: MutableList<Node>, index: Int) -> Unit,
+private fun NodeLike.findMutableListContainingChild(
+    targetNode: NodeLike,
+    whenFoundDo: (nodeList: MutableList<NodeLike>, index: Int) -> Unit,
 ) {
     relevantMemberProperties().forEach { property ->
         when (val value = property.get(this)) {
@@ -496,7 +510,7 @@ private fun Node.findMutableListContainingChild(
                 for (i in 0 until value.size) {
                     // We want to find a particular child, not just one which is equal to it
                     if (value[i] === targetNode) {
-                        whenFoundDo(value as MutableList<Node>, i)
+                        whenFoundDo(value as MutableList<NodeLike>, i)
                         return
                     }
                 }
@@ -510,33 +524,33 @@ private fun Node.findMutableListContainingChild(
  * Replaces [this] node with any amount of other nodes if it is in a [MutableList].
  * <p/>Looks for [this] in the lists of nodes in the parent node.
  * When found, [this] is removed, and in its place [newNodes] are inserted.
- * For this to work, [Node.assignParents] must have been called.
+ * For this to work, [NodeLike.assignParents] must have been called.
  */
-fun Node.replaceWithSeveral(newNodes: List<Node>) {
+fun NodeLike.replaceWithSeveral(newNodes: List<NodeLike>) {
     parent?.replaceWithSeveral(this, newNodes) ?: throw IllegalStateException("Parent not set")
 }
 
 /**
  * Inserts the [newNodes] before [this] node if it is in a [MutableList].
- * For this to work, [Node.assignParents] must have been called.
+ * For this to work, [NodeLike.assignParents] must have been called.
  */
-fun Node.addSeveralBefore(newNodes: List<Node>) {
+fun NodeLike.addSeveralBefore(newNodes: List<NodeLike>) {
     parent?.addSeveralBefore(this, newNodes) ?: throw IllegalStateException("Parent not set")
 }
 
 /**
  * Inserts the [newNodes] after [this] node if it is in a [MutableList].
- * For this to work, [Node.assignParents] must have been called.
+ * For this to work, [NodeLike.assignParents] must have been called.
  */
-fun Node.addSeveralAfter(newNodes: List<Node>) {
+fun NodeLike.addSeveralAfter(newNodes: List<NodeLike>) {
     parent?.addSeveralAfter(this, newNodes) ?: throw IllegalStateException("Parent not set")
 }
 
 /**
  * Removes [this] node from the parent if it is in a [MutableList].
- * For this to work, [Node.assignParents] must have been called.
+ * For this to work, [NodeLike.assignParents] must have been called.
  */
-fun Node.removeFromList() {
+fun NodeLike.removeFromList() {
     parent?.removeFromList(this) ?: throw IllegalStateException("Parent not set")
 }
 

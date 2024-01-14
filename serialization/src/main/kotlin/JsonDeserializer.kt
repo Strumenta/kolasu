@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.parsing.ParsingResult
@@ -41,7 +41,7 @@ class JsonDeserializer {
         if (typeToDeserialize.classifier is KClass<*>) {
             val rawClass: Class<*> = (typeToDeserialize.classifier as KClass<*>).java
             when {
-                Node::class.java.isAssignableFrom(rawClass) -> {
+                NodeLike::class.java.isAssignableFrom(rawClass) -> {
                     val className = json.asJsonObject[JSON_TYPE_KEY].asString
                     val actualClass =
                         try {
@@ -64,7 +64,7 @@ class JsonDeserializer {
                                 }$className",
                             )
                         }
-                    return deserialize(actualClass.asSubclass(Node::class.java), json.asJsonObject)
+                    return deserialize(actualClass.asSubclass(NodeLike::class.java), json.asJsonObject)
                 }
 
                 Collection::class.java.isAssignableFrom(rawClass) -> {
@@ -117,7 +117,7 @@ class JsonDeserializer {
         TODO()
     }
 
-    fun <T : Node> deserialize(
+    fun <T : NodeLike> deserialize(
         clazz: Class<T>,
         json: String,
     ): T {
@@ -125,7 +125,7 @@ class JsonDeserializer {
         return deserialize(clazz, jo)
     }
 
-    fun <T : Node> deserialize(
+    fun <T : NodeLike> deserialize(
         clazz: Class<T>,
         jo: JsonObject,
     ): T {
@@ -175,7 +175,7 @@ class JsonDeserializer {
         return instance ?: throw UnsupportedOperationException()
     }
 
-    fun <T : Node> deserializeResult(
+    fun <T : NodeLike> deserializeResult(
         rootClass: Class<T>,
         json: String,
     ): Result<T> {
@@ -198,7 +198,7 @@ class JsonDeserializer {
         return Result(errors, root)
     }
 
-    fun <T : Node> deserializeParsingResult(
+    fun <T : NodeLike> deserializeParsingResult(
         rootClass: Class<T>,
         json: String,
     ): ParsingResult<T> {

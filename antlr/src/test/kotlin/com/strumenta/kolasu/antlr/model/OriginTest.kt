@@ -17,7 +17,8 @@ import kotlin.test.assertNull
 import org.junit.Test as test
 
 class OriginTest {
-    @test fun parseTreeOriginRange() {
+    @test
+    fun parseTreeOriginRange() {
         val code =
             """set a = 1 + 2
             |input c is string
@@ -53,7 +54,8 @@ class OriginTest {
         assertEquals(null, node.range)
     }
 
-    @test fun parseTreeOriginsSourceText() {
+    @test
+    fun parseTreeOriginsSourceText() {
         val code =
             """set a = 1 + 2
             |input c is string

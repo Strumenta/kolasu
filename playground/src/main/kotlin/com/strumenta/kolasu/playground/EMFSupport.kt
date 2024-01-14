@@ -12,7 +12,7 @@ import com.strumenta.kolasu.emf.setResourceURI
 import com.strumenta.kolasu.emf.setSingleContainment
 import com.strumenta.kolasu.emf.setStringAttribute
 import com.strumenta.kolasu.emf.toEObject
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
@@ -74,7 +74,7 @@ private fun makeWorkspaceFileEObject(): EObject {
     return TRANSPILATION_METAMODEL.eFactoryInstance.create(ec)
 }
 
-fun <S : Node, T : Node> TranspilationTrace<S, T>.toEObject(resource: Resource): EObject {
+fun <S : NodeLike, T : NodeLike> TranspilationTrace<S, T>.toEObject(resource: Resource): EObject {
     val transpilationTraceEO = makeTranspilationTraceEObject()
     transpilationTraceEO.setStringAttribute("originalCode", this.originalCode)
     val mapping = KolasuToEMFMapping()
@@ -113,7 +113,7 @@ fun WorkspaceTranspilationTrace.toEObject(resource: Resource): EObject {
     return transpilationTraceEO
 }
 
-fun <S : Node, T : Node> TranspilationTrace<S, T>.saveAsJson(
+fun <S : NodeLike, T : NodeLike> TranspilationTrace<S, T>.saveAsJson(
     name: String,
     vararg ePackages: EPackage,
 ): String {

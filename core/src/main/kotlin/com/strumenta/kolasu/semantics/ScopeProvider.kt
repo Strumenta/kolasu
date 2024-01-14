@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.semantics
 
 import com.strumenta.kolasu.model.KReferenceByName
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.utils.memoize
 import com.strumenta.kolasu.utils.sortBySubclassesFirst
@@ -13,9 +13,9 @@ import kotlin.reflect.full.isSuperclassOf
 class ScopeProvider(
     private val scopeResolutionRules: MutableMap<
         String,
-        MutableMap<KClass<out Node>, (Node) -> Scope>,
+        MutableMap<KClass<out NodeLike>, (NodeLike) -> Scope>,
         > = mutableMapOf(),
-    private val scopeConstructionRules: MutableMap<KClass<out Node>, (Node) -> Scope> = mutableMapOf(),
+    private val scopeConstructionRules: MutableMap<KClass<out NodeLike>, (NodeLike) -> Scope> = mutableMapOf(),
 ) {
     fun loadFrom(
         configuration: ScopeProviderConfiguration,
@@ -24,17 +24,17 @@ class ScopeProvider(
         configuration.scopeResolutionRules.mapValuesTo(this.scopeResolutionRules) { (_, classToScopeResolutionRules) ->
             classToScopeResolutionRules
                 .mapValues { (_, scopeResolutionRule) ->
-                    { node: Node -> semantics.scopeResolutionRule(node) }
+                    { node: NodeLike -> semantics.scopeResolutionRule(node) }
                 }.toMutableMap()
         }
         configuration.scopeConstructionRules.mapValuesTo(this.scopeConstructionRules) { (_, scopeConstructionRule) ->
-            { node: Node -> semantics.scopeConstructionRule(node) }
+            { node: NodeLike -> semantics.scopeConstructionRule(node) }
         }
     }
 
     fun scopeFor(
-        referenceByName: KReferenceByName<out Node>,
-        node: Node? = null,
+        referenceByName: KReferenceByName<out NodeLike>,
+        node: NodeLike? = null,
     ): Scope {
         return node
             ?.let { this.scopeResolutionRules.getOrDefault(referenceByName.name, null) }
@@ -50,7 +50,7 @@ class ScopeProvider(
             ?: Scope()
     }
 
-    fun scopeFrom(node: Node? = null): Scope {
+    fun scopeFrom(node: NodeLike? = null): Scope {
         return node
             ?.let {
                 this
@@ -69,11 +69,11 @@ class ScopeProvider(
 class ScopeProviderConfiguration(
     val scopeResolutionRules: MutableMap<
         String,
-        MutableMap<KClass<out Node>, Semantics.(Node) -> Scope>,
+        MutableMap<KClass<out NodeLike>, Semantics.(NodeLike) -> Scope>,
         > = mutableMapOf(),
-    val scopeConstructionRules: MutableMap<KClass<out Node>, Semantics.(Node) -> Scope> = mutableMapOf(),
+    val scopeConstructionRules: MutableMap<KClass<out NodeLike>, Semantics.(NodeLike) -> Scope> = mutableMapOf(),
 ) {
-    inline fun <reified N : Node> scopeFor(
+    inline fun <reified N : NodeLike> scopeFor(
         referenceByName: KReferenceByName<N>,
         crossinline scopeResolutionRule: Semantics.(N) -> Scope,
     ) {
@@ -82,19 +82,19 @@ class ScopeProviderConfiguration(
             .getOrPut(referenceByName.name) { mutableMapOf() }
             .putIfAbsent(
                 N::class,
-                { semantics: Semantics, node: Node ->
+                { semantics: Semantics, node: NodeLike ->
                     if (node is N) semantics.scopeResolutionRule(node) else Scope()
                 }.memoize(),
             )
     }
 
-    inline fun <reified N : Node> scopeFrom(
+    inline fun <reified N : NodeLike> scopeFrom(
         nodeType: KClass<N>,
         crossinline scopeConstructionRule: Semantics.(N) -> Scope,
     ) {
         this.scopeConstructionRules.putIfAbsent(
             nodeType,
-            { semantics: Semantics, node: Node ->
+            { semantics: Semantics, node: NodeLike ->
                 if (node is N) semantics.scopeConstructionRule(node) else Scope()
             }.memoize(),
         )

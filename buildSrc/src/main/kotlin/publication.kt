@@ -1,11 +1,11 @@
-import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.Project
+import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import java.net.URI
 
-fun Project.isReleaseVersion() : Boolean {
+fun Project.isReleaseVersion(): Boolean {
     return !((this.version as String).endsWith("-SNAPSHOT"))
 }
 
@@ -31,7 +31,12 @@ fun PublishingExtension.addSonatypeRepo(project: Project) {
     }
 }
 
-fun PublishingExtension.addPublication(pubName: String, pubDescription: String, project: Project, addPrefix: Boolean = true) {
+fun PublishingExtension.addPublication(
+    pubName: String,
+    pubDescription: String,
+    project: Project,
+    addPrefix: Boolean = true
+) {
     publications {
         create<MavenPublication>(pubName) {
             from(project.components["java"])

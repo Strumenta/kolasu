@@ -1,4 +1,4 @@
-@file:OptIn(FirIncompatiblePluginAPI::class, ObsoleteDescriptorBasedAPI::class)
+@file:OptIn(FirIncompatiblePluginAPI::class, ObsoleteDescriptorBasedAPI::class, ObsoleteDescriptorBasedAPI::class)
 
 package com.strumenta.kolasu.kcp
 
@@ -19,7 +19,6 @@ import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
-import org.jetbrains.kotlin.ir.interpreter.toIrConst
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrAnonymousInitializerSymbolImpl
 import org.jetbrains.kotlin.ir.util.allParameters
@@ -48,6 +47,7 @@ class FieldObservableExtension(
             ).single()
     }
 
+    @OptIn(ObsoleteDescriptorBasedAPI::class)
     override fun visitPropertyNew(declaration: IrProperty): IrStatement {
         if (declaration.declareReference()) {
             //     init {

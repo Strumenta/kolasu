@@ -4,8 +4,8 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.model.Destination
-import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeDestination
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.NodeOrigin
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.Point
@@ -92,7 +92,7 @@ fun Range.toEObject(): EObject {
     return eo
 }
 
-fun <T : Node> Result<T>.toEObject(astPackage: EPackage): EObject {
+fun <T : NodeLike> com.strumenta.kolasu.validation.Result<T>.toEObject(astPackage: EPackage): EObject {
     val resultEO = makeResultEObject(this)
     val rootSF = resultEO.eClass().eAllStructuralFeatures.find { it.name == "root" }!!
     if (root != null) {
@@ -112,7 +112,7 @@ private fun makeResultEObject(result: Result<*>): EObject {
     return resultEO
 }
 
-fun <T : Node> Result<T>.toEObject(
+fun <T : NodeLike> Result<T>.toEObject(
     resource: Resource,
     kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping(),
 ): EObject {
@@ -147,7 +147,8 @@ private fun toValue(
     value: Any?,
     kolasuToEMFMapping: KolasuToEMFMapping = KolasuToEMFMapping(),
 ): Any? {
-    when (val pdValue: Any? = value) {
+    val pdValue: Any? = value
+    when (pdValue) {
         is Enum<*> -> {
             val ee = ePackage.getEEnum(pdValue.javaClass)
             return ee.getEEnumLiteral(pdValue.name)
@@ -198,7 +199,7 @@ private fun toValue(
                     // same EObject can be inserted in the containment relation where it belongs.
                     refEO.eSet(
                         refEC.getEStructuralFeature("referenced")!!,
-                        (pdValue.referred as? Node)?.getOrCreateEObject(ePackage, kolasuToEMFMapping),
+                        (pdValue.referred as? NodeLike)?.getOrCreateEObject(ePackage, kolasuToEMFMapping),
                     )
                     refEO
                 }
@@ -206,10 +207,10 @@ private fun toValue(
                 pdValue is Result<*> -> {
                     val resEC = STARLASU_METAMODEL.getEClass("Result")
                     val resEO = STARLASU_METAMODEL.eFactoryInstance.create(resEC)
-                    if (pdValue.root is Node) {
+                    if (pdValue.root is NodeLike) {
                         resEO.eSet(
                             resEC.getEStructuralFeature("root"),
-                            (pdValue.root as Node)
+                            (pdValue.root as NodeLike)
                                 .getOrCreateEObject(ePackage, kolasuToEMFMapping),
                         )
                     } else {
@@ -280,7 +281,7 @@ fun Resource.getEClass(klass: KClass<*>): EClass =
     this.findEClass(klass)
         ?: throw ClassNotFoundException(klass.qualifiedName)
 
-fun Node.toEObject(
+fun NodeLike.toEObject(
     ePackage: EPackage,
     mapping: KolasuToEMFMapping = KolasuToEMFMapping(),
 ): EObject = toEObject(ePackage.eResource(), mapping)
@@ -288,7 +289,7 @@ fun Node.toEObject(
 /**
  * This method retrieves the EObject already built for this Node or create it if it does not exist.
  */
-fun Node.getOrCreateEObject(
+fun NodeLike.getOrCreateEObject(
     ePackage: EPackage,
     mapping: KolasuToEMFMapping = KolasuToEMFMapping(),
 ): EObject = getOrCreateEObject(ePackage.eResource(), mapping)
@@ -298,16 +299,16 @@ fun EClass.instantiate(): EObject {
 }
 
 class KolasuToEMFMapping {
-    private val nodeToEObjects = IdentityHashMap<Node, EObject>()
+    private val nodeToEObjects = IdentityHashMap<NodeLike, EObject>()
 
     fun associate(
-        node: Node,
+        node: NodeLike,
         eo: EObject,
     ) {
         nodeToEObjects[node] = eo
     }
 
-    fun getAssociatedEObject(node: Node): EObject? {
+    fun getAssociatedEObject(node: NodeLike): EObject? {
         return nodeToEObjects[node]
     }
 
@@ -317,7 +318,7 @@ class KolasuToEMFMapping {
      * so that future calls to this method will return that EObject.
      */
     fun getOrCreate(
-        node: Node,
+        node: NodeLike,
         eResource: Resource,
     ): EObject {
         val existing = getAssociatedEObject(node)
@@ -337,7 +338,7 @@ class KolasuToEMFMapping {
 /**
  * This method retrieves the EObject already built for this Node or create it if it does not exist.
  */
-fun Node.getOrCreateEObject(
+fun NodeLike.getOrCreateEObject(
     eResource: Resource,
     mapping: KolasuToEMFMapping = KolasuToEMFMapping(),
 ): EObject {
@@ -437,7 +438,7 @@ private fun setDestination(
  *  - the [Kolasu metamodel package][STARLASU_METAMODEL]
  *  - every [EPackage] containing the definitions of the node classes in the tree.
  */
-fun Node.toEObject(
+fun NodeLike.toEObject(
     eResource: Resource,
     mapping: KolasuToEMFMapping = KolasuToEMFMapping(),
 ): EObject {
@@ -462,7 +463,7 @@ fun Node.toEObject(
                     val elist = eo.eGet(esf) as MutableList<EObject?>
                     (pd.value as List<*>?)?.forEach {
                         try {
-                            val childEO = (it as Node?)?.getOrCreateEObject(eResource, mapping)
+                            val childEO = (it as NodeLike?)?.getOrCreateEObject(eResource, mapping)
                             elist.add(childEO)
                         } catch (e: Exception) {
                             throw RuntimeException("Unable to map to EObject child $it in property $pd of $this", e)
@@ -472,7 +473,7 @@ fun Node.toEObject(
                     if (pd.value == null) {
                         eo.eSet(esf, null)
                     } else {
-                        eo.eSet(esf, (pd.value as Node).getOrCreateEObject(eResource, mapping))
+                        eo.eSet(esf, (pd.value as NodeLike).getOrCreateEObject(eResource, mapping))
                     }
                 }
             } else {
