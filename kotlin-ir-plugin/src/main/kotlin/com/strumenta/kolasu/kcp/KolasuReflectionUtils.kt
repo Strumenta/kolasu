@@ -3,7 +3,6 @@ package com.strumenta.kolasu.kcp
 import com.strumenta.kolasu.model.INode
 import com.strumenta.kolasu.model.ReferenceByName
 import org.jetbrains.kotlin.backend.jvm.ir.getIoFile
-import org.jetbrains.kotlin.backend.jvm.ir.psiElement
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtil
@@ -38,7 +37,14 @@ val IrDeclarationBase.compilerSourceLocation: CompilerMessageSourceLocation?
     }
 
 fun IrValueParameter.isVal(): Boolean {
-    return this.psiElement!!.firstChild.text == "val"
+    val text =
+        this
+            .file
+            .getIoFile()!!
+            .readText()
+            .substring(this.startOffset, this.endOffset)
+            .trim()
+    return text.startsWith("val ")
 }
 
 @ObsoleteDescriptorBasedAPI

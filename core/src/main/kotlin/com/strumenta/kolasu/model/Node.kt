@@ -27,6 +27,8 @@ open class Node :
     @Internal
     override val destinations = mutableListOf<Destination>()
 
+    constructor()
+
     constructor(range: Range?) : this() {
         this.range = range
     }

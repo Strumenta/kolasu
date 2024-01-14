@@ -73,5 +73,5 @@ annotation class Link
 /**
  * Use this to mark something that does not inherit from Node as a node, so it will be included in the AST.
  */
-// TODO remove
+@Deprecated("Planned for removal")
 annotation class NodeType

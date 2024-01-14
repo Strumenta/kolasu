@@ -233,8 +233,7 @@ fun INode.containingProperty(): PropertyDescription? {
         return null
     }
     return this.parent!!.properties.find { p ->
-        val v = p.value
-        when (v) {
+        when (val v = p.value) {
             is Collection<*> -> v.contains(this)
             this -> true
             else -> false

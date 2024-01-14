@@ -504,9 +504,7 @@ data class CharacterValue(
 
         other as CharacterValue
 
-        if (!value.contentEquals(other.value)) return false
-
-        return true
+        return value.contentEquals(other.value)
     }
 
     override fun hashCode(): Int {

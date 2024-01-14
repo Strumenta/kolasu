@@ -181,11 +181,11 @@ class MetamodelTest {
         assertEquals("com.strumenta.kolasu.emf", ePackage.name)
         assertEquals(2, ePackage.eClassifiers.size)
 
-        val AltCompilationUnit: EClass = ePackage.eClassifiers.find { it.name == "AltCompilationUnit" } as EClass
-        assertEquals(false, AltCompilationUnit.isInterface)
+        val altCompilationUnit: EClass = ePackage.eClassifiers.find { it.name == "AltCompilationUnit" } as EClass
+        assertEquals(false, altCompilationUnit.isInterface)
 
-        val SomeInterface: EClass = ePackage.eClassifiers.find { it.name == "SomeInterface" } as EClass
-        assertEquals(true, SomeInterface.isInterface)
+        val someInterface: EClass = ePackage.eClassifiers.find { it.name == "SomeInterface" } as EClass
+        assertEquals(true, someInterface.isInterface)
     }
 
     @Test
@@ -224,10 +224,10 @@ class MetamodelTest {
         val ePackage = metamodelBuilder.generate()
         assertEquals("com.strumenta.kolasu.emf", ePackage.name)
         assertEquals(2, ePackage.eClassifiers.size)
-        val MyClassWithInternalClasses = ePackage.eClassifiers[0]
-        val Internal = ePackage.eClassifiers[1]
-        assertEquals("MyClassWithInternalClasses", MyClassWithInternalClasses.name)
-        assertEquals("MyClassWithInternalClasses.Internal", Internal.name)
+        val myClassWithInternalClasses = ePackage.eClassifiers[0]
+        val internal = ePackage.eClassifiers[1]
+        assertEquals("MyClassWithInternalClasses", myClassWithInternalClasses.name)
+        assertEquals("MyClassWithInternalClasses.Internal", internal.name)
     }
 }
 

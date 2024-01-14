@@ -109,7 +109,6 @@ open class SimpleNodeObserver : ObservableObserver<NodeNotification<in INode>> {
                     notification.oldValue,
                     notification.newValue,
                 )
-
             is ChildAdded<INode> -> onChildAdded(notification.node, notification.containmentName, notification.child)
             is ChildRemoved<INode> ->
                 onChildRemoved(
@@ -132,7 +131,6 @@ open class SimpleNodeObserver : ObservableObserver<NodeNotification<in INode>> {
                     notification.referenceName,
                     notification.referringNode,
                 )
-
             is ReferencedToRemoved<INode> ->
                 onReferringRemoved(
                     notification.node,

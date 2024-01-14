@@ -15,7 +15,6 @@ import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOriginImpl
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
@@ -26,9 +25,12 @@ import org.jetbrains.kotlin.ir.util.allParameters
 import org.jetbrains.kotlin.ir.util.parentAsClass
 import org.jetbrains.kotlin.ir.util.statements
 import org.jetbrains.kotlin.ir.util.toIrConst
+import org.jetbrains.kotlin.name.CallableId
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.Name
 
-object AutoObserveReferenceOrigin : IrDeclarationOriginImpl("AutoObserveReference", true)
+// object AutoObserveReferenceOrigin : IrDeclarationOriginImpl("AutoObserveReference", true)
 
 /**
  * Make a certain field observable.
@@ -36,11 +38,14 @@ object AutoObserveReferenceOrigin : IrDeclarationOriginImpl("AutoObserveReferenc
 class FieldObservableExtension(
     val pluginContext: IrPluginContext,
 ) : IrElementTransformerVoidWithContext() {
-    val notifyOfPropertyChange: IrSimpleFunctionSymbol =
+    val notifyOfPropertyChange: IrSimpleFunctionSymbol by lazy {
+        val callableId =
+            CallableId(ClassId.topLevel(FqName(Node::class.qualifiedName!!)), Name.identifier("notifyOfPropertyChange"))
         pluginContext
             .referenceFunctions(
-                FqName("${Node::class.qualifiedName}.notifyOfPropertyChange"),
+                callableId,
             ).single()
+    }
 
     @OptIn(ObsoleteDescriptorBasedAPI::class)
     override fun visitPropertyNew(declaration: IrProperty): IrStatement {
@@ -52,7 +57,8 @@ class FieldObservableExtension(
             val referenceByNameSetContainerMethod =
                 pluginContext
                     .referenceFunctions(
-                        FqName("${ReferenceByName::class.qualifiedName}.setContainer"),
+                        ReferenceByName::class,
+                        "setContainer",
                     ).single()
 
             val propertyGetter = declaration.getter!!

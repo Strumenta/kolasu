@@ -64,7 +64,7 @@ class ReferenceByName<N>(
                 "We cannot enforce it statically but only Node should be referred to. Instead $value was assigned " +
                     "(class: ${value?.javaClass})"
             }
-            changes.onNext(ReferenceChangeNotification(field, value))
+            changes.onNext(ReferenceChangeNotification(field, value as N?))
             field = value
         }
 
