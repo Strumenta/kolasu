@@ -10,7 +10,6 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
-import java.io.Serializable
 import java.nio.charset.Charset
 
 /**
@@ -24,7 +23,7 @@ open class CodeProcessingResult<D>(
     val issues: List<Issue>,
     val data: D?,
     val code: String? = null,
-) : Serializable {
+) {
     val isCorrect: Boolean
         get() = issues.none { it.severity != IssueSeverity.INFO }
 
@@ -66,7 +65,7 @@ open class KolasuToken(
     open val category: TokenCategory,
     open val range: Range,
     open val text: String,
-) : Serializable
+)
 
 /**
  * The result of lexing (tokenizing) a stream.
@@ -124,7 +123,7 @@ open class ParsingResult<RootNode : NodeLike>(
 
 fun String.toStream(charset: Charset = Charsets.UTF_8) = ByteArrayInputStream(toByteArray(charset))
 
-interface KolasuLexer<T : KolasuToken> : Serializable {
+interface KolasuLexer<T : KolasuToken> {
     /**
      * Performs "lexing" on the given code string, i.e., it breaks it into tokens.
      */

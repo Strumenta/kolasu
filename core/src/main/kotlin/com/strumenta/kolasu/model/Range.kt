@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.model
 
 import java.io.File
-import java.io.Serializable
 import java.net.URL
 import java.nio.file.Path
 
@@ -20,8 +19,7 @@ val START_POINT = Point(START_LINE, START_COLUMN)
 data class Point(
     val line: Int,
     val column: Int,
-) : Comparable<Point>,
-    Serializable {
+) : Comparable<Point> {
     override fun compareTo(other: Point): Int {
         if (line == other.line) {
             return this.column - other.column
@@ -124,9 +122,7 @@ fun lineRange(
     return Range(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length), source)
 }
 
-abstract class Source :
-    Serializable,
-    Comparable<Source> {
+abstract class Source : Comparable<Source> {
     protected abstract fun stringDescription(): String
 
     override fun compareTo(other: Source): Int {
@@ -224,8 +220,7 @@ data class Range(
     val start: Point,
     val end: Point,
     var source: Source? = null,
-) : Comparable<Range>,
-    Serializable {
+) : Comparable<Range> {
     override fun toString(): String {
         return "Range(start=$start, end=$end${if (source == null) "" else ", source=$source"})"
     }

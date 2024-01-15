@@ -8,16 +8,13 @@ import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.model.annotations.Annotation
 import com.strumenta.kolasu.model.observable.AttributeChangedNotification
 import com.strumenta.kolasu.model.observable.NodeNotification
-import java.io.Serializable
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty1
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  */
-open class Node :
-    NodeLike,
-    Serializable {
+open class Node : NodeLike {
     @property:Internal
     override val changes = PublishSubject<NodeNotification<in NodeLike>>()
 

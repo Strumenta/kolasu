@@ -9,7 +9,6 @@ import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.model.observable.ReferenceSet
 import com.strumenta.kolasu.model.observable.ReferencedToAdded
 import com.strumenta.kolasu.model.observable.ReferencedToRemoved
-import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
@@ -55,7 +54,7 @@ data class ReferenceChangeNotification<N : PossiblyNamed>(
 class ReferenceByName<N>(
     val name: String,
     initialReferred: N? = null,
-) : Serializable where N : PossiblyNamed {
+) where N : PossiblyNamed {
     val changes = PublishSubject<ReferenceChangeNotification<N>>()
 
     var referred: N? = null

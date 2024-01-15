@@ -1,7 +1,5 @@
 package com.strumenta.kolasu.model
 
-import java.io.Serializable
-
 interface Origin {
     var range: Range?
     val sourceText: String?
@@ -12,15 +10,13 @@ interface Origin {
 data class SimpleOrigin(
     override var range: Range?,
     override val sourceText: String? = null,
-) : Origin,
-    Serializable
+) : Origin
 
 data class CompositeOrigin(
     val elements: List<Origin>,
     override var range: Range?,
     override val sourceText: String?,
-) : Origin,
-    Serializable
+) : Origin
 
 data class NodeOrigin(
     val node: NodeLike,
