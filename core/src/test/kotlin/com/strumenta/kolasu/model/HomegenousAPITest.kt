@@ -24,11 +24,11 @@ class HomogenousAPITest {
     @Test
     fun attributes() {
         val n1 = HNodeA("foo")
-        assertEquals("foo", n1.getAttribute("name"))
-        n1.setAttribute("name", "bar")
-        assertEquals("bar", n1.getAttribute("name"))
+        assertEquals("foo", n1.getAttributeValue("name"))
+        n1.setAttributeValue("name", "bar")
+        assertEquals("bar", n1.getAttributeValue("name"))
         n1.name = "zum"
-        assertEquals("zum", n1.getAttribute("name"))
+        assertEquals("zum", n1.getAttributeValue("name"))
     }
 
     @Test

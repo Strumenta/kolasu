@@ -9,7 +9,6 @@ import com.strumenta.kolasu.model.annotations.Annotation
 import com.strumenta.kolasu.model.observable.AttributeChangedNotification
 import com.strumenta.kolasu.model.observable.NodeNotification
 import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KProperty1
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
@@ -161,8 +160,17 @@ open class Node : NodeLike {
         return rawValue as ReferenceByName<*>
     }
 
-    override fun getAttributeValue(attribute: Attribute): Any? {
-        return nodeProperties.find { it.name == attribute.name }!!.get(this)
+    fun <T : PossiblyNamed>getReference(name: String): ReferenceByName<T> {
+        val rawValue = properties.find { it.name == name }!!.value
+        return rawValue as ReferenceByName<T>
+    }
+
+    fun getAttributeValue(attribute: Attribute): Any? {
+        return properties.find { it.name == attribute.name }!!.value
+    }
+
+    fun getAttributeValue(name: String): Any? {
+        return properties.find { it.name == name }!!.value
     }
 
     override fun <T : Any?> setAttribute(
@@ -223,15 +231,7 @@ open class Node : NodeLike {
         }
     }
 
-    override fun <T : PossiblyNamed> getReference(referenceName: String): ReferenceByName<T> {
-        val prop = nodeProperties.find { it.name == referenceName } as KProperty1<NodeLike, ReferenceByName<T>>
-        return prop.call(this)
-    }
-
-    override fun <T : PossiblyNamed> setReferenceReferred(
-        referenceName: String,
-        referred: T,
-    ) {
+    fun <T : PossiblyNamed>setReferenceReferred(referenceName: String, referred: T) {
         val ref: ReferenceByName<T> = getReference(referenceName)
         ref.referred = referred
     }
