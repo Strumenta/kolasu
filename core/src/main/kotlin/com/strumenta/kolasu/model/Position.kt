@@ -143,6 +143,9 @@ data class SyntheticSource(val description: String) : Source()
  */
 data class Position(val start: Point, val end: Point, var source: Source? = null) : Comparable<Position>, Serializable {
 
+    val isFlat: Boolean
+        get() = start == end
+
     override fun toString(): String {
         return "Position(start=$start, end=$end${if (source == null) "" else ", source=$source"})"
     }

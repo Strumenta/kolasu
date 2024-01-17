@@ -88,4 +88,16 @@ class KolasuParserTest {
         assertNotNull(result.issues.find { it.message.startsWith("Extraneous input 'set'") })
         assertNotNull(result.issues.find { it.message.startsWith("Mismatched input 'c'") })
     }
+
+    @Test
+    fun issuesHaveNotFlatPosition() {
+        val parser = SimpleLangKolasuParser()
+        val result = parser.parse(
+            """set set a = 10
+            |display c
+            """.trimMargin()
+        )
+        assert(result.issues.isNotEmpty())
+        assert(result.issues.none { it.position?.isFlat ?: false })
+    }
 }
