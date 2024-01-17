@@ -75,4 +75,17 @@ class KolasuParserTest {
         )
         assertEquals(1, parser.cachesCounter)
     }
+
+    @Test
+    fun issuesAreCapitalized() {
+        val parser = SimpleLangKolasuParser()
+        val result = parser.parse(
+            """set set a = 10
+            |display c
+            """.trimMargin()
+        )
+        assert(result.issues.isNotEmpty())
+        assertNotNull(result.issues.find { it.message.startsWith("Extraneous input 'set'") })
+        assertNotNull(result.issues.find { it.message.startsWith("Mismatched input 'c'") })
+    }
 }

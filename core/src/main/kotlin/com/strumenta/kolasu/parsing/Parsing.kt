@@ -3,6 +3,7 @@ package com.strumenta.kolasu.parsing
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.utils.capitalize
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
@@ -248,7 +249,7 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
             issues.add(
                 Issue(
                     IssueType.SYNTACTIC,
-                    errorMessage ?: "unspecified",
+                    errorMessage?.capitalize() ?: "unspecified",
                     position = Point(line, charPositionInLine).asPosition
                 )
             )
