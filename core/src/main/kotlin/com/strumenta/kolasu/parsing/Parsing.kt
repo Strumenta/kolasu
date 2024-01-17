@@ -246,11 +246,16 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
             errorMessage: String?,
             p5: RecognitionException?
         ) {
+            val startPoint = Point(line, charPositionInLine)
+            var endPoint = startPoint
+            if (p1 is CommonToken) {
+                endPoint = startPoint.plus(p1.text)
+            }
             issues.add(
                 Issue(
                     IssueType.SYNTACTIC,
                     errorMessage?.capitalize() ?: "unspecified",
-                    position = Point(line, charPositionInLine).asPosition
+                    position = Position(startPoint, endPoint)
                 )
             )
         }
