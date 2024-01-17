@@ -217,12 +217,12 @@ fun Lexer.injectErrorCollectorInLexer(issues: MutableList<Issue>) {
     this.removeErrorListeners()
     this.addErrorListener(object : BaseErrorListener() {
         override fun syntaxError(
-            p0: Recognizer<*, *>?,
-            p1: Any?,
+            recognizer: Recognizer<*, *>?,
+            offendingSymbol: Any?,
             line: Int,
             charPositionInLine: Int,
             errorMessage: String?,
-            p5: RecognitionException?
+            recognitionException: RecognitionException?
         ) {
             issues.add(
                 Issue(
@@ -239,17 +239,17 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
     this.removeErrorListeners()
     this.addErrorListener(object : BaseErrorListener() {
         override fun syntaxError(
-            p0: Recognizer<*, *>?,
-            p1: Any?,
+            recognizer: Recognizer<*, *>?,
+            offendingSymbol: Any?,
             line: Int,
             charPositionInLine: Int,
             errorMessage: String?,
-            p5: RecognitionException?
+            recognitionException: RecognitionException?
         ) {
             val startPoint = Point(line, charPositionInLine)
             var endPoint = startPoint
-            if (p1 is CommonToken) {
-                endPoint = startPoint.plus(p1.text)
+            if (offendingSymbol is CommonToken) {
+                endPoint = startPoint.plus(offendingSymbol.text)
             }
             issues.add(
                 Issue(
