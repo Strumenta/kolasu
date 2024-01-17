@@ -249,7 +249,7 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
             val startPoint = Point(line, charPositionInLine)
             var endPoint = startPoint
             if (offendingSymbol is CommonToken) {
-                endPoint = startPoint.plus(offendingSymbol.text)
+                endPoint = offendingSymbol.endPoint
             }
             issues.add(
                 Issue(
