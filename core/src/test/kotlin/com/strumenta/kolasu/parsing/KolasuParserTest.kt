@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.simplelang.SimpleLangLexer
@@ -99,5 +101,9 @@ class KolasuParserTest {
         )
         assert(result.issues.isNotEmpty())
         assert(result.issues.none { it.position?.isFlat ?: false })
+        val extraneousInput = result.issues.find { it.message.startsWith("Extraneous input 'set'") }!!
+        assertEquals(Position(Point(1, 4), Point(1, 7)), extraneousInput.position)
+        val mismatchedInput = result.issues.find { it.message.startsWith("Mismatched input 'c'") }!!
+        assertEquals(Position(Point(2, 8), Point(2, 9)), mismatchedInput.position)
     }
 }
