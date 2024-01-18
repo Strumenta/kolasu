@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.PropertyDescription
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.processProperties
@@ -11,11 +12,13 @@ import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.traversing.walk
+import com.strumenta.kolasu.utils.capitalize
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
 import org.antlr.v4.runtime.BaseErrorListener
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonToken
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.Lexer
 import org.antlr.v4.runtime.Parser
@@ -308,18 +311,23 @@ fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
     this.addErrorListener(
         object : BaseErrorListener() {
             override fun syntaxError(
-                p0: Recognizer<*, *>?,
-                p1: Any?,
+                recognizer: Recognizer<*, *>?,
+                offendingSymbol: Any?,
                 line: Int,
                 charPositionInLine: Int,
                 errorMessage: String?,
-                p5: RecognitionException?,
+                recognitionException: RecognitionException?,
             ) {
+                val startPoint = Point(line, charPositionInLine)
+                var endPoint = startPoint
+                if (offendingSymbol is CommonToken) {
+                    endPoint = offendingSymbol.endPoint
+                }
                 issues.add(
                     Issue(
                         IssueType.SYNTACTIC,
-                        errorMessage ?: "unspecified",
-                        range = Point(line, charPositionInLine).asRange,
+                        errorMessage?.capitalize() ?: "unspecified",
+                        range = Range(startPoint, endPoint),
                     ),
                 )
             }

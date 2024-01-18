@@ -221,6 +221,9 @@ data class Range(
     val end: Point,
     var source: Source? = null,
 ) : Comparable<Range> {
+    val isFlat: Boolean
+        get() = start == end
+
     override fun toString(): String {
         return "Range(start=$start, end=$end${if (source == null) "" else ", source=$source"})"
     }

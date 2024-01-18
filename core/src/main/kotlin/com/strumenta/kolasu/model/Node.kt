@@ -160,12 +160,12 @@ open class Node : NodeLike {
         return rawValue as ReferenceByName<*>
     }
 
-    fun <T : PossiblyNamed>getReference(name: String): ReferenceByName<T> {
+    override fun <T : PossiblyNamed> getReference(name: String): ReferenceByName<T> {
         val rawValue = properties.find { it.name == name }!!.value
         return rawValue as ReferenceByName<T>
     }
 
-    fun getAttributeValue(attribute: Attribute): Any? {
+    override fun getAttributeValue(attribute: Attribute): Any? {
         return properties.find { it.name == attribute.name }!!.value
     }
 
@@ -231,7 +231,10 @@ open class Node : NodeLike {
         }
     }
 
-    fun <T : PossiblyNamed>setReferenceReferred(referenceName: String, referred: T) {
+    override fun <T : PossiblyNamed> setReferenceReferred(
+        referenceName: String,
+        referred: T,
+    ) {
         val ref: ReferenceByName<T> = getReference(referenceName)
         ref.referred = referred
     }

@@ -1,8 +1,6 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.utils.capitalize
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity

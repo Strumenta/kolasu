@@ -2,7 +2,7 @@ package com.strumenta.kolasu.antlr.parsing
 
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.simplelang.SimpleLangLexer
@@ -82,11 +82,12 @@ class KolasuParserTest {
     @Test
     fun issuesAreCapitalized() {
         val parser = SimpleLangKolasuParser()
-        val result = parser.parse(
-            """set set a = 10
+        val result =
+            parser.parse(
+                """set set a = 10
             |display c
-            """.trimMargin()
-        )
+                """.trimMargin(),
+            )
         assert(result.issues.isNotEmpty())
         assertNotNull(result.issues.find { it.message.startsWith("Extraneous input 'set'") })
         assertNotNull(result.issues.find { it.message.startsWith("Mismatched input 'c'") })
@@ -95,16 +96,17 @@ class KolasuParserTest {
     @Test
     fun issuesHaveNotFlatPosition() {
         val parser = SimpleLangKolasuParser()
-        val result = parser.parse(
-            """set set a = 10
+        val result =
+            parser.parse(
+                """set set a = 10
             |display c
-            """.trimMargin()
-        )
+                """.trimMargin(),
+            )
         assert(result.issues.isNotEmpty())
-        assert(result.issues.none { it.position?.isFlat ?: false })
+        assert(result.issues.none { it.range?.isFlat ?: false })
         val extraneousInput = result.issues.find { it.message.startsWith("Extraneous input 'set'") }!!
-        assertEquals(Position(Point(1, 4), Point(1, 7)), extraneousInput.position)
+        assertEquals(Range(Point(1, 4), Point(1, 7)), extraneousInput.range)
         val mismatchedInput = result.issues.find { it.message.startsWith("Mismatched input 'c'") }!!
-        assertEquals(Position(Point(2, 8), Point(2, 9)), mismatchedInput.position)
+        assertEquals(Range(Point(2, 8), Point(2, 9)), mismatchedInput.range)
     }
 }
