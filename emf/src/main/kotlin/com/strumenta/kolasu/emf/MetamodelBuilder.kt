@@ -171,7 +171,7 @@ class MetamodelBuilder(
             }
             throw Error(
                 "This class does not belong to this EPackage: ${kClass.qualifiedName}. " +
-                    "This EPackage: ${this.ePackage.name}"
+                    "This EPackage: ${this.ePackage.name}. Kotlin Package Name: $kotlinPackageName"
             )
         }
 

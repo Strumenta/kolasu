@@ -61,7 +61,8 @@ fun EPackage.setResourceURI(uri: String) {
     resource.contents.add(this)
 }
 
-fun KolasuLanguage.toEPackage(nsUri: String? = null, nsPrefix: String? = null): EPackage {
+fun KolasuLanguage.toEPackage(nsUri: String? = null, nsPrefix: String? = null,
+                              kotlinPackageName: String = this.qualifiedName): EPackage {
     val qualifiedNameParts = this.qualifiedName.split(".")
     val nsUriCalc = nsUri ?: if (qualifiedNameParts.size >= 3) {
         "https://${qualifiedNameParts[1]}.${qualifiedNameParts[0]}/" +
@@ -73,7 +74,8 @@ fun KolasuLanguage.toEPackage(nsUri: String? = null, nsPrefix: String? = null): 
     val mmBuilder = MetamodelBuilder(
         this.qualifiedName,
         nsUriCalc,
-        nsPrefix ?: this.simpleName
+        nsPrefix ?: this.simpleName,
+        kotlinPackageName = kotlinPackageName
     )
     this.astClasses.forEach {
         mmBuilder.provideClass(it)
