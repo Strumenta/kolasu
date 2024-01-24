@@ -7,10 +7,11 @@ import com.strumenta.kolasu.emf.saveAsJson
 import com.strumenta.kolasu.emf.toEPackage
 import com.strumenta.kolasu.language.KolasuLanguage
 
-class KolasuLanguageGeneratorCommand(val language: KolasuLanguage) : CliktCommand() {
+class KolasuLanguageGeneratorCommand(val language: KolasuLanguage,
+                                     private val kotlinPackageName: String = language.qualifiedName) : CliktCommand() {
     val languageFile by argument().file(canBeDir = false)
 
     override fun run() {
-        language.toEPackage().saveAsJson(languageFile)
+        language.toEPackage(kotlinPackageName=kotlinPackageName).saveAsJson(languageFile)
     }
 }
