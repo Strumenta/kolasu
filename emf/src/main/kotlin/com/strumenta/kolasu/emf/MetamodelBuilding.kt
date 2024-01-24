@@ -61,8 +61,11 @@ fun EPackage.setResourceURI(uri: String) {
     resource.contents.add(this)
 }
 
-fun KolasuLanguage.toEPackage(nsUri: String? = null, nsPrefix: String? = null,
-                              kotlinPackageName: String = this.qualifiedName): EPackage {
+fun KolasuLanguage.toEPackage(
+    nsUri: String? = null,
+    nsPrefix: String? = null,
+    kotlinPackageName: String = this.qualifiedName
+): EPackage {
     val qualifiedNameParts = this.qualifiedName.split(".")
     val nsUriCalc = nsUri ?: if (qualifiedNameParts.size >= 3) {
         "https://${qualifiedNameParts[1]}.${qualifiedNameParts[0]}/" +
