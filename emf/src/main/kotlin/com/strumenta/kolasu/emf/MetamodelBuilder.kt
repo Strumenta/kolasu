@@ -36,8 +36,18 @@ private val KClass<*>.packageName: String?
 
 /**
  * When building multiple related EPackages use MetamodelsBuilder instead.
+ *
+ * @param metamodelName this is the name of the metamodel, or the name assigned to the EPackage to be created
+ * @param kotlinPackageName this is where we look for Kotlin classes. By default it coincides with the metamodel name
+ *                          but in certain cases it may be different (for example having a suffix like model or ast)
  */
-class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, resource: Resource? = null) :
+class MetamodelBuilder(
+    metamodelName: String,
+    nsURI: String,
+    nsPrefix: String,
+    resource: Resource? = null,
+    val kotlinPackageName: String = metamodelName
+) :
     ClassifiersProvider {
 
     private val ePackage: EPackage = EcoreFactory.eINSTANCE.createEPackage()
@@ -48,7 +58,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
     internal var container: MetamodelsBuilder? = null
 
     init {
-        ePackage.name = packageName
+        ePackage.name = metamodelName
         ePackage.nsURI = nsURI
         ePackage.nsPrefix = nsPrefix
         if (resource == null) {
@@ -151,7 +161,7 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             return EcoreFactory.eINSTANCE.ecorePackage.eObject
         }
 
-        if (kClass.packageName != this.ePackage.name) {
+        if (kClass.packageName != kotlinPackageName) {
             if (container != null) {
                 for (sibling in container!!.singleMetamodelsBuilders) {
                     if (sibling.canProvideClass(kClass)) {
@@ -342,14 +352,14 @@ class MetamodelBuilder(packageName: String, nsURI: String, nsPrefix: String, res
             return true
         }
 
-        return kClass.packageName == this.ePackage.name
+        return kClass.packageName == this.kotlinPackageName
     }
 
     override fun provideClass(kClass: KClass<*>): EClass {
         if (!eClasses.containsKey(kClass)) {
             val ch = eclassTypeHandlers.find { it.canHandle(kClass) }
             val eClass = ch?.toEClass(kClass, this) ?: classToEClass(kClass)
-            if (kClass.packageName != this.ePackage.name) {
+            if (kClass.packageName != this.kotlinPackageName) {
                 return eClass
             }
             if (ch == null || !ch.external()) {

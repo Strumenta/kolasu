@@ -57,6 +57,7 @@ class MetamodelTest {
         )
         metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
+        assertEquals("com.strumenta.kolasu.emf", ePackage.name)
 
         ePackage.saveEcore(temporaryFile("simplemm.ecore"))
         val jsonFile = temporaryFile("simplemm.json")
@@ -84,8 +85,46 @@ class MetamodelTest {
         assertTrue(statementInterface.isSuperTypeOf(statementClass))
     }
 
-    private fun checkEPackage(ePackage: EPackage) {
-        assertEquals("com.strumenta.kolasu.emf", ePackage.name)
+    @Test
+    fun generateSimpleMetamodelWithKotlinPackageName() {
+        val metamodelBuilder = MetamodelBuilder(
+            "my.arbitrary.name",
+            "https://strumenta.com/simplemm",
+            "simplemm",
+            kotlinPackageName = "com.strumenta.kolasu.emf"
+        )
+        metamodelBuilder.provideClass(CompilationUnit::class)
+        val ePackage = metamodelBuilder.generate()
+        assertEquals("my.arbitrary.name", ePackage.name)
+
+        ePackage.saveEcore(temporaryFile("simplemm.ecore"))
+        val jsonFile = temporaryFile("simplemm.json")
+        ePackage.saveAsJson(jsonFile)
+        checkEPackage(ePackage, "my.arbitrary.name")
+
+        val resourceSet = ResourceSetImpl()
+        resourceSet.resourceFactoryRegistry.extensionToFactoryMap["json"] = JsonResourceFactory()
+        resourceSet.resourceFactoryRegistry.protocolToFactoryMap["https"] = JsonResourceFactory()
+        val kolasuURI = URI.createURI(STARLASU_METAMODEL.nsURI)
+        val kolasuRes = resourceSet.createResource(kolasuURI)
+        kolasuRes.contents.add(STARLASU_METAMODEL)
+        val metaURI = URI.createFileURI(jsonFile.absolutePath)
+        val metaRes = resourceSet.createResource(metaURI)
+        metaRes.load(null)
+        assertEquals(1, metaRes.contents.size)
+        assertTrue(metaRes.contents[0] is EPackage)
+        val loadedPkg = metaRes.contents[0] as EPackage
+        checkEPackage(loadedPkg, "my.arbitrary.name")
+
+        val statementClass: EClass = ePackage.eClassifiers.find { it.name == "Statement" } as EClass
+        val statementInterface = statementClass.eSuperTypes.find { it.name == "Statement" } as EClass
+        assertTrue(statementInterface.isInterface)
+        assertEquals("StrumentaLanguageSupport", statementInterface.ePackage.name)
+        assertTrue(statementInterface.isSuperTypeOf(statementClass))
+    }
+
+    private fun checkEPackage(ePackage: EPackage, expectedPackageName: String = "com.strumenta.kolasu.emf") {
+        assertEquals(expectedPackageName, ePackage.name)
         assertEquals(7, ePackage.eClassifiers.size)
 
         val cu: EClass = ePackage.eClassifiers.find { it.name == "CompilationUnit" } as EClass
