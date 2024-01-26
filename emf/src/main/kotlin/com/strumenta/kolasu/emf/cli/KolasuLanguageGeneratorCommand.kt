@@ -9,7 +9,7 @@ import com.strumenta.kolasu.language.KolasuLanguage
 
 class KolasuLanguageGeneratorCommand(
     val language: KolasuLanguage,
-    private val kotlinPackageName: String = language.qualifiedName
+    private val kotlinPackageName: String = language.qualifiedName,
 ) : CliktCommand() {
     val languageFile by argument().file(canBeDir = false)
 

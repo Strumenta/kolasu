@@ -122,12 +122,13 @@ class MetamodelTest {
 
     @Test
     fun generateSimpleMetamodelWithKotlinPackageName() {
-        val metamodelBuilder = MetamodelBuilder(
-            "my.arbitrary.name",
-            "https://strumenta.com/simplemm",
-            "simplemm",
-            kotlinPackageName = "com.strumenta.kolasu.emf"
-        )
+        val metamodelBuilder =
+            MetamodelBuilder(
+                "my.arbitrary.name",
+                "https://strumenta.com/simplemm",
+                "simplemm",
+                kotlinPackageName = "com.strumenta.kolasu.emf",
+            )
         metamodelBuilder.provideClass(CompilationUnit::class)
         val ePackage = metamodelBuilder.generate()
         assertEquals("my.arbitrary.name", ePackage.name)
@@ -158,7 +159,10 @@ class MetamodelTest {
         assertTrue(statementInterface.isSuperTypeOf(statementClass))
     }
 
-    private fun checkEPackage(ePackage: EPackage, expectedPackageName: String = "com.strumenta.kolasu.emf") {
+    private fun checkEPackage(
+        ePackage: EPackage,
+        expectedPackageName: String = "com.strumenta.kolasu.emf",
+    ) {
         assertEquals(expectedPackageName, ePackage.name)
         assertEquals(7, ePackage.eClassifiers.size)
 

@@ -63,10 +63,8 @@ class MetamodelBuilder(
     nsURI: String,
     nsPrefix: String,
     resource: Resource? = null,
-    val kotlinPackageName: String = metamodelName
-) :
-    ClassifiersProvider {
-
+    val kotlinPackageName: String = metamodelName,
+) : ClassifiersProvider {
     private val ePackage: EPackage = EcoreFactory.eINSTANCE.createEPackage()
     private val eClasses = HashMap<KClass<*>, EClass>()
     private val dataTypes = HashMap<KType, EDataType>()
@@ -189,7 +187,7 @@ class MetamodelBuilder(
             }
             throw Error(
                 "This class does not belong to this EPackage: ${kClass.qualifiedName}. " +
-                    "This EPackage: ${this.ePackage.name}. Kotlin Package Name: $kotlinPackageName"
+                    "This EPackage: ${this.ePackage.name}. Kotlin Package Name: $kotlinPackageName",
             )
         }
 
