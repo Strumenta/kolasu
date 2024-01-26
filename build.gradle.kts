@@ -1,4 +1,6 @@
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_9
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
@@ -132,6 +134,16 @@ subprojects {
             }
         }
     }
+
+    tasks
+        .withType<KotlinCompile>()
+        .configureEach {
+            compilerOptions
+                .languageVersion
+                .set(
+                    KOTLIN_1_9,
+                )
+        }
 }
 
 release {
