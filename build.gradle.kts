@@ -28,122 +28,125 @@ val isReleaseVersion = !(version as String).endsWith("-SNAPSHOT")
 
 subprojects {
 
-    apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin = "org.jlleitschuh.gradle.ktlint")
-    apply(plugin = "maven-publish")
-    apply(plugin = "idea")
-    apply(plugin = "signing")
-    apply(plugin = "org.jetbrains.dokka")
-    apply(plugin = "org.jetbrains.kotlinx.kover")
+    if (this.name != "ast") {
+        apply(plugin = "org.jetbrains.kotlin.jvm")
 
-    this.version = rootProject.version
-    this.group = rootProject.group
+        apply(plugin = "org.jlleitschuh.gradle.ktlint")
+        apply(plugin = "maven-publish")
+        apply(plugin = "idea")
+        apply(plugin = "signing")
+        apply(plugin = "org.jetbrains.dokka")
+        apply(plugin = "org.jetbrains.kotlinx.kover")
 
-    val kotlinVersion = extra["kotlinVersion"]
+        this.version = rootProject.version
+        this.group = rootProject.group
 
-    dependencies {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-        // implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-        implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+        val kotlinVersion = extra["kotlinVersion"]
 
-        testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
-    }
+        dependencies {
+            implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+            // implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+            implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
 
-    java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
+            testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
+        }
 
-    tasks.withType(DokkaTask::class).configureEach {
-        dokkaSourceSets {
-            named("main") {
-                includeNonPublic.set(true)
-                moduleName.set("kolasu-" + moduleName.get())
-                // includes.from("src/main/dokka/module.md")
+        java {
+            sourceCompatibility = JavaVersion.VERSION_1_8
+            targetCompatibility = JavaVersion.VERSION_1_8
+        }
+
+        tasks.withType(DokkaTask::class).configureEach {
+            dokkaSourceSets {
+                named("main") {
+                    includeNonPublic.set(true)
+                    moduleName.set("kolasu-" + moduleName.get())
+                    // includes.from("src/main/dokka/module.md")
+                }
             }
         }
-    }
 
-    tasks.register<Jar>("kdocJar") {
-        dependsOn("dokkaJavadoc")
-        from((tasks.named("dokkaJavadoc").get() as DokkaTask).outputDirectory)
-        archiveClassifier.set("javadoc")
-    }
+        tasks.register<Jar>("kdocJar") {
+            dependsOn("dokkaJavadoc")
+            from((tasks.named("dokkaJavadoc").get() as DokkaTask).outputDirectory)
+            archiveClassifier.set("javadoc")
+        }
 
-    tasks.register<Jar>("sourcesJar") {
-        archiveClassifier.set("sources")
-        // See https://discuss.gradle.org/t/why-subproject-sourceset-dirs-project-sourceset-dirs/7376/5
-        // Without the closure, parent sources are used for children too
-        from(sourceSets["main"].allSource)
-    }
+        tasks.register<Jar>("sourcesJar") {
+            archiveClassifier.set("sources")
+            // See https://discuss.gradle.org/t/why-subproject-sourceset-dirs-project-sourceset-dirs/7376/5
+            // Without the closure, parent sources are used for children too
+            from(sourceSets["main"].allSource)
+        }
 
-    tasks.named("publish") {
-        dependsOn("kdocJar")
-        dependsOn("sourcesJar")
-    }
+        tasks.named("publish") {
+            dependsOn("kdocJar")
+            dependsOn("sourcesJar")
+        }
 
-    tasks.named("publishToMavenLocal") {
-        dependsOn("kdocJar")
-        dependsOn("sourcesJar")
-    }
+        tasks.named("publishToMavenLocal") {
+            dependsOn("kdocJar")
+            dependsOn("sourcesJar")
+        }
 
-    tasks.withType(Test::class).all {
-        testLogging {
-            showStandardStreams = true
-            showExceptions = true
-            exceptionFormat =
+        tasks.withType(Test::class).all {
+            testLogging {
+                showStandardStreams = true
+                showExceptions = true
+                exceptionFormat =
+                    org
+                        .gradle
+                        .api
+                        .tasks
+                        .testing
+                        .logging
+                        .TestExceptionFormat
+                        .FULL
+            }
+        }
+
+        val jvmVersion = extra["jvm_version"]!! as String
+
+        tasks
+            .withType(
                 org
+                    .jetbrains
+                    .kotlin
                     .gradle
-                    .api
                     .tasks
-                    .testing
-                    .logging
-                    .TestExceptionFormat
-                    .FULL
+                    .KotlinCompile::class,
+            ).all {
+                kotlinOptions {
+                    jvmTarget = "$jvmVersion"
+                }
+            }
+
+        tasks.withType(Sign::class) {
+            enabled = isReleaseVersion
         }
-    }
 
-    val jvmVersion = extra["jvm_version"]!! as String
-
-    tasks
-        .withType(
-            org
-                .jetbrains
-                .kotlin
-                .gradle
-                .tasks
-                .KotlinCompile::class,
-        ).all {
-            kotlinOptions {
-                jvmTarget = "$jvmVersion"
+        ktlint {
+            filter {
+                exclude { element ->
+                    element
+                        .file
+                        .absolutePath
+                        .split(File.separator)
+                        .contains("build")
+                }
             }
         }
 
-    tasks.withType(Sign::class) {
-        enabled = isReleaseVersion
-    }
-
-    ktlint {
-        filter {
-            exclude { element ->
-                element
-                    .file
-                    .absolutePath
-                    .split(File.separator)
-                    .contains("build")
+        tasks
+            .withType<KotlinCompile>()
+            .configureEach {
+                compilerOptions
+                    .languageVersion
+                    .set(
+                        KOTLIN_1_9,
+                    )
             }
-        }
     }
-
-    tasks
-        .withType<KotlinCompile>()
-        .configureEach {
-            compilerOptions
-                .languageVersion
-                .set(
-                    KOTLIN_1_9,
-                )
-        }
 }
 
 release {
