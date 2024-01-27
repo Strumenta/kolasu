@@ -6,6 +6,7 @@ dependencies {
     implementation(libs.gson)
 
     implementation(project(":core"))
+    implementation(project(":ast"))
 }
 
 publishing {
