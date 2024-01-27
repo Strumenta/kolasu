@@ -4,6 +4,7 @@ import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.ast.Destination
 import com.strumenta.kolasu.ast.Internal
+import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.ast.Source
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment

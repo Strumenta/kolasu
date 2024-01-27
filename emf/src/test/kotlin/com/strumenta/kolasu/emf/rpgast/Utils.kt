@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.emf.rpgast
 
+import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.Range
 
 fun Any?.asNonNullString(): String = this?.toString() ?: ""
 

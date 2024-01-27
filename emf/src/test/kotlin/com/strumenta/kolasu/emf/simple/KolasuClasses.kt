@@ -2,9 +2,9 @@ package com.strumenta.kolasu.emf.simple
 
 import com.strumenta.kolasu.ast.Derived
 import com.strumenta.kolasu.ast.Link
+import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Range
 import java.math.BigDecimal
 
 abstract class Expression(

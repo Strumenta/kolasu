@@ -1,9 +1,9 @@
 package com.strumenta.kolasu.antlr.parsing
 
+import com.strumenta.kolasu.ast.Point
+import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.ast.Source
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser

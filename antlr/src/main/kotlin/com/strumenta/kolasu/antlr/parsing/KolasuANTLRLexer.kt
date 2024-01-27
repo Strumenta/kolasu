@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.antlr.parsing
 
-import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.ast.Point
 import com.strumenta.kolasu.parsing.KolasuLexer
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.LexingResult

@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.traversing
 
+import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.range
 import kotlin.system.measureTimeMillis

@@ -1,10 +1,10 @@
 package com.smeup.rpgparser.parsing.ast
 
+import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.emf.rpgast.AbstractDataDefinition
 import com.strumenta.kolasu.emf.rpgast.FieldDefinition
 import com.strumenta.kolasu.emf.rpgast.atLine
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
 import java.math.BigDecimal
 
