@@ -1,10 +1,10 @@
 package com.strumenta.kolasu.lionweb
 
+import com.strumenta.kolasu.ast.Source
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.allFeatures
 import com.strumenta.kolasu.model.containingProperty
 import com.strumenta.kolasu.model.indexInContainingProperty

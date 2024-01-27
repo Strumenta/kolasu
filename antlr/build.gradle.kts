@@ -11,6 +11,7 @@ dependencies {
     antlr("org.antlr:antlr4:$antlrVersion")
     implementation("org.antlr:antlr4-runtime:$antlrVersion")
     implementation(project(":core"))
+    implementation(project(":ast"))
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
 }
 

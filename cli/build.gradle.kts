@@ -3,6 +3,7 @@ val gsonVersion = extra["gson_version"]
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":ast"))
     implementation(project(":serialization"))
 
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.8.0")

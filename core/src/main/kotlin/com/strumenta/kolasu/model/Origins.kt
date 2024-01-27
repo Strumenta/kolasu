@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.ast.Source
+
 interface Origin {
     var range: Range?
     val sourceText: String?

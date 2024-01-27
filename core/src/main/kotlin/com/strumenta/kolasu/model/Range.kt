@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.ast.Source
 import java.io.File
 import java.net.URL
 import java.nio.file.Path
@@ -120,14 +121,6 @@ fun lineRange(
 ): Range {
     require(lineNumber >= 1) { "Line numbers are expected to be equal or greater than 1" }
     return Range(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length), source)
-}
-
-abstract class Source : Comparable<Source> {
-    protected abstract fun stringDescription(): String
-
-    override fun compareTo(other: Source): Int {
-        return this.stringDescription().compareTo(other.stringDescription())
-    }
 }
 
 class SourceSet(
