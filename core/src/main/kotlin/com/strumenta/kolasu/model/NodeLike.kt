@@ -5,6 +5,7 @@ import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.ast.Destination
 import com.strumenta.kolasu.ast.FeatureDescription
 import com.strumenta.kolasu.ast.Internal
+import com.strumenta.kolasu.ast.Origin
 import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.ast.Source
 import com.strumenta.kolasu.language.Attribute
