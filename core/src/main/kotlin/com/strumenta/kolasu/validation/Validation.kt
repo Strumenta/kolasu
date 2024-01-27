@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.validation
 
-import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.ast.Range
 
 enum class IssueType {
     LEXICAL,

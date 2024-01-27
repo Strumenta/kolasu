@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.ast.Source
 
 interface Origin {

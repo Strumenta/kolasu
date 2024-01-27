@@ -1,6 +1,6 @@
 package com.smeup.rpgparser.parsing.ast
 
-import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.ast.Range
 
 // %LOOKUP
 // To be supported:

@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.codegen
 
+import com.strumenta.kolasu.ast.Range
+import com.strumenta.kolasu.ast.START_POINT
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.START_POINT
 import com.strumenta.kolasu.model.TextFileDestination
 import kotlin.reflect.KClass
 import kotlin.reflect.full.superclasses

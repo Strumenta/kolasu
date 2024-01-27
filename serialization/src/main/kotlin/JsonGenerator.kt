@@ -7,9 +7,9 @@ import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.stream.JsonWriter
+import com.strumenta.kolasu.ast.Point
+import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.parsing.ParsingResult

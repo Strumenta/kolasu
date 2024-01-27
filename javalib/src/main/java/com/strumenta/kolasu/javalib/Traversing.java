@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.javalib;
 
+import com.strumenta.kolasu.ast.Range;
 import com.strumenta.kolasu.model.NodeLike;
-import com.strumenta.kolasu.model.Range;
 import com.strumenta.kolasu.traversing.ProcessingByRange;
 import com.strumenta.kolasu.traversing.ProcessingStructurally;
 import kotlin.jvm.internal.Reflection;
