@@ -3,6 +3,7 @@ package com.strumenta.kolasu.model
 import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.ast.Destination
+import com.strumenta.kolasu.ast.FeatureDescription
 import com.strumenta.kolasu.ast.Internal
 import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.ast.Source
@@ -45,10 +46,10 @@ open class Node : NodeLike {
      * The properties of this AST nodes, including attributes, children, and references.
      */
     @property:Internal
-    override val properties: List<PropertyDescription>
+    override val properties: List<FeatureDescription>
         get() =
             try {
-                nodeProperties.map { PropertyDescription.buildFor(it, this) }
+                nodeProperties.map { FeatureDescription.buildFor(it, this) }
             } catch (e: Throwable) {
                 throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
             }.also { properties ->

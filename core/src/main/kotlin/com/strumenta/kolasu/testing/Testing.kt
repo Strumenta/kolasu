@@ -1,9 +1,9 @@
 package com.strumenta.kolasu.testing
 
+import com.strumenta.kolasu.ast.FeatureType
 import com.strumenta.kolasu.model.KReferenceByName
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.PropertyType
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.kReferenceByNameProperties
 import com.strumenta.kolasu.parsing.ParsingResult
@@ -217,7 +217,7 @@ fun assertASTsAreEqual(
                             )
                         }
                     }
-                } else if (expectedProperty.propertyType == PropertyType.REFERENCE) {
+                } else if (expectedProperty.featureType == FeatureType.REFERENCE) {
                     if (expectedPropValue is ReferenceByName<*> && actualPropValue is ReferenceByName<*>) {
                         assertEquals(
                             expectedPropValue.name,

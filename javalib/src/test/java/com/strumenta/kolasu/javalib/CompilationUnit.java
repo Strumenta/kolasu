@@ -1,6 +1,9 @@
 package com.strumenta.kolasu.javalib;
 
+import com.strumenta.kolasu.ast.FeatureDescription;
 import com.strumenta.kolasu.ast.Internal;
+import com.strumenta.kolasu.ast.Multiplicity;
+import com.strumenta.kolasu.ast.FeatureType;
 import com.strumenta.kolasu.model.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,8 +22,8 @@ public class CompilationUnit extends Node {
     @NotNull
     @Override
     @Internal
-    public List<PropertyDescription> getProperties() {
-        return Arrays.asList(new PropertyDescription("as", true, Multiplicity.MANY, getAs(), PropertyType.CONTAINMENT));
+    public List<FeatureDescription> getProperties() {
+        return Arrays.asList(new FeatureDescription("as", true, Multiplicity.MANY, getAs(), FeatureType.CONTAINMENT));
     }
 
     public static class A extends Node {
@@ -33,8 +36,8 @@ public class CompilationUnit extends Node {
         @NotNull
         @Override
         @Internal
-        public List<PropertyDescription> getProperties() {
-            return Arrays.asList(new PropertyDescription("bs", true, Multiplicity.MANY, getBs(), PropertyType.CONTAINMENT));
+        public List<FeatureDescription> getProperties() {
+            return Arrays.asList(new FeatureDescription("bs", true, Multiplicity.MANY, getBs(), FeatureType.CONTAINMENT));
         }
     }
 

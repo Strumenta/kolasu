@@ -1,11 +1,11 @@
 package com.strumenta.kolasu.antlr.parsing
 
+import com.strumenta.kolasu.ast.FeatureDescription
 import com.strumenta.kolasu.ast.Point
 import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.ast.Source
 import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.PropertyDescription
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.parsing.ASTParser
@@ -264,7 +264,7 @@ abstract class KolasuANTLRParser<R : NodeLike, P : Parser, C : ParserRuleContext
     @JvmOverloads
     fun processProperties(
         node: NodeLike,
-        propertyOperation: (PropertyDescription) -> Unit,
+        propertyOperation: (FeatureDescription) -> Unit,
         propertiesToIgnore: Set<String> = emptySet(),
     ) = node.processProperties(propertiesToIgnore, propertyOperation)
 
