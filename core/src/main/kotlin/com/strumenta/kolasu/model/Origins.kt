@@ -1,14 +1,7 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.ast.Origin
 import com.strumenta.kolasu.ast.Range
-import com.strumenta.kolasu.ast.Source
-
-interface Origin {
-    var range: Range?
-    val sourceText: String?
-    val source: Source?
-        get() = range?.source
-}
 
 data class SimpleOrigin(
     override var range: Range?,
