@@ -80,12 +80,11 @@ public data class StringValue(
             """package com.strumenta.example
 
 import com.strumenta.kolasu.lionweb.LionWebAssociation
-import com.strumenta.kolasu.model.NodeType
+import com.strumenta.kolasu.model.NodeLike
 import kotlin.Boolean
 
 @LionWebAssociation(key = "MyKey")
-@NodeType
-public interface MyInterface {
+public interface MyInterface : NodeLike {
   public var someFlag: Boolean = someFlag
 }""".trim(),
             generated.first().code.trim(),

@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.javalib;
 
+import com.strumenta.kolasu.ast.Internal;
 import com.strumenta.kolasu.model.*;
 import org.jetbrains.annotations.NotNull;
 

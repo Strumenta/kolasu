@@ -20,6 +20,7 @@ dependencies {
     api(project(":core"))
     api(project(":emf"))
     api(project(":lionweb"))
+    api(project(":ast"))
 
     implementation("com.squareup:kotlinpoet:1.14.2")
     implementation("com.github.ajalt.clikt:clikt:$cliktVersion")

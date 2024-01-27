@@ -6,8 +6,8 @@ import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.asAttribute
 import com.strumenta.kolasu.model.containedType
 import com.strumenta.kolasu.model.isAttribute
+import com.strumenta.kolasu.model.isConceptInterface
 import com.strumenta.kolasu.model.isContainment
-import com.strumenta.kolasu.model.isMarkedAsNodeType
 import com.strumenta.kolasu.model.isReference
 import com.strumenta.kolasu.model.nodeProperties
 import com.strumenta.kolasu.model.referredType
@@ -56,7 +56,7 @@ class KolasuLanguage(
             Any::class -> Unit
             else -> {
                 if (kClass.java.isInterface) {
-                    if (kClass.isMarkedAsNodeType()) {
+                    if (kClass.isConceptInterface) {
                         addInterfaceClass(kClass)
                     }
                 } else {

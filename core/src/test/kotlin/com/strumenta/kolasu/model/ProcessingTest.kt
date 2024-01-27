@@ -33,8 +33,7 @@ data class DW(
     val manyAs: MutableList<AW>,
 ) : Node()
 
-@NodeType
-interface FooNodeType
+interface FooNodeType : NodeLike
 
 interface BarNotNodeType
 
@@ -72,8 +71,8 @@ data class ValueReference(
 class ProcessingTest {
     @test
     fun recognizeNodeType() {
-        assertEquals(true, FooNodeType::class.isMarkedAsNodeType())
-        assertEquals(false, BarNotNodeType::class.isMarkedAsNodeType())
+        assertEquals(true, FooNodeType::class.isConceptInterface)
+        assertEquals(false, BarNotNodeType::class.isConceptInterface)
 
         assertEquals(true, FooNodeType::class.isANode())
         assertEquals(false, BarNotNodeType::class.isANode())

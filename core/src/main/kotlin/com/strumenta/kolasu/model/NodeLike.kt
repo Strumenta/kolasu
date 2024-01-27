@@ -2,6 +2,7 @@ package com.strumenta.kolasu.model
 
 import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
+import com.strumenta.kolasu.ast.Internal
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference

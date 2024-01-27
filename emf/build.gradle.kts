@@ -12,6 +12,7 @@ dependencies {
     api(project(":core"))
     api(project(":cli"))
     api(project(":antlr"))
+    api(project(":ast"))
     api("org.eclipse.emf:org.eclipse.emf.common:2.23.0")
     api("org.eclipse.emf:org.eclipse.emf.ecore:2.25.0")
     api("org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.16.0")

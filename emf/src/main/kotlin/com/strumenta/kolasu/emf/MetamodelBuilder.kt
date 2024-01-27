@@ -99,6 +99,7 @@ class MetamodelBuilder(
         eclassTypeHandlers.add(LocalDateTimeHandler)
 
         eclassTypeHandlers.add(NodeHandler)
+        eclassTypeHandlers.add(NodeLikeHandler)
         eclassTypeHandlers.add(NamedHandler)
         eclassTypeHandlers.add(RangeHandler)
         eclassTypeHandlers.add(PossiblyNamedHandler)
