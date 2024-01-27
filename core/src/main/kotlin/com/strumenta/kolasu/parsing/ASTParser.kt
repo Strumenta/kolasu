@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.parsing
 
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.ast.Source
-import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.StringSource
 import java.io.BufferedReader
 import java.io.File

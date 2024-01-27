@@ -6,7 +6,7 @@ import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.split
 import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
-import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.traversing.walkDescendants

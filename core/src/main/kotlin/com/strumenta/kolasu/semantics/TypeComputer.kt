@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.semantics
 
-import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.utils.memoize
 import com.strumenta.kolasu.utils.sortBySubclassesFirst
 import kotlin.reflect.KClass

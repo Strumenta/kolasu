@@ -2,7 +2,7 @@
 
 package com.strumenta.kolasu.traversing
 
-import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.ast.NodeLike
 import java.util.ArrayDeque
 import java.util.WeakHashMap
 import kotlin.reflect.KClass

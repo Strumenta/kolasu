@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.testing
 
 import com.strumenta.kolasu.ast.FeatureType
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.model.KReferenceByName
-import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.kReferenceByNameProperties

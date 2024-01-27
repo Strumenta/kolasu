@@ -2,6 +2,7 @@ val cliktVersion = extra["clikt_version"]
 val gsonVersion = extra["gson_version"]
 
 dependencies {
+    api("com.badoo.reaktive:reaktive:2.0.1")
 }
 
 publishing {

@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.serialization
 
-import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.traversing.ASTWalker

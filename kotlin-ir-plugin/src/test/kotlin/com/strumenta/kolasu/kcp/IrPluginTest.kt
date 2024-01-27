@@ -122,7 +122,7 @@ fun main() {
           package mytest
 
           import com.strumenta.kolasu.model.Node
-          import com.strumenta.kolasu.model.NodeLike
+          import com.strumenta.kolasu.ast.NodeLike
           import com.strumenta.kolasu.model.observable.SimpleNodeObserver
 
     data class MyNode(var p1: Int) : Node()
@@ -300,7 +300,7 @@ fun main() {
                         """
           package mytest
 
-          import com.strumenta.kolasu.model.NodeLike
+          import com.strumenta.kolasu.ast.NodeLike
           import com.strumenta.kolasu.model.Node
           import com.strumenta.kolasu.model.observable.ObservableList
           import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver

@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.emf.rpgast
 
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.ast.Range
-import com.strumenta.kolasu.model.NodeLike
 
 data class ToAstConfiguration(
     val considerRange: Boolean = true,

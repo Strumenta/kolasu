@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.traversing
 
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.range
 import kotlin.test.Test
 import kotlin.test.assertEquals

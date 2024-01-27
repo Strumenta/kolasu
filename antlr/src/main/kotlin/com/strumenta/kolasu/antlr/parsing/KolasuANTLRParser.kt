@@ -1,11 +1,11 @@
 package com.strumenta.kolasu.antlr.parsing
 
 import com.strumenta.kolasu.ast.FeatureDescription
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.ast.Point
 import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.ast.Source
 import com.strumenta.kolasu.model.FileSource
-import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.parsing.ASTParser

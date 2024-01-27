@@ -2,7 +2,9 @@ package com.strumenta.kolasu.model.observable
 
 import com.badoo.reaktive.disposable.Disposable
 import com.badoo.reaktive.observable.ObservableObserver
-import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.ast.ChildAdded
+import com.strumenta.kolasu.ast.ChildRemoved
+import com.strumenta.kolasu.ast.NodeLike
 
 class MultiplePropertyListObserver<C : NodeLike, E : NodeLike>(
     val container: C,
