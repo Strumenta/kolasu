@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.model
 
-interface Destination
+import com.strumenta.kolasu.ast.Destination
 
 data class CompositeDestination(
     val elements: List<Destination>,

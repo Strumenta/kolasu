@@ -3,7 +3,7 @@ package com.strumenta.kolasu.emf
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.model.Destination
+import com.strumenta.kolasu.ast.Destination
 import com.strumenta.kolasu.model.NodeDestination
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.NodeOrigin
