@@ -2,6 +2,7 @@
 
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.ast.FeatureDescription
 import com.strumenta.kolasu.traversing.ASTWalker
 import com.strumenta.kolasu.traversing.children
 import com.strumenta.kolasu.traversing.searchByType
@@ -69,7 +70,7 @@ fun <T : NodeLike> T.withParent(parent: NodeLike?): T {
 @JvmOverloads
 fun NodeLike.processProperties(
     propertiesToIgnore: Set<String> = emptySet(),
-    propertyOperation: (PropertyDescription) -> Unit,
+    propertyOperation: (FeatureDescription) -> Unit,
 ) {
     this.properties.filter { it.name !in propertiesToIgnore }.forEach {
         try {
@@ -228,7 +229,7 @@ val NodeLike.previousSamePropertySibling: NodeLike?
 /**
  * Return the property containing this Node, if any. Null should be returned for root nodes.
  */
-fun NodeLike.containingProperty(): PropertyDescription? {
+fun NodeLike.containingProperty(): FeatureDescription? {
     if (this.parent == null) {
         return null
     }
@@ -250,7 +251,7 @@ fun NodeLike.indexInContainingProperty(): Int? {
     return if (p == null) {
         null
     } else if (p.value is Collection<*>) {
-        p.value.indexOf(this)
+        (p.value as Collection<*>).indexOf(this)
     } else {
         0
     }

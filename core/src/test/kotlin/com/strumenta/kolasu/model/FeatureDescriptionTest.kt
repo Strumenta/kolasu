@@ -1,5 +1,8 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.ast.FeatureDescription
+import com.strumenta.kolasu.ast.FeatureType
+import com.strumenta.kolasu.ast.Multiplicity
 import org.junit.Test
 import java.util.LinkedList
 import kotlin.test.assertEquals
@@ -20,22 +23,22 @@ data class Foo4(
     val foos: List<Foo1>?,
 ) : Node()
 
-class PropertyDescriptionTest {
+class FeatureDescriptionTest {
     @Test
     fun buildForNotNodeSingleProperty() {
-        val list = LinkedList<PropertyDescription>()
+        val list = LinkedList<FeatureDescription>()
         val instance = Foo1("gino")
         instance.processProperties {
             list.add(it)
         }
         assertEquals(1, list.size)
         assertEquals(
-            PropertyDescription(
+            FeatureDescription(
                 "name",
                 false,
                 Multiplicity.SINGULAR,
                 "gino",
-                PropertyType.ATTRIBUTE,
+                FeatureType.ATTRIBUTE,
             ),
             list[0],
         )
@@ -43,19 +46,19 @@ class PropertyDescriptionTest {
 
     @Test
     fun buildForNotNodeMultipleProperty() {
-        val list = LinkedList<PropertyDescription>()
+        val list = LinkedList<FeatureDescription>()
         val instance = Foo2(listOf("gino", "pino"))
         instance.processProperties {
             list.add(it)
         }
         assertEquals(1, list.size)
         assertEquals(
-            PropertyDescription(
+            FeatureDescription(
                 "names",
                 false,
                 Multiplicity.MANY,
                 listOf("gino", "pino"),
-                PropertyType.ATTRIBUTE,
+                FeatureType.ATTRIBUTE,
             ),
             list[0],
         )
@@ -63,19 +66,19 @@ class PropertyDescriptionTest {
 
     @Test
     fun buildForNodeSingleProperty() {
-        val list = LinkedList<PropertyDescription>()
+        val list = LinkedList<FeatureDescription>()
         val instance = Foo3(Foo1("gino"))
         instance.processProperties {
             list.add(it)
         }
         assertEquals(1, list.size)
         assertEquals(
-            PropertyDescription(
+            FeatureDescription(
                 "foo",
                 true,
                 Multiplicity.SINGULAR,
                 Foo1("gino"),
-                PropertyType.CONTAINMENT,
+                FeatureType.CONTAINMENT,
             ),
             list[0],
         )
@@ -83,19 +86,19 @@ class PropertyDescriptionTest {
 
     @Test
     fun buildForNodeMultipleProperty() {
-        val list = LinkedList<PropertyDescription>()
+        val list = LinkedList<FeatureDescription>()
         val instance = Foo4(listOf(Foo1("gino")))
         instance.processProperties {
             list.add(it)
         }
         assertEquals(1, list.size)
         assertEquals(
-            PropertyDescription(
+            FeatureDescription(
                 "foos",
                 true,
                 Multiplicity.MANY,
                 listOf(Foo1("gino")),
-                PropertyType.CONTAINMENT,
+                FeatureType.CONTAINMENT,
             ),
             list[0],
         )
@@ -103,19 +106,19 @@ class PropertyDescriptionTest {
 
     @Test
     fun buildForNodeMultiplePropertyEmpty() {
-        val list = LinkedList<PropertyDescription>()
+        val list = LinkedList<FeatureDescription>()
         val instance = Foo4(listOf())
         instance.processProperties {
             list.add(it)
         }
         assertEquals(1, list.size)
         assertEquals(
-            PropertyDescription(
+            FeatureDescription(
                 "foos",
                 true,
                 Multiplicity.MANY,
                 emptyList<Foo1>(),
-                PropertyType.CONTAINMENT,
+                FeatureType.CONTAINMENT,
             ),
             list[0],
         )
@@ -123,19 +126,19 @@ class PropertyDescriptionTest {
 
     @Test
     fun buildForNodeMultiplePropertyNull() {
-        val list = LinkedList<PropertyDescription>()
+        val list = LinkedList<FeatureDescription>()
         val instance = Foo4(null)
         instance.processProperties {
             list.add(it)
         }
         assertEquals(1, list.size)
         assertEquals(
-            PropertyDescription(
+            FeatureDescription(
                 "foos",
                 true,
                 Multiplicity.MANY,
                 null,
-                PropertyType.CONTAINMENT,
+                FeatureType.CONTAINMENT,
             ),
             list[0],
         )

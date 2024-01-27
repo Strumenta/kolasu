@@ -1,15 +1,15 @@
 package com.strumenta.kolasu.serialization
 
 import com.google.gson.stream.JsonWriter
+import com.strumenta.kolasu.ast.FeatureDescription
+import com.strumenta.kolasu.ast.FeatureType
+import com.strumenta.kolasu.ast.Multiplicity
 import com.strumenta.kolasu.ast.Point
 import com.strumenta.kolasu.ast.Range
-import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.PropertyDescription
-import com.strumenta.kolasu.model.PropertyType
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.range
 import com.strumenta.kolasu.validation.Issue
@@ -366,33 +366,33 @@ class JsonGenerationTest {
             DynamicNode(
                 "com.strumenta.kolasu.test.Node",
                 listOf(
-                    PropertyDescription(
+                    FeatureDescription(
                         "someAttr",
                         false,
                         Multiplicity.SINGULAR,
                         123,
-                        PropertyType.ATTRIBUTE,
+                        FeatureType.ATTRIBUTE,
                     ),
-                    PropertyDescription(
+                    FeatureDescription(
                         "someListAttr",
                         false,
                         Multiplicity.MANY,
                         listOf("a", "b"),
-                        PropertyType.ATTRIBUTE,
+                        FeatureType.ATTRIBUTE,
                     ),
-                    PropertyDescription(
+                    FeatureDescription(
                         "someChild",
                         true,
                         Multiplicity.SINGULAR,
                         BaseNode(456),
-                        PropertyType.CONTAINMENT,
+                        FeatureType.CONTAINMENT,
                     ),
-                    PropertyDescription(
+                    FeatureDescription(
                         "someChildren",
                         true,
                         Multiplicity.MANY,
                         listOf(BaseNode(78), BaseNode(90)),
-                        PropertyType.CONTAINMENT,
+                        FeatureType.CONTAINMENT,
                     ),
                 ),
             )
@@ -429,5 +429,5 @@ class JsonGenerationTest {
 
 data class DynamicNode(
     override val nodeType: String,
-    override val properties: List<PropertyDescription>,
+    override val properties: List<FeatureDescription>,
 ) : Node()

@@ -1,5 +1,8 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.ast.FeatureDescription
+import com.strumenta.kolasu.ast.FeatureType
+import com.strumenta.kolasu.ast.Multiplicity
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Feature
@@ -42,90 +45,71 @@ fun <T : Any> KClass<T>.processProperties(
     }
 }
 
-enum class PropertyType {
-    ATTRIBUTE,
-    CONTAINMENT,
-    REFERENCE,
+fun FeatureDescription.valueToString(): String {
+    if (value == null) {
+        return "null"
+    }
+    return if (provideNodes) {
+        if (multiplicity == Multiplicity.MANY) {
+            "[${(value as Collection<NodeLike>).joinToString(",") { it.nodeType }}]"
+        } else {
+            "${(value as NodeLike).nodeType}(...)"
+        }
+    } else {
+        if (multiplicity == Multiplicity.MANY) {
+            "[${(value as Collection<*>).joinToString(",") { it.toString() }}]"
+        } else {
+            value.toString()
+        }
+    }
 }
 
-data class PropertyDescription(
-    val name: String,
-    val provideNodes: Boolean,
-    val multiplicity: Multiplicity,
-    val value: Any?,
-    val propertyType: PropertyType,
-) {
-    fun valueToString(): String {
-        if (value == null) {
-            return "null"
-        }
-        return if (provideNodes) {
-            if (multiplicity == Multiplicity.MANY) {
-                "[${(value as Collection<NodeLike>).joinToString(",") { it.nodeType }}]"
-            } else {
-                "${(value as NodeLike).nodeType}(...)"
-            }
-        } else {
-            if (multiplicity == Multiplicity.MANY) {
-                "[${(value as Collection<*>).joinToString(",") { it.toString() }}]"
-            } else {
-                value.toString()
-            }
-        }
+fun <N : NodeLike> FeatureDescription.Companion.multiple(property: KProperty1<N, *>): Boolean {
+    val propertyType = property.returnType
+    val classifier = propertyType.classifier as? KClass<*>
+    return (classifier?.isSubclassOf(Collection::class) == true)
+}
+
+fun <N : NodeLike> FeatureDescription.Companion.optional(property: KProperty1<N, *>): Boolean {
+    val propertyType = property.returnType
+    return !multiple(property) && propertyType.isMarkedNullable
+}
+
+fun <N : NodeLike> FeatureDescription.Companion.multiplicity(property: KProperty1<N, *>): Multiplicity {
+    return when {
+        multiple(property) -> Multiplicity.MANY
+        optional(property) -> Multiplicity.OPTIONAL
+        else -> Multiplicity.SINGULAR
     }
+}
 
-    val isMultiple: Boolean
-        get() = multiplicity == Multiplicity.MANY
-
-    companion object {
-        fun <N : NodeLike> multiple(property: KProperty1<N, *>): Boolean {
-            val propertyType = property.returnType
-            val classifier = propertyType.classifier as? KClass<*>
-            return (classifier?.isSubclassOf(Collection::class) == true)
-        }
-
-        fun <N : NodeLike> optional(property: KProperty1<N, *>): Boolean {
-            val propertyType = property.returnType
-            return !multiple(property) && propertyType.isMarkedNullable
-        }
-
-        fun <N : NodeLike> multiplicity(property: KProperty1<N, *>): Multiplicity {
-            return when {
-                multiple(property) -> Multiplicity.MANY
-                optional(property) -> Multiplicity.OPTIONAL
-                else -> Multiplicity.SINGULAR
-            }
-        }
-
-        fun <N : NodeLike> providesNodes(property: KProperty1<N, *>): Boolean {
-            val propertyType = property.returnType
-            val classifier = propertyType.classifier as? KClass<*>
-            return if (multiple(property)) {
-                providesNodes(propertyType.arguments[0])
-            } else {
-                providesNodes(classifier)
-            }
-        }
-
-        fun <N : NodeLike> buildFor(
-            property: KProperty1<N, *>,
-            node: NodeLike,
-        ): PropertyDescription {
-            val multiplicity = multiplicity(property)
-            val provideNodes = providesNodes(property)
-            return PropertyDescription(
-                name = property.name,
-                provideNodes = provideNodes,
-                multiplicity = multiplicity,
-                value = property.get(node as N),
-                when {
-                    property.isReference() -> PropertyType.REFERENCE
-                    provideNodes -> PropertyType.CONTAINMENT
-                    else -> PropertyType.ATTRIBUTE
-                },
-            )
-        }
+fun <N : NodeLike> FeatureDescription.Companion.providesNodes(property: KProperty1<N, *>): Boolean {
+    val propertyType = property.returnType
+    val classifier = propertyType.classifier as? KClass<*>
+    return if (multiple(property)) {
+        providesNodes(propertyType.arguments[0])
+    } else {
+        providesNodes(classifier)
     }
+}
+
+fun <N : NodeLike> FeatureDescription.Companion.buildFor(
+    property: KProperty1<N, *>,
+    node: NodeLike,
+): FeatureDescription {
+    val multiplicity = multiplicity(property)
+    val provideNodes = providesNodes(property)
+    return FeatureDescription(
+        name = property.name,
+        provideNodes = provideNodes,
+        multiplicity = multiplicity,
+        value = property.get(node as N),
+        when {
+            property.isReference() -> FeatureType.REFERENCE
+            provideNodes -> FeatureType.CONTAINMENT
+            else -> FeatureType.ATTRIBUTE
+        },
+    )
 }
 
 private fun providesNodes(classifier: KClassifier?): Boolean {
@@ -186,12 +170,6 @@ data class PropertyTypeDescription(
             )
         }
     }
-}
-
-enum class Multiplicity {
-    OPTIONAL,
-    SINGULAR,
-    MANY,
 }
 
 private fun providesNodes(kTypeProjection: KTypeProjection): Boolean {

@@ -3,6 +3,7 @@ package com.strumenta.kolasu.model
 import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.ast.Destination
+import com.strumenta.kolasu.ast.FeatureDescription
 import com.strumenta.kolasu.ast.Internal
 import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.ast.Source
@@ -29,7 +30,7 @@ interface NodeLike {
      * The properties of this AST nodes, including attributes, children, and references.
      */
     @property:Internal
-    val properties: List<PropertyDescription>
+    val properties: List<FeatureDescription>
 
     /**
      * The origin from which this AST Node has been generated, if any.
