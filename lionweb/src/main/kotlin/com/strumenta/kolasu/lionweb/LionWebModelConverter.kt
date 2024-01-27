@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.ast.Source
+import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.PossiblyNamed
@@ -70,7 +71,7 @@ class LionWebModelConverter {
                     is Property -> {
                         val kAttribute =
                             kFeatures.find { it.name == feature.name }
-                                as? com.strumenta.kolasu.language.Attribute
+                                as? Attribute
                                 ?: throw IllegalArgumentException("Property ${feature.name} not found in $kNode")
                         val kValue = kNode.getAttributeValue(kAttribute)
                         lwNode.setPropertyValue(feature, kValue)
