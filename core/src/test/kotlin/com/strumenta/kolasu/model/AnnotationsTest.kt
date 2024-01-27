@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.model.annotations.Annotation
-import com.strumenta.kolasu.model.annotations.MultipleAnnotation
-import com.strumenta.kolasu.model.annotations.SingleAnnotation
+import com.strumenta.kolasu.ast.Annotation
+import com.strumenta.kolasu.ast.MultipleAnnotation
+import com.strumenta.kolasu.ast.SingleAnnotation
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

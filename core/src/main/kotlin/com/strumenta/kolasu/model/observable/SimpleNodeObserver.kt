@@ -2,49 +2,14 @@ package com.strumenta.kolasu.model.observable
 
 import com.badoo.reaktive.disposable.Disposable
 import com.badoo.reaktive.observable.ObservableObserver
-import com.strumenta.kolasu.model.NodeLike
-
-sealed class NodeNotification<N : NodeLike> {
-    abstract val node: N
-}
-
-data class AttributeChangedNotification<N : NodeLike, V : Any?>(
-    override val node: N,
-    val attributeName: String,
-    val oldValue: V,
-    val newValue: V,
-) : NodeNotification<N>()
-
-data class ChildAdded<N : NodeLike>(
-    override val node: N,
-    val containmentName: String,
-    val child: NodeLike,
-) : NodeNotification<N>()
-
-data class ChildRemoved<N : NodeLike>(
-    override val node: N,
-    val containmentName: String,
-    val child: NodeLike,
-) : NodeNotification<N>()
-
-data class ReferenceSet<N : NodeLike>(
-    override val node: N,
-    val referenceName: String,
-    val oldReferredNode: NodeLike?,
-    val newReferredNode: NodeLike?,
-) : NodeNotification<N>()
-
-data class ReferencedToAdded<N : NodeLike>(
-    override val node: N,
-    val referenceName: String,
-    val referringNode: NodeLike,
-) : NodeNotification<N>()
-
-data class ReferencedToRemoved<N : NodeLike>(
-    override val node: N,
-    val referenceName: String,
-    val referringNode: NodeLike,
-) : NodeNotification<N>()
+import com.strumenta.kolasu.ast.AttributeChangedNotification
+import com.strumenta.kolasu.ast.ChildAdded
+import com.strumenta.kolasu.ast.ChildRemoved
+import com.strumenta.kolasu.ast.NodeLike
+import com.strumenta.kolasu.ast.NodeNotification
+import com.strumenta.kolasu.ast.ReferenceSet
+import com.strumenta.kolasu.ast.ReferencedToAdded
+import com.strumenta.kolasu.ast.ReferencedToRemoved
 
 open class SimpleNodeObserver : ObservableObserver<NodeNotification<in NodeLike>> {
     open fun <V : Any?> onAttributeChange(

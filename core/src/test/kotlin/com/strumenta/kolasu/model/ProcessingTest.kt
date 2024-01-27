@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.ast.NodeLike
 import java.util.LinkedList
 import kotlin.test.assertEquals
 import kotlin.test.assertSame

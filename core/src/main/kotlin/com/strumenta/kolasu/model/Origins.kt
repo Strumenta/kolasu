@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.ast.Origin
 import com.strumenta.kolasu.ast.Range
 

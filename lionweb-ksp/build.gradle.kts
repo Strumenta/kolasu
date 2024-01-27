@@ -17,6 +17,7 @@ val completeKspVersion = if (kspVersion.contains("-")) kspVersion else "$kotlinV
 dependencies {
     implementation("com.google.devtools.ksp:symbol-processing-api:$completeKspVersion")
     implementation(project(":core"))
+    implementation(project(":ast"))
 }
 
 val isReleaseVersion = !(version as String).endsWith("SNAPSHOT")

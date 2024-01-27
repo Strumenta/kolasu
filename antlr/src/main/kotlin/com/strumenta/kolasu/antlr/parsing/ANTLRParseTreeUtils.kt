@@ -1,10 +1,10 @@
 package com.strumenta.kolasu.antlr.parsing
 
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.ast.Origin
 import com.strumenta.kolasu.ast.Point
 import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.ast.Source
-import com.strumenta.kolasu.model.NodeLike
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token

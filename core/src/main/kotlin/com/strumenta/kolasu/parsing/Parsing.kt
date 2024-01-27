@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.parsing
 
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.ast.Range
-import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.Result

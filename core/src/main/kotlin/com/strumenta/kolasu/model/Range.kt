@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.ast.Point
 import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.ast.START_COLUMN

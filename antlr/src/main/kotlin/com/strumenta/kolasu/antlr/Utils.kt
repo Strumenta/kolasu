@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.antlr
 
 import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.model.SimpleOrigin
 
 /**

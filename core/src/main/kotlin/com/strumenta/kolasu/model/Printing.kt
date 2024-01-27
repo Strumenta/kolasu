@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.parsing.ParsingResult
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.jvm.isAccessible

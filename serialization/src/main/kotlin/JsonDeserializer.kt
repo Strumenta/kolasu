@@ -4,9 +4,9 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.ast.Point
 import com.strumenta.kolasu.ast.Range
-import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity

@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.ast.Internal
+import com.strumenta.kolasu.ast.NodeLike
 
 interface Statement : NodeLike
 

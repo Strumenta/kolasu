@@ -1,7 +1,4 @@
-package com.strumenta.kolasu.model.annotations
-
-import com.strumenta.kolasu.ast.Internal
-import com.strumenta.kolasu.model.NodeLike
+package com.strumenta.kolasu.ast
 
 /**
  * Annotations are useful to attach additional data to nodes, without having to modify the node classes.

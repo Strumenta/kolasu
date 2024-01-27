@@ -1,18 +1,12 @@
-package com.strumenta.kolasu.model
+package com.strumenta.kolasu.ast
 
 import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
-import com.strumenta.kolasu.ast.Destination
-import com.strumenta.kolasu.ast.FeatureDescription
-import com.strumenta.kolasu.ast.Internal
-import com.strumenta.kolasu.ast.Origin
-import com.strumenta.kolasu.ast.Range
-import com.strumenta.kolasu.ast.Source
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
-import com.strumenta.kolasu.model.annotations.Annotation
-import com.strumenta.kolasu.model.observable.NodeNotification
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.ReferenceByName
 import kotlin.reflect.KClass
 
 typealias NodeObserver = ObservableObserver<in NodeNotification<in NodeLike>>
