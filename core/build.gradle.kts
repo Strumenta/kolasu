@@ -2,6 +2,7 @@ val kotlinVersion = extra["kotlinVersion"]
 
 dependencies {
     api("com.badoo.reaktive:reaktive:2.0.1")
+    implementation(project(":ast"))
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
 }
 
