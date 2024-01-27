@@ -11,7 +11,6 @@ import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.declaredFeatures
 import com.strumenta.kolasu.model.isConcept
 import com.strumenta.kolasu.model.isConceptInterface
-import com.strumenta.kolasu.model.isMarkedAsNodeType
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.DataType
@@ -74,7 +73,7 @@ class LionWebLanguageConverter {
                         .supertypes
                         .map { it.classifier as KClass<*> }
                         .filter { it.java.isInterface }
-                superInterfaces.filter { it.isMarkedAsNodeType() }.forEach {
+                superInterfaces.filter { it.isConceptInterface }.forEach {
                     conceptInterface.addExtendedInterface(correspondingInterface(it))
                 }
             } else {
@@ -90,7 +89,7 @@ class LionWebLanguageConverter {
                     throw IllegalStateException()
                 }
                 val interfaces = astClass.supertypes.map { it.classifier as KClass<*> }.filter { it.java.isInterface }
-                interfaces.filter { it.isMarkedAsNodeType() }.forEach {
+                interfaces.filter { it.isConceptInterface }.forEach {
                     concept.addImplementedInterface(correspondingInterface(it))
                 }
             }

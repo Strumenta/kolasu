@@ -12,7 +12,7 @@ import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.NodeType
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
@@ -25,6 +25,10 @@ import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
 import org.jetbrains.kotlin.konan.file.File
+import kotlin.reflect.KClass
+
+private val KClass<*>.packageName: String
+    get() = this.qualifiedName!!.removeSuffix(".${this.simpleName}")
 
 data class KotlinFile(
     val path: String,
@@ -128,10 +132,8 @@ class ASTGenerator(
                             .addMember("key = \"${element.key}\"")
                             .build(),
                     )
-                    typeSpec.addAnnotation(
-                        AnnotationSpec
-                            .builder(NodeType::class.java)
-                            .build(),
+                    typeSpec.addSuperinterface(
+                        ClassName.forKClass(NodeLike::class),
                     )
                     val fqName = "$packageName.${element.name!!}"
                     if (fqName in existingKotlinClasses) {
@@ -278,3 +280,10 @@ class ASTGenerator(
             }
         }
 }
+
+fun TypeSpec.Companion.classBuilder(kClass: KClass<*>): TypeSpec.Builder =
+    TypeSpec.classBuilder(
+        ClassName.forKClass(kClass),
+    )
+
+fun ClassName.Companion.forKClass(kClass: KClass<*>): ClassName = ClassName(kClass.packageName, kClass.simpleName!!)

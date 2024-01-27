@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.model.annotations
 
-import com.strumenta.kolasu.model.Internal
+import com.strumenta.kolasu.ast.Internal
 import com.strumenta.kolasu.model.NodeLike
 
 /**
