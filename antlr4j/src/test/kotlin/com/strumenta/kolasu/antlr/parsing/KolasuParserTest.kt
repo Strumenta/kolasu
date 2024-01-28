@@ -1,5 +1,8 @@
 package com.strumenta.kolasu.antlr.parsing
 
+import com.strumenta.kolasu.antlr4j.parsing.ANTLRTokenFactory
+import com.strumenta.kolasu.antlr4j.parsing.KolasuANTLRParser
+import com.strumenta.kolasu.antlr4j.parsing.KolasuANTLRToken
 import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.ast.Point
 import com.strumenta.kolasu.ast.Range

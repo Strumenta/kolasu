@@ -1,10 +1,10 @@
 package com.strumenta.kolasu.transformation
 
 import com.strumenta.kolasu.ast.NodeLike
+import com.strumenta.kolasu.ast.NodeOrigin
 import com.strumenta.kolasu.ast.Origin
 import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.model.GenericErrorNode
-import com.strumenta.kolasu.model.NodeOrigin
 import com.strumenta.kolasu.model.PropertyTypeDescription
 import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.model.processProperties

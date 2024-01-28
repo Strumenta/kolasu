@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.antlr.mapping
+package com.strumenta.kolasu.antlr4j.mapping
 
 import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed

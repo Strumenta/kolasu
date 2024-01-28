@@ -1,16 +1,17 @@
-package com.strumenta.kolasu.antlr.parsing
+package com.strumenta.kolasu.antlr4k.parsing
 
 import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.ast.Origin
 import com.strumenta.kolasu.ast.Point
 import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.ast.Source
-import org.antlr.v4.runtime.ParserRuleContext
-import org.antlr.v4.runtime.RuleContext
-import org.antlr.v4.runtime.Token
-import org.antlr.v4.runtime.tree.ErrorNode
-import org.antlr.v4.runtime.tree.ParseTree
-import org.antlr.v4.runtime.tree.TerminalNode
+import org.antlr.v4.kotlinruntime.ParserRuleContext
+import org.antlr.v4.kotlinruntime.RuleContext
+import org.antlr.v4.kotlinruntime.Token
+import org.antlr.v4.kotlinruntime.misc.Interval
+import org.antlr.v4.kotlinruntime.tree.ErrorNode
+import org.antlr.v4.kotlinruntime.tree.ParseTree
+import org.antlr.v4.kotlinruntime.tree.TerminalNode
 import kotlin.reflect.KClass
 
 /**
@@ -26,10 +27,10 @@ fun ParserRuleContext.processDescendantsAndErrors(
         operationOnParserRuleContext(this)
     }
     if (this.children != null) {
-        this.children.filterIsInstance(ParserRuleContext::class.java).forEach {
+        this.children!!.filterIsInstance<ParserRuleContext>().forEach {
             it.processDescendantsAndErrors(operationOnParserRuleContext, operationOnError, includingMe = true)
         }
-        this.children.filterIsInstance(ErrorNode::class.java).forEach {
+        this.children!!.filterIsInstance<ErrorNode>().forEach {
             operationOnError(it)
         }
     }
@@ -39,19 +40,14 @@ fun ParserRuleContext.processDescendantsAndErrors(
  * Get the original text associated to this non-terminal by querying the inputstream.
  */
 fun ParserRuleContext.getOriginalText(): String {
-    val a: Int = this.start.startIndex
-    val b: Int = this.stop.stopIndex
+    val a: Int = this.start!!.startIndex
+    val b: Int = this.stop!!.stopIndex
     if (a > b) {
         throw IllegalStateException("Start index should be less than or equal to the stop index. Start: $a, Stop: $b")
     }
     val interval =
-        org
-            .antlr
-            .v4
-            .runtime
-            .misc
-            .Interval(a, b)
-    return this.start.inputStream.getText(interval)
+        Interval(a, b)
+    return this.start!!.inputStream!!.getText(interval)
 }
 
 /**
@@ -69,13 +65,8 @@ fun Token.getOriginalText(): String {
         throw IllegalStateException("Start index should be less than or equal to the stop index. Start: $a, Stop: $b")
     }
     val interval =
-        org
-            .antlr
-            .v4
-            .runtime
-            .misc
-            .Interval(a, b)
-    return this.inputStream.getText(interval)
+        Interval(a, b)
+    return this.inputStream!!.getText(interval)
 }
 
 /**
@@ -152,13 +143,13 @@ val RuleContext.lastChild: ParseTree?
     get() = if (hasChildren) this.getChild(this.childCount - 1) else null
 
 val Token.length
-    get() = if (this.type == Token.EOF) 0 else text.length
+    get() = if (this.type == Token.EOF) 0 else text!!.length
 
 val Token.startPoint: Point
     get() = Point(this.line, this.charPositionInLine)
 
 val Token.endPoint: Point
-    get() = if (this.type == Token.EOF) startPoint else startPoint + this.text
+    get() = if (this.type == Token.EOF) startPoint else startPoint + this.text!!
 
 val Token.range: Range
     get() = Range(startPoint, endPoint)
@@ -167,7 +158,7 @@ val Token.range: Range
  * Returns the range of the receiver parser rule context.
  */
 val ParserRuleContext.range: Range
-    get() = Range(start.startPoint, stop.endPoint)
+    get() = Range(start!!.startPoint, stop!!.endPoint)
 
 /**
  * Returns the range of the receiver parser rule context.
@@ -218,5 +209,5 @@ fun <T : RuleContext> RuleContext.ancestor(kclass: KClass<T>): T =
     } else if (kclass.isInstance(this.parent)) {
         this.parent as T
     } else {
-        this.parent.ancestor(kclass)
+        this.parent!!.ancestor(kclass)
     }
