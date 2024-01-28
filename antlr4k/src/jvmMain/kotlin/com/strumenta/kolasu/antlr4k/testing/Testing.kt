@@ -1,5 +1,6 @@
-package com.strumenta.kolasu.antlr4k.parsing
+package com.strumenta.kolasu.antlr4k.testing
 
+import com.strumenta.kolasu.antlr4k.parsing.toParseTreeModel
 import org.antlr.v4.kotlinruntime.ParserRuleContext
 import org.antlr.v4.kotlinruntime.Vocabulary
 import kotlin.test.assertEquals
