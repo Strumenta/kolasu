@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.antlr.parsing.coverage
+package com.strumenta.kolasu.antlr4j.parsing.coverage
 
 import com.strumenta.kolasu.traversing.mutableStackOf
 import org.antlr.v4.runtime.Parser

@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.antlr.parsing.coverage
 
+import com.strumenta.kolasu.antlr4j.parsing.coverage.CoverageListener
 import com.strumenta.simplelang.SimpleLangLexer
 import com.strumenta.simplelang.SimpleLangParser
 import org.antlr.v4.runtime.CharStreams

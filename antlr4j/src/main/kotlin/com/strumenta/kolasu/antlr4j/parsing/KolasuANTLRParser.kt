@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.antlr.parsing
+package com.strumenta.kolasu.antlr4j.parsing
 
 import com.strumenta.kolasu.ast.FeatureDescription
 import com.strumenta.kolasu.ast.NodeLike

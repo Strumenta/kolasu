@@ -1,6 +1,10 @@
 package com.strumenta.kolasu.antlr.mapping
 
-import com.strumenta.kolasu.antlr.parsing.withParseTreeNode
+import com.strumenta.kolasu.antlr4j.mapping.ParseTreeToASTTransformer
+import com.strumenta.kolasu.antlr4j.mapping.TrivialFactoryOfParseTreeToASTNodeTransformer
+import com.strumenta.kolasu.antlr4j.mapping.registerTrivialPTtoASTConversion
+import com.strumenta.kolasu.antlr4j.mapping.unwrap
+import com.strumenta.kolasu.antlr4j.parsing.withParseTreeNode
 import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.model.GenericErrorNode

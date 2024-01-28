@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.playground
 
-import com.strumenta.kolasu.antlr.parsing.FirstStageParsingResult
-import com.strumenta.kolasu.antlr.parsing.ParsingResultWithFirstStage
+import com.strumenta.kolasu.antlr4j.parsing.FirstStageParsingResult
+import com.strumenta.kolasu.antlr4j.parsing.ParsingResultWithFirstStage
 import com.strumenta.kolasu.emf.MetamodelsBuilder
 import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.parsing.ParsingResult

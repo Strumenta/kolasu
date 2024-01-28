@@ -1,7 +1,7 @@
-package com.strumenta.kolasu.antlr.mapping
+package com.strumenta.kolasu.antlr4j.mapping
 
-import com.strumenta.kolasu.antlr.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.antlr.parsing.withParseTreeNode
+import com.strumenta.kolasu.antlr4j.parsing.ParseTreeOrigin
+import com.strumenta.kolasu.antlr4j.parsing.withParseTreeNode
 import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.ast.Origin
 import com.strumenta.kolasu.ast.Source
