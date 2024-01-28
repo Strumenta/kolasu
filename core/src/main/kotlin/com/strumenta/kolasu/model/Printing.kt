@@ -49,7 +49,7 @@ fun <N : NodeLike> ParsingResult<N>.debugPrint(
         sb.append("${indent}${indentBlock}root = null\n")
     } else {
         sb.append("${indent}${indentBlock}root = [\n")
-        sb.append(this.root.debugPrint(indent + indentBlock + indentBlock, configuration = configuration))
+        sb.append(this.root!!.debugPrint(indent + indentBlock + indentBlock, configuration = configuration))
         sb.append("${indent}$indentBlock]\n")
     }
     sb.append("$indent}\n")
