@@ -16,6 +16,10 @@ kotlin {
     jvm {
         withJava()
     }
+    js {
+        browser()
+        nodejs()
+    }
     sourceSets {
         val commonMain by getting {
             dependencies {
