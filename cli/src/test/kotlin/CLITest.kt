@@ -289,6 +289,17 @@ class CLITest {
     }
 
     @Test
+    fun nodeToString() {
+        assertEquals(
+            """MyFieldDecl {
+            |  name = f3
+            |} // MyFieldDecl
+            """.trimMargin(),
+            MyFieldDecl("f3").toString(),
+        )
+    }
+
+    @Test
     fun runSimpleASTSaverSimpleFileSpecifyingDebugFormat() {
         val myDir = createTempDirectory()
         val myFile = createTempFile(myDir, "myfile.mylang")
