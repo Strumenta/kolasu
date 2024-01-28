@@ -28,7 +28,7 @@ val isReleaseVersion = !(version as String).endsWith("-SNAPSHOT")
 
 subprojects {
 
-    if (this.name != "ast") {
+    if (this.name != "ast" && this.name != "antlr4k") {
         apply(plugin = "org.jetbrains.kotlin.jvm")
 
         apply(plugin = "org.jlleitschuh.gradle.ktlint")
