@@ -124,7 +124,7 @@ fun <T : NodeLike> assertParsingResultsAreEqual(
     assertEquals(expected.issues, actual.issues)
     assertEquals(expected.root != null, actual.root != null)
     if (expected.root != null) {
-        assertASTsAreEqual(expected.root, actual.root!!)
+        assertASTsAreEqual(expected.root!!, actual.root!!)
     }
 }
 

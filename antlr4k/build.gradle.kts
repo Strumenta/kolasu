@@ -10,6 +10,7 @@ plugins {
 val cliktVersion = extra["clikt_version"]
 val gsonVersion = extra["gson_version"]
 val antlrKotlinVersion = extra["antlrKotlinVersion"]
+val kotlinVersion = extra["kotlinVersion"]
 
 kotlin {
     jvm {
@@ -19,6 +20,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":ast"))
+                implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
                 implementation("com.strumenta:antlr-kotlin-runtime:$antlrKotlinVersion")
             }
         }
