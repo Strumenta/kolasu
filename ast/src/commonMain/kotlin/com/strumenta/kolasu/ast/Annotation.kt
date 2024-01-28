@@ -29,8 +29,8 @@ sealed class Annotation {
     }
 
     @Internal
-    val annotationType: String
-        get() = this::class.qualifiedName!!
+    abstract val annotationType: String
+    // get() = this::class.qualifiedName!!
 
     @Internal
     val single: Boolean

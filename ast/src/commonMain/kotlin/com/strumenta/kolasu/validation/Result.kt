@@ -28,7 +28,7 @@ data class Result<C>(
                 listOf(
                     Issue(
                         type = errorType,
-                        message = e.message ?: e.javaClass.simpleName,
+                        message = e.message ?: e.toString(),
                         range = null,
                     ),
                 )

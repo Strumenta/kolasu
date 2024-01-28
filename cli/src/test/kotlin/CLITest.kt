@@ -295,7 +295,8 @@ class CLITest {
             """MyFieldDecl {
             |  name = f3
             |} // MyFieldDecl
-            |""".trimMargin(),
+            |
+            """.trimMargin(),
             MyFieldDecl("f3").debugPrint(),
         )
     }

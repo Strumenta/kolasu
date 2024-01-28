@@ -48,8 +48,7 @@ class ReferenceByName<N>(
     var referred: N? = null
         set(value) {
             require(value is NodeLike || value == null) {
-                "We cannot enforce it statically but only Node should be referred to. Instead $value was assigned " +
-                    "(class: ${value?.javaClass})"
+                "We cannot enforce it statically but only Node should be referred to. Instead $value was assigned"
             }
             changes.onNext(ReferenceChangeNotification(field, value as N?))
             field = value
