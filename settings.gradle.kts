@@ -3,6 +3,7 @@ pluginManagement {
     val dokkaVersion: String by settings
     plugins {
         id("org.jetbrains.kotlin.jvm") version "$kotlinVersion"
+        id("org.jetbrains.kotlin.multiplatform") version "$kotlinVersion"
         id("org.jetbrains.kotlin.kapt") version "$kotlinVersion"
         id("org.jetbrains.dokka") version "$dokkaVersion"
         id("com.github.gmazzo.buildconfig") version "3.1.0"
@@ -13,6 +14,7 @@ pluginManagement {
 rootProject.name = "kolasu"
 include("core")
 include("antlr4j")
+include("antlr4k")
 include("emf")
 include("playground")
 include("javalib")

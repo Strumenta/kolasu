@@ -17,7 +17,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api("com.badoo.reaktive:reaktive:2.0.1")
+                implementation(project(":ast"))
             }
         }
     }
