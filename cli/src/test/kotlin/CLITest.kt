@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.output.CliktConsole
 import com.strumenta.kolasu.ast.Source
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.debugPrint
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.junit.Test
@@ -289,13 +290,13 @@ class CLITest {
     }
 
     @Test
-    fun nodeToString() {
+    fun debugPrint() {
         assertEquals(
             """MyFieldDecl {
             |  name = f3
             |} // MyFieldDecl
-            """.trimMargin(),
-            MyFieldDecl("f3").toString(),
+            |""".trimMargin(),
+            MyFieldDecl("f3").debugPrint(),
         )
     }
 
