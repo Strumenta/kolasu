@@ -7,7 +7,6 @@ import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
-import kotlin.reflect.KClass
 
 typealias NodeObserver = ObservableObserver<in NodeNotification<in NodeLike>>
 
@@ -75,18 +74,18 @@ interface NodeLike {
     @Internal
     val allAnnotations: List<Annotation>
 
-    fun <I : Annotation> annotationsByType(kClass: KClass<I>): List<I> {
-        return allAnnotations.filterIsInstance(kClass.java)
+    fun annotationsByType(annotationType: String): List<Annotation> {
+        return allAnnotations.filter { it.annotationType == annotationType }
     }
 
-    fun <I : Annotation> getSingleAnnotation(kClass: KClass<I>): I? {
-        val instances = allAnnotations.filterIsInstance(kClass.java)
+    fun getSingleAnnotation(annotationType: String): Annotation? {
+        val instances = annotationsByType(annotationType)
         return if (instances.isEmpty()) {
             null
         } else if (instances.size == 1) {
             instances.first()
         } else {
-            throw IllegalStateException("More than one instance of $kClass found")
+            throw IllegalStateException("More than one instance of $annotationType found")
         }
     }
 
