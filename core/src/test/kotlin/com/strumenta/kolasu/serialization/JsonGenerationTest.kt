@@ -338,28 +338,32 @@ class JsonGenerationTest {
                     false,
                     Multiplicity.SINGULAR,
                     123,
-                    PropertyType.ATTRIBUTE
+                    PropertyType.ATTRIBUTE,
+                    derived = false
                 ),
                 PropertyDescription(
                     "someListAttr",
                     false,
                     Multiplicity.MANY,
                     listOf("a", "b"),
-                    PropertyType.ATTRIBUTE
+                    PropertyType.ATTRIBUTE,
+                    derived = false
                 ),
                 PropertyDescription(
                     "someChild",
                     true,
                     Multiplicity.SINGULAR,
                     BaseNode(456),
-                    PropertyType.CONTAINMENT
+                    PropertyType.CONTAINMENT,
+                    derived = false
                 ),
                 PropertyDescription(
                     "someChildren",
                     true,
                     Multiplicity.MANY,
                     listOf(BaseNode(78), BaseNode(90)),
-                    PropertyType.CONTAINMENT
+                    PropertyType.CONTAINMENT,
+                    derived = false
                 )
             )
         )

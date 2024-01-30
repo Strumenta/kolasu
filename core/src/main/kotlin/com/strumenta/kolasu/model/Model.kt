@@ -215,7 +215,6 @@ val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
 val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() = memberProperties.asSequence()
         .filter { it.visibility == KVisibility.PUBLIC }
-        .filter { it.findAnnotation<Derived>() == null }
         .filter { it.findAnnotation<Internal>() == null }
         .filter { it.findAnnotation<Link>() == null }
         .toList()
