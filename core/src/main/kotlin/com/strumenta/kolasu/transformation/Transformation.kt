@@ -537,9 +537,11 @@ open class ASTTransformer(
                                 if (kParameter.isOptional) {
                                     return AbsentParameterValue
                                 }
+                                // see https://youtrack.jetbrains.com/issue/KT-65341
+                                val paramName = kParameter.name!!
                                 throw java.lang.IllegalStateException(
                                     "We do not know how to produce " +
-                                        "parameter ${kParameter.name!!} for $target",
+                                        "parameter $paramName for $target",
                                 )
                             } else {
                                 return when (val childSource = childNodeTransformer.get.invoke(source)) {
@@ -574,8 +576,10 @@ open class ASTTransformer(
                                 }
                             }
                         } catch (t: Throwable) {
+                            // See https://youtrack.jetbrains.com/issue/KT-65341
+                            val paramName = kParameter.name!!
                             throw RuntimeException(
-                                "Issue while populating parameter ${kParameter.name} in " +
+                                "Issue while populating parameter $paramName in " +
                                     "constructor ${target.qualifiedName}.${target.preferredConstructor()}",
                                 t,
                             )
