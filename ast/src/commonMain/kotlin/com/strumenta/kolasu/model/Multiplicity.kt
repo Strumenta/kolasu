@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.ast
+package com.strumenta.kolasu.model
 
 enum class Multiplicity {
     OPTIONAL,

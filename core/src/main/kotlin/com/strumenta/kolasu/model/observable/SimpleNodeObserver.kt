@@ -2,14 +2,14 @@ package com.strumenta.kolasu.model.observable
 
 import com.badoo.reaktive.disposable.Disposable
 import com.badoo.reaktive.observable.ObservableObserver
-import com.strumenta.kolasu.ast.AttributeChangedNotification
-import com.strumenta.kolasu.ast.ChildAdded
-import com.strumenta.kolasu.ast.ChildRemoved
-import com.strumenta.kolasu.ast.NodeLike
-import com.strumenta.kolasu.ast.NodeNotification
-import com.strumenta.kolasu.ast.ReferenceSet
-import com.strumenta.kolasu.ast.ReferencedToAdded
-import com.strumenta.kolasu.ast.ReferencedToRemoved
+import com.strumenta.kolasu.model.AttributeChangedNotification
+import com.strumenta.kolasu.model.ChildAdded
+import com.strumenta.kolasu.model.ChildRemoved
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.NodeNotification
+import com.strumenta.kolasu.model.ReferenceSet
+import com.strumenta.kolasu.model.ReferencedToAdded
+import com.strumenta.kolasu.model.ReferencedToRemoved
 
 open class SimpleNodeObserver : ObservableObserver<NodeNotification<in NodeLike>> {
     open fun <V : Any?> onAttributeChange(

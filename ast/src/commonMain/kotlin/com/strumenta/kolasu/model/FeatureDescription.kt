@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.ast
+package com.strumenta.kolasu.model
 
 data class FeatureDescription(
     val name: String,

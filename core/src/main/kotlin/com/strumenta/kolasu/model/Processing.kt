@@ -2,8 +2,6 @@
 
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.ast.FeatureDescription
-import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.traversing.ASTWalker
 import com.strumenta.kolasu.traversing.children
 import com.strumenta.kolasu.traversing.searchByType

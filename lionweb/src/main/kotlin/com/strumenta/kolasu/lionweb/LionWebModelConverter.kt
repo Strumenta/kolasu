@@ -1,11 +1,12 @@
 package com.strumenta.kolasu.lionweb
 
-import com.strumenta.kolasu.ast.Source
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.FileSource
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.allFeatures
 import com.strumenta.kolasu.model.containingProperty
 import com.strumenta.kolasu.model.indexInContainingProperty
@@ -114,11 +115,11 @@ class LionWebModelConverter {
             val kClass =
                 languageConverter.correspondingKolasuClass(lwNode.concept)
                     ?: throw RuntimeException("We do not have StarLasu AST class for LIonWeb Concept ${lwNode.concept}")
-            val kNode: com.strumenta.kolasu.ast.NodeLike = instantiate(kClass, lwNode, referencesPostponer)
+            val kNode: NodeLike = instantiate(kClass, lwNode, referencesPostponer)
             associateNodes(kNode, lwNode)
         }
         lwTree.thisAndAllDescendants().forEach { lwNode ->
-            val kNode: com.strumenta.kolasu.ast.NodeLike = nodesMapping.byB(lwNode)!!
+            val kNode: NodeLike = nodesMapping.byB(lwNode)!!
             // TODO populate values not already set at construction time
         }
         referencesPostponer.populateReferences(nodesMapping)
@@ -170,7 +171,7 @@ class LionWebModelConverter {
         kClass: KClass<*>,
         data: Node,
         referencesPostponer: ReferencesPostponer,
-    ): com.strumenta.kolasu.ast.NodeLike {
+    ): NodeLike {
         val constructor: KFunction<Any> =
             when {
                 kClass.constructors.size == 1 -> {
@@ -285,18 +286,18 @@ class LionWebModelConverter {
             }
         }
         try {
-            return constructor.callBy(params) as com.strumenta.kolasu.ast.NodeLike
+            return constructor.callBy(params) as NodeLike
         } catch (e: ClassCastException) {
             throw RuntimeException("Issue instantiating using constructor $constructor with params $params", e)
         }
     }
 
-    private fun findConcept(kNode: com.strumenta.kolasu.ast.NodeLike): Concept {
+    private fun findConcept(kNode: NodeLike): Concept {
         return languageConverter.correspondingConcept(kNode.javaClass.kotlin)
     }
 
     private fun nodeID(
-        kNode: com.strumenta.kolasu.ast.NodeLike,
+        kNode: NodeLike,
         customSourceId: String? = null,
     ): String {
         return "${customSourceId ?: kNode.source.id}_${kNode.positionalID}"

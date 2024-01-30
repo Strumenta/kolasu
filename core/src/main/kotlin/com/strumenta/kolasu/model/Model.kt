@@ -1,12 +1,5 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.ast.Derived
-import com.strumenta.kolasu.ast.Internal
-import com.strumenta.kolasu.ast.Link
-import com.strumenta.kolasu.ast.NodeLike
-import com.strumenta.kolasu.ast.NodeOrigin
-import com.strumenta.kolasu.ast.Origin
-import com.strumenta.kolasu.ast.Range
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility

@@ -1,13 +1,13 @@
 package com.smeup.rpgparser.parsing.ast
 
-import com.strumenta.kolasu.ast.Derived
-import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.emf.rpgast.AbstractDataDefinition
 import com.strumenta.kolasu.emf.rpgast.DataDefinition
 import com.strumenta.kolasu.emf.rpgast.FileDefinition
 import com.strumenta.kolasu.emf.rpgast.InStatementDataDefinition
+import com.strumenta.kolasu.model.Derived
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Range
 
 // This file contains the AST nodes at the highest level:
 // from the CompilationUnit (which represents the whole file)

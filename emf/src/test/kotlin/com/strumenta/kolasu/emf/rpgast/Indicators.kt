@@ -1,7 +1,7 @@
 package com.smeup.rpgparser.parsing.ast
 
-import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.emf.rpgast.isInt
+import com.strumenta.kolasu.model.Range
 
 // *IN01..*IN99 and *INLR *INRT
 

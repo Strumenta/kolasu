@@ -6,11 +6,6 @@ import com.badoo.reaktive.observable.filter
 import com.badoo.reaktive.observable.map
 import com.badoo.reaktive.subject.getObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
-import com.strumenta.kolasu.ast.NodeLike
-import com.strumenta.kolasu.ast.ReferenceChangeNotification
-import com.strumenta.kolasu.ast.ReferenceSet
-import com.strumenta.kolasu.ast.ReferencedToAdded
-import com.strumenta.kolasu.ast.ReferencedToRemoved
 
 /**
  * An entity that can have a name

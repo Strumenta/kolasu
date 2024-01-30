@@ -1,9 +1,5 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.ast.FeatureDescription
-import com.strumenta.kolasu.ast.FeatureType
-import com.strumenta.kolasu.ast.Multiplicity
-import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Feature

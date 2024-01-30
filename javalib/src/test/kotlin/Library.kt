@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.javalib
 
-import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 
 data class Library(
     val books: List<Book>,

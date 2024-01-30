@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.language
 
-import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.codegen.ASTCodeGenerator
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.parsing.ASTParser
 
 /**

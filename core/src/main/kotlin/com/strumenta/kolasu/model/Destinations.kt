@@ -1,9 +1,5 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.ast.Destination
-import com.strumenta.kolasu.ast.NodeLike
-import com.strumenta.kolasu.ast.Range
-
 data class CompositeDestination(
     val elements: List<Destination>,
 ) : Destination

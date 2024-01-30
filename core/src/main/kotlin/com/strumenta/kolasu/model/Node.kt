@@ -2,17 +2,6 @@ package com.strumenta.kolasu.model
 
 import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
-import com.strumenta.kolasu.ast.Annotation
-import com.strumenta.kolasu.ast.AttributeChangedNotification
-import com.strumenta.kolasu.ast.Destination
-import com.strumenta.kolasu.ast.FeatureDescription
-import com.strumenta.kolasu.ast.Internal
-import com.strumenta.kolasu.ast.NodeLike
-import com.strumenta.kolasu.ast.NodeNotification
-import com.strumenta.kolasu.ast.Origin
-import com.strumenta.kolasu.ast.Range
-import com.strumenta.kolasu.ast.SimpleOrigin
-import com.strumenta.kolasu.ast.Source
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference

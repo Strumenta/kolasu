@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.ast
+package com.strumenta.kolasu.model
 
 /**
  * Annotations are useful to attach additional data to nodes, without having to modify the node classes.

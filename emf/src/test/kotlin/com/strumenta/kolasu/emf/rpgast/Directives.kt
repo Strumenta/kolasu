@@ -1,7 +1,7 @@
 package com.smeup.rpgparser.parsing.ast
 
-import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Range
 
 abstract class Directive(
     specifiedRange: Range? = null,

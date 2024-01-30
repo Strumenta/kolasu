@@ -1,9 +1,9 @@
 package com.strumenta.kolasu.javalib;
 
-import com.strumenta.kolasu.ast.FeatureDescription;
-import com.strumenta.kolasu.ast.Internal;
-import com.strumenta.kolasu.ast.Multiplicity;
-import com.strumenta.kolasu.ast.FeatureType;
+import com.strumenta.kolasu.model.FeatureDescription;
+import com.strumenta.kolasu.model.Internal;
+import com.strumenta.kolasu.model.Multiplicity;
+import com.strumenta.kolasu.model.FeatureType;
 import com.strumenta.kolasu.model.*;
 import org.jetbrains.annotations.NotNull;
 

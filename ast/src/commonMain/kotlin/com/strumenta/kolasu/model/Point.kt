@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.ast
+package com.strumenta.kolasu.model
 
 val START_LINE = 1
 val START_COLUMN = 0

@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.antlr4k.parsing
 
-import com.strumenta.kolasu.ast.NodeLike
-import com.strumenta.kolasu.ast.Point
-import com.strumenta.kolasu.ast.Range
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType

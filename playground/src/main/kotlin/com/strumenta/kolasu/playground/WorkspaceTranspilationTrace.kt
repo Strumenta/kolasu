@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.playground
 
-import com.strumenta.kolasu.ast.NodeLike
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 
