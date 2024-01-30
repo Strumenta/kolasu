@@ -79,8 +79,8 @@ public data class StringValue(
         assertEquals(
             """package com.strumenta.example
 
-import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.lionweb.LionWebAssociation
+import com.strumenta.kolasu.model.NodeLike
 import kotlin.Boolean
 
 @LionWebAssociation(key = "MyKey")
