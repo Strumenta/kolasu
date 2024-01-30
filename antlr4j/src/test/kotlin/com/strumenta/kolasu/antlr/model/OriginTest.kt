@@ -2,9 +2,9 @@ package com.strumenta.kolasu.antlr.model
 
 import com.strumenta.kolasu.antlr4j.detachFromParseTree
 import com.strumenta.kolasu.antlr4j.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.ast.Point
-import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.range
 import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.model.withRange

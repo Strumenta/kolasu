@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.language
 
-import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.asAttribute
 import com.strumenta.kolasu.model.containedType
 import com.strumenta.kolasu.model.isAttribute

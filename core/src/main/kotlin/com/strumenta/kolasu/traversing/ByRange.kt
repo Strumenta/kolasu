@@ -2,8 +2,8 @@
 
 package com.strumenta.kolasu.traversing
 
-import com.strumenta.kolasu.ast.NodeLike
-import com.strumenta.kolasu.ast.Range
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.contains
 
 /**

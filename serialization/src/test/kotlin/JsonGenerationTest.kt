@@ -1,15 +1,15 @@
 package com.strumenta.kolasu.serialization
 
 import com.google.gson.stream.JsonWriter
-import com.strumenta.kolasu.ast.FeatureDescription
-import com.strumenta.kolasu.ast.FeatureType
-import com.strumenta.kolasu.ast.Multiplicity
-import com.strumenta.kolasu.ast.NodeLike
-import com.strumenta.kolasu.ast.Point
-import com.strumenta.kolasu.ast.Range
+import com.strumenta.kolasu.model.FeatureDescription
+import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.range
 import com.strumenta.kolasu.validation.Issue

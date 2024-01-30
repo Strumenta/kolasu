@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.antlr4j
 
 import com.strumenta.kolasu.antlr4j.parsing.ParseTreeOrigin
-import com.strumenta.kolasu.ast.NodeLike
-import com.strumenta.kolasu.ast.SimpleOrigin
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.SimpleOrigin
 
 /**
  * Remove links to the ParseTree, in order to save memory.

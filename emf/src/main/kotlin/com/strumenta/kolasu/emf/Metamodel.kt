@@ -1,15 +1,15 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.ast.NodeLike
-import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.model.EntityDeclaration
 import com.strumenta.kolasu.model.ErrorNode
 import com.strumenta.kolasu.model.Expression
 import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PlaceholderElement
 import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.Statement
 import com.strumenta.kolasu.transformation.GenericNode

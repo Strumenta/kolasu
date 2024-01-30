@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.language
 
-import com.strumenta.kolasu.ast.Multiplicity
+import com.strumenta.kolasu.model.Multiplicity
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 

@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.model.observable
 
-import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
 import kotlin.test.Test
 import kotlin.test.assertEquals

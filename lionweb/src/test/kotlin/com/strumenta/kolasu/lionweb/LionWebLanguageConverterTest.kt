@@ -1,9 +1,9 @@
 package com.strumenta.kolasu.lionweb
 
-import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.utils.LanguageValidator

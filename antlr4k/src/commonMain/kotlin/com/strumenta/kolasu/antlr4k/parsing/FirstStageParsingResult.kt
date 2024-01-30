@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.antlr4k.parsing
 
-import com.strumenta.kolasu.ast.NodeLike
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.parsing.CodeProcessingResult
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.kotlinruntime.ParserRuleContext

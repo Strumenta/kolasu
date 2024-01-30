@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.serialization
 
-import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.traversing.walkLeavesFirst
 import org.junit.Test

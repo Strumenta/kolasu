@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.javalib;
 
 import com.strumenta.kolasu.model.DebugPrintConfiguration;
-import com.strumenta.kolasu.ast.NodeLike;
+import com.strumenta.kolasu.model.NodeLike;
 import com.strumenta.kolasu.model.PrintingKt;
 
 /**

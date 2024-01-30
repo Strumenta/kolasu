@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.ast.NodeLike
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType

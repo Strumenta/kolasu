@@ -1,6 +1,4 @@
-package com.strumenta.kolasu.ast
-
-import com.strumenta.kolasu.model.PossiblyNamed
+package com.strumenta.kolasu.model
 
 sealed class NodeNotification<N : NodeLike> {
     abstract val node: N

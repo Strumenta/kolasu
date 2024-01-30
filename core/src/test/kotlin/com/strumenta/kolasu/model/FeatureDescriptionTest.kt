@@ -1,8 +1,5 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.ast.FeatureDescription
-import com.strumenta.kolasu.ast.FeatureType
-import com.strumenta.kolasu.ast.Multiplicity
 import org.junit.Test
 import java.util.LinkedList
 import kotlin.test.assertEquals

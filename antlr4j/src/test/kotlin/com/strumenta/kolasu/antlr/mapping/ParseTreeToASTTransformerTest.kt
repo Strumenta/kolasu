@@ -5,12 +5,12 @@ import com.strumenta.kolasu.antlr4j.mapping.TrivialFactoryOfParseTreeToASTNodeTr
 import com.strumenta.kolasu.antlr4j.mapping.registerTrivialPTtoASTConversion
 import com.strumenta.kolasu.antlr4j.mapping.unwrap
 import com.strumenta.kolasu.antlr4j.parsing.withParseTreeNode
-import com.strumenta.kolasu.ast.NodeLike
-import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.model.hasValidParents

@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.ast
+package com.strumenta.kolasu.model
 
 /**
  * Use this to mark properties that are internal, i.e., they are used for bookkeeping and are not part of the model,

@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.codegen
 
-import com.strumenta.kolasu.ast.NodeLike
+import com.strumenta.kolasu.model.NodeLike
 import java.io.File
 import kotlin.reflect.KClass
 

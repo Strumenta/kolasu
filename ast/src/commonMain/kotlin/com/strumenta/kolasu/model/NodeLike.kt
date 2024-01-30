@@ -1,12 +1,10 @@
-package com.strumenta.kolasu.ast
+package com.strumenta.kolasu.model
 
 import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
-import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.ReferenceByName
 
 typealias NodeObserver = ObservableObserver<in NodeNotification<in NodeLike>>
 

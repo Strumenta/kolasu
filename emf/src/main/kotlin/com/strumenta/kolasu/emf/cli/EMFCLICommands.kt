@@ -6,7 +6,6 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
-import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.cli.ASTProcessingCommand
 import com.strumenta.kolasu.cli.ParserInstantiator
 import com.strumenta.kolasu.cli.changeExtension
@@ -15,6 +14,7 @@ import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.createResource
 import com.strumenta.kolasu.emf.saveMetamodel
 import com.strumenta.kolasu.emf.saveModel
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.parsing.ParsingResult
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource

@@ -4,10 +4,10 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.output.CliktConsole
-import com.strumenta.kolasu.ast.NodeLike
 import com.strumenta.kolasu.cli.ParserInstantiator
 import com.strumenta.kolasu.emf.EMFMetamodelSupport
 import com.strumenta.kolasu.emf.EcoreEnabledParser
+import com.strumenta.kolasu.model.NodeLike
 
 class EMFCLITool<R : NodeLike, P>(
     parserInstantiator: ParserInstantiator<P>,

@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.kcp
 
-import com.strumenta.kolasu.ast.NodeLike
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
 import org.jetbrains.kotlin.backend.jvm.ir.getIoFile
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange

@@ -7,7 +7,7 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.strumenta.kolasu.ast.NodeLike
+import com.strumenta.kolasu.model.NodeLike
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintWriter

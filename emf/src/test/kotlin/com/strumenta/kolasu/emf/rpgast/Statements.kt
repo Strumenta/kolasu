@@ -1,13 +1,13 @@
 package com.smeup.rpgparser.parsing.ast
 
-import com.strumenta.kolasu.ast.Derived
-import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.emf.rpgast.AbstractDataDefinition
 import com.strumenta.kolasu.emf.rpgast.ComparisonOperator
 import com.strumenta.kolasu.emf.rpgast.InStatementDataDefinition
 import com.strumenta.kolasu.emf.rpgast.KListType
 import com.strumenta.kolasu.emf.rpgast.startLine
+import com.strumenta.kolasu.model.Derived
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.traversing.findAncestorOfType
 

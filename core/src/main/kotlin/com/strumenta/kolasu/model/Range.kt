@@ -1,10 +1,5 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.ast.NodeLike
-import com.strumenta.kolasu.ast.Point
-import com.strumenta.kolasu.ast.Range
-import com.strumenta.kolasu.ast.START_COLUMN
-import com.strumenta.kolasu.ast.Source
 import java.io.File
 import java.net.URL
 import java.nio.file.Path

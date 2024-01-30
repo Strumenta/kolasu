@@ -1,9 +1,9 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.antlr4j.parsing.withParseTreeNode
-import com.strumenta.kolasu.ast.Point
-import com.strumenta.kolasu.ast.Range
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.Statement
 import com.strumenta.kolasu.model.TextFileDestination

@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.ast
+package com.strumenta.kolasu.model
 
 abstract class Source : Comparable<Source> {
     protected abstract fun stringDescription(): String
