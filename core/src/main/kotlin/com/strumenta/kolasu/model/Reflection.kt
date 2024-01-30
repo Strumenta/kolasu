@@ -9,6 +9,7 @@ import kotlin.reflect.KClassifier
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeProjection
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.withNullability
 
@@ -51,7 +52,8 @@ data class PropertyDescription(
     val provideNodes: Boolean,
     val multiplicity: Multiplicity,
     val value: Any?,
-    val propertyType: PropertyType
+    val propertyType: PropertyType,
+    val derived: Boolean
 ) {
 
     fun valueToString(): String {
@@ -119,7 +121,8 @@ data class PropertyDescription(
                     property.isReference() -> PropertyType.REFERENCE
                     provideNodes -> PropertyType.CONTAINMENT
                     else -> PropertyType.ATTRIBUTE
-                }
+                },
+                derived = property.findAnnotation<Derived>() != null
             )
         }
     }

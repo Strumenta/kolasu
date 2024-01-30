@@ -20,7 +20,7 @@ public class CompilationUnit extends Node {
         @Override
         @Internal
         public List<PropertyDescription> getProperties() {
-            return Arrays.asList(new PropertyDescription("bs", true, Multiplicity.MANY, getBs(), PropertyType.CONTAINMENT));
+            return Arrays.asList(new PropertyDescription("bs", true, Multiplicity.MANY, getBs(), PropertyType.CONTAINMENT, false));
         }
     }
 
@@ -38,6 +38,6 @@ public class CompilationUnit extends Node {
     @Override
     @Internal
     public List<PropertyDescription> getProperties() {
-        return Arrays.asList(new PropertyDescription("as", true, Multiplicity.MANY, getAs(), PropertyType.CONTAINMENT));
+        return Arrays.asList(new PropertyDescription("as", true, Multiplicity.MANY, getAs(), PropertyType.CONTAINMENT, false));
     }
 }
