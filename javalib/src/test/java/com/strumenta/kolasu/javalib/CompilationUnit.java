@@ -22,6 +22,13 @@ public class CompilationUnit extends Node {
         public List<PropertyDescription> getProperties() {
             return Arrays.asList(new PropertyDescription("bs", true, Multiplicity.MANY, getBs(), PropertyType.CONTAINMENT, false));
         }
+
+        @NotNull
+        @Override
+        @Internal
+        public List<PropertyDescription> getOriginalProperties() {
+            return Arrays.asList(new PropertyDescription("bs", true, Multiplicity.MANY, getBs(), PropertyType.CONTAINMENT, false));
+        }
     }
 
     public static class B extends Node {
@@ -38,6 +45,13 @@ public class CompilationUnit extends Node {
     @Override
     @Internal
     public List<PropertyDescription> getProperties() {
+        return Arrays.asList(new PropertyDescription("as", true, Multiplicity.MANY, getAs(), PropertyType.CONTAINMENT, false));
+    }
+
+    @NotNull
+    @Override
+    @Internal
+    public List<PropertyDescription> getOriginalProperties() {
         return Arrays.asList(new PropertyDescription("as", true, Multiplicity.MANY, getAs(), PropertyType.CONTAINMENT, false));
     }
 }
