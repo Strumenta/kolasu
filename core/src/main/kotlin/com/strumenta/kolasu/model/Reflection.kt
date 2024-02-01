@@ -13,9 +13,17 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.withNullability
 
-fun <T : Node> T.relevantMemberProperties(withPosition: Boolean = false, withNodeType: Boolean = false):
+fun <T : Node> T.relevantMemberProperties(
+    withPosition: Boolean = false,
+    withNodeType: Boolean = false,
+    includeDerived: Boolean = false
+):
     List<KProperty1<T, *>> {
-    val list = this::class.nodeOriginalProperties.map { it as KProperty1<T, *> }.toMutableList()
+    val list = if (includeDerived) {
+        this::class.nodeProperties.map { it as KProperty1<T, *> }.toMutableList()
+    } else {
+        this::class.nodeOriginalProperties.map { it as KProperty1<T, *> }.toMutableList()
+    }
     if (withPosition) {
         list.add(Node::position as KProperty1<T, *>)
     }

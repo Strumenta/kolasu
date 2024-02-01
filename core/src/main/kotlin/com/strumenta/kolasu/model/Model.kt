@@ -71,6 +71,10 @@ open class Node() : Origin, Destination, Serializable {
             throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
         }
 
+    /**
+     * The properties of this AST nodes, including attributes, children, and references, but excluding derived
+     * properties.
+     */
     @property:Internal
     open val originalProperties: List<PropertyDescription>
         get() = try {
@@ -230,12 +234,8 @@ val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
         .toList()
 
 val <T : Any> KClass<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
-    get() = memberProperties.asSequence()
-        .filter { it.visibility == KVisibility.PUBLIC }
+    get() = nodeProperties
         .filter { it.findAnnotation<Derived>() == null }
-        .filter { it.findAnnotation<Internal>() == null }
-        .filter { it.findAnnotation<Link>() == null }
-        .toList()
 
 /**
  * @return all properties of this node that are considered AST properties.

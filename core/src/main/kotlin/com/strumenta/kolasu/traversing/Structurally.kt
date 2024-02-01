@@ -94,9 +94,15 @@ fun Node.walkAncestors(): Sequence<Node> {
 /**
  * @return all direct children of this node.
  */
-fun Node.walkChildren(): Sequence<Node> {
+fun Node.walkChildren(includeDerived: Boolean = false): Sequence<Node> {
     return sequence {
-        this@walkChildren.originalProperties.forEach { property ->
+        (
+            if (includeDerived) {
+                this@walkChildren.properties
+            } else {
+                this@walkChildren.originalProperties
+            }
+            ).forEach { property ->
             when (val value = property.value) {
                 is Node -> yield(value)
                 is Collection<*> -> value.forEach { if (it is Node) yield(it) }
