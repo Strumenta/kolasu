@@ -398,4 +398,5 @@ class JsonGenerationTest {
     }
 }
 
-data class DynamicNode(override val nodeType: String, override val properties: List<PropertyDescription>) : Node()
+data class DynamicNode(override val nodeType: String, override val originalProperties: List<PropertyDescription>) :
+    Node()
