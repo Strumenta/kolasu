@@ -73,6 +73,25 @@ fun Node.processProperties(
 }
 
 /**
+ * Executes an operation on the properties of a node.
+ * @param propertiesToIgnore which properties to ignore
+ * @param propertyOperation the operation to perform on each property.
+ */
+@JvmOverloads
+fun Node.processOriginalProperties(
+    propertiesToIgnore: Set<String> = emptySet(),
+    propertyOperation: (PropertyDescription) -> Unit
+) {
+    this.originalProperties.filter { it.name !in propertiesToIgnore }.forEach {
+        try {
+            propertyOperation(it)
+        } catch (t: Throwable) {
+            throw java.lang.RuntimeException("Issue processing property $it in $this", t)
+        }
+    }
+}
+
+/**
  * Executes an operation on the properties definitions of a node class.
  * @param propertiesToIgnore which properties to ignore
  * @param propertyTypeOperation the operation to perform on each property.
@@ -125,7 +144,7 @@ fun Node.processConsideringDirectParent(operation: (Node, Node?) -> Unit, parent
 val Node.children: List<Node>
     get() {
         val children = mutableListOf<Node>()
-        this.properties.forEach { p ->
+        this.originalProperties.forEach { p ->
             val v = p.value
             when (v) {
                 is Node -> children.add(v)
