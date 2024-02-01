@@ -48,7 +48,7 @@ class TranspilationTraceTest {
     "message" : "some issue",
     "severity" : "WARNING"
   } ]
-}""",
+}""".replace("\n", System.lineSeparator()),
             tt.saveAsJson("foo.json", mm)
         )
     }
@@ -85,7 +85,7 @@ class TranspilationTraceTest {
     }
   },
   "generatedCode" : "b:2"
-}""",
+}""".replace("\n", System.lineSeparator()),
             tt.saveAsJson("foo.json", mm)
         )
     }
@@ -122,7 +122,7 @@ class TranspilationTraceTest {
     } ]
   },
   "generatedCode" : "b:2"
-}""",
+}""".replace("\n", System.lineSeparator()),
             tt.saveAsJson("foo.json", mm)
         )
     }
@@ -172,7 +172,7 @@ class TranspilationTraceTest {
     }
   },
   "generatedCode" : "b:2"
-}""",
+}""".replace("\n", System.lineSeparator()),
             tt.saveAsJson("foo.json", mm)
         )
     }
