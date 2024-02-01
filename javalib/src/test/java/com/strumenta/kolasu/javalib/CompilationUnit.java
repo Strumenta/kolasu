@@ -19,12 +19,6 @@ public class CompilationUnit extends Node {
         return as;
     }
 
-    @NotNull
-    @Override
-    @Internal
-    public List<FeatureDescription> getProperties() {
-        return Arrays.asList(new FeatureDescription("as", true, Multiplicity.MANY, getAs(), FeatureType.CONTAINMENT));
-    }
 
     public static class A extends Node {
         private List<B> bs = new LinkedList<>();
@@ -45,11 +39,6 @@ public class CompilationUnit extends Node {
 
     }
 
-    private List<A> as = new LinkedList<>();
-
-    public List<A> getAs() {
-        return as;
-    }
 
     @NotNull
     @Override
