@@ -27,7 +27,7 @@ public class CompilationUnit extends Node {
         @Override
         @Internal
         public List<PropertyDescription> getOriginalProperties() {
-            return Arrays.asList(new PropertyDescription("bs", true, Multiplicity.MANY, getBs(), PropertyType.CONTAINMENT, false));
+            return getProperties();
         }
     }
 
@@ -52,6 +52,6 @@ public class CompilationUnit extends Node {
     @Override
     @Internal
     public List<PropertyDescription> getOriginalProperties() {
-        return Arrays.asList(new PropertyDescription("as", true, Multiplicity.MANY, getAs(), PropertyType.CONTAINMENT, false));
+        return getProperties();
     }
 }

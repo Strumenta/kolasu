@@ -2,7 +2,6 @@ package com.strumenta.kolasu.javalib;
 
 import com.strumenta.kolasu.model.Node;
 import com.strumenta.kolasu.model.Processing;
-import com.strumenta.kolasu.model.PropertyDescription;
 import com.strumenta.kolasu.traversing.ProcessingStructurally;
 import org.junit.Test;
 
