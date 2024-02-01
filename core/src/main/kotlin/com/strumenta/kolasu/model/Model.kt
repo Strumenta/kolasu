@@ -71,6 +71,14 @@ open class Node() : Origin, Destination, Serializable {
             throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
         }
 
+    @property:Internal
+    open val originalProperties: List<PropertyDescription>
+        get() = try {
+            nodeOriginalProperties.map { PropertyDescription.buildFor(it, this) }
+        } catch (e: Throwable) {
+            throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
+        }
+
     /**
      * The node from which this AST Node has been generated, if any.
      */
@@ -212,9 +220,19 @@ fun <N : Node> N.withOrigin(origin: Origin?): N {
 
 val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.kotlin.nodeProperties
+val <T : Any> Class<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
+    get() = this.kotlin.nodeOriginalProperties
 val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() = memberProperties.asSequence()
         .filter { it.visibility == KVisibility.PUBLIC }
+        .filter { it.findAnnotation<Internal>() == null }
+        .filter { it.findAnnotation<Link>() == null }
+        .toList()
+
+val <T : Any> KClass<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
+    get() = memberProperties.asSequence()
+        .filter { it.visibility == KVisibility.PUBLIC }
+        .filter { it.findAnnotation<Derived>() == null }
         .filter { it.findAnnotation<Internal>() == null }
         .filter { it.findAnnotation<Link>() == null }
         .toList()
@@ -224,6 +242,12 @@ val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
  */
 val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.nodeProperties
+
+/**
+ * @return all non-derived properties of this node that are considered AST properties.
+ */
+val <T : Node> T.nodeOriginalProperties: Collection<KProperty1<T, *>>
+    get() = this.javaClass.nodeOriginalProperties
 
 /**
  * Use this to mark properties that are internal, i.e., they are used for bookkeeping and are not part of the model,

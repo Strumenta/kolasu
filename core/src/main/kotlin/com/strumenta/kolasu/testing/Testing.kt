@@ -144,9 +144,9 @@ fun assertASTsAreEqual(
         if (considerPosition) {
             assertEquals(expected.position, actual.position, "$context.position")
         }
-        expected.properties.forEach { expectedProperty ->
+        expected.originalProperties.forEach { expectedProperty ->
             try {
-                val actualProperty = actual.properties.find { it.name == expectedProperty.name }
+                val actualProperty = actual.originalProperties.find { it.name == expectedProperty.name }
                     ?: fail("No property ${expectedProperty.name} found at $context")
                 val actualPropValue = actualProperty.value
                 val expectedPropValue = expectedProperty.value
