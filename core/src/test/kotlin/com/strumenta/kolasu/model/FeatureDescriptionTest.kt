@@ -36,7 +36,7 @@ class FeatureDescriptionTest {
                 Multiplicity.SINGULAR,
                 "gino",
                 FeatureType.ATTRIBUTE,
-                derived = false
+                derived = false,
             ),
             list[0],
         )
@@ -57,7 +57,7 @@ class FeatureDescriptionTest {
                 Multiplicity.MANY,
                 listOf("gino", "pino"),
                 FeatureType.ATTRIBUTE,
-                derived = false
+                derived = false,
             ),
             list[0],
         )
@@ -78,7 +78,7 @@ class FeatureDescriptionTest {
                 Multiplicity.SINGULAR,
                 Foo1("gino"),
                 FeatureType.CONTAINMENT,
-                derived = false
+                derived = false,
             ),
             list[0],
         )
@@ -99,7 +99,7 @@ class FeatureDescriptionTest {
                 Multiplicity.MANY,
                 listOf(Foo1("gino")),
                 FeatureType.CONTAINMENT,
-                derived = false
+                derived = false,
             ),
             list[0],
         )
@@ -120,7 +120,7 @@ class FeatureDescriptionTest {
                 Multiplicity.MANY,
                 emptyList<Foo1>(),
                 FeatureType.CONTAINMENT,
-                derived = false
+                derived = false,
             ),
             list[0],
         )
@@ -141,7 +141,7 @@ class FeatureDescriptionTest {
                 Multiplicity.MANY,
                 null,
                 FeatureType.CONTAINMENT,
-                derived = false
+                derived = false,
             ),
             list[0],
         )

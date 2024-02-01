@@ -107,7 +107,7 @@ fun <N : NodeLike> FeatureDescription.Companion.buildFor(
             provideNodes -> FeatureType.CONTAINMENT
             else -> FeatureType.ATTRIBUTE
         },
-        derived = property.findAnnotation<Derived>() != null
+        derived = property.findAnnotation<Derived>() != null,
     )
 }
 
