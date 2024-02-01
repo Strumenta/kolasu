@@ -122,7 +122,7 @@ class ResultTest {
   }, {
     "message" : "Translation issue"
   } ]
-}""",
+}""".replace("\n", System.lineSeparator()),
             emfString
         )
     }
