@@ -69,6 +69,9 @@ class KolasuLanguage(
     }
 
     fun <N : NodeLike> addClass(kClass: KClass<N>): Boolean {
+        if (kClass == Node::class) {
+            return false
+        }
         if (!_astClasses.contains(kClass) && _astClasses.add(kClass)) {
             kClass.supertypes.forEach { superType ->
                 processSuperType(superType)

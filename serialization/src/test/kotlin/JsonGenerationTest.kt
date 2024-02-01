@@ -372,6 +372,7 @@ class JsonGenerationTest {
                         Multiplicity.SINGULAR,
                         123,
                         FeatureType.ATTRIBUTE,
+                        derived = false
                     ),
                     FeatureDescription(
                         "someListAttr",
@@ -379,6 +380,7 @@ class JsonGenerationTest {
                         Multiplicity.MANY,
                         listOf("a", "b"),
                         FeatureType.ATTRIBUTE,
+                        derived = false
                     ),
                     FeatureDescription(
                         "someChild",
@@ -386,6 +388,7 @@ class JsonGenerationTest {
                         Multiplicity.SINGULAR,
                         BaseNode(456),
                         FeatureType.CONTAINMENT,
+                        derived = false
                     ),
                     FeatureDescription(
                         "someChildren",
@@ -393,6 +396,7 @@ class JsonGenerationTest {
                         Multiplicity.MANY,
                         listOf(BaseNode(78), BaseNode(90)),
                         FeatureType.CONTAINMENT,
+                        derived = false
                     ),
                 ),
             )

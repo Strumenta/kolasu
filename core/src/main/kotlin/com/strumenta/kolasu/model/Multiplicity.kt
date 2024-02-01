@@ -9,6 +9,7 @@ import kotlin.reflect.KClassifier
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeProjection
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.withNullability
 
@@ -106,6 +107,7 @@ fun <N : NodeLike> FeatureDescription.Companion.buildFor(
             provideNodes -> FeatureType.CONTAINMENT
             else -> FeatureType.ATTRIBUTE
         },
+        derived = property.findAnnotation<Derived>() != null
     )
 }
 

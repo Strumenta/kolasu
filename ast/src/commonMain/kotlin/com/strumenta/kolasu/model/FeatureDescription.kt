@@ -6,6 +6,7 @@ data class FeatureDescription(
     val multiplicity: Multiplicity,
     val value: Any?,
     val featureType: FeatureType,
+    val derived: Boolean
 ) {
     val isMultiple: Boolean
         get() = multiplicity == Multiplicity.MANY

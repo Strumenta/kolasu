@@ -17,6 +17,7 @@ import io.lionweb.lioncore.java.language.DataType
 import io.lionweb.lioncore.java.language.Enumeration
 import io.lionweb.lioncore.java.language.Interface
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
+import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -28,6 +29,7 @@ import kotlin.reflect.full.createType
 class LionWebLanguageConverter {
     private val astClassesAndClassifiers = BiMap<KClass<*>, Classifier<*>>()
     private val classesAndEnumerations = BiMap<EnumKClass, Enumeration>()
+    private val primitiveTypes = BiMap<KClass<*>, PrimitiveType>()
     private val languages = BiMap<KolasuLanguage, LWLanguage>()
 
     init {
@@ -254,6 +256,7 @@ class LionWebLanguageConverter {
             Long::class.createType() -> LionCoreBuiltins.getInteger()
             String::class.createType() -> LionCoreBuiltins.getString()
             Boolean::class.createType() -> LionCoreBuiltins.getBoolean()
+            Char::class.createType() -> StarLasuLWLanguage.char
             else -> {
                 val kClass = kType.classifier as KClass<*>
                 val isEnum = kClass.supertypes.any { it.classifier == Enum::class }
@@ -268,7 +271,15 @@ class LionWebLanguageConverter {
                         return enumeration
                     }
                 } else {
-                    throw UnsupportedOperationException("KType: $kType")
+                    val primitiveType = primitiveTypes.byA(kClass)
+                    if (primitiveType == null) {
+                        val newPrimitiveType = PrimitiveType(lionwebLanguage, kClass.simpleName)
+                        lionwebLanguage.addElement(newPrimitiveType)
+                        primitiveTypes.associate(kClass, newPrimitiveType)
+                        return newPrimitiveType
+                    } else {
+                        return primitiveType
+                    }
                 }
             }
         }
