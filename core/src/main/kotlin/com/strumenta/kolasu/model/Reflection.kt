@@ -305,7 +305,7 @@ fun <N : Any> KClass<N>.isInherited(feature: Feature): Boolean {
     return false
 }
 
-fun <N : Any> KClass<N>.declaredFeatures(): List<Feature> {
+fun <N : Any> KClass<N>.declaredFeatures(includeDerived: Boolean = false): List<Feature> {
     if (!featuresCache.containsKey(this)) {
         // Named can be used also for things which are not Node, so we treat it as a special case
         featuresCache[this] = if (!isANode() && this != Named::class) {
@@ -315,7 +315,8 @@ fun <N : Any> KClass<N>.declaredFeatures(): List<Feature> {
                 supertypes.map { (it.classifier as? KClass<*>)?.allFeatures()?.map { it.name } ?: emptyList() }
                     .flatten()
                     .toSet()
-            val notInheritedProps = nodeProperties.filter { it.name !in inheritedNamed }
+            val notInheritedProps = (if (includeDerived) nodeProperties else nodeOriginalProperties)
+                .filter { it.name !in inheritedNamed }
             notInheritedProps.map {
                 when {
                     it.isAttribute() -> {

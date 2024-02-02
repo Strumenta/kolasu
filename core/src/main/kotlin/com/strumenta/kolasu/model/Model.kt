@@ -163,12 +163,15 @@ open class Node() : Origin, Destination, Serializable {
         return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
     }
 
-    fun getChildren(containment: Containment): List<Node> {
-        return getChildren(containment.name)
+    fun getChildren(containment: Containment, includeDerived: Boolean = false): List<Node> {
+        return getChildren(containment.name, includeDerived)
     }
 
-    fun getChildren(name: String): List<Node> {
-        return when (val rawValue = properties.find { it.name == name }!!.value) {
+    fun getChildren(name: String, includeDerived: Boolean = false): List<Node> {
+        return when (
+            val rawValue = (if (includeDerived) properties else originalProperties)
+                .find { it.name == name }!!.value
+        ) {
             null -> {
                 emptyList()
             }
