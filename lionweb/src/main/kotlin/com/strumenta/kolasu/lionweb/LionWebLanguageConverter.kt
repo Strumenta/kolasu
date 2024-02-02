@@ -228,6 +228,8 @@ class LionWebLanguageConverter {
                     val enumeration = classesAndEnumerations.byA(kClass as EnumKClass)
                     if (enumeration == null) {
                         val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
+                        newEnumeration.id = (lionwebLanguage.id ?: "unknown_language") + "_" + newEnumeration.name
+                        newEnumeration.key = newEnumeration.name
                         lionwebLanguage.addElement(newEnumeration)
                         classesAndEnumerations.associate(kClass, newEnumeration)
                         return newEnumeration
