@@ -219,7 +219,7 @@ class LionWebLanguageConverter {
         return astClassesAndClassifiers.byA(kClass) ?: throw IllegalArgumentException("Unknown KClass $kClass")
     }
 
-    private fun toLWEnumeration(kClass: KClass<*>, lionwebLanguage: LWLanguage) : Enumeration {
+    private fun toLWEnumeration(kClass: KClass<*>, lionwebLanguage: LWLanguage): Enumeration {
         val enumeration = classesAndEnumerations.byA(kClass as EnumKClass)
         if (enumeration == null) {
             val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
