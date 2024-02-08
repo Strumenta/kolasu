@@ -35,7 +35,7 @@ import kotlin.reflect.full.primaryConstructor
  */
 class LionWebModelConverter {
     private val languageConverter = LionWebLanguageConverter()
-    private val nodesMapping = BiMap<KNode, LWNode>()
+    private val nodesMapping = BiMap<KNode, LWNode>(usingIdentity = true)
 
     fun correspondingLanguage(kolasuLanguage: KolasuLanguage): Language {
         return languageConverter.correspondingLanguage(kolasuLanguage)
