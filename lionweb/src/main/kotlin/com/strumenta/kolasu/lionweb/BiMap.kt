@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.lionweb
 
-class BiMap<A, B> {
+import java.util.IdentityHashMap
+
+class BiMap<A, B>(val usingIdentity: Boolean = false) {
     val `as`: Set<A>
         get() = _asToBs.keys
     val bs: Set<B>
@@ -10,8 +12,8 @@ class BiMap<A, B> {
     val bsToAsMap: Map<B, A>
         get() = _bsToAs
 
-    private val _asToBs = mutableMapOf<A, B>()
-    private val _bsToAs = mutableMapOf<B, A>()
+    private val _asToBs = if (usingIdentity) IdentityHashMap() else mutableMapOf<A, B>()
+    private val _bsToAs = if (usingIdentity) IdentityHashMap() else mutableMapOf<B, A>()
 
     fun associate(a: A, b: B) {
         _asToBs[a] = b
