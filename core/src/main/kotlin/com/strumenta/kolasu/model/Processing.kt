@@ -231,9 +231,9 @@ fun Node.containingProperty(): PropertyDescription? {
     }
     return this.parent!!.properties.find { p ->
         val v = p.value
-        when (v) {
-            is Collection<*> -> v.contains(this)
-            this -> true
+        when {
+            v is Collection<*> -> v.any { it === this }
+            v === this -> true
             else -> false
         }
     } ?: throw IllegalStateException("No containing property for $this with parent ${this.parent}")
@@ -248,7 +248,7 @@ fun Node.indexInContainingProperty(): Int? {
     return if (p == null) {
         null
     } else if (p.value is Collection<*>) {
-        p.value.indexOfFirst { this === it}
+        p.value.indexOfFirst { this === it }
     } else {
         0
     }
