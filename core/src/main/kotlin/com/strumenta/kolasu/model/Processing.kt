@@ -248,7 +248,7 @@ fun Node.indexInContainingProperty(): Int? {
     return if (p == null) {
         null
     } else if (p.value is Collection<*>) {
-        p.value.indexOf(this)
+        p.value.indexOfFirst { this === it}
     } else {
         0
     }
