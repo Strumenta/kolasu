@@ -233,7 +233,7 @@ class ModelTest {
       "${'$'}ref" : "/"
     }
   }
-}""",
+}""".replace("\n", System.lineSeparator()),
             eo1.saveAsJson(),
         )
     }
@@ -298,7 +298,7 @@ class ModelTest {
   "singlePointer" : {
     "name" : "foo"
   }
-}""",
+}""".replace("\n", System.lineSeparator()),
             eo1.saveAsJson(),
         )
     }
@@ -385,7 +385,7 @@ class ModelTest {
       "${'$'}ref" : "//@myChildren.0/@myChildren.0/@myChildren.0"
     }
   }
-}""",
+}""".replace("\n", System.lineSeparator()),
             eoA.saveAsJson(),
         )
     }
@@ -421,7 +421,7 @@ class ModelTest {
       "column" : 17
     }
   }
-}""",
+}""".replace("\n", System.lineSeparator()),
             eo.saveAsJson(),
         )
     }
@@ -455,7 +455,7 @@ class ModelTest {
       "${'$'}ref" : "#//"
     }
   }
-}""",
+}""".replace("\n", System.lineSeparator()),
             eo2.saveAsJson(),
         )
     }
@@ -476,7 +476,7 @@ class ModelTest {
         assertEquals(
             """{
   "eClass" : "https://strumenta.com/starlasu/v2#//GenericNode"
-}""",
+}""".replace("\n", System.lineSeparator()),
             gn.saveAsJson(),
         )
     }

@@ -33,6 +33,8 @@ fun <N : NodeLike> N.withOrigin(node: NodeLike): N {
 
 val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.kotlin.nodeProperties
+val <T : Any> Class<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
+    get() = this.kotlin.nodeOriginalProperties
 val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() =
         memberProperties
@@ -42,8 +44,19 @@ val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
             .filter { it.findAnnotation<Link>() == null }
             .toList()
 
+val <T : Any> KClass<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
+    get() =
+        nodeProperties
+            .filter { it.findAnnotation<Derived>() == null }
+
 /**
  * @return all properties of this node that are considered AST properties.
  */
 val <T : NodeLike> T.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.nodeProperties
+
+/**
+ * @return all non-derived properties of this node that are considered AST properties.
+ */
+val <T : Node> T.nodeOriginalProperties: Collection<KProperty1<T, *>>
+    get() = this.javaClass.nodeOriginalProperties

@@ -210,7 +210,7 @@ class EMFCLIToolTest {
       "containment" : true
     } ]
   } ]
-}""",
+}""".replace("\n", System.lineSeparator()),
             myFile.readText(),
         )
     }
@@ -743,7 +743,7 @@ class EMFCLIToolTest {
       "containment" : true
     } ]
   } ]
-} ]""",
+} ]""".replace("\n", System.lineSeparator()),
             myFile.readText(),
         )
     }
@@ -806,7 +806,7 @@ class EMFCLIToolTest {
       "name" : "EntityFoo"
     } ]
   }
-}""",
+}""".replace("\n", System.lineSeparator()),
             outMyFile1.readText(),
         )
         assertEquals(
@@ -818,7 +818,7 @@ class EMFCLIToolTest {
       "name" : "EntityBar"
     } ]
   }
-}""",
+}""".replace("\n", System.lineSeparator()),
             outMyFile2.readText(),
         )
         assert(outMyFile2.exists())

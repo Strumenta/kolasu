@@ -94,9 +94,15 @@ fun NodeLike.walkAncestors(): Sequence<NodeLike> {
 /**
  * @return all direct children of this node.
  */
-fun NodeLike.walkChildren(): Sequence<NodeLike> {
+fun NodeLike.walkChildren(includeDerived: Boolean = false): Sequence<NodeLike> {
     return sequence {
-        this@walkChildren.properties.forEach { property ->
+        (
+            if (includeDerived) {
+                this@walkChildren.properties
+            } else {
+                this@walkChildren.originalFeatures
+            }
+        ).forEach { property ->
             when (val value = property.value) {
                 is NodeLike -> yield(value)
                 is Collection<*> -> value.forEach { if (it is NodeLike) yield(it) }

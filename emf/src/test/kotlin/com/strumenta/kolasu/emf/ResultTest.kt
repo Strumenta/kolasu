@@ -128,7 +128,7 @@ class ResultTest {
     "type" : "TRANSLATION",
     "message" : "Translation issue"
   } ]
-}""",
+}""".replace("\n", System.lineSeparator()),
             emfString,
         )
     }

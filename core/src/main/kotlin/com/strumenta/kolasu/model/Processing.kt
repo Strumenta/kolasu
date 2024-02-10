@@ -81,6 +81,25 @@ fun NodeLike.processProperties(
 }
 
 /**
+ * Executes an operation on the properties of a node.
+ * @param propertiesToIgnore which properties to ignore
+ * @param propertyOperation the operation to perform on each property.
+ */
+@JvmOverloads
+fun NodeLike.processOriginalProperties(
+    propertiesToIgnore: Set<String> = emptySet(),
+    propertyOperation: (FeatureDescription) -> Unit,
+) {
+    this.originalFeatures.filter { it.name !in propertiesToIgnore }.forEach {
+        try {
+            propertyOperation(it)
+        } catch (t: Throwable) {
+            throw java.lang.RuntimeException("Issue processing property $it in $this", t)
+        }
+    }
+}
+
+/**
  * Executes an operation on the properties definitions of a node class.
  * @param propertiesToIgnore which properties to ignore
  * @param propertyTypeOperation the operation to perform on each property.
@@ -139,7 +158,7 @@ fun NodeLike.processConsideringDirectParent(
 val NodeLike.children: List<NodeLike>
     get() {
         val children = mutableListOf<NodeLike>()
-        this.properties.forEach { p ->
+        this.originalFeatures.forEach { p ->
             val v = p.value
             when (v) {
                 is NodeLike -> children.add(v)

@@ -48,6 +48,11 @@ class LionWebLanguageConverter {
         lionwebLanguage.id = "starlasu_language_${kolasuLanguage.qualifiedName.replace('.', '-')}"
         lionwebLanguage.addDependency(StarLasuLWLanguage)
 
+        // Consider enumerations!
+        kolasuLanguage.enumClasses.forEach { enumClass ->
+            toLWEnumeration(enumClass, lionwebLanguage)
+        }
+
         // First we create all types
         kolasuLanguage.astClasses.forEach { astClass ->
             if (astClass.isConcept) {
@@ -247,6 +252,23 @@ class LionWebLanguageConverter {
         return astClassesAndClassifiers.byA(kClass) ?: throw IllegalArgumentException("Unknown KClass $kClass")
     }
 
+    private fun toLWEnumeration(
+        kClass: KClass<*>,
+        lionwebLanguage: LWLanguage,
+    ): Enumeration {
+        val enumeration = classesAndEnumerations.byA(kClass as EnumKClass)
+        if (enumeration == null) {
+            val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
+            newEnumeration.id = (lionwebLanguage.id ?: "unknown_language") + "_" + newEnumeration.name
+            newEnumeration.key = newEnumeration.name
+            lionwebLanguage.addElement(newEnumeration)
+            classesAndEnumerations.associate(kClass, newEnumeration)
+            return newEnumeration
+        } else {
+            return enumeration
+        }
+    }
+
     private fun toLWDataType(
         kType: KType,
         lionwebLanguage: LWLanguage,
@@ -261,15 +283,7 @@ class LionWebLanguageConverter {
                 val kClass = kType.classifier as KClass<*>
                 val isEnum = kClass.supertypes.any { it.classifier == Enum::class }
                 if (isEnum) {
-                    val enumeration = classesAndEnumerations.byA(kClass as EnumKClass)
-                    if (enumeration == null) {
-                        val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
-                        lionwebLanguage.addElement(newEnumeration)
-                        classesAndEnumerations.associate(kClass, newEnumeration)
-                        return newEnumeration
-                    } else {
-                        return enumeration
-                    }
+                    return toLWEnumeration(kClass, lionwebLanguage)
                 } else {
                     val primitiveType = primitiveTypes.byA(kClass)
                     if (primitiveType == null) {

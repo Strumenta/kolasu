@@ -25,6 +25,19 @@ interface NodeLike {
     val properties: List<FeatureDescription>
 
     /**
+     * The properties of this AST nodes, including attributes, children, and references, but excluding derived
+     * properties.
+     */
+    @property:Internal
+    open val originalFeatures: List<FeatureDescription>
+        get() =
+            try {
+                properties.filter { !it.derived }
+            } catch (e: Throwable) {
+                throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
+            }
+
+    /**
      * The origin from which this AST Node has been generated, if any.
      */
     @property:Internal

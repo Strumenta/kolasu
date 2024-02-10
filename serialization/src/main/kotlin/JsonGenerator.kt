@@ -11,7 +11,7 @@ import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.processProperties
+import com.strumenta.kolasu.model.processOriginalProperties
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
@@ -284,7 +284,7 @@ class JsonGenerator {
                 jsonObject.addProperty(JSON_DESTINATION_KEY, destinationId)
             }
         }
-        node.processProperties {
+        node.processOriginalProperties {
             try {
                 if (it.value == null) {
                     jsonObject.add(it.name, JsonNull.INSTANCE)
@@ -341,7 +341,7 @@ private fun NodeLike.toJsonStreaming(
         writer.name(JSON_RANGE_KEY)
         this.range!!.toJsonStreaming(writer)
     }
-    this.processProperties {
+    this.processOriginalProperties {
         writer.name(it.name)
         if (it.value == null) {
             writer.nullValue()
