@@ -10,13 +10,26 @@ data class FeatureDescription(
     val name: String,
     val provideNodes: Boolean,
     val multiplicity: Multiplicity,
-    val value: Any?,
+    val valueProvider: ()->Any?,
     val featureType: FeatureType,
-    val derived: Boolean,
+    val derived: Boolean = false
 ) {
+    constructor(
+        name: String,
+        provideNodes: Boolean,
+        multiplicity: Multiplicity,
+        value: Any?,
+        featureType: FeatureType,
+        derived: Boolean = false
+    ) : this(name, provideNodes, multiplicity, {value}, featureType, derived)
+
     val isMultiple: Boolean
         get() = multiplicity == Multiplicity.MANY
 
     companion object {
     }
+
+    val value: Any?
+        get() = valueProvider.invoke()
+
 }
