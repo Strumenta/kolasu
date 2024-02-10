@@ -47,6 +47,7 @@ object StarLasuGeneratedDeclarationKey : GeneratedDeclarationKey()
 class SettingParentExtension(
     val pluginContext: IrPluginContext,
     val messageCollector: MessageCollector,
+    isBaseNode: Boolean,
 ) : IrElementTransformerVoidWithContext() {
     override fun visitPropertyNew(declaration: IrProperty): IrStatement {
         val prevBody = declaration.setter?.body

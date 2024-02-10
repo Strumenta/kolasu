@@ -7,14 +7,26 @@ import com.strumenta.kolasu.model.Node
 import org.jetbrains.kotlin.backend.common.extensions.FirIncompatiblePluginAPI
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
+import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.backend.common.lower.irBlockBody
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
+import org.jetbrains.kotlin.descriptors.DescriptorVisibility
+import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.declarations.impl.IrPropertyImpl
+import org.jetbrains.kotlin.ir.symbols.IrPropertySymbol
+import org.jetbrains.kotlin.ir.symbols.impl.IrPropertyPublicSymbolImpl
+import org.jetbrains.kotlin.ir.util.IdSignature
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.util.primaryConstructor
+import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.getClassFqNameUnsafe
 
 class StarLasuIrGenerationExtension(
     private val messageCollector: MessageCollector,
@@ -24,8 +36,6 @@ class StarLasuIrGenerationExtension(
         pluginContext: IrPluginContext,
         isBaseNode: Boolean,
     ) {
-        if (isBaseNode) {
-        } else {
             irClass.primaryConstructor?.valueParameters?.forEach { param ->
                 if (param.isVal() && (param.isSingleContainment() || param.isSingleAttribute())) {
                     messageCollector.report(
@@ -35,13 +45,19 @@ class StarLasuIrGenerationExtension(
                     )
                 }
             }
-            irClass.accept(FieldObservableExtension(pluginContext), null)
-            irClass.accept(SettingParentExtension(pluginContext, messageCollector), null)
+            irClass.accept(FieldObservableExtension(pluginContext, isBaseNode), null)
+            irClass.accept(SettingParentExtension(pluginContext, messageCollector, isBaseNode), null)
             if (isBaseNode) {
-//            override val properties: List<FeatureDescription>
+                //            override val properties: List<FeatureDescription>
 //            get() = TODO("Not yet implemented")
+
+                val propertiesSymbol = IrPropertyPublicSymbolImpl(IdSignature.CommonSignature(irClass.symbol.getClassFqNameUnsafe().asString(), "properties", null, 0, ))
+                //val propertiesDecl = DeclarationIrBuilder(pluginContext, propertiesSymbol)
+                val origin = IrDeclarationOrigin.GeneratedByPlugin(StarLasuGeneratedDeclarationKey)
+                val propertiesDecl = IrPropertyImpl(0, 0, origin, propertiesSymbol, Name.identifier("properties"),
+                    DescriptorVisibilities.PUBLIC, Modality.OPEN, false, false, false, false, false)
+                irClass.declarations.add(propertiesDecl)
             }
-        }
     }
 
     override fun generate(

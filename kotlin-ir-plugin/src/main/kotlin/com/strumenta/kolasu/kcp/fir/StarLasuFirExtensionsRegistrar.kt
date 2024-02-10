@@ -4,6 +4,6 @@ import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 
 class StarLasuFirExtensionsRegistrar : FirExtensionRegistrar() {
     override fun ExtensionRegistrarContext.configurePlugin() {
-        +::ConceptGenerator
+        //+::ConceptGenerator
     }
 }

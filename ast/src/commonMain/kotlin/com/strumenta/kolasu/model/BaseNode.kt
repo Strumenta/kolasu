@@ -7,12 +7,7 @@ import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 
 abstract class BaseNode : NodeLike {
-    override val allAnnotations: List<Annotation>
-        get() = TODO("Not yet implemented")
-    override val changes: PublishSubject<NodeNotification<in NodeLike>>
-        get() = TODO("Not yet implemented")
-    override val destinations: MutableList<Destination>
-        get() = TODO("Not yet implemented")
+
     override val nodeType: String
         get() = TODO("Not yet implemented")
 
@@ -92,4 +87,25 @@ abstract class BaseNode : NodeLike {
     override fun subscribe(observer: ObservableObserver<NodeNotification<in NodeLike>>) {
         TODO("Not yet implemented")
     }
+
+    protected fun notifyOfPropertyChange(
+        propertyName: String,
+        oldValue: Any?,
+        newValue: Any?,
+    ) {
+        changes.onNext(AttributeChangedNotification(this, propertyName, oldValue, newValue))
+    }
+    @property:Internal
+    override val changes = PublishSubject<NodeNotification<in NodeLike>>()
+
+    @Internal
+    private val annotations: MutableList<kotlin.Annotation> = mutableListOf()
+
+    override val allAnnotations: List<Annotation>
+        get() = TODO("Not yet implemented")
+
+    @Internal
+    override val destinations = mutableListOf<Destination>()
+
+
 }
