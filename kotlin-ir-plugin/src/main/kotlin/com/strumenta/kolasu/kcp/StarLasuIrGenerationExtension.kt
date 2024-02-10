@@ -18,9 +18,13 @@ import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrPropertyImpl
 import org.jetbrains.kotlin.ir.symbols.IrPropertySymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrPropertyPublicSymbolImpl
+import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionPublicSymbolImpl
+import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.util.IdSignature
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
 import org.jetbrains.kotlin.ir.util.kotlinFqName
@@ -51,11 +55,30 @@ class StarLasuIrGenerationExtension(
                 //            override val properties: List<FeatureDescription>
 //            get() = TODO("Not yet implemented")
 
-                val propertiesSymbol = IrPropertyPublicSymbolImpl(IdSignature.CommonSignature(irClass.symbol.getClassFqNameUnsafe().asString(), "properties", null, 0, ))
+                val propertySignature = IdSignature.CommonSignature(irClass.kotlinFqName.asString(), "properties", null, 0, )
+                val propertiesSymbol = IrPropertyPublicSymbolImpl(propertySignature)
                 //val propertiesDecl = DeclarationIrBuilder(pluginContext, propertiesSymbol)
                 val origin = IrDeclarationOrigin.GeneratedByPlugin(StarLasuGeneratedDeclarationKey)
                 val propertiesDecl = IrPropertyImpl(0, 0, origin, propertiesSymbol, Name.identifier("properties"),
                     DescriptorVisibilities.PUBLIC, Modality.OPEN, false, false, false, false, false)
+                propertiesDecl.parent = irClass
+                messageCollector.report(
+                    CompilerMessageSeverity.WARNING,
+                    "Getter ${propertiesDecl.getter}",
+                )
+                val accessorSignature =
+                    IdSignature.CommonSignature(
+                        packageFqName = irClass.kotlinFqName.asString(),
+                        declarationFqName = "${irClass.kotlinFqName.asString()}.properties.get",
+                        id = null,
+                        mask = 0,
+                        description = null,
+                    )
+                val propertiesGetterSymbol = IrSimpleFunctionPublicSymbolImpl(IdSignature.AccessorSignature(propertySignature, accessorSignature))
+
+                val propertiesType : IrType = TODO()
+                propertiesDecl.getter = IrFunctionImpl(0, 0, origin, propertiesGetterSymbol, Name.special("getProperties"),
+                    DescriptorVisibilities.PUBLIC, Modality.OPEN, propertiesType,false, false, false, false, false, false, false)
                 irClass.declarations.add(propertiesDecl)
             }
     }
