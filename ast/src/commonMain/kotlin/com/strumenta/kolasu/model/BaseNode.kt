@@ -33,7 +33,10 @@ abstract class BaseNode : NodeLike {
         TODO("Not yet implemented")
     }
 
-    override fun <T : NodeLike> addToContainment(containmentName: String, child: T) {
+    override fun <T : NodeLike> addToContainment(
+        containmentName: String,
+        child: T,
+    ) {
         TODO("Not yet implemented")
     }
 
@@ -65,15 +68,24 @@ abstract class BaseNode : NodeLike {
         TODO("Not yet implemented")
     }
 
-    override fun <T : NodeLike> removeFromContainment(containmentName: String, child: T) {
+    override fun <T : NodeLike> removeFromContainment(
+        containmentName: String,
+        child: T,
+    ) {
         TODO("Not yet implemented")
     }
 
-    override fun <T> setAttribute(attributeName: String, value: T) {
+    override fun <T> setAttribute(
+        attributeName: String,
+        value: T,
+    ) {
         TODO("Not yet implemented")
     }
 
-    override fun <T : PossiblyNamed> setReferenceReferred(referenceName: String, referred: T) {
+    override fun <T : PossiblyNamed> setReferenceReferred(
+        referenceName: String,
+        referred: T,
+    ) {
         TODO("Not yet implemented")
     }
 
