@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.ir.backend.js.utils.realOverrideTarget
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irReturn
+import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
@@ -81,6 +82,7 @@ class StarLasuIrGenerationExtension(
             if (isBaseNode) {
                 if (irClass.modality != Modality.SEALED && irClass.modality != Modality.ABSTRACT) {
                     overrideCalculateFeaturesBody(irClass, pluginContext)
+                    overrideCalculateNodeTypeBody(irClass, pluginContext)
                 }
             }
     }
@@ -88,7 +90,7 @@ class StarLasuIrGenerationExtension(
     private fun overrideCalculateFeaturesBody(irClass: IrClass, pluginContext: IrPluginContext) {
         messageCollector.report(
             CompilerMessageSeverity.WARNING,
-            "overrideCalculateFeatures for ${irClass.name.identifier}",
+            "overrideCalculateFeaturesBody for ${irClass.name.identifier}",
             irClass.compilerSourceLocation
         )
         val function = irClass.functions.find { it.name.identifier == "calculateFeatures" }
@@ -107,20 +109,27 @@ class StarLasuIrGenerationExtension(
                 +irReturn(irCall(mutableListOf))
             }
         }
-//        irClass.functions.forEach { function ->
-//
-//        }
-//        val baseNode =
-//            irClass.getAllSuperclasses().find {
-//                it.kotlinFqName.toString() == BaseNode::class.qualifiedName
-//            }!!
-//        val baseNodeProperties = baseNode.properties.find { it.name.identifier == "properties" }!!
-//        val returnType = baseNodeProperties.getter!!.returnType
+    }
 
-//        val function = irClass.addFunction("calculateFeatures", returnType, Modality.OPEN, DescriptorVisibilities.PROTECTED,
-//            origin = PartiallyLinkedDeclarationOrigin.MISSING_DECLARATION)
-//        function.overriddenSymbols = mutableListOf(baseNode.functions.find { it.name.identifier == "calculateFeatures" }!!.symbol)
-
+    private fun overrideCalculateNodeTypeBody(irClass: IrClass, pluginContext: IrPluginContext) {
+        messageCollector.report(
+            CompilerMessageSeverity.WARNING,
+            "overrideCalculateNodeTypeBody for ${irClass.name.identifier}",
+            irClass.compilerSourceLocation
+        )
+        val function = irClass.functions.find { it.name.identifier == "calculateNodeType" }
+        if (function != null) {
+            messageCollector.report(
+                CompilerMessageSeverity.WARNING,
+                "function calculateNodeType FOUND",
+                irClass.compilerSourceLocation
+            )
+            function.body = DeclarationIrBuilder(pluginContext, function.symbol).irBlockBody(
+                IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
+            ) {
+                +irReturn(irString(irClass.name.identifier))
+            }
+        }
     }
 
     private fun overrideCalculateFeatures(irClass: IrClass, pluginContext: IrPluginContext) {

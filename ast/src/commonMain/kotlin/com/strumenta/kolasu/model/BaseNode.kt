@@ -7,8 +7,7 @@ import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 
 abstract class BaseNode : NodeLike {
-    override val nodeType: String
-        get() = TODO("Not yet implemented")
+    override val nodeType: String = calculateNodeType()
 
     override var origin: Origin? = null
 
@@ -16,6 +15,11 @@ abstract class BaseNode : NodeLike {
 
     protected open fun calculateFeatures() : List<FeatureDescription> {
         TODO("Not yet implemented")
+    }
+
+    protected open fun calculateNodeType() : String {
+        // We do not want this to crash when initializing subclasses
+        return "<UNSPECIFIED>"
     }
 
     override val properties: List<FeatureDescription> by lazy {

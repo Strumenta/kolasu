@@ -105,35 +105,19 @@ class BaseNodeGenerator(
             val type : ConeKotlinType = listClassId.createConeType(session, typeArguments = arrayOf(featureDescriptionClassId.createConeType(session)))
             val classSymbol = callableId.classId!!.toSymbol(session) as FirClassSymbol<*>
             val function = createMemberFunction(classSymbol, Key, name, type) {
-//                this.status {
-//                    this.setv
-//                    this.visibility = Visibilities.Protected
-//                    this.modality = Modality.OPEN
-//                    this.effectiveVisibility = EffectiveVisibility.Protected(null)
-//                }
             }
             function.replaceBody(FirBlockBuilder()
-                .apply {
-//                    statements.add(FirReturnExpressionBuilder().apply {
-//                        this.target = FirFunctionTarget(null, false).apply {
-//                            bind(function)
-//                        }
-//
-//                        // FirSimpleNamedReference(source = null, name=Name.identifier("mutableListOf"))
-//                        val mutableListOf = FirResolvedCallableReferenceBuilder().apply {
-//                            this.name = Name.identifier("mutableListOf")
-//                            this.resolvedSymbol = FirNamedFunctionSymbol(CallableId(FqName("kotlin.collections"), null, Name.identifier("mutableListOf")))
-//                            this.mappedArguments = emptyMap()
-//                        }.build()
-//
-//                        this.result = FirFunctionCallBuilder().apply {
-//                            this.calleeReference = mutableListOf//
-//                            this.argumentList = buildResolvedArgumentList(LinkedHashMap())
-//                        }.build()
-//                    }.build())
-                }
                 .build())
-            // function.body = FirBlockBuilder()
+            return listOf(function.symbol)
+        }
+        if (callableId.callableName.identifier == "calculateNodeType") {
+            val name = Name.identifier("calculateNodeType")
+            val type : ConeKotlinType = session.builtinTypes.stringType.type
+            val classSymbol = callableId.classId!!.toSymbol(session) as FirClassSymbol<*>
+            val function = createMemberFunction(classSymbol, Key, name, type) {
+            }
+            function.replaceBody(FirBlockBuilder()
+                .build())
             return listOf(function.symbol)
         }
         return super.generateFunctions(callableId, context)
@@ -157,22 +141,7 @@ class BaseNodeGenerator(
         log("getCallableNamesForClass $classSymbol $context")
         if (classSymbol.extendBaseNode && !classSymbol.isAbstract && !classSymbol.isSealed) {
             log("  ${classSymbol.classId.asSingleFqName().asString()} extends BaseNode")
-//            val res = super.getCallableNamesForClass(classSymbol, context)
-//            log("  res = $res")
-            val name = Name.identifier("calculateFeatures")
-//            val listClassId = ClassId.fromString(List::class.qualifiedName!!.replace(".", "/"))
-//            val featureDescriptionClassId = ClassId.fromString(FeatureDescription::class.qualifiedName!!.replace(".", "/"))
-//            val type : ConeKotlinType = listClassId.createConeType(session, typeArguments = arrayOf(featureDescriptionClassId.createConeType(session)))
-//            val function = createMemberFunction(classSymbol, Key, name, type) {
-////                this.status {
-////                    this.setv
-////                    this.visibility = Visibilities.Protected
-////                    this.modality = Modality.OPEN
-////                    this.effectiveVisibility = EffectiveVisibility.Protected(null)
-////                }
-//            }
-
-            return setOf(name)
+            return setOf(Name.identifier("calculateFeatures"), Name.identifier("calculateNodeType"))
         }
         return super.getCallableNamesForClass(classSymbol, context)
     }
