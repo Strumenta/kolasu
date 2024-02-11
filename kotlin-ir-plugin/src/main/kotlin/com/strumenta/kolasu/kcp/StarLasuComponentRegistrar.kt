@@ -20,7 +20,7 @@ class StarLasuComponentRegistrar : CompilerPluginRegistrar() {
     override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
         val messageCollector = configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
 
-        FirExtensionRegistrarAdapter.registerExtension(StarLasuFirExtensionsRegistrar())
+        FirExtensionRegistrarAdapter.registerExtension(StarLasuFirExtensionsRegistrar(messageCollector))
         IrGenerationExtension.registerExtension(StarLasuIrGenerationExtension(messageCollector))
     }
 }

@@ -20,6 +20,8 @@ import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
+import org.jetbrains.kotlin.ir.backend.js.utils.realOverrideTarget
+import org.jetbrains.kotlin.ir.builders.declarations.addFunction
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.declarations.IrClass
@@ -43,9 +45,12 @@ import org.jetbrains.kotlin.ir.types.IrTypeArgument
 import org.jetbrains.kotlin.ir.types.SimpleTypeNullability
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.util.IdSignature
+import org.jetbrains.kotlin.ir.util.addFakeOverrides
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
+import org.jetbrains.kotlin.ir.util.isOverridableOrOverrides
 import org.jetbrains.kotlin.ir.util.kotlinFqName
+import org.jetbrains.kotlin.ir.util.nameForIrSerialization
 import org.jetbrains.kotlin.ir.util.overrides
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
@@ -75,9 +80,95 @@ class StarLasuIrGenerationExtension(
             irClass.accept(SettingParentExtension(pluginContext, messageCollector, isBaseNode), null)
             if (isBaseNode) {
                 if (irClass.modality != Modality.SEALED && irClass.modality != Modality.ABSTRACT) {
-                    overrideProperties(irClass, pluginContext)
+                    overrideCalculateFeaturesBody(irClass, pluginContext)
                 }
             }
+    }
+
+    private fun overrideCalculateFeaturesBody(irClass: IrClass, pluginContext: IrPluginContext) {
+        messageCollector.report(
+            CompilerMessageSeverity.WARNING,
+            "overrideCalculateFeatures for ${irClass.name.identifier}",
+            irClass.compilerSourceLocation
+        )
+        val function = irClass.functions.find { it.name.identifier == "calculateFeatures" }
+        if (function != null) {
+            messageCollector.report(
+                CompilerMessageSeverity.WARNING,
+                "function calculateFeatures FOUND",
+                irClass.compilerSourceLocation
+            )
+            val mutableListOf =
+                pluginContext
+                    .referenceFunctions(CallableId(FqName("kotlin.collections"), null, Name.identifier("emptyList"))).single()
+            function.body = DeclarationIrBuilder(pluginContext, function.symbol).irBlockBody(
+                IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
+            ) {
+                +irReturn(irCall(mutableListOf))
+            }
+        }
+//        irClass.functions.forEach { function ->
+//
+//        }
+//        val baseNode =
+//            irClass.getAllSuperclasses().find {
+//                it.kotlinFqName.toString() == BaseNode::class.qualifiedName
+//            }!!
+//        val baseNodeProperties = baseNode.properties.find { it.name.identifier == "properties" }!!
+//        val returnType = baseNodeProperties.getter!!.returnType
+
+//        val function = irClass.addFunction("calculateFeatures", returnType, Modality.OPEN, DescriptorVisibilities.PROTECTED,
+//            origin = PartiallyLinkedDeclarationOrigin.MISSING_DECLARATION)
+//        function.overriddenSymbols = mutableListOf(baseNode.functions.find { it.name.identifier == "calculateFeatures" }!!.symbol)
+
+    }
+
+    private fun overrideCalculateFeatures(irClass: IrClass, pluginContext: IrPluginContext) {
+        messageCollector.report(
+            CompilerMessageSeverity.WARNING,
+            "overrideCalculateFeatures for ${irClass.name.identifier}",
+            irClass.compilerSourceLocation
+        )
+        irClass.functions.forEach { function ->
+            messageCollector.report(
+                CompilerMessageSeverity.WARNING,
+                "function ${function.name.identifier}",
+                irClass.compilerSourceLocation
+            )
+        }
+        val baseNode =
+            irClass.getAllSuperclasses().find {
+                it.kotlinFqName.toString() == BaseNode::class.qualifiedName
+            }!!
+        val baseNodeProperties = baseNode.properties.find { it.name.identifier == "properties" }!!
+        val returnType = baseNodeProperties.getter!!.returnType
+
+//        val functionSignature = IdSignature.CommonSignature(irClass.kotlinFqName.asString(), "calculateFeatures", null, 0, )
+//
+//        val function = IrFactoryImpl.createSimpleFunction(UNDEFINED_OFFSET, UNDEFINED_OFFSET, PartiallyLinkedDeclarationOrigin.MISSING_DECLARATION,
+//            Name.identifier("calculateFeatures"), DescriptorVisibilities.PROTECTED, false, false,
+//            baseNodeProperties.getter!!.returnType,baseNodeProperties.getter!!.modality,
+//            IrSimpleFunctionPublicSymbolImpl(functionSignature),
+//            false, false, false, false)
+//        val function = irClass.addFunction {
+//            name = Name.identifier("calculateFeatures")
+//            this.returnType = returnType
+//            modality = Modality.OPEN
+//            visibility = DescriptorVisibilities.PROTECTED
+//            //originalDeclaration = baseNode.functions.find { it.name.identifier == "calculateFeatures" }!!
+//            origin = PartiallyLinkedDeclarationOrigin.MISSING_DECLARATION
+//        }
+        val function = irClass.addFunction("calculateFeatures", returnType, Modality.OPEN, DescriptorVisibilities.PROTECTED,
+            origin = PartiallyLinkedDeclarationOrigin.MISSING_DECLARATION)
+         function.overriddenSymbols = mutableListOf(baseNode.functions.find { it.name.identifier == "calculateFeatures" }!!.symbol)
+        val mutableListOf =
+            pluginContext
+                .referenceFunctions(CallableId(FqName("kotlin.collections"), null, Name.identifier("emptyList"))).single()
+        function.body = DeclarationIrBuilder(pluginContext, function.symbol).irBlockBody(
+            IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
+        ) {
+            +irReturn(irCall(mutableListOf))
+        }
     }
 
     private fun overrideProperties(irClass: IrClass, pluginContext: IrPluginContext) {
@@ -91,7 +182,21 @@ class StarLasuIrGenerationExtension(
             }!!
         val nodeLikeProperties = nodeLike.properties.find { it.name.identifier == "properties" }!!
         val baseNodeProperties = baseNode.properties.find { it.name.identifier == "properties" }!!
-        val baseNodeGetProperties = baseNode.functions.find { it.name.identifier == "getProperties" }!!
+        baseNode.declarations.forEach {
+            messageCollector.report(
+                CompilerMessageSeverity.WARNING,
+                "Declaration ${it}",
+                irClass.compilerSourceLocation,
+            )
+        }
+        baseNode.functions.forEach {
+            messageCollector.report(
+                CompilerMessageSeverity.WARNING,
+                "Function ${it.name}",
+                irClass.compilerSourceLocation,
+            )
+        }
+        //val baseNodeGetProperties = baseNode.functions.find { it.name.identifier == "getProperties" }!!
 
         //            override val properties: List<FeatureDescription>
 //            get() = TODO("Not yet implemented")
@@ -114,7 +219,7 @@ class StarLasuIrGenerationExtension(
             Name.identifier("getProperties")/*baseNodeProperties.getter!!.name*/, DescriptorVisibilities.PUBLIC, false, false,
             baseNodeProperties.getter!!.returnType,baseNodeProperties.getter!!.modality, IrSimpleFunctionPublicSymbolImpl(accessorSignature),
             false, false, false, false)
-        property.getter!!.overriddenSymbols = mutableListOf(baseNodeProperties.getter!!.symbol, baseNodeGetProperties.symbol)
+        property.getter!!.overriddenSymbols = mutableListOf(baseNodeProperties.getter!!.symbol)
         val mutableListOf =
             pluginContext
                 .referenceFunctions(CallableId(FqName("kotlin.collections"), null, Name.identifier("emptyList"))).single()
