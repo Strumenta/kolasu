@@ -5,28 +5,37 @@ package com.strumenta.kolasu.kcp
 import com.strumenta.kolasu.model.BaseNode
 import com.strumenta.kolasu.model.FeatureDescription
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.ReferenceByName
 import org.jetbrains.kotlin.backend.common.extensions.FirIncompatiblePluginAPI
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irBlockBody
+import org.jetbrains.kotlin.backend.wasm.ir2wasm.allSuperInterfaces
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
+import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
+import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrPropertyImpl
+import org.jetbrains.kotlin.ir.linkage.partial.PartiallyLinkedDeclarationOrigin
 import org.jetbrains.kotlin.ir.symbols.IrClassifierSymbol
 import org.jetbrains.kotlin.ir.symbols.IrPropertySymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrClassPublicSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrClassSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrPropertyPublicSymbolImpl
+import org.jetbrains.kotlin.ir.symbols.impl.IrPropertySymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionPublicSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
@@ -34,9 +43,14 @@ import org.jetbrains.kotlin.ir.types.IrTypeArgument
 import org.jetbrains.kotlin.ir.types.SimpleTypeNullability
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.util.IdSignature
+import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
 import org.jetbrains.kotlin.ir.util.kotlinFqName
+import org.jetbrains.kotlin.ir.util.overrides
 import org.jetbrains.kotlin.ir.util.primaryConstructor
+import org.jetbrains.kotlin.ir.util.properties
+import org.jetbrains.kotlin.name.CallableId
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.getClassFqNameUnsafe
 
@@ -60,48 +74,85 @@ class StarLasuIrGenerationExtension(
             irClass.accept(FieldObservableExtension(pluginContext, isBaseNode), null)
             irClass.accept(SettingParentExtension(pluginContext, messageCollector, isBaseNode), null)
             if (isBaseNode) {
-
-                val baseNodeClass = irClass.getAllSuperclasses().find {
-                    it.kotlinFqName.toString() == BaseNode::class.qualifiedName
-                }!!
-                baseNodeClass.declarations.forEach {
-                    messageCollector.report(
-                        CompilerMessageSeverity.WARNING,
-                        "DECLARATION ${it.javaClass}",
-                    )
+                if (irClass.modality != Modality.SEALED && irClass.modality != Modality.ABSTRACT) {
+                    overrideProperties(irClass, pluginContext)
                 }
+            }
+    }
 
-                //            override val properties: List<FeatureDescription>
+    private fun overrideProperties(irClass: IrClass, pluginContext: IrPluginContext) {
+        val nodeLike =
+            irClass.allSuperInterfaces().find {
+                it.kotlinFqName.toString() == NodeLike::class.qualifiedName
+            }!!
+        val baseNode =
+            irClass.getAllSuperclasses().find {
+                it.kotlinFqName.toString() == BaseNode::class.qualifiedName
+            }!!
+        val nodeLikeProperties = nodeLike.properties.find { it.name.identifier == "properties" }!!
+        val baseNodeProperties = baseNode.properties.find { it.name.identifier == "properties" }!!
+        val baseNodeGetProperties = baseNode.functions.find { it.name.identifier == "getProperties" }!!
+
+        //            override val properties: List<FeatureDescription>
 //            get() = TODO("Not yet implemented")
 
-                val propertySignature = IdSignature.CommonSignature(irClass.kotlinFqName.asString(), "properties", null, 0, )
-                val propertiesSymbol = IrPropertyPublicSymbolImpl(propertySignature)
-                //val propertiesDecl = DeclarationIrBuilder(pluginContext, propertiesSymbol)
-                val origin = IrDeclarationOrigin.GeneratedByPlugin(StarLasuGeneratedDeclarationKey)
-                val propertiesDecl = IrPropertyImpl(0, 0, origin, propertiesSymbol, Name.identifier("properties"),
-                    DescriptorVisibilities.PUBLIC, Modality.OPEN, false, false, false, false, false)
-                propertiesDecl.parent = irClass
-                messageCollector.report(
-                    CompilerMessageSeverity.WARNING,
-                    "Getter ${propertiesDecl.getter}",
-                )
-                val accessorSignature =
-                    IdSignature.CommonSignature(
-                        packageFqName = irClass.kotlinFqName.asString(),
-                        declarationFqName = "${irClass.kotlinFqName.asString()}.properties.get",
-                        id = null,
-                        mask = 0,
-                        description = null,
-                    )
-                val propertiesGetterSymbol = IrSimpleFunctionPublicSymbolImpl(IdSignature.AccessorSignature(propertySignature, accessorSignature))
 
-                val listClassifierSymbol : IrClassifierSymbol = List::class.classifierSymbol
-                val featureDescription : IrTypeArgument = IrSimpleTypeImpl(null, FeatureDescription::class.classifierSymbol, SimpleTypeNullability.DEFINITELY_NOT_NULL, emptyList(), emptyList())
-                val propertiesType : IrType = IrSimpleTypeImpl(null, listClassifierSymbol, SimpleTypeNullability.DEFINITELY_NOT_NULL, listOf(featureDescription), emptyList())
-                propertiesDecl.getter = IrFunctionImpl(0, 0, origin, propertiesGetterSymbol, Name.special("<get>"),
-                    DescriptorVisibilities.PUBLIC, Modality.OPEN, propertiesType,false, false, false, false, false, false, false)
-                irClass.declarations.add(propertiesDecl)
-            }
+        val property = IrFactoryImpl.createProperty(
+            UNDEFINED_OFFSET, UNDEFINED_OFFSET, PartiallyLinkedDeclarationOrigin.MISSING_DECLARATION,
+            Name.identifier("properties"), DescriptorVisibilities.PUBLIC, Modality.OPEN,
+            IrPropertySymbolImpl(), false, false, false, false,
+            false, null, false, false)
+        val accessorSignature =
+            IdSignature.CommonSignature(
+                packageFqName = irClass.kotlinFqName.asString(),
+                declarationFqName = "${irClass.kotlinFqName.asString()}.properties.get",
+                id = null,
+                mask = 0,
+                description = null,
+            )
+        property.getter = IrFactoryImpl.createSimpleFunction(UNDEFINED_OFFSET, UNDEFINED_OFFSET, PartiallyLinkedDeclarationOrigin.MISSING_DECLARATION,
+            Name.identifier("getProperties")/*baseNodeProperties.getter!!.name*/, DescriptorVisibilities.PUBLIC, false, false,
+            baseNodeProperties.getter!!.returnType,baseNodeProperties.getter!!.modality, IrSimpleFunctionPublicSymbolImpl(accessorSignature),
+            false, false, false, false)
+        property.getter!!.overriddenSymbols = mutableListOf(baseNodeProperties.getter!!.symbol, baseNodeGetProperties.symbol)
+        val mutableListOf =
+            pluginContext
+                .referenceFunctions(CallableId(FqName("kotlin.collections"), null, Name.identifier("emptyList"))).single()
+        property.getter!!.body = DeclarationIrBuilder(pluginContext, property.getter!!.symbol).irBlockBody(
+            IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
+        ) {
+            +irReturn(irCall(mutableListOf))
+        }
+        property.parent = irClass
+        irClass.declarations.add(property)
+
+//                val propertySignature = IdSignature.CommonSignature(irClass.kotlinFqName.asString(), "properties", null, 0, )
+//                val propertiesSymbol = IrPropertyPublicSymbolImpl(propertySignature)
+//                //val propertiesDecl = DeclarationIrBuilder(pluginContext, propertiesSymbol)
+//                val origin = IrDeclarationOrigin.GeneratedByPlugin(StarLasuGeneratedDeclarationKey)
+//                val propertiesDecl = IrPropertyImpl(0, 0, origin, propertiesSymbol, Name.identifier("properties"),
+//                    DescriptorVisibilities.PUBLIC, Modality.OPEN, false, false, false, false, false)
+//                propertiesDecl.parent = irClass
+//                messageCollector.report(
+//                    CompilerMessageSeverity.WARNING,
+//                    "Getter ${propertiesDecl.getter}",
+//                )
+//                val accessorSignature =
+//                    IdSignature.CommonSignature(
+//                        packageFqName = irClass.kotlinFqName.asString(),
+//                        declarationFqName = "${irClass.kotlinFqName.asString()}.properties.get",
+//                        id = null,
+//                        mask = 0,
+//                        description = null,
+//                    )
+//                val propertiesGetterSymbol = IrSimpleFunctionPublicSymbolImpl(IdSignature.AccessorSignature(propertySignature, accessorSignature))
+//
+//                val listClassifierSymbol : IrClassifierSymbol = List::class.classifierSymbol
+//                val featureDescription : IrTypeArgument = IrSimpleTypeImpl(null, FeatureDescription::class.classifierSymbol, SimpleTypeNullability.DEFINITELY_NOT_NULL, emptyList(), emptyList())
+//                val propertiesType : IrType = IrSimpleTypeImpl(null, listClassifierSymbol, SimpleTypeNullability.DEFINITELY_NOT_NULL, listOf(featureDescription), emptyList())
+//                propertiesDecl.getter = IrFunctionImpl(0, 0, origin, propertiesGetterSymbol, Name.special("<get>"),
+//                    DescriptorVisibilities.PUBLIC, Modality.OPEN, propertiesType,false, false, false, false, false, false, false)
+//                irClass.declarations.add(propertiesDecl)
     }
 
     override fun generate(
