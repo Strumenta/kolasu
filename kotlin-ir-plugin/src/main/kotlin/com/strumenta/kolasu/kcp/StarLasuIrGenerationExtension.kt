@@ -4,6 +4,8 @@ package com.strumenta.kolasu.kcp
 
 import com.strumenta.kolasu.model.BaseNode
 import com.strumenta.kolasu.model.FeatureDescription
+import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
@@ -23,8 +25,13 @@ import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.backend.js.utils.realOverrideTarget
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
 import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irCallOp
+import org.jetbrains.kotlin.ir.builders.irGet
+import org.jetbrains.kotlin.ir.builders.irLetS
+import org.jetbrains.kotlin.ir.builders.irNull
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
+import org.jetbrains.kotlin.ir.builders.irTemporary
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
@@ -46,6 +53,7 @@ import org.jetbrains.kotlin.ir.types.IrTypeArgument
 import org.jetbrains.kotlin.ir.types.SimpleTypeNullability
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.util.IdSignature
+import org.jetbrains.kotlin.ir.util.addArguments
 import org.jetbrains.kotlin.ir.util.addFakeOverrides
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
@@ -56,6 +64,7 @@ import org.jetbrains.kotlin.ir.util.overrides
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
 import org.jetbrains.kotlin.name.CallableId
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.getClassFqNameUnsafe
@@ -102,11 +111,36 @@ class StarLasuIrGenerationExtension(
             )
             val mutableListOf =
                 pluginContext
-                    .referenceFunctions(CallableId(FqName("kotlin.collections"), null, Name.identifier("emptyList"))).single()
+                    .referenceFunctions(CallableId(FqName("kotlin.collections"), null, Name.identifier("mutableListOf"))).find { it.owner!!.valueParameters.size == 0 }!!
             function.body = DeclarationIrBuilder(pluginContext, function.symbol).irBlockBody(
                 IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
             ) {
-                +irReturn(irCall(mutableListOf))
+                // We create a mutable list with no parameters
+                //val mutableListOfCall = irCall(mutableListOf)
+                // Then we call apply on it
+                //apply {  }
+
+                val variable = irTemporary(irCall(mutableListOf))
+                +variable
+                val mutableListClass = pluginContext.referenceClass(MutableList::class.classId) ?: throw RuntimeException("MutableList not found")
+                val add = mutableListClass.functions.find { it.owner.name.identifier == "add" } ?: throw RuntimeException("MutableList.add not found")
+                irClass.properties.forEach { property ->
+                    +irCall(add).apply {
+                        dispatchReceiver = irGet(variable)
+
+//                        class FeatureDescription(
+//                            val name: String,
+//                            val provideNodes: Boolean,
+//                            val multiplicity: Multiplicity,
+//                            val valueProvider: () -> Any?,
+//                            val featureType: FeatureType,
+//                            val derived: Boolean = false,
+
+                            putValueArgument(0, irNull())
+                    }
+                }
+
+                +irReturn(irGet(variable))
             }
         }
     }
@@ -130,143 +164,6 @@ class StarLasuIrGenerationExtension(
                 +irReturn(irString(irClass.name.identifier))
             }
         }
-    }
-
-    private fun overrideCalculateFeatures(irClass: IrClass, pluginContext: IrPluginContext) {
-        messageCollector.report(
-            CompilerMessageSeverity.WARNING,
-            "overrideCalculateFeatures for ${irClass.name.identifier}",
-            irClass.compilerSourceLocation
-        )
-        irClass.functions.forEach { function ->
-            messageCollector.report(
-                CompilerMessageSeverity.WARNING,
-                "function ${function.name.identifier}",
-                irClass.compilerSourceLocation
-            )
-        }
-        val baseNode =
-            irClass.getAllSuperclasses().find {
-                it.kotlinFqName.toString() == BaseNode::class.qualifiedName
-            }!!
-        val baseNodeProperties = baseNode.properties.find { it.name.identifier == "properties" }!!
-        val returnType = baseNodeProperties.getter!!.returnType
-
-//        val functionSignature = IdSignature.CommonSignature(irClass.kotlinFqName.asString(), "calculateFeatures", null, 0, )
-//
-//        val function = IrFactoryImpl.createSimpleFunction(UNDEFINED_OFFSET, UNDEFINED_OFFSET, PartiallyLinkedDeclarationOrigin.MISSING_DECLARATION,
-//            Name.identifier("calculateFeatures"), DescriptorVisibilities.PROTECTED, false, false,
-//            baseNodeProperties.getter!!.returnType,baseNodeProperties.getter!!.modality,
-//            IrSimpleFunctionPublicSymbolImpl(functionSignature),
-//            false, false, false, false)
-//        val function = irClass.addFunction {
-//            name = Name.identifier("calculateFeatures")
-//            this.returnType = returnType
-//            modality = Modality.OPEN
-//            visibility = DescriptorVisibilities.PROTECTED
-//            //originalDeclaration = baseNode.functions.find { it.name.identifier == "calculateFeatures" }!!
-//            origin = PartiallyLinkedDeclarationOrigin.MISSING_DECLARATION
-//        }
-        val function = irClass.addFunction("calculateFeatures", returnType, Modality.OPEN, DescriptorVisibilities.PROTECTED,
-            origin = PartiallyLinkedDeclarationOrigin.MISSING_DECLARATION)
-         function.overriddenSymbols = mutableListOf(baseNode.functions.find { it.name.identifier == "calculateFeatures" }!!.symbol)
-        val mutableListOf =
-            pluginContext
-                .referenceFunctions(CallableId(FqName("kotlin.collections"), null, Name.identifier("emptyList"))).single()
-        function.body = DeclarationIrBuilder(pluginContext, function.symbol).irBlockBody(
-            IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
-        ) {
-            +irReturn(irCall(mutableListOf))
-        }
-    }
-
-    private fun overrideProperties(irClass: IrClass, pluginContext: IrPluginContext) {
-        val nodeLike =
-            irClass.allSuperInterfaces().find {
-                it.kotlinFqName.toString() == NodeLike::class.qualifiedName
-            }!!
-        val baseNode =
-            irClass.getAllSuperclasses().find {
-                it.kotlinFqName.toString() == BaseNode::class.qualifiedName
-            }!!
-        val nodeLikeProperties = nodeLike.properties.find { it.name.identifier == "properties" }!!
-        val baseNodeProperties = baseNode.properties.find { it.name.identifier == "properties" }!!
-        baseNode.declarations.forEach {
-            messageCollector.report(
-                CompilerMessageSeverity.WARNING,
-                "Declaration ${it}",
-                irClass.compilerSourceLocation,
-            )
-        }
-        baseNode.functions.forEach {
-            messageCollector.report(
-                CompilerMessageSeverity.WARNING,
-                "Function ${it.name}",
-                irClass.compilerSourceLocation,
-            )
-        }
-        //val baseNodeGetProperties = baseNode.functions.find { it.name.identifier == "getProperties" }!!
-
-        //            override val properties: List<FeatureDescription>
-//            get() = TODO("Not yet implemented")
-
-
-        val property = IrFactoryImpl.createProperty(
-            UNDEFINED_OFFSET, UNDEFINED_OFFSET, PartiallyLinkedDeclarationOrigin.MISSING_DECLARATION,
-            Name.identifier("properties"), DescriptorVisibilities.PUBLIC, Modality.OPEN,
-            IrPropertySymbolImpl(), false, false, false, false,
-            false, null, false, false)
-        val accessorSignature =
-            IdSignature.CommonSignature(
-                packageFqName = irClass.kotlinFqName.asString(),
-                declarationFqName = "${irClass.kotlinFqName.asString()}.properties.get",
-                id = null,
-                mask = 0,
-                description = null,
-            )
-        property.getter = IrFactoryImpl.createSimpleFunction(UNDEFINED_OFFSET, UNDEFINED_OFFSET, PartiallyLinkedDeclarationOrigin.MISSING_DECLARATION,
-            Name.identifier("getProperties")/*baseNodeProperties.getter!!.name*/, DescriptorVisibilities.PUBLIC, false, false,
-            baseNodeProperties.getter!!.returnType,baseNodeProperties.getter!!.modality, IrSimpleFunctionPublicSymbolImpl(accessorSignature),
-            false, false, false, false)
-        property.getter!!.overriddenSymbols = mutableListOf(baseNodeProperties.getter!!.symbol)
-        val mutableListOf =
-            pluginContext
-                .referenceFunctions(CallableId(FqName("kotlin.collections"), null, Name.identifier("emptyList"))).single()
-        property.getter!!.body = DeclarationIrBuilder(pluginContext, property.getter!!.symbol).irBlockBody(
-            IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
-        ) {
-            +irReturn(irCall(mutableListOf))
-        }
-        property.parent = irClass
-        irClass.declarations.add(property)
-
-//                val propertySignature = IdSignature.CommonSignature(irClass.kotlinFqName.asString(), "properties", null, 0, )
-//                val propertiesSymbol = IrPropertyPublicSymbolImpl(propertySignature)
-//                //val propertiesDecl = DeclarationIrBuilder(pluginContext, propertiesSymbol)
-//                val origin = IrDeclarationOrigin.GeneratedByPlugin(StarLasuGeneratedDeclarationKey)
-//                val propertiesDecl = IrPropertyImpl(0, 0, origin, propertiesSymbol, Name.identifier("properties"),
-//                    DescriptorVisibilities.PUBLIC, Modality.OPEN, false, false, false, false, false)
-//                propertiesDecl.parent = irClass
-//                messageCollector.report(
-//                    CompilerMessageSeverity.WARNING,
-//                    "Getter ${propertiesDecl.getter}",
-//                )
-//                val accessorSignature =
-//                    IdSignature.CommonSignature(
-//                        packageFqName = irClass.kotlinFqName.asString(),
-//                        declarationFqName = "${irClass.kotlinFqName.asString()}.properties.get",
-//                        id = null,
-//                        mask = 0,
-//                        description = null,
-//                    )
-//                val propertiesGetterSymbol = IrSimpleFunctionPublicSymbolImpl(IdSignature.AccessorSignature(propertySignature, accessorSignature))
-//
-//                val listClassifierSymbol : IrClassifierSymbol = List::class.classifierSymbol
-//                val featureDescription : IrTypeArgument = IrSimpleTypeImpl(null, FeatureDescription::class.classifierSymbol, SimpleTypeNullability.DEFINITELY_NOT_NULL, emptyList(), emptyList())
-//                val propertiesType : IrType = IrSimpleTypeImpl(null, listClassifierSymbol, SimpleTypeNullability.DEFINITELY_NOT_NULL, listOf(featureDescription), emptyList())
-//                propertiesDecl.getter = IrFunctionImpl(0, 0, origin, propertiesGetterSymbol, Name.special("<get>"),
-//                    DescriptorVisibilities.PUBLIC, Modality.OPEN, propertiesType,false, false, false, false, false, false, false)
-//                irClass.declarations.add(propertiesDecl)
     }
 
     override fun generate(

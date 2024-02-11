@@ -31,3 +31,6 @@ val KClass<*>.packageName : String
 
 val KClass<*>.classifierSymbol : IrClassifierSymbol
     get() = IrClassPublicSymbolImpl(IdSignature.CommonSignature(this.packageName, this.simpleName!!, null, 0, null))
+
+val KClass<*>.classId : ClassId
+    get() = ClassId(FqName(this.packageName), Name.identifier(this.simpleName!!))
