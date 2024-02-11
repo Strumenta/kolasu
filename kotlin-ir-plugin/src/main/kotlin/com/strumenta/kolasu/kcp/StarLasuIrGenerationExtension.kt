@@ -3,6 +3,7 @@
 package com.strumenta.kolasu.kcp
 
 import com.strumenta.kolasu.model.BaseNode
+import com.strumenta.kolasu.model.FeatureDescription
 import com.strumenta.kolasu.model.Node
 import org.jetbrains.kotlin.backend.common.extensions.FirIncompatiblePluginAPI
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
@@ -21,10 +22,17 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrPropertyImpl
+import org.jetbrains.kotlin.ir.symbols.IrClassifierSymbol
 import org.jetbrains.kotlin.ir.symbols.IrPropertySymbol
+import org.jetbrains.kotlin.ir.symbols.impl.IrClassPublicSymbolImpl
+import org.jetbrains.kotlin.ir.symbols.impl.IrClassSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrPropertyPublicSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionPublicSymbolImpl
+import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.types.IrTypeArgument
+import org.jetbrains.kotlin.ir.types.SimpleTypeNullability
+import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.util.IdSignature
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
 import org.jetbrains.kotlin.ir.util.kotlinFqName
@@ -52,6 +60,17 @@ class StarLasuIrGenerationExtension(
             irClass.accept(FieldObservableExtension(pluginContext, isBaseNode), null)
             irClass.accept(SettingParentExtension(pluginContext, messageCollector, isBaseNode), null)
             if (isBaseNode) {
+
+                val baseNodeClass = irClass.getAllSuperclasses().find {
+                    it.kotlinFqName.toString() == BaseNode::class.qualifiedName
+                }!!
+                baseNodeClass.declarations.forEach {
+                    messageCollector.report(
+                        CompilerMessageSeverity.WARNING,
+                        "DECLARATION ${it.javaClass}",
+                    )
+                }
+
                 //            override val properties: List<FeatureDescription>
 //            get() = TODO("Not yet implemented")
 
@@ -76,8 +95,10 @@ class StarLasuIrGenerationExtension(
                     )
                 val propertiesGetterSymbol = IrSimpleFunctionPublicSymbolImpl(IdSignature.AccessorSignature(propertySignature, accessorSignature))
 
-                val propertiesType : IrType = TODO()
-                propertiesDecl.getter = IrFunctionImpl(0, 0, origin, propertiesGetterSymbol, Name.special("getProperties"),
+                val listClassifierSymbol : IrClassifierSymbol = List::class.classifierSymbol
+                val featureDescription : IrTypeArgument = IrSimpleTypeImpl(null, FeatureDescription::class.classifierSymbol, SimpleTypeNullability.DEFINITELY_NOT_NULL, emptyList(), emptyList())
+                val propertiesType : IrType = IrSimpleTypeImpl(null, listClassifierSymbol, SimpleTypeNullability.DEFINITELY_NOT_NULL, listOf(featureDescription), emptyList())
+                propertiesDecl.getter = IrFunctionImpl(0, 0, origin, propertiesGetterSymbol, Name.special("<get>"),
                     DescriptorVisibilities.PUBLIC, Modality.OPEN, propertiesType,false, false, false, false, false, false, false)
                 irClass.declarations.add(propertiesDecl)
             }
@@ -121,3 +142,4 @@ class StarLasuIrGenerationExtension(
         }
     }
 }
+
