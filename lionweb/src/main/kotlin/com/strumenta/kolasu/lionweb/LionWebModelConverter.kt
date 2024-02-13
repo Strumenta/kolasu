@@ -103,8 +103,12 @@ class LionWebModelConverter {
         lwTree.thisAndAllDescendants().reversed().forEach { lwNode ->
             val kClass = languageConverter.correspondingKolasuClass(lwNode.concept)
                 ?: throw RuntimeException("We do not have StarLasu AST class for LIonWeb Concept ${lwNode.concept}")
-            val kNode: com.strumenta.kolasu.model.Node = instantiate(kClass, lwNode, referencesPostponer)
-            associateNodes(kNode, lwNode)
+            try {
+                val kNode: com.strumenta.kolasu.model.Node = instantiate(kClass, lwNode, referencesPostponer)
+                associateNodes(kNode, lwNode)
+            } catch (e: RuntimeException) {
+                throw RuntimeException("Issue instantiating $kClass from LionWeb node $lwNode", e)
+            }
         }
         lwTree.thisAndAllDescendants().forEach { lwNode ->
             val kNode: com.strumenta.kolasu.model.Node = nodesMapping.byB(lwNode)!!
@@ -243,8 +247,8 @@ class LionWebModelConverter {
         }
         try {
             return constructor.callBy(params) as com.strumenta.kolasu.model.Node
-        } catch (e: ClassCastException) {
-            throw RuntimeException("Issue instantiating using constructor $constructor with params $params", e)
+        } catch (e: Exception) {
+            throw RuntimeException("Issue instantiating using constructor $constructor with params ${params.map { "${it.key.name}=${it.value.toString()}" }}", e)
         }
     }
 

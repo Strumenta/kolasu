@@ -93,7 +93,13 @@ class LionWebLanguageConverter {
                     concept.addImplementedInterface(correspondingInterface(it))
                 }
             }
-            astClass.declaredFeatures().forEach {
+            val features = try {
+                astClass.declaredFeatures()
+            } catch (e: RuntimeException) {
+                throw RuntimeException("Issue processing features for AST class ${astClass.qualifiedName}", e)
+            }
+
+            features.forEach {
                 when (it) {
                     is Attribute -> {
                         val prop = Property(it.name, featuresContainer)

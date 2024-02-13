@@ -160,7 +160,7 @@ fun assertASTsAreEqual(
                             assertEquals(
                                 actualPropValueCollection == null,
                                 expectedPropValueCollection == null,
-                                "$context.${expectedProperty.name} nullness"
+                                "$context.${expectedProperty.name} nullness: expected value to be $expectedPropValueCollection but was $actualPropValueCollection (node type ${actual.nodeType})"
                             )
                             if (actualPropValueCollection != null && expectedPropValueCollection != null) {
                                 assertEquals(
@@ -174,7 +174,7 @@ fun assertASTsAreEqual(
                                     assertASTsAreEqual(
                                         expectedIt.next(),
                                         actualIt.next(),
-                                        "$context[$i]",
+                                        "$context.${expectedProperty.name}[$i]",
                                         considerPosition = considerPosition,
                                         useLightweightAttributeEquality = useLightweightAttributeEquality
                                     )
