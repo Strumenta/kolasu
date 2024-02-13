@@ -252,6 +252,10 @@ fun <N : Node> KProperty1<N, *>.referredType(): KClass<out Node> {
 fun <N : Any> KProperty1<N, *>.asContainment(): Containment {
     val multiplicity = when {
         (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
+            if (this.returnType.isMarkedNullable) {
+                throw IllegalStateException("Containments should not be defined as nullable collections " +
+                        "(property ${this.name})")
+            }
             Multiplicity.MANY
         }
         this.returnType.isMarkedNullable -> Multiplicity.OPTIONAL

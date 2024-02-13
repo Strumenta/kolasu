@@ -29,6 +29,8 @@ interface MyRelevantInterface
 
 data class SimpleNodeB(val value: String) : SimpleDecl()
 
+data class MyNodeWithNullableContainmentLists(val children: MutableList<MyNodeWithNullableContainmentLists>?) : Node()
+
 class LionWebLanguageConverterTest {
 
     @Test
@@ -112,5 +114,13 @@ class LionWebLanguageConverterTest {
 
         val validationResult = LanguageValidator().validate(lwLanguage)
         assertEquals(true, validationResult.isSuccessful, validationResult.issues.toString())
+    }
+
+    @Test(expected = RuntimeException::class)
+    fun conversionOfNullableContainmentListIsForbidden() {
+        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
+            addClass(MyNodeWithNullableContainmentLists::class)
+        }
+        val lwLanguage = LionWebLanguageConverter().exportToLionWeb(kLanguage)
     }
 }
