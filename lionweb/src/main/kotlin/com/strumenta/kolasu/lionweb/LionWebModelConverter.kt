@@ -19,7 +19,6 @@ import io.lionweb.lioncore.java.model.ReferenceValue
 import io.lionweb.lioncore.java.model.impl.DynamicEnumerationValue
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
-import java.lang.ClassCastException
 import java.lang.IllegalArgumentException
 import java.util.IdentityHashMap
 import kotlin.IllegalStateException
@@ -248,7 +247,11 @@ class LionWebModelConverter {
         try {
             return constructor.callBy(params) as com.strumenta.kolasu.model.Node
         } catch (e: Exception) {
-            throw RuntimeException("Issue instantiating using constructor $constructor with params ${params.map { "${it.key.name}=${it.value.toString()}" }}", e)
+            throw RuntimeException(
+                "Issue instantiating using constructor $constructor with params " +
+                    "${params.map { "${it.key.name}=${it.value}" }}",
+                e
+            )
         }
     }
 

@@ -253,8 +253,10 @@ fun <N : Any> KProperty1<N, *>.asContainment(): Containment {
     val multiplicity = when {
         (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
             if (this.returnType.isMarkedNullable) {
-                throw IllegalStateException("Containments should not be defined as nullable collections " +
-                        "(property ${this.name})")
+                throw IllegalStateException(
+                    "Containments should not be defined as nullable collections " +
+                        "(property ${this.name})"
+                )
             }
             Multiplicity.MANY
         }

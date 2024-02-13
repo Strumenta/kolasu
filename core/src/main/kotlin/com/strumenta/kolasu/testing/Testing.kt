@@ -160,7 +160,9 @@ fun assertASTsAreEqual(
                             assertEquals(
                                 actualPropValueCollection == null,
                                 expectedPropValueCollection == null,
-                                "$context.${expectedProperty.name} nullness: expected value to be $expectedPropValueCollection but was $actualPropValueCollection (node type ${actual.nodeType})"
+                                "$context.${expectedProperty.name} nullness: expected value " +
+                                    "to be $expectedPropValueCollection but was $actualPropValueCollection " +
+                                    "(node type ${actual.nodeType})"
                             )
                             if (actualPropValueCollection != null && expectedPropValueCollection != null) {
                                 assertEquals(
