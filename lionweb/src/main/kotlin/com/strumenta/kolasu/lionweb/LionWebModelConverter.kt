@@ -1,13 +1,9 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.language.KolasuLanguage
-import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.allFeatures
-import com.strumenta.kolasu.model.containingProperty
-import com.strumenta.kolasu.model.indexInContainingProperty
 import com.strumenta.kolasu.traversing.walk
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
@@ -38,8 +34,10 @@ interface PrimitiveValueSerialization<E> {
 
 /**
  * This class is able to convert between Kolasu and LionWeb models, tracking the mapping.
+ *
+ * @param nodeIdProvider logic to be used to associate IDs to Kolasu nodes when exporting them to LionWeb
  */
-class LionWebModelConverter {
+class LionWebModelConverter(var nodeIdProvider: LionWebNodeIdProvider = StructuralLionWebNodeIdProvider()) {
     private val languageConverter = LionWebLanguageConverter()
     private val nodesMapping = BiMap<KNode, LWNode>(usingIdentity = true)
     private val primitiveValueSerializations = mutableMapOf<KClass<*>, PrimitiveValueSerialization<*>>()
@@ -63,13 +61,13 @@ class LionWebModelConverter {
         this.languageConverter.associateLanguages(lwLanguage, kolasuLanguage)
     }
 
-    fun exportModelToLionWeb(kolasuTree: KNode, customSourceId: String? = null): LWNode {
+    fun exportModelToLionWeb(kolasuTree: KNode): LWNode {
         if (nodesMapping.containsA(kolasuTree)) {
             return nodesMapping.byA(kolasuTree)!!
         }
         kolasuTree.walk().forEach { kNode ->
             if (!nodesMapping.containsA(kNode)) {
-                val lwNode = DynamicNode(nodeID(kNode, customSourceId), findConcept(kNode))
+                val lwNode = DynamicNode(nodeIdProvider.id(kNode), findConcept(kNode))
                 associateNodes(kNode, lwNode)
             }
         }
@@ -326,33 +324,7 @@ class LionWebModelConverter {
         return languageConverter.correspondingConcept(kNode.javaClass.kotlin)
     }
 
-    private fun nodeID(kNode: com.strumenta.kolasu.model.Node, customSourceId: String? = null): String {
-        return "${customSourceId ?: kNode.source.id}_${kNode.positionalID}"
-    }
-
     private fun associateNodes(kNode: KNode, lwNode: LWNode) {
         nodesMapping.associate(kNode, lwNode)
     }
 }
-
-private val KNode.positionalID: String
-    get() {
-        return if (this.parent == null) {
-            "root"
-        } else {
-            val cp = this.containingProperty()!!
-            val postfix = if (cp.multiple) "${cp.name}_${this.indexInContainingProperty()!!}" else cp.name
-            "${this.parent!!.positionalID}_$postfix"
-        }
-    }
-
-private val Source?.id: String
-    get() {
-        return if (this == null) {
-            "UNKNOWN_SOURCE"
-        } else if (this is FileSource) {
-            "file_${this.file.path.replace('.', '-').replace('/', '-')}"
-        } else {
-            TODO("Unable to generate ID for Source $this (${this.javaClass.canonicalName})")
-        }
-    }
