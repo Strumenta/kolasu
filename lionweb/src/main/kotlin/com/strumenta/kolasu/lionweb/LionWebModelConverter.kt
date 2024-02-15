@@ -184,11 +184,8 @@ class LionWebModelConverter {
                             val entries = kClass.java.methods.find {
                                 it.name == "getEntries"
                             }!!.invoke(null) as List<Any>
-                            // val entriesProp = kClass.memberProperties.find { it.name == "entries" }
-                            // val fields = kClass.java.declaredFields.filter { Modifier.isStatic(it.modifiers) }.map { it.get(null) }
                             val nameProp = kClass.memberProperties.find { it.name == "name" }!! as KProperty1<Any, *>
                             val namesToFields = entries.associate { nameProp.invoke(it) as String to it }
-                            // val entries = kClass.staticProperties.first().get()
                             val nameToSearch = propValue.serializedValue.split("/").last()
                             params[param] = namesToFields[nameToSearch]!!
                         } else {
