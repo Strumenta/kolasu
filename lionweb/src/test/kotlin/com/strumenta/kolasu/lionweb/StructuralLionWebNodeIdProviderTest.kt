@@ -39,7 +39,7 @@ class StructuralLionWebNodeIdProviderTest {
         root.walk().forEach { node ->
             val id = ip.id(node)
             assertNotNull(id)
-            assert(id !in encounteredIDs) { "Node ID ${id} was already used" }
+            assert(id !in encounteredIDs) { "Node ID $id was already used" }
             encounteredIDs.add(id)
         }
         assertEquals(7, encounteredIDs.size)

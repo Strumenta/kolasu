@@ -10,7 +10,8 @@ class ConstantSourceIdProvider(var value: String) : SourceIdProvider {
     override fun sourceId(source: Source?) = value
 }
 
-class StructuralLionWebNodeIdProvider(var sourceIdProvider: SourceIdProvider = SimpleSourceIdProvider()) : LionWebNodeIdProvider {
+class StructuralLionWebNodeIdProvider(var sourceIdProvider: SourceIdProvider = SimpleSourceIdProvider()) :
+    LionWebNodeIdProvider {
 
     constructor(customSourceId: String) : this(ConstantSourceIdProvider(customSourceId))
 
