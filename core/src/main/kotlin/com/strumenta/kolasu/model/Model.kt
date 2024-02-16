@@ -31,6 +31,8 @@ interface Destination
 data class CompositeDestination(val elements: List<Destination>) : Destination, Serializable
 data class TextFileDestination(val position: Position?) : Destination, Serializable
 
+val RESERVED_FEATURE_NAMES = setOf("parent", "position")
+
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  *
@@ -167,10 +169,16 @@ open class Node() : Origin, Destination, Serializable {
         return getChildren(containment.name, includeDerived)
     }
 
-    fun getChildren(name: String, includeDerived: Boolean = false): List<Node> {
+    fun getChildren(propertyName: String, includeDerived: Boolean = false): List<Node> {
+        checkFeatureName(propertyName)
+        val property = (if (includeDerived) properties else originalProperties)
+            .find { it.name == propertyName }
+        require(property != null) {
+            "Property $propertyName not found in node of type ${this.nodeType} " +
+                "(considering derived properties? $includeDerived)"
+        }
         return when (
-            val rawValue = (if (includeDerived) properties else originalProperties)
-                .find { it.name == name }!!.value
+            val rawValue = property!!.value
         ) {
             null -> {
                 emptyList()
@@ -234,6 +242,12 @@ val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
         .filter { it.visibility == KVisibility.PUBLIC }
         .filter { it.findAnnotation<Internal>() == null }
         .filter { it.findAnnotation<Link>() == null }
+        .map {
+            require(it.name !in RESERVED_FEATURE_NAMES) {
+                "Property ${it.name} in ${this.qualifiedName} should be marked as internal"
+            }
+            it
+        }
         .toList()
 
 val <T : Any> KClass<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
@@ -283,3 +297,7 @@ annotation class Link
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class NodeType
+
+fun checkFeatureName(featureName: String) {
+    require(featureName !in RESERVED_FEATURE_NAMES) { "$featureName is not a valid feature name" }
+}

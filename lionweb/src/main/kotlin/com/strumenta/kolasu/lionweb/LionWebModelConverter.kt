@@ -11,7 +11,9 @@ import com.strumenta.kolasu.model.indexInContainingProperty
 import com.strumenta.kolasu.traversing.walk
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
+import io.lionweb.lioncore.java.language.Enumeration
 import io.lionweb.lioncore.java.language.Language
+import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.Node
@@ -29,12 +31,25 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
+interface PrimitiveValueSerialization<E> {
+    fun serialize(value: E): String
+    fun deserialize(serialized: String): E
+}
+
 /**
  * This class is able to convert between Kolasu and LionWeb models, tracking the mapping.
  */
 class LionWebModelConverter {
     private val languageConverter = LionWebLanguageConverter()
     private val nodesMapping = BiMap<KNode, LWNode>(usingIdentity = true)
+    private val primitiveValueSerializations = mutableMapOf<KClass<*>, PrimitiveValueSerialization<*>>()
+
+    fun <E : Any>registerPrimitiveValueSerialization(
+        kClass: KClass<E>,
+        primitiveValueSerialization: PrimitiveValueSerialization<E>
+    ) {
+        primitiveValueSerializations[kClass] = primitiveValueSerialization
+    }
 
     fun correspondingLanguage(kolasuLanguage: KolasuLanguage): Language {
         return languageConverter.correspondingLanguage(kolasuLanguage)
@@ -117,14 +132,69 @@ class LionWebModelConverter {
         return nodesMapping.byB(lwTree)!!
     }
 
+    fun prepareJsonSerialization(
+        jsonSerialization: JsonSerialization =
+            JsonSerialization.getStandardSerialization()
+    ): JsonSerialization {
+        jsonSerialization.primitiveValuesSerialization.registerSerializer(
+            StarLasuLWLanguage.char.id
+        ) { value -> "$value" }
+        jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+            StarLasuLWLanguage.char.id
+        ) { serialized -> serialized[0] }
+        languageConverter.knownLWLanguages().forEach {
+            jsonSerialization.classifierResolver.registerLanguage(it)
+        }
+        languageConverter.knownKolasuLanguages().forEach { kolasuLanguage ->
+            val lionwebLanguage = languageConverter.correspondingLanguage(kolasuLanguage)
+            kolasuLanguage.enumClasses.forEach { enumClass ->
+                val enumeration =
+                    lionwebLanguage.elements.filterIsInstance<Enumeration>().find { it.name == enumClass.simpleName }!!
+                val ec = enumClass
+                jsonSerialization.primitiveValuesSerialization.registerSerializer(
+                    enumeration.id!!
+                ) { value -> (value as Enum<*>).name }
+                val values = ec.members.find { it.name == "values" }!!.call() as Array<Enum<*>>
+                jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+                    enumeration.id!!
+                ) { serialized ->
+                    if (serialized == null) {
+                        null
+                    } else {
+                        values.find { it.name == serialized }
+                            ?: throw RuntimeException(
+                                "Cannot find enumeration value for $serialized (enum ${enumClass.qualifiedName})"
+                            )
+                    }
+                }
+            }
+            kolasuLanguage.primitiveClasses.forEach { primitiveClass ->
+                if (primitiveValueSerializations.containsKey(primitiveClass)) {
+                    val lwPrimitiveType: PrimitiveType = languageConverter
+                        .getKolasuClassesToPrimitiveTypesMapping()[primitiveClass]
+                        ?: throw IllegalStateException(
+                            "No Primitive Type found associated to primitive value class " +
+                                "${primitiveClass.qualifiedName}"
+                        )
+                    val serializer = primitiveValueSerializations[primitiveClass]!! as PrimitiveValueSerialization<Any>
+                    jsonSerialization.primitiveValuesSerialization.registerSerializer(
+                        lwPrimitiveType.id!!
+                    ) { value -> serializer.serialize(value) }
+
+                    jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+                        lwPrimitiveType.id!!
+                    ) { serialized -> serializer.deserialize(serialized) }
+                }
+            }
+        }
+        return jsonSerialization
+    }
+
     /**
      * Deserialize nodes, taking into accaount the known languages.
      */
     fun deserializeToNodes(json: String, useDynamicNodesIfNeeded: Boolean = true): List<LWNode> {
-        val js = JsonSerialization.getStandardSerialization()
-        languageConverter.knownLWLanguages().forEach {
-            js.classifierResolver.registerLanguage(it)
-        }
+        val js = prepareJsonSerialization()
         if (useDynamicNodesIfNeeded) {
             js.enableDynamicNodes()
         }
