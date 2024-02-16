@@ -27,14 +27,30 @@ class KolasuLanguage(
         get() = _astClasses
     val enumClasses: List<KClass<out Enum<*>>>
         get() = _enumClasses
+    val primitiveClasses: List<KClass<*>>
+        get() = _primitiveClasses
     private val _astClasses: MutableList<KClass<*>> = mutableListOf()
     private val _enumClasses: MutableList<KClass<out Enum<*>>> = mutableListOf()
+    private val _primitiveClasses: MutableList<KClass<*>> = mutableListOf()
 
     val simpleName: String
         get() = qualifiedName.split(".").last()
 
     fun addEnumClass(kClass: KClass<out Enum<*>>) {
+        if (_enumClasses.contains(kClass)) {
+            return
+        }
         _enumClasses.add(kClass)
+    }
+
+    fun addPrimitiveClass(kClass: KClass<*>) {
+        if (kClass in setOf(Int::class, String::class, Boolean::class, Char::class)) {
+            return
+        }
+        if (_primitiveClasses.contains(kClass)) {
+            return
+        }
+        _primitiveClasses.add(kClass)
     }
 
     fun addInterfaceClass(kClass: KClass<*>): Boolean {
@@ -89,8 +105,12 @@ class KolasuLanguage(
                 } else if (nodeProperty.isAttribute()) {
                     try {
                         val attributeKClass = nodeProperty.asAttribute().type.classifier as? KClass<*>
-                        if (attributeKClass != null && attributeKClass.superclasses.contains(Enum::class)) {
-                            addEnumClass(attributeKClass as KClass<out Enum<*>>)
+                        if (attributeKClass != null) {
+                            if (attributeKClass.superclasses.contains(Enum::class)) {
+                                addEnumClass(attributeKClass as KClass<out Enum<*>>)
+                            } else {
+                                addPrimitiveClass(attributeKClass as KClass<*>)
+                            }
                         }
                     } catch (e: Exception) {
                         throw RuntimeException(
@@ -109,4 +129,6 @@ class KolasuLanguage(
     fun findASTClass(name: String): KClass<*>? = astClasses.find { it.simpleName == name }
 
     fun findEnumClass(name: String): KClass<out Enum<*>>? = enumClasses.find { it.simpleName == name }
+
+    fun findPrimitiveClass(name: String): KClass<*>? = primitiveClasses.find { it.simpleName == name }
 }

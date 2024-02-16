@@ -71,7 +71,7 @@ fun NodeLike.processProperties(
     propertiesToIgnore: Set<String> = emptySet(),
     propertyOperation: (FeatureDescription) -> Unit,
 ) {
-    this.properties.filter { it.name !in propertiesToIgnore }.forEach {
+    this.features.filter { it.name !in propertiesToIgnore }.forEach {
         try {
             propertyOperation(it)
         } catch (t: Throwable) {
@@ -144,7 +144,7 @@ fun NodeLike.processConsideringDirectParent(
     parent: NodeLike? = null,
 ) {
     operation(this, parent)
-    this.properties.forEach { p ->
+    this.features.forEach { p ->
         when (val v = p.value) {
             is NodeLike -> v.processConsideringDirectParent(operation, this)
             is Collection<*> -> v.forEach { (it as? NodeLike)?.processConsideringDirectParent(operation, this) }
@@ -205,7 +205,7 @@ val NodeLike.nextSamePropertySibling: NodeLike?
             val siblings =
                 this
                     .parent!!
-                    .properties
+                    .features
                     .find { p ->
                         val v = p.value
                         when (v) {
@@ -229,7 +229,7 @@ val NodeLike.previousSamePropertySibling: NodeLike?
             val siblings =
                 this
                     .parent!!
-                    .properties
+                    .features
                     .find { p ->
                         val v = p.value
                         when (v) {
@@ -251,10 +251,11 @@ fun NodeLike.containingProperty(): FeatureDescription? {
     if (this.parent == null) {
         return null
     }
-    return this.parent!!.properties.find { p ->
-        when (val v = p.value) {
-            is Collection<*> -> v.contains(this)
-            this -> true
+    return this.parent!!.features.find { p ->
+        val v = p.value
+        when {
+            v is Collection<*> -> v.any { it === this }
+            v === this -> true
             else -> false
         }
     } ?: throw IllegalStateException("No containing property for $this with parent ${this.parent}")
@@ -269,7 +270,7 @@ fun NodeLike.indexInContainingProperty(): Int? {
     return if (p == null) {
         null
     } else if (p.value is Collection<*>) {
-        (p.value as Collection<*>).indexOf(this)
+        (p.value as Collection<*>).indexOfFirst { this === it }
     } else {
         0
     }

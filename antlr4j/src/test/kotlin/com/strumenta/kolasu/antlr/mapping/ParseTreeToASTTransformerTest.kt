@@ -65,7 +65,7 @@ data class EModule(
 
 data class EEntity(
     override val name: String,
-    val features: MutableList<EFeature>,
+    val features2: MutableList<EFeature>,
 ) : Node(),
     Named
 
@@ -560,7 +560,7 @@ class EntTransformer(
 ) : ParseTreeToASTTransformer(issues, allowGenericNode = false) {
     init {
         registerNodeTransformer(EntCtx::class) { ctx -> Ent(ctx.name) }
-            .withChild(Ent::features, EntCtx::features)
+            .withChild(Ent::features2, EntCtx::features2)
         registerNodeTransformer(EntCtxFeature::class) { ctx -> EntFeature(name = ctx.name) }
             .withChild(EntFeature::type, EntCtxFeature::type)
         this.registerNodeTransformer(EntCtxStringType::class, EntStringType::class)
@@ -569,7 +569,7 @@ class EntTransformer(
 
 data class EntCtx(
     val name: String,
-    val features: List<EntCtxFeature?>,
+    val features2: List<EntCtxFeature?>,
 )
 
 data class EntCtxFeature(
@@ -585,7 +585,7 @@ class EntCtxStringType : EntCtxPrimitiveType()
 
 data class Ent(
     override val name: String,
-    var features: List<EntFeature> = listOf(),
+    var features2: List<EntFeature> = listOf(),
 ) : Node(),
     Named
 

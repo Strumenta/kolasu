@@ -29,7 +29,7 @@ import kotlin.reflect.full.createType
 class LionWebLanguageConverter {
     private val astClassesAndClassifiers = BiMap<KClass<*>, Classifier<*>>()
     private val classesAndEnumerations = BiMap<EnumKClass, Enumeration>()
-    private val primitiveTypes = BiMap<KClass<*>, PrimitiveType>()
+    private val classesAndPrimitiveTypes = BiMap<KClass<*>, PrimitiveType>()
     private val languages = BiMap<KolasuLanguage, LWLanguage>()
 
     init {
@@ -48,9 +48,12 @@ class LionWebLanguageConverter {
         lionwebLanguage.id = "starlasu_language_${kolasuLanguage.qualifiedName.replace('.', '-')}"
         lionwebLanguage.addDependency(StarLasuLWLanguage)
 
-        // Consider enumerations!
         kolasuLanguage.enumClasses.forEach { enumClass ->
             toLWEnumeration(enumClass, lionwebLanguage)
+        }
+
+        kolasuLanguage.primitiveClasses.forEach { primitiveClass ->
+            toLWPrimitiveType(primitiveClass, lionwebLanguage)
         }
 
         // First we create all types
@@ -100,7 +103,14 @@ class LionWebLanguageConverter {
                     concept.addImplementedInterface(correspondingInterface(it))
                 }
             }
-            astClass.declaredFeatures().forEach {
+            val features =
+                try {
+                    astClass.declaredFeatures()
+                } catch (e: RuntimeException) {
+                    throw RuntimeException("Issue processing features for AST class ${astClass.qualifiedName}", e)
+                }
+
+            features.forEach {
                 when (it) {
                     is Attribute -> {
                         val prop = Property(it.name, featuresContainer)
@@ -144,7 +154,7 @@ class LionWebLanguageConverter {
                 }
             }
         }
-        languages.associate(kolasuLanguage, lionwebLanguage)
+        this.languages.associate(kolasuLanguage, lionwebLanguage)
         return lionwebLanguage
     }
 
@@ -174,15 +184,28 @@ class LionWebLanguageConverter {
         }
         kolasuLanguage.enumClasses.forEach { enumClass ->
             var enumeration: Enumeration? = null
-            val annotation = enumClass.annotations.filterIsInstance(LionWebAssociation::class.java).firstOrNull()
+            val annotation = enumClass.annotations.filterIsInstance<LionWebAssociation>().firstOrNull()
             if (annotation != null) {
                 enumeration =
-                    lwLanguage.elements.filterIsInstance(Enumeration::class.java).find {
+                    lwLanguage.elements.filterIsInstance<Enumeration>().find {
                         it.key == annotation.key
                     }
             }
             if (enumeration != null) {
                 classesAndEnumerations.associate(enumClass, enumeration)
+            }
+        }
+        kolasuLanguage.primitiveClasses.forEach { primitiveClass ->
+            var primitiveType: PrimitiveType? = null
+            val annotation = primitiveClass.annotations.filterIsInstance<LionWebAssociation>().firstOrNull()
+            if (annotation != null) {
+                primitiveType =
+                    lwLanguage.elements.filterIsInstance<PrimitiveType>().find {
+                        it.key == annotation.key
+                    }
+            }
+            if (primitiveType != null) {
+                classesAndPrimitiveTypes.associate(primitiveClass, primitiveType)
             }
         }
     }
@@ -217,8 +240,16 @@ class LionWebLanguageConverter {
         return classesAndEnumerations.bsToAsMap
     }
 
+    fun getPrimitiveTypesToKolasuClassesMapping(): Map<PrimitiveType, KClass<*>> {
+        return classesAndPrimitiveTypes.bsToAsMap
+    }
+
     fun getKolasuClassesToEnumerationsMapping(): Map<EnumKClass, Enumeration> {
         return classesAndEnumerations.asToBsMap
+    }
+
+    fun getKolasuClassesToPrimitiveTypesMapping(): Map<KClass<*>, PrimitiveType> {
+        return classesAndPrimitiveTypes.asToBsMap
     }
 
     fun correspondingInterface(kClass: KClass<*>): Interface {
@@ -269,6 +300,24 @@ class LionWebLanguageConverter {
         }
     }
 
+    private fun toLWPrimitiveType(
+        kClass: KClass<*>,
+        lionwebLanguage: LWLanguage,
+    ): PrimitiveType {
+        val primitiveType = classesAndPrimitiveTypes.byA(kClass)
+        if (primitiveType == null) {
+            val newPrimitiveName = kClass.simpleName
+            val newPrimitiveTypeID = (lionwebLanguage.id ?: "unknown_language") + "_" + newPrimitiveName
+            val newPrimitiveType = PrimitiveType(lionwebLanguage, newPrimitiveName, newPrimitiveTypeID)
+            newPrimitiveType.setKey(newPrimitiveName)
+            lionwebLanguage.addElement(newPrimitiveType)
+            classesAndPrimitiveTypes.associate(kClass, newPrimitiveType)
+            return newPrimitiveType
+        } else {
+            return primitiveType
+        }
+    }
+
     private fun toLWDataType(
         kType: KType,
         lionwebLanguage: LWLanguage,
@@ -285,15 +334,7 @@ class LionWebLanguageConverter {
                 if (isEnum) {
                     return toLWEnumeration(kClass, lionwebLanguage)
                 } else {
-                    val primitiveType = primitiveTypes.byA(kClass)
-                    if (primitiveType == null) {
-                        val newPrimitiveType = PrimitiveType(lionwebLanguage, kClass.simpleName)
-                        lionwebLanguage.addElement(newPrimitiveType)
-                        primitiveTypes.associate(kClass, newPrimitiveType)
-                        return newPrimitiveType
-                    } else {
-                        return primitiveType
-                    }
+                    return toLWPrimitiveType(kClass, lionwebLanguage)
                 }
             }
         }

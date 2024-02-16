@@ -42,7 +42,7 @@ class SemanticsTest {
                 mutableListOf(
                     ClassDecl(
                         name = "class_0",
-                        features =
+                        features2 =
                             mutableListOf(
                                 FeatureDecl(
                                     name = "feature_0",
@@ -131,7 +131,7 @@ class SemanticsTest {
                 scopeFrom(ClassDecl::class) {
                     scope {
                         it.operations.forEach(this::define)
-                        it.features.forEach(this::define)
+                        it.features2.forEach(this::define)
                         parent =
                             symbolResolver.scopeFrom(
                                 it

@@ -29,7 +29,7 @@ class OnlyReferencedIdProvider(
             .walk()
             .flatMap { node ->
                 node
-                    .properties
+                    .features
                     .filter { property -> property.value is ReferenceByName<*> }
                     .mapNotNull { property -> (property.value as ReferenceByName<*>).referred }
             }.toSet()

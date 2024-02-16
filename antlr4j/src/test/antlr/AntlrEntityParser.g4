@@ -15,7 +15,7 @@ module:
 
 entity:
     ENTITY name=ID LCRLY
-        features+=feature*
+        features2+=feature*
     RCRLY
     ;
 

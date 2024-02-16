@@ -22,7 +22,7 @@ internal open class TypeDecl(
 internal data class ClassDecl(
     override val name: String,
     var superclass: ReferenceByName<ClassDecl>? = null,
-    var features: MutableList<FeatureDecl> = mutableListOf(),
+    var features2: MutableList<FeatureDecl> = mutableListOf(),
     var operations: MutableList<OperationDecl> = mutableListOf(),
 ) : TypeDecl(name)
 

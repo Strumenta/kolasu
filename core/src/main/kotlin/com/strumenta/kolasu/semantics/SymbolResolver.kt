@@ -32,7 +32,7 @@ class SymbolResolver(
         property: KReferenceByName<out NodeLike>,
         node: NodeLike,
     ) {
-        (node.properties.find { it.name == property.name }?.value as ReferenceByName<PossiblyNamed>?)?.apply {
+        (node.features.find { it.name == property.name }?.value as ReferenceByName<PossiblyNamed>?)?.apply {
             this.referred = scopeProvider.scopeFor(property, node).resolve(this.name, property.getReferredType())
         }
     }

@@ -98,7 +98,7 @@ fun NodeLike.walkChildren(includeDerived: Boolean = false): Sequence<NodeLike> {
     return sequence {
         (
             if (includeDerived) {
-                this@walkChildren.properties
+                this@walkChildren.features
             } else {
                 this@walkChildren.originalFeatures
             }

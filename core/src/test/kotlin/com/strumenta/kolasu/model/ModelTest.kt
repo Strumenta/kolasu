@@ -186,6 +186,6 @@ class ModelTest {
 
     @test
     fun nameIsProperty() {
-        assertTrue { MyNode("").properties.map { it.name }.contains("name") }
+        assertTrue { MyNode("").features.map { it.name }.contains("name") }
     }
 }

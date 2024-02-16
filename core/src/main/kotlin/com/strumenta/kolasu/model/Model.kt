@@ -42,7 +42,12 @@ val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
             .filter { it.visibility == KVisibility.PUBLIC }
             .filter { it.findAnnotation<Internal>() == null }
             .filter { it.findAnnotation<Link>() == null }
-            .toList()
+            .map {
+                require(it.name !in RESERVED_FEATURE_NAMES) {
+                    "Property ${it.name} in ${this.qualifiedName} should be marked as internal"
+                }
+                it
+            }.toList()
 
 val <T : Any> KClass<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
     get() =

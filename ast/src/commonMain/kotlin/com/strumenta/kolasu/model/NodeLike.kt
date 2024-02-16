@@ -22,19 +22,19 @@ interface NodeLike {
      * The properties of this AST nodes, including attributes, children, and references.
      */
     @property:Internal
-    val properties: List<FeatureDescription>
+    val features: List<FeatureDescription>
 
     /**
-     * The properties of this AST nodes, including attributes, children, and references, but excluding derived
-     * properties.
+     * The features of this AST nodes, including attributes, children, and references, but excluding derived
+     * features.
      */
     @property:Internal
     open val originalFeatures: List<FeatureDescription>
         get() =
             try {
-                properties.filter { !it.derived }
+                features.filter { !it.derived }
             } catch (e: Throwable) {
-                throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
+                throw RuntimeException("Issue while getting features of node ${this::class.qualifiedName}", e)
             }
 
     /**
@@ -106,7 +106,10 @@ interface NodeLike {
 
     fun hasAnnotation(annotation: Annotation): Boolean = allAnnotations.contains(annotation)
 
-    fun getChildren(containment: Containment): List<NodeLike>
+    fun getChildren(
+        containment: Containment,
+        includeDerived: Boolean = false,
+    ): List<NodeLike>
 
     fun getReference(reference: Reference): ReferenceByName<*>
 

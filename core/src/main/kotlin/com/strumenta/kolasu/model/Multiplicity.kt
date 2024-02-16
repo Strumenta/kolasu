@@ -236,6 +236,12 @@ fun <N : Any> KProperty1<N, *>.asContainment(): Containment {
             this.returnType.isMarkedNullable -> Multiplicity.OPTIONAL
             else -> Multiplicity.SINGULAR
         }
+    if (multiplicity == Multiplicity.MANY && this.returnType.isMarkedNullable) {
+        throw IllegalStateException(
+            "Containments should not be defined as nullable collections " +
+                "(property ${this.name})",
+        )
+    }
     val type =
         if (multiplicity == Multiplicity.MANY) {
             this

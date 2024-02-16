@@ -12,6 +12,8 @@ annotation class Internal
  * Use this to mark all relations which are secondary, i.e., they are calculated from other relations,
  * so that they will not be considered branches of the AST.
  */
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
 annotation class Derived
 
 /**
@@ -19,4 +21,6 @@ annotation class Derived
  * contained by the Node having the properties. In other words: they are just references.
  * This will prevent them from being considered branches of the AST.
  */
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
 annotation class Link

@@ -310,11 +310,41 @@ class ProcessingTest {
     }
 
     @test
+    fun containingPropertyWhenNodesAreEquals() {
+        val a1 = AW("1")
+        val a2 = AW("1")
+        val a3 = AW("1")
+        val a4 = AW("4")
+        val b = BW(a1, mutableListOf(a2, a3, a4))
+        b.assignParents()
+        assertEquals(null, b.containingProperty())
+        assertEquals("a", a1.containingProperty()?.name)
+        assertEquals("manyAs", a2.containingProperty()?.name)
+        assertEquals("manyAs", a3.containingProperty()?.name)
+        assertEquals("manyAs", a4.containingProperty()?.name)
+    }
+
+    @test
     fun indexInContainingProperty() {
         val a1 = AW("1")
         val a2 = AW("2")
         val a3 = AW("3")
         val a4 = AW("4")
+        val b = BW(a1, mutableListOf(a2, a3, a4))
+        b.assignParents()
+        assertEquals(null, b.indexInContainingProperty())
+        assertEquals(0, a1.indexInContainingProperty())
+        assertEquals(0, a2.indexInContainingProperty())
+        assertEquals(1, a3.indexInContainingProperty())
+        assertEquals(2, a4.indexInContainingProperty())
+    }
+
+    @test
+    fun indexInContainingPropertyWhenNodeAreEquals() {
+        val a1 = AW("1")
+        val a2 = AW("2")
+        val a3 = AW("3")
+        val a4 = AW("2")
         val b = BW(a1, mutableListOf(a2, a3, a4))
         b.assignParents()
         assertEquals(null, b.indexInContainingProperty())

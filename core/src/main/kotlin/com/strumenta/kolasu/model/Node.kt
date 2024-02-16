@@ -38,7 +38,7 @@ open class Node : NodeLike {
      * The properties of this AST nodes, including attributes, children, and references.
      */
     @property:Internal
-    override val properties: List<FeatureDescription>
+    override val features: List<FeatureDescription>
         get() =
             try {
                 nodeProperties.map { FeatureDescription.buildFor(it, this) }
@@ -103,7 +103,7 @@ open class Node : NodeLike {
      * of circular graphs.
      */
     final override fun toString(): String {
-        return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
+        return "${this.nodeType}(${features.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
     }
 
     protected fun notifyOfPropertyChange(
@@ -136,8 +136,18 @@ open class Node : NodeLike {
         annotation.detach()
     }
 
-    override fun getChildren(containment: Containment): List<NodeLike> {
-        return when (val rawValue = nodeProperties.find { it.name == containment.name }!!.get(this)) {
+    override fun getChildren(
+        containment: Containment,
+        includeDerived: Boolean,
+    ): List<NodeLike> {
+        val property =
+            (if (includeDerived) features else originalFeatures)
+                .find { it.name == containment.name }
+        require(property != null) {
+            "Property ${containment.name} not found in node of type ${this.nodeType} " +
+                "(considering derived properties? $includeDerived)"
+        }
+        return when (val rawValue = property!!.value) {
             null -> {
                 emptyList()
             }
@@ -158,16 +168,16 @@ open class Node : NodeLike {
     }
 
     override fun <T : PossiblyNamed> getReference(name: String): ReferenceByName<T> {
-        val rawValue = properties.find { it.name == name }!!.value
+        val rawValue = features.find { it.name == name }!!.value
         return rawValue as ReferenceByName<T>
     }
 
     override fun getAttributeValue(attribute: Attribute): Any? {
-        return properties.find { it.name == attribute.name }!!.value
+        return features.find { it.name == attribute.name }!!.value
     }
 
     fun getAttributeValue(name: String): Any? {
-        return properties.find { it.name == name }!!.value
+        return features.find { it.name == name }!!.value
     }
 
     override fun <T : Any?> setAttribute(
