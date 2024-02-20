@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.isSuperclassOf
 
 // instance
-
+@Deprecated("The corresponding component in the semantics module should be used instead.")
 class TypeComputer(
     private val typingRules: MutableMap<KClass<out Node>, (Node) -> Node?> = mutableMapOf()
 ) {
@@ -29,7 +29,7 @@ class TypeComputer(
 }
 
 // configuration
-
+@Deprecated("The corresponding component in the semantics module should be used instead.")
 class TypeComputerConfiguration(
     val typingRules: MutableMap<KClass<out Node>, Semantics.(Node) -> Node?> = mutableMapOf(
         Node::class to { it }
