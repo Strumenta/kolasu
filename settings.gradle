@@ -1,5 +1,9 @@
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.5.0'
+}
 rootProject.name = 'kolasu'
 include 'core'
+include 'semantics'
 include 'emf'
 include 'playground'
 include 'javalib'
@@ -7,3 +11,4 @@ include 'lionweb'
 include 'lionweb-gen'
 include 'lionweb-ksp'
 include 'lionweb-gen-gradle'
+
