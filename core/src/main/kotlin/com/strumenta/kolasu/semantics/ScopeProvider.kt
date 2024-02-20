@@ -10,6 +10,7 @@ import kotlin.reflect.full.isSuperclassOf
 
 // instance
 
+@Deprecated("The corresponding component in the semantics module should be used instead.")
 class ScopeProvider(
     private val scopeResolutionRules: MutableMap<String,
         MutableMap<KClass<out Node>, (Node) -> Scope>> = mutableMapOf(),
@@ -55,6 +56,7 @@ class ScopeProvider(
 
 // configuration
 
+@Deprecated("The corresponding component in the semantics module should be used instead.")
 class ScopeProviderConfiguration(
     val scopeResolutionRules: MutableMap<String,
         MutableMap<KClass<out Node>, Semantics.(Node) -> Scope>> = mutableMapOf(),
@@ -95,6 +97,7 @@ fun scopeProvider(init: ScopeProviderConfiguration.() -> Unit) = ScopeProviderCo
 
 // TODO handle multiple symbols (e.g. function overloading)
 // TODO allow other than name-based symbol binding (e.g. predicated, numbered, etc.)
+@Deprecated("The corresponding component in the semantics module should be used instead.")
 data class Scope(
     var parent: Scope? = null,
     val symbolTable: MutableMap<String, MutableList<PossiblyNamed>> = mutableMapOf(),
