@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.lionweb
+package com.strumenta.kolasu.ids
 
 import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.Source
