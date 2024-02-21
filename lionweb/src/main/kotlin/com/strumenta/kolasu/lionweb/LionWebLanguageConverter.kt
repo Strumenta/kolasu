@@ -22,6 +22,7 @@ import io.lionweb.lioncore.java.language.Property
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
+import kotlin.reflect.full.findAnnotations
 
 /**
  * This class is able to convert between Kolasu and LionWeb languages, tracking the mapping.
@@ -59,6 +60,7 @@ class LionWebLanguageConverter {
         kolasuLanguage.astClasses.forEach { astClass ->
             if (astClass.isConcept) {
                 val concept = Concept(lionwebLanguage, astClass.simpleName)
+                concept.isPartition = astClass.findAnnotations(LionWebPartition::class).isNotEmpty()
                 concept.key = lionwebLanguage.key + "_" + concept.name
                 concept.id = lionwebLanguage.id + "_" + concept.name
                 concept.isAbstract = astClass.isAbstract || astClass.isSealed
