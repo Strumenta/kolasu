@@ -82,6 +82,8 @@ class ReferenceByName<N : PossiblyNamed>(
         if (name != other.name) return false
         if (identifier != other.identifier) return false
         if (referred != other.referred) return false
+        if (identifier != other.identifier) return false
+
         return true
     }
 }

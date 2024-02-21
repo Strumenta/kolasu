@@ -18,7 +18,10 @@ interface Origin {
         get() = position?.source
 }
 
-class SimpleOrigin(override val position: Position?, override val sourceText: String?) : Origin, Serializable
+class SimpleOrigin(
+    override val position: Position?,
+    override val sourceText: String? = null
+) : Origin, Serializable
 
 data class CompositeOrigin(
     val elements: List<Origin>,
@@ -194,12 +197,15 @@ open class Node() : Origin, Destination, Serializable {
         }
     }
 
-    fun getReference(reference: Reference): ReferenceByName<*> {
+    fun getReference(reference: Reference): ReferenceByName<*>? {
         return getReference(reference.name)
     }
 
-    fun getReference(name: String): ReferenceByName<*> {
+    fun getReference(name: String): ReferenceByName<*>? {
         val rawValue = properties.find { it.name == name }!!.value
+        if (rawValue == null) {
+            return null
+        }
         return rawValue as ReferenceByName<*>
     }
 
