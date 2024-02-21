@@ -5,8 +5,8 @@ import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 
 data class SymbolDescription(
-    override val name: String,
     val identifier: String,
+    override val name: String,
     val types: List<String>,
     val fields: Map<String, ValueDescription>
 ) : Node(), Named

@@ -25,4 +25,8 @@ class BiMap<A, B>(val usingIdentity: Boolean = false) {
 
     fun containsA(a: A): Boolean = _asToBs.containsKey(a)
     fun containsB(b: B): Boolean = _bsToAs.containsKey(b)
+    fun clear() {
+        _asToBs.clear()
+        _bsToAs.clear()
+    }
 }
