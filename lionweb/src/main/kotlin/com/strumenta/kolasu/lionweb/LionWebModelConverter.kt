@@ -61,7 +61,7 @@ class LionWebModelConverter(var nodeIdProvider: LionWebNodeIdProvider = Structur
         this.languageConverter.associateLanguages(lwLanguage, kolasuLanguage)
     }
 
-    fun exportModelToLionWeb(kolasuTree: KNode): LWNode {
+    fun exportModelToLionWeb(kolasuTree: KNode, nodeIdProvider: LionWebNodeIdProvider = this.nodeIdProvider): LWNode {
         if (nodesMapping.containsA(kolasuTree)) {
             return nodesMapping.byA(kolasuTree)!!
         }
