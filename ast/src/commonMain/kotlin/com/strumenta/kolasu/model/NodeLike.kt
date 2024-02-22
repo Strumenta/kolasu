@@ -34,7 +34,7 @@ interface NodeLike {
             try {
                 features.filter { !it.derived }
             } catch (e: Throwable) {
-                throw RuntimeException("Issue while getting features of node ${this::class.qualifiedName}", e)
+                throw RuntimeException("Issue while getting features of node ${this::class}", e)
             }
 
     /**
