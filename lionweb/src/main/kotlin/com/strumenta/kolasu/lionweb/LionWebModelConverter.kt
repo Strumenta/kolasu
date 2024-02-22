@@ -40,8 +40,12 @@ interface PrimitiveValueSerialization<E> {
 
 /**
  * This class is able to convert between Kolasu and LionWeb models, tracking the mapping.
+ *
+ * @param nodeIdProvider logic to be used to associate IDs to Kolasu nodes when exporting them to LionWeb
  */
-class LionWebModelConverter {
+class LionWebModelConverter(
+    var nodeIdProvider: LionWebNodeIdProvider = StructuralLionWebNodeIdProvider(),
+) {
     private val languageConverter = LionWebLanguageConverter()
     private val nodesMapping = BiMap<KNode, LWNode>(usingIdentity = true)
     private val primitiveValueSerializations = mutableMapOf<KClass<*>, PrimitiveValueSerialization<*>>()
@@ -70,14 +74,14 @@ class LionWebModelConverter {
 
     fun exportModelToLionWeb(
         kolasuTree: KNode,
-        customSourceId: String? = null,
+        nodeIdProvider: LionWebNodeIdProvider = this.nodeIdProvider,
     ): LWNode {
         if (nodesMapping.containsA(kolasuTree)) {
             return nodesMapping.byA(kolasuTree)!!
         }
         kolasuTree.walk().forEach { kNode ->
             if (!nodesMapping.containsA(kNode)) {
-                val lwNode = DynamicNode(nodeID(kNode, customSourceId), findConcept(kNode))
+                val lwNode = DynamicNode(nodeIdProvider.id(kNode), findConcept(kNode))
                 associateNodes(kNode, lwNode)
             }
         }
@@ -289,11 +293,8 @@ class LionWebModelConverter {
                                         it.name == "getEntries"
                                     }!!
                                     .invoke(null) as List<Any>
-                            // val entriesProp = kClass.memberProperties.find { it.name == "entries" }
-                            // val fields = kClass.java.declaredFields.filter { Modifier.isStatic(it.modifiers) }.map { it.get(null) }
                             val nameProp = kClass.memberProperties.find { it.name == "name" }!! as KProperty1<Any, *>
                             val namesToFields = entries.associate { nameProp.invoke(it) as String to it }
-                            // val entries = kClass.staticProperties.first().get()
                             val nameToSearch = propValue.serializedValue.split("/").last()
                             params[param] = namesToFields[nameToSearch]!!
                         } else {
