@@ -463,6 +463,8 @@ fun main() {
     val a2 = A("Bar", 18, a1)
     val a3 = A("Zum", 99, a2)
 
+   // println("calculateGenericFeatures ${'$'}{a1.calculateGenericFeatures()}")
+    // println("Features ${'$'}{a1.features}")
     assertEquals(3, a1.features.size)
     
     assertEquals("f1", a1.features[0].name)

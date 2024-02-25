@@ -6,6 +6,19 @@ import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 
+class GenericFeatureDescription(
+    val name: String,
+    val provideNodes: Boolean,
+    val multiplicity: Multiplicity,
+    val valueProvider: (node: NodeLike) -> Any?,
+    val featureType: FeatureType,
+    val derived: Boolean = false,
+) {
+    fun toFeatureDescription(instance: NodeLike): FeatureDescription {
+        return FeatureDescription(name, provideNodes, multiplicity, { valueProvider(instance) }, featureType, derived)
+    }
+}
+
 abstract class BaseNode : NodeLike {
     override val nodeType: String = calculateNodeType()
 
@@ -13,8 +26,9 @@ abstract class BaseNode : NodeLike {
 
     override var parent: NodeLike? = null
 
-    protected open fun calculateFeatures(): List<FeatureDescription> {
-        TODO("Not yet implemented")
+    // TODO make it protected
+    open fun calculateGenericFeatures(): List<GenericFeatureDescription> {
+        TODO("calculateGenericFeatures should be overridden by compiler plugin")
     }
 
     protected open fun calculateNodeType(): String {
@@ -23,7 +37,8 @@ abstract class BaseNode : NodeLike {
     }
 
     override val features: List<FeatureDescription> by lazy {
-        calculateFeatures()
+        val generic = calculateGenericFeatures()
+        generic.map { it.toFeatureDescription(this) }
     }
     override var range: Range?
         get() = TODO("Not yet implemented")

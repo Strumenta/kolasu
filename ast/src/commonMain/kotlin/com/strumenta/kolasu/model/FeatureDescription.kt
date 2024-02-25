@@ -10,7 +10,7 @@ class FeatureDescription(
     val name: String,
     val provideNodes: Boolean,
     val multiplicity: Multiplicity,
-    val valueProvider: (() -> Any?)? = null,
+    val valueProvider: () -> Any?,
     val featureType: FeatureType,
     val derived: Boolean = false,
 ) {

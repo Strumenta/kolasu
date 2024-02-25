@@ -2,6 +2,7 @@ package com.strumenta.kolasu.kcp.fir
 
 import com.strumenta.kolasu.model.BaseNode
 import com.strumenta.kolasu.model.FeatureDescription
+import com.strumenta.kolasu.model.GenericFeatureDescription
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.fir.FirImplementationDetail
 import org.jetbrains.kotlin.fir.FirSession
@@ -63,12 +64,12 @@ class BaseNodeGenerator(
         context: MemberGenerationContext?,
     ): List<FirNamedFunctionSymbol> {
         log("generateFunctions $callableId $context")
-        if (callableId.callableName.identifier == "calculateFeatures") {
-            val name = Name.identifier("calculateFeatures")
+        if (callableId.callableName.identifier == "calculateGenericFeatures") {
+            val name = Name.identifier("calculateGenericFeatures")
             val listClassId = ClassId.fromString(List::class.qualifiedName!!.replace(".", "/"))
             val featureDescriptionClassId =
                 ClassId.fromString(
-                    FeatureDescription::class.qualifiedName!!.replace(".", "/"),
+                    GenericFeatureDescription::class.qualifiedName!!.replace(".", "/"),
                 )
             val type: ConeKotlinType =
                 listClassId.createConeType(
@@ -122,7 +123,7 @@ class BaseNodeGenerator(
         log("getCallableNamesForClass $classSymbol $context")
         if (classSymbol.extendBaseNode && !classSymbol.isAbstract && !classSymbol.isSealed) {
             log("  ${classSymbol.classId.asSingleFqName().asString()} extends BaseNode")
-            return setOf(Name.identifier("calculateFeatures"), Name.identifier("calculateNodeType"))
+            return setOf(Name.identifier("calculateGenericFeatures"), Name.identifier("calculateNodeType"))
         }
         return super.getCallableNamesForClass(classSymbol, context)
     }
