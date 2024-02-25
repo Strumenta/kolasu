@@ -10,7 +10,7 @@ class FeatureDescription(
     val name: String,
     val provideNodes: Boolean,
     val multiplicity: Multiplicity,
-    val valueProvider: () -> Any?,
+    val valueProvider: (() -> Any?)? = null,
     val featureType: FeatureType,
     val derived: Boolean = false,
 ) {
@@ -30,7 +30,7 @@ class FeatureDescription(
     }
 
     val value: Any?
-        get() = valueProvider.invoke()
+        get() = (valueProvider ?: throw IllegalStateException()).invoke()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

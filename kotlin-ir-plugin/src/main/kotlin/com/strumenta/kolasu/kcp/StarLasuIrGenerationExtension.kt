@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
+import org.jetbrains.kotlin.ir.backend.js.utils.typeArguments
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.buildFun
 import org.jetbrains.kotlin.ir.builders.irBlockBody
@@ -26,6 +27,7 @@ import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
+import org.jetbrains.kotlin.ir.builders.irNull
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.builders.irVararg
@@ -37,8 +39,12 @@ import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
+import org.jetbrains.kotlin.ir.expressions.impl.IrCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrFunctionExpressionImpl
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
+import org.jetbrains.kotlin.ir.types.IrSimpleType
+import org.jetbrains.kotlin.ir.types.IrTypeSubstitutor
+import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.file
@@ -50,6 +56,7 @@ import org.jetbrains.kotlin.ir.util.properties
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.getClassFqNameUnsafe
 
 class StarLasuIrGenerationExtension(
     private val messageCollector: MessageCollector,
@@ -102,12 +109,12 @@ class StarLasuIrGenerationExtension(
                 pluginContext
                     .referenceClass(FeatureType::class.classId)!!
             val featureTypeValueOf =
-                multiplicity.functions.find {
+                featureType.functions.find {
                     it.owner.name.identifier ==
                         "valueOf"
                 }!!
 
-            add(
+            val constructorCall =
                 irCallConstructor(constructor, emptyList()).apply {
                     // val name: String,
                     // val provideNodes: Boolean,
@@ -172,17 +179,19 @@ class StarLasuIrGenerationExtension(
                             }
                     putValueArgument(
                         3,
-                        IrFunctionExpressionImpl(
-                            startOffset = SYNTHETIC_OFFSET,
-                            endOffset = SYNTHETIC_OFFSET,
-                            type =
-                                pluginContext
-                                    .irBuiltIns
-                                    .functionN(0)
-                                    .typeWith(pluginContext.irBuiltIns.anyNType),
-                            origin = IrStatementOrigin.LAMBDA,
-                            function = lambda,
-                        ),
+                        // TODO UNCOMMENT ME: I AM JUST DEBUGGING THE ARRAYSTOREEXCEPTION
+//                        IrFunctionExpressionImpl(
+//                            startOffset = SYNTHETIC_OFFSET,
+//                            endOffset = SYNTHETIC_OFFSET,
+//                            type =
+//                                pluginContext
+//                                    .irBuiltIns
+//                                    .functionN(0)
+//                                    .typeWith(pluginContext.irBuiltIns.anyNType),
+//                            origin = IrStatementOrigin.LAMBDA,
+//                            function = lambda,
+//                        ),
+                        irNull()
                     )
                     putValueArgument(
                         4,
@@ -191,8 +200,9 @@ class StarLasuIrGenerationExtension(
                         },
                     )
                     putValueArgument(5, irBoolean(false))
-                },
-            )
+                }
+            //println("TYPE OF CONSTRUCTOR CALL ${(constructorCall.type as IrSimpleType).classifier.getClassFqNameUnsafe().asString()}")
+            add(constructorCall)
         }
     }
 
@@ -228,23 +238,29 @@ class StarLasuIrGenerationExtension(
                     // Then we call apply on it
                     // apply {  }
 
-                    val call =
-                        irCall(mutableListOf).apply {
+                    val call = IrCallImpl(
+                        startOffset, endOffset, mutableListOf.owner.returnType, mutableListOf,
+                        typeArgumentsCount = 1,
+                        valueArgumentsCount = 1,
+                        origin = null
+                    ).apply {
+                            this.putTypeArgument(0, pluginContext.referenceClass(FeatureDescription::class.classId)!!.defaultType)
                             val param = mutableListOf.owner!!.valueParameters.first()
+                            val values = buildList {
+                                irClass.properties.forEach { property ->
+                                    populateFeatureListWithProperty(
+                                        property, function,
+                                        irClass, pluginContext,
+                                    ) {
+                                        add(it)
+                                    }
+                                }
+                            }
                             putValueArgument(
                                 0,
                                 irVararg(
                                     param.type,
-                                    buildList {
-                                        irClass.properties.forEach { property ->
-                                            populateFeatureListWithProperty(
-                                                property, function,
-                                                irClass, pluginContext,
-                                            ) {
-                                                add(it)
-                                            }
-                                        }
-                                    },
+                                    values,
                                 ),
                             )
                         }
