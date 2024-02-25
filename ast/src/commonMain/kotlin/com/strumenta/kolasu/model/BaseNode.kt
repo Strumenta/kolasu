@@ -27,7 +27,7 @@ abstract class BaseNode : NodeLike {
     override var parent: NodeLike? = null
 
     // TODO make it protected
-    open fun calculateGenericFeatures(): List<GenericFeatureDescription> {
+    open fun calculateFeatures(): List<FeatureDescription> {
         TODO("calculateGenericFeatures should be overridden by compiler plugin")
     }
 
@@ -37,8 +37,7 @@ abstract class BaseNode : NodeLike {
     }
 
     override val features: List<FeatureDescription> by lazy {
-        val generic = calculateGenericFeatures()
-        generic.map { it.toFeatureDescription(this) }
+        calculateFeatures()
     }
     override var range: Range?
         get() = TODO("Not yet implemented")

@@ -2,6 +2,8 @@
 
 package com.strumenta.kolasu.kcp
 
+import com.strumenta.kolasu.kcp.fir.GENERATED_CALCULATED_FEATURES
+import com.strumenta.kolasu.kcp.fir.pseudoLambdaName
 import com.strumenta.kolasu.model.BaseNode
 import com.strumenta.kolasu.model.FeatureDescription
 import com.strumenta.kolasu.model.FeatureType
@@ -81,6 +83,9 @@ class StarLasuIrGenerationExtension(
             if (irClass.modality != Modality.SEALED && irClass.modality != Modality.ABSTRACT) {
                 overrideCalculateFeaturesBody(irClass, pluginContext)
                 overrideCalculateNodeTypeBody(irClass, pluginContext)
+                irClass.properties.forEach { property ->
+                    overridePseudoLambda(irClass, pluginContext, property)
+                }
             }
         }
     }
@@ -95,7 +100,7 @@ class StarLasuIrGenerationExtension(
         if (property.backingField != null) {
             val constructor =
                 pluginContext
-                    .referenceConstructors(GenericFeatureDescription::class.classId)
+                    .referenceConstructors(FeatureDescription::class.classId)
                     .first()
             val multiplicity =
                 pluginContext
@@ -125,49 +130,7 @@ class StarLasuIrGenerationExtension(
                         },
                     )
 
-                    val lambda =
-                        context
-                            .irFactory
-                            .buildFun {
-                                startOffset = SYNTHETIC_OFFSET
-                                endOffset = SYNTHETIC_OFFSET
-                                origin =
-                                    IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
-                                name = Name.identifier("my_helper_lambda_for_${property.name}")
-                                visibility = DescriptorVisibilities.LOCAL
-                                returnType = pluginContext.irBuiltIns.anyNType
-                            }.apply {
-                                parent = function
-                                require(symbol.owner.file == irClass.file)
-                                valueParameters =
-                                    listOf(
-                                        buildValueParameter(this) {
-                                            origin = IrDeclarationOrigin.DEFINED
-                                            name = Name.identifier("node")
-                                            index = 0
-                                            type =
-                                                pluginContext.referenceClass(NodeLike::class.classId)!!.defaultType
-                                        },
-                                    )
-                                body =
-                                    irBlockBody {
-                                        +irReturn(
-                                            irGetField(
-                                                irAs(
-                                                    irGet(
-                                                        valueParameters[0],
-                                                    ),
-                                                    irClass.defaultType,
-                                                ),
-                                                property.backingField
-                                                    ?: throw IllegalStateException(
-                                                        "no backing field for property ${property.name.identifier} " +
-                                                            "in ${irClass.kotlinFqName.asString()}",
-                                                    ),
-                                            ),
-                                        )
-                                    }
-                            }
+                    val pseudoLambda = irClass.functions.find { it.name.identifier == pseudoLambdaName(property.name.identifier) }!!
 
                     putValueArgument(
                         3,
@@ -178,9 +141,9 @@ class StarLasuIrGenerationExtension(
                                 pluginContext
                                     .irBuiltIns
                                     .functionN(1)
-                                    .typeWith(pluginContext.referenceClass(NodeLike::class.classId)!!.defaultType),
+                                    .typeWith(irClass.defaultType),
                             origin = IrStatementOrigin.LAMBDA,
-                            function = lambda,
+                            function = pseudoLambda,
                         ),
                     )
                     putValueArgument(
@@ -204,11 +167,12 @@ class StarLasuIrGenerationExtension(
             "overrideCalculateFeaturesBody for ${irClass.name.identifier}",
             irClass.compilerSourceLocation,
         )
-        val function = irClass.functions.find { it.name.identifier == "calculateGenericFeatures" }
+        val function = irClass.functions.find { it.name.identifier == GENERATED_CALCULATED_FEATURES
+        }
         if (function != null) {
             messageCollector.report(
                 CompilerMessageSeverity.WARNING,
-                "function calculateGenericFeatures FOUND",
+                "function $GENERATED_CALCULATED_FEATURES FOUND",
                 irClass.compilerSourceLocation,
             )
             function.body =
@@ -246,7 +210,7 @@ class StarLasuIrGenerationExtension(
                     val listOfFeatureDescriptionType =
                         listClass
                             .typeWith(pluginContext
-                                .referenceClass(GenericFeatureDescription::class.classId)!!
+                                .referenceClass(FeatureDescription::class.classId)!!
                                 .defaultType)
                     val resultVariable = irTemporary(emptyCall, nameHint = "myFeatures", listOfFeatureDescriptionType)
 
@@ -281,7 +245,7 @@ class StarLasuIrGenerationExtension(
                 }
             messageCollector.report(
                 CompilerMessageSeverity.WARNING,
-                "function calculateGenericFeatures has been modified",
+                "function $GENERATED_CALCULATED_FEATURES has been modified",
                 irClass.compilerSourceLocation,
             )
         }
@@ -310,6 +274,37 @@ class StarLasuIrGenerationExtension(
                     IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
                 ) {
                     +irReturn(irString(irClass.name.identifier))
+                }
+        }
+    }
+
+    private fun overridePseudoLambda(
+        irClass: IrClass,
+        pluginContext: IrPluginContext,
+        property: IrProperty,
+    ) {
+        messageCollector.report(
+            CompilerMessageSeverity.WARNING,
+            "overridePseudoLambda for ${irClass.name.identifier} and $property",
+            irClass.compilerSourceLocation,
+        )
+        val function = irClass.functions.find { it.name.identifier == pseudoLambdaName(property.name.identifier) }
+
+
+        if (function != null) {
+            messageCollector.report(
+                CompilerMessageSeverity.WARNING,
+                "function overridePseudoLambda ${property.name.identifier} FOUND",
+                irClass.compilerSourceLocation,
+            )
+            function.body =
+                DeclarationIrBuilder(pluginContext, function.symbol).irBlockBody(
+                    IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
+                ) {
+                    +irReturn(irCall(property.getter!!).apply {
+                        this.dispatchReceiver = irGet(function.dispatchReceiverParameter!!)
+                        // TODO pass receiver?
+                    })
                 }
         }
     }
@@ -356,4 +351,42 @@ class StarLasuIrGenerationExtension(
 object myOrigin : IrDeclarationOrigin {
     override val name: String
         get() = "KolasuPlugin"
+}
+
+
+TODO: rifare le lambda guardandao
+
+fun IrPluginContext.createSuspendLambdaFunctionWithCoroutineScope(
+    originFunction: IrFunction,
+    function: IrFunction
+): IrSimpleFunction {
+    return irFactory.buildFun {
+        origin = IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
+        name = SpecialNames.NO_NAME_PROVIDED
+        visibility = DescriptorVisibilities.LOCAL
+        returnType = function.returnType
+        modality = Modality.FINAL
+        isSuspend = true
+    }.apply {
+        parent = function
+        body = createIrBuilder(symbol).run {
+            // don't use expr body, coroutine codegen can't generate for it.
+            irBlockBody {
+                +irReturn(irCall(originFunction).apply call@{
+                    // set arguments
+                    function.dispatchReceiverParameter?.also {
+                        this@call.dispatchReceiver = irGet(it)
+                    }
+
+                    function.extensionReceiverParameter?.also {
+                        this@call.extensionReceiver = irGet(it)
+                    }
+
+                    for ((index, parameter) in function.valueParameters.withIndex()) {
+                        this@call.putValueArgument(index, irGet(parameter))
+                    }
+                })
+            }
+        }
+    }
 }

@@ -8,7 +8,16 @@ import com.strumenta.kolasu.model.Multiplicity
 
 data class A(
     val f: String,
-) : BaseNode()
+) : BaseNode() {
+
+    private fun helperF() : Any? {
+        return this.f
+    }
+
+    override fun calculateFeatures(): List<FeatureDescription> {
+        return mutableListOf(FeatureDescription("a", false, Multiplicity.MANY, ::helperF, FeatureType.ATTRIBUTE, false))
+    }
+}
 
 fun main(args: Array<String>) {
     val n = A("foo")

@@ -34,6 +34,10 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+public const val GENERATED_CALCULATED_FEATURES = "calculateFeatures"
+
+fun pseudoLambdaName(propertyName: String) : String = "pseudo_lambda_${propertyName}"
+
 class BaseNodeGenerator(
     session: FirSession,
 ) : FirDeclarationGenerationExtension(session) {
@@ -64,12 +68,31 @@ class BaseNodeGenerator(
         context: MemberGenerationContext?,
     ): List<FirNamedFunctionSymbol> {
         log("generateFunctions $callableId $context")
-        if (callableId.callableName.identifier == "calculateGenericFeatures") {
-            val name = Name.identifier("calculateGenericFeatures")
+        if (callableId.callableName.identifier.startsWith("pseudo_lambda")) {
+            val name = callableId.callableName
+            val listClassId = ClassId.fromString(Any::class.qualifiedName!!.replace(".", "/"))
+            val type: ConeKotlinType =
+                listClassId.createConeType(
+                    session,
+                    typeArguments = arrayOf(),
+                    nullable = true
+                )
+            val classSymbol = callableId.classId!!.toSymbol(session) as FirClassSymbol<*>
+            val function =
+                createMemberFunction(classSymbol, Key, name, type) {
+                }
+            function.replaceBody(
+                FirBlockBuilder()
+                    .build(),
+            )
+            return listOf(function.symbol)
+        }
+        if (callableId.callableName.identifier == GENERATED_CALCULATED_FEATURES) {
+            val name = Name.identifier(GENERATED_CALCULATED_FEATURES)
             val listClassId = ClassId.fromString(List::class.qualifiedName!!.replace(".", "/"))
             val featureDescriptionClassId =
                 ClassId.fromString(
-                    GenericFeatureDescription::class.qualifiedName!!.replace(".", "/"),
+                    FeatureDescription::class.qualifiedName!!.replace(".", "/"),
                 )
             val type: ConeKotlinType =
                 listClassId.createConeType(
@@ -123,7 +146,11 @@ class BaseNodeGenerator(
         log("getCallableNamesForClass $classSymbol $context")
         if (classSymbol.extendBaseNode && !classSymbol.isAbstract && !classSymbol.isSealed) {
             log("  ${classSymbol.classId.asSingleFqName().asString()} extends BaseNode")
-            return setOf(Name.identifier("calculateGenericFeatures"), Name.identifier("calculateNodeType"))
+            val set = mutableSetOf(Name.identifier(GENERATED_CALCULATED_FEATURES), Name.identifier("calculateNodeType"))
+            set.addAll(classSymbol.declarationSymbols.filterIsInstance<FirPropertySymbol>().map { Name.identifier(
+                pseudoLambdaName(it.name.identifier)
+            ) })
+            return set
         }
         return super.getCallableNamesForClass(classSymbol, context)
     }
