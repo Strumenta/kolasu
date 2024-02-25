@@ -435,6 +435,57 @@ fun main() {
         result.invokeMainMethod("mytest.MainKt")
     }
 
+    @Test
+    fun `check features are listed correctly`() {
+        val result =
+            compile(
+                sourceFile =
+                SourceFile.kotlin(
+                    "main.kt",
+                    """
+package mytest
+
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.BaseNode
+import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.model.observable.ObservableList
+import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.ReferenceByName
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import com.strumenta.kolasu.model.observable.SimpleNodeObserver
+
+data class A(val f1: String, val f2: Int, val f3: A? = null) : BaseNode()
+
+fun main() {
+    val a1 = A("Foo", 6)
+    val a2 = A("Bar", 18, a1)
+    val a3 = A("Zum", 99, a2)
+
+    assertEquals(3, a1.features.size)
+    
+    assertEquals("f1", a1.features[0].name)
+    assertEquals("Foo", a1.features[0].value)
+    assertEquals(FeatureType.ATTRIBUTE, a1.features[0].featureType)
+
+    assertEquals("f2", a1.features[1].name)
+    assertEquals(6, a1.features[1].value)
+    assertEquals(FeatureType.ATTRIBUTE, a1.features[1].featureType)
+
+    assertEquals("f3", a1.features[2].name)
+    assertEquals(null, a1.features[2].value)
+    assertEquals(FeatureType.CONTAINMENT, a1.features[2].featureType)
+}
+
+""",
+                ),
+            )
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+
+        result.invokeMainMethod("mytest.MainKt")
+    }
+
     private fun CompilationResultWithClassLoader.invokeMainMethod(className: String) {
         val mainKt = this.classLoader.loadClass(className)
         val mainMethod =
