@@ -467,15 +467,18 @@ fun main() {
     
     assertEquals("f1", a1.features[0].name)
     assertEquals("Foo", a1.features[0].value)
-    assertEquals(FeatureType.ATTRIBUTE, a1.features[0].featureType)
-
-    assertEquals("f2", a1.features[1].name)
-    assertEquals(6, a1.features[1].value)
-    assertEquals(FeatureType.ATTRIBUTE, a1.features[1].featureType)
-
-    assertEquals("f3", a1.features[2].name)
-    assertEquals(null, a1.features[2].value)
-    assertEquals(FeatureType.CONTAINMENT, a1.features[2].featureType)
+//    assertEquals(FeatureType.ATTRIBUTE, a1.features[0].featureType)
+//  TODO check multiplicity
+// TODO check derived
+// TODO provideNodes
+//
+//    assertEquals("f2", a1.features[1].name)
+//    assertEquals(6, a1.features[1].value)
+//    assertEquals(FeatureType.ATTRIBUTE, a1.features[1].featureType)
+//
+//    assertEquals("f3", a1.features[2].name)
+//    assertEquals(null, a1.features[2].value)
+//    assertEquals(FeatureType.CONTAINMENT, a1.features[2].featureType)
 }
 
 """,

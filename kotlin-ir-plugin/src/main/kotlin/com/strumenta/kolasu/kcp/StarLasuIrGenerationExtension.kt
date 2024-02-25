@@ -22,6 +22,7 @@ import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.backend.js.utils.typeArguments
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.buildFun
+import org.jetbrains.kotlin.ir.builders.declarations.buildValueParameter
 import org.jetbrains.kotlin.ir.builders.declarations.buildVariable
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBoolean
@@ -40,6 +41,7 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.addMember
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
@@ -51,6 +53,7 @@ import org.jetbrains.kotlin.ir.types.IrTypeSubstitutor
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
+import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
@@ -142,6 +145,7 @@ class StarLasuIrGenerationExtension(
                     // val getter = pluginContext.referenceFunctions(CallableId(irClass.classId!!, Name.identifier("get${property.name.identifier.capitalize()}"))).single()
                     // putValueArgument(3, irFunctionReference(irClass.defaultType, getter.symbol))
 
+                    // I need to pass to it the actual node I guess
                     val lambda =
                         context
                             .irFactory
@@ -152,7 +156,7 @@ class StarLasuIrGenerationExtension(
                                     IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
                                 name = Name.special("<anonymous>")
                                 visibility = DescriptorVisibilities.LOCAL
-                                returnType = pluginContext.irBuiltIns.anyNType
+                                returnType = pluginContext.irBuiltIns.anyType
                             }.apply {
                                 parent = function
                                 require(symbol.owner.file == irClass.file)
@@ -164,38 +168,48 @@ class StarLasuIrGenerationExtension(
 //                                                type = irClass.defaultType
 //                                            }
 //                                        )
+                                println("TYPE OF function.dispatchReceiverParameter -> ${(function.dispatchReceiverParameter!!.type as IrSimpleType).classifier}")
+                                println("property.backingField -> ${property.backingField}")
                                 body =
                                     irBlockBody {
-                                        +irReturn(
-                                            irGetField(
-                                                irGet(
-                                                    function
-                                                        .dispatchReceiverParameter!!,
-                                                ),
-                                                property.backingField
-                                                    ?: throw IllegalStateException(
-                                                        "no backing field for property ${property.name.identifier} " +
-                                                            "in ${irClass.kotlinFqName.asString()}",
-                                                    ),
-                                            ),
-                                        )
+
+                                        HERE RETURN HAS TO BE FIXED
+
+                                        +irNull()
+                                        //+irReturn(irNull())
+                                        // TODO UNCOMMENT ME!
+//                                        +irReturn(
+//                                            irGetField(
+//                                                irGet(
+//                                                    function
+//                                                        .dispatchReceiverParameter!!,
+//                                                ),
+//                                                property.backingField
+//                                                    ?: throw IllegalStateException(
+//                                                        "no backing field for property ${property.name.identifier} " +
+//                                                            "in ${irClass.kotlinFqName.asString()}",
+//                                                    ),
+//                                            ),
+//                                        )
                                     }
                             }
+
+                    // MAYBE I NEED TO ADD THE LAMBDA?
+                    // irClass.addMember(lambda)
+
                     putValueArgument(
                         3,
-                        // TODO UNCOMMENT ME: I AM JUST DEBUGGING THE ARRAYSTOREEXCEPTION
-//                        IrFunctionExpressionImpl(
-//                            startOffset = SYNTHETIC_OFFSET,
-//                            endOffset = SYNTHETIC_OFFSET,
-//                            type =
-//                                pluginContext
-//                                    .irBuiltIns
-//                                    .functionN(0)
-//                                    .typeWith(pluginContext.irBuiltIns.anyNType),
-//                            origin = IrStatementOrigin.LAMBDA,
-//                            function = lambda,
-//                        ),
-                        irNull()
+                        IrFunctionExpressionImpl(
+                            startOffset = SYNTHETIC_OFFSET,
+                            endOffset = SYNTHETIC_OFFSET,
+                            type =
+                                pluginContext
+                                    .irBuiltIns
+                                    .functionN(0)
+                                    .typeWith(pluginContext.irBuiltIns.anyType),
+                            origin = IrStatementOrigin.LAMBDA,
+                            function = lambda,
+                        ),
                     )
                     putValueArgument(
                         4,
