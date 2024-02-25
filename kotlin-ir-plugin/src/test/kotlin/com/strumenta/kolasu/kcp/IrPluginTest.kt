@@ -19,7 +19,7 @@ fun CompilationResultWithClassLoader.assertHasMessage(regex: Regex) {
 
 fun CompilationResultWithClassLoader.assertHasMessage(msg: String) {
     val messageLines = this.messages.lines()
-    assert(messageLines.any { msg.equals(it) })
+    assert(messageLines.any { msg == it })
 }
 
 fun CompilationResultWithClassLoader.assertHasNotMessage(regex: Regex) {

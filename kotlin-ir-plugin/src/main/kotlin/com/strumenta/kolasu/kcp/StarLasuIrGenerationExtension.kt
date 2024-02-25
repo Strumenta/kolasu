@@ -55,95 +55,126 @@ class StarLasuIrGenerationExtension(
         pluginContext: IrPluginContext,
         isBaseNode: Boolean,
     ) {
-            irClass.primaryConstructor?.valueParameters?.forEach { param ->
-                if (param.isVal() && (param.isSingleContainment() || param.isSingleAttribute())) {
-                    messageCollector.report(
-                        CompilerMessageSeverity.WARNING,
-                        "Value param ${irClass.kotlinFqName}.${param.name} is not assignable",
-                        param.compilerSourceLocation,
-                    )
-                }
+        irClass.primaryConstructor?.valueParameters?.forEach { param ->
+            if (param.isVal() && (param.isSingleContainment() || param.isSingleAttribute())) {
+                messageCollector.report(
+                    CompilerMessageSeverity.WARNING,
+                    "Value param ${irClass.kotlinFqName}.${param.name} is not assignable",
+                    param.compilerSourceLocation,
+                )
             }
-            irClass.accept(FieldObservableExtension(pluginContext, isBaseNode), null)
-            irClass.accept(SettingParentExtension(pluginContext, messageCollector, isBaseNode), null)
-            if (isBaseNode) {
-                if (irClass.modality != Modality.SEALED && irClass.modality != Modality.ABSTRACT) {
-                    overrideCalculateFeaturesBody(irClass, pluginContext)
-                    overrideCalculateNodeTypeBody(irClass, pluginContext)
-                }
+        }
+        irClass.accept(FieldObservableExtension(pluginContext, isBaseNode), null)
+        irClass.accept(SettingParentExtension(pluginContext, messageCollector, isBaseNode), null)
+        if (isBaseNode) {
+            if (irClass.modality != Modality.SEALED && irClass.modality != Modality.ABSTRACT) {
+                overrideCalculateFeaturesBody(irClass, pluginContext)
+                overrideCalculateNodeTypeBody(irClass, pluginContext)
             }
+        }
     }
 
-    private fun overrideCalculateFeaturesBody(irClass: IrClass, pluginContext: IrPluginContext) {
+    private fun overrideCalculateFeaturesBody(
+        irClass: IrClass,
+        pluginContext: IrPluginContext,
+    ) {
         messageCollector.report(
             CompilerMessageSeverity.WARNING,
             "overrideCalculateFeaturesBody for ${irClass.name.identifier}",
-            irClass.compilerSourceLocation
+            irClass.compilerSourceLocation,
         )
         val function = irClass.functions.find { it.name.identifier == "calculateFeatures" }
         if (function != null) {
             messageCollector.report(
                 CompilerMessageSeverity.WARNING,
                 "function calculateFeatures FOUND",
-                irClass.compilerSourceLocation
+                irClass.compilerSourceLocation,
             )
             val mutableListOf =
                 pluginContext
-                    .referenceFunctions(CallableId(FqName("kotlin.collections"), null, Name.identifier("mutableListOf"))).find { it.owner!!.valueParameters.size == 1 }!!
-            function.body = DeclarationIrBuilder(pluginContext, function.symbol).irBlockBody(
-                IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
-            ) {
-                // We create a mutable list with no parameters
-                //val mutableListOfCall = irCall(mutableListOf)
-                // Then we call apply on it
-                //apply {  }
+                    .referenceFunctions(
+                        CallableId(FqName("kotlin.collections"), null, Name.identifier("mutableListOf")),
+                    ).find {
+                        it.owner!!.valueParameters.size == 1
+                    }!!
+            function.body =
+                DeclarationIrBuilder(pluginContext, function.symbol).irBlockBody(
+                    IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
+                ) {
+                    // We create a mutable list with no parameters
+                    // val mutableListOfCall = irCall(mutableListOf)
+                    // Then we call apply on it
+                    // apply {  }
 
-                val call = irCall(mutableListOf).apply {
-                    val param = mutableListOf.owner!!.valueParameters.first()
-                    putValueArgument(0, irVararg(param.type, buildList {
-                        irClass.properties.forEach { property ->
-                            if (property.backingField != null) {
-                                val constructor =
-                                    pluginContext.referenceConstructors(FeatureDescription::class.classId).first()
-                                val multiplicity = pluginContext.referenceClass(Multiplicity::class.classId)!!
-                                val multiplicityValueOf =
-                                    multiplicity.functions.find { it.owner.name.identifier == "valueOf" }!!
-                                val featureType = pluginContext.referenceClass(FeatureType::class.classId)!!
-                                val featureTypeValueOf =
-                                    multiplicity.functions.find { it.owner.name.identifier == "valueOf" }!!
+                    val call =
+                        irCall(mutableListOf).apply {
+                            val param = mutableListOf.owner!!.valueParameters.first()
+                            putValueArgument(
+                                0,
+                                irVararg(
+                                    param.type,
+                                    buildList {
+                                        irClass.properties.forEach { property ->
+                                            if (property.backingField != null) {
+                                                val constructor =
+                                                    pluginContext
+                                                        .referenceConstructors(FeatureDescription::class.classId)
+                                                        .first()
+                                                val multiplicity =
+                                                    pluginContext
+                                                        .referenceClass(Multiplicity::class.classId)!!
+                                                val multiplicityValueOf =
+                                                    multiplicity.functions.find {
+                                                        it.owner.name.identifier ==
+                                                            "valueOf"
+                                                    }!!
+                                                val featureType =
+                                                    pluginContext
+                                                        .referenceClass(FeatureType::class.classId)!!
+                                                val featureTypeValueOf =
+                                                    multiplicity.functions.find {
+                                                        it.owner.name.identifier ==
+                                                            "valueOf"
+                                                    }!!
 
+                                                add(
+                                                    irCallConstructor(constructor, emptyList()).apply {
+                                                        // val name: String,
+                                                        // val provideNodes: Boolean,
+                                                        // val multiplicity: Multiplicity,
+                                                        // val valueProvider: () -> Any?,
+                                                        // val featureType: FeatureType,
+                                                        // val derived: Boolean = false,
+                                                        putValueArgument(0, irString(property.name.identifier))
+                                                        putValueArgument(1, irBoolean(false))
+                                                        putValueArgument(
+                                                            2,
+                                                            irCall(multiplicityValueOf).apply {
+                                                                putValueArgument(0, irString("SINGULAR"))
+                                                            },
+                                                        )
+                                                        //                                val getter = irClass.functions.find { it.name.identifier == "get${property.name.identifier.capitalize()}"} !!
+                                                        //                                IrSimpleFunctionSymbolImpl().apply {
+                                                        //                                    this.
+                                                        //                                }
+                                                        // val getter = property.getter!!
+                                                        // val getter = pluginContext.referenceFunctions(CallableId(irClass.classId!!, Name.identifier("get${property.name.identifier.capitalize()}"))).single()
+                                                        // putValueArgument(3, irFunctionReference(irClass.defaultType, getter.symbol))
 
-                                add(irCallConstructor(constructor, emptyList()).apply {
-                                    // val name: String,
-                                    // val provideNodes: Boolean,
-                                    // val multiplicity: Multiplicity,
-                                    // val valueProvider: () -> Any?,
-                                    // val featureType: FeatureType,
-                                    // val derived: Boolean = false,
-                                    putValueArgument(0, irString(property.name.identifier))
-                                    putValueArgument(1, irBoolean(false))
-                                    putValueArgument(2, irCall(multiplicityValueOf).apply {
-                                        putValueArgument(0, irString("SINGULAR"))
-                                    })
-                                    //                                val getter = irClass.functions.find { it.name.identifier == "get${property.name.identifier.capitalize()}"} !!
-                                    //                                IrSimpleFunctionSymbolImpl().apply {
-                                    //                                    this.
-                                    //                                }
-                                    //val getter = property.getter!!
-                                    //val getter = pluginContext.referenceFunctions(CallableId(irClass.classId!!, Name.identifier("get${property.name.identifier.capitalize()}"))).single()
-                                    //putValueArgument(3, irFunctionReference(irClass.defaultType, getter.symbol))
-
-
-                                    val lambda = context.irFactory.buildFun {
-                                        startOffset = SYNTHETIC_OFFSET
-                                        endOffset = SYNTHETIC_OFFSET
-                                        origin = IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
-                                        name = Name.special("<anonymous>")
-                                        visibility = DescriptorVisibilities.LOCAL
-                                        returnType = pluginContext.irBuiltIns.anyNType
-                                    }.apply {
-                                        parent = function
-                                        require(symbol.owner.file == irClass.file)
+                                                        val lambda =
+                                                            context
+                                                                .irFactory
+                                                                .buildFun {
+                                                                    startOffset = SYNTHETIC_OFFSET
+                                                                    endOffset = SYNTHETIC_OFFSET
+                                                                    origin =
+                                                                        IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
+                                                                    name = Name.special("<anonymous>")
+                                                                    visibility = DescriptorVisibilities.LOCAL
+                                                                    returnType = pluginContext.irBuiltIns.anyNType
+                                                                }.apply {
+                                                                    parent = function
+                                                                    require(symbol.owner.file == irClass.file)
 //                                        valueParameters = listOf (
 //                                            buildValueParameter(this) {
 //                                                origin = IrDeclarationOrigin.DEFINED
@@ -152,33 +183,49 @@ class StarLasuIrGenerationExtension(
 //                                                type = irClass.defaultType
 //                                            }
 //                                        )
-                                        body = irBlockBody {
-                                            +irReturn(irGetField(irGet(function.dispatchReceiverParameter!!),
-                                                property.backingField
-                                                    ?: throw IllegalStateException("no backing field for property ${property.name.identifier} in ${irClass.kotlinFqName.asString()}")
-                                            )
-                                            )
+                                                                    body =
+                                                                        irBlockBody {
+                                                                            +irReturn(
+                                                                                irGetField(
+                                                                                    irGet(
+                                                                                        function
+                                                                                            .dispatchReceiverParameter!!,
+                                                                                    ),
+                                                                                    property.backingField
+                                                                                        ?: throw IllegalStateException("no backing field for property ${property.name.identifier} in ${irClass.kotlinFqName.asString()}"),
+                                                                                ),
+                                                                            )
+                                                                        }
+                                                                }
+                                                        putValueArgument(
+                                                            3,
+                                                            IrFunctionExpressionImpl(
+                                                                startOffset = SYNTHETIC_OFFSET,
+                                                                endOffset = SYNTHETIC_OFFSET,
+                                                                type =
+                                                                    pluginContext
+                                                                        .irBuiltIns
+                                                                        .functionN(0)
+                                                                        .typeWith(pluginContext.irBuiltIns.anyNType),
+                                                                origin = IrStatementOrigin.LAMBDA,
+                                                                function = lambda,
+                                                            ),
+                                                        )
+                                                        putValueArgument(
+                                                            4,
+                                                            irCall(featureTypeValueOf).apply {
+                                                                putValueArgument(0, irString("CONTAINMENT"))
+                                                            },
+                                                        )
+                                                        putValueArgument(5, irBoolean(false))
+                                                    },
+                                                )
+                                            }
                                         }
-                                    }
-                                    putValueArgument(
-                                        3, IrFunctionExpressionImpl(
-                                            startOffset = SYNTHETIC_OFFSET,
-                                            endOffset = SYNTHETIC_OFFSET,
-                                            type = pluginContext.irBuiltIns.functionN(0)
-                                                .typeWith(pluginContext.irBuiltIns.anyNType),
-                                            origin = IrStatementOrigin.LAMBDA,
-                                            function = lambda
-                                        )
-                                    )
-                                    putValueArgument(4, irCall(featureTypeValueOf).apply {
-                                        putValueArgument(0, irString("CONTAINMENT"))
-                                    })
-                                    putValueArgument(5, irBoolean(false))
-                                })
-                            }
+                                    },
+                                ),
+                            )
                         }
-                    }))
-                }
 //                val mutableListClass = pluginContext.referenceClass(MutableList::class.classId) ?: throw RuntimeException("MutableList not found")
 //                val add = mutableListClass.functions.find { it.owner.name.identifier == "add" } ?: throw RuntimeException("MutableList.add not found")
 //                irClass.properties.forEach { property ->
@@ -197,29 +244,33 @@ class StarLasuIrGenerationExtension(
 //                    }
 //                }
 
-                +irReturn(call)
-            }
+                    +irReturn(call)
+                }
         }
     }
 
-    private fun overrideCalculateNodeTypeBody(irClass: IrClass, pluginContext: IrPluginContext) {
+    private fun overrideCalculateNodeTypeBody(
+        irClass: IrClass,
+        pluginContext: IrPluginContext,
+    ) {
         messageCollector.report(
             CompilerMessageSeverity.WARNING,
             "overrideCalculateNodeTypeBody for ${irClass.name.identifier}",
-            irClass.compilerSourceLocation
+            irClass.compilerSourceLocation,
         )
         val function = irClass.functions.find { it.name.identifier == "calculateNodeType" }
         if (function != null) {
             messageCollector.report(
                 CompilerMessageSeverity.WARNING,
                 "function calculateNodeType FOUND",
-                irClass.compilerSourceLocation
+                irClass.compilerSourceLocation,
             )
-            function.body = DeclarationIrBuilder(pluginContext, function.symbol).irBlockBody(
-                IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
-            ) {
-                +irReturn(irString(irClass.name.identifier))
-            }
+            function.body =
+                DeclarationIrBuilder(pluginContext, function.symbol).irBlockBody(
+                    IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
+                ) {
+                    +irReturn(irString(irClass.name.identifier))
+                }
         }
     }
 
@@ -261,4 +312,3 @@ class StarLasuIrGenerationExtension(
         }
     }
 }
-

@@ -13,16 +13,16 @@ abstract class BaseNode : NodeLike {
 
     override var parent: NodeLike? = null
 
-    protected open fun calculateFeatures() : List<FeatureDescription> {
+    protected open fun calculateFeatures(): List<FeatureDescription> {
         TODO("Not yet implemented")
     }
 
-    protected open fun calculateNodeType() : String {
+    protected open fun calculateNodeType(): String {
         // We do not want this to crash when initializing subclasses
         return "<UNSPECIFIED>"
     }
 
-    override val properties: List<FeatureDescription> by lazy {
+    override val features: List<FeatureDescription> by lazy {
         calculateFeatures()
     }
     override var range: Range?
@@ -52,7 +52,7 @@ abstract class BaseNode : NodeLike {
         TODO("Not yet implemented")
     }
 
-    override fun getChildren(containment: Containment): List<NodeLike> {
+    override fun getChildren(containment: Containment, includeDerived: Boolean): List<NodeLike> {
         TODO("Not yet implemented")
     }
 
@@ -104,6 +104,7 @@ abstract class BaseNode : NodeLike {
     ) {
         changes.onNext(AttributeChangedNotification(this, propertyName, oldValue, newValue))
     }
+
     @property:Internal
     override val changes = PublishSubject<NodeNotification<in NodeLike>>()
 
@@ -115,6 +116,4 @@ abstract class BaseNode : NodeLike {
 
     @Internal
     override val destinations = mutableListOf<Destination>()
-
-
 }
