@@ -52,7 +52,10 @@ abstract class BaseNode : NodeLike {
         TODO("Not yet implemented")
     }
 
-    override fun getChildren(containment: Containment, includeDerived: Boolean): List<NodeLike> {
+    override fun getChildren(
+        containment: Containment,
+        includeDerived: Boolean,
+    ): List<NodeLike> {
         TODO("Not yet implemented")
     }
 

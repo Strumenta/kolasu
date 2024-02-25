@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
+import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.buildFun
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBoolean
@@ -31,7 +32,10 @@ import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.declarations.IrProperty
+import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
+import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.impl.IrFunctionExpressionImpl
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
@@ -71,6 +75,124 @@ class StarLasuIrGenerationExtension(
                 overrideCalculateFeaturesBody(irClass, pluginContext)
                 overrideCalculateNodeTypeBody(irClass, pluginContext)
             }
+        }
+    }
+
+    private fun IrBuilderWithScope.populateFeatureListWithProperty(
+        property: IrProperty,
+        function: IrSimpleFunction,
+        irClass: IrClass,
+        pluginContext: IrPluginContext,
+        add: (value: IrExpression) -> Unit,
+    ) {
+        if (property.backingField != null) {
+            val constructor =
+                pluginContext
+                    .referenceConstructors(FeatureDescription::class.classId)
+                    .first()
+            val multiplicity =
+                pluginContext
+                    .referenceClass(Multiplicity::class.classId)!!
+            val multiplicityValueOf =
+                multiplicity.functions.find {
+                    it.owner.name.identifier ==
+                        "valueOf"
+                }!!
+            val featureType =
+                pluginContext
+                    .referenceClass(FeatureType::class.classId)!!
+            val featureTypeValueOf =
+                multiplicity.functions.find {
+                    it.owner.name.identifier ==
+                        "valueOf"
+                }!!
+
+            add(
+                irCallConstructor(constructor, emptyList()).apply {
+                    // val name: String,
+                    // val provideNodes: Boolean,
+                    // val multiplicity: Multiplicity,
+                    // val valueProvider: () -> Any?,
+                    // val featureType: FeatureType,
+                    // val derived: Boolean = false,
+                    putValueArgument(0, irString(property.name.identifier))
+                    putValueArgument(1, irBoolean(false))
+                    putValueArgument(
+                        2,
+                        irCall(multiplicityValueOf).apply {
+                            putValueArgument(0, irString("SINGULAR"))
+                        },
+                    )
+                    //                                val getter = irClass.functions.find { it.name.identifier == "get${property.name.identifier.capitalize()}"} !!
+                    //                                IrSimpleFunctionSymbolImpl().apply {
+                    //                                    this.
+                    //                                }
+                    // val getter = property.getter!!
+                    // val getter = pluginContext.referenceFunctions(CallableId(irClass.classId!!, Name.identifier("get${property.name.identifier.capitalize()}"))).single()
+                    // putValueArgument(3, irFunctionReference(irClass.defaultType, getter.symbol))
+
+                    val lambda =
+                        context
+                            .irFactory
+                            .buildFun {
+                                startOffset = SYNTHETIC_OFFSET
+                                endOffset = SYNTHETIC_OFFSET
+                                origin =
+                                    IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
+                                name = Name.special("<anonymous>")
+                                visibility = DescriptorVisibilities.LOCAL
+                                returnType = pluginContext.irBuiltIns.anyNType
+                            }.apply {
+                                parent = function
+                                require(symbol.owner.file == irClass.file)
+//                                        valueParameters = listOf (
+//                                            buildValueParameter(this) {
+//                                                origin = IrDeclarationOrigin.DEFINED
+//                                                name = Name.identifier("field")
+//                                                index = 0
+//                                                type = irClass.defaultType
+//                                            }
+//                                        )
+                                body =
+                                    irBlockBody {
+                                        +irReturn(
+                                            irGetField(
+                                                irGet(
+                                                    function
+                                                        .dispatchReceiverParameter!!,
+                                                ),
+                                                property.backingField
+                                                    ?: throw IllegalStateException(
+                                                        "no backing field for property ${property.name.identifier} " +
+                                                            "in ${irClass.kotlinFqName.asString()}",
+                                                    ),
+                                            ),
+                                        )
+                                    }
+                            }
+                    putValueArgument(
+                        3,
+                        IrFunctionExpressionImpl(
+                            startOffset = SYNTHETIC_OFFSET,
+                            endOffset = SYNTHETIC_OFFSET,
+                            type =
+                                pluginContext
+                                    .irBuiltIns
+                                    .functionN(0)
+                                    .typeWith(pluginContext.irBuiltIns.anyNType),
+                            origin = IrStatementOrigin.LAMBDA,
+                            function = lambda,
+                        ),
+                    )
+                    putValueArgument(
+                        4,
+                        irCall(featureTypeValueOf).apply {
+                            putValueArgument(0, irString("CONTAINMENT"))
+                        },
+                    )
+                    putValueArgument(5, irBoolean(false))
+                },
+            )
         }
     }
 
@@ -115,111 +237,11 @@ class StarLasuIrGenerationExtension(
                                     param.type,
                                     buildList {
                                         irClass.properties.forEach { property ->
-                                            if (property.backingField != null) {
-                                                val constructor =
-                                                    pluginContext
-                                                        .referenceConstructors(FeatureDescription::class.classId)
-                                                        .first()
-                                                val multiplicity =
-                                                    pluginContext
-                                                        .referenceClass(Multiplicity::class.classId)!!
-                                                val multiplicityValueOf =
-                                                    multiplicity.functions.find {
-                                                        it.owner.name.identifier ==
-                                                            "valueOf"
-                                                    }!!
-                                                val featureType =
-                                                    pluginContext
-                                                        .referenceClass(FeatureType::class.classId)!!
-                                                val featureTypeValueOf =
-                                                    multiplicity.functions.find {
-                                                        it.owner.name.identifier ==
-                                                            "valueOf"
-                                                    }!!
-
-                                                add(
-                                                    irCallConstructor(constructor, emptyList()).apply {
-                                                        // val name: String,
-                                                        // val provideNodes: Boolean,
-                                                        // val multiplicity: Multiplicity,
-                                                        // val valueProvider: () -> Any?,
-                                                        // val featureType: FeatureType,
-                                                        // val derived: Boolean = false,
-                                                        putValueArgument(0, irString(property.name.identifier))
-                                                        putValueArgument(1, irBoolean(false))
-                                                        putValueArgument(
-                                                            2,
-                                                            irCall(multiplicityValueOf).apply {
-                                                                putValueArgument(0, irString("SINGULAR"))
-                                                            },
-                                                        )
-                                                        //                                val getter = irClass.functions.find { it.name.identifier == "get${property.name.identifier.capitalize()}"} !!
-                                                        //                                IrSimpleFunctionSymbolImpl().apply {
-                                                        //                                    this.
-                                                        //                                }
-                                                        // val getter = property.getter!!
-                                                        // val getter = pluginContext.referenceFunctions(CallableId(irClass.classId!!, Name.identifier("get${property.name.identifier.capitalize()}"))).single()
-                                                        // putValueArgument(3, irFunctionReference(irClass.defaultType, getter.symbol))
-
-                                                        val lambda =
-                                                            context
-                                                                .irFactory
-                                                                .buildFun {
-                                                                    startOffset = SYNTHETIC_OFFSET
-                                                                    endOffset = SYNTHETIC_OFFSET
-                                                                    origin =
-                                                                        IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
-                                                                    name = Name.special("<anonymous>")
-                                                                    visibility = DescriptorVisibilities.LOCAL
-                                                                    returnType = pluginContext.irBuiltIns.anyNType
-                                                                }.apply {
-                                                                    parent = function
-                                                                    require(symbol.owner.file == irClass.file)
-//                                        valueParameters = listOf (
-//                                            buildValueParameter(this) {
-//                                                origin = IrDeclarationOrigin.DEFINED
-//                                                name = Name.identifier("field")
-//                                                index = 0
-//                                                type = irClass.defaultType
-//                                            }
-//                                        )
-                                                                    body =
-                                                                        irBlockBody {
-                                                                            +irReturn(
-                                                                                irGetField(
-                                                                                    irGet(
-                                                                                        function
-                                                                                            .dispatchReceiverParameter!!,
-                                                                                    ),
-                                                                                    property.backingField
-                                                                                        ?: throw IllegalStateException("no backing field for property ${property.name.identifier} in ${irClass.kotlinFqName.asString()}"),
-                                                                                ),
-                                                                            )
-                                                                        }
-                                                                }
-                                                        putValueArgument(
-                                                            3,
-                                                            IrFunctionExpressionImpl(
-                                                                startOffset = SYNTHETIC_OFFSET,
-                                                                endOffset = SYNTHETIC_OFFSET,
-                                                                type =
-                                                                    pluginContext
-                                                                        .irBuiltIns
-                                                                        .functionN(0)
-                                                                        .typeWith(pluginContext.irBuiltIns.anyNType),
-                                                                origin = IrStatementOrigin.LAMBDA,
-                                                                function = lambda,
-                                                            ),
-                                                        )
-                                                        putValueArgument(
-                                                            4,
-                                                            irCall(featureTypeValueOf).apply {
-                                                                putValueArgument(0, irString("CONTAINMENT"))
-                                                            },
-                                                        )
-                                                        putValueArgument(5, irBoolean(false))
-                                                    },
-                                                )
+                                            populateFeatureListWithProperty(
+                                                property, function,
+                                                irClass, pluginContext,
+                                            ) {
+                                                add(it)
                                             }
                                         }
                                     },
