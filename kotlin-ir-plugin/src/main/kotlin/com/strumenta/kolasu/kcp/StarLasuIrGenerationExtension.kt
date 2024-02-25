@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irBlockBody
+import org.jetbrains.kotlin.backend.jvm.functionByName
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
@@ -21,6 +22,7 @@ import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.backend.js.utils.typeArguments
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.buildFun
+import org.jetbrains.kotlin.ir.builders.declarations.buildVariable
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBoolean
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -29,7 +31,9 @@ import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.builders.irNull
 import org.jetbrains.kotlin.ir.builders.irReturn
+import org.jetbrains.kotlin.ir.builders.irSet
 import org.jetbrains.kotlin.ir.builders.irString
+import org.jetbrains.kotlin.ir.builders.irTemporary
 import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
@@ -238,6 +242,23 @@ class StarLasuIrGenerationExtension(
                     // Then we call apply on it
                     // apply {  }
 
+                    val mutableListOfZeroParams =
+                        pluginContext
+                            .referenceFunctions(
+                                CallableId(FqName("kotlin.collections"), null, Name.identifier("mutableListOf")),
+                            ).find {
+                                it.owner!!.valueParameters.isEmpty()
+                            }!!
+
+                    val emptyCall = IrCallImpl(
+                    startOffset, endOffset, mutableListOfZeroParams.owner.returnType, mutableListOfZeroParams,
+                    typeArgumentsCount = 1,
+                    valueArgumentsCount = 0,
+                    origin = null
+                ).apply {
+                    this.putTypeArgument(0, pluginContext.referenceClass(FeatureDescription::class.classId)!!.defaultType)
+                }
+
                     val call = IrCallImpl(
                         startOffset, endOffset, mutableListOf.owner.returnType, mutableListOf,
                         typeArgumentsCount = 1,
@@ -282,7 +303,44 @@ class StarLasuIrGenerationExtension(
 //                    }
 //                }
 
-                    +irReturn(call)
+                    val listClass = pluginContext.referenceClass(MutableList::class.classId)!!
+                    val listOfFeatureDescriptionType = listClass.typeWith(pluginContext.referenceClass(FeatureDescription::class.classId)!!.defaultType)
+//                    val resultVariable = buildVariable(function, SYNTHETIC_OFFSET, SYNTHETIC_OFFSET, myOrigin,
+//                        Name.identifier("features"), listOfFeatureDescriptionType).apply {
+//                            initializer = emptyCall
+//                    }
+                    //+irSet(resultVariable, emptyCall)
+                    val resultVariable = irTemporary(emptyCall, nameHint = "myFeatures", listOfFeatureDescriptionType)
+                    //+resultVariable
+
+                    irClass.properties.forEach { property ->
+                        populateFeatureListWithProperty(
+                            property, function,
+                            irClass, pluginContext,
+                        ) { featureDescription ->
+                            // We want to invoke add
+//                            val mutableCollection = pluginContext.referenceClass(MutableCollection::class.classId)!!
+//                            //println("BY NAME " + mutableCollection.functionByName("add"))
+//                            listClass.functions.forEach {
+//                                println("LIST CLASS FUNCTION $it ${it.owner.name}")
+//                            }
+//                            pluginContext.referenceFunctions()
+                            // val addMethod = mutableCollection.functions.find { it.owner.name.identifier == "add" && it.owner.valueParameters.size == 1}!!
+                            val addMethod = pluginContext
+                                    .referenceFunctions(
+                            CallableId(FqName("kotlin.collections"), FqName.topLevel(Name.identifier("MutableList")), Name.identifier("add")),
+                            ).find {
+                            it.owner!!.valueParameters.size == 1
+                        }!!
+
+                            +irCall(addMethod).apply {
+                                dispatchReceiver = irGet(resultVariable)
+                                putValueArgument(0, featureDescription)
+                            }
+                        }
+                    }
+
+                    +irReturn(irGet(resultVariable))
                 }
         }
     }
@@ -349,4 +407,10 @@ class StarLasuIrGenerationExtension(
             }
         }
     }
+}
+
+object myOrigin : IrDeclarationOrigin {
+    override val name: String
+        get() = "KolasuPlugin"
+
 }
