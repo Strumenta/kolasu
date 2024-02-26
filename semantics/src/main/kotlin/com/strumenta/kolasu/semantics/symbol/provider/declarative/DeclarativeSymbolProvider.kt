@@ -125,7 +125,7 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
         source: Node
     ): ContainmentValueDescription? {
         return identifierProvider.getIdentifierFor(source)
-            ?.let { SymbolDescription(it, emptyList(), emptyMap())}
+            ?.let { SymbolDescription(it, emptyList(), emptyMap()) }
             ?.let { ContainmentValueDescription(it) }
     }
 
@@ -141,7 +141,6 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
     private fun toListValueDescription(identifierProvider: IdentifierProvider, source: List<*>): ListValueDescription {
         return ListValueDescription(source.mapNotNull { this.toValueDescription(identifierProvider, it) }.toList())
     }
-
 }
 
 data class DeclarativeSymbolProviderRuleArguments<NodeTy : Node>(val node: NodeTy, val symbolProvider: SymbolProvider)
