@@ -4,11 +4,10 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.semantics.identifier.provider.IdentifierProvider
 import com.strumenta.kolasu.semantics.symbol.description.BooleanValueDescription
+import com.strumenta.kolasu.semantics.symbol.description.ContainmentValueDescription
 import com.strumenta.kolasu.semantics.symbol.description.IntegerValueDescription
 import com.strumenta.kolasu.semantics.symbol.description.ListValueDescription
-import com.strumenta.kolasu.semantics.symbol.description.MapValueDescription
 import com.strumenta.kolasu.semantics.symbol.description.ReferenceValueDescription
-import com.strumenta.kolasu.semantics.symbol.description.SetValueDescription
 import com.strumenta.kolasu.semantics.symbol.description.StringValueDescription
 import com.strumenta.kolasu.semantics.symbol.description.SymbolDescription
 import com.strumenta.kolasu.semantics.symbol.description.ValueDescription
@@ -105,11 +104,9 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
             is Boolean -> BooleanValueDescription(source)
             is Int -> IntegerValueDescription(source)
             is String -> StringValueDescription(source)
-            is Node -> toReferenceValueDescription(identifierProvider, source)
+            is Node -> toContainmentValueDescription(identifierProvider, source)
             is ReferenceByName<*> -> toReferenceValueDescription(identifierProvider, source)
             is List<*> -> toListValueDescription(identifierProvider, source)
-            is Set<*> -> toSetValueDescription(identifierProvider, source)
-            is Map<*, *> -> toMapValueDescription(identifierProvider, source)
             else -> null
         }
     }
@@ -121,6 +118,15 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
         return source.referred
             ?.let { it as? Node }
             ?.let { toReferenceValueDescription(identifierProvider, it) }
+    }
+
+    private fun toContainmentValueDescription(
+        identifierProvider: IdentifierProvider,
+        source: Node
+    ): ContainmentValueDescription? {
+        return identifierProvider.getIdentifierFor(source)
+            ?.let { SymbolDescription(it, emptyList(), emptyMap())}
+            ?.let { ContainmentValueDescription(it) }
     }
 
     private fun toReferenceValueDescription(
@@ -136,17 +142,6 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
         return ListValueDescription(source.mapNotNull { this.toValueDescription(identifierProvider, it) }.toList())
     }
 
-    private fun toSetValueDescription(identifierProvider: IdentifierProvider, source: Set<*>): SetValueDescription {
-        return SetValueDescription(source.mapNotNull { this.toValueDescription(identifierProvider, it) }.toSet())
-    }
-
-    private fun toMapValueDescription(identifierProvider: IdentifierProvider, source: Map<*, *>): MapValueDescription {
-        return MapValueDescription(
-            source.mapNotNull { (key, value) ->
-                if (key is String) toValueDescription(identifierProvider, value)?.let { key to it } else null
-            }.associate { (key, value) -> key to value }
-        )
-    }
 }
 
 data class DeclarativeSymbolProviderRuleArguments<NodeTy : Node>(val node: NodeTy, val symbolProvider: SymbolProvider)
