@@ -26,14 +26,10 @@ data class ReferenceValueDescription(
     override val value: SymbolDescription? = null
 ) : ValueDescription
 
+data class ContainmentValueDescription(
+    override val value: SymbolDescription? = null
+): ValueDescription
+
 data class ListValueDescription(
     override val value: List<ValueDescription> = emptyList()
-) : ValueDescription
-
-data class SetValueDescription(
-    override val value: Set<ValueDescription> = emptySet()
-) : ValueDescription
-
-data class MapValueDescription(
-    override val value: Map<String, ValueDescription> = emptyMap()
 ) : ValueDescription
