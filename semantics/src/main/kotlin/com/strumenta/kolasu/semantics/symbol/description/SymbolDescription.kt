@@ -28,7 +28,7 @@ data class ReferenceValueDescription(
 
 data class ContainmentValueDescription(
     override val value: SymbolDescription? = null
-): ValueDescription
+) : ValueDescription
 
 data class ListValueDescription(
     override val value: List<ValueDescription> = emptyList()
