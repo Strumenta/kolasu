@@ -99,7 +99,6 @@ fun <N : NodeLike> FeatureDescription.Companion.buildFor(
     val provideNodes = providesNodes(property)
     return FeatureDescription(
         name = property.name,
-        provideNodes = provideNodes,
         multiplicity = multiplicity,
         value = property.get(node as N),
         when {

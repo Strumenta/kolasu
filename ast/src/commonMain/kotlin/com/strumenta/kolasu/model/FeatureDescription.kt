@@ -8,8 +8,6 @@ fun checkFeatureName(featureName: String) {
 
 class FeatureDescription(
     val name: String,
-    // TODO remove me
-    val provideNodes: Boolean,
     val multiplicity: Multiplicity,
     val valueProvider: () -> Any?,
     val featureType: FeatureType,
@@ -17,12 +15,14 @@ class FeatureDescription(
 ) {
     constructor(
         name: String,
-        provideNodes: Boolean,
         multiplicity: Multiplicity,
         value: Any?,
         featureType: FeatureType,
         derived: Boolean = false,
-    ) : this(name, provideNodes, multiplicity, { value }, featureType, derived)
+    ) : this(name, multiplicity, { value }, featureType, derived)
+
+    val provideNodes: Boolean
+        get() = featureType in arrayOf(FeatureType.CONTAINMENT)
 
     val isMultiple: Boolean
         get() = multiplicity == Multiplicity.MANY

@@ -6,19 +6,6 @@ import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 
-class GenericFeatureDescription(
-    val name: String,
-    val provideNodes: Boolean,
-    val multiplicity: Multiplicity,
-    val valueProvider: (node: NodeLike) -> Any?,
-    val featureType: FeatureType,
-    val derived: Boolean = false,
-) {
-    fun toFeatureDescription(instance: NodeLike): FeatureDescription {
-        return FeatureDescription(name, provideNodes, multiplicity, { valueProvider(instance) }, featureType, derived)
-    }
-}
-
 abstract class BaseNode : NodeLike {
     override val nodeType: String = calculateNodeType()
 

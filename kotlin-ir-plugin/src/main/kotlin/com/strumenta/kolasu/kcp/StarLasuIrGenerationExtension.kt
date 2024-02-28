@@ -114,9 +114,8 @@ class StarLasuIrGenerationExtension(
             val constructorCall =
                 irCallConstructor(constructor, emptyList()).apply {
                     putValueArgument(0, irString(property.name.identifier))
-                    putValueArgument(1, irBoolean(property.providesNodes()))
                     putValueArgument(
-                        2,
+                        1,
                         irCall(multiplicityValueOf).apply {
                             val multiplicityValue = property.getter!!.returnType.multiplicity()
                             putValueArgument(0, irString(multiplicityValue.name))
@@ -135,7 +134,7 @@ class StarLasuIrGenerationExtension(
                     val lambda = pluginContext.createLambdaFunctionWithNeededScope(function, property)
 
                     putValueArgument(
-                        3,
+                        2,
                         IrFunctionExpressionImpl(
                             startOffset = SYNTHETIC_OFFSET,
                             endOffset = SYNTHETIC_OFFSET,
@@ -149,14 +148,14 @@ class StarLasuIrGenerationExtension(
                         ),
                     )
                     putValueArgument(
-                        4,
+                        3,
                         irCall(featureTypeValueOf).apply {
                             val featureTypeValue = property.getter!!.returnType.featureType()
                             putValueArgument(0, irString(featureTypeValue.name))
                         },
                     )
                     // derived
-                    putValueArgument(5, irBoolean(property.isDerived()))
+                    putValueArgument(4, irBoolean(property.isDerived()))
                 }
             add(constructorCall)
         }
