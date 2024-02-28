@@ -35,14 +35,18 @@ import java.time.format.DateTimeFormatter
 
 public const val GENERATED_CALCULATED_FEATURES = "calculateFeatures"
 
+val COMPILER_PLUGIN_DEBUG = false
+
 class BaseNodeGenerator(
     session: FirSession,
 ) : FirDeclarationGenerationExtension(session) {
     private fun log(text: String) {
-        val file = File("/Users/ftomassetti/repos/kolasu/log.txt")
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-        val current = LocalDateTime.now().format(formatter)
-        file.appendText("$current: $text\n")
+        if (COMPILER_PLUGIN_DEBUG) {
+            val file = File("compiler-plugin-log.txt")
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+            val current = LocalDateTime.now().format(formatter)
+            file.appendText("$current: $text\n")
+        }
     }
 
     override fun generateTopLevelClassLikeDeclaration(classId: ClassId): FirClassLikeSymbol<*>? {
