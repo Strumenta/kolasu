@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.kcp
 
+import com.strumenta.kolasu.model.Derived
 import com.strumenta.kolasu.model.FeatureType
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.NodeLike
@@ -18,6 +19,7 @@ import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.isNullable
 import org.jetbrains.kotlin.ir.util.file
+import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.getAllSuperClassifiers
 import kotlin.reflect.KClass
@@ -136,8 +138,7 @@ fun IrType.multiplicity(): Multiplicity {
 
 @ObsoleteDescriptorBasedAPI
 fun IrProperty.isDerived(): Boolean {
-    // TODO fix me
-    return false
+    return this.hasAnnotation(Derived::class.classId)
 }
 
 @ObsoleteDescriptorBasedAPI
