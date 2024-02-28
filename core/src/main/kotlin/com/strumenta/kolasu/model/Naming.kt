@@ -34,8 +34,11 @@ interface Named : PossiblyNamed {
  * This is not statically enforced as we may want to use some interface, which cannot extend Node.
  * However, this is enforced dynamically.
  */
-class ReferenceByName<N>(val name: String, initialReferred: N? = null) : Serializable where N : PossiblyNamed {
-
+class ReferenceByName<N : PossiblyNamed>(
+    val name: String,
+    initialReferred: N? = null,
+    var identifier: String? = null
+) : Serializable {
     var referred: N? = null
         set(value) {
             require(value is Node || value == null) {
@@ -49,6 +52,9 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) : Seriali
         this.referred = initialReferred
     }
 
+    val resolved: Boolean
+        get() = referred != null
+
     override fun toString(): String {
         return if (resolved) {
             "Ref($name)[Solved]"
@@ -57,9 +63,6 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) : Seriali
         }
     }
 
-    val resolved: Boolean
-        get() = referred != null
-
     override fun hashCode(): Int {
         return name.hashCode() * (7 + if (resolved) 2 else 1)
     }
@@ -67,10 +70,8 @@ class ReferenceByName<N>(val name: String, initialReferred: N? = null) : Seriali
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ReferenceByName<*>) return false
-
         if (name != other.name) return false
         if (referred != other.referred) return false
-
         return true
     }
 }
