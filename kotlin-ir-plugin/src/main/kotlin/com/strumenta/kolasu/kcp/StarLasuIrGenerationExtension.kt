@@ -3,18 +3,16 @@
 package com.strumenta.kolasu.kcp
 
 import com.strumenta.kolasu.kcp.fir.GENERATED_CALCULATED_FEATURES
-import com.strumenta.kolasu.kcp.fir.pseudoLambdaName
 import com.strumenta.kolasu.model.BaseNode
 import com.strumenta.kolasu.model.FeatureDescription
 import com.strumenta.kolasu.model.FeatureType
-import com.strumenta.kolasu.model.GenericFeatureDescription
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.NodeLike
 import org.jetbrains.kotlin.backend.common.extensions.FirIncompatiblePluginAPI
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irBlockBody
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -24,19 +22,17 @@ import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.buildFun
-import org.jetbrains.kotlin.ir.builders.declarations.buildValueParameter
-import org.jetbrains.kotlin.ir.builders.irAs
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBoolean
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irGet
-import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.builders.irTemporary
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
+import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
@@ -49,8 +45,6 @@ import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
-import org.jetbrains.kotlin.ir.util.defaultType
-import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
 import org.jetbrains.kotlin.ir.util.kotlinFqName
@@ -59,6 +53,7 @@ import org.jetbrains.kotlin.ir.util.properties
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.name.SpecialNames
 
 class StarLasuIrGenerationExtension(
     private val messageCollector: MessageCollector,
@@ -69,7 +64,7 @@ class StarLasuIrGenerationExtension(
         isBaseNode: Boolean,
     ) {
         irClass.primaryConstructor?.valueParameters?.forEach { param ->
-            if (param.isVal() && (param.isSingleContainment() || param.isSingleAttribute())) {
+            if (param.isVal() && (param.isSingleOrOptionalContainment() || param.isSingleAttribute())) {
                 messageCollector.report(
                     CompilerMessageSeverity.WARNING,
                     "Value param ${irClass.kotlinFqName}.${param.name} is not assignable",
@@ -83,9 +78,6 @@ class StarLasuIrGenerationExtension(
             if (irClass.modality != Modality.SEALED && irClass.modality != Modality.ABSTRACT) {
                 overrideCalculateFeaturesBody(irClass, pluginContext)
                 overrideCalculateNodeTypeBody(irClass, pluginContext)
-                irClass.properties.forEach { property ->
-                    overridePseudoLambda(irClass, pluginContext, property)
-                }
             }
         }
     }
@@ -122,15 +114,25 @@ class StarLasuIrGenerationExtension(
             val constructorCall =
                 irCallConstructor(constructor, emptyList()).apply {
                     putValueArgument(0, irString(property.name.identifier))
-                    putValueArgument(1, irBoolean(false))
+                    putValueArgument(1, irBoolean(property.providesNodes()))
                     putValueArgument(
                         2,
                         irCall(multiplicityValueOf).apply {
-                            putValueArgument(0, irString("SINGULAR"))
+                            val multiplicityValue = property.getter!!.returnType.multiplicity()
+                            putValueArgument(0, irString(multiplicityValue.name))
                         },
                     )
 
-                    val pseudoLambda = irClass.functions.find { it.name.identifier == pseudoLambdaName(property.name.identifier) }!!
+                    // To create lambda you should do something like this:
+                    // 1. Create a simple function with LOCAL_FUNCTION_FOR_LAMBDA origin (ofc, fill it with types you need):
+                    //     https://github.com/ForteScarlet/kotlin-suspend-transform-compiler-plugin/blob/
+                    //           2c3bf967fdc81e20fc73ac90e8e54ce51833d35b/compiler/suspend-transform-plugin/src/main/kotlin/
+                    //           love/forte/plugin/suspendtrans/utils/IrFunctionUtils.kt#L147
+                    // 2. Create IrFunctionExpression IR-node, that accepts the previously created simple function and its type.
+                    //    As far as I know, there is no IrBuilderWithScope method for this type of IR-node, but this is how we represent
+                    //    lambdas inside the compiler, so you can create it with the IrFunctionExpressionImpl constructor.
+
+                    val lambda = pluginContext.createLambdaFunctionWithNeededScope(function, property)
 
                     putValueArgument(
                         3,
@@ -140,19 +142,21 @@ class StarLasuIrGenerationExtension(
                             type =
                                 pluginContext
                                     .irBuiltIns
-                                    .functionN(1)
-                                    .typeWith(irClass.defaultType),
+                                    .functionN(0)
+                                    .typeWith(pluginContext.irBuiltIns.anyNType),
                             origin = IrStatementOrigin.LAMBDA,
-                            function = pseudoLambda,
+                            function = lambda,
                         ),
                     )
                     putValueArgument(
                         4,
                         irCall(featureTypeValueOf).apply {
-                            putValueArgument(0, irString("CONTAINMENT"))
+                            val featureTypeValue = property.getter!!.returnType.featureType()
+                            putValueArgument(0, irString(featureTypeValue.name))
                         },
                     )
-                    putValueArgument(5, irBoolean(false))
+                    // derived
+                    putValueArgument(5, irBoolean(property.isDerived()))
                 }
             add(constructorCall)
         }
@@ -167,8 +171,10 @@ class StarLasuIrGenerationExtension(
             "overrideCalculateFeaturesBody for ${irClass.name.identifier}",
             irClass.compilerSourceLocation,
         )
-        val function = irClass.functions.find { it.name.identifier == GENERATED_CALCULATED_FEATURES
-        }
+        val function =
+            irClass.functions.find {
+                it.name.identifier == GENERATED_CALCULATED_FEATURES
+            }
         if (function != null) {
             messageCollector.report(
                 CompilerMessageSeverity.WARNING,
@@ -184,8 +190,10 @@ class StarLasuIrGenerationExtension(
                     val mutableListOfZeroParams =
                         pluginContext
                             .referenceFunctions(
-                                CallableId(FqName("kotlin.collections"), null,
-                                    Name.identifier("mutableListOf")),
+                                CallableId(
+                                    FqName("kotlin.collections"), null,
+                                    Name.identifier("mutableListOf"),
+                                ),
                             ).find {
                                 it.owner!!.valueParameters.isEmpty()
                             }!!
@@ -209,9 +217,11 @@ class StarLasuIrGenerationExtension(
                     val listClass = pluginContext.referenceClass(MutableList::class.classId)!!
                     val listOfFeatureDescriptionType =
                         listClass
-                            .typeWith(pluginContext
-                                .referenceClass(FeatureDescription::class.classId)!!
-                                .defaultType)
+                            .typeWith(
+                                pluginContext
+                                    .referenceClass(FeatureDescription::class.classId)!!
+                                    .defaultType,
+                            )
                     val resultVariable = irTemporary(emptyCall, nameHint = "myFeatures", listOfFeatureDescriptionType)
 
                     irClass.properties.forEach { property ->
@@ -262,7 +272,6 @@ class StarLasuIrGenerationExtension(
         )
         val function = irClass.functions.find { it.name.identifier == "calculateNodeType" }
 
-
         if (function != null) {
             messageCollector.report(
                 CompilerMessageSeverity.WARNING,
@@ -274,37 +283,6 @@ class StarLasuIrGenerationExtension(
                     IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
                 ) {
                     +irReturn(irString(irClass.name.identifier))
-                }
-        }
-    }
-
-    private fun overridePseudoLambda(
-        irClass: IrClass,
-        pluginContext: IrPluginContext,
-        property: IrProperty,
-    ) {
-        messageCollector.report(
-            CompilerMessageSeverity.WARNING,
-            "overridePseudoLambda for ${irClass.name.identifier} and $property",
-            irClass.compilerSourceLocation,
-        )
-        val function = irClass.functions.find { it.name.identifier == pseudoLambdaName(property.name.identifier) }
-
-
-        if (function != null) {
-            messageCollector.report(
-                CompilerMessageSeverity.WARNING,
-                "function overridePseudoLambda ${property.name.identifier} FOUND",
-                irClass.compilerSourceLocation,
-            )
-            function.body =
-                DeclarationIrBuilder(pluginContext, function.symbol).irBlockBody(
-                    IrFactoryImpl.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET),
-                ) {
-                    +irReturn(irCall(property.getter!!).apply {
-                        this.dispatchReceiver = irGet(function.dispatchReceiverParameter!!)
-                        // TODO pass receiver?
-                    })
                 }
         }
     }
@@ -348,45 +326,30 @@ class StarLasuIrGenerationExtension(
     }
 }
 
-object myOrigin : IrDeclarationOrigin {
-    override val name: String
-        get() = "KolasuPlugin"
-}
-
-
-TODO: rifare le lambda guardandao
-
-fun IrPluginContext.createSuspendLambdaFunctionWithCoroutineScope(
-    originFunction: IrFunction,
-    function: IrFunction
-): IrSimpleFunction {
-    return irFactory.buildFun {
-        origin = IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
-        name = SpecialNames.NO_NAME_PROVIDED
-        visibility = DescriptorVisibilities.LOCAL
-        returnType = function.returnType
-        modality = Modality.FINAL
-        isSuspend = true
-    }.apply {
-        parent = function
-        body = createIrBuilder(symbol).run {
-            // don't use expr body, coroutine codegen can't generate for it.
-            irBlockBody {
-                +irReturn(irCall(originFunction).apply call@{
-                    // set arguments
-                    function.dispatchReceiverParameter?.also {
-                        this@call.dispatchReceiver = irGet(it)
+fun IrPluginContext.createLambdaFunctionWithNeededScope(
+    containingFunction: IrFunction,
+    property: IrProperty,
+): IrSimpleFunction =
+    irFactory
+        .buildFun {
+            origin = IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
+            name = SpecialNames.NO_NAME_PROVIDED
+            visibility = DescriptorVisibilities.LOCAL
+            returnType = irBuiltIns.anyNType
+            modality = Modality.FINAL
+            isSuspend = false
+        }.apply {
+            parent = containingFunction
+            body =
+                irBuiltIns.createIrBuilder(symbol).run {
+                    irBlockBody {
+                        val nodeInstance = irGet(containingFunction.dispatchReceiverParameter!!)
+                        // TODO pass the instance somehow?
+                        +irReturn(
+                            irCall(property.getter!!).apply {
+                                dispatchReceiver = nodeInstance
+                            },
+                        )
                     }
-
-                    function.extensionReceiverParameter?.also {
-                        this@call.extensionReceiver = irGet(it)
-                    }
-
-                    for ((index, parameter) in function.valueParameters.withIndex()) {
-                        this@call.putValueArgument(index, irGet(parameter))
-                    }
-                })
-            }
+                }
         }
-    }
-}

@@ -448,6 +448,7 @@ package mytest
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.BaseNode
 import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.observable.ObservableList
 import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
 import com.strumenta.kolasu.model.Named
@@ -463,24 +464,28 @@ fun main() {
     val a2 = A("Bar", 18, a1)
     val a3 = A("Zum", 99, a2)
 
-   // println("calculateGenericFeatures ${'$'}{a1.calculateGenericFeatures()}")
-    // println("Features ${'$'}{a1.features}")
     assertEquals(3, a1.features.size)
     
     assertEquals("f1", a1.features[0].name)
     assertEquals("Foo", a1.features[0].value)
-//    assertEquals(FeatureType.ATTRIBUTE, a1.features[0].featureType)
-//  TODO check multiplicity
-// TODO check derived
-// TODO provideNodes
-//
-//    assertEquals("f2", a1.features[1].name)
-//    assertEquals(6, a1.features[1].value)
-//    assertEquals(FeatureType.ATTRIBUTE, a1.features[1].featureType)
-//
-//    assertEquals("f3", a1.features[2].name)
-//    assertEquals(null, a1.features[2].value)
-//    assertEquals(FeatureType.CONTAINMENT, a1.features[2].featureType)
+    assertEquals(FeatureType.ATTRIBUTE, a1.features[0].featureType)
+    assertEquals(Multiplicity.SINGULAR, a1.features[0].multiplicity)
+    assertEquals(false, a1.features[0].derived)
+    assertEquals(false, a1.features[0].provideNodes)
+
+    assertEquals("f2", a1.features[1].name)
+    assertEquals(6, a1.features[1].value)
+    assertEquals(FeatureType.ATTRIBUTE, a1.features[1].featureType)
+    assertEquals(Multiplicity.SINGULAR, a1.features[1].multiplicity)
+    assertEquals(false, a1.features[1].derived)
+    assertEquals(false, a1.features[1].provideNodes)
+
+    assertEquals("f3", a1.features[2].name)
+    assertEquals(null, a1.features[2].value)
+    assertEquals(FeatureType.CONTAINMENT, a1.features[2].featureType)
+    assertEquals(Multiplicity.OPTIONAL, a1.features[2].multiplicity)
+    assertEquals(false, a1.features[2].derived)
+    assertEquals(true, a1.features[2].provideNodes)
 }
 
 """,

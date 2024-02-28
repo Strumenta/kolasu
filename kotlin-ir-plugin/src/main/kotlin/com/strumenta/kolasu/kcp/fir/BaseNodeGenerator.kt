@@ -2,7 +2,6 @@ package com.strumenta.kolasu.kcp.fir
 
 import com.strumenta.kolasu.model.BaseNode
 import com.strumenta.kolasu.model.FeatureDescription
-import com.strumenta.kolasu.model.GenericFeatureDescription
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.fir.FirImplementationDetail
 import org.jetbrains.kotlin.fir.FirSession
@@ -36,13 +35,11 @@ import java.time.format.DateTimeFormatter
 
 public const val GENERATED_CALCULATED_FEATURES = "calculateFeatures"
 
-fun pseudoLambdaName(propertyName: String) : String = "pseudo_lambda_${propertyName}"
-
 class BaseNodeGenerator(
     session: FirSession,
 ) : FirDeclarationGenerationExtension(session) {
     private fun log(text: String) {
-        val file = File("/Users/federico/repos/kolasu-mp-example/log.txt")
+        val file = File("/Users/ftomassetti/repos/kolasu/log.txt")
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         val current = LocalDateTime.now().format(formatter)
         file.appendText("$current: $text\n")
@@ -75,7 +72,7 @@ class BaseNodeGenerator(
                 listClassId.createConeType(
                     session,
                     typeArguments = arrayOf(),
-                    nullable = true
+                    nullable = true,
                 )
             val classSymbol = callableId.classId!!.toSymbol(session) as FirClassSymbol<*>
             val function =
@@ -147,9 +144,6 @@ class BaseNodeGenerator(
         if (classSymbol.extendBaseNode && !classSymbol.isAbstract && !classSymbol.isSealed) {
             log("  ${classSymbol.classId.asSingleFqName().asString()} extends BaseNode")
             val set = mutableSetOf(Name.identifier(GENERATED_CALCULATED_FEATURES), Name.identifier("calculateNodeType"))
-            set.addAll(classSymbol.declarationSymbols.filterIsInstance<FirPropertySymbol>().map { Name.identifier(
-                pseudoLambdaName(it.name.identifier)
-            ) })
             return set
         }
         return super.getCallableNamesForClass(classSymbol, context)

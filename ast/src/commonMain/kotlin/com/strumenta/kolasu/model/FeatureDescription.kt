@@ -8,6 +8,7 @@ fun checkFeatureName(featureName: String) {
 
 class FeatureDescription(
     val name: String,
+    // TODO remove me
     val provideNodes: Boolean,
     val multiplicity: Multiplicity,
     val valueProvider: () -> Any?,
