@@ -11,6 +11,7 @@ import com.strumenta.kolasu.model.allFeatures
 import com.strumenta.kolasu.model.containingProperty
 import com.strumenta.kolasu.model.indexInContainingProperty
 import com.strumenta.kolasu.traversing.walk
+import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Enumeration
@@ -222,6 +223,22 @@ class LionWebModelConverter(
             js.enableDynamicNodes()
         }
         return js.deserializeToNodes(json)
+    }
+
+    fun knownLWLanguages(): Set<LWLanguage> {
+        return languageConverter.knownLWLanguages()
+    }
+
+    fun knownKolasuLanguages(): Set<KolasuLanguage> {
+        return languageConverter.knownKolasuLanguages()
+    }
+
+    fun getKolasuClassesToClassifiersMapping(): Map<KClass<*>, Classifier<*>> {
+        return languageConverter.getKolasuClassesToClassifiersMapping()
+    }
+
+    fun getClassifiersToKolasuClassesMapping(): Map<Classifier<*>, KClass<*>> {
+        return languageConverter.getClassifiersToKolasuClassesMapping()
     }
 
     /**
