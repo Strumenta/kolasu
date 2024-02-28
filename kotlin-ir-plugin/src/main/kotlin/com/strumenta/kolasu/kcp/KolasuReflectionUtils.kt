@@ -57,13 +57,13 @@ fun IrValueParameter.isSingleOrOptionalContainment(): Boolean {
 }
 
 @ObsoleteDescriptorBasedAPI
-fun IrValueParameter.isSingleAttribute(): Boolean {
+fun IrValueParameter.isSingleOrOptionalAttribute(): Boolean {
     val propertyType = this.type
-    return propertyType.isSingleAttribute() ?: false
+    return propertyType.isSingleOrOptionalAttribute() ?: false
 }
 
 @ObsoleteDescriptorBasedAPI
-fun IrProperty.declareSingleContainment(): Boolean {
+fun IrProperty.declareSingleOrOptionalContainment(): Boolean {
     val propertyType = this.backingField?.type
     return propertyType?.isSingleOrOptionalContainment() ?: false
 }
@@ -84,7 +84,7 @@ fun IrType.isSingleOrOptionalContainment(): Boolean {
 }
 
 @ObsoleteDescriptorBasedAPI
-fun IrType.isSingleAttribute(): Boolean {
+fun IrType.isSingleOrOptionalAttribute(): Boolean {
     return !this.isAssignableTo(List::class) && !this.isAssignableTo(NodeLike::class)
 }
 
@@ -113,7 +113,7 @@ fun IrType.isAssignableTo(kClass: KClass<*>): Boolean =
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 fun IrType.featureType(): FeatureType {
     return when {
-        isSingleAttribute() -> FeatureType.ATTRIBUTE
+        isSingleOrOptionalAttribute() -> FeatureType.ATTRIBUTE
         isSingleOrOptionalContainment() -> FeatureType.CONTAINMENT
         else -> TODO()
     }
@@ -122,7 +122,7 @@ fun IrType.featureType(): FeatureType {
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 fun IrType.multiplicity(): Multiplicity {
     return when {
-        isSingleAttribute() -> Multiplicity.SINGULAR
+        isSingleOrOptionalAttribute() -> Multiplicity.SINGULAR
         isSingleOrOptionalContainment() -> {
             if (this.isNullable()) {
                 Multiplicity.OPTIONAL

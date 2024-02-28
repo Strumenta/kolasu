@@ -52,7 +52,7 @@ class SettingParentExtension(
     override fun visitPropertyNew(declaration: IrProperty): IrStatement {
         val prevBody = declaration.setter?.body
         if (prevBody != null && declaration.setter!!.origin == IrDeclarationOrigin.DEFAULT_PROPERTY_ACCESSOR) {
-            if (declaration.declareSingleContainment()) {
+            if (declaration.declareSingleOrOptionalContainment()) {
                 val thisParameter: IrValueParameter = declaration.setter!!.allParameters[0]
                 val valueParameter: IrValueParameter = declaration.setter!!.allParameters[1]
                 declaration.setter!!.body =

@@ -64,7 +64,7 @@ class StarLasuIrGenerationExtension(
         isBaseNode: Boolean,
     ) {
         irClass.primaryConstructor?.valueParameters?.forEach { param ->
-            if (param.isVal() && (param.isSingleOrOptionalContainment() || param.isSingleAttribute())) {
+            if (param.isVal() && (param.isSingleOrOptionalContainment() || param.isSingleOrOptionalAttribute())) {
                 messageCollector.report(
                     CompilerMessageSeverity.WARNING,
                     "Value param ${irClass.kotlinFqName}.${param.name} is not assignable",
