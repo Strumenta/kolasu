@@ -32,7 +32,6 @@ class FeatureDescriptionTest {
         assertEquals(
             FeatureDescription(
                 "name",
-                false,
                 Multiplicity.SINGULAR,
                 "gino",
                 FeatureType.ATTRIBUTE,
@@ -53,7 +52,6 @@ class FeatureDescriptionTest {
         assertEquals(
             FeatureDescription(
                 "names",
-                false,
                 Multiplicity.MANY,
                 listOf("gino", "pino"),
                 FeatureType.ATTRIBUTE,
@@ -74,7 +72,6 @@ class FeatureDescriptionTest {
         assertEquals(
             FeatureDescription(
                 "foo",
-                true,
                 Multiplicity.SINGULAR,
                 Foo1("gino"),
                 FeatureType.CONTAINMENT,
@@ -95,7 +92,6 @@ class FeatureDescriptionTest {
         assertEquals(
             FeatureDescription(
                 "foos",
-                true,
                 Multiplicity.MANY,
                 listOf(Foo1("gino")),
                 FeatureType.CONTAINMENT,
@@ -116,7 +112,6 @@ class FeatureDescriptionTest {
         assertEquals(
             FeatureDescription(
                 "foos",
-                true,
                 Multiplicity.MANY,
                 emptyList<Foo1>(),
                 FeatureType.CONTAINMENT,
@@ -137,7 +132,6 @@ class FeatureDescriptionTest {
         assertEquals(
             FeatureDescription(
                 "foos",
-                true,
                 Multiplicity.MANY,
                 null,
                 FeatureType.CONTAINMENT,

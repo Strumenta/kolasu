@@ -31,7 +31,7 @@ public class CompilationUnit extends Node {
         @Override
         @Internal
         public List<FeatureDescription> getFeatures() {
-            return Arrays.asList(new FeatureDescription("bs", true, Multiplicity.MANY, getBs(), FeatureType.CONTAINMENT, false));
+            return Arrays.asList(new FeatureDescription("bs",  Multiplicity.MANY, getBs(), FeatureType.CONTAINMENT, false));
         }
     }
 
@@ -44,6 +44,6 @@ public class CompilationUnit extends Node {
     @Override
     @Internal
     public List<FeatureDescription> getFeatures() {
-        return Arrays.asList(new FeatureDescription("as", true, Multiplicity.MANY, getAs(), FeatureType.CONTAINMENT, false));
+        return Arrays.asList(new FeatureDescription("as",  Multiplicity.MANY, getAs(), FeatureType.CONTAINMENT, false));
     }
 }

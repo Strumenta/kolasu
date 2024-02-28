@@ -15,12 +15,12 @@ import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 @AutoService(CompilerPluginRegistrar::class)
 class StarLasuComponentRegistrar : CompilerPluginRegistrar() {
     override val supportsK2: Boolean
-        get() = false
+        get() = true
 
     override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
         val messageCollector = configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
 
-        FirExtensionRegistrarAdapter.registerExtension(StarLasuFirExtensionsRegistrar())
+        FirExtensionRegistrarAdapter.registerExtension(StarLasuFirExtensionsRegistrar(messageCollector))
         IrGenerationExtension.registerExtension(StarLasuIrGenerationExtension(messageCollector))
     }
 }

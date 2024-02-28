@@ -1,5 +1,8 @@
 package com.strumenta.kolasu.kcp
 
+import com.strumenta.kolasu.model.Derived
+import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
 import org.jetbrains.kotlin.backend.jvm.ir.getIoFile
@@ -14,7 +17,9 @@ import org.jetbrains.kotlin.ir.declarations.path
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
+import org.jetbrains.kotlin.ir.types.isNullable
 import org.jetbrains.kotlin.ir.util.file
+import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.getAllSuperClassifiers
 import kotlin.reflect.KClass
@@ -48,21 +53,21 @@ fun IrValueParameter.isVal(): Boolean {
 }
 
 @ObsoleteDescriptorBasedAPI
-fun IrValueParameter.isSingleContainment(): Boolean {
+fun IrValueParameter.isSingleOrOptionalContainment(): Boolean {
     val propertyType = this.type
-    return propertyType.isSingleContainment() ?: false
+    return propertyType.isSingleOrOptionalContainment() ?: false
 }
 
 @ObsoleteDescriptorBasedAPI
-fun IrValueParameter.isSingleAttribute(): Boolean {
+fun IrValueParameter.isSingleOrOptionalAttribute(): Boolean {
     val propertyType = this.type
-    return propertyType.isSingleAttribute() ?: false
+    return propertyType.isSingleOrOptionalAttribute() ?: false
 }
 
 @ObsoleteDescriptorBasedAPI
-fun IrProperty.declareSingleContainment(): Boolean {
+fun IrProperty.declareSingleOrOptionalContainment(): Boolean {
     val propertyType = this.backingField?.type
-    return propertyType?.isSingleContainment() ?: false
+    return propertyType?.isSingleOrOptionalContainment() ?: false
 }
 
 @ObsoleteDescriptorBasedAPI
@@ -72,7 +77,7 @@ fun IrProperty.declareReference(): Boolean {
 }
 
 @ObsoleteDescriptorBasedAPI
-fun IrType.isSingleContainment(): Boolean {
+fun IrType.isSingleOrOptionalContainment(): Boolean {
     return if (this is IrSimpleType) {
         this.isAssignableTo(NodeLike::class)
     } else {
@@ -81,8 +86,8 @@ fun IrType.isSingleContainment(): Boolean {
 }
 
 @ObsoleteDescriptorBasedAPI
-fun IrType.isSingleAttribute(): Boolean {
-    return !this.isAssignableTo(Collection::class) && !this.isAssignableTo(NodeLike::class)
+fun IrType.isSingleOrOptionalAttribute(): Boolean {
+    return !this.isAssignableTo(List::class) && !this.isAssignableTo(NodeLike::class)
 }
 
 @ObsoleteDescriptorBasedAPI
@@ -93,7 +98,7 @@ fun IrType.isReference(): Boolean {
 @ObsoleteDescriptorBasedAPI
 fun IrProperty.declareMultipleContainment(): Boolean {
     val propertyType = this.backingField?.type
-    return propertyType?.isAssignableTo(Collection::class) ?: false
+    return propertyType?.isAssignableTo(List::class) ?: false
 }
 
 @ObsoleteDescriptorBasedAPI
@@ -106,3 +111,38 @@ fun IrType.isAssignableTo(kClass: KClass<*>): Boolean =
     } else {
         false
     }
+
+@OptIn(ObsoleteDescriptorBasedAPI::class)
+fun IrType.featureType(): FeatureType {
+    return when {
+        isSingleOrOptionalAttribute() -> FeatureType.ATTRIBUTE
+        isSingleOrOptionalContainment() -> FeatureType.CONTAINMENT
+        else -> TODO()
+    }
+}
+
+@OptIn(ObsoleteDescriptorBasedAPI::class)
+fun IrType.multiplicity(): Multiplicity {
+    return when {
+        isSingleOrOptionalAttribute() -> Multiplicity.SINGULAR
+        isSingleOrOptionalContainment() -> {
+            if (this.isNullable()) {
+                Multiplicity.OPTIONAL
+            } else {
+                Multiplicity.SINGULAR
+            }
+        }
+        else -> TODO()
+    }
+}
+
+@ObsoleteDescriptorBasedAPI
+fun IrProperty.isDerived(): Boolean {
+    return this.hasAnnotation(Derived::class.classId)
+}
+
+@ObsoleteDescriptorBasedAPI
+fun IrProperty.providesNodes(): Boolean {
+    val featureType = this.getter!!.returnType.featureType()
+    return featureType in setOf(FeatureType.CONTAINMENT, FeatureType.REFERENCE)
+}

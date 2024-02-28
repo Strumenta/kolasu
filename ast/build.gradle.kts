@@ -24,6 +24,8 @@ kotlin {
                 api("com.badoo.reaktive:reaktive:2.0.1")
             }
         }
+        val jsMain by getting
+        val jvmMain by getting
     }
 }
 
