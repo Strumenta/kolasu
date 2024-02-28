@@ -195,7 +195,7 @@ abstract class BaseNode : NodeLike {
         this.changes.subscribe(observer)
     }
 
-    protected fun notifyOfPropertyChange(
+    fun notifyOfPropertyChange(
         propertyName: String,
         oldValue: Any?,
         newValue: Any?,

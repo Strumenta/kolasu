@@ -86,6 +86,19 @@ fun IrType.isSingleOrOptionalContainment(): Boolean {
 }
 
 @ObsoleteDescriptorBasedAPI
+fun IrType.isMultipleContainment(): Boolean {
+    return if (this is IrSimpleType) {
+        if (this.isAssignableTo(List::class)) {
+            (this.arguments[0] as? IrSimpleType)?.isSingleOrOptionalContainment() ?: false
+        } else {
+            false
+        }
+    } else {
+        false
+    }
+}
+
+@ObsoleteDescriptorBasedAPI
 fun IrType.isSingleOrOptionalAttribute(): Boolean {
     return !this.isAssignableTo(List::class) && !this.isAssignableTo(NodeLike::class)
 }
@@ -117,6 +130,7 @@ fun IrType.featureType(): FeatureType {
     return when {
         isSingleOrOptionalAttribute() -> FeatureType.ATTRIBUTE
         isSingleOrOptionalContainment() -> FeatureType.CONTAINMENT
+        isMultipleContainment() -> FeatureType.CONTAINMENT
         else -> TODO()
     }
 }
@@ -132,6 +146,7 @@ fun IrType.multiplicity(): Multiplicity {
                 Multiplicity.SINGULAR
             }
         }
+        isAssignableTo(List::class) -> Multiplicity.MANY
         else -> TODO()
     }
 }

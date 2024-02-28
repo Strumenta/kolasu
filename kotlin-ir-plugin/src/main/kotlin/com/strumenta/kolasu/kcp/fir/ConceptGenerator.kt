@@ -36,8 +36,6 @@ class ConceptGenerator(
 ) : FirDeclarationGenerationExtension(session) {
     companion object {
         val MY_CLASS_ID = ClassId(FqName.fromSegments(listOf("foo", "bar")), Name.identifier("MyClass"))
-
-        val FOO_ID = CallableId(MY_CLASS_ID, Name.identifier("foo"))
     }
 
     override fun generateTopLevelClassLikeDeclaration(classId: ClassId): FirClassLikeSymbol<*>? {
@@ -115,14 +113,6 @@ class ConceptGenerator(
             }
         return listOf(function.symbol)
     }
-
-//  override fun getCallableNamesForClass(classSymbol: FirClassSymbol<*>, context: MemberGenerationContext): Set<Name> {
-//    return if (classSymbol.classId == MY_CLASS_ID) {
-//      setOf(FOO_ID.callableName, SpecialNames.INIT)
-//    } else {
-//      emptySet()
-//    }
-//  }
 
     override fun getTopLevelClassIds(): Set<ClassId> = setOf(MY_CLASS_ID)
 

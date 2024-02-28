@@ -31,8 +31,6 @@ import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
-// object AutoObserveReferenceOrigin : IrDeclarationOriginImpl("AutoObserveReference", true)
-
 /**
  * Make a certain field observable.
  */

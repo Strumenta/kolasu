@@ -1,14 +1,13 @@
-@file:OptIn(FirIncompatiblePluginAPI::class, ObsoleteDescriptorBasedAPI::class, UnsafeDuringIrConstructionAPI::class)
+@file:OptIn(ObsoleteDescriptorBasedAPI::class, UnsafeDuringIrConstructionAPI::class)
 
 package com.strumenta.kolasu.kcp
 
-import com.strumenta.kolasu.kcp.fir.GENERATED_CALCULATED_FEATURES
+import com.strumenta.kolasu.kcp.fir.GENERATED_CALCULATE_FEATURES
 import com.strumenta.kolasu.model.BaseNode
 import com.strumenta.kolasu.model.FeatureDescription
 import com.strumenta.kolasu.model.FeatureType
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Node
-import org.jetbrains.kotlin.backend.common.extensions.FirIncompatiblePluginAPI
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
@@ -73,7 +72,7 @@ class StarLasuIrGenerationExtension(
             }
         }
         irClass.accept(FieldObservableExtension(pluginContext, isBaseNode), null)
-        irClass.accept(SettingParentExtension(pluginContext, messageCollector, isBaseNode), null)
+        irClass.accept(SettingParentExtension(pluginContext, messageCollector), null)
         if (isBaseNode) {
             if (irClass.modality != Modality.SEALED && irClass.modality != Modality.ABSTRACT) {
                 overrideCalculateFeaturesBody(irClass, pluginContext)
@@ -85,7 +84,6 @@ class StarLasuIrGenerationExtension(
     private fun IrBuilderWithScope.populateFeatureListWithProperty(
         property: IrProperty,
         function: IrSimpleFunction,
-        irClass: IrClass,
         pluginContext: IrPluginContext,
         add: (value: IrExpression) -> Unit,
     ) {
@@ -172,12 +170,12 @@ class StarLasuIrGenerationExtension(
         )
         val function =
             irClass.functions.find {
-                it.name.identifier == GENERATED_CALCULATED_FEATURES
+                it.name.identifier == GENERATED_CALCULATE_FEATURES
             }
         if (function != null) {
             messageCollector.report(
                 CompilerMessageSeverity.WARNING,
-                "function $GENERATED_CALCULATED_FEATURES FOUND",
+                "function $GENERATED_CALCULATE_FEATURES FOUND",
                 irClass.compilerSourceLocation,
             )
             function.body =
@@ -226,7 +224,7 @@ class StarLasuIrGenerationExtension(
                     irClass.properties.forEach { property ->
                         populateFeatureListWithProperty(
                             property, function,
-                            irClass, pluginContext,
+                            pluginContext,
                         ) { featureDescription ->
                             // We want to invoke add
                             val addMethod =
@@ -254,7 +252,7 @@ class StarLasuIrGenerationExtension(
                 }
             messageCollector.report(
                 CompilerMessageSeverity.WARNING,
-                "function $GENERATED_CALCULATED_FEATURES has been modified",
+                "function $GENERATED_CALCULATE_FEATURES has been modified",
                 irClass.compilerSourceLocation,
             )
         }
@@ -314,7 +312,7 @@ class StarLasuIrGenerationExtension(
                     } else {
                         messageCollector.report(
                             CompilerMessageSeverity.INFO,
-                            "BaseNode subclass ${irClass.kotlinFqName} identified",
+                            "BaseNode class ${irClass.kotlinFqName} identified",
                             irClass.compilerSourceLocation,
                         )
                     }
@@ -343,7 +341,6 @@ fun IrPluginContext.createLambdaFunctionWithNeededScope(
                 irBuiltIns.createIrBuilder(symbol).run {
                     irBlockBody {
                         val nodeInstance = irGet(containingFunction.dispatchReceiverParameter!!)
-                        // TODO pass the instance somehow?
                         +irReturn(
                             irCall(property.getter!!).apply {
                                 dispatchReceiver = nodeInstance
