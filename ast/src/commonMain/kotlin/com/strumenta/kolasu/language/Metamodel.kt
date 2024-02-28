@@ -5,6 +5,31 @@ import com.strumenta.kolasu.model.checkFeatureName
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
+data class StarLasuLanguage(val qualifiedName: String, val types: MutableList<Type> = mutableListOf()) {
+    val simpleName: String
+        get() = qualifiedName.split(".").last()
+}
+
+// Types
+
+sealed class Type(val name: String)
+
+sealed class ConceptLike(name: String, val features: MutableList<Feature> = mutableListOf()) : Type(name)
+
+class Concept(name: String, features: MutableList<Feature> = mutableListOf()) : ConceptLike(name, features)
+
+class ConceptInterface(name: String, features: MutableList<Feature> = mutableListOf()) : ConceptLike(name, features)
+
+sealed class DataType(name: String) : Type(name)
+
+class PrimitiveType(name: String) : Type(name)
+
+class EnumType(name: String, val literals: MutableList<EnumerationLiteral> = mutableListOf()) : Type(name)
+
+data class EnumerationLiteral(val name: String)
+
+// Features
+
 sealed class Feature {
     abstract val name: String
 
@@ -12,18 +37,20 @@ sealed class Feature {
      * Only Containment can have Multiplicity Many.
      */
     abstract val multiplicity: Multiplicity
+
+    abstract val type: Type
 }
 
 data class Attribute(
     override val name: String,
     val optional: Boolean,
-    val type: KType,
+    override val type: DataType,
 ) : Feature() {
     init {
-        require(!type.isMarkedNullable) {
-            "The type should be specified as not nullable. " +
-                "The optional flag should be used to represent nullability"
-        }
+//        require(!type.isMarkedNullable) {
+//            "The type should be specified as not nullable. " +
+//                "The optional flag should be used to represent nullability"
+//        }
         checkFeatureName(name)
     }
 
@@ -32,13 +59,13 @@ data class Attribute(
 }
 
 sealed class Link : Feature() {
-    abstract val type: KClass<*>
+    abstract override val type: ConceptLike
 }
 
 data class Reference(
     override val name: String,
     val optional: Boolean,
-    override val type: KClass<*>,
+    override val type: ConceptLike
 ) : Link() {
     override val multiplicity: Multiplicity
         get() = if (optional) Multiplicity.OPTIONAL else Multiplicity.SINGULAR
@@ -51,7 +78,7 @@ data class Reference(
 data class Containment(
     override val name: String,
     override val multiplicity: Multiplicity,
-    override val type: KClass<*>,
+    override val type: ConceptLike
 ) : Link() {
     init {
         checkFeatureName(name)

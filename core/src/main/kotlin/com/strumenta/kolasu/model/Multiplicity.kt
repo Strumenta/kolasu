@@ -1,7 +1,9 @@
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.ConceptLike
 import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.DataType
 import com.strumenta.kolasu.language.Feature
 import com.strumenta.kolasu.language.Reference
 import kotlin.reflect.KClass
@@ -254,7 +256,15 @@ fun <N : Any> KProperty1<N, *>.asContainment(): Containment {
         } else {
             this.returnType.classifier as KClass<*>
         }
-    return Containment(this.name, multiplicity, type)
+    return Containment(this.name, multiplicity, type.asConceptLike())
+}
+
+fun KClass<*>.asConceptLike() : ConceptLike {
+    TODO()
+}
+
+fun KClass<*>.asDataType() : DataType {
+    TODO()
 }
 
 fun <N : Any> KProperty1<N, *>.asReference(): Reference {
@@ -267,14 +277,15 @@ fun <N : Any> KProperty1<N, *>.asReference(): Reference {
             this.returnType.isMarkedNullable -> true
             else -> false
         }
+    val kClass = this
+        .returnType
+        .arguments[0]
+        .type
+        ?.classifier as? KClass<*> ?: throw IllegalStateException()
     return Reference(
         this.name,
         optional,
-        this
-            .returnType
-            .arguments[0]
-            .type
-            ?.classifier as KClass<*>,
+        kClass.asConceptLike()
     )
 }
 
@@ -288,7 +299,7 @@ fun <N : Any> KProperty1<N, *>.asAttribute(): Attribute {
             this.returnType.isMarkedNullable -> true
             else -> false
         }
-    return Attribute(this.name, optional, this.returnType.withNullability(false))
+    return Attribute(this.name, optional, (this.returnType.withNullability(false).classifier as KClass<*>).asDataType())
 }
 
 private val featuresCache = mutableMapOf<KClass<*>, List<Feature>>()
