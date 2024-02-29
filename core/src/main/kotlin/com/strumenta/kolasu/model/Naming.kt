@@ -43,7 +43,7 @@ interface Named : PossiblyNamed {
 class ReferenceByName<N : PossiblyNamed>(
     val name: String,
     initialReferred: N? = null,
-    var identifier: String? = null,
+    var identifier: String? = null
 ) : Serializable {
     var referred: N? = null
         set(value) {
@@ -92,7 +92,7 @@ class ReferenceByName<N : PossiblyNamed>(
  */
 fun <N> ReferenceByName<N>.tryToResolve(
     candidates: Iterable<N>,
-    caseInsensitive: Boolean = false,
+    caseInsensitive: Boolean = false
 ): Boolean where N : PossiblyNamed {
     val res: N? = candidates.find { if (it.name == null) false else it.name.equals(this.name, caseInsensitive) }
     this.referred = res
@@ -125,7 +125,7 @@ typealias KReferenceByName<S> = KProperty1<S, ReferenceByName<out PossiblyNamed>
 fun kReferenceByNameType(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class): KType {
     return ReferenceByName::class.createType(
         arguments = listOf(KTypeProjection(variance = KVariance.OUT, type = targetClass.createType())),
-        nullable = true,
+        nullable = true
     )
 }
 
