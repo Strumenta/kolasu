@@ -9,6 +9,6 @@ import kotlin.reflect.KProperty1
 interface ScopeProvider {
     fun <NodeType : Node> scopeFor(
         node: NodeType,
-        reference: KProperty1<in NodeType, ReferenceByName<out PossiblyNamed>>
+        reference: KProperty1<in NodeType, ReferenceByName<out PossiblyNamed>?>
     ): ScopeDescription?
 }

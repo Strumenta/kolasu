@@ -33,7 +33,7 @@ open class SymbolResolver(
      **/
     fun resolve(
         node: Node,
-        reference: KProperty1<Node, ReferenceByName<PossiblyNamed>>
+        reference: KProperty1<Node, ReferenceByName<PossiblyNamed>?>
     ) {
         node.properties
             .find { it.name == reference.name }
@@ -59,12 +59,12 @@ open class SymbolResolver(
     /**
      * Retrieve all reference properties of a given node.
      **/
-    private fun Node.references(): List<KProperty1<Node, ReferenceByName<PossiblyNamed>>> {
+    private fun Node.references(): List<KProperty1<Node, ReferenceByName<PossiblyNamed>?>> {
         return this.nodeProperties
             .filter { it.returnType.isSubtypeOf(kReferenceByNameType()) }
             .mapNotNull {
                 @Suppress("UNCHECKED_CAST")
-                it as? KProperty1<Node, ReferenceByName<PossiblyNamed>>
+                it as? KProperty1<Node, ReferenceByName<PossiblyNamed>?>
             }
     }
 }

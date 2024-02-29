@@ -15,7 +15,7 @@ import kotlin.reflect.full.isSuperclassOf
  **/
 inline fun <
     reified NodeTy : Node,
-    PropertyTy : KProperty1<in NodeTy, ReferenceByName<out PossiblyNamed>>
+    PropertyTy : KProperty1<in NodeTy, ReferenceByName<out PossiblyNamed>?>
     > scopeFor(
     property: PropertyTy,
     ignoreCase: Boolean = false,
@@ -52,7 +52,7 @@ open class DeclarativeScopeProvider(
 
     override fun <NodeType : Node> scopeFor(
         node: NodeType,
-        reference: KProperty1<in NodeType, ReferenceByName<out PossiblyNamed>>
+        reference: KProperty1<in NodeType, ReferenceByName<out PossiblyNamed>?>
     ): ScopeDescription? {
         return this.rules
             .firstOrNull { it.canBeInvokedWith(node::class, reference) }
@@ -82,7 +82,7 @@ class DeclarativeScopeProviderRule<NodeTy : Node>(
 
     fun canBeInvokedWith(
         nodeType: KClass<*>,
-        property: KProperty1<*, ReferenceByName<out PossiblyNamed>>
+        property: KProperty1<*, ReferenceByName<out PossiblyNamed>?>
     ): Boolean {
         return this.nodeType.isSuperclassOf(nodeType) && this.propertyName == property.name
     }
