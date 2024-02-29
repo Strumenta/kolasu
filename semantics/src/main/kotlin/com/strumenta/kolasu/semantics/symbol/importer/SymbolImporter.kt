@@ -13,8 +13,7 @@ open class SymbolImporter(
         node: Node,
         withChildren: Boolean = false
     ) {
-        this.symbolProvider.symbolFor(node)
-            ?.let { this.symbolRepository.store(it) }
+        this.symbolProvider.symbolFor(node)?.let { this.symbolRepository.store(it) }
         node.children.forEach { this.import(it, withChildren) }
     }
 }

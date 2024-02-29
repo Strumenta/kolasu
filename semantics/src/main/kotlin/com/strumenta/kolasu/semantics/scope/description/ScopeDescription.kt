@@ -1,41 +1,134 @@
 package com.strumenta.kolasu.semantics.scope.description
 
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.semantics.symbol.description.SymbolDescription
+
+/**
+ * Utility function for defining scope descriptions.
+ **/
 fun scope(
     ignoreCase: Boolean = false,
-    init: ScopeDescription.() -> Unit
-): ScopeDescription {
-    return ScopeDescription(ignoreCase).apply(init)
-}
+    init: ScopeDescriptionApi.() -> Unit
+): ScopeDescription = ScopeDescription(ignoreCase).apply(init)
 
+/**
+ * A scope description containing all relevant information
+ * concerning the visible elements at a given point in space or time.
+ * - `ignoreCase`: whether the names associated to the symbols
+ * in this scope should be handled as case-sensitive or not;
+ * - `nodes`: the local symbols contained in this scope and
+ * their associated name;
+ * - `identifiers`: the external symbols contained in this scope
+ * and their associated name;
+ * - `parent`: the scope description *preceding* the current one - used
+ * as delegate if no symbol can be found for a given name in the current scope;
+ *
+ * Each scope description can be configured through the methods defined in
+ * the `ScopeDescriptionApi`. References can be resolved invoking `resolve(reference)`.
+ *
+ * Given a reference, the scope provider will follow the following plan:
+ * - try to retrieve a local symbol associated with the given reference name;
+ * - if not found, try to retrieve a global symbol associated with the given reference name;
+ * - if not found, delegate the resolution to its parent (if any)
+ *
+ **/
 class ScopeDescription(
     private val ignoreCase: Boolean = false
-) {
+) : ScopeDescriptionApi {
     private var parent: ScopeDescription? = null
-    private val entries: MutableMap<String, String> = mutableMapOf()
+    private val identifiers: MutableMap<String, String> = mutableMapOf()
+    private val nodes: MutableMap<String, PossiblyNamed> = mutableMapOf()
 
-    fun resolve(name: String): String? {
-        return this.entries[name.asKey()] ?: this.parent?.resolve(name)
+    /**
+     * Resolves the given reference in the current scope (or its parents).
+     **/
+    fun resolve(reference: ReferenceByName<out PossiblyNamed>) {
+        val name = reference.name.asKey()
+        val node by lazy { this.nodes[name] }
+        val identifier by lazy { this.identifiers[name] }
+        when {
+            node != null -> {
+                @Suppress("UNCHECKED_CAST")
+                (reference as ReferenceByName<PossiblyNamed>).referred = node
+            }
+            identifier != null -> {
+                reference.identifier = identifier
+            }
+            else -> {
+                this.parent?.resolve(reference)
+            }
+        }
     }
 
-    fun define(
+    override fun define(
         name: String,
-        identifier: String
+        symbol: Node
     ) {
-        this.entries[name] = identifier
+        when (symbol) {
+            is SymbolDescription -> this.identifiers[name.asKey()] = symbol.identifier
+            is PossiblyNamed -> this.nodes[name.asKey()] = symbol
+        }
     }
 
-    fun parent(parent: ScopeDescription) {
+    override fun define(symbol: PossiblyNamed) {
+        if (symbol is Node && symbol.name != null) {
+            this.define(symbol.name!!, symbol)
+        }
+    }
+
+    override fun parent(parent: ScopeDescription) {
         this.parent = parent
     }
 
-    fun parent(
-        ignoreCase: Boolean = false,
-        init: ScopeDescription.() -> Unit
+    override fun parent(
+        ignoreCase: Boolean,
+        init: ScopeDescriptionApi.() -> Unit
     ) {
         this.parent = scope(ignoreCase, init)
     }
 
+    /**
+     * Handle case sensitivity if enabled.
+     **/
     private fun String.asKey(): String {
         return if (ignoreCase) this.lowercase() else this
     }
+}
+
+/**
+ * Interface for defining scope descriptions. It provides
+ * the following methods:
+ * - `define(name, node)` - to associate the given local or global symbol with the given name;
+ * - `parent(parent)` - to update the parent scope from another description;
+ * - `parent(ignoreCase, init)` - to update the parent scope from a literal description;
+ **/
+interface ScopeDescriptionApi {
+    /**
+     * Associates the given symbol with the given name.
+     **/
+    fun define(
+        name: String,
+        symbol: Node
+    )
+
+    /**
+     * Associates the given symbol with its name.
+     *
+     **/
+    fun define(symbol: PossiblyNamed)
+
+    /**
+     * Updates the parent of this scope from another description.
+     **/
+    fun parent(parent: ScopeDescription)
+
+    /**
+     * Updates the parent of this scope from a literal description.
+     **/
+    fun parent(
+        ignoreCase: Boolean = false,
+        init: ScopeDescriptionApi.() -> Unit
+    )
 }
