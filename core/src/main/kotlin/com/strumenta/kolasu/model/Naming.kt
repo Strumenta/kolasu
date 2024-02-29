@@ -33,11 +33,17 @@ interface Named : PossiblyNamed {
  *
  * This is not statically enforced as we may want to use some interface, which cannot extend Node.
  * However, this is enforced dynamically.
+ *
+ * The node referenced by a ReferenceByName instance can be contained in the same AST or some external source
+ * (typically other ASTs). In the latter case, we might want to indicate that, although we know which node the reference
+ * is pointing to, we do not want to retrieve it straight away for performance reasons. In these circumstances,
+ * the `referred` field is null and the `identifier` field is used instead. This, will be used to retrieve the
+ * actual node at a later stage.
  */
 class ReferenceByName<N : PossiblyNamed>(
     val name: String,
     initialReferred: N? = null,
-    var identifier: String? = null
+    var identifier: String? = null,
 ) : Serializable {
     var referred: N? = null
         set(value) {
@@ -53,6 +59,9 @@ class ReferenceByName<N : PossiblyNamed>(
     }
 
     val resolved: Boolean
+        get() = identifier != null || retrieved
+
+    val retrieved: Boolean
         get() = referred != null
 
     override fun toString(): String {
@@ -64,13 +73,14 @@ class ReferenceByName<N : PossiblyNamed>(
     }
 
     override fun hashCode(): Int {
-        return name.hashCode() * (7 + if (resolved) 2 else 1)
+        return name.hashCode() * (1 + identifier.hashCode()) * (7 + if (resolved) 2 else 1)
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ReferenceByName<*>) return false
         if (name != other.name) return false
+        if (identifier != other.identifier) return false
         if (referred != other.referred) return false
         return true
     }
@@ -82,7 +92,7 @@ class ReferenceByName<N : PossiblyNamed>(
  */
 fun <N> ReferenceByName<N>.tryToResolve(
     candidates: Iterable<N>,
-    caseInsensitive: Boolean = false
+    caseInsensitive: Boolean = false,
 ): Boolean where N : PossiblyNamed {
     val res: N? = candidates.find { if (it.name == null) false else it.name.equals(this.name, caseInsensitive) }
     this.referred = res
@@ -115,7 +125,7 @@ typealias KReferenceByName<S> = KProperty1<S, ReferenceByName<out PossiblyNamed>
 fun kReferenceByNameType(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class): KType {
     return ReferenceByName::class.createType(
         arguments = listOf(KTypeProjection(variance = KVariance.OUT, type = targetClass.createType())),
-        nullable = true
+        nullable = true,
     )
 }
 
