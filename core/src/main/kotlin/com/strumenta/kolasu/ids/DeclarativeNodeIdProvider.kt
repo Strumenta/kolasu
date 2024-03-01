@@ -35,7 +35,7 @@ open class DeclarativeNodeIdProvider(
  * Can be used whenever listing the rules in the DeclarativeNodeIdProvider constructor.
  **/
 inline fun <reified NodeTy : Node> idFor(
-    noinline specification: (DeclarativeNodeIdProviderRuleContext<NodeTy>) -> String
+    noinline specification: NodeIdProvider.(NodeTy) -> String
 ): DeclarativeNodeIdProviderRule<NodeTy> = DeclarativeNodeIdProviderRule(NodeTy::class, specification)
 
 /**
@@ -43,14 +43,14 @@ inline fun <reified NodeTy : Node> idFor(
  **/
 class DeclarativeNodeIdProviderRule<NodeTy : Node>(
     private val nodeType: KClass<NodeTy>,
-    private val specification: (DeclarativeNodeIdProviderRuleContext<NodeTy>) -> String
+    private val specification: NodeIdProvider.(NodeTy) -> String
 ) : Comparable<DeclarativeNodeIdProviderRule<*>>, (NodeIdProvider, Node) -> String {
     override fun invoke(
         nodeIdProvider: NodeIdProvider,
         node: Node
     ): String {
         @Suppress("UNCHECKED_CAST")
-        return DeclarativeNodeIdProviderRuleContext(node as NodeTy, nodeIdProvider).let(specification)
+        return nodeIdProvider.specification(node as NodeTy)
     }
 
     fun canBeInvokedWith(type: KClass<*>): Boolean {
@@ -65,14 +65,3 @@ class DeclarativeNodeIdProviderRule<NodeTy : Node>(
         }
     }
 }
-
-/**
- * Class representing the available context while defining a
- * declarative node identifier rule:
- * - node: the current node we are defining the identifier for;
- * - nodeIdProvider: the identifier provider itself to reuse identifiers from other nodes;
- **/
-data class DeclarativeNodeIdProviderRuleContext<NodeTy : Node>(
-    val node: NodeTy,
-    val nodeIdProvider: NodeIdProvider
-)

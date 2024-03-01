@@ -38,16 +38,16 @@ class ScopeDescription(
     private val ignoreCase: Boolean = false
 ) : ScopeDescriptionApi {
     private var parent: ScopeDescription? = null
-    private val identifiers: MutableMap<String, String> = mutableMapOf()
-    private val nodes: MutableMap<String, PossiblyNamed> = mutableMapOf()
+    private val namesToExternalSymbolIdentifiers: MutableMap<String, String> = mutableMapOf()
+    private val namesToLocalSymbolNodes: MutableMap<String, PossiblyNamed> = mutableMapOf()
 
     /**
      * Resolves the given reference in the current scope (or its parents).
      **/
     fun resolve(reference: ReferenceByName<out PossiblyNamed>) {
         val name = reference.name.asKey()
-        val node by lazy { this.nodes[name] }
-        val identifier by lazy { this.identifiers[name] }
+        val node by lazy { this.namesToLocalSymbolNodes[name] }
+        val identifier by lazy { this.namesToExternalSymbolIdentifiers[name] }
         when {
             node != null -> {
                 @Suppress("UNCHECKED_CAST")
@@ -67,8 +67,8 @@ class ScopeDescription(
         symbol: Node
     ) {
         when (symbol) {
-            is SymbolDescription -> this.identifiers[name.asKey()] = symbol.identifier
-            is PossiblyNamed -> this.nodes[name.asKey()] = symbol
+            is SymbolDescription -> this.namesToExternalSymbolIdentifiers[name.asKey()] = symbol.identifier
+            is PossiblyNamed -> this.namesToLocalSymbolNodes[name.asKey()] = symbol
         }
     }
 
