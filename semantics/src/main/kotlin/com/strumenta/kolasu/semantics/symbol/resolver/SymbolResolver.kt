@@ -18,8 +18,8 @@ import kotlin.reflect.full.isSubtypeOf
  *
  * Symbol resolution can be executed invoking one of the following methods:
  * - `resolve(node, reference)`: to resolve a specific reference of the given node;
- * - `resolve(node, withChildren)`: to resolve all references of the given node
- * and its children if `withChildren` is set to `true`;
+ * - `resolve(node, entireTree)`: to resolve all references of the given node
+ * and its children if `entireTree` is set to `true`;
  *
  * In both cases, the symbol resolver will resolve references by performing an in-place update.
  * For each reference, the `referred` or `identifier` properties will be updated
@@ -46,7 +46,7 @@ open class SymbolResolver(
 
     /**
      * Attempts to resolve all reference properties of the
-     * given node and its children (if `withChildren` is `true`).
+     * given node and its children (if `entireTree` is `true`).
      **/
     fun resolve(
         node: Node,
