@@ -10,5 +10,5 @@ interface ScopeProvider {
     fun <NodeType : Node> scopeFor(
         node: NodeType,
         reference: KProperty1<in NodeType, ReferenceByName<out PossiblyNamed>?>
-    ): ScopeDescription?
+    ): ScopeDescription
 }

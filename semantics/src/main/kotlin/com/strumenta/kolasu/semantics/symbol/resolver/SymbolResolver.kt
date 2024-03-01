@@ -50,10 +50,10 @@ open class SymbolResolver(
      **/
     fun resolve(
         node: Node,
-        withChildren: Boolean = false
+        entireTree: Boolean = false
     ) {
         node.references().forEach { reference -> this.resolve(node, reference) }
-        if (withChildren) node.children.forEach { this.resolve(it) }
+        if (entireTree) node.children.forEach { this.resolve(it, entireTree) }
     }
 
     /**

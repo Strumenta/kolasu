@@ -25,6 +25,10 @@ data class StringValueDescription(
     override val value: String? = null
 ) : ValueDescription(value)
 
+object NullValueDescription : ValueDescription(null) {
+    private fun readResolve(): Any = NullValueDescription
+}
+
 data class ReferenceValueDescription(
     override val value: String? = null
 ) : ValueDescription(value)
