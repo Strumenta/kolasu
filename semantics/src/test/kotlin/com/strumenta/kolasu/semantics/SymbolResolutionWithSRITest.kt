@@ -50,7 +50,7 @@ class SymbolResolutionWithSRITest {
         val symbolResolver = SR(scopeProvider)
 
         assertEquals(false, todo2.prerequisite!!.resolved)
-        symbolResolver.resolve(todoProject, withChildren = true)
+        symbolResolver.resolve(todoProject, entireTree = true)
         assertEquals(true, todo2.prerequisite!!.resolved)
         assertEquals(todo1, todo2.prerequisite!!.referred)
     }
@@ -75,7 +75,7 @@ class SymbolResolutionWithSRITest {
         val symbolResolver = SR(scopeProvider)
 
         assertEquals(false, todo2.prerequisite!!.resolved)
-        symbolResolver.resolve(todoProject, withChildren = true)
+        symbolResolver.resolve(todoProject, entireTree = true)
         assertEquals(true, todo2.prerequisite!!.resolved)
         assertEquals(todo1, todo2.prerequisite!!.referred)
     }
@@ -143,7 +143,7 @@ class SymbolResolutionWithSRITest {
         val symbolResolver = SR(scopeProvider)
 
         assertEquals(false, todo4.prerequisite!!.resolved)
-        symbolResolver.resolve(todoProjectErrands, withChildren = true)
+        symbolResolver.resolve(todoProjectErrands, entireTree = true)
         assertEquals(true, todo4.prerequisite!!.resolved)
         assertEquals("synthetic_Personal-Source_root_todos_1", todo4.prerequisite.identifier)
     }
