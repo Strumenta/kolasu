@@ -7,25 +7,8 @@ import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.model.kReferenceByNameType
 import com.strumenta.kolasu.model.nodeProperties
 import com.strumenta.kolasu.semantics.scope.provider.ScopeProvider
-import com.strumenta.kolasu.semantics.symbol.description.SymbolDescription
-import com.strumenta.kolasu.semantics.symbol.repository.SymbolRepository
-import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSubtypeOf
-
-class EmptySymbolRepository : SymbolRepository {
-    override fun load(identifier: String): SymbolDescription? {
-        return null
-    }
-
-    override fun store(symbol: SymbolDescription) {
-        TODO("Not yet implemented")
-    }
-
-    override fun find(withType: KClass<out Node>): Sequence<SymbolDescription> {
-        return emptySequence()
-    }
-}
 
 /**
  * Symbol resolver instances can be used to resolve references within AST nodes

@@ -105,7 +105,8 @@ class SymbolResolutionWithSRITest {
 
         val nodeIdProvider = StructuralNodeIdProvider()
         val symbolProvider = object : SymbolProvider {
-            override fun symbolFor(node: Node?): SymbolDescription? {
+
+            override fun symbolFor(node: Node): SymbolDescription? {
                 if (node is Todo) {
                     val id = nodeIdProvider.id(node)
                     return SymbolDescription(
