@@ -75,6 +75,8 @@ class ScopeDescription(
     override fun define(symbol: PossiblyNamed) {
         if (symbol is Node && symbol.name != null) {
             this.define(symbol.name!!, symbol)
+        } else {
+            throw RuntimeException("Symbols must be SymbolDescription or Node instances with a non-null name property.")
         }
     }
 
@@ -100,7 +102,7 @@ class ScopeDescription(
 /**
  * Interface for defining scope descriptions. It provides
  * the following methods:
- * - `define(name, node)` - to associate the given local or global symbol with the given name;
+ * - `define(name, symbol)` - to associate the given local or global symbol with the given name;
  * - `parent(parent)` - to update the parent scope from another description;
  * - `parent(ignoreCase, init)` - to update the parent scope from a literal description;
  **/
