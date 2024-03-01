@@ -53,10 +53,12 @@ open class DeclarativeScopeProvider(
     override fun <NodeType : Node> scopeFor(
         node: NodeType,
         reference: KProperty1<in NodeType, ReferenceByName<out PossiblyNamed>?>
-    ): ScopeDescription? {
-        return this.rules
-            .firstOrNull { it.canBeInvokedWith(node::class, reference) }
+    ): ScopeDescription {
+        return this.rules.firstOrNull { it.canBeInvokedWith(node::class, reference) }
             ?.invoke(this, node)
+            ?: throw RuntimeException(
+                "Cannot find scoping rule for reference ${node::class.qualifiedName}::${reference.name}"
+            )
     }
 }
 
