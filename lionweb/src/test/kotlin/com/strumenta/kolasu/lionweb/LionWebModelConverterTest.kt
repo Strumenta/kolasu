@@ -17,6 +17,10 @@ class LionWebModelConverterTest {
     {
       "version": "1",
       "key": "com-strumenta-SimpleLang"
+    },
+        {
+      "key": "LionCore-builtins",
+      "version": "2023.1"
     }
   ],
   "nodes": [
