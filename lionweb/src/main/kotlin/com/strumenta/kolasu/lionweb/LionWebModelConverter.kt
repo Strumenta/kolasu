@@ -20,7 +20,6 @@ import io.lionweb.lioncore.java.model.ReferenceValue
 import io.lionweb.lioncore.java.model.impl.DynamicEnumerationValue
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.java.model.impl.ProxyNode
-import io.lionweb.lioncore.java.self.LionCore
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import java.lang.IllegalArgumentException
 import java.util.IdentityHashMap
@@ -115,7 +114,7 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
                                 }
                                 kValue.resolved -> {
                                     // This is tricky, as we need to set a LW Node, but we have just an identifier...
-                                    val lwReferred : Node = DynamicNode(kValue.identifier!!, LionCoreBuiltins.getNode())
+                                    val lwReferred: Node = DynamicNode(kValue.identifier!!, LionCoreBuiltins.getNode())
                                     lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
                                 }
                                 else -> {

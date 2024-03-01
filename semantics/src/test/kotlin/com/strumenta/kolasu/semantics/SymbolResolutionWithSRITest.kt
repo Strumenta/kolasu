@@ -149,7 +149,6 @@ class SymbolResolutionWithSRITest {
     }
 }
 
-
 class ASTsSymbolRepository(
     val symbolProvider: SymbolProvider,
     vararg val roots: Node
