@@ -33,11 +33,10 @@ open class DeclarativeSymbolProvider(
 ) : SymbolProvider {
     private val rules: List<DeclarativeSymbolProviderRule<out Node>> = rules.sorted()
 
-    override fun symbolFor(node: Node): SymbolDescription {
+    override fun symbolFor(node: Node): SymbolDescription? {
         return this.rules
             .firstOrNull { it.isCompatibleWith(node::class) }
             ?.invoke(nodeIdProvider, this, node)
-            ?: throw RuntimeException("No compatible rule found for ${node::class.qualifiedName}")
     }
 }
 
