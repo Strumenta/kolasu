@@ -60,7 +60,7 @@ open class DeclarativeScopeProvider(
         reference: KProperty1<in NodeType, ReferenceByName<out PossiblyNamed>?>
     ): ScopeDescription {
         return this.rules.firstOrNull { it.canBeInvokedWith(node::class, reference) }
-            ?.invoke(this, node)
+            ?.invoke(this, node, nodeIdProvider)
             ?: throw RuntimeException(
                 "Cannot find scoping rule for reference ${node::class.qualifiedName}::${reference.name}"
             )
