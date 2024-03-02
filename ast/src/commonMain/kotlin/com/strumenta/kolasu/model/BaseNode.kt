@@ -27,7 +27,7 @@ abstract class BaseNode : NodeLike {
      * This is overriden by the compiler plugin
      */
     protected open fun calculateFeatures(): List<FeatureDescription> {
-        TODO("calculateGenericFeatures should be overridden by compiler plugin")
+        TODO("calculateFeatures should be overridden by compiler plugin")
     }
 
     /**
