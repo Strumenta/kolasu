@@ -24,6 +24,11 @@ kotlin {
                 api("com.badoo.reaktive:reaktive:2.0.1")
             }
         }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
         val jsMain by getting
         val jvmMain by getting
     }

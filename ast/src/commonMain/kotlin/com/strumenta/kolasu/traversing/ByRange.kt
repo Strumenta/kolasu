@@ -5,6 +5,8 @@ package com.strumenta.kolasu.traversing
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.contains
+import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 
 /**
  * @param range the range where to search for nodes

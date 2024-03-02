@@ -1,4 +1,4 @@
-@file:JvmName("ProcessingStructurally")
+@file:JvmName("ProcessingStructurallyExtra")
 
 package com.strumenta.kolasu.traversing
 
@@ -80,40 +80,6 @@ fun NodeLike.walkLeavesFirst(): Sequence<NodeLike> {
 }
 
 /**
- * @return the sequence of nodes from this.parent all the way up to the root node.
- * For this to work, assignParents() must have been called.
- */
-fun NodeLike.walkAncestors(): Sequence<NodeLike> {
-    var currentNode: NodeLike? = this
-    return generateSequence {
-        currentNode = currentNode!!.parent
-        currentNode
-    }
-}
-
-/**
- * @return all direct children of this node.
- */
-fun NodeLike.walkChildren(includeDerived: Boolean = false): Sequence<NodeLike> {
-    return sequence {
-        (
-            if (includeDerived) {
-                this@walkChildren.features
-            } else {
-                this@walkChildren.originalFeatures
-            }
-        ).forEach { property ->
-            when (val value = property.value) {
-                is NodeLike -> yield(value)
-                is Collection<*> -> value.forEach { if (it is NodeLike) yield(it) }
-            }
-        }
-    }
-}
-
-typealias ASTWalker = (NodeLike) -> Sequence<NodeLike>
-
-/**
  * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method.
  * For post-order traversal, take "walkLeavesFirst"
  * @return walks the whole AST starting from the childnodes of this node.
@@ -142,14 +108,6 @@ fun <T> NodeLike.findAncestorOfType(klass: Class<T>): T? {
     return walkAncestors().filterIsInstance(klass).firstOrNull()
 }
 
-/**
- * @return all direct children of this node.
- */
-val NodeLike.children: List<NodeLike>
-    get() {
-        return walkChildren().toList()
-    }
-
 @JvmOverloads
 fun <T> NodeLike.searchByType(
     klass: Class<T>,
@@ -173,6 +131,8 @@ fun <T> NodeLike.collectByType(
  * The FastWalker is a walker that implements a cache to speed up subsequent walks.
  * The first walk will take the same time of a normal walk.
  * This walker will ignore any change to the nodes.
+ *
+ * TODO we should replace this with usages of observers
  */
 class FastWalker(
     val node: NodeLike,

@@ -123,6 +123,16 @@ data class Range(
     val end: Point,
     var source: Source? = null,
 ) : Comparable<Range> {
+    constructor(
+        startLine: Int,
+        startCol: Int,
+        endLine: Int,
+        endCol: Int,
+    ) : this(
+        Point(startLine, startCol),
+        Point(endLine, endCol),
+    )
+
     val isFlat: Boolean
         get() = start == end
 
