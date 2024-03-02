@@ -23,8 +23,8 @@ gradlePlugin {
     plugins {
         create("kotlinIrPluginTemplate") {
             id = rootProject.extra["kotlinPluginID"] as String
-            displayName = "Kotlin Ir Plugin Template"
-            description = "Kotlin Ir Plugin Template"
+            displayName = "Kolasu Multiplatform"
+            description = "Kolasu Multiplatform"
             implementationClass = "com.strumenta.kolasu.kcp.gradle.StarLasuGradlePlugin"
         }
     }

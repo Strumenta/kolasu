@@ -496,6 +496,65 @@ fun main() {
         result.invokeMainMethod("mytest.MainKt")
     }
 
+
+    @Test
+    fun `node type is overridden also for subclasses`() {
+        val result =
+            compile(
+                sourceFile =
+                SourceFile.kotlin(
+                    "main.kt",
+                    """
+package mytest
+
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.BaseNode
+import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.model.Multiplicity
+import com.strumenta.kolasu.model.observable.ObservableList
+import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.ReferenceByName
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import com.strumenta.kolasu.model.observable.SimpleNodeObserver
+
+sealed class Expression : BaseNode()
+
+sealed class Statement : BaseNode()
+
+class InputDeclaration : Statement()
+
+data class SumExpr(var left: Expression, var right: Expression) : Expression()
+
+data class IntLiteral(var value: Int) : Expression()
+
+class VarDeclaration(override var name: String, var value: Expression) : Statement(), Named
+
+class MiniCalcFile(val statements : MutableList<Statement>) : BaseNode()
+
+fun main() {
+    val id = InputDeclaration()
+    val se = SumExpr(IntLiteral(1), IntLiteral(2))
+    val il = IntLiteral(3)
+    val vd = VarDeclaration("Foo", IntLiteral(4))
+    val mv = MiniCalcFile(mutableListOf())
+
+    assertEquals("MiniCalcFile", mv.nodeType)
+    assertEquals("InputDeclaration", id.nodeType)
+    assertEquals("SumExpr", se.nodeType)
+    assertEquals("IntLiteral", il.nodeType)
+    assertEquals("VarDeclaration", vd.nodeType) 
+}
+
+""",
+                ),
+            )
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+
+        result.invokeMainMethod("mytest.MainKt")
+    }
+
     private fun CompilationResultWithClassLoader.invokeMainMethod(className: String) {
         val mainKt = this.classLoader.loadClass(className)
         val mainMethod =

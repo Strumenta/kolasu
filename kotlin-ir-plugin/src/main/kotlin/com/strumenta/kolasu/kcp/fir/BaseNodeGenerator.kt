@@ -33,14 +33,14 @@ import java.time.format.DateTimeFormatter
 const val GENERATED_CALCULATE_FEATURES = "calculateFeatures"
 const val GENERATED_CALCULATE_NODE_TYPE = "calculateNodeType"
 
-const val COMPILER_PLUGIN_DEBUG = false
+const val COMPILER_PLUGIN_DEBUG = true
 
 class BaseNodeGenerator(
     session: FirSession,
 ) : FirDeclarationGenerationExtension(session) {
     private fun log(text: String) {
         if (COMPILER_PLUGIN_DEBUG) {
-            val file = File("compiler-plugin-log.txt")
+            val file = File("/Users/federico/repos/kolasu-mp-example/compiler-plugin-log.txt")
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
             val current = LocalDateTime.now().format(formatter)
             file.appendText("$current: $text\n")
@@ -122,7 +122,7 @@ class BaseNodeGenerator(
         context: MemberGenerationContext,
     ): Set<Name> {
         log("getCallableNamesForClass $classSymbol $context")
-        if (classSymbol.extendBaseNode && !classSymbol.isAbstract && !classSymbol.isSealed) {
+        if (classSymbol.extendBaseNode(session) && !classSymbol.isAbstract && !classSymbol.isSealed) {
             log("  ${classSymbol.classId.asSingleFqName().asString()} extends BaseNode")
             val set =
                 mutableSetOf(
@@ -156,12 +156,24 @@ class BaseNodeGenerator(
 }
 
 @OptIn(SymbolInternals::class)
-val FirClassSymbol<*>.extendBaseNode: Boolean
-    get() =
-        this.fir.superTypeRefs.any {
-            (it as? FirResolvedTypeRefImpl)
-                ?.type
-                ?.classId
-                ?.asSingleFqName()
-                ?.asString() == BaseNode::class.qualifiedName!!
+fun FirClassSymbol<*>.isOrExtendBaseNode(firSession: FirSession): Boolean {
+    return isBaseNode(firSession) || extendBaseNode(firSession)
+}
+
+@OptIn(SymbolInternals::class)
+fun FirClassSymbol<*>.isBaseNode(firSession: FirSession): Boolean {
+    return this.classId.asSingleFqName().asString() == BaseNode::class.qualifiedName!!
+}
+
+@OptIn(SymbolInternals::class)
+fun FirClassSymbol<*>.extendBaseNode(firSession: FirSession): Boolean {
+    return this.fir.superTypeRefs.any {
+        when (it) {
+            is FirResolvedTypeRefImpl -> {
+                (it.type.classId!!.toSymbol(firSession) as FirClassSymbol<*>).isOrExtendBaseNode(firSession)
+            }
+
+            else -> TODO()
         }
+    }
+}
