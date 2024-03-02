@@ -21,6 +21,7 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import org.jetbrains.kotlin.fir.types.classId
+import org.jetbrains.kotlin.fir.types.impl.FirImplicitAnyTypeRef
 import org.jetbrains.kotlin.fir.types.impl.FirResolvedTypeRefImpl
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
@@ -172,8 +173,13 @@ fun FirClassSymbol<*>.extendBaseNode(firSession: FirSession): Boolean {
             is FirResolvedTypeRefImpl -> {
                 (it.type.classId!!.toSymbol(firSession) as FirClassSymbol<*>).isOrExtendBaseNode(firSession)
             }
+            is FirImplicitAnyTypeRef -> {
+                false
+            }
 
-            else -> TODO()
+            else -> {
+                throw IllegalStateException("Processing ${it.javaClass.canonicalName} ($it)")
+            }
         }
     }
 }
