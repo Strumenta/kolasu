@@ -496,15 +496,14 @@ fun main() {
         result.invokeMainMethod("mytest.MainKt")
     }
 
-
     @Test
     fun `node type is overridden also for subclasses`() {
         val result =
             compile(
                 sourceFile =
-                SourceFile.kotlin(
-                    "main.kt",
-                    """
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
 package mytest
 
 import com.strumenta.kolasu.model.NodeLike
@@ -548,7 +547,7 @@ fun main() {
 }
 
 """,
-                ),
+                    ),
             )
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 

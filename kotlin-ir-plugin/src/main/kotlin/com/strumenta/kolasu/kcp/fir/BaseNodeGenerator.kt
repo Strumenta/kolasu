@@ -157,18 +157,16 @@ class BaseNodeGenerator(
 }
 
 @OptIn(SymbolInternals::class)
-fun FirClassSymbol<*>.isOrExtendBaseNode(firSession: FirSession): Boolean {
-    return isBaseNode(firSession) || extendBaseNode(firSession)
-}
+fun FirClassSymbol<*>.isOrExtendBaseNode(firSession: FirSession): Boolean =
+    isBaseNode(firSession) || extendBaseNode(firSession)
 
 @OptIn(SymbolInternals::class)
-fun FirClassSymbol<*>.isBaseNode(firSession: FirSession): Boolean {
-    return this.classId.asSingleFqName().asString() == BaseNode::class.qualifiedName!!
-}
+fun FirClassSymbol<*>.isBaseNode(firSession: FirSession): Boolean =
+    this.classId.asSingleFqName().asString() == BaseNode::class.qualifiedName!!
 
 @OptIn(SymbolInternals::class)
-fun FirClassSymbol<*>.extendBaseNode(firSession: FirSession): Boolean {
-    return this.fir.superTypeRefs.any {
+fun FirClassSymbol<*>.extendBaseNode(firSession: FirSession): Boolean =
+    this.fir.superTypeRefs.any {
         when (it) {
             is FirResolvedTypeRefImpl -> {
                 (it.type.classId!!.toSymbol(firSession) as FirClassSymbol<*>).isOrExtendBaseNode(firSession)
@@ -182,4 +180,3 @@ fun FirClassSymbol<*>.extendBaseNode(firSession: FirSession): Boolean {
             }
         }
     }
-}
