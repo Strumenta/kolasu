@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.lionweb
 
+import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.FileSource
@@ -45,7 +46,7 @@ interface PrimitiveValueSerialization<E> {
  * @param nodeIdProvider logic to be used to associate IDs to Kolasu nodes when exporting them to LionWeb
  */
 class LionWebModelConverter(
-    var nodeIdProvider: LionWebNodeIdProvider = StructuralLionWebNodeIdProvider(),
+    var nodeIdProvider: NodeIdProvider = StructuralLionWebNodeIdProvider(),
 ) {
     private val languageConverter = LionWebLanguageConverter()
     private val nodesMapping = BiMap<KNode, LWNode>(usingIdentity = true)
@@ -75,7 +76,7 @@ class LionWebModelConverter(
 
     fun exportModelToLionWeb(
         kolasuTree: KNode,
-        nodeIdProvider: LionWebNodeIdProvider = this.nodeIdProvider,
+        nodeIdProvider: NodeIdProvider = this.nodeIdProvider,
     ): LWNode {
         if (nodesMapping.containsA(kolasuTree)) {
             return nodesMapping.byA(kolasuTree)!!
