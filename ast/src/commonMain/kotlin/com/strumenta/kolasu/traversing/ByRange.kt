@@ -64,7 +64,7 @@ fun NodeLike.searchByRange(
  * @return walks the AST within the given [range] starting from this node, depth-first.
  */
 fun NodeLike.walkWithin(range: Range): Sequence<NodeLike> =
-    if (range.contains(this)) {
+    if (range.contains(this.range)) {
         sequenceOf(this) + this.children.walkWithin(range)
     } else if (this.overlaps(range)) {
         this.children.walkWithin(range)

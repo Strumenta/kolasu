@@ -11,7 +11,6 @@ import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.range
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
@@ -46,7 +45,7 @@ class JsonGenerationTest {
         val result: Result<NodeLike> =
             Result(
                 listOf(
-                    Issue(IssueType.SYNTACTIC, "An error", range = range(1, 2, 3, 4)),
+                    Issue(IssueType.SYNTACTIC, "An error", range = Range(1, 2, 3, 4)),
                     Issue(IssueType.LEXICAL, "A warning", severity = IssueSeverity.WARNING),
                     Issue(IssueType.SEMANTIC, "An info", severity = IssueSeverity.INFO),
                     Issue(IssueType.TRANSLATION, "Translation issue"),

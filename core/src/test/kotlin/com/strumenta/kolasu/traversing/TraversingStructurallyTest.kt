@@ -4,7 +4,6 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.assignParents
-import com.strumenta.kolasu.model.range
 import kotlin.system.measureTimeMillis
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -43,29 +42,29 @@ internal class TraversingStructurallyTest {
                 Box(
                     "first",
                     listOf(
-                        Item("1", specifiedRange = range(3, 6, 3, 12)),
+                        Item("1", specifiedRange = Range(3, 6, 3, 12)),
                     ),
-                    specifiedRange = range(2, 3, 4, 3),
+                    specifiedRange = Range(2, 3, 4, 3),
                 ),
-                Item("2", specifiedRange = range(5, 3, 5, 9)),
+                Item("2", specifiedRange = Range(5, 3, 5, 9)),
                 Box(
                     "big",
                     listOf(
                         Box(
                             "small",
                             listOf(
-                                Item("3", specifiedRange = range(8, 7, 8, 13)),
-                                Item("4", specifiedRange = range(9, 7, 9, 13)),
-                                Item("5", specifiedRange = range(10, 7, 10, 13)),
+                                Item("3", specifiedRange = Range(8, 7, 8, 13)),
+                                Item("4", specifiedRange = Range(9, 7, 9, 13)),
+                                Item("5", specifiedRange = Range(10, 7, 10, 13)),
                             ),
-                            specifiedRange = range(7, 5, 11, 5),
+                            specifiedRange = Range(7, 5, 11, 5),
                         ),
                     ),
-                    specifiedRange = range(6, 3, 12, 3),
+                    specifiedRange = Range(6, 3, 12, 3),
                 ),
-                Item("6", specifiedRange = range(13, 3, 13, 9)),
+                Item("6", specifiedRange = Range(13, 3, 13, 9)),
             ),
-            specifiedRange = range(1, 1, 14, 1),
+            specifiedRange = Range(1, 1, 14, 1),
         )
 
     @Test
@@ -179,11 +178,11 @@ internal class TraversingStructurallyTest {
                             "first",
                             set =
                                 hashSetOf(
-                                    Item("1", specifiedRange = range(3, 6, 3, 12)),
+                                    Item("1", specifiedRange = Range(3, 6, 3, 12)),
                                 ),
-                            specifiedRange = range(2, 3, 4, 3),
+                            specifiedRange = Range(2, 3, 4, 3),
                         ),
-                        Item("2", specifiedRange = range(5, 3, 5, 9)),
+                        Item("2", specifiedRange = Range(5, 3, 5, 9)),
                         Box(
                             "big",
                             set =
@@ -192,18 +191,18 @@ internal class TraversingStructurallyTest {
                                         "small",
                                         set =
                                             hashSetOf(
-                                                Item("3", specifiedRange = range(8, 7, 8, 13)),
-                                                Item("4", specifiedRange = range(9, 7, 9, 13)),
-                                                Item("5", specifiedRange = range(10, 7, 10, 13)),
+                                                Item("3", specifiedRange = Range(8, 7, 8, 13)),
+                                                Item("4", specifiedRange = Range(9, 7, 9, 13)),
+                                                Item("5", specifiedRange = Range(10, 7, 10, 13)),
                                             ),
-                                        specifiedRange = range(7, 5, 11, 5),
+                                        specifiedRange = Range(7, 5, 11, 5),
                                     ),
                                 ),
-                            specifiedRange = range(6, 3, 12, 3),
+                            specifiedRange = Range(6, 3, 12, 3),
                         ),
-                        Item("6", specifiedRange = range(13, 3, 13, 9)),
+                        Item("6", specifiedRange = Range(13, 3, 13, 9)),
                     ),
-                specifiedRange = range(1, 1, 14, 1),
+                specifiedRange = Range(1, 1, 14, 1),
             )
         val set = mutableSetOf<String>()
         testCase

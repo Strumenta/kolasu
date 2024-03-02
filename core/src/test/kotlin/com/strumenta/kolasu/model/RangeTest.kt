@@ -16,9 +16,9 @@ class RangeTest {
         val after = Node(Range(Point(3, 0), Point(3, 10)))
         val range = Range(Point(2, 0), Point(2, 10))
 
-        assertFalse("contains should return false with node before") { range.contains(before) }
-        assertTrue("contains should return true with node inside") { range.contains(inside) }
-        assertFalse("contains should return false with node after") { range.contains(after) }
+        assertFalse("contains should return false with node before") { range.contains(before.range) }
+        assertTrue("contains should return true with node inside") { range.contains(inside.range) }
+        assertFalse("contains should return false with node after") { range.contains(after.range) }
     }
 
     @test(expected = Exception::class)
