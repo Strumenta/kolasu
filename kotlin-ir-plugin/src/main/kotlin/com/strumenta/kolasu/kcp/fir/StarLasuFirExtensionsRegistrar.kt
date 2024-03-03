@@ -12,6 +12,6 @@ class StarLasuFirExtensionsRegistrar(
 ) : FirExtensionRegistrar() {
     override fun ExtensionRegistrarContext.configurePlugin() {
         // +::ConceptGenerator
-        +::BaseNodeGenerator
+        +::MPNodeGenerator
     }
 }

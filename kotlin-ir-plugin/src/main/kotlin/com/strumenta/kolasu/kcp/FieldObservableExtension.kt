@@ -2,7 +2,7 @@
 
 package com.strumenta.kolasu.kcp
 
-import com.strumenta.kolasu.model.BaseNode
+import com.strumenta.kolasu.model.MPNode
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
@@ -36,13 +36,13 @@ import org.jetbrains.kotlin.name.Name
  */
 class FieldObservableExtension(
     val pluginContext: IrPluginContext,
-    isBaseNode: Boolean,
+    isMPNode: Boolean,
 ) : IrElementTransformerVoidWithContext() {
     val notifyOfPropertyChange: IrSimpleFunctionSymbol by lazy {
         val callableId =
-            if (isBaseNode) {
+            if (isMPNode) {
                 CallableId(
-                    ClassId.topLevel(FqName(BaseNode::class.qualifiedName!!)),
+                    ClassId.topLevel(FqName(MPNode::class.qualifiedName!!)),
                     Name.identifier("notifyOfPropertyChange"),
                 )
             } else {

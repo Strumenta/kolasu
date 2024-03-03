@@ -3,9 +3,9 @@
 package com.strumenta.kolasu.kcp
 
 import com.strumenta.kolasu.kcp.fir.GENERATED_CALCULATE_FEATURES
-import com.strumenta.kolasu.model.BaseNode
 import com.strumenta.kolasu.model.FeatureDescription
 import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.model.MPNode
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Node
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
@@ -60,7 +60,7 @@ class StarLasuIrGenerationExtension(
     private fun checkASTNode(
         irClass: IrClass,
         pluginContext: IrPluginContext,
-        isBaseNode: Boolean,
+        isMPNode: Boolean,
     ) {
         irClass.primaryConstructor?.valueParameters?.forEach { param ->
             if (param.isVal() && (param.isSingleOrOptionalContainment() || param.isSingleOrOptionalAttribute())) {
@@ -71,9 +71,9 @@ class StarLasuIrGenerationExtension(
                 )
             }
         }
-        irClass.accept(FieldObservableExtension(pluginContext, isBaseNode), null)
+        irClass.accept(FieldObservableExtension(pluginContext, isMPNode), null)
         irClass.accept(SettingParentExtension(pluginContext, messageCollector), null)
-        if (isBaseNode) {
+        if (isMPNode) {
             if (irClass.modality != Modality.SEALED && irClass.modality != Modality.ABSTRACT) {
                 overrideCalculateFeaturesBody(irClass, pluginContext)
                 overrideCalculateNodeTypeBody(irClass, pluginContext)
@@ -298,11 +298,11 @@ class StarLasuIrGenerationExtension(
                     irClass.getAllSuperclasses().any {
                         it.kotlinFqName.toString() == Node::class.qualifiedName
                     }
-                val isBaseNode =
+                val isMPNode =
                     irClass.getAllSuperclasses().any {
-                        it.kotlinFqName.toString() == BaseNode::class.qualifiedName
+                        it.kotlinFqName.toString() == MPNode::class.qualifiedName
                     }
-                if (isASTNode || isBaseNode) {
+                if (isASTNode || isMPNode) {
                     if (isASTNode) {
                         messageCollector.report(
                             CompilerMessageSeverity.INFO,
@@ -312,11 +312,11 @@ class StarLasuIrGenerationExtension(
                     } else {
                         messageCollector.report(
                             CompilerMessageSeverity.INFO,
-                            "BaseNode class ${irClass.kotlinFqName} identified",
+                            "MPNode class ${irClass.kotlinFqName} identified",
                             irClass.compilerSourceLocation,
                         )
                     }
-                    checkASTNode(irClass, pluginContext, isBaseNode)
+                    checkASTNode(irClass, pluginContext, isMPNode)
                 }
             }
         }

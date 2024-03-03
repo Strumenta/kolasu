@@ -55,9 +55,9 @@ fun debug() = "Hello, World!"
                     SourceFile.kotlin(
                         "main.kt",
                         """
-          import com.strumenta.kolasu.model.BaseNode
+          import com.strumenta.kolasu.model.MPNode
 
-    data class MyNode(var p1: Int) : BaseNode()
+    data class MyNode(var p1: Int) : MPNode()
 
 fun main() {
   val n = MyNode(1)
@@ -86,9 +86,9 @@ fun main() {
                     SourceFile.kotlin(
                         "main.kt",
                         """
-          import com.strumenta.kolasu.model.BaseNode
+          import com.strumenta.kolasu.model.MPNode
 
-    data class MyNode(val p1: Int, var p2: String) : BaseNode()
+    data class MyNode(val p1: Int, var p2: String) : MPNode()
 
 fun main() {
   val n = MyNode(1, "foo")
@@ -99,7 +99,7 @@ fun main() {
                     ),
             )
         result.assertHasMessage(
-            Regex("i: file:///[a-zA-Z0-9/\\-.]*:[0-9]+:[0-9]+ BaseNode class MyNode identified"),
+            Regex("i: file:///[a-zA-Z0-9/\\-.]*:[0-9]+:[0-9]+ MPNode class MyNode identified"),
         )
         result.assertHasMessage(
             Regex("w: file:///[a-zA-Z0-9/\\-.]*:[0-9]+:[0-9]+ Value param MyNode.p1 is not assignable"),
@@ -121,13 +121,13 @@ fun main() {
                         """
           package mytest
 
-          import com.strumenta.kolasu.model.BaseNode
+          import com.strumenta.kolasu.model.MPNode
           import com.strumenta.kolasu.model.NodeLike
           import com.strumenta.kolasu.model.observable.SimpleNodeObserver
 
-    data class MyNode(var p1: Int) : BaseNode()
+    data class MyNode(var p1: Int) : MPNode()
 
-class Foo : BaseNode() {
+class Foo : MPNode() {
 var p2 : Int = 0 
     set(value) {
         notifyOfPropertyChange("p2", field, value)
@@ -161,7 +161,7 @@ fun main() {
 """,
                     ),
             )
-        result.assertHasMessage(Regex("i: file:///[a-zA-Z0-9/\\-.]*:6:6 BaseNode class mytest.MyNode identified"))
+        result.assertHasMessage(Regex("i: file:///[a-zA-Z0-9/\\-.]*:6:6 MPNode class mytest.MyNode identified"))
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
@@ -189,9 +189,9 @@ fun main() {
                         """
           package mytest
 
-          import com.strumenta.kolasu.model.BaseNode
+          import com.strumenta.kolasu.model.MPNode
 
-    data class MyNode(var p1: MyNode? = null) : BaseNode()
+    data class MyNode(var p1: MyNode? = null) : MPNode()
 
 fun main() {
   val n1 = MyNode()
@@ -259,11 +259,11 @@ fun main() {
                         """
           package mytest
 
-          import com.strumenta.kolasu.model.BaseNode
+          import com.strumenta.kolasu.model.MPNode
           import com.strumenta.kolasu.model.observable.ObservableList
           import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
 
-    data class MyNode(var p4: ObservableList<MyNode> = ObservableList()) : BaseNode()
+    data class MyNode(var p4: ObservableList<MyNode> = ObservableList()) : MPNode()
 
 fun main() {
   val n1 = MyNode()
@@ -446,7 +446,7 @@ fun main() {
 package mytest
 
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.BaseNode
+import com.strumenta.kolasu.model.MPNode
 import com.strumenta.kolasu.model.FeatureType
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.observable.ObservableList
@@ -457,7 +457,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import com.strumenta.kolasu.model.observable.SimpleNodeObserver
 
-data class A(val f1: String, val f2: Int, val f3: A? = null) : BaseNode()
+data class A(val f1: String, val f2: Int, val f3: A? = null) : MPNode()
 
 fun main() {
     val a1 = A("Foo", 6)
@@ -507,7 +507,7 @@ fun main() {
 package mytest
 
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.BaseNode
+import com.strumenta.kolasu.model.MPNode
 import com.strumenta.kolasu.model.FeatureType
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.observable.ObservableList
@@ -518,9 +518,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import com.strumenta.kolasu.model.observable.SimpleNodeObserver
 
-sealed class Expression : BaseNode()
+sealed class Expression : MPNode()
 
-sealed class Statement : BaseNode()
+sealed class Statement : MPNode()
 
 class InputDeclaration : Statement()
 
@@ -530,7 +530,7 @@ data class IntLiteral(var value: Int) : Expression()
 
 class VarDeclaration(override var name: String, var value: Expression) : Statement(), Named
 
-class MiniCalcFile(val statements : MutableList<Statement>) : BaseNode()
+class MiniCalcFile(val statements : MutableList<Statement>) : MPNode()
 
 fun main() {
     val id = InputDeclaration()

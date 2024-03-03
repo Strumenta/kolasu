@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.kcp.fir
 
-import com.strumenta.kolasu.model.BaseNode
 import com.strumenta.kolasu.model.FeatureDescription
+import com.strumenta.kolasu.model.MPNode
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.utils.isAbstract
@@ -36,7 +36,7 @@ const val GENERATED_CALCULATE_NODE_TYPE = "calculateNodeType"
 
 const val COMPILER_PLUGIN_DEBUG = true
 
-class BaseNodeGenerator(
+class MPNodeGenerator(
     session: FirSession,
 ) : FirDeclarationGenerationExtension(session) {
     private fun log(text: String) {
@@ -123,8 +123,8 @@ class BaseNodeGenerator(
         context: MemberGenerationContext,
     ): Set<Name> {
         log("getCallableNamesForClass $classSymbol $context")
-        if (classSymbol.extendBaseNode(session) && !classSymbol.isAbstract && !classSymbol.isSealed) {
-            log("  ${classSymbol.classId.asSingleFqName().asString()} extends BaseNode")
+        if (classSymbol.extendMPNode(session) && !classSymbol.isAbstract && !classSymbol.isSealed) {
+            log("  ${classSymbol.classId.asSingleFqName().asString()} extends MPNode")
             val set =
                 mutableSetOf(
                     Name.identifier(GENERATED_CALCULATE_FEATURES),
@@ -157,19 +157,19 @@ class BaseNodeGenerator(
 }
 
 @OptIn(SymbolInternals::class)
-fun FirClassSymbol<*>.isOrExtendBaseNode(firSession: FirSession): Boolean =
-    isBaseNode(firSession) || extendBaseNode(firSession)
+fun FirClassSymbol<*>.isOrExtendMPNode(firSession: FirSession): Boolean =
+    isMPNode(firSession) || extendMPNode(firSession)
 
 @OptIn(SymbolInternals::class)
-fun FirClassSymbol<*>.isBaseNode(firSession: FirSession): Boolean =
-    this.classId.asSingleFqName().asString() == BaseNode::class.qualifiedName!!
+fun FirClassSymbol<*>.isMPNode(firSession: FirSession): Boolean =
+    this.classId.asSingleFqName().asString() == MPNode::class.qualifiedName!!
 
 @OptIn(SymbolInternals::class)
-fun FirClassSymbol<*>.extendBaseNode(firSession: FirSession): Boolean =
+fun FirClassSymbol<*>.extendMPNode(firSession: FirSession): Boolean =
     this.fir.superTypeRefs.any {
         when (it) {
             is FirResolvedTypeRefImpl -> {
-                (it.type.classId!!.toSymbol(firSession) as FirClassSymbol<*>).isOrExtendBaseNode(firSession)
+                (it.type.classId!!.toSymbol(firSession) as FirClassSymbol<*>).isOrExtendMPNode(firSession)
             }
             is FirImplicitAnyTypeRef -> {
                 false

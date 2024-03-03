@@ -7,7 +7,11 @@ import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 
-abstract class BaseNode : NodeLike {
+/**
+ * This represents a Multi-platform Kotlin Code. It should be used with the kolasu-multiplatform
+ * gradle plugin.
+ */
+abstract class MPNode : NodeLike {
     @Internal
     override val nodeType: String = calculateNodeType()
 
