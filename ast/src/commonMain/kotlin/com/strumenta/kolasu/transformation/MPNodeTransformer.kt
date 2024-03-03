@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.transformation
 
+import com.strumenta.kolasu.model.NodeLike
+
 val c = 3
 
 //
@@ -10,16 +12,16 @@ val c = 3
 // //import kotlin.reflect.full.memberFunctions
 // //import kotlin.reflect.full.memberProperties
 //
-// /**
-// * Transformer that, given a tree node, will instantiate the corresponding transformed node.
-// */
-// class NodeTransformer<Source, Output : NodeLike>(
-//    val constructorToUse: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> List<Output>,
-//    var children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
-//    var finalizer: (Output) -> Unit = {},
-//    var skipChildren: Boolean = false,
-//    var childrenSetAtConstruction: Boolean = false,
-// ) {
+ /**
+ * Transformer that, given a tree node, will instantiate the corresponding transformed node.
+ */
+ class MPNodeTransformer<Source, Output : NodeLike>(
+    val constructorToUse: (Source, MPASTTransformer, MPNodeTransformer<Source, Output>) -> List<Output>,
+    var children: MutableMap<String, MPChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
+    var finalizer: (Output) -> Unit = {},
+    var skipChildren: Boolean = false,
+    var childrenSetAtConstruction: Boolean = false,
+ ) {
 //    companion object {
 //        fun <Source, Output : NodeLike> single(
 //            singleConstructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> Output?,
@@ -196,4 +198,4 @@ val c = 3
 // //                (sourceProp as KProperty1<Any, Any>).get(src)
 // //            }
 //        }
-// }
+}

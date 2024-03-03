@@ -1,5 +1,12 @@
 package com.strumenta.kolasu.transformation
 
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueSeverity
+import kotlin.jvm.JvmOverloads
+import kotlin.reflect.KClass
+
 val a = 1
 
 //
@@ -25,20 +32,19 @@ val a = 1
 // //import kotlin.reflect.full.memberProperties
 // //import kotlin.reflect.full.superclasses
 //
-// /**
-// * Implementation of a tree-to-tree transformation. For each source node type, we can register a transformer that knows
-// * how to produce a transformed node. Then, this transformer can read metadata in the transformed node to recursively
-// * transform and assign children.
-// * If no node transformer is provided for a source node type, a GenericNode is created, and the processing of the
-// * subtree stops there.
-// */
-// open class ASTTransformer(
-//    /**
-//     * Additional issues found during the transformation process.
-//     */
-//    val issues: MutableList<Issue> = mutableListOf(),
-//    val allowGenericNode: Boolean = true,
-// ) {
+ /**
+ * Implementation of a tree-to-tree transformation. For each source node type, we can register a transformer that knows
+ * how to produce a transformed node. Then, this transformer can read metadata in the transformed node to recursively
+ * transform and assign children.
+ * If no node transformer is provided for a source node type, a GenericNode is created, and the processing of the
+ * subtree stops there.
+ */
+ open class MPASTTransformer(
+    /**
+     * Additional issues found during the transformation process.
+     */
+    val issues: MutableList<Issue> = mutableListOf(),
+ ) {
 //    /**
 //     * NodeTransformers that map from source tree node to target tree node.
 //     */
@@ -47,44 +53,45 @@ val a = 1
 //    private val _knownClasses = mutableMapOf<String, MutableSet<KClass<*>>>()
 //    val knownClasses: Map<String, Set<KClass<*>>> = _knownClasses
 //
-//    /**
-//     * This ensures that the generated value is a single Node or null.
-//     */
-//    @JvmOverloads
-//    fun transform(
-//        source: Any?,
-//        parent: NodeLike? = null,
-//    ): NodeLike? {
-//        val result = transformIntoNodes(source, parent)
-//        return when (result.size) {
-//            0 -> null
-//            1 -> {
-//                val node = result.first()
-//                require(node is NodeLike)
-//                node
-//            }
-//            else -> throw IllegalStateException(
-//                "Cannot transform into a single Node as multiple nodes where produced",
-//            )
-//        }
-//    }
-//
-//    /**
-//     * Performs the transformation of a node and, recursively, its descendants.
-//     */
-//    @JvmOverloads
-//    open fun transformIntoNodes(
-//        source: Any?,
-//        parent: NodeLike? = null,
-//    ): List<NodeLike> {
-//        if (source == null) {
-//            return emptyList()
-//        }
-//        if (source is Collection<*>) {
-//            throw Error("Mapping error: received collection when value was expected")
-//        }
-//        val nodes: List<NodeLike>
-//        val transformer = getNodeTransformer<Any, NodeLike>(source::class as KClass<Any>)
+    /**
+     * This ensures that the generated value is a single Node or null.
+     */
+    @JvmOverloads
+    fun transform(
+        source: Any?,
+        parent: NodeLike? = null,
+    ): NodeLike? {
+        val result = transformIntoNodes(source, parent)
+        return when (result.size) {
+            0 -> null
+            1 -> {
+                val node = result.first()
+                require(node is NodeLike)
+                node
+            }
+            else -> throw IllegalStateException(
+                "Cannot transform into a single Node as multiple nodes where produced",
+            )
+        }
+    }
+
+    /**
+     * Performs the transformation of a node and, recursively, its descendants.
+     */
+    @JvmOverloads
+    open fun transformIntoNodes(
+        source: Any?,
+        parent: NodeLike? = null,
+    ): List<NodeLike> {
+        if (source == null) {
+            return emptyList()
+        }
+        if (source is Collection<*>) {
+            throw Error("Mapping error: received collection when value was expected")
+        }
+        val nodes: List<NodeLike>
+        val transformer = getNodeTransformer<Any, NodeLike>(source::class as KClass<Any>)
+        TODO()
 //        if (transformer != null) {
 //            nodes = makeNodes(transformer, source, allowGenericNode = allowGenericNode)
 //            if (!transformer.skipChildren && !transformer.childrenSetAtConstruction) {
@@ -143,7 +150,7 @@ val a = 1
 // //                }
 //            }
 //        }
-//    }
+}
 //
 //    protected open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
 //
@@ -198,7 +205,8 @@ val a = 1
 //        return nodes
 //    }
 //
-//    protected open fun <S : Any, T : NodeLike> getNodeTransformer(kClass: KClass<S>): NodeTransformer<S, T>? {
+    protected open fun <S : Any, T : NodeLike> getNodeTransformer(kClass: KClass<S>): MPNodeTransformer<S, T>? {
+        TODO()
 //        val nodeTransformer = nodeTransformers[kClass]
 //        if (nodeTransformer != null) {
 //            return nodeTransformer as NodeTransformer<S, T>
@@ -216,7 +224,7 @@ val a = 1
 // //            }
 //        }
 //        return null
-//    }
+}
 //
 //    fun <S : Any, T : NodeLike> registerNodeTransformer(
 //        kclass: KClass<S>,
@@ -432,13 +440,13 @@ val a = 1
 //        //set.add(target)
 //    }
 //
-//    fun addIssue(
-//        message: String,
-//        severity: IssueSeverity = IssueSeverity.ERROR,
-//        range: Range? = null,
-//    ): Issue {
-//        val issue = Issue.semantic(message, severity, range)
-//        issues.add(issue)
-//        return issue
-//    }
-// }
+    fun addIssue(
+    message: String,
+    severity: IssueSeverity = IssueSeverity.ERROR,
+    range: Range? = null,
+    ): Issue {
+        val issue = Issue.semantic(message, severity, range)
+        issues.add(issue)
+        return issue
+    }
+}
