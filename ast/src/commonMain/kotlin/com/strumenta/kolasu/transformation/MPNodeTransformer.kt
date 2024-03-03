@@ -36,6 +36,22 @@ val c = 3
 //            }, children, finalizer, skipChildren, childrenSetAtConstruction)
 //        }
 //    }
+
+         companion object {
+        fun <Source, Output : NodeLike> single(
+            singleConstructor: (Source, MPASTTransformer, MPNodeTransformer<Source, Output>) -> Output?,
+//            children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
+//            finalizer: (Output) -> Unit = {},
+//            skipChildren: Boolean = false,
+//            childrenSetAtConstruction: Boolean = false,
+        ): MPNodeTransformer<Source, Output> {
+            return MPNodeTransformer({ source, at, nf ->
+                val result = singleConstructor(source, at, nf)
+                if (result == null) emptyList() else listOf(result)
+            }/*, children, finalizer, skipChildren, childrenSetAtConstruction*/)
+        }
+    }
+
 //
 //    /**
 //     * Specify how to convert a child. The value obtained from the conversion could either be used

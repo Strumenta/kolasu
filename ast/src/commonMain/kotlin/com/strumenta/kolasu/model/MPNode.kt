@@ -4,6 +4,7 @@ import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.exceptions.IllegalStateException
 import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 
@@ -12,6 +13,11 @@ import com.strumenta.kolasu.language.Reference
  * gradle plugin.
  */
 abstract class MPNode : NodeLike {
+
+    override val concept: Concept by lazy {
+        calculateConcept()
+    }
+
     @Internal
     override val nodeType: String = calculateNodeType()
 
@@ -26,6 +32,14 @@ abstract class MPNode : NodeLike {
      */
     @property:Internal
     override var parent: NodeLike? = null
+
+    /**
+     * This is overriden by the compiler plugin
+     */
+    protected open fun calculateConcept(): Concept {
+        TODO("calculateConcept should be overridden by compiler plugin")
+    }
+
 
     /**
      * This is overriden by the compiler plugin

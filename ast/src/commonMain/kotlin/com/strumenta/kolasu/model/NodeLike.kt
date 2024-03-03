@@ -3,12 +3,16 @@ package com.strumenta.kolasu.model
 import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 
 typealias NodeObserver = ObservableObserver<in NodeNotification<in NodeLike>>
 
 interface NodeLike {
+    open val concept: Concept
+        get() = TODO()
+
     @property:Internal
     val changes: PublishSubject<NodeNotification<in NodeLike>>
 

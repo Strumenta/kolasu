@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.transformation
 
+import com.strumenta.kolasu.language.Concept
+import com.strumenta.kolasu.language.ConceptLike
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.validation.Issue
@@ -45,10 +47,10 @@ val a = 1
      */
     val issues: MutableList<Issue> = mutableListOf(),
  ) {
-//    /**
-//     * NodeTransformers that map from source tree node to target tree node.
-//     */
-//    private val nodeTransformers = mutableMapOf<KClass<*>, NodeTransformer<*, *>>()
+    /**
+     * NodeTransformers that map from source tree node to target tree node.
+     */
+    private val nodeTransformers = mutableMapOf<ConceptLike, MPNodeTransformer<*, *>>()
 //
 //    private val _knownClasses = mutableMapOf<String, MutableSet<KClass<*>>>()
 //    val knownClasses: Map<String, Set<KClass<*>>> = _knownClasses
@@ -58,7 +60,7 @@ val a = 1
      */
     @JvmOverloads
     fun transform(
-        source: Any?,
+        source: NodeLike?,
         parent: NodeLike? = null,
     ): NodeLike? {
         val result = transformIntoNodes(source, parent)
@@ -80,7 +82,7 @@ val a = 1
      */
     @JvmOverloads
     open fun transformIntoNodes(
-        source: Any?,
+        source: NodeLike?,
         parent: NodeLike? = null,
     ): List<NodeLike> {
         if (source == null) {
@@ -90,40 +92,28 @@ val a = 1
             throw Error("Mapping error: received collection when value was expected")
         }
         val nodes: List<NodeLike>
-        val transformer = getNodeTransformer<Any, NodeLike>(source::class as KClass<Any>)
+        val transformer = getNodeTransformer<NodeLike, NodeLike>(source.concept)
+        if (transformer != null) {
+            nodes = makeNodes(transformer, source)
+            if (!transformer.skipChildren && !transformer.childrenSetAtConstruction) {
+                nodes.forEach { node -> setChildren(transformer, source, node) }
+            }
+            nodes.forEach { node ->
+                transformer.finalizer(node)
+                node.parent = parent
+            }
+             return nodes
+        } else {
+            throw IllegalStateException("Unable to translate node $source")
+        }
+    }
+
+    private fun setChildren(
+        transformer: MPNodeTransformer<NodeLike, NodeLike>,
+        source: Any,
+        node: NodeLike,
+    ) {
         TODO()
-//        if (transformer != null) {
-//            nodes = makeNodes(transformer, source, allowGenericNode = allowGenericNode)
-//            if (!transformer.skipChildren && !transformer.childrenSetAtConstruction) {
-//                nodes.forEach { node -> setChildren(transformer, source, node) }
-//            }
-//            nodes.forEach { node ->
-//                transformer.finalizer(node)
-//                node.parent = parent
-//            }
-//        } else {
-//            if (allowGenericNode) {
-//                val origin = asOrigin(source)
-//                nodes = listOf(GenericMPNode(parent).withOrigin(origin))
-//                issues.add(
-//                    Issue.semantic(
-//                        "Source node not mapped: ${source::class.qualifiedName}",
-//                        IssueSeverity.WARNING,
-//                        origin?.range,
-//                    ),
-//                )
-//            } else {
-//                throw IllegalStateException("Unable to translate node $source")
-//            }
-//        }
-//        return nodes
-//    }
-//
-//    private fun setChildren(
-//        transformer: NodeTransformer<Any, NodeLike>,
-//        source: Any,
-//        node: NodeLike,
-//    ) {
 //        node.originalFeatures.forEach { feature ->
 //            val childKey = node::class.qualifiedName + "#" + feature.name
 //            var childNodeTransformer = transformer.getChildNodeTransformer<NodeLike, Any, Any>(node::class, feature.name)
@@ -132,25 +122,25 @@ val a = 1
 //                    setChild(childNodeTransformer, source, node, feature)
 //                }
 //            } else {
-//                // MAPPED WILL NOT BE SUPPORTED FOR NOW
-// //val targetProp = node::class.memberProperties.find { it.name == feature.name }
-// //                val mapped = targetProp?.findAnnotation<Mapped>()
-// //                if (targetProp is KMutableProperty1 && mapped != null) {
-// //                    val path = (mapped.path.ifEmpty { targetProp.name })
-// //                    childNodeTransformer =
-// //                        ChildNodeTransformer(
-// //                            childKey,
-// //                            transformer.getter(path),
-// //                            (targetProp as KMutableProperty1<Any, Any?>)::set,
-// //                        )
-// //                    transformer.children[childKey] = childNodeTransformer as ChildNodeTransformer<Any, *, *>
-// //                    setChild(childNodeTransformer, source, node, feature)
-// //                } else {
-//                    transformer.children[childKey] = NO_CHILD_NODE
-// //                }
-//            }
-//        }
-}
+                // MAPPED WILL NOT BE SUPPORTED FOR NOW
+ //val targetProp = node::class.memberProperties.find { it.name == feature.name }
+ //                val mapped = targetProp?.findAnnotation<Mapped>()
+ //                if (targetProp is KMutableProperty1 && mapped != null) {
+ //                    val path = (mapped.path.ifEmpty { targetProp.name })
+ //                    childNodeTransformer =
+ //                        ChildNodeTransformer(
+ //                            childKey,
+ //                            transformer.getter(path),
+ //                            (targetProp as KMutableProperty1<Any, Any?>)::set,
+ //                        )
+ //                    transformer.children[childKey] = childNodeTransformer as ChildNodeTransformer<Any, *, *>
+ //                    setChild(childNodeTransformer, source, node, feature)
+ //                } else {
+                    //transformer.children[childKey] = NO_CHILD_NODE
+ //                }
+  //          }
+       }
+
 //
 //    protected open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
 //
@@ -182,58 +172,54 @@ val a = 1
 //        return source
 //    }
 //
-//    protected open fun <S : Any, T : NodeLike> makeNodes(
-//        transformer: NodeTransformer<S, T>,
-//        source: S,
-//        allowGenericNode: Boolean = true,
-//    ): List<NodeLike> {
-//        val nodes =
-//            try {
-//                transformer.constructorToUse(source, this, transformer)
-//            } catch (e: Exception) {
-//                if (allowGenericNode) {
-//                    listOf(GenericMPErrorNode(e))
-//                } else {
-//                    throw e
-//                }
-//            }
+    protected open fun <S : NodeLike, T : NodeLike> makeNodes(
+        transformer: MPNodeTransformer<S, T>,
+        source: S,
+        allowGenericNode: Boolean = true,
+    ): List<NodeLike> {
+        val nodes =
+            try {
+                transformer.constructorToUse(source, this, transformer)
+            } catch (e: Exception) {
+                if (allowGenericNode) {
+                    listOf(GenericMPErrorNode(e))
+                } else {
+                    throw e
+                }
+            }
+        // TODO re-enable me
 //        nodes.forEach { node ->
 //            if (node.origin == null) {
 //                node.withOrigin(asOrigin(source))
 //            }
 //        }
-//        return nodes
-//    }
+        return nodes
+    }
 //
-    protected open fun <S : Any, T : NodeLike> getNodeTransformer(kClass: KClass<S>): MPNodeTransformer<S, T>? {
-        TODO()
-//        val nodeTransformer = nodeTransformers[kClass]
-//        if (nodeTransformer != null) {
-//            return nodeTransformer as NodeTransformer<S, T>
-//        } else {
-//            if (kClass == Any::class) {
-//                return null
-//            }
-//            // TODO here we should get the Concept and all of its super concepts
-//            TODO()
-// //            for (superclass in kClass.superclasses) {
-// //                val superClassNodeTransformer = getNodeTransformer<S, T>(superclass as KClass<S>)
-// //                if (superClassNodeTransformer != null) {
-// //                    return superClassNodeTransformer
-// //                }
-// //            }
-//        }
-//        return null
+    protected fun <S : Any, T : NodeLike> getNodeTransformer(concept: ConceptLike): MPNodeTransformer<S, T>? {
+        val nodeTransformer = nodeTransformers[concept]
+        if (nodeTransformer != null) {
+            return nodeTransformer as MPNodeTransformer<S, T>
+        } else {
+            // TODO here we should get the Concept and all of its super concepts
+             for (superConcept in concept.superConceptLikes) {
+                 val superClassNodeTransformer = getNodeTransformer<S, T>(superConcept)
+                 if (superClassNodeTransformer != null) {
+                     return superClassNodeTransformer
+                 }
+             }
+        }
+        return null
 }
-//
-//    fun <S : Any, T : NodeLike> registerNodeTransformer(
-//        kclass: KClass<S>,
-//        transformer: (S, ASTTransformer, NodeTransformer<S, T>) -> T?,
-//    ): NodeTransformer<S, T> {
-//        val nodeTransformer = NodeTransformer.single(transformer)
-//        nodeTransformers[kclass] = nodeTransformer
-//        return nodeTransformer
-//    }
+
+    fun <S : NodeLike, T : NodeLike> registerNodeTransformer(
+        concept: ConceptLike,
+        transformer: (S, MPASTTransformer, MPNodeTransformer<S, T>) -> T?,
+    ): MPNodeTransformer<S, T> {
+        val nodeTransformer = MPNodeTransformer.single(transformer)
+        nodeTransformers[concept] = nodeTransformer
+        return nodeTransformer
+    }
 //
 //    fun <S : Any, T : NodeLike> registerMultipleNodeTransformer(
 //        kclass: KClass<S>,
