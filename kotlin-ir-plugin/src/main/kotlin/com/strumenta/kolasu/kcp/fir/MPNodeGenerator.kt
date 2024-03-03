@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.types.ConeKotlinType
+import org.jetbrains.kotlin.fir.types.FirErrorTypeRef
 import org.jetbrains.kotlin.fir.types.classId
 import org.jetbrains.kotlin.fir.types.impl.FirImplicitAnyTypeRef
 import org.jetbrains.kotlin.fir.types.impl.FirResolvedTypeRefImpl
@@ -34,19 +35,10 @@ import java.time.format.DateTimeFormatter
 const val GENERATED_CALCULATE_FEATURES = "calculateFeatures"
 const val GENERATED_CALCULATE_NODE_TYPE = "calculateNodeType"
 
-const val COMPILER_PLUGIN_DEBUG = true
 
 class MPNodeGenerator(
     session: FirSession,
-) : FirDeclarationGenerationExtension(session) {
-    private fun log(text: String) {
-        if (COMPILER_PLUGIN_DEBUG) {
-            val file = File("/Users/federico/repos/kolasu-mp-example/compiler-plugin-log.txt")
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-            val current = LocalDateTime.now().format(formatter)
-            file.appendText("$current: $text\n")
-        }
-    }
+) : BaseFirExtension(session) {
 
     override fun generateTopLevelClassLikeDeclaration(classId: ClassId): FirClassLikeSymbol<*>? {
         log("generateTopLevelClassLikeDeclaration $classId")
@@ -172,6 +164,9 @@ fun FirClassSymbol<*>.extendMPNode(firSession: FirSession): Boolean =
                 (it.type.classId!!.toSymbol(firSession) as FirClassSymbol<*>).isOrExtendMPNode(firSession)
             }
             is FirImplicitAnyTypeRef -> {
+                false
+            }
+            is FirErrorTypeRef -> {
                 false
             }
 

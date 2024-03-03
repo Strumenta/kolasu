@@ -13,5 +13,6 @@ class StarLasuFirExtensionsRegistrar(
     override fun ExtensionRegistrarContext.configurePlugin() {
         // +::ConceptGenerator
         +::MPNodeGenerator
+        +::LanguageGenerator
     }
 }

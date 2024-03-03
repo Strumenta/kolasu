@@ -31,7 +31,7 @@ import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
-class ConceptGenerator(
+class LanguageGenerator(
     session: FirSession,
 ) : BaseFirExtension(session) {
     companion object {
@@ -39,6 +39,7 @@ class ConceptGenerator(
     }
 
     override fun generateTopLevelClassLikeDeclaration(classId: ClassId): FirClassLikeSymbol<*>? {
+        log("LanguageGenerator.generateTopLevelClassLikeDeclaration $classId")
         if (classId != MY_CLASS_ID) return null
         val klass =
             buildRegularClass {
@@ -65,58 +66,68 @@ class ConceptGenerator(
     }
 
     override fun generateConstructors(context: MemberGenerationContext): List<FirConstructorSymbol> {
-        val classId = context.owner.classId
-        require(classId == MY_CLASS_ID)
-        val constructor =
-            buildPrimaryConstructor {
-                resolvePhase = FirResolvePhase.BODY_RESOLVE
-                moduleData = session.moduleData
-                origin = Key.origin
-                returnTypeRef =
-                    buildResolvedTypeRef {
-                        type = classId.toConeType()
-                    }
-                status =
-                    FirResolvedDeclarationStatusImpl(
-                        Visibilities.Public,
-                        Modality.FINAL,
-                        EffectiveVisibility.Public,
-                    )
-                symbol = FirConstructorSymbol(classId)
-            }.also {
-                it.containingClassForStaticMemberAttr = ConeClassLikeLookupTagImpl(classId)
-            }
-        return listOf(constructor.symbol)
+        return emptyList()
+//        val classId = context.owner.classId
+//        require(classId == MY_CLASS_ID)
+//        val constructor =
+//            buildPrimaryConstructor {
+//                resolvePhase = FirResolvePhase.BODY_RESOLVE
+//                moduleData = session.moduleData
+//                origin = Key.origin
+//                returnTypeRef =
+//                    buildResolvedTypeRef {
+//                        type = classId.toConeType()
+//                    }
+//                status =
+//                    FirResolvedDeclarationStatusImpl(
+//                        Visibilities.Public,
+//                        Modality.FINAL,
+//                        EffectiveVisibility.Public,
+//                    )
+//                symbol = FirConstructorSymbol(classId)
+//            }.also {
+//                it.containingClassForStaticMemberAttr = ConeClassLikeLookupTagImpl(classId)
+//            }
+//        return listOf(constructor.symbol)
     }
 
     override fun generateFunctions(
         callableId: CallableId,
         context: MemberGenerationContext?,
     ): List<FirNamedFunctionSymbol> {
-        val function =
-            buildSimpleFunction {
-                resolvePhase = FirResolvePhase.BODY_RESOLVE
-                moduleData = session.moduleData
-                origin = Key.origin
-                status =
-                    FirResolvedDeclarationStatusImpl(
-                        Visibilities.Public,
-                        Modality.FINAL,
-                        EffectiveVisibility.Public,
-                    )
-                returnTypeRef = session.builtinTypes.stringType
-                name = callableId.callableName
-                symbol = FirNamedFunctionSymbol(callableId)
-                // it's better to use default type on corresponding firClass to handle type parameters
-                // but in this case we know that MyClass don't have any generics
-                dispatchReceiverType = callableId.classId?.toConeType()
-            }
-        return listOf(function.symbol)
+        return emptyList()
+//        val function =
+//            buildSimpleFunction {
+//                resolvePhase = FirResolvePhase.BODY_RESOLVE
+//                moduleData = session.moduleData
+//                origin = Key.origin
+//                status =
+//                    FirResolvedDeclarationStatusImpl(
+//                        Visibilities.Public,
+//                        Modality.FINAL,
+//                        EffectiveVisibility.Public,
+//                    )
+//                returnTypeRef = session.builtinTypes.stringType
+//                name = callableId.callableName
+//                symbol = FirNamedFunctionSymbol(callableId)
+//                // it's better to use default type on corresponding firClass to handle type parameters
+//                // but in this case we know that MyClass don't have any generics
+//                dispatchReceiverType = callableId.classId?.toConeType()
+//            }
+//        return listOf(function.symbol)
     }
 
-    override fun getTopLevelClassIds(): Set<ClassId> = setOf(MY_CLASS_ID)
+    override fun getTopLevelClassIds(): Set<ClassId> {
+        val result = setOf(MY_CLASS_ID)
+        log("LanguageGenerator.getTopLevelClassIds -> $result")
+        return result
+    }
 
-    override fun hasPackage(packageFqName: FqName): Boolean = packageFqName == MY_CLASS_ID.packageFqName
+    override fun hasPackage(packageFqName: FqName): Boolean {
+        val result = packageFqName == MY_CLASS_ID.packageFqName
+        log("LanguageGenerator.hasPackage $packageFqName -> $result")
+        return result
+    }
 
     object Key : GeneratedDeclarationKey()
 }

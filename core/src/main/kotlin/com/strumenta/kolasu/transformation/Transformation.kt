@@ -37,21 +37,7 @@ internal class PresentParameterValue(
 
 internal object AbsentParameterValue : ParameterValue()
 
-inline fun <T : Any> KClass<T>.preferredConstructor(): KFunction<T> {
-    val constructors = this.constructors
-    return if (constructors.size != 1) {
-        if (this.primaryConstructor != null) {
-            this.primaryConstructor!!
-        } else {
-            throw RuntimeException(
-                "Node Factories support only classes with exactly one constructor or a " +
-                    "primary constructor. Class ${this.qualifiedName} has ${constructors.size}",
-            )
-        }
-    } else {
-        constructors.first()
-    }
-}
+
 
 interface ParameterConverter {
     fun isApplicable(
