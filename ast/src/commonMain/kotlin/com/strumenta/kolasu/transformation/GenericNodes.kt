@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.transformation
 
+import com.strumenta.kolasu.model.ErrorNode
 import com.strumenta.kolasu.model.MPNode
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.traversing.children
 
 /**
@@ -37,16 +37,8 @@ class GenericMPErrorNode(
         message
             ?: if (error != null) {
                 val msg = if (error.message != null) ": " + error.message else ""
-                "Exception ${error::class.qualifiedName}$msg"
+                "Exception ${error::class}$msg"
             } else {
                 "Unspecified error node"
             }
-}
-
-/**
- * An AST node that marks the presence of an error, for example a syntactic or semantic error in the original tree.
- */
-interface ErrorNode {
-    val message: String
-    val range: Range?
 }

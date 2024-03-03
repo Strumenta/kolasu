@@ -11,7 +11,7 @@ import kotlin.reflect.full.memberProperties
  * Transformer that, given a tree node, will instantiate the corresponding transformed node.
  */
 class NodeTransformer<Source, Output : NodeLike>(
-    val constructor: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> List<Output>,
+    val constructorToUse: (Source, ASTTransformer, NodeTransformer<Source, Output>) -> List<Output>,
     var children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
     var finalizer: (Output) -> Unit = {},
     var skipChildren: Boolean = false,
