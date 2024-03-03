@@ -29,3 +29,23 @@ data class NodeOrigin(
     override val sourceText: String?
         get() = node.sourceText
 }
+
+fun <N : NodeLike> N.withOrigin(node: NodeLike): N {
+    this.origin =
+        if (node == this) {
+            null
+        } else {
+            NodeOrigin(node)
+        }
+    return this
+}
+
+fun <N : NodeLike> N.withOrigin(origin: Origin?): N {
+    this.origin =
+        if (origin == NodeOrigin(this)) {
+            null
+        } else {
+            origin
+        }
+    return this
+}

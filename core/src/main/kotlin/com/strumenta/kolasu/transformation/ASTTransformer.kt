@@ -176,7 +176,7 @@ open class ASTTransformer(
     ): List<NodeLike> {
         val nodes =
             try {
-                transformer.constructor(source, this, transformer)
+                transformer.constructorToUse(source, this, transformer)
             } catch (e: Exception) {
                 if (allowGenericNode) {
                     listOf(GenericErrorNode(e))
