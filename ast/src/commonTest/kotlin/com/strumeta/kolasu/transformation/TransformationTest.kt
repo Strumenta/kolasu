@@ -28,8 +28,6 @@ sealed class ParseTreeExpr
 class ParseTreeSumExpr(val left: ParseTreeExpr, val right: ParseTreeExpr) : ParseTreeExpr()
 class ParseTreeIntLiteral(val value: Int): ParseTreeExpr()
 
-
-
 class TransformationTest {
 
     @Test
