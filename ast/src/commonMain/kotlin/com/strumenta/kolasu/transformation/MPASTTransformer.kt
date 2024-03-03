@@ -9,7 +9,7 @@ import com.strumenta.kolasu.validation.IssueSeverity
 import kotlin.jvm.JvmOverloads
 import kotlin.reflect.KClass
 
-val a = 1
+typealias DefaulTransformer = (Any, MPASTTransformer) -> List<NodeLike>
 
 //
 // //import com.strumenta.kolasu.model.GenericErrorNode
@@ -51,6 +51,8 @@ val a = 1
      * NodeTransformers that map from source tree node to target tree node.
      */
     private val nodeTransformers = mutableMapOf<KClass<*>, MPNodeTransformer<*, *>>()
+
+     private var defaultTransformer : DefaulTransformer? = null
 //
 //    private val _knownClasses = mutableMapOf<String, MutableSet<KClass<*>>>()
 //    val knownClasses: Map<String, Set<KClass<*>>> = _knownClasses
@@ -59,7 +61,7 @@ val a = 1
      * This ensures that the generated value is a single Node or null.
      */
     @JvmOverloads
-    fun <S:Any, T: NodeLike>transform(
+    fun <S:Any>transform(
         source: S?,
         parent: NodeLike? = null,
     ): NodeLike? {
@@ -81,7 +83,7 @@ val a = 1
      * Performs the transformation of a node and, recursively, its descendants.
      */
     @JvmOverloads
-    protected inline fun <reified S: Any>transformIntoNodes(
+    fun <S: Any>transformIntoNodes(
         source: S?,
         parent: NodeLike? = null,
     ): List<NodeLike> {
@@ -92,19 +94,22 @@ val a = 1
             throw Error("Mapping error: received collection when value was expected")
         }
         val nodes: List<NodeLike>
-
-        val transformer = getNodeTransformer<S, NodeLike>(S::class)
+        val transformer = getNodeTransformer<S, NodeLike>(source!!::class)
         if (transformer != null) {
             nodes = makeNodes(transformer, source)
-            if (!transformer.skipChildren && !transformer.childrenSetAtConstruction) {
-                nodes.forEach { node -> setChildren(transformer as MPNodeTransformer<Any, NodeLike>, source, node) }
-            }
-            nodes.forEach { node ->
-                transformer.finalizer(node)
-                node.parent = parent
-            }
+//            if (!transformer.skipChildren && !transformer.childrenSetAtConstruction) {
+//                nodes.forEach { node -> setChildren(transformer as MPNodeTransformer<Any, NodeLike>, source, node) }
+//            }
+//            nodes.forEach { node ->
+//                transformer.finalizer(node)
+//                node.parent = parent
+//            }
              return nodes
         } else {
+            if (defaultTransformer != null) {
+                nodes = defaultTransformer!!.invoke(source, this)
+                return nodes
+            }
             throw IllegalStateException("Unable to translate node $source")
         }
     }
@@ -240,6 +245,12 @@ protected fun <S : Any, T : NodeLike> getNodeTransformer(sourceType: KClass<*>):
         nodeTransformers[concept] = nodeTransformer
         return nodeTransformer
     }
+
+     fun registerDefaultNodeTransformer(
+         transformer: DefaulTransformer,
+     ) {
+         defaultTransformer = transformer
+     }
 
 //    fun <S : Any?, T : NodeLike> registerNodeTransformer(
 //        concept: ConceptLike,
@@ -464,4 +475,20 @@ protected fun <S : Any, T : NodeLike> getNodeTransformer(sourceType: KClass<*>):
         issues.add(issue)
         return issue
     }
+}
+
+/**
+ * Translate the given node and ensure a certain type will be obtained.
+ *
+ * Example:
+ * ```
+ * JPostIncrementExpr(translateCasted<JExpression>(expression().first()))
+ * ```
+ */
+fun <T> MPASTTransformer.translateCasted(original: Any): T {
+    val result = transform(original)
+    if (result is Nothing) {
+        throw IllegalStateException("Transformation produced Nothing")
+    }
+    return result as T
 }

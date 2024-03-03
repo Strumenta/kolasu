@@ -3,6 +3,7 @@ package com.strumeta.kolasu.transformation
 import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.model.MPNode
 import com.strumenta.kolasu.transformation.MPASTTransformer
+import com.strumenta.kolasu.transformation.translateCasted
 import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -46,7 +47,7 @@ class TransformationTest {
     fun transformerIntInIntLiteral() {
         val original = 3
         val transformer = MPASTTransformer()
-        transformer.registerNodeTransformer<Int, FIntLiteral>(FIntLiteral::class) { a, b, c ->
+        transformer.registerNodeTransformer<Int, FIntLiteral>(Int::class) { a, b, c ->
             FIntLiteral(a * 2)
         }
 
@@ -57,10 +58,12 @@ class TransformationTest {
     fun transformerParseTreeIntoAstWithSpecificTransformes() {
         val original = ParseTreeSumExpr(ParseTreeIntLiteral(1), ParseTreeIntLiteral(2))
         val transformer = MPASTTransformer()
-        TODO("register specific transformers")
-//        transformer.registerNodeTransformer<Int, FIntLiteral>(FIntLiteral::class.concept) { a, b, c ->
-//            FIntLiteral(a * 2)
-//        }
+        transformer.registerNodeTransformer<ParseTreeIntLiteral, FIntLiteral>(ParseTreeIntLiteral::class) { a, b, c ->
+            FIntLiteral(a.value)
+        }
+        transformer.registerNodeTransformer<ParseTreeSumExpr, FSumExpr>(ParseTreeSumExpr::class) { a, b, c ->
+            FSumExpr(b.translateCasted(a.left), b.translateCasted(a.right))
+        }
 
         assertEquals(FSumExpr(FIntLiteral(1), FIntLiteral(2)), transformer.transform(original))
     }
@@ -69,10 +72,16 @@ class TransformationTest {
     fun transformerParseTreeIntoAstWithDefaultTransformer() {
         val original = ParseTreeSumExpr(ParseTreeIntLiteral(1), ParseTreeIntLiteral(2))
         val transformer = MPASTTransformer()
-        TODO("register default transformer")
-//        transformer.registerNodeTransformer<Int, FIntLiteral>(FIntLiteral::class.concept) { a, b, c ->
-//            FIntLiteral(a * 2)
-//        }
+
+        transformer.registerDefaultNodeTransformer { source, astTransformer, ->
+            // Here we should use some logic that consumes the entity model
+            // we do not have that, so we do something simpler
+            when(source) {
+                is ParseTreeSumExpr -> listOf(FSumExpr(astTransformer.translateCasted(source.left), astTransformer.translateCasted(source.right)))
+                is ParseTreeIntLiteral -> listOf(FIntLiteral(source.value))
+                else -> TODO()
+            }
+        }
 
         assertEquals(FSumExpr(FIntLiteral(1), FIntLiteral(2)), transformer.transform(original))
     }
