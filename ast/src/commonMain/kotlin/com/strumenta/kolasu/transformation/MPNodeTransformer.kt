@@ -38,7 +38,7 @@ val c = 3
 //    }
 
          companion object {
-        fun <Source, Output : NodeLike> single(
+        fun <Source: Any, Output : NodeLike> single(
             singleConstructor: (Source, MPASTTransformer, MPNodeTransformer<Source, Output>) -> Output?,
 //            children: MutableMap<String, ChildNodeTransformer<Source, *, *>?> = mutableMapOf(),
 //            finalizer: (Output) -> Unit = {},

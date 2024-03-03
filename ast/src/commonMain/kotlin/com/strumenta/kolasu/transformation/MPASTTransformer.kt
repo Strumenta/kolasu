@@ -50,7 +50,7 @@ val a = 1
     /**
      * NodeTransformers that map from source tree node to target tree node.
      */
-    private val nodeTransformers = mutableMapOf<ConceptLike, MPNodeTransformer<*, *>>()
+    private val nodeTransformers = mutableMapOf<KClass<*>, MPNodeTransformer<*, *>>()
 //
 //    private val _knownClasses = mutableMapOf<String, MutableSet<KClass<*>>>()
 //    val knownClasses: Map<String, Set<KClass<*>>> = _knownClasses
@@ -59,11 +59,11 @@ val a = 1
      * This ensures that the generated value is a single Node or null.
      */
     @JvmOverloads
-    fun transform(
-        source: NodeLike?,
+    fun <S:Any, T: NodeLike>transform(
+        source: S?,
         parent: NodeLike? = null,
     ): NodeLike? {
-        val result = transformIntoNodes(source, parent)
+        val result = transformIntoNodes<S>(source, parent)
         return when (result.size) {
             0 -> null
             1 -> {
@@ -81,8 +81,8 @@ val a = 1
      * Performs the transformation of a node and, recursively, its descendants.
      */
     @JvmOverloads
-    open fun transformIntoNodes(
-        source: NodeLike?,
+    protected inline fun <reified S: Any>transformIntoNodes(
+        source: S?,
         parent: NodeLike? = null,
     ): List<NodeLike> {
         if (source == null) {
@@ -92,11 +92,12 @@ val a = 1
             throw Error("Mapping error: received collection when value was expected")
         }
         val nodes: List<NodeLike>
-        val transformer = getNodeTransformer<NodeLike, NodeLike>(source.concept)
+
+        val transformer = getNodeTransformer<S, NodeLike>(S::class)
         if (transformer != null) {
             nodes = makeNodes(transformer, source)
             if (!transformer.skipChildren && !transformer.childrenSetAtConstruction) {
-                nodes.forEach { node -> setChildren(transformer, source, node) }
+                nodes.forEach { node -> setChildren(transformer as MPNodeTransformer<Any, NodeLike>, source, node) }
             }
             nodes.forEach { node ->
                 transformer.finalizer(node)
@@ -108,8 +109,8 @@ val a = 1
         }
     }
 
-    private fun setChildren(
-        transformer: MPNodeTransformer<NodeLike, NodeLike>,
+    protected fun setChildren(
+        transformer: MPNodeTransformer<Any, NodeLike>,
         source: Any,
         node: NodeLike,
     ) {
@@ -172,7 +173,7 @@ val a = 1
 //        return source
 //    }
 //
-    protected open fun <S : NodeLike, T : NodeLike> makeNodes(
+    protected open fun <S : Any, T : NodeLike> makeNodes(
         transformer: MPNodeTransformer<S, T>,
         source: S,
         allowGenericNode: Boolean = true,
@@ -196,30 +197,58 @@ val a = 1
         return nodes
     }
 //
-    protected fun <S : Any, T : NodeLike> getNodeTransformer(concept: ConceptLike): MPNodeTransformer<S, T>? {
-        val nodeTransformer = nodeTransformers[concept]
-        if (nodeTransformer != null) {
-            return nodeTransformer as MPNodeTransformer<S, T>
-        } else {
-            // TODO here we should get the Concept and all of its super concepts
-             for (superConcept in concept.superConceptLikes) {
-                 val superClassNodeTransformer = getNodeTransformer<S, T>(superConcept)
-                 if (superClassNodeTransformer != null) {
-                     return superClassNodeTransformer
-                 }
-             }
-        }
-        return null
+protected fun <S : Any, T : NodeLike> getNodeTransformer(sourceType: KClass<*>): MPNodeTransformer<S, T>? {
+    println("nodeTransformers: $nodeTransformers")
+    println("sourceType: $sourceType")
+    val nodeTransformer = nodeTransformers[sourceType]
+    if (nodeTransformer != null) {
+        return nodeTransformer as MPNodeTransformer<S, T>
+    } else {
+        // TODO here we should get the Concept and all of its super concepts
+        // TODO here for classes that we know are mapped to concepts we also consider super concepts
+//        for (superConcept in concept.superConceptLikes) {
+//            val superClassNodeTransformer = getNodeTransformer<S, T>(superConcept)
+//            if (superClassNodeTransformer != null) {
+//                return superClassNodeTransformer
+//            }
+//        }
+    }
+    return null
 }
 
-    fun <S : NodeLike, T : NodeLike> registerNodeTransformer(
-        concept: ConceptLike,
+//    protected fun <S : Any, T : NodeLike> getNodeTransformer(concept: ConceptLike): MPNodeTransformer<S, T>? {
+//        val nodeTransformer = nodeTransformers[concept]
+//        if (nodeTransformer != null) {
+//            return nodeTransformer as MPNodeTransformer<S, T>
+//        } else {
+//            // TODO here we should get the Concept and all of its super concepts
+//             for (superConcept in concept.superConceptLikes) {
+//                 val superClassNodeTransformer = getNodeTransformer<S, T>(superConcept)
+//                 if (superClassNodeTransformer != null) {
+//                     return superClassNodeTransformer
+//                 }
+//             }
+//        }
+//        return null
+//}
+
+     fun <S : Any, T : NodeLike> registerNodeTransformer(
+        concept: KClass<*>,
         transformer: (S, MPASTTransformer, MPNodeTransformer<S, T>) -> T?,
     ): MPNodeTransformer<S, T> {
-        val nodeTransformer = MPNodeTransformer.single(transformer)
+        val nodeTransformer = MPNodeTransformer.single<S, T>(transformer)
         nodeTransformers[concept] = nodeTransformer
         return nodeTransformer
     }
+
+//    fun <S : Any?, T : NodeLike> registerNodeTransformer(
+//        concept: ConceptLike,
+//        transformer: (S, MPASTTransformer, MPNodeTransformer<S, T>) -> T?,
+//    ): MPNodeTransformer<S, T> {
+//        val nodeTransformer = MPNodeTransformer.single(transformer)
+//        nodeTransformers[concept] = nodeTransformer
+//        return nodeTransformer
+//    }
 //
 //    fun <S : Any, T : NodeLike> registerMultipleNodeTransformer(
 //        kclass: KClass<S>,

@@ -15,11 +15,18 @@ data class FIntLiteral(val value: Int) : FExpression() {
     }
 }
 
+data class FSumExpr(val left: FExpression, val right: FExpression) : FExpression()
+
 val KClass<FIntLiteral>.concept : Concept
     get() {
     val c = Concept("FIntLiteral")
     return c
 }
+
+sealed class ParseTreeExpr
+class ParseTreeSumExpr(val left: ParseTreeExpr, val right: ParseTreeExpr) : ParseTreeExpr()
+class ParseTreeIntLiteral(val value: Int): ParseTreeExpr()
+
 
 
 class TransformationTest {
@@ -28,11 +35,46 @@ class TransformationTest {
     fun transformerThatDoubleValue() {
         val original = FIntLiteral(3)
         val transformer = MPASTTransformer()
-        transformer.registerNodeTransformer<FIntLiteral, FIntLiteral>(FIntLiteral::class.concept) { a, b, c ->
+        transformer.registerNodeTransformer<FIntLiteral, FIntLiteral>(FIntLiteral::class) { a, b, c ->
             FIntLiteral(a.value * 2)
         }
 
         assertEquals(FIntLiteral(6), transformer.transform(original))
+    }
+
+    @Test
+    fun transformerIntInIntLiteral() {
+        val original = 3
+        val transformer = MPASTTransformer()
+        transformer.registerNodeTransformer<Int, FIntLiteral>(FIntLiteral::class) { a, b, c ->
+            FIntLiteral(a * 2)
+        }
+
+        assertEquals(FIntLiteral(6), transformer.transform(original))
+    }
+
+    @Test
+    fun transformerParseTreeIntoAstWithSpecificTransformes() {
+        val original = ParseTreeSumExpr(ParseTreeIntLiteral(1), ParseTreeIntLiteral(2))
+        val transformer = MPASTTransformer()
+        TODO("register specific transformers")
+//        transformer.registerNodeTransformer<Int, FIntLiteral>(FIntLiteral::class.concept) { a, b, c ->
+//            FIntLiteral(a * 2)
+//        }
+
+        assertEquals(FSumExpr(FIntLiteral(1), FIntLiteral(2)), transformer.transform(original))
+    }
+
+    @Test
+    fun transformerParseTreeIntoAstWithDefaultTransformer() {
+        val original = ParseTreeSumExpr(ParseTreeIntLiteral(1), ParseTreeIntLiteral(2))
+        val transformer = MPASTTransformer()
+        TODO("register default transformer")
+//        transformer.registerNodeTransformer<Int, FIntLiteral>(FIntLiteral::class.concept) { a, b, c ->
+//            FIntLiteral(a * 2)
+//        }
+
+        assertEquals(FSumExpr(FIntLiteral(1), FIntLiteral(2)), transformer.transform(original))
     }
 
 }
