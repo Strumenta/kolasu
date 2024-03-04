@@ -1,7 +1,5 @@
 package com.strumenta.kolasu.semantics.scope.description
 
-import com.strumenta.kolasu.ids.NodeIdProvider
-import com.strumenta.kolasu.ids.StructuralNodeIdProvider
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
@@ -12,7 +10,6 @@ import com.strumenta.kolasu.semantics.symbol.description.SymbolDescription
  **/
 fun scope(
     ignoreCase: Boolean = false,
-    nodeIdProvider: NodeIdProvider = StructuralNodeIdProvider(),
     init: ScopeDescriptionApi.() -> Unit
 ): ScopeDescription = ScopeDescription(ignoreCase).apply(init)
 
@@ -38,9 +35,7 @@ fun scope(
  *
  **/
 class ScopeDescription(
-    private val ignoreCase: Boolean = false,
-    private val nodeIdProvider: NodeIdProvider = StructuralNodeIdProvider()
-
+    private val ignoreCase: Boolean = false
 ) : ScopeDescriptionApi {
     private var parent: ScopeDescription? = null
     private val namesToExternalSymbolIdentifiers: MutableMap<String, String> = mutableMapOf()
@@ -93,7 +88,7 @@ class ScopeDescription(
         ignoreCase: Boolean,
         init: ScopeDescriptionApi.() -> Unit
     ) {
-        this.parent = scope(ignoreCase, nodeIdProvider, init)
+        this.parent = scope(ignoreCase, init)
     }
 
     /**
