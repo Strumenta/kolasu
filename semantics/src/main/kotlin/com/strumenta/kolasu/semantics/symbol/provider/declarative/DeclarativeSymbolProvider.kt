@@ -77,8 +77,8 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
         return (node as NodeTy).let {
             this.specification(DeclarativeSymbolProviderRuleContext(node, symbolProvider))
             SymbolDescription(
-                nodeIdProvider.id(node),
                 getName(node),
+                nodeIdProvider.id(node),
                 getTypes(node),
                 getProperties(nodeIdProvider, node)
             )
