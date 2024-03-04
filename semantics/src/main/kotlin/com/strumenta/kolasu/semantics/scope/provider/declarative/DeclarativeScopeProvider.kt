@@ -81,7 +81,7 @@ class DeclarativeScopeProviderRule<NodeTy : Node>(
         node: Node,
         nodeIdProvider: NodeIdProvider
     ): ScopeDescription {
-        return ScopeDescription(this.ignoreCase, nodeIdProvider = nodeIdProvider).apply {
+        return ScopeDescription(this.ignoreCase).apply {
             @Suppress("UNCHECKED_CAST")
             val context = DeclarativeScopeProviderRuleContext(node as NodeTy, scopeProvider)
             this.specification(context)
