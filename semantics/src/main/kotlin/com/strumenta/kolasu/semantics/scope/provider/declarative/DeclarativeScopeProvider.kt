@@ -1,7 +1,5 @@
 package com.strumenta.kolasu.semantics.scope.provider.declarative
 
-import com.strumenta.kolasu.ids.NodeIdProvider
-import com.strumenta.kolasu.ids.StructuralNodeIdProvider
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
@@ -48,19 +46,16 @@ inline fun <
  * ```
  **/
 open class DeclarativeScopeProvider(
-    open var nodeIdProvider: NodeIdProvider = StructuralNodeIdProvider(),
     vararg rules: DeclarativeScopeProviderRule<out Node>
 ) : ScopeProvider {
     private val rules: List<DeclarativeScopeProviderRule<out Node>> = rules.sorted()
-
-    constructor(vararg rules: DeclarativeScopeProviderRule<out Node>) : this(StructuralNodeIdProvider(), *rules)
 
     override fun <NodeType : Node> scopeFor(
         node: NodeType,
         reference: KProperty1<in NodeType, ReferenceByName<out PossiblyNamed>?>
     ): ScopeDescription {
         return this.rules.firstOrNull { it.canBeInvokedWith(node::class, reference) }
-            ?.invoke(this, node, nodeIdProvider)
+            ?.invoke(this, node)
             ?: throw RuntimeException(
                 "Cannot find scoping rule for reference ${node::class.qualifiedName}::${reference.name}"
             )
@@ -75,11 +70,10 @@ class DeclarativeScopeProviderRule<NodeTy : Node>(
     private val propertyName: String,
     private val ignoreCase: Boolean,
     private val specification: ScopeDescription.(DeclarativeScopeProviderRuleContext<NodeTy>) -> Unit
-) : (ScopeProvider, Node, NodeIdProvider) -> ScopeDescription, Comparable<DeclarativeScopeProviderRule<out Node>> {
+) : (ScopeProvider, Node) -> ScopeDescription, Comparable<DeclarativeScopeProviderRule<out Node>> {
     override fun invoke(
         scopeProvider: ScopeProvider,
-        node: Node,
-        nodeIdProvider: NodeIdProvider
+        node: Node
     ): ScopeDescription {
         return ScopeDescription(this.ignoreCase).apply {
             @Suppress("UNCHECKED_CAST")
