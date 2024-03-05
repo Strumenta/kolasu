@@ -71,7 +71,7 @@ class SymbolResolutionWithSRITest {
                     define(it)
                 }
             }
-        ).apply { this.nodeIdProvider = nodeIdProvider }
+        )
         val symbolResolver = SR(scopeProvider)
 
         assertEquals(false, todo2.prerequisite!!.resolved)
@@ -138,7 +138,7 @@ class SymbolResolutionWithSRITest {
                     define(it.name!!, it)
                 }
             }
-        ).apply { this.nodeIdProvider = nodeIdProvider }
+        )
 
         // We can now resolve _only_ the nodes in the current AST, so we do not specify other ASTs
         val symbolResolver = SR(scopeProvider)
