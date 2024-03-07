@@ -1,8 +1,11 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.language.KolasuLanguage
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.model.withPosition
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import kotlin.test.Test
@@ -284,6 +287,39 @@ class LionWebModelConverterTest {
         expectedAST.assignParents()
 
         assertASTsAreEqual(expectedAST, kAST)
+    }
+
+    @Test
+    fun serializeAndDeserializePosition() {
+        val mConverter = LionWebModelConverter()
+        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
+            addClass(SimpleRoot::class)
+        }
+        mConverter.exportLanguageToLionWeb(kLanguage)
+
+        val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
+            .withPosition(Position(Point(1, 1), Point(1, 10)))
+        a1.ref.referred = a1
+        val b2 = SimpleNodeB("some magic value")
+            .withPosition(Position(Point(2, 1), Point(2, 10)))
+        val b3_1 = SimpleNodeB("some other value")
+            .withPosition(Position(Point(2, 21), Point(2, 30)))
+        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b3_1)
+            .withPosition(Position(Point(3, 4), Point(3, 12)))
+        val initialAst = SimpleRoot(
+            12345,
+            mutableListOf(
+                a1,
+                b2,
+                a3
+            )
+        )
+        initialAst.assignParents()
+
+        val lwAST = mConverter.exportModelToLionWeb(initialAst)
+        val deserializedAST = mConverter.importModelFromLionWeb(lwAST)
+
+        assertASTsAreEqual(initialAst, deserializedAST, considerPosition = true)
     }
 
     @Test
