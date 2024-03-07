@@ -7,6 +7,7 @@ import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.withPosition
 import com.strumenta.kolasu.testing.assertASTsAreEqual
+import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,10 +21,14 @@ class LionWebModelConverterTest {
   "serializationFormatVersion": "2023.1",
   "languages": [
     {
-      "version": "1",
-      "key": "com-strumenta-SimpleLang"
+      "key": "com-strumenta-SimpleLang",
+      "version": "1"
     },
-        {
+    {
+      "key": "com_strumenta_starlasu",
+      "version": "1"
+    },
+    {
       "key": "LionCore-builtins",
       "version": "2023.1"
     }
@@ -58,6 +63,14 @@ class LionWebModelConverterTest {
             "UNKNOWN_SOURCE_root_childrez_1",
             "UNKNOWN_SOURCE_root_childrez_2"
           ]
+        },
+        {
+          "containment": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-position-key"
+          },
+          "children": []
         }
       ],
       "references": [],
@@ -87,6 +100,14 @@ class LionWebModelConverterTest {
             "language": "com-strumenta-SimpleLang",
             "version": "1",
             "key": "com-strumenta-SimpleLang_SimpleNodeA_child"
+          },
+          "children": []
+        },
+        {
+          "containment": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-position-key"
           },
           "children": []
         }
@@ -126,7 +147,16 @@ class LionWebModelConverterTest {
           "value": "some magic value"
         }
       ],
-      "containments": [],
+      "containments": [
+        {
+          "containment": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-position-key"
+          },
+          "children": []
+        }
+      ],
       "references": [],
       "annotations": [],
       "parent": "UNKNOWN_SOURCE_root"
@@ -158,6 +188,14 @@ class LionWebModelConverterTest {
           "children": [
             "UNKNOWN_SOURCE_root_childrez_2_child"
           ]
+        },
+        {
+          "containment": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-position-key"
+          },
+          "children": []
         }
       ],
       "references": [
@@ -195,7 +233,16 @@ class LionWebModelConverterTest {
           "value": "some other value"
         }
       ],
-      "containments": [],
+      "containments": [
+        {
+          "containment": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-position-key"
+          },
+          "children": []
+        }
+      ],
       "references": [],
       "annotations": [],
       "parent": "UNKNOWN_SOURCE_root_childrez_2"
@@ -269,7 +316,7 @@ class LionWebModelConverterTest {
         }
         mConverter.exportLanguageToLionWeb(kLanguage)
         val lwAST = mConverter.deserializeToNodes(serialized).first()
-        val kAST = mConverter.importModelFromLionWeb(lwAST)
+        val kAST = mConverter.importModelFromLionWeb(lwAST) as KNode
 
         val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
         a1.ref.referred = a1
@@ -287,6 +334,19 @@ class LionWebModelConverterTest {
         expectedAST.assignParents()
 
         assertASTsAreEqual(expectedAST, kAST)
+    }
+
+    @Test
+    fun kolasuNodesExtendsLionWebASTNode() {
+        val mConverter = LionWebModelConverter()
+        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
+            addClass(SimpleRoot::class)
+        }
+        val lwLanguage = mConverter.exportLanguageToLionWeb(kLanguage)
+        assertEquals(4, lwLanguage.elements.filterIsInstance<Concept>().size)
+        lwLanguage.elements.filterIsInstance<Concept>().forEach { concept ->
+            assertEquals(true, concept.allAncestors().contains(StarLasuLWLanguage.ASTNode))
+        }
     }
 
     @Test
@@ -317,7 +377,16 @@ class LionWebModelConverterTest {
         initialAst.assignParents()
 
         val lwAST = mConverter.exportModelToLionWeb(initialAst)
-        val deserializedAST = mConverter.importModelFromLionWeb(lwAST)
+        assertEquals(0, lwAST.getChildrenByContainmentName("position").size)
+        assertEquals(3, lwAST.children.size)
+        val lwASTChild0 = lwAST.children[0]
+        assertEquals(1, lwASTChild0.getChildrenByContainmentName("position").size)
+        val lwASTChild1 = lwAST.children[1]
+        assertEquals(1, lwASTChild1.getChildrenByContainmentName("position").size)
+        val lwASTChild2 = lwAST.children[2]
+        assertEquals(1, lwASTChild2.getChildrenByContainmentName("position").size)
+
+        val deserializedAST = mConverter.importModelFromLionWeb(lwAST) as KNode
 
         assertASTsAreEqual(initialAst, deserializedAST, considerPosition = true)
     }

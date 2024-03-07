@@ -13,7 +13,10 @@ interface SourceIdProvider {
 }
 
 abstract class AbstractSourceIdProvider : SourceIdProvider {
-    protected fun cleanId(id: String) = id.replace('.', '-').replace('/', '-')
+    protected fun cleanId(id: String) = id
+        .replace('.', '-')
+        .replace('/', '-')
+        .replace(' ', '_')
 }
 
 class SimpleSourceIdProvider : AbstractSourceIdProvider() {
