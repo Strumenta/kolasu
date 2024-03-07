@@ -5,6 +5,7 @@ import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.allFeatures
+import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.traversing.walk
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
@@ -149,6 +150,7 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
                 ?: throw RuntimeException("We do not have StarLasu AST class for LIonWeb Concept ${lwNode.concept}")
             try {
                 val kNode: com.strumenta.kolasu.model.Node = instantiate(kClass, lwNode, referencesPostponer)
+                kNode.assignParents()
                 associateNodes(kNode, lwNode)
             } catch (e: RuntimeException) {
                 throw RuntimeException("Issue instantiating $kClass from LionWeb node $lwNode", e)
