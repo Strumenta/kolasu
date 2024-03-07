@@ -3,6 +3,7 @@ package com.strumenta.kolasu.model
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
+import com.strumenta.kolasu.traversing.walk
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -112,9 +113,28 @@ open class Node() : Origin, Destination, Serializable {
             this.positionOverride = position
         }
 
+    private var explicitlySetSource: Source? = null
+
     @property:Internal
-    override val source: Source?
-        get() = origin?.source
+    override var source: Source?
+        get() = explicitlySetSource ?: origin?.source
+        set(value) {
+            // This is a limit of the current API: to specify a Source we need to specify coordinates
+            if (this.position == null) {
+                explicitlySetSource = value
+            } else {
+                this.origin = SimpleOrigin(this.position!!.copy(source = value))
+            }
+            require(this.source === value)
+        }
+
+    fun setSourceForTree(source: Source): Node {
+        this.source = source
+        this.walk().forEach {
+            it.source = source
+        }
+        return this
+    }
 
     fun detach(keepPosition: Boolean = true, keepSourceText: Boolean = false) {
         val existingOrigin = origin

@@ -2,6 +2,8 @@ package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.language.KolasuLanguage
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.allFeatures
@@ -44,7 +46,12 @@ interface PrimitiveValueSerialization<E> {
  */
 class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionWebNodeIdProvider()) {
     private val languageConverter = LionWebLanguageConverter()
-    private val nodesMapping = BiMap<KNode, LWNode>(usingIdentity = true)
+
+    /**
+     * We mostly map Kolasu Nodes to LionWeb Nodes, but we also map things that are not Kolasu Nodes such
+     * as instances of Position and Point.
+     */
+    private val nodesMapping = BiMap<Any, LWNode>(usingIdentity = true)
     private val primitiveValueSerializations = mutableMapOf<KClass<*>, PrimitiveValueSerialization<*>>()
 
     fun clearNodesMapping() {
@@ -96,12 +103,44 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
                         }
 
                         is Containment -> {
-                            val kContainment = kFeatures.find { it.name == feature.name }
-                                as com.strumenta.kolasu.language.Containment
-                            val kValue = kNode.getChildren(kContainment)
-                            kValue.forEach { kChild ->
-                                val lwChild = nodesMapping.byA(kChild)!!
-                                lwNode.addChild(feature, lwChild)
+                            try {
+                                if (feature == StarLasuLWLanguage.ASTNodePosition) {
+                                    if (kNode.position != null) {
+                                        val lwPositionStartValue = DynamicNode(
+                                            lwNode.id + "_position_start",
+                                            StarLasuLWLanguage.Point
+                                        )
+                                        lwPositionStartValue.setPropertyValueByName("line", kNode.position!!.start.line)
+                                        lwPositionStartValue.setPropertyValueByName(
+                                            "column",
+                                            kNode.position!!.start.column
+                                        )
+
+                                        val lwPositionEndValue = DynamicNode(
+                                            lwNode.id + "_position_end",
+                                            StarLasuLWLanguage.Point
+                                        )
+                                        lwPositionEndValue.setPropertyValueByName("line", kNode.position!!.end.line)
+                                        lwPositionEndValue.setPropertyValueByName("column", kNode.position!!.end.column)
+
+                                        val lwPositionValue =
+                                            DynamicNode(lwNode.id + "_position", StarLasuLWLanguage.Position)
+                                        lwPositionValue.addChild(StarLasuLWLanguage.PositionStart, lwPositionStartValue)
+                                        lwPositionValue.addChild(StarLasuLWLanguage.PositionEnd, lwPositionEndValue)
+
+                                        lwNode.addChild(StarLasuLWLanguage.ASTNodePosition, lwPositionValue)
+                                    }
+                                } else {
+                                    val kContainment = kFeatures.find { it.name == feature.name }
+                                        as com.strumenta.kolasu.language.Containment
+                                    val kValue = kNode.getChildren(kContainment)
+                                    kValue.forEach { kChild ->
+                                        val lwChild = nodesMapping.byA(kChild)!!
+                                        lwNode.addChild(feature, lwChild)
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                throw RuntimeException("Issue while processing containment ${feature.name}", e)
                             }
                         }
 
@@ -143,22 +182,30 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
         return result
     }
 
-    fun importModelFromLionWeb(lwTree: LWNode): KNode {
+    fun importModelFromLionWeb(lwTree: LWNode): Any {
         val referencesPostponer = ReferencesPostponer()
         lwTree.thisAndAllDescendants().reversed().forEach { lwNode ->
             val kClass = languageConverter.correspondingKolasuClass(lwNode.concept)
                 ?: throw RuntimeException("We do not have StarLasu AST class for LIonWeb Concept ${lwNode.concept}")
             try {
-                val kNode: com.strumenta.kolasu.model.Node = instantiate(kClass, lwNode, referencesPostponer)
-                kNode.assignParents()
-                associateNodes(kNode, lwNode)
+                val instantiated = instantiate(kClass, lwNode, referencesPostponer)
+                if (instantiated is KNode) {
+                    instantiated.assignParents()
+                }
+                associateNodes(instantiated, lwNode)
             } catch (e: RuntimeException) {
                 throw RuntimeException("Issue instantiating $kClass from LionWeb node $lwNode", e)
             }
         }
         lwTree.thisAndAllDescendants().forEach { lwNode ->
-            val kNode: com.strumenta.kolasu.model.Node = nodesMapping.byB(lwNode)!!
+            val kNode = nodesMapping.byB(lwNode)!!
             // TODO populate values not already set at construction time
+            if (kNode is KNode) {
+                val lwPosition = lwNode.getOnlyChildByContainmentName("position")
+                if (lwPosition != null) {
+                    kNode.position = nodesMapping.byB(lwPosition) as Position
+                }
+            }
         }
         referencesPostponer.populateReferences(nodesMapping)
         return nodesMapping.byB(lwTree)!!
@@ -259,7 +306,7 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
             values[referenceByName] = referred
         }
 
-        fun populateReferences(nodesMapping: BiMap<KNode, LWNode>) {
+        fun populateReferences(nodesMapping: BiMap<Any, LWNode>) {
             values.forEach { entry ->
                 if (entry.value == null) {
                     entry.key.referred = null
@@ -274,8 +321,28 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
         }
     }
 
-    private fun instantiate(kClass: KClass<*>, data: Node, referencesPostponer: ReferencesPostponer):
-        com.strumenta.kolasu.model.Node {
+    private fun <T : Any> instantiate(kClass: KClass<T>, data: Node, referencesPostponer: ReferencesPostponer):
+        T {
+        if (kClass == Position::class) {
+            val start = instantiate(
+                Point::class,
+                data.getOnlyChildByContainmentName("start")!!,
+                referencesPostponer
+            ) as Point
+            val end = instantiate(
+                Point::class,
+                data.getOnlyChildByContainmentName("end")!!,
+                referencesPostponer
+            ) as Point
+            return Position(start, end) as T
+        }
+        if (kClass == Point::class) {
+            return Point(
+                data.getPropertyValueByName("line") as Int,
+                data.getPropertyValueByName("column") as Int
+            ) as T
+        }
+
         val constructor: KFunction<Any> = when {
             kClass.constructors.size == 1 -> {
                 kClass.constructors.first()
@@ -364,7 +431,7 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
             }
         }
         try {
-            return constructor.callBy(params) as com.strumenta.kolasu.model.Node
+            return constructor.callBy(params) as T
         } catch (e: Exception) {
             throw RuntimeException(
                 "Issue instantiating using constructor $constructor with params " +
@@ -378,7 +445,7 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
         return languageConverter.correspondingConcept(kNode.javaClass.kotlin)
     }
 
-    private fun associateNodes(kNode: KNode, lwNode: LWNode) {
+    private fun associateNodes(kNode: Any, lwNode: LWNode) {
         nodesMapping.associate(kNode, lwNode)
     }
 }

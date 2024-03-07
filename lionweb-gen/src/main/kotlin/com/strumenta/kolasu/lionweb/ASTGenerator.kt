@@ -13,6 +13,7 @@ import com.squareup.kotlinpoet.asTypeName
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeType
+import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.ReferenceByName
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
@@ -79,7 +80,9 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                         } else {
                             typeSpec.superclass(typeName(element.extendedConcept!!))
                             (element.extendedConcept as Concept).allFeatures().forEach {
-                                typeSpec.addSuperclassConstructorParameter(it.name!!)
+                                if (it != StarLasuLWLanguage.ASTNodePosition) {
+                                    typeSpec.addSuperclassConstructorParameter(it.name!!)
+                                }
                             }
                         }
                         element.implemented.forEach {
@@ -87,10 +90,18 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                         }
                         val constructor = FunSpec.constructorBuilder()
                         element.inheritedFeatures().forEach { feature ->
-                            processFeature(feature, constructor, typeSpec, true, element.isAbstract)
+                            if (feature == StarLasuLWLanguage.ASTNodePosition) {
+                                // skip it
+                            } else {
+                                processFeature(feature, constructor, typeSpec, true, element.isAbstract)
+                            }
                         }
                         element.features.forEach { feature ->
-                            processFeature(feature, constructor, typeSpec, false, element.isAbstract)
+                            if (feature == StarLasuLWLanguage.ASTNodePosition) {
+                                // skip it
+                            } else {
+                                processFeature(feature, constructor, typeSpec, false, element.isAbstract)
+                            }
                         }
                         if (constructor.parameters.isNotEmpty()) {
                             typeSpec.primaryConstructor(constructor.build())
@@ -218,6 +229,9 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
             }
             classifier.id == LionCoreBuiltins.getINamed().id -> {
                 Named::class.java.asTypeName()
+            }
+            classifier.id == StarLasuLWLanguage.Position.id -> {
+                Position::class.java.asTypeName()
             }
             classifier.language == this.language -> {
                 ClassName(packageName, classifier.name!!)
