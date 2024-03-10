@@ -2,6 +2,7 @@
 
 package com.strumenta.kolasu.kcp
 
+import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.model.MPNode
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
@@ -15,10 +16,12 @@ import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
+import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
+import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrAnonymousInitializerSymbolImpl
@@ -123,8 +126,19 @@ class FieldObservableExtension(
 
                             this.dispatchReceiver = irGet(thisParameter)
 
-                            // "<name of property>"
-                            putValueArgument(0, declaration.name.identifier.toIrConst(irContext.irBuiltIns.stringType))
+                            // attribute myClass.concept.attribute(attributeName)
+                            val companionClass = declaration.parentAsClass.declarations.filterIsInstance<IrClass>().find { it.isCompanion }!!
+                            val attributeMethod = pluginContext.referenceFunctions(Concept::class, "attribute").single()
+                            val attributeName = declaration.name.identifier.toIrConst(irContext.irBuiltIns.stringType)
+
+                            val companionInstance = TODO("get companion instance")
+                            val concept : IrExpression = TODO("GET THE CONCEPT FROM THE COMPANION")
+
+                            val attribute = irCall(attributeMethod).apply {
+                                dispatchReceiver = concept
+                                putValueArgument(0, attributeName)
+                            }
+                            putValueArgument(0, attribute)
                             // current backing field value
                             putValueArgument(1, irGetField(irGet(thisParameter), declaration.backingField!!))
                             // value passed to the setter

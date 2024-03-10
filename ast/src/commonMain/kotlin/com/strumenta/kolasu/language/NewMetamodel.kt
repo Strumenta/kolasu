@@ -25,12 +25,20 @@ class StarLasuLanguage {
 
 sealed class ConceptLike {
     abstract val superConceptLikes: List<ConceptLike>
+    val features : MutableList<Feature> = mutableListOf()
+    abstract val allFeatures : List<Feature>
+    val allAttributes : List<Attribute>
+        get() = allFeatures.filterIsInstance<Attribute>()
+    fun feature(name: String) : Feature? = allFeatures.find { it.name == name }
+    fun attribute(name: String) : Attribute? = allAttributes.find { it.name == name }
 }
 
 class ConceptInterface : ConceptLike() {
     var superInterfaces: MutableList<ConceptInterface> = mutableListOf()
     override val superConceptLikes: List<ConceptLike>
         get() = superInterfaces
+    override val allFeatures: List<Feature>
+        get() = TODO("Not yet implemented")
 }
 
 class Concept(
@@ -64,4 +72,7 @@ class Concept(
     }
 
     override fun hashCode(): Int = name.hashCode()
+
+    override val allFeatures: List<Feature>
+        get() = TODO("Not yet implemented")
 }

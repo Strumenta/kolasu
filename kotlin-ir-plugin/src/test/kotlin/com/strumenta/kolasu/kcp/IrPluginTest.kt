@@ -122,6 +122,7 @@ fun main() {
           package mytest
 
           import com.strumenta.kolasu.model.MPNode
+          import com.strumenta.kolasu.language.Attribute
           import com.strumenta.kolasu.model.NodeLike
           import com.strumenta.kolasu.model.observable.SimpleNodeObserver
 
@@ -130,7 +131,7 @@ fun main() {
 class Foo : MPNode() {
 var p2 : Int = 0 
     set(value) {
-        notifyOfAttributeChange("p2", field, value)
+        notifyOfAttributeChange(Foo.concept.attribute("p2")!!, field, value)
         field = value
     }
 }
@@ -139,11 +140,11 @@ object MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
     override fun <V : Any?>onAttributeChange(
         node: NodeLike,
-        attributeName: String,
+        attribute: Attribute,
         oldValue: V,
         newValue: V
     ) {
-        observations.add("${'$'}attributeName: ${'$'}oldValue -> ${'$'}newValue")
+        observations.add("${'$'}{attribute.name}: ${'$'}oldValue -> ${'$'}newValue")
     }
 
 }
@@ -161,7 +162,7 @@ fun main() {
 """,
                     ),
             )
-        result.assertHasMessage(Regex("i: file:///[a-zA-Z0-9/\\-.]*:6:6 MPNode class mytest.MyNode identified"))
+        result.assertHasMessage(Regex("i: file:///[a-zA-Z0-9/\\-.]*:7:7 MPNode class mytest.MyNode identified"))
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
