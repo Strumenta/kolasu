@@ -2,6 +2,7 @@
 
 package com.strumenta.kolasu.kcp
 
+import com.strumenta.kolasu.language.Concept
 import com.tschuchort.compiletesting.CompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
@@ -551,6 +552,80 @@ fun main() {
         result.invokeMainMethod("mytest.MainKt")
     }
 
+    @Test
+    fun `get concept on class`() {
+        val result =
+            compile(
+                sourceFile =
+                SourceFile.kotlin(
+                    "main.kt",
+                    """
+package mytest
+
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.MPNode
+import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.model.Multiplicity
+import com.strumenta.kolasu.model.observable.ObservableList
+import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.ReferenceByName
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import com.strumenta.kolasu.model.observable.SimpleNodeObserver
+
+data class SimpleNode(var foo: String, var other: SimpleNode? = null) : MPNode()
+
+fun main() {
+    assertEquals("SimpleNode", SimpleNode.concept.name)
+}
+
+""",
+                ),
+            )
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+
+        result.invokeMainMethod("mytest.MainKt")
+    }
+
+    @Test
+    fun `get concept on instance`() {
+        val result =
+            compile(
+                sourceFile =
+                SourceFile.kotlin(
+                    "main.kt",
+                    """
+package mytest
+
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.MPNode
+import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.model.Multiplicity
+import com.strumenta.kolasu.model.observable.ObservableList
+import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.ReferenceByName
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import com.strumenta.kolasu.model.observable.SimpleNodeObserver
+
+data class SimpleNode(var foo: String, var other: SimpleNode? = null) : MPNode()
+
+fun main() {
+    val n1 = SimpleNode("a")
+
+    assertEquals("SimpleNode", n1.concept.name)
+}
+
+""",
+                ),
+            )
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+
+        result.invokeMainMethod("mytest.MainKt")
+    }
+
     private fun CompilationResultWithClassLoader.invokeMainMethod(className: String) {
         val mainKt = this.classLoader.loadClass(className)
         val mainMethod =
@@ -614,3 +689,9 @@ fun compile(
     sourceFile: SourceFile,
     plugin: CompilerPluginRegistrar = StarLasuComponentRegistrar(),
 ): CompilationResultWithClassLoader = compile(listOf(sourceFile), plugin)
+
+//class A {
+//    companion object {
+//        val concept = Concept("A")
+//    }
+//}

@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.fir.types.FirErrorTypeRef
 import org.jetbrains.kotlin.fir.types.classId
 import org.jetbrains.kotlin.fir.types.impl.FirImplicitAnyTypeRef
 import org.jetbrains.kotlin.fir.types.impl.FirResolvedTypeRefImpl
+import org.jetbrains.kotlin.fir.types.impl.FirUserTypeRefImpl
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -36,7 +37,7 @@ class MPNodeGenerator(
 ) : BaseFirExtension(session) {
     override fun generateTopLevelClassLikeDeclaration(classId: ClassId): FirClassLikeSymbol<*>? {
         log("generateTopLevelClassLikeDeclaration $classId")
-        return generateTopLevelClassLikeDeclaration(classId)
+        return super.generateTopLevelClassLikeDeclaration(classId)
     }
 
     override fun generateNestedClassLikeDeclaration(
@@ -162,6 +163,9 @@ fun FirClassSymbol<*>.extendMPNode(firSession: FirSession): Boolean =
             }
             is FirErrorTypeRef -> {
                 false
+            }
+            is FirUserTypeRefImpl -> {
+                it.qualifier.any { it.name.identifier == "MPNode"}
             }
 
             else -> {
