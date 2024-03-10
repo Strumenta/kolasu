@@ -38,17 +38,17 @@ class FieldObservableExtension(
     val pluginContext: IrPluginContext,
     isMPNode: Boolean,
 ) : IrElementTransformerVoidWithContext() {
-    val notifyOfPropertyChange: IrSimpleFunctionSymbol by lazy {
+    val notifyOfAttributeChange: IrSimpleFunctionSymbol by lazy {
         val callableId =
             if (isMPNode) {
                 CallableId(
                     ClassId.topLevel(FqName(MPNode::class.qualifiedName!!)),
-                    Name.identifier("notifyOfPropertyChange"),
+                    Name.identifier("notifyOfAttributeChange"),
                 )
             } else {
                 CallableId(
                     ClassId.topLevel(FqName(Node::class.qualifiedName!!)),
-                    Name.identifier("notifyOfPropertyChange"),
+                    Name.identifier("notifyOfAttributeChange"),
                 )
             }
         pluginContext
@@ -110,9 +110,9 @@ class FieldObservableExtension(
             if (prevBody != null && declaration.setter!!.origin == IrDeclarationOrigin.DEFAULT_PROPERTY_ACCESSOR) {
                 declaration.setter!!.body =
                     DeclarationIrBuilder(irContext, declaration.setter!!.symbol).irBlockBody(declaration.setter!!) {
-                        // notifyOfPropertyChange("<name of property>", field, value)
+                        // notifyOfAttributeChange("<name of property>", field, value)
                         +irCall(
-                            notifyOfPropertyChange,
+                            notifyOfAttributeChange,
                             pluginContext.irBuiltIns.unitType,
                             valueArgumentsCount = 3,
                             typeArgumentsCount = 0,

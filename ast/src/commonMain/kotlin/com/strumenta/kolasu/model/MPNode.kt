@@ -222,12 +222,12 @@ abstract class MPNode : NodeLike {
         this.changes.subscribe(observer)
     }
 
-    fun notifyOfPropertyChange(
-        propertyName: String,
+    fun notifyOfAttributeChange(
+        attribute: Attribute,
         oldValue: Any?,
         newValue: Any?,
     ) {
-        changes.onNext(AttributeChangedNotification(this, propertyName, oldValue, newValue))
+        changes.onNext(AttributeChangedNotification(this, attribute, oldValue, newValue))
     }
 
     @property:Internal

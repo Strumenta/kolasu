@@ -127,12 +127,12 @@ open class Node : NodeLike {
         return "${this.nodeType}(${features.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
     }
 
-    protected fun notifyOfPropertyChange(
-        propertyName: String,
+    protected fun notifyOfAttributeChange(
+        attribute: Attribute,
         oldValue: Any?,
         newValue: Any?,
     ) {
-        changes.onNext(AttributeChangedNotification(this, propertyName, oldValue, newValue))
+        changes.onNext(AttributeChangedNotification(this, attribute, oldValue, newValue))
     }
 
     @Internal

@@ -131,7 +131,7 @@ fun main() {
 class Foo : MPNode() {
 var p2 : Int = 0 
     set(value) {
-        notifyOfPropertyChange("p2", field, value)
+        notifyOfAttributeChange("p2", field, value)
         field = value
     }
 }

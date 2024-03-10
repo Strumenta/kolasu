@@ -2,6 +2,7 @@ package com.strumenta.kolasu.model.observable
 
 import com.badoo.reaktive.disposable.Disposable
 import com.badoo.reaktive.observable.ObservableObserver
+import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.model.AttributeChangedNotification
 import com.strumenta.kolasu.model.ChildAdded
 import com.strumenta.kolasu.model.ChildRemoved
@@ -14,7 +15,7 @@ import com.strumenta.kolasu.model.ReferencedToRemoved
 open class SimpleNodeObserver : ObservableObserver<NodeNotification<in NodeLike>> {
     open fun <V : Any?> onAttributeChange(
         node: NodeLike,
-        attributeName: String,
+        attribute: Attribute,
         oldValue: V,
         newValue: V,
     ) {
@@ -70,7 +71,7 @@ open class SimpleNodeObserver : ObservableObserver<NodeNotification<in NodeLike>
             is AttributeChangedNotification<NodeLike, *> ->
                 onAttributeChange(
                     notification.node,
-                    notification.attributeName,
+                    notification.attribute,
                     notification.oldValue,
                     notification.newValue,
                 )

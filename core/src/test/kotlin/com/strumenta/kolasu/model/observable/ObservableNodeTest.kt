@@ -1,16 +1,21 @@
 package com.strumenta.kolasu.model.observable
 
+import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceByName
+import kotlin.reflect.full.defaultType
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
+val intType = Int::class.defaultType
 
 class MyObservableNode : Node() {
     var p1: Int = 0
         set(value) {
-            notifyOfPropertyChange("p1", field, value)
+            val attr = Attribute("p1", false, intType)
+            notifyOfAttributeChange(attr, field, value)
             field = value
         }
 }
@@ -22,11 +27,11 @@ class MyObserver(
 
     override fun <V> onAttributeChange(
         node: NodeLike,
-        attributeName: String,
+        attribute: Attribute,
         oldValue: V,
         newValue: V,
     ) {
-        observations.add("$attributeName: $oldValue -> $newValue")
+        observations.add("${attribute.name}: $oldValue -> $newValue")
     }
 
     override fun onChildAdded(
