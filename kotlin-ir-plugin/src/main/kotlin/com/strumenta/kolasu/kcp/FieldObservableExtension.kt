@@ -13,6 +13,7 @@ import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irBlockBody
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
+import org.jetbrains.kotlin.ir.backend.js.utils.isObjectInstanceGetter
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
@@ -26,7 +27,13 @@ import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrAnonymousInitializerSymbolImpl
 import org.jetbrains.kotlin.ir.util.allParameters
+import org.jetbrains.kotlin.ir.util.companionObject
+import org.jetbrains.kotlin.ir.util.fields
+import org.jetbrains.kotlin.ir.util.functions
+import org.jetbrains.kotlin.ir.util.kotlinFqName
+import org.jetbrains.kotlin.ir.util.nestedClasses
 import org.jetbrains.kotlin.ir.util.parentAsClass
+import org.jetbrains.kotlin.ir.util.properties
 import org.jetbrains.kotlin.ir.util.statements
 import org.jetbrains.kotlin.ir.util.toIrConst
 import org.jetbrains.kotlin.name.CallableId
@@ -126,25 +133,9 @@ class FieldObservableExtension(
 
                             this.dispatchReceiver = irGet(thisParameter)
 
-                            // attribute myClass.concept.attribute(attributeName)
-                            val companionClass =
-                                declaration
-                                    .parentAsClass
-                                    .declarations
-                                    .filterIsInstance<IrClass>()
-                                    .find { it.isCompanion }!!
-                            val attributeMethod = pluginContext.referenceFunctions(Concept::class, "attribute").single()
-                            val attributeName = declaration.name.identifier.toIrConst(irContext.irBuiltIns.stringType)
-
-                            val companionInstance = TODO("get companion instance")
-                            val concept: IrExpression = TODO("GET THE CONCEPT FROM THE COMPANION")
-
-                            val attribute =
-                                irCall(attributeMethod).apply {
-                                    dispatchReceiver = concept
-                                    putValueArgument(0, attributeName)
-                                }
-                            putValueArgument(0, attribute)
+                            // attribute: myClass.concept.attribute(attributeName)
+                            val nodeSubClass = declaration.parentAsClass
+                            putValueArgument(0, attributeByName(pluginContext, nodeSubClass, declaration.name.identifier))
                             // current backing field value
                             putValueArgument(1, irGetField(irGet(thisParameter), declaration.backingField!!))
                             // value passed to the setter

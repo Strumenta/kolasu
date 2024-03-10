@@ -23,7 +23,7 @@ class StarLasuLanguage {
     }
 }
 
-sealed class ConceptLike {
+sealed class ConceptLike(var name: String) {
     abstract val superConceptLikes: List<ConceptLike>
     val features: MutableList<Feature> = mutableListOf()
     abstract val allFeatures: List<Feature>
@@ -33,9 +33,10 @@ sealed class ConceptLike {
     fun feature(name: String): Feature? = allFeatures.find { it.name == name }
 
     fun attribute(name: String): Attribute? = allAttributes.find { it.name == name }
+    fun requireAttribute(name: String): Attribute = attribute(name) ?: throw IllegalArgumentException("Cannot find attribute $name in ${this.name}")
 }
 
-class ConceptInterface : ConceptLike() {
+class ConceptInterface : ConceptLike("") {
     var superInterfaces: MutableList<ConceptInterface> = mutableListOf()
     override val superConceptLikes: List<ConceptLike>
         get() = superInterfaces
@@ -44,8 +45,8 @@ class ConceptInterface : ConceptLike() {
 }
 
 class Concept(
-    var name: String,
-) : ConceptLike() {
+    name: String,
+) : ConceptLike(name) {
     var superConcept: Concept? = null
     var conceptInterfaces: MutableList<ConceptInterface> = mutableListOf()
 
@@ -76,5 +77,12 @@ class Concept(
     override fun hashCode(): Int = name.hashCode()
 
     override val allFeatures: List<Feature>
-        get() = TODO("Not yet implemented")
+        get() {
+            val res = mutableListOf<Feature>()
+            res.addAll(features)
+            this.superConceptLikes.forEach { scl ->
+                res.addAll(scl.allFeatures)
+            }
+            return res
+        }
 }
