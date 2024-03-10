@@ -9,8 +9,14 @@ class MyNode : MPNode()
 
 class MetamodelTest {
     @Test
+    fun attributeMultiplicity() {
+        assertEquals(Multiplicity.OPTIONAL, Attribute("MyAttribute", true, stringType).multiplicity)
+        assertEquals(Multiplicity.SINGULAR, Attribute("MyAttribute", false, stringType).multiplicity)
+    }
+
+    @Test
     fun referenceMultiplicity() {
-        assertEquals(Multiplicity.OPTIONAL, Reference("MyAttribute", true, MyNode::class).multiplicity)
-        assertEquals(Multiplicity.SINGULAR, Reference("MyAttribute", false, MyNode::class).multiplicity)
+        assertEquals(Multiplicity.OPTIONAL, Reference("MyReference", true, MyNode::class).multiplicity)
+        assertEquals(Multiplicity.SINGULAR, Reference("MyReference", false, MyNode::class).multiplicity)
     }
 }
