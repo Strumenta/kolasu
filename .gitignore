@@ -38,3 +38,5 @@ generated-test-src
 /*.xmi
 **/bin/
 .netlify
+.kotlin
+yarn.lock
