@@ -552,7 +552,7 @@ fun main() {
         result.invokeMainMethod("mytest.MainKt")
     }
 
-    NOW WE GENERATE THE CONCEPT PROPERTY IN THE COMPANION OBJECT AND WE NEED TO POPULATE IT
+    //NOW WE GENERATE THE CONCEPT PROPERTY IN THE COMPANION OBJECT AND WE NEED TO POPULATE IT
 
     @Test
     fun `get concept on class`() {
