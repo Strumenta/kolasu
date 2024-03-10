@@ -32,4 +32,9 @@ class BiMap<A, B>(
     fun containsA(a: A): Boolean = privateAsToBs.containsKey(a)
 
     fun containsB(b: B): Boolean = privateBsToAs.containsKey(b)
+
+    fun clear() {
+        privateAsToBs.clear()
+        privateBsToAs.clear()
+    }
 }

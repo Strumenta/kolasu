@@ -17,6 +17,7 @@ import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Enumeration
 import io.lionweb.lioncore.java.language.Language
+import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
@@ -24,6 +25,7 @@ import io.lionweb.lioncore.java.model.Node
 import io.lionweb.lioncore.java.model.ReferenceValue
 import io.lionweb.lioncore.java.model.impl.DynamicEnumerationValue
 import io.lionweb.lioncore.java.model.impl.DynamicNode
+import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import java.lang.IllegalArgumentException
 import java.util.IdentityHashMap
@@ -51,6 +53,10 @@ class LionWebModelConverter(
     private val languageConverter = LionWebLanguageConverter()
     private val nodesMapping = BiMap<KNode, LWNode>(usingIdentity = true)
     private val primitiveValueSerializations = mutableMapOf<KClass<*>, PrimitiveValueSerialization<*>>()
+
+    fun clearNodesMapping() {
+        nodesMapping.clear()
+    }
 
     fun <E : Any> registerPrimitiveValueSerialization(
         kClass: KClass<E>,
@@ -117,13 +123,24 @@ class LionWebModelConverter(
                             kFeatures.find { it.name == feature.name }
                                 as com.strumenta.kolasu.language.Reference
                         val kValue = kNode.getReference(kReference)
-                        val lwReferred: Node? =
-                            if (kValue.referred == null) {
-                                null
-                            } else {
-                                nodesMapping.byA(kValue.referred!! as KNode)!!
+                        if (kValue == null) {
+                            lwNode.addReferenceValue(feature, null)
+                        } else {
+                            when {
+                                kValue.isRetrieved -> {
+                                    val lwReferred: Node = nodesMapping.byA(kValue.referred!! as KNode)!!
+                                    lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
+                                }
+                                kValue.isResolved -> {
+                                    // This is tricky, as we need to set a LW Node, but we have just an identifier...
+                                    val lwReferred: Node = DynamicNode(kValue.identifier!!, LionCoreBuiltins.getNode())
+                                    lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
+                                }
+                                else -> {
+                                    lwNode.addReferenceValue(feature, ReferenceValue(null, kValue.name))
+                                }
                             }
-                        lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
+                        }
                     }
                 }
             }
@@ -260,7 +277,11 @@ class LionWebModelConverter(
                 if (entry.value == null) {
                     entry.key.referred = null
                 } else {
-                    entry.key.referred = nodesMapping.byB(entry.value as LWNode)!! as PossiblyNamed
+                    if (entry.value is ProxyNode) {
+                        entry.key.identifier = (entry.value as ProxyNode).id
+                    } else {
+                        entry.key.referred = nodesMapping.byB(entry.value as LWNode)!! as PossiblyNamed
+                    }
                 }
             }
         }

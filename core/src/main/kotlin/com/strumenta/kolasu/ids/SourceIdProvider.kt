@@ -2,6 +2,7 @@ package com.strumenta.kolasu.ids
 
 import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.Source
+import com.strumenta.kolasu.model.SyntheticSource
 import java.io.File
 
 /**
@@ -23,6 +24,9 @@ class SimpleSourceIdProvider : AbstractSourceIdProvider() {
             }
             is FileSource -> {
                 cleanId("file_${source.file.path}")
+            }
+            is SyntheticSource -> {
+                cleanId("synthetic_${source.description}")
             }
             else -> {
                 TODO("Unable to generate ID for Source $this (${this.javaClass.canonicalName})")

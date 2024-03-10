@@ -33,10 +33,17 @@ interface Named : PossiblyNamed {
  *
  * This is not statically enforced as we may want to use some interface, which cannot extend Node.
  * However, this is enforced dynamically.
+ *
+ * The node referenced by a ReferenceByName instance can be contained in the same AST or some external source
+ * (typically other ASTs). In the latter case, we might want to indicate that, although we know which node the reference
+ * is pointing to, we do not want to retrieve it straight away for performance reasons. In these circumstances,
+ * the `referred` field is null and the `identifier` field is used instead. This, will be used to retrieve the
+ * actual node at a later stage.
  */
 class ReferenceByName<N>(
     val name: String,
     initialReferred: N? = null,
+    var identifier: String? = null,
 ) where N : PossiblyNamed {
     val changes = PublishSubject<ReferenceChangeNotification<N>>()
 
@@ -131,19 +138,21 @@ class ReferenceByName<N>(
     }
 
     val isResolved: Boolean
+        get() = identifier != null || isRetrieved
+
+    val isRetrieved: Boolean
         get() = referred != null
 
     override fun hashCode(): Int {
-        return name.hashCode() * (7 + if (isResolved) 2 else 1)
+        return name.hashCode() * (1 + identifier.hashCode()) * (7 + if (isResolved) 2 else 1)
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ReferenceByName<*>) return false
-
         if (name != other.name) return false
+        if (identifier != other.identifier) return false
         if (referred != other.referred) return false
-
         return true
     }
 }

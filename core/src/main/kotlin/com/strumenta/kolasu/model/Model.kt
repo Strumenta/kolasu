@@ -1,10 +1,45 @@
 package com.strumenta.kolasu.model
 
+import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
+
+interface Origin {
+    var range: Range?
+    val sourceText: String?
+    val source: Source?
+        get() = range?.source
+}
+
+class SimpleOrigin(
+    override var range: Range?,
+    override val sourceText: String? = null,
+) : Origin,
+    Serializable
+
+data class CompositeOrigin(
+    val elements: List<Origin>,
+    override var range: Range?,
+    override val sourceText: String?,
+) : Origin,
+    Serializable
+
+interface Destination
+
+val RESERVED_FEATURE_NAMES = setOf("parent", "position")
+
+fun <N : NodeLike> N.withOrigin(node: NodeLike): N {
+    this.origin =
+        if (node == this) {
+            null
+        } else {
+            NodeOrigin(node)
+        }
+    return this
+}
 
 fun <N : NodeLike> N.withRange(range: Range?): N {
     this.range = range
@@ -17,16 +52,6 @@ fun <N : NodeLike> N.withOrigin(origin: Origin?): N {
             null
         } else {
             origin
-        }
-    return this
-}
-
-fun <N : NodeLike> N.withOrigin(node: NodeLike): N {
-    this.origin =
-        if (node == this) {
-            null
-        } else {
-            NodeOrigin(node)
         }
     return this
 }
@@ -65,3 +90,7 @@ val <T : NodeLike> T.nodeProperties: Collection<KProperty1<T, *>>
  */
 val <T : Node> T.nodeOriginalProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.nodeOriginalProperties
+
+fun checkFeatureName(featureName: String) {
+    require(featureName !in RESERVED_FEATURE_NAMES) { "$featureName is not a valid feature name" }
+}

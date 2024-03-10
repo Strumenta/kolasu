@@ -29,7 +29,11 @@ fun assertJSONsAreEqual(
     } else if (expected is JsonArray && actual is JsonArray) {
         val eja = expected.asJsonArray
         val aja = actual.asJsonArray
-        assertEquals(eja.size(), aja.size())
+        assertEquals(
+            eja.size(),
+            aja.size(),
+            message = "size of $context (expected: ${eja.size()}, actual: ${aja.size()}",
+        )
         (0 until eja.size()).forEach { i ->
             assertJSONsAreEqual(eja[i], aja[i], "$context[$i]")
         }

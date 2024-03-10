@@ -177,7 +177,7 @@ class PrinterOutput(
         generation()
         val endPoint = currentPoint
         val nodeRangeInGeneratedCode = Range(startPoint, endPoint)
-        ast.destinations += TextFileDestination(range = nodeRangeInGeneratedCode)
+        ast.destinations.add(TextFileDestination(range = nodeRangeInGeneratedCode))
     }
 
     fun <T : NodeLike> printList(

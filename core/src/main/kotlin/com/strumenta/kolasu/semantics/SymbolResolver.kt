@@ -10,7 +10,7 @@ import com.strumenta.kolasu.traversing.walkChildren
 import kotlin.reflect.KClass
 
 // instance
-
+@Deprecated("The corresponding component in the semantics module should be used instead.")
 class SymbolResolver(
     private val scopeProvider: ScopeProvider = ScopeProvider(),
 ) {
@@ -46,7 +46,7 @@ class SymbolResolver(
 }
 
 // configuration
-
+@Deprecated("The corresponding component in the semantics module should be used instead.")
 class SymbolResolverConfiguration(
     val scopeProvider: ScopeProviderConfiguration = ScopeProviderConfiguration(),
 ) {
