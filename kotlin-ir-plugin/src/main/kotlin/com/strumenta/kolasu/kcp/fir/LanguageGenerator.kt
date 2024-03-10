@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.kcp.fir
 
+import com.strumenta.kolasu.kcp.classId
+import com.strumenta.kolasu.language.Concept
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.EffectiveVisibility
@@ -21,8 +23,10 @@ import org.jetbrains.kotlin.fir.moduleData
 import org.jetbrains.kotlin.fir.plugin.PropertyBuildingContext
 import org.jetbrains.kotlin.fir.plugin.createCompanionObject
 import org.jetbrains.kotlin.fir.plugin.createDefaultPrivateConstructor
+import org.jetbrains.kotlin.fir.plugin.createMemberProperty
 import org.jetbrains.kotlin.fir.resolve.providers.firProvider
 import org.jetbrains.kotlin.fir.resolve.providers.toSymbol
+import org.jetbrains.kotlin.fir.resolve.typeResolver
 import org.jetbrains.kotlin.fir.scopes.kotlinScopeProvider
 import org.jetbrains.kotlin.fir.symbols.SymbolInternals
 import org.jetbrains.kotlin.fir.symbols.impl.ConeClassLikeLookupTagImpl
@@ -33,6 +37,7 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.types.ConeClassLikeType
+import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import org.jetbrains.kotlin.fir.types.ConeTypeProjection
 import org.jetbrains.kotlin.fir.types.impl.ConeClassLikeTypeImpl
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
@@ -178,6 +183,14 @@ class LanguageGenerator(
             //PropertyBuildingContext(session, Key, callableId.classId!!, )
 
             val ps = FirPropertySymbol(callableId)
+
+            val conceptClassId : ClassId = Concept::class.classId
+            val conceptType : ConeKotlinType = conceptClassId.toConeType()
+            val thisClass : FirClassSymbol<*> = callableId.classId!!.toSymbol(session) as FirClassSymbol<*>
+            val property = createMemberProperty(thisClass, Key, Name.identifier("concept"), conceptType)
+
+            ps.bind(property)
+
             //val fir =(callableId.classId!!.toSymbol(session)!! as FirClassSymbol<*>).pro
             //ps.bind(fir)
             listOf(ps)
