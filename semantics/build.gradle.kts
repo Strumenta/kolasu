@@ -79,3 +79,9 @@ signing {
 }
 
 tasks.findByName("dokkaJavadoc")?.dependsOn(":core:compileKotlin")
+
+tasks {
+    named("generateMetadataFileForKolasu_semanticsPublication") {
+        dependsOn("kdocJar")
+    }
+}
