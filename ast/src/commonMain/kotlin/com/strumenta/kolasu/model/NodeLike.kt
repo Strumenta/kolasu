@@ -10,8 +10,8 @@ import com.strumenta.kolasu.language.Reference
 typealias NodeObserver = ObservableObserver<in NodeNotification<in NodeLike>>
 
 interface NodeLike {
-    open val concept: Concept
-        get() = TODO()
+    @Internal
+    abstract val concept: Concept
 
     @property:Internal
     val changes: PublishSubject<NodeNotification<in NodeLike>>
