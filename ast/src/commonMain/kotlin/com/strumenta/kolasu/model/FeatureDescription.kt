@@ -21,6 +21,7 @@ class FeatureDescription(
         derived: Boolean = false,
     ) : this(name, multiplicity, { value }, featureType, derived)
 
+    @Deprecated("Consider the feature type")
     val provideNodes: Boolean
         get() = featureType in arrayOf(FeatureType.CONTAINMENT)
 
