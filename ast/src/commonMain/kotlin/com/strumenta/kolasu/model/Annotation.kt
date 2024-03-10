@@ -13,6 +13,7 @@ sealed class Annotation {
     /**
      * Attach the annotation to a specific node.
      * The annotation should not be already attached to any node, not even to the same node to which we are attaching it.
+     * This method is intended to be call by the node and not directly.
      */
     fun attachTo(node: NodeLike) {
         require(annotatedNode == null)
@@ -22,6 +23,7 @@ sealed class Annotation {
     /**
      * The annotation will be detached, if attached to any node.
      * If the annotation was not attached to any node, nothing will happen.
+     * This method is intended to be call by the node and not directly.
      */
     fun detach() {
         require(annotatedNode == null || !annotatedNode!!.hasAnnotation(this))
@@ -32,14 +34,14 @@ sealed class Annotation {
     abstract val annotationType: String
 
     @Internal
-    val single: Boolean
-        get() = !multiple
+    val isSingle: Boolean
+        get() = !isMultiple
 
     @Internal
-    abstract val multiple: Boolean
+    abstract val isMultiple: Boolean
 
     @Internal
-    val attached: Boolean
+    val isAttached: Boolean
         get() = annotatedNode?.hasAnnotation(this) ?: false
 }
 
@@ -47,7 +49,14 @@ sealed class Annotation {
  * A Single Annotation. Each Node can have at most one instance attached for each type of SingleAnnotation.
  */
 abstract class SingleAnnotation : Annotation() {
-    override val multiple: Boolean
+    override val isMultiple: Boolean
+        get() = false
+}
+
+open class SimpleSingleAnnotation(
+    override val annotationType: String,
+) : Annotation() {
+    override val isMultiple: Boolean
         get() = false
 }
 
@@ -55,6 +64,6 @@ abstract class SingleAnnotation : Annotation() {
  * A Multiple Annotation. Each Node can have any number of instances attached for each type of MultipleAnnotation.
  */
 abstract class MultipleAnnotation : Annotation() {
-    override val multiple: Boolean
+    override val isMultiple: Boolean
         get() = true
 }

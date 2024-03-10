@@ -123,7 +123,7 @@ open class Node : NodeLike {
             throw java.lang.IllegalStateException("Annotation already attached")
         }
         annotation.attachTo(this)
-        if (annotation.single) {
+        if (annotation.isSingle) {
             annotations.filter { it.annotationType == annotation.annotationType }.forEach { removeAnnotation(it) }
         }
         annotations.add(annotation)

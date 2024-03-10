@@ -84,7 +84,7 @@ abstract class MPNode : NodeLike {
             throw IllegalStateException("Annotation already attached")
         }
         annotation.attachTo(this)
-        if (annotation.single) {
+        if (annotation.isSingle) {
             annotations.filter { it.annotationType == annotation.annotationType }.forEach { removeAnnotation(it) }
         }
         annotations.add(annotation)
