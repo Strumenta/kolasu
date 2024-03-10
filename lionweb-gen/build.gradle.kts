@@ -7,12 +7,11 @@ plugins {
 
 val lionwebVersion = extra["lionwebVersion"]
 val kotlinVersion = extra["kotlinVersion"]
-val cliktVersion = extra["clikt_version"]
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    implementation("com.github.ajalt.clikt:clikt:$cliktVersion")
+    implementation(libs.clikt)
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
     implementation("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebVersion")
     implementation("io.lionweb.lionweb-java:lionweb-java-2023.1-emf:$lionwebVersion")
@@ -22,7 +21,6 @@ dependencies {
     api(project(":ast"))
 
     implementation("com.squareup:kotlinpoet:1.14.2")
-    implementation("com.github.ajalt.clikt:clikt:$cliktVersion")
     implementation(libs.gson) {
         version {
             strictly(libs.gson.get().version!!)

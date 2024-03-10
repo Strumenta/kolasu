@@ -7,10 +7,9 @@ plugins {
 
 val lionwebVersion = extra["lionwebVersion"]
 val kotlinVersion = extra["kotlinVersion"]
-val cliktVersion = extra["clikt_version"]
 
 dependencies {
-    implementation("com.github.ajalt.clikt:clikt:$cliktVersion")
+    implementation(libs.clikt)
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
     testImplementation(libs.gson)
     testImplementation("io.github.mkfl3x:json-delta:1.3")

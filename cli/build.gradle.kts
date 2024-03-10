@@ -1,12 +1,10 @@
-val cliktVersion = extra["clikt_version"]
-
 dependencies {
     implementation(project(":core"))
     implementation(project(":ast"))
     implementation(project(":serialization"))
 
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.8.0")
-    api("com.github.ajalt.clikt:clikt:$cliktVersion")
+    api(libs.clikt)
 }
 
 publishing {

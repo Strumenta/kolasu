@@ -2,12 +2,10 @@ plugins {
     id("antlr")
 }
 
-val antlrVersion = extra["antlr_version"]
 val kotlinVersion = extra["kotlinVersion"]
-val cliktVersion = extra["clikt_version"]
 
 dependencies {
-    antlr("org.antlr:antlr4:$antlrVersion")
+    antlr(libs.antlr4Tool)
     api(project(":core"))
     api(project(":cli"))
     api(project(":antlr4j"))
@@ -19,9 +17,9 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.1")
     implementation(libs.gson)
 
-    api("com.github.ajalt.clikt:clikt:$cliktVersion")
+    api(libs.clikt)
 
-    testImplementation("org.antlr:antlr4-runtime:$antlrVersion")
+    testImplementation(libs.antlr4jRuntime)
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
 }
 

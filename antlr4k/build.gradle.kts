@@ -7,7 +7,6 @@ plugins {
     id("org.jetbrains.kotlinx.kover")
 }
 
-val cliktVersion = extra["clikt_version"]
 val antlrKotlinVersion = extra["antlrKotlinVersion"]
 val kotlinVersion = extra["kotlinVersion"]
 
