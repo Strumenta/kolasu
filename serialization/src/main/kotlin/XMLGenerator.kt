@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.serialization
 
+import com.strumenta.kolasu.model.FeatureType
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
@@ -139,13 +140,13 @@ private fun NodeLike.toXML(
         if (it.value == null) {
             element.addNullChild(it.name, document)
         } else if (it.isMultiple) {
-            if (it.provideNodes) {
+            if (it.featureType == FeatureType.CONTAINMENT) {
                 element.addListOfNodes(it.name, (it.value as Collection<*>).map { it as NodeLike }, document)
             } else {
                 element.addAttributesList(it.name, it.value as Collection<*>, document)
             }
         } else {
-            if (it.provideNodes) {
+            if (it.featureType == FeatureType.CONTAINMENT) {
                 element.addChild((it.value as NodeLike).toXML(it.name, document))
             } else {
                 element.addAttribute(it.name, it.value!!)

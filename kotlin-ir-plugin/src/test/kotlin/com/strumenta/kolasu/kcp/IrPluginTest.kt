@@ -471,21 +471,18 @@ fun main() {
     assertEquals(FeatureType.ATTRIBUTE, a1.features[0].featureType)
     assertEquals(Multiplicity.SINGULAR, a1.features[0].multiplicity)
     assertEquals(false, a1.features[0].derived)
-    assertEquals(false, a1.features[0].provideNodes)
 
     assertEquals("f2", a1.features[1].name)
     assertEquals(6, a1.features[1].value)
     assertEquals(FeatureType.ATTRIBUTE, a1.features[1].featureType)
     assertEquals(Multiplicity.SINGULAR, a1.features[1].multiplicity)
     assertEquals(false, a1.features[1].derived)
-    assertEquals(false, a1.features[1].provideNodes)
-
+    
     assertEquals("f3", a1.features[2].name)
     assertEquals(null, a1.features[2].value)
     assertEquals(FeatureType.CONTAINMENT, a1.features[2].featureType)
     assertEquals(Multiplicity.OPTIONAL, a1.features[2].multiplicity)
     assertEquals(false, a1.features[2].derived)
-    assertEquals(true, a1.features[2].provideNodes)
 }
 
 """,

@@ -21,10 +21,6 @@ class FeatureDescription(
         derived: Boolean = false,
     ) : this(name, multiplicity, { value }, featureType, derived)
 
-    @Deprecated("Consider the feature type")
-    val provideNodes: Boolean
-        get() = featureType in arrayOf(FeatureType.CONTAINMENT)
-
     val isMultiple: Boolean
         get() = multiplicity == Multiplicity.MANY
 
@@ -41,7 +37,6 @@ class FeatureDescription(
         other as FeatureDescription
 
         if (name != other.name) return false
-        if (provideNodes != other.provideNodes) return false
         if (multiplicity != other.multiplicity) return false
         if (featureType != other.featureType) return false
         if (derived != other.derived) return false
@@ -51,7 +46,6 @@ class FeatureDescription(
 
     override fun hashCode(): Int {
         var result = name.hashCode()
-        result = 31 * result + provideNodes.hashCode()
         result = 31 * result + multiplicity.hashCode()
         result = 31 * result + featureType.hashCode()
         result = 31 * result + derived.hashCode()

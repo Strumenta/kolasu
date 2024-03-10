@@ -47,17 +47,20 @@ fun FeatureDescription.valueToString(): String {
     if (value == null) {
         return "null"
     }
-    return if (provideNodes) {
-        if (multiplicity == Multiplicity.MANY) {
-            "[${(value as Collection<NodeLike>).joinToString(",") { it.nodeType }}]"
-        } else {
-            "${(value as NodeLike).nodeType}(...)"
+    return when (featureType) {
+        FeatureType.CONTAINMENT -> {
+            if (multiplicity == Multiplicity.MANY) {
+                "[${(value as Collection<NodeLike>).joinToString(",") { it.nodeType }}]"
+            } else {
+                "${(value as NodeLike).nodeType}(...)"
+            }
         }
-    } else {
-        if (multiplicity == Multiplicity.MANY) {
-            "[${(value as Collection<*>).joinToString(",") { it.toString() }}]"
-        } else {
-            value.toString()
+        FeatureType.ATTRIBUTE, FeatureType.REFERENCE -> {
+            if (multiplicity == Multiplicity.MANY) {
+                "[${(value as Collection<*>).joinToString(",") { it.toString() }}]"
+            } else {
+                value.toString()
+            }
         }
     }
 }

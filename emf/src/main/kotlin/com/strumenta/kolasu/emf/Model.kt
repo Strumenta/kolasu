@@ -4,6 +4,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.strumenta.kolasu.antlr4j.parsing.ParseTreeOrigin
 import com.strumenta.kolasu.model.Destination
+import com.strumenta.kolasu.model.FeatureType
 import com.strumenta.kolasu.model.NodeDestination
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.NodeOrigin
@@ -458,7 +459,7 @@ fun NodeLike.toEObject(
 
         this.processProperties { pd ->
             val esf = ec.eAllStructuralFeatures.find { it.name == pd.name }!!
-            if (pd.provideNodes) {
+            if (pd.featureType == FeatureType.CONTAINMENT) {
                 if (pd.isMultiple) {
                     val elist = eo.eGet(esf) as MutableList<EObject?>
                     (pd.value as List<*>?)?.forEach {

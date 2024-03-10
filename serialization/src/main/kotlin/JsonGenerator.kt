@@ -7,6 +7,7 @@ import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.stream.JsonWriter
+import com.strumenta.kolasu.model.FeatureType
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
@@ -289,7 +290,7 @@ class JsonGenerator {
                 if (it.value == null) {
                     jsonObject.add(it.name, JsonNull.INSTANCE)
                 } else if (it.isMultiple) {
-                    if (it.provideNodes) {
+                    if (it.featureType == FeatureType.CONTAINMENT) {
                         jsonObject.add(
                             it.name,
                             (it.value as Collection<*>)
@@ -307,7 +308,7 @@ class JsonGenerator {
                         jsonObject.add(it.name, valueToJson(it.value, withIds))
                     }
                 } else {
-                    if (it.provideNodes) {
+                    if (it.featureType == FeatureType.CONTAINMENT) {
                         jsonObject.add(
                             it.name,
                             nodeToJson(
@@ -347,7 +348,7 @@ private fun NodeLike.toJsonStreaming(
             writer.nullValue()
         } else if (it.isMultiple) {
             writer.beginArray()
-            if (it.provideNodes) {
+            if (it.featureType == FeatureType.CONTAINMENT) {
                 (it.value as Collection<*>).forEach {
                     (it as NodeLike).toJsonStreaming(writer, shortClassNames)
                 }
@@ -358,7 +359,7 @@ private fun NodeLike.toJsonStreaming(
             }
             writer.endArray()
         } else {
-            if (it.provideNodes) {
+            if (it.featureType == FeatureType.CONTAINMENT) {
                 (it.value as NodeLike).toJsonStreaming(writer, shortClassNames)
             } else {
                 it.value.toJsonStreaming(writer)
