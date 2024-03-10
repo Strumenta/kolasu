@@ -1,9 +1,7 @@
-val gsonVersion = extra["gson_version"]
-
 dependencies {
     api(project(":core"))
     api(project(":emf"))
-    implementation("com.google.code.gson:gson:$gsonVersion")
+    implementation(libs.gson)
 }
 
 publishing {

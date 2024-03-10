@@ -4,7 +4,6 @@ plugins {
 
 val antlrVersion = extra["antlr_version"]
 val kotlinVersion = extra["kotlinVersion"]
-val gsonVersion = extra["gson_version"]
 val cliktVersion = extra["clikt_version"]
 
 dependencies {
@@ -18,7 +17,7 @@ dependencies {
     api("org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.16.0")
     api("org.eclipse.emfcloud:emfjson-jackson:2.0.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.1")
-    implementation("com.google.code.gson:gson:$gsonVersion")
+    implementation(libs.gson)
 
     api("com.github.ajalt.clikt:clikt:$cliktVersion")
 

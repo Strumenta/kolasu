@@ -8,7 +8,6 @@ plugins {
 val lionwebVersion = extra["lionwebVersion"]
 val kotlinVersion = extra["kotlinVersion"]
 val cliktVersion = extra["clikt_version"]
-val gsonVersion = extra["gson_version"] as String
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
@@ -24,9 +23,9 @@ dependencies {
 
     implementation("com.squareup:kotlinpoet:1.14.2")
     implementation("com.github.ajalt.clikt:clikt:$cliktVersion")
-    implementation("com.google.code.gson:gson:$gsonVersion") {
+    implementation(libs.gson) {
         version {
-            strictly(gsonVersion)
+            strictly(libs.gson.get().version!!)
         }
     }
 
@@ -44,14 +43,6 @@ publishing {
 signing {
     sign(publishing.publications["kolasu_lionweb_gen"])
 }
-
-// configurations.all {
-//    resolutionStrategy.eachDependency { details ->
-//        if (details.requested.group == "com.google.code.gson") {
-//            details.useVersion(gson_version)
-//        }
-//    }
-// }
 
 tasks.findByName("dokkaJavadoc")!!.dependsOn(":core:compileKotlin")
 tasks.findByName("dokkaJavadoc")!!.dependsOn(":emf:compileKotlin")

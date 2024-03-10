@@ -1,5 +1,4 @@
 val cliktVersion = extra["clikt_version"]
-val gsonVersion = extra["gson_version"]
 
 dependencies {
     implementation(project(":core"))
