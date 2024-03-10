@@ -350,7 +350,7 @@ class ASTTransformerTest {
             .registerNodeTransformer(CU::class, CU::class)
             .withChild(CU::statements, CU::statements)
         transformer.registerNodeTransformer(DisplayIntStatement::class) { s ->
-            s.withOrigin(GenericNode())
+            s.withOrigin(NodeOrigin(GenericNode()))
         }
 
         val cu =

@@ -13,7 +13,6 @@ import com.strumenta.kolasu.language.Reference
  * gradle plugin.
  */
 abstract class MPNode : NodeLike {
-
     override val concept: Concept by lazy {
         calculateConcept()
     }
@@ -39,7 +38,6 @@ abstract class MPNode : NodeLike {
     protected open fun calculateConcept(): Concept {
         TODO("calculateConcept should be overridden by compiler plugin")
     }
-
 
     /**
      * This is overriden by the compiler plugin

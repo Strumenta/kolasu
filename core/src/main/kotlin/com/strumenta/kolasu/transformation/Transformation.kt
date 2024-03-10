@@ -1,9 +1,7 @@
 package com.strumenta.kolasu.transformation
 
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
-import kotlin.reflect.full.primaryConstructor
 
 /**
  * A child of an AST node that is automatically populated from a source tree.
@@ -36,8 +34,6 @@ internal class PresentParameterValue(
 ) : ParameterValue()
 
 internal object AbsentParameterValue : ParameterValue()
-
-
 
 interface ParameterConverter {
     fun isApplicable(

@@ -7,7 +7,6 @@ import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.utils.isAbstract
 import org.jetbrains.kotlin.fir.declarations.utils.isSealed
 import org.jetbrains.kotlin.fir.expressions.builder.FirBlockBuilder
-import org.jetbrains.kotlin.fir.extensions.FirDeclarationGenerationExtension
 import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
 import org.jetbrains.kotlin.fir.extensions.NestedClassGenerationContext
 import org.jetbrains.kotlin.fir.plugin.createConeType
@@ -28,18 +27,13 @@ import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
-import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 const val GENERATED_CALCULATE_FEATURES = "calculateFeatures"
 const val GENERATED_CALCULATE_NODE_TYPE = "calculateNodeType"
 
-
 class MPNodeGenerator(
     session: FirSession,
 ) : BaseFirExtension(session) {
-
     override fun generateTopLevelClassLikeDeclaration(classId: ClassId): FirClassLikeSymbol<*>? {
         log("generateTopLevelClassLikeDeclaration $classId")
         return generateTopLevelClassLikeDeclaration(classId)

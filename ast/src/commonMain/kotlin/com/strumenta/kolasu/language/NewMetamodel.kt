@@ -33,8 +33,9 @@ class ConceptInterface : ConceptLike() {
         get() = superInterfaces
 }
 
-class Concept(var name: String) : ConceptLike() {
-
+class Concept(
+    var name: String,
+) : ConceptLike() {
     var superConcept: Concept? = null
     var conceptInterfaces: MutableList<ConceptInterface> = mutableListOf()
 
@@ -43,7 +44,6 @@ class Concept(var name: String) : ConceptLike() {
 
     val language: StarLasuLanguage
         get() = TODO()
-
 
     fun instantiateNode(featureValues: Map<Feature, Any?>): MPNode {
         TODO()
@@ -63,9 +63,5 @@ class Concept(var name: String) : ConceptLike() {
         return name == other.name
     }
 
-    override fun hashCode(): Int {
-        return name.hashCode()
-    }
-
-
+    override fun hashCode(): Int = name.hashCode()
 }

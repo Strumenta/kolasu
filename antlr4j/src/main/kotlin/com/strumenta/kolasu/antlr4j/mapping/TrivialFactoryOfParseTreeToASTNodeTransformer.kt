@@ -169,7 +169,7 @@ fun <T : Any> KClass<T>.pickConstructor(): KFunction<T> {
         } else {
             throw RuntimeException(
                 "Node Factories support only classes with exactly one constructor or a " +
-                        "primary constructor. Class ${this.qualifiedName} has ${constructors.size}",
+                    "primary constructor. Class ${this.qualifiedName} has ${constructors.size}",
             )
         }
     } else {

@@ -10,33 +10,31 @@ import kotlin.reflect.KClass
 
 typealias DefaulTransformer = (Any, MPASTTransformer) -> List<NodeLike>
 
- /**
+/**
  * Implementation of a tree-to-tree transformation. For each source node type, we can register a transformer that knows
  * how to produce a transformed node. Then, this transformer can read metadata in the transformed node to recursively
  * transform and assign children.
  * If no node transformer is provided for a source node type, a GenericNode is created, and the processing of the
  * subtree stops there.
  */
- open class MPASTTransformer(
+open class MPASTTransformer(
     /**
      * Additional issues found during the transformation process.
      */
     val issues: MutableList<Issue> = mutableListOf(),
- ) {
+) {
     /**
      * NodeTransformers that map from source tree node to target tree node.
      */
     private val nodeTransformers = mutableMapOf<KClass<*>, MPNodeTransformer<*, *>>()
 
-     private var defaultTransformer : DefaulTransformer? = null
+    private var defaultTransformer: DefaulTransformer? = null
 
     /**
      * This ensures that the generated value is a single Node or null.
      */
     @JvmOverloads
-    fun <S:Any>transform(
-        source: S?,
-    ): NodeLike? {
+    fun <S : Any> transform(source: S?): NodeLike? {
         val result = transformIntoNodes(source)
         return when (result.size) {
             0 -> null
@@ -55,9 +53,7 @@ typealias DefaulTransformer = (Any, MPASTTransformer) -> List<NodeLike>
      * Performs the transformation of a node and, recursively, its descendants.
      */
     @JvmOverloads
-    fun <S: Any>transformIntoNodes(
-        source: S?
-    ): List<NodeLike> {
+    fun <S : Any> transformIntoNodes(source: S?): List<NodeLike> {
         if (source == null) {
             return emptyList()
         }
@@ -89,24 +85,24 @@ typealias DefaulTransformer = (Any, MPASTTransformer) -> List<NodeLike>
         return nodes
     }
 
-     private fun <S : Any, T : NodeLike> getNodeTransformer(sourceType: KClass<*>): MPNodeTransformer<S, T>? {
-    val nodeTransformer = nodeTransformers[sourceType]
-    if (nodeTransformer != null) {
-        return nodeTransformer as MPNodeTransformer<S, T>
-    } else {
-        // TODO here we should get the Concept and all of its super concepts
-        // TODO here for classes that we know are mapped to concepts we also consider super concepts
+    private fun <S : Any, T : NodeLike> getNodeTransformer(sourceType: KClass<*>): MPNodeTransformer<S, T>? {
+        val nodeTransformer = nodeTransformers[sourceType]
+        if (nodeTransformer != null) {
+            return nodeTransformer as MPNodeTransformer<S, T>
+        } else {
+            // TODO here we should get the Concept and all of its super concepts
+            // TODO here for classes that we know are mapped to concepts we also consider super concepts
 //        for (superConcept in concept.superConceptLikes) {
 //            val superClassNodeTransformer = getNodeTransformer<S, T>(superConcept)
 //            if (superClassNodeTransformer != null) {
 //                return superClassNodeTransformer
 //            }
 //        }
+        }
+        return null
     }
-    return null
-}
 
-     fun <S : Any, T : NodeLike> registerNodeTransformer(
+    fun <S : Any, T : NodeLike> registerNodeTransformer(
         concept: KClass<*>,
         transformer: (S, MPASTTransformer, MPNodeTransformer<S, T>) -> T?,
     ): MPNodeTransformer<S, T> {
@@ -115,16 +111,14 @@ typealias DefaulTransformer = (Any, MPASTTransformer) -> List<NodeLike>
         return nodeTransformer
     }
 
-     fun registerDefaultNodeTransformer(
-         transformer: DefaulTransformer,
-     ) {
-         defaultTransformer = transformer
-     }
+    fun registerDefaultNodeTransformer(transformer: DefaulTransformer) {
+        defaultTransformer = transformer
+    }
 
     fun addIssue(
-    message: String,
-    severity: IssueSeverity = IssueSeverity.ERROR,
-    range: Range? = null,
+        message: String,
+        severity: IssueSeverity = IssueSeverity.ERROR,
+        range: Range? = null,
     ): Issue {
         val issue = Issue.semantic(message, severity, range)
         issues.add(issue)

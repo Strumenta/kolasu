@@ -8,8 +8,9 @@ import java.time.format.DateTimeFormatter
 
 const val COMPILER_PLUGIN_DEBUG = true
 
-abstract class BaseFirExtension(session: FirSession,
-) : FirDeclarationGenerationExtension(session)  {
+abstract class BaseFirExtension(
+    session: FirSession,
+) : FirDeclarationGenerationExtension(session) {
     protected fun log(text: String) {
         if (COMPILER_PLUGIN_DEBUG) {
             val file = File("/Users/federico/repos/kolasu-mp-example/compiler-plugin-log.txt")
