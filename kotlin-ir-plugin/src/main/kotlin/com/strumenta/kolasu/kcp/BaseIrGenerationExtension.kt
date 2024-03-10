@@ -12,7 +12,7 @@ abstract class BaseIrGenerationExtension : IrGenerationExtension {
     fun processMPNodeSubclasses(
         moduleFragment: IrModuleFragment,
         pluginContext: IrPluginContext,
-        processor: (irClass: IrClass)->Unit
+        processor: (irClass: IrClass) -> Unit,
     ) {
         moduleFragment.files.forEach { irFile ->
             irFile.declarations.filterIsInstance<IrClass>().forEach { irClass ->
@@ -26,5 +26,4 @@ abstract class BaseIrGenerationExtension : IrGenerationExtension {
             }
         }
     }
-
 }

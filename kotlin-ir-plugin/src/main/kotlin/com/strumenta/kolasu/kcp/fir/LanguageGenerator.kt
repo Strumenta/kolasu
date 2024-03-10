@@ -4,30 +4,15 @@ import com.strumenta.kolasu.kcp.classId
 import com.strumenta.kolasu.language.Concept
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.descriptors.ClassKind
-import org.jetbrains.kotlin.descriptors.EffectiveVisibility
-import org.jetbrains.kotlin.descriptors.Modality
-import org.jetbrains.kotlin.descriptors.Visibilities
-import org.jetbrains.kotlin.fir.FirElement
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
-import org.jetbrains.kotlin.fir.declarations.FirProperty
-import org.jetbrains.kotlin.fir.declarations.builder.buildRegularClass
-import org.jetbrains.kotlin.fir.declarations.impl.FirResolvedDeclarationStatusImpl
 import org.jetbrains.kotlin.fir.declarations.origin
-import org.jetbrains.kotlin.fir.extensions.FirDeclarationPredicateRegistrar
 import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
 import org.jetbrains.kotlin.fir.extensions.NestedClassGenerationContext
-import org.jetbrains.kotlin.fir.extensions.predicate.LookupPredicate
-import org.jetbrains.kotlin.fir.extensions.predicateBasedProvider
-import org.jetbrains.kotlin.fir.moduleData
-import org.jetbrains.kotlin.fir.plugin.PropertyBuildingContext
 import org.jetbrains.kotlin.fir.plugin.createCompanionObject
 import org.jetbrains.kotlin.fir.plugin.createDefaultPrivateConstructor
 import org.jetbrains.kotlin.fir.plugin.createMemberProperty
-import org.jetbrains.kotlin.fir.resolve.providers.firProvider
 import org.jetbrains.kotlin.fir.resolve.providers.toSymbol
-import org.jetbrains.kotlin.fir.resolve.typeResolver
-import org.jetbrains.kotlin.fir.scopes.kotlinScopeProvider
 import org.jetbrains.kotlin.fir.symbols.SymbolInternals
 import org.jetbrains.kotlin.fir.symbols.impl.ConeClassLikeLookupTagImpl
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
@@ -35,12 +20,10 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
-import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.types.ConeClassLikeType
 import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import org.jetbrains.kotlin.fir.types.ConeTypeProjection
 import org.jetbrains.kotlin.fir.types.impl.ConeClassLikeTypeImpl
-import org.jetbrains.kotlin.fir.visitors.FirTransformer
 import org.jetbrains.kotlin.ir.backend.js.utils.TODO
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
@@ -87,28 +70,28 @@ class LanguageGenerator(
 
 //    override fun generateConstructors(context: MemberGenerationContext): List<FirConstructorSymbol> {
 //        return emptyList()
-////        val classId = context.owner.classId
-////        require(classId == MY_CLASS_ID)
-////        val constructor =
-////            buildPrimaryConstructor {
-////                resolvePhase = FirResolvePhase.BODY_RESOLVE
-////                moduleData = session.moduleData
-////                origin = Key.origin
-////                returnTypeRef =
-////                    buildResolvedTypeRef {
-////                        type = classId.toConeType()
-////                    }
-////                status =
-////                    FirResolvedDeclarationStatusImpl(
-////                        Visibilities.Public,
-////                        Modality.FINAL,
-////                        EffectiveVisibility.Public,
-////                    )
-////                symbol = FirConstructorSymbol(classId)
-////            }.also {
-////                it.containingClassForStaticMemberAttr = ConeClassLikeLookupTagImpl(classId)
-////            }
-////        return listOf(constructor.symbol)
+// //        val classId = context.owner.classId
+// //        require(classId == MY_CLASS_ID)
+// //        val constructor =
+// //            buildPrimaryConstructor {
+// //                resolvePhase = FirResolvePhase.BODY_RESOLVE
+// //                moduleData = session.moduleData
+// //                origin = Key.origin
+// //                returnTypeRef =
+// //                    buildResolvedTypeRef {
+// //                        type = classId.toConeType()
+// //                    }
+// //                status =
+// //                    FirResolvedDeclarationStatusImpl(
+// //                        Visibilities.Public,
+// //                        Modality.FINAL,
+// //                        EffectiveVisibility.Public,
+// //                    )
+// //                symbol = FirConstructorSymbol(classId)
+// //            }.also {
+// //                it.containingClassForStaticMemberAttr = ConeClassLikeLookupTagImpl(classId)
+// //            }
+// //        return listOf(constructor.symbol)
 //    }
 
     override fun generateFunctions(
@@ -149,7 +132,7 @@ class LanguageGenerator(
 //        val result = packageFqName == MY_CLASS_ID.packageFqName
 //        log("LanguageGenerator.hasPackage $packageFqName -> $result")
 //        return result
-        //TODO()
+        // TODO()
         return false
     }
 
@@ -168,31 +151,31 @@ class LanguageGenerator(
 //        name: Name,
 //        context: NestedClassGenerationContext
 //    ): FirClassLikeSymbol<*>? {
-////        return super.generateNestedClassLikeDeclaration(owner, name, context)
+// //        return super.generateNestedClassLikeDeclaration(owner, name, context)
 //        TODO()
 //    }
 
     @OptIn(SymbolInternals::class)
     override fun generateProperties(
         callableId: CallableId,
-        context: MemberGenerationContext?
+        context: MemberGenerationContext?,
     ): List<FirPropertySymbol> {
 //        return super.generateProperties(callableId, context)
 
         return if (callableId.callableName.identifier == "concept") {
-            //PropertyBuildingContext(session, Key, callableId.classId!!, )
+            // PropertyBuildingContext(session, Key, callableId.classId!!, )
 
             val ps = FirPropertySymbol(callableId)
 
-            val conceptClassId : ClassId = Concept::class.classId
-            val conceptType : ConeKotlinType = conceptClassId.toConeType()
-            val thisClass : FirClassSymbol<*> = callableId.classId!!.toSymbol(session) as FirClassSymbol<*>
+            val conceptClassId: ClassId = Concept::class.classId
+            val conceptType: ConeKotlinType = conceptClassId.toConeType()
+            val thisClass: FirClassSymbol<*> = callableId.classId!!.toSymbol(session) as FirClassSymbol<*>
             val property = createMemberProperty(thisClass, Key, Name.identifier("concept"), conceptType)
 
             ps.bind(property)
 
-            //val fir =(callableId.classId!!.toSymbol(session)!! as FirClassSymbol<*>).pro
-            //ps.bind(fir)
+            // val fir =(callableId.classId!!.toSymbol(session)!! as FirClassSymbol<*>).pro
+            // ps.bind(fir)
             listOf(ps)
         } else {
             emptyList()
@@ -211,7 +194,7 @@ class LanguageGenerator(
 //        classSymbol: FirClassSymbol<*>,
 //        context: NestedClassGenerationContext
 //    ): Set<Name> {
-////        return super.getNestedClassifiersNames(classSymbol, context)
+// //        return super.getNestedClassifiersNames(classSymbol, context)
 //        // TODO we could define the concept here
 //        return setOf(Name.identifier("Concept"))
 //    }
@@ -222,7 +205,11 @@ class LanguageGenerator(
     }
 
     @OptIn(SymbolInternals::class)
-    override fun generateNestedClassLikeDeclaration(owner: FirClassSymbol<*>, name: Name, context: NestedClassGenerationContext): FirClassLikeSymbol<*>? =
+    override fun generateNestedClassLikeDeclaration(
+        owner: FirClassSymbol<*>,
+        name: Name,
+        context: NestedClassGenerationContext,
+    ): FirClassLikeSymbol<*>? =
         runIf(name == DEFAULT_NAME_FOR_COMPANION_OBJECT) {
             val firClass = createCompanionObject(owner, Key)
             firClass.symbol
@@ -233,14 +220,20 @@ class LanguageGenerator(
         return listOf(constructor.symbol)
     }
 
-    override fun getCallableNamesForClass(classSymbol: FirClassSymbol<*>, context: MemberGenerationContext): Set<Name> {
+    override fun getCallableNamesForClass(
+        classSymbol: FirClassSymbol<*>,
+        context: MemberGenerationContext,
+    ): Set<Name> {
         if (!classSymbol.isCompanion) return emptySet()
 
         val origin = classSymbol.origin as? FirDeclarationOrigin.Plugin
         return runIf(origin?.key == Key) { setOf(SpecialNames.INIT, Name.identifier("concept")) }.orEmpty()
     }
 
-    override fun getNestedClassifiersNames(classSymbol: FirClassSymbol<*>, context: NestedClassGenerationContext): Set<Name> {
+    override fun getNestedClassifiersNames(
+        classSymbol: FirClassSymbol<*>,
+        context: NestedClassGenerationContext,
+    ): Set<Name> {
 //        runIf(classSymbol matches companionPredicate and classSymbol.needsCompanion) {
 //            setOf(DEFAULT_NAME_FOR_COMPANION_OBJECT)
 //        }.orEmpty()
@@ -257,13 +250,13 @@ class LanguageGenerator(
 }
 
 private val FirClassSymbol<*>.isCompanion get() =
-    isSingleton && with(classId) {
-        isNestedClass && shortClassName == DEFAULT_NAME_FOR_COMPANION_OBJECT
-    }
+    isSingleton &&
+        with(classId) {
+            isNestedClass && shortClassName == DEFAULT_NAME_FOR_COMPANION_OBJECT
+        }
 
 private val FirClassSymbol<*>.needsCompanion get() =
     !isSingleton && declarationSymbols.none { (it as? FirClassSymbol<*>)?.isCompanion ?: false }
 
 private val FirClassSymbol<*>.isSingleton get() =
     classKind == ClassKind.OBJECT
-

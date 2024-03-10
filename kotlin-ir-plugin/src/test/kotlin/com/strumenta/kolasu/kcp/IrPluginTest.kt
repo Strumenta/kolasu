@@ -2,7 +2,6 @@
 
 package com.strumenta.kolasu.kcp
 
-import com.strumenta.kolasu.language.Concept
 import com.tschuchort.compiletesting.CompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
@@ -552,16 +551,16 @@ fun main() {
         result.invokeMainMethod("mytest.MainKt")
     }
 
-    //NOW WE GENERATE THE CONCEPT PROPERTY IN THE COMPANION OBJECT AND WE NEED TO POPULATE IT
+    // NOW WE GENERATE THE CONCEPT PROPERTY IN THE COMPANION OBJECT AND WE NEED TO POPULATE IT
 
     @Test
     fun `get concept on class`() {
         val result =
             compile(
                 sourceFile =
-                SourceFile.kotlin(
-                    "main.kt",
-                    """
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
 package mytest
 
 import com.strumenta.kolasu.model.NodeLike
@@ -583,7 +582,7 @@ fun main() {
 }
 
 """,
-                ),
+                    ),
             )
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
@@ -595,9 +594,9 @@ fun main() {
         val result =
             compile(
                 sourceFile =
-                SourceFile.kotlin(
-                    "main.kt",
-                    """
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
 package mytest
 
 import com.strumenta.kolasu.model.NodeLike
@@ -621,7 +620,7 @@ fun main() {
 }
 
 """,
-                ),
+                    ),
             )
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
@@ -692,8 +691,8 @@ fun compile(
     plugin: CompilerPluginRegistrar = StarLasuComponentRegistrar(),
 ): CompilationResultWithClassLoader = compile(listOf(sourceFile), plugin)
 
-//class A {
+// class A {
 //    companion object {
 //        val concept = Concept("A")
 //    }
-//}
+// }

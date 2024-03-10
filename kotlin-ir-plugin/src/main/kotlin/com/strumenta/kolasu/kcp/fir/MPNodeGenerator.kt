@@ -165,7 +165,7 @@ fun FirClassSymbol<*>.extendMPNode(firSession: FirSession): Boolean =
                 false
             }
             is FirUserTypeRefImpl -> {
-                it.qualifier.any { it.name.identifier == "MPNode"}
+                it.qualifier.any { it.name.identifier == "MPNode" }
             }
 
             else -> {
