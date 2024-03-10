@@ -2,6 +2,7 @@ package com.strumenta.kolasu.language
 
 import com.strumenta.kolasu.model.MPNode
 import com.strumenta.kolasu.model.Multiplicity
+import kotlin.test.DefaultAsserter.fail
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -15,8 +16,22 @@ class MetamodelTest {
     }
 
     @Test
+    fun attributeNullableType() {
+        assertThrows { Attribute("MyAttribute", true, nullableStringType) }
+    }
+
+    @Test
     fun referenceMultiplicity() {
         assertEquals(Multiplicity.OPTIONAL, Reference("MyReference", true, MyNode::class).multiplicity)
         assertEquals(Multiplicity.SINGULAR, Reference("MyReference", false, MyNode::class).multiplicity)
+    }
+}
+
+fun assertThrows(op: () -> Unit) {
+    try {
+        op.invoke()
+        fail("exception not thrown")
+    } catch (t: Throwable) {
+
     }
 }

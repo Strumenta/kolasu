@@ -9,3 +9,4 @@ expect fun simpleType(
 ): KType
 
 val stringType = simpleType(String::class)
+val nullableStringType = simpleType(String::class, true)
