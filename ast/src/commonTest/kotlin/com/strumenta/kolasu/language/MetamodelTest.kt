@@ -32,6 +32,5 @@ fun assertThrows(op: () -> Unit) {
         op.invoke()
         fail("exception not thrown")
     } catch (t: Throwable) {
-
     }
 }
