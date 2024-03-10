@@ -25,12 +25,14 @@ class StarLasuLanguage {
 
 sealed class ConceptLike {
     abstract val superConceptLikes: List<ConceptLike>
-    val features : MutableList<Feature> = mutableListOf()
-    abstract val allFeatures : List<Feature>
-    val allAttributes : List<Attribute>
+    val features: MutableList<Feature> = mutableListOf()
+    abstract val allFeatures: List<Feature>
+    val allAttributes: List<Attribute>
         get() = allFeatures.filterIsInstance<Attribute>()
-    fun feature(name: String) : Feature? = allFeatures.find { it.name == name }
-    fun attribute(name: String) : Attribute? = allAttributes.find { it.name == name }
+
+    fun feature(name: String): Feature? = allFeatures.find { it.name == name }
+
+    fun attribute(name: String): Attribute? = allAttributes.find { it.name == name }
 }
 
 class ConceptInterface : ConceptLike() {

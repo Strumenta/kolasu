@@ -127,17 +127,23 @@ class FieldObservableExtension(
                             this.dispatchReceiver = irGet(thisParameter)
 
                             // attribute myClass.concept.attribute(attributeName)
-                            val companionClass = declaration.parentAsClass.declarations.filterIsInstance<IrClass>().find { it.isCompanion }!!
+                            val companionClass =
+                                declaration
+                                    .parentAsClass
+                                    .declarations
+                                    .filterIsInstance<IrClass>()
+                                    .find { it.isCompanion }!!
                             val attributeMethod = pluginContext.referenceFunctions(Concept::class, "attribute").single()
                             val attributeName = declaration.name.identifier.toIrConst(irContext.irBuiltIns.stringType)
 
                             val companionInstance = TODO("get companion instance")
-                            val concept : IrExpression = TODO("GET THE CONCEPT FROM THE COMPANION")
+                            val concept: IrExpression = TODO("GET THE CONCEPT FROM THE COMPANION")
 
-                            val attribute = irCall(attributeMethod).apply {
-                                dispatchReceiver = concept
-                                putValueArgument(0, attributeName)
-                            }
+                            val attribute =
+                                irCall(attributeMethod).apply {
+                                    dispatchReceiver = concept
+                                    putValueArgument(0, attributeName)
+                                }
                             putValueArgument(0, attribute)
                             // current backing field value
                             putValueArgument(1, irGetField(irGet(thisParameter), declaration.backingField!!))
