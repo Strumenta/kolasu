@@ -34,11 +34,11 @@ class LionWebGradlePlugin : Plugin<Project> {
 
     private fun createGenASTClassesTask(project: Project, configuration: LionWebGradleExtension) : Task {
         return project.tasks.create(genASTClasses) {
-            it.group = tasksGroup
-            it.description = "Generate Kolasu ASTs from LionWeb languages"
-            it.inputs.files(configuration.languages.get())
-            it.outputs.dir(configuration.outdir.get())
-            it.doLast {
+            this.group = tasksGroup
+            this.description = "Generate Kolasu ASTs from LionWeb languages"
+            this.inputs.files(configuration.languages.get())
+            this.outputs.dir(configuration.outdir.get())
+            this.doLast {
                 println("LIonWeb AST Classes generation task - started")
                 println("  languages: ${configuration.languages.get()}")
                 configuration.languages.get().forEach { languageFile ->
@@ -68,20 +68,20 @@ class LionWebGradlePlugin : Plugin<Project> {
     }
 
     private fun createGenLanguagesTask(project: Project, configuration: LionWebGradleExtension) : Task {
-        return project.tasks.create(genLanguages) { it ->
-            it.description = "Generate LionWeb languages from Kolasu ASTs"
-            it.group = tasksGroup
-            it.dependsOn("compileKotlin")
-            it.doLast {
+        return project.tasks.create(genLanguages) {
+            this.description = "Generate LionWeb languages from Kolasu ASTs"
+            this.group = tasksGroup
+            this.dependsOn("compileKotlin")
+            this.doLast {
                 if (configuration.exportPackages.get().isEmpty()) {
                     project.logger.warn("executing $genLanguages task but no export packages defined")
                 } else {
                     configuration.exportPackages.get().forEach { packageName ->
                         project.logger.lifecycle("generating LionWeb language for package $packageName")
-                        project.javaexec { jes ->
-                            jes.classpath = project.sourceSets.getByName("main").runtimeClasspath
-                            jes.mainClass.set("${packageName}.Language")
-                            jes.args = mutableListOf(lionwebLanguageFile(project, packageName).absolutePath)
+                        project.javaexec {
+                            this.classpath = project.sourceSets.getByName("main").runtimeClasspath
+                            this.mainClass.set("${packageName}.Language")
+                            this.args = mutableListOf(lionwebLanguageFile(project, packageName).absolutePath)
                         }
                     }
                 }
@@ -122,7 +122,7 @@ class LionWebGradlePlugin : Plugin<Project> {
         ksp.arg("file", kspFile.absolutePath)
 
         val prepareKsp = project.tasks.create("prepareKspForLionWebGen") {
-            it.doFirst {
+            this.doFirst {
                 val exportPackagesStr = configuration.exportPackages.get().let { it.joinToString(",") }
                 kspFile.parentFile.mkdirs()
                 kspFile.writeText("exportPackages=$exportPackagesStr\n")
@@ -136,8 +136,8 @@ class LionWebGradlePlugin : Plugin<Project> {
      */
     private fun configureCompilation(project: Project) {
         project.sourceSets.getByName("main") {
-            it.java.srcDir("src${File.separator}main${File.separator}java")
-            it.java.srcDir(File(project.buildDir, "lionweb-gen"))
+            this.java.srcDir("src${File.separator}main${File.separator}java")
+            this.java.srcDir(File(project.buildDir, "lionweb-gen"))
         }
 
         project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).forEach {

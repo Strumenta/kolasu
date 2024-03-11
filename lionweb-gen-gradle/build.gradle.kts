@@ -1,18 +1,24 @@
 plugins {
     id("java-gradle-plugin")
-    id 'org.jetbrains.kotlin.jvm'
+    id("org.jetbrains.kotlin.jvm")
     id("com.github.gmazzo.buildconfig") version "3.1.0"
     id("maven-publish")
     id("com.gradle.plugin-publish") version "1.2.0"
-    id "org.jetbrains.dokka"
+    id("org.jetbrains.dokka")
+    `kotlin-dsl`
 }
 
-def completeKspVersion = kspVersion.contains("-") ? kspVersion : "${kotlin_version}-${kspVersion}"
+val kspVersion = extra["kspVersion"] as String
+val kotlin_version = extra["kotlin_version"] as String
+val lionwebVersion = extra["lionwebVersion"] as String
+val gson_version = extra["gson_version"] as String
+val lionwebGenGradlePluginID = extra["lionwebGenGradlePluginID"] as String
+val completeKspVersion = if (kspVersion.contains("-")) kspVersion else "${kotlin_version}-${kspVersion}"
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    api("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
     implementation("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebVersion")
     api(project(":lionweb-gen"))
     testImplementation(project(":lionweb-ksp"))
@@ -28,7 +34,7 @@ buildConfig {
     buildConfigField("String", "PLUGIN_GROUP", "\"${project.group}\"")
     buildConfigField("String", "PLUGIN_NAME", "\"${project.name}\"")
     buildConfigField("String", "PLUGIN_VERSION", "\"${project.version}\"")
-    buildConfigField("String", "LIONCORE_VERSION", "\"${project.lionwebVersion}\"")
+    buildConfigField("String", "LIONCORE_VERSION", "\"${lionwebVersion}\"")
 }
 
 gradlePlugin {
@@ -39,7 +45,7 @@ gradlePlugin {
             id = lionwebGenGradlePluginID as String
             displayName = "Kolasu LionWeb Gen"
             description = "Kolasu LionWeb Gen"
-            tags.set(["parsing", "ast", "starlasu", "lionweb"])
+            tags.set(listOf("parsing", "ast", "starlasu", "lionweb"))
             implementationClass = "com.strumenta.kolasu.lionwebgen.LionWebGradlePlugin"
         }
     }
@@ -49,20 +55,17 @@ tasks.named("compileKotlin") {
     dependsOn("generateBuildConfig")
 }
 
-test {
+tasks.test {
     useJUnitPlatform()
 }
 
-tasks.findByName("dokkaJavadoc").dependsOn("generateBuildConfig")
-tasks.findByName("dokkaJavadoc").dependsOn(":core:compileKotlin")
-tasks.findByName("dokkaJavadoc").dependsOn(":emf:compileKotlin")
-tasks.findByName("dokkaJavadoc").dependsOn(":lionweb:jar")
-tasks.findByName("dokkaJavadoc").dependsOn(":lionweb-gen:jar")
+tasks.findByName("dokkaJavadoc")!!.dependsOn("generateBuildConfig")
+tasks.findByName("dokkaJavadoc")!!.dependsOn(":core:compileKotlin")
+tasks.findByName("dokkaJavadoc")!!.dependsOn(":emf:compileKotlin")
+tasks.findByName("dokkaJavadoc")!!.dependsOn(":lionweb:jar")
+tasks.findByName("dokkaJavadoc")!!.dependsOn(":lionweb-gen:jar")
 
 java {
-    sourceCompatibility = "$jvm_version"
-    targetCompatibility = "$jvm_version"
-    registerFeature('cli') {
-        usingSourceSet(sourceSets.main)
-    }
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
