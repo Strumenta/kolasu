@@ -7,6 +7,8 @@ import com.strumenta.kolasu.testing.assertASTsAreEqual
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 
 class LionWebModelConverterTest {
@@ -282,5 +284,27 @@ class LionWebModelConverterTest {
         expectedAST.assignParents()
 
         assertASTsAreEqual(expectedAST, kAST)
+    }
+
+    @Test
+    fun exportParent() {
+        val b2 = SimpleNodeB("some magic value")
+        val a1 = SimpleNodeA("A1", ReferenceByName("A1"), b2)
+        a1.assignParents()
+
+        // if we store b2, child of a1, we expect the parent to be set
+        val converter = LionWebModelConverter()
+        converter.exportLanguageToLionWeb(
+            KolasuLanguage("myLanguage").apply {
+                addClass(SimpleNodeA::class)
+                addClass(SimpleNodeB::class)
+            }
+        )
+        var exported = converter.exportModelToLionWeb(b2, considerParent = false)
+        assertNull(exported.parent)
+
+        exported = converter.exportModelToLionWeb(b2, considerParent = true)
+        assertNotNull(exported.parent)
+        assertEquals(converter.nodeIdProvider.id(a1), exported.parent.id)
     }
 }
