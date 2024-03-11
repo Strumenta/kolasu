@@ -69,56 +69,64 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
         this.languageConverter.associateLanguages(lwLanguage, kolasuLanguage)
     }
 
-    fun exportModelToLionWeb(kolasuTree: KNode, nodeIdProvider: NodeIdProvider = this.nodeIdProvider): LWNode {
-        if (nodesMapping.containsA(kolasuTree)) {
-            return nodesMapping.byA(kolasuTree)!!
-        }
-        kolasuTree.walk().forEach { kNode ->
-            if (!nodesMapping.containsA(kNode)) {
-                val lwNode = DynamicNode(nodeIdProvider.id(kNode), findConcept(kNode))
-                associateNodes(kNode, lwNode)
+    fun exportModelToLionWeb(
+        kolasuTree: KNode,
+        nodeIdProvider: NodeIdProvider = this.nodeIdProvider,
+        considerParent: Boolean = true
+    ): LWNode {
+        if (!nodesMapping.containsA(kolasuTree)) {
+            kolasuTree.walk().forEach { kNode ->
+                if (!nodesMapping.containsA(kNode)) {
+                    val lwNode = DynamicNode(nodeIdProvider.id(kNode), findConcept(kNode))
+                    associateNodes(kNode, lwNode)
+                }
             }
-        }
-        kolasuTree.walk().forEach { kNode ->
-            val lwNode = nodesMapping.byA(kNode)!!
-            val kFeatures = kNode.javaClass.kotlin.allFeatures()
-            lwNode.concept.allFeatures().forEach { feature ->
-                when (feature) {
-                    is Property -> {
-                        val kAttribute = kFeatures.find { it.name == feature.name }
-                            as? com.strumenta.kolasu.language.Attribute
-                            ?: throw IllegalArgumentException("Property ${feature.name} not found in $kNode")
-                        val kValue = kNode.getAttributeValue(kAttribute)
-                        lwNode.setPropertyValue(feature, kValue)
-                    }
-                    is Containment -> {
-                        val kContainment = kFeatures.find { it.name == feature.name }
-                            as com.strumenta.kolasu.language.Containment
-                        val kValue = kNode.getChildren(kContainment)
-                        kValue.forEach { kChild ->
-                            val lwChild = nodesMapping.byA(kChild)!!
-                            lwNode.addChild(feature, lwChild)
+            kolasuTree.walk().forEach { kNode ->
+                val lwNode = nodesMapping.byA(kNode)!!
+                val kFeatures = kNode.javaClass.kotlin.allFeatures()
+                lwNode.concept.allFeatures().forEach { feature ->
+                    when (feature) {
+                        is Property -> {
+                            val kAttribute = kFeatures.find { it.name == feature.name }
+                                as? com.strumenta.kolasu.language.Attribute
+                                ?: throw IllegalArgumentException("Property ${feature.name} not found in $kNode")
+                            val kValue = kNode.getAttributeValue(kAttribute)
+                            lwNode.setPropertyValue(feature, kValue)
                         }
-                    }
-                    is Reference -> {
-                        val kReference = kFeatures.find { it.name == feature.name }
-                            as com.strumenta.kolasu.language.Reference
-                        val kValue = kNode.getReference(kReference)
-                        if (kValue == null) {
-                            lwNode.addReferenceValue(feature, null)
-                        } else {
-                            when {
-                                kValue.retrieved -> {
-                                    val lwReferred: Node = nodesMapping.byA(kValue.referred!! as KNode)!!
-                                    lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
-                                }
-                                kValue.resolved -> {
-                                    // This is tricky, as we need to set a LW Node, but we have just an identifier...
-                                    val lwReferred: Node = DynamicNode(kValue.identifier!!, LionCoreBuiltins.getNode())
-                                    lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
-                                }
-                                else -> {
-                                    lwNode.addReferenceValue(feature, ReferenceValue(null, kValue.name))
+
+                        is Containment -> {
+                            val kContainment = kFeatures.find { it.name == feature.name }
+                                as com.strumenta.kolasu.language.Containment
+                            val kValue = kNode.getChildren(kContainment)
+                            kValue.forEach { kChild ->
+                                val lwChild = nodesMapping.byA(kChild)!!
+                                lwNode.addChild(feature, lwChild)
+                            }
+                        }
+
+                        is Reference -> {
+                            val kReference = kFeatures.find { it.name == feature.name }
+                                as com.strumenta.kolasu.language.Reference
+                            val kValue = kNode.getReference(kReference)
+                            if (kValue == null) {
+                                lwNode.addReferenceValue(feature, null)
+                            } else {
+                                when {
+                                    kValue.retrieved -> {
+                                        val lwReferred: Node = nodesMapping.byA(kValue.referred!! as KNode)!!
+                                        lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
+                                    }
+
+                                    kValue.resolved -> {
+                                        // This is tricky, as we need to set a LW Node, but we have just an identifier...
+                                        val lwReferred: Node =
+                                            DynamicNode(kValue.identifier!!, LionCoreBuiltins.getNode())
+                                        lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
+                                    }
+
+                                    else -> {
+                                        lwNode.addReferenceValue(feature, ReferenceValue(null, kValue.name))
+                                    }
                                 }
                             }
                         }
@@ -127,7 +135,11 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
             }
         }
 
-        return nodesMapping.byA(kolasuTree)!!
+        val result = nodesMapping.byA(kolasuTree)!!
+        if (considerParent && kolasuTree.parent != null) {
+            (result as DynamicNode).parent = ProxyNode(nodeIdProvider.id(kolasuTree.parent!!))
+        }
+        return result
     }
 
     fun importModelFromLionWeb(lwTree: LWNode): KNode {
