@@ -121,6 +121,7 @@ class SourceSetElement(val sourceSet: SourceSet, val relativePath: Path) : Sourc
 data class FileSource(val file: File) : Source()
 class StringSource(val code: String? = null) : Source()
 class URLSource(val url: URL) : Source()
+data class CodeBaseSource(val codebaseName: String, val relativePath: String) : Source()
 
 /**
  * This source is intended to be used for nodes that are "calculated".

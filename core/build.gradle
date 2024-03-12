@@ -140,3 +140,4 @@ signing {
 
 tasks.findByName("generateGrammarSource").dependsOn("sourcesJar")
 tasks.findByName("runKtlintCheckOverTestSourceSet").dependsOn("generateTestGrammarSource")
+tasks.findByName("runKtlintFormatOverTestSourceSet").dependsOn("generateTestGrammarSource")

@@ -32,7 +32,7 @@ class SimpleSourceIdProvider : AbstractSourceIdProvider() {
                 cleanId("synthetic_${source.description}")
             }
             else -> {
-                TODO("Unable to generate ID for Source $this (${this.javaClass.canonicalName})")
+                TODO("Unable to generate ID for Source $this (${source.javaClass.canonicalName})")
             }
         }
     }
