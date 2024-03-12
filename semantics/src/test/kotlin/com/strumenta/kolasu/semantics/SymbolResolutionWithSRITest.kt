@@ -1,14 +1,7 @@
 package com.strumenta.kolasu.semantics
 
 import com.strumenta.kolasu.ids.StructuralNodeIdProvider
-import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.SimpleOrigin
-import com.strumenta.kolasu.model.SyntheticSource
-import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.semantics.scope.provider.declarative.DeclarativeScopeProvider
 import com.strumenta.kolasu.semantics.scope.provider.declarative.scopeFor
 import com.strumenta.kolasu.semantics.symbol.description.SymbolDescription
