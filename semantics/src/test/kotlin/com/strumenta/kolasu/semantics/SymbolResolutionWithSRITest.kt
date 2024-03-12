@@ -11,9 +11,9 @@ import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.semantics.scope.provider.declarative.DeclarativeScopeProvider
 import com.strumenta.kolasu.semantics.scope.provider.declarative.scopeFor
-import com.strumenta.kolasu.semantics.symbol.description.StringValueDescription
 import com.strumenta.kolasu.semantics.symbol.description.SymbolDescription
 import com.strumenta.kolasu.semantics.symbol.provider.SymbolProvider
+import com.strumenta.kolasu.semantics.symbol.provider.symbolProvider
 import com.strumenta.kolasu.semantics.symbol.repository.SymbolRepository
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.traversing.walkDescendants
@@ -104,20 +104,10 @@ class SymbolResolutionWithSRITest {
         }
 
         val nodeIdProvider = StructuralNodeIdProvider()
-        val symbolProvider = object : SymbolProvider {
 
-            override fun symbolFor(node: Node): SymbolDescription? {
-                if (node is Todo) {
-                    val id = nodeIdProvider.id(node)
-                    return SymbolDescription(
-                        node.name,
-                        id,
-                        emptyList(),
-                        mapOf("name" to StringValueDescription(node.name))
-                    )
-                } else {
-                    return null
-                }
+        val symbolProvider = symbolProvider(nodeIdProvider) {
+            symbolFor(Todo::class) {
+                include("name", it.node.name)
             }
         }
 
