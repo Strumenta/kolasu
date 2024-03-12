@@ -13,3 +13,7 @@ interface NodeIdProvider {
      */
     fun id(kNode: KNode): String
 }
+
+interface IDLogic {
+    val calculatedID: String
+}

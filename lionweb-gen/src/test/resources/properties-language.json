@@ -68,7 +68,7 @@
           "targets": [
             {
               "resolveInfo": "com.strumenta.StarLasu",
-              "reference": "com_strumenta_starlasu"
+              "reference": "com-strumenta-StarLasu"
             }
           ]
         }
@@ -131,7 +131,7 @@
           "targets": [
             {
               "resolveInfo": "ASTNode",
-              "reference": "com_strumenta_starlasu_ASTNode"
+              "reference": "com-strumenta-StarLasu-ASTNode-id"
             }
           ]
         },
@@ -263,7 +263,7 @@
           "targets": [
             {
               "resolveInfo": "ASTNode",
-              "reference": "com_strumenta_starlasu_ASTNode"
+              "reference": "com-strumenta-StarLasu-ASTNode-id"
             }
           ]
         },
@@ -444,7 +444,7 @@
           "targets": [
             {
               "resolveInfo": "ASTNode",
-              "reference": "com_strumenta_starlasu_ASTNode"
+              "reference": "com-strumenta-StarLasu-ASTNode-id"
             }
           ]
         },

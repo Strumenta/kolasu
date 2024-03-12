@@ -5,13 +5,14 @@ plugins {
     id("maven-publish")
     id("com.gradle.plugin-publish") version "1.2.0"
     id("org.jetbrains.dokka")
+    `kotlin-dsl`
 }
 
 val kspVersion = extra["kspVersion"] as String
 val kotlinVersion = extra["kotlinVersion"] as String
 val lionwebVersion = extra["lionwebVersion"] as String
-val completeKspVersion = if (kspVersion.contains("-")) kspVersion else "$kotlinVersion-$kspVersion"
 val lionwebGenGradlePluginID = extra["lionwebGenGradlePluginID"] as String
+val completeKspVersion = if (kspVersion.contains("-")) kspVersion else "$kotlinVersion-$kspVersion"
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
@@ -61,6 +62,11 @@ tasks.findByName("dokkaJavadoc")!!.dependsOn(":core:compileKotlin")
 tasks.findByName("dokkaJavadoc")!!.dependsOn(":emf:compileKotlin")
 tasks.findByName("dokkaJavadoc")!!.dependsOn(":lionweb:jar")
 tasks.findByName("dokkaJavadoc")!!.dependsOn(":lionweb-gen:jar")
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 afterEvaluate {
     tasks {

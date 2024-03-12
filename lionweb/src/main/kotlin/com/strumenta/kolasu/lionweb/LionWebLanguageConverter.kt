@@ -8,6 +8,8 @@ import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.declaredFeatures
 import com.strumenta.kolasu.model.isConcept
 import com.strumenta.kolasu.model.isConceptInterface
@@ -39,6 +41,8 @@ class LionWebLanguageConverter {
         registerMapping(NodeLike::class, StarLasuLWLanguage.ASTNode)
         registerMapping(Node::class, StarLasuLWLanguage.ASTNode)
         registerMapping(Named::class, LionCoreBuiltins.getINamed())
+        registerMapping(Range::class, StarLasuLWLanguage.Range)
+        registerMapping(Point::class, StarLasuLWLanguage.Point)
     }
 
     fun exportToLionWeb(kolasuLanguage: KolasuLanguage): LWLanguage {

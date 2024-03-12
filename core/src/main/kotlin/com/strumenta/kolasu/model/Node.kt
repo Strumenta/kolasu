@@ -5,6 +5,7 @@ import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
+import com.strumenta.kolasu.traversing.walk
 import kotlin.reflect.KMutableProperty
 
 /**
@@ -86,9 +87,28 @@ open class Node : NodeLike {
             }
         }
 
+    private var explicitlySetSource: Source? = null
+
     @property:Internal
-    override val source: Source?
-        get() = origin?.source
+    override var source: Source?
+        get() = explicitlySetSource ?: origin?.source
+        set(value) {
+            // This is a limit of the current API: to specify a Source we need to specify coordinates
+            if (this.range == null) {
+                explicitlySetSource = value
+            } else {
+                this.origin = SimpleOrigin(this.range!!.copy(source = value))
+            }
+            require(this.source === value)
+        }
+
+    fun setSourceForTree(source: Source): NodeLike {
+        this.source = source
+        this.walk().forEach {
+            it.source = source
+        }
+        return this
+    }
 
     /**
      * The source text for this node

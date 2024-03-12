@@ -58,7 +58,7 @@ interface NodeLike {
     var range: Range?
 
     @property:Internal
-    val source: Source?
+    var source: Source?
 
     /**
      * Tests whether the given range is contained in the interval represented by this object.
