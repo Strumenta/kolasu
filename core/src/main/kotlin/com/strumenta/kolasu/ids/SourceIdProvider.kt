@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.ids
 
+import com.strumenta.kolasu.model.CodeBaseSource
 import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.SyntheticSource
@@ -21,6 +22,9 @@ abstract class AbstractSourceIdProvider : SourceIdProvider {
 
 class SimpleSourceIdProvider : AbstractSourceIdProvider() {
     override fun sourceId(source: Source?): String {
+        if (source is IDLogic) {
+            return source!!.calculatedID
+        }
         return when (source) {
             null -> {
                 "UNKNOWN_SOURCE"
@@ -30,6 +34,9 @@ class SimpleSourceIdProvider : AbstractSourceIdProvider() {
             }
             is SyntheticSource -> {
                 cleanId("synthetic_${source.description}")
+            }
+            is CodeBaseSource -> {
+                cleanId("codebase_${source.codebaseName}_relpath_${source.relativePath}")
             }
             else -> {
                 TODO("Unable to generate ID for Source $this (${source.javaClass.canonicalName})")
