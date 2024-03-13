@@ -2,12 +2,13 @@ package com.strumenta.kolasu.semantics
 
 import com.strumenta.kolasu.ids.StructuralNodeIdProvider
 import com.strumenta.kolasu.model.*
-import com.strumenta.kolasu.semantics.scope.provider.declarative.DeclarativeScopeProvider
-import com.strumenta.kolasu.semantics.scope.provider.declarative.scopeFor
+import com.strumenta.kolasu.semantics.scope.provider.ReferenceNode
+import com.strumenta.kolasu.semantics.scope.provider.scopeProvider
 import com.strumenta.kolasu.semantics.symbol.description.SymbolDescription
 import com.strumenta.kolasu.semantics.symbol.provider.SymbolProvider
 import com.strumenta.kolasu.semantics.symbol.provider.symbolProvider
 import com.strumenta.kolasu.semantics.symbol.repository.SymbolRepository
+import com.strumenta.kolasu.traversing.findAncestorOfType
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.traversing.walkDescendants
 import kotlin.reflect.KClass
@@ -20,7 +21,7 @@ class TodoProject(override var name: String, val todos: MutableList<Todo>) : Nod
 class Todo(
     override var name: String,
     var description: String,
-    val prerequisite: ReferenceByName<Todo>? = null
+    val prerequisite: ReferenceNode<Todo>? = null
 ) : Node(), Named
 
 class SymbolResolutionWithSRITest {
@@ -28,49 +29,46 @@ class SymbolResolutionWithSRITest {
     @Test
     fun symbolResolutionPointingToNodes() {
         val todo1 = Todo("todo1", "stuff to do 1")
-        val todo2 = Todo("todo2", "stuff to do 2", prerequisite = ReferenceByName("todo1"))
+        val todo2 = Todo("todo2", "stuff to do 2", prerequisite = ReferenceNode("todo1", Todo::class))
         val todo3 = Todo("todo3", "stuff to do 3")
         val todoProject = TodoProject("Personal", mutableListOf(todo1, todo2, todo3))
         todoProject.assignParents()
 
-        val scopeProvider = DeclarativeScopeProvider(
-            scopeFor(Todo::prerequisite) {
-                (it.node.parent as TodoProject).todos.forEach {
-                    define(it)
-                }
+        val scopeProvider = scopeProvider {
+            scopeFor(Todo::class) {
+                it.node.findAncestorOfType(TodoProject::class.java)?.todos?.forEach(this::defineLocalSymbol)
             }
-        )
+        }
+
         val symbolResolver = SR(scopeProvider)
 
-        assertEquals(false, todo2.prerequisite!!.resolved)
-        symbolResolver.resolve(todoProject, entireTree = true)
-        assertEquals(true, todo2.prerequisite!!.resolved)
-        assertEquals(todo1, todo2.prerequisite!!.referred)
+        assertEquals(false, todo2.prerequisite!!.reference.resolved)
+        symbolResolver.resolveTree(todoProject)
+        assertEquals(true, todo2.prerequisite!!.reference.resolved)
+        assertEquals(todo1, todo2.prerequisite!!.reference.referred)
     }
 
     @Test
     fun symbolResolutionPointingToNodesWithCustomIdProvider() {
         val todo1 = Todo("todo1", "stuff to do 1")
-        val todo2 = Todo("todo2", "stuff to do 2", prerequisite = ReferenceByName("todo1"))
+        val todo2 = Todo("todo2", "stuff to do 2", prerequisite = ReferenceNode("todo1", Todo::class))
         val todo3 = Todo("todo3", "stuff to do 3")
         val todoProject = TodoProject("Personal", mutableListOf(todo1, todo2, todo3))
         todoProject.assignParents()
 
         val nodeIdProvider = StructuralNodeIdProvider("foo")
 
-        val scopeProvider = DeclarativeScopeProvider(
-            scopeFor(Todo::prerequisite) {
-                (it.node.parent as TodoProject).todos.forEach {
-                    define(it)
-                }
+        val scopeProvider = scopeProvider {
+            scopeFor(Todo::class) {
+                it.node.findAncestorOfType(TodoProject::class.java)?.todos?.forEach(this::defineLocalSymbol)
             }
-        )
+        }
         val symbolResolver = SR(scopeProvider)
 
-        assertEquals(false, todo2.prerequisite!!.resolved)
-        symbolResolver.resolve(todoProject, entireTree = true)
-        assertEquals(true, todo2.prerequisite!!.resolved)
-        assertEquals(todo1, todo2.prerequisite!!.referred)
+        assertEquals(false, todo2.prerequisite!!.reference.resolved)
+        symbolResolver.resolveTree(todoProject)
+        assertEquals(true, todo2.prerequisite!!.reference.resolved)
+        assertEquals(todo1, todo2.prerequisite!!.reference.referred)
     }
 
     @Test
@@ -87,7 +85,7 @@ class SymbolResolutionWithSRITest {
             assertEquals(source1, it.source)
         }
 
-        val todo4 = Todo("todo4", "Some stuff to do", ReferenceByName("todo2"))
+        val todo4 = Todo("todo4", "Some stuff to do", ReferenceNode("todo2", type = Todo::class))
         val todoProjectErrands = TodoProject("Errands", mutableListOf(todo4))
         val source2 = SyntheticSource("Errands-Source")
         todoProjectErrands.assignParents()
@@ -109,27 +107,20 @@ class SymbolResolutionWithSRITest {
             todoProjectPersonal,
             todoProjectErrands
         )
-        val scopeProvider = DeclarativeScopeProvider(
-            scopeFor(Todo::prerequisite) {
-                // We first consider local todos, as they may shadow todos from other projects
-                (it.node.parent as TodoProject).todos.forEach {
-                    define(it)
-                }
-                // We then consider all symbols from the sri. Note that nodes of the current project
-                // appear both as nodes and as symbols
-                sri.find(Todo::class).forEach {
-                    define(it.name!!, it)
-                }
+        val scopeProvider = scopeProvider {
+            scopeFor(Todo::class) {
+                it.node.findAncestorOfType(TodoProject::class.java)?.todos?.forEach(this::defineLocalSymbol)
+                sri.find(Todo::class).forEach(this::defineExternalSymbol)
             }
-        )
+        }
 
         // We can now resolve _only_ the nodes in the current AST, so we do not specify other ASTs
         val symbolResolver = SR(scopeProvider)
 
-        assertEquals(false, todo4.prerequisite!!.resolved)
-        symbolResolver.resolve(todoProjectErrands, entireTree = true)
-        assertEquals(true, todo4.prerequisite!!.resolved)
-        assertEquals("synthetic_Personal-Source_root_todos_1", todo4.prerequisite.identifier)
+        assertEquals(false, todo4.prerequisite!!.reference.resolved)
+        symbolResolver.resolveTree(todoProjectErrands)
+        assertEquals(true, todo4.prerequisite!!.reference.resolved)
+        assertEquals("synthetic_Personal-Source_root_todos_1", todo4.prerequisite.reference.identifier)
     }
 }
 
