@@ -91,6 +91,7 @@ class ScopeProviderConfiguration(
 
 // builder
 
+@Deprecated("The corresponding component in the semantics module should be used instead.")
 fun scopeProvider(init: ScopeProviderConfiguration.() -> Unit) = ScopeProviderConfiguration().apply(init)
 
 // scopes
