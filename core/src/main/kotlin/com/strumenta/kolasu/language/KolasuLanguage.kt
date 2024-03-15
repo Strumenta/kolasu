@@ -51,15 +51,30 @@ class KolasuLanguage(val qualifiedName: String) {
     }
 
     fun addInterfaceClass(kClass: KClass<*>): Boolean {
-        if (!_astClasses.contains(kClass) && _astClasses.add(kClass)) {
-            kClass.supertypes.forEach { superType -> processSuperType(superType) }
-            return true
+        val attempt = tentativeAddInterfaceClass(kClass)
+        if (attempt.issues.isEmpty()) {
+            return attempt.result
         } else {
-            return false
+            throw RuntimeException(
+                "Issues prevented from adding $kClass:\n${attempt.issues.map { it.message }
+                    .joinToString("\n")}"
+            )
         }
     }
 
-    private fun processSuperType(superType: KType) {
+    fun tentativeAddInterfaceClass(
+        kClass: KClass<*>,
+        exceptions: MutableList<Exception> = mutableListOf<Exception>()
+    ): Attempt<Boolean, Exception> {
+        if (!_astClasses.contains(kClass) && _astClasses.add(kClass)) {
+            kClass.supertypes.forEach { superType -> processSuperType(superType, exceptions) }
+            return Attempt(true, exceptions)
+        } else {
+            return Attempt(false, exceptions)
+        }
+    }
+
+    private fun processSuperType(superType: KType, exceptions: MutableList<Exception> = mutableListOf<Exception>()) {
         val kClass = superType.classifier as? KClass<*>
         when (kClass) {
             null -> Unit
@@ -69,11 +84,11 @@ class KolasuLanguage(val qualifiedName: String) {
             else -> {
                 if (kClass.java.isInterface) {
                     if (kClass.isMarkedAsNodeType()) {
-                        addInterfaceClass(kClass)
+                        tentativeAddInterfaceClass(kClass, exceptions)
                     }
                 } else {
                     if (kClass.isSubclassOf(Node::class)) {
-                        addClass(kClass as KClass<out Node>)
+                        tentativeAddClass(kClass as KClass<out Node>, exceptions)
                     }
                 }
             }
@@ -81,23 +96,38 @@ class KolasuLanguage(val qualifiedName: String) {
     }
 
     fun <N : Node> addClass(kClass: KClass<N>): Boolean {
+        val attempt = tentativeAddClass(kClass)
+        if (attempt.issues.isEmpty()) {
+            return attempt.result
+        } else {
+            throw RuntimeException(
+                "Issues prevented from adding $kClass:\n${attempt.issues.map { it.message }
+                    .joinToString("\n")}"
+            )
+        }
+    }
+
+    fun <N : Node> tentativeAddClass(
+        kClass: KClass<N>,
+        exceptions: MutableList<Exception> = mutableListOf<Exception>()
+    ): Attempt<Boolean, Exception> {
         if (kClass == Node::class) {
-            return false
+            return Attempt(false, exceptions)
         }
         if (!_astClasses.contains(kClass) && _astClasses.add(kClass)) {
             kClass.supertypes.forEach { superType ->
-                processSuperType(superType)
+                processSuperType(superType, exceptions)
             }
             if (kClass.isSealed) {
                 kClass.sealedSubclasses.forEach {
-                    addClass(it)
+                    tentativeAddClass(it, exceptions)
                 }
             }
             kClass.nodeProperties.forEach { nodeProperty ->
                 if (nodeProperty.isContainment()) {
-                    addClass(nodeProperty.containedType())
+                    tentativeAddClass(nodeProperty.containedType(), exceptions)
                 } else if (nodeProperty.isReference()) {
-                    addClass(nodeProperty.referredType())
+                    tentativeAddClass(nodeProperty.referredType(), exceptions)
                 } else if (nodeProperty.isAttribute()) {
                     try {
                         val attributeKClass = nodeProperty.asAttribute().type.classifier as? KClass<*>
@@ -109,16 +139,18 @@ class KolasuLanguage(val qualifiedName: String) {
                             }
                         }
                     } catch (e: Exception) {
-                        throw RuntimeException(
-                            "Issue while examining kotlin class $kClass and its property $nodeProperty",
-                            e
+                        exceptions.add(
+                            RuntimeException(
+                                "Issue while examining kotlin class $kClass and its property $nodeProperty",
+                                e
+                            )
                         )
                     }
                 }
             }
-            return true
+            return Attempt(true, exceptions)
         } else {
-            return false
+            return Attempt(false, exceptions)
         }
     }
 
@@ -126,3 +158,5 @@ class KolasuLanguage(val qualifiedName: String) {
     fun findEnumClass(name: String): KClass<out Enum<*>>? = enumClasses.find { it.simpleName == name }
     fun findPrimitiveClass(name: String): KClass<*>? = primitiveClasses.find { it.simpleName == name }
 }
+
+data class Attempt<V, I>(val result: V, val issues: List<I>)
