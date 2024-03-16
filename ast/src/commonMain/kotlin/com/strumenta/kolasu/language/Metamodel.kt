@@ -14,7 +14,7 @@ data class StarLasuLanguage(
 // Types
 
 sealed class Type(
-    val name: String,
+    open val name: String,
 )
 
 sealed class ConceptLike(
@@ -36,12 +36,12 @@ sealed class DataType(
     name: String,
 ) : Type(name)
 
-class PrimitiveType(
-    name: String,
+data class PrimitiveType(
+    override val name: String,
 ) : DataType(name)
 
-class EnumType(
-    name: String,
+data class EnumType(
+    override val name: String,
     val literals: MutableList<EnumerationLiteral> = mutableListOf(),
 ) : DataType(name)
 

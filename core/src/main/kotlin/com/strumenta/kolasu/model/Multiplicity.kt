@@ -4,13 +4,17 @@ import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.ConceptLike
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.DataType
+import com.strumenta.kolasu.language.EnumType
+import com.strumenta.kolasu.language.EnumerationLiteral
 import com.strumenta.kolasu.language.Feature
+import com.strumenta.kolasu.language.PrimitiveType
 import com.strumenta.kolasu.language.Reference
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeProjection
+import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.withNullability
@@ -264,7 +268,12 @@ fun KClass<*>.asConceptLike(): ConceptLike {
 }
 
 fun KClass<*>.asDataType(): DataType {
-    TODO()
+    if (this.allSuperclasses.contains(Enum::class)) {
+        val literals = (this.members.find { it.name == "values" }!!.call() as Array<Enum<*>>).map { EnumerationLiteral(it.name) }
+        return EnumType(this.qualifiedName!!, literals.toMutableList())
+    } else {
+        return PrimitiveType(this.qualifiedName!!)
+    }
 }
 
 fun <N : Any> KProperty1<N, *>.asReference(): Reference {
