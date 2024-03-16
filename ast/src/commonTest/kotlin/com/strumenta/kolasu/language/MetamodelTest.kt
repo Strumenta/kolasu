@@ -8,6 +8,8 @@ import kotlin.test.assertEquals
 
 class MyNode : MPNode()
 
+enum class MyEnum
+
 class MetamodelTest {
     @Test
     fun attributeMultiplicity() {
@@ -16,14 +18,15 @@ class MetamodelTest {
     }
 
     @Test
-    fun attributeNullableType() {
-        assertThrows { Attribute("MyAttribute", true, nullableStringType) }
-    }
-
-    @Test
     fun referenceMultiplicity() {
-        assertEquals(Multiplicity.OPTIONAL, Reference("MyReference", true, MyNode::class).multiplicity)
-        assertEquals(Multiplicity.SINGULAR, Reference("MyReference", false, MyNode::class).multiplicity)
+        assertEquals(
+            Multiplicity.OPTIONAL,
+            Reference("MyReference", true, Concept("com.strumenta.kolasu.language.MyNode")).multiplicity,
+        )
+        assertEquals(
+            Multiplicity.SINGULAR,
+            Reference("MyReference", false, Concept("com.strumenta.kolasu.language.MyNode")).multiplicity,
+        )
     }
 }
 

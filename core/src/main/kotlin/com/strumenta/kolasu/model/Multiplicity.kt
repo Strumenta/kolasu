@@ -259,11 +259,11 @@ fun <N : Any> KProperty1<N, *>.asContainment(): Containment {
     return Containment(this.name, multiplicity, type.asConceptLike())
 }
 
-fun KClass<*>.asConceptLike() : ConceptLike {
+fun KClass<*>.asConceptLike(): ConceptLike {
     TODO()
 }
 
-fun KClass<*>.asDataType() : DataType {
+fun KClass<*>.asDataType(): DataType {
     TODO()
 }
 
@@ -277,15 +277,16 @@ fun <N : Any> KProperty1<N, *>.asReference(): Reference {
             this.returnType.isMarkedNullable -> true
             else -> false
         }
-    val kClass = this
-        .returnType
-        .arguments[0]
-        .type
-        ?.classifier as? KClass<*> ?: throw IllegalStateException()
+    val kClass =
+        this
+            .returnType
+            .arguments[0]
+            .type
+            ?.classifier as? KClass<*> ?: throw IllegalStateException()
     return Reference(
         this.name,
         optional,
-        kClass.asConceptLike()
+        kClass.asConceptLike(),
     )
 }
 
