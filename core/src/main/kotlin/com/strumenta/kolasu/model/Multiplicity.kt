@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.Concept
+import com.strumenta.kolasu.language.ConceptInterface
 import com.strumenta.kolasu.language.ConceptLike
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.DataType
@@ -264,12 +266,25 @@ fun <N : Any> KProperty1<N, *>.asContainment(): Containment {
 }
 
 fun KClass<*>.asConceptLike(): ConceptLike {
-    TODO()
+    // TODO find features
+    return when {
+        this.isConceptInterface -> ConceptInterface(this.qualifiedName!!)
+        this.isConcept -> Concept(this.qualifiedName!!)
+        else -> throw IllegalStateException("Not a Concept or a ConceptInterface")
+    }
 }
 
 fun KClass<*>.asDataType(): DataType {
     if (this.allSuperclasses.contains(Enum::class)) {
-        val literals = (this.members.find { it.name == "values" }!!.call() as Array<Enum<*>>).map { EnumerationLiteral(it.name) }
+        val literals =
+            (
+                this
+                    .members
+                    .find {
+                        it.name == "values"
+                    }!!
+                    .call() as Array<Enum<*>>
+            ).map { EnumerationLiteral(it.name) }
         return EnumType(this.qualifiedName!!, literals.toMutableList())
     } else {
         return PrimitiveType(this.qualifiedName!!)

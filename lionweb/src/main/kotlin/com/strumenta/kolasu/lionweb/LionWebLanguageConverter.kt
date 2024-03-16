@@ -1,6 +1,9 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.ConceptInterface as KConceptInterface
+import com.strumenta.kolasu.language.ConceptLike
+import com.strumenta.kolasu.language.Concept as KConcept
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.language.Reference
@@ -25,6 +28,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotations
+import com.strumenta.kolasu.language.DataType as KDataType
 
 /**
  * This class is able to convert between Kolasu and LionWeb languages, tracking the mapping.
@@ -285,6 +289,20 @@ class LionWebLanguageConverter {
         astClassesAndClassifiers.associate(kolasuClass, featuresContainer)
     }
 
+    private fun toLWClassifier(conceptLike: ConceptLike): Classifier<*> {
+        return when (conceptLike) {
+            is KConcept -> {
+                TODO()
+            }
+
+            is KConceptInterface -> {
+                TODO()
+            }
+
+            else -> throw IllegalStateException()
+        }
+    }
+
     private fun toLWClassifier(kClass: KClass<*>): Classifier<*> {
         return astClassesAndClassifiers.byA(kClass) ?: throw IllegalArgumentException("Unknown KClass $kClass")
     }
@@ -322,6 +340,13 @@ class LionWebLanguageConverter {
         } else {
             return primitiveType
         }
+    }
+
+    private fun toLWDataType(
+        kDataType: KDataType,
+        lionwebLanguage: LWLanguage,
+    ): DataType<*> {
+        TODO()
     }
 
     private fun toLWDataType(

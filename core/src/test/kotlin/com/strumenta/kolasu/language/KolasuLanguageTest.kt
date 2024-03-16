@@ -23,14 +23,19 @@ data class C3(
 ) : C1()
 
 class KolasuLanguageTest {
-
     @Test
     fun recognizeEnum() {
-        assertEquals(EnumType("com.strumenta.kolasu.language.E1", mutableListOf(
-            EnumerationLiteral("A"),
-            EnumerationLiteral("B"),
-                    EnumerationLiteral("C")
-        )), E1::class.asDataType())
+        assertEquals(
+            EnumType(
+                "com.strumenta.kolasu.language.E1",
+                mutableListOf(
+                    EnumerationLiteral("A"),
+                    EnumerationLiteral("B"),
+                    EnumerationLiteral("C"),
+                ),
+            ),
+            E1::class.asDataType(),
+        )
     }
 
     @Test
