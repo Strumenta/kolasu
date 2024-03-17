@@ -45,40 +45,40 @@ data class ExtNode(
 class ModelTest {
     @test
     fun referenceByNameUnsolvedToString() {
-        val refUnsolved = ReferenceByName<MyNode>("foo")
+        val refUnsolved = ReferenceValue<MyNode>("foo")
         assertEquals("Ref(foo)[Unsolved]", refUnsolved.toString())
     }
 
     @test
     fun referenceByNameSolvedToString() {
-        val refSolved = ReferenceByName<MyNode>("foo", MyNode("foo"))
+        val refSolved = ReferenceValue<MyNode>("foo", MyNode("foo"))
         assertEquals("Ref(foo)[Solved]", refSolved.toString())
     }
 
     @test
     fun tryToResolvePositiveCaseSameCase() {
-        val ref = ReferenceByName<MyNode>("foo")
+        val ref = ReferenceValue<MyNode>("foo")
         assertEquals(true, ref.tryToResolve(listOf(MyNode("foo"))))
         assertEquals(true, ref.isResolved)
     }
 
     @test
     fun tryToResolveNegativeCaseSameCase() {
-        val ref = ReferenceByName<MyNode>("foo")
+        val ref = ReferenceValue<MyNode>("foo")
         assertEquals(false, ref.tryToResolve(listOf(MyNode("foo2"))))
         assertEquals(false, ref.isResolved)
     }
 
     @test
     fun tryToResolvePositiveCaseDifferentCase() {
-        val ref = ReferenceByName<MyNode>("foo")
+        val ref = ReferenceValue<MyNode>("foo")
         assertEquals(true, ref.tryToResolve(listOf(MyNode("fOo")), caseInsensitive = true))
         assertEquals(true, ref.isResolved)
     }
 
     @test
     fun tryToResolveNegativeCaseDifferentCase() {
-        val ref = ReferenceByName<MyNode>("foo")
+        val ref = ReferenceValue<MyNode>("foo")
         assertEquals(false, ref.tryToResolve(listOf(MyNode("foO"))))
         assertEquals(false, ref.isResolved)
     }

@@ -2,7 +2,7 @@ package com.strumenta.kolasu.codegen
 
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 
 // This file contains the AST definition for the Kotlin language
 // It is partially based on the specifications https://kotlinlang.org/docs/reference/grammar.html
@@ -106,7 +106,7 @@ data class KUniIsExpression(
 
 data class KMethodCallExpression(
     var qualifier: KExpression,
-    var method: ReferenceByName<KMethodSymbol>,
+    var method: ReferenceValue<KMethodSymbol>,
     val args: MutableList<KExpression> = mutableListOf(),
     val lambda: KLambda? = null,
 ) : KExpression()
@@ -141,7 +141,7 @@ interface KFunctionSymbol : Named
 interface KMethodSymbol : Named
 
 data class KFunctionCall(
-    val function: ReferenceByName<KFunctionSymbol>,
+    val function: ReferenceValue<KFunctionSymbol>,
     val args: MutableList<KParameterValue> = mutableListOf(),
 ) : KExpression()
 

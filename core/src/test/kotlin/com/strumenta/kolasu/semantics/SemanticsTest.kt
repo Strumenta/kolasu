@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.semantics
 
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.processNodesOfType
 import com.strumenta.kolasu.testing.assertReferencesNotResolved
@@ -46,14 +46,14 @@ class SemanticsTest {
                             mutableListOf(
                                 FeatureDecl(
                                     name = "feature_0",
-                                    type = ReferenceByName(name = "class_1"),
+                                    type = ReferenceValue(name = "class_1"),
                                 ),
                             ),
                         operations =
                             mutableListOf(
                                 OperationDecl(
                                     name = "operation_0",
-                                    returns = ReferenceByName(name = "class_0"),
+                                    returns = ReferenceValue(name = "class_0"),
                                     statements =
                                         mutableListOf(
                                             AssignmentStmt(
@@ -61,17 +61,17 @@ class SemanticsTest {
                                                     RefExpr(
                                                         context =
                                                             CallExpr(
-                                                                operation = ReferenceByName(name = "operation_0"),
+                                                                operation = ReferenceValue(name = "operation_0"),
                                                             ),
-                                                        symbol = ReferenceByName(name = "feature_0"),
+                                                        symbol = ReferenceValue(name = "feature_0"),
                                                     ),
                                                 rhs =
                                                     RefExpr(
                                                         context =
                                                             CallExpr(
-                                                                operation = ReferenceByName(name = "operation_0"),
+                                                                operation = ReferenceValue(name = "operation_0"),
                                                             ),
-                                                        symbol = ReferenceByName(name = "feature_0"),
+                                                        symbol = ReferenceValue(name = "feature_0"),
                                                     ),
                                             ),
                                         ),

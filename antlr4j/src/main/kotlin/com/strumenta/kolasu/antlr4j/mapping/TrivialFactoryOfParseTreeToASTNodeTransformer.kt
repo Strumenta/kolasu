@@ -2,7 +2,7 @@ package com.strumenta.kolasu.antlr4j.mapping
 
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.transformation.ASTTransformer
 import com.strumenta.kolasu.transformation.preferredConstructor
@@ -23,8 +23,8 @@ object TrivialFactoryOfParseTreeToASTNodeTransformer {
         expectedType: KType,
     ): Any? {
         return when (expectedType.classifier) {
-            ReferenceByName::class -> {
-                ReferenceByName<PossiblyNamed>(name = text)
+            ReferenceValue::class -> {
+                ReferenceValue<PossiblyNamed>(name = text)
             }
 
             String::class -> {

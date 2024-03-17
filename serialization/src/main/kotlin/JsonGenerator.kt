@@ -11,7 +11,7 @@ import com.strumenta.kolasu.model.FeatureType
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.processOriginalProperties
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.traversing.walk
@@ -223,7 +223,7 @@ class JsonGenerator {
                 is String -> JsonPrimitive(value)
                 is Number -> JsonPrimitive(value)
                 is Boolean -> JsonPrimitive(value)
-                is ReferenceByName<*> -> {
+                is ReferenceValue<*> -> {
                     val jsonObject = JsonObject()
                     jsonObject.addProperty("name", value.name)
                     if (withIds != null) {

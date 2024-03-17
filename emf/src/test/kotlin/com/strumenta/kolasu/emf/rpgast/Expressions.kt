@@ -5,7 +5,7 @@ import com.strumenta.kolasu.emf.rpgast.FieldDefinition
 import com.strumenta.kolasu.emf.rpgast.atLine
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import java.math.BigDecimal
 
 abstract class Expression(
@@ -206,7 +206,7 @@ abstract class AssignableExpression(
 }
 
 data class DataRefExpr(
-    val variable: ReferenceByName<AbstractDataDefinition>,
+    val variable: ReferenceValue<AbstractDataDefinition>,
     val specifiedRange: Range? = null,
 ) : AssignableExpression(specifiedRange) {
     init {
@@ -235,7 +235,7 @@ data class DataRefExpr(
 
 data class QualifiedAccessExpr(
     val container: Expression,
-    val field: ReferenceByName<FieldDefinition>,
+    val field: ReferenceValue<FieldDefinition>,
     val specifiedRange: Range? = null,
 ) : AssignableExpression(specifiedRange) {
     init {
@@ -268,13 +268,12 @@ data class ArrayAccessExpr(
 // TODO replace them in the AST during the resolution phase
 
 data class FunctionCall(
-    val function: ReferenceByName<Function>,
+    val function: ReferenceValue<Function>,
     val args: List<Expression>,
     val specifiedRange: Range? = null,
 ) : Expression(specifiedRange)
 
-fun dataRefTo(dataDefinition: AbstractDataDefinition) =
-    DataRefExpr(ReferenceByName(dataDefinition.name, dataDefinition))
+fun dataRefTo(dataDefinition: AbstractDataDefinition) = DataRefExpr(ReferenceValue(dataDefinition.name, dataDefinition))
 
 data class NumberOfElementsExpr(
     val value: Expression,

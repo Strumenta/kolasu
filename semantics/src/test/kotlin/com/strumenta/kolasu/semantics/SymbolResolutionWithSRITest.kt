@@ -6,7 +6,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.SimpleOrigin
 import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
@@ -32,7 +32,7 @@ class TodoProject(
 class Todo(
     override var name: String,
     var description: String,
-    val prerequisite: ReferenceByName<Todo>? = null,
+    val prerequisite: ReferenceValue<Todo>? = null,
 ) : Node(),
     Named
 
@@ -40,7 +40,7 @@ class SymbolResolutionWithSRITest {
     @Test
     fun symbolResolutionPointingToNodes() {
         val todo1 = Todo("todo1", "stuff to do 1")
-        val todo2 = Todo("todo2", "stuff to do 2", prerequisite = ReferenceByName("todo1"))
+        val todo2 = Todo("todo2", "stuff to do 2", prerequisite = ReferenceValue("todo1"))
         val todo3 = Todo("todo3", "stuff to do 3")
         val todoProject = TodoProject("Personal", mutableListOf(todo1, todo2, todo3))
         todoProject.assignParents()
@@ -64,7 +64,7 @@ class SymbolResolutionWithSRITest {
     @Test
     fun symbolResolutionPointingToNodesWithCustomIdProvider() {
         val todo1 = Todo("todo1", "stuff to do 1")
-        val todo2 = Todo("todo2", "stuff to do 2", prerequisite = ReferenceByName("todo1"))
+        val todo2 = Todo("todo2", "stuff to do 2", prerequisite = ReferenceValue("todo1"))
         val todo3 = Todo("todo3", "stuff to do 3")
         val todoProject = TodoProject("Personal", mutableListOf(todo1, todo2, todo3))
         todoProject.assignParents()
@@ -101,7 +101,7 @@ class SymbolResolutionWithSRITest {
             assertEquals(source1, it.source)
         }
 
-        val todo4 = Todo("todo4", "Some stuff to do", ReferenceByName("todo2"))
+        val todo4 = Todo("todo4", "Some stuff to do", ReferenceValue("todo2"))
         val todoProjectErrands = TodoProject("Errands", mutableListOf(todo4))
         val source2 = SyntheticSource("Errands-Source")
         todoProjectErrands.assignParents()

@@ -12,7 +12,7 @@ import kotlin.reflect.full.isSubtypeOf
  * Try to resolve the reference by finding a named element with a matching name.
  * The name match is performed in a case-sensitive or insensitive way depending on the value of @param[caseInsensitive].
  */
-fun <N> ReferenceByName<N>.tryToResolve(
+fun <N> ReferenceValue<N>.tryToResolve(
     candidates: Iterable<N>,
     caseInsensitive: Boolean = false,
 ): Boolean where N : PossiblyNamed {
@@ -28,7 +28,7 @@ fun <N> ReferenceByName<N>.tryToResolve(
  * @param possibleValue the candidate value.
  * @return true if the assignment has been performed
  */
-fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : PossiblyNamed =
+fun <N> ReferenceValue<N>.tryToResolve(possibleValue: N?): Boolean where N : PossiblyNamed =
     if (possibleValue == null) {
         false
     } else {
@@ -39,13 +39,13 @@ fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : Po
 /**
  * Typealias representing reference properties.
  **/
-typealias KReferenceByName<S> = KProperty1<S, ReferenceByName<out PossiblyNamed>?>
+typealias KReferenceByName<S> = KProperty1<S, ReferenceValue<out PossiblyNamed>?>
 
 /**
  * Builds a type representation for a reference
  **/
 fun kReferenceByNameType(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class): KType =
-    ReferenceByName::class.createType(
+    ReferenceValue::class.createType(
         arguments = listOf(KTypeProjection(variance = KVariance.OUT, type = targetClass.createType())),
         nullable = true,
     )

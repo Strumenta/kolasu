@@ -11,7 +11,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.model.invalidRanges
@@ -82,7 +82,7 @@ class EStringType : EType()
 class EBooleanType : EType()
 
 data class EEntityRefType(
-    val entity: ReferenceByName<EEntity>,
+    val entity: ReferenceValue<EEntity>,
 ) : EType()
 
 data class SScript(
@@ -92,12 +92,12 @@ data class SScript(
 sealed class SStatement : Node()
 
 data class SCreateStatement(
-    val entity: ReferenceByName<EEntity>,
+    val entity: ReferenceValue<EEntity>,
     val name: String? = null,
 ) : SStatement()
 
 data class SSetStatement(
-    val feature: ReferenceByName<EFeature>,
+    val feature: ReferenceValue<EFeature>,
     val instance: SExpression,
     val value: SExpression,
 ) : SStatement()
@@ -142,12 +142,12 @@ data class SConcat(
 ) : SExpression()
 
 data class SFeatureAccess(
-    val feature: ReferenceByName<EFeature>,
+    val feature: ReferenceValue<EFeature>,
     val container: SExpression,
 ) : SExpression()
 
 data class SInstanceById(
-    val entity: ReferenceByName<EEntity>,
+    val entity: ReferenceValue<EEntity>,
     val index: SExpression,
 ) : SExpression()
 
@@ -395,7 +395,7 @@ class ParseTreeToASTTransformerTest {
                     EEntity(
                         "BAR",
                         mutableListOf(
-                            EFeature("C", EEntityRefType(ReferenceByName("FOO"))),
+                            EFeature("C", EEntityRefType(ReferenceValue("FOO"))),
                         ),
                     ),
                 ),
@@ -489,20 +489,20 @@ class ParseTreeToASTTransformerTest {
         val expectedAST =
             SScript(
                 mutableListOf(
-                    SCreateStatement(ReferenceByName("Client")),
+                    SCreateStatement(ReferenceValue("Client")),
                     SSetStatement(
-                        ReferenceByName("name"),
+                        ReferenceValue("name"),
                         SInstanceById(
-                            ReferenceByName("Client"),
+                            ReferenceValue("Client"),
                             SIntegerLiteral(1),
                         ),
                         SStringLiteral("ACME Inc."),
                     ),
-                    SCreateStatement(ReferenceByName("Product")),
+                    SCreateStatement(ReferenceValue("Product")),
                     SSetStatement(
-                        ReferenceByName("value"),
+                        ReferenceValue("value"),
                         SInstanceById(
-                            ReferenceByName("Product"),
+                            ReferenceValue("Product"),
                             SIntegerLiteral(2),
                         ),
                         SDivision(SSum(SIntegerLiteral(1500), SIntegerLiteral(200)), SIntegerLiteral(2)),
@@ -511,9 +511,9 @@ class ParseTreeToASTTransformerTest {
                         SConcat(
                             SStringLiteral("Value of Product #2 is: "),
                             SFeatureAccess(
-                                ReferenceByName("value"),
+                                ReferenceValue("value"),
                                 SInstanceById(
-                                    ReferenceByName("Product"),
+                                    ReferenceValue("Product"),
                                     SIntegerLiteral(2),
                                 ),
                             ),

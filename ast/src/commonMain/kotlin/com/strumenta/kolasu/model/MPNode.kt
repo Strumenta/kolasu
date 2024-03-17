@@ -172,14 +172,14 @@ abstract class MPNode : NodeLike {
         }
     }
 
-    override fun getReference(reference: Reference): ReferenceByName<*> {
+    override fun getReference(reference: Reference): ReferenceValue<*> {
         val rawValue = features.find { it.name == reference.name }!!.value
-        return rawValue as ReferenceByName<*>
+        return rawValue as ReferenceValue<*>
     }
 
-    override fun <T : PossiblyNamed> getReference(name: String): ReferenceByName<T> {
+    override fun <T : PossiblyNamed> getReference(name: String): ReferenceValue<T> {
         val rawValue = features.find { it.name == name }!!.value
-        return rawValue as ReferenceByName<T>
+        return rawValue as ReferenceValue<T>
     }
 
     override fun <T : NodeLike> removeFromContainment(
@@ -202,7 +202,7 @@ abstract class MPNode : NodeLike {
         referenceName: String,
         referred: T,
     ) {
-        val ref: ReferenceByName<T> = getReference(referenceName)
+        val ref: ReferenceValue<T> = getReference(referenceName)
         ref.referred = referred
     }
 

@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.codegen
 
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -11,7 +11,7 @@ class ASTCodeGeneratorTest {
         val ex =
             KMethodCallExpression(
                 KThisExpression(),
-                ReferenceByName("myMethod"),
+                ReferenceValue("myMethod"),
                 mutableListOf(KStringLiteral("abc"), KIntLiteral(123), KStringLiteral("qer")),
             )
         val code = KotlinPrinter().printToString(ex)
@@ -46,7 +46,7 @@ class ASTCodeGeneratorTest {
         val ex =
             KMethodCallExpression(
                 KThisExpression(),
-                ReferenceByName("myMethod"),
+                ReferenceValue("myMethod"),
                 mutableListOf(KStringLiteral("abc"), KIntLiteral(123), KStringLiteral("qer")),
             )
         val code = KotlinPrinter().printToString(ex)

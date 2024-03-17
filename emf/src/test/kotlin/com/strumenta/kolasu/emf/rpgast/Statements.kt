@@ -8,7 +8,7 @@ import com.strumenta.kolasu.emf.rpgast.startLine
 import com.strumenta.kolasu.model.Derived
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.traversing.findAncestorOfType
 
 class DBFile
@@ -55,7 +55,7 @@ fun List<Statement>.explode(): List<Statement> {
 }
 
 data class ExecuteSubroutine(
-    var subroutine: ReferenceByName<Subroutine>,
+    var subroutine: ReferenceValue<Subroutine>,
     val specifiedRange: Range? = null,
 ) : Statement(specifiedRange)
 
@@ -431,7 +431,7 @@ data class PlistStmt(
 }
 
 data class PlistParam(
-    val param: ReferenceByName<AbstractDataDefinition>,
+    val param: ReferenceValue<AbstractDataDefinition>,
     @Derived val dataDefinition: InStatementDataDefinition? = null,
     val specifiedRange: Range? = null,
 ) : Node(specifiedRange)

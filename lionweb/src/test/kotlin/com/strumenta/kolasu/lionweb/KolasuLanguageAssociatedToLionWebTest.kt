@@ -3,7 +3,7 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Enumeration
 import io.lionweb.lioncore.java.language.Language
@@ -20,7 +20,7 @@ data class LWRoot(
 @LionWebAssociation("key-456")
 data class LWNodeA(
     override val name: String,
-    val ref: ReferenceByName<LWNodeA>,
+    val ref: ReferenceValue<LWNodeA>,
     val child: LWNodeB?,
 ) : Node(),
     Named

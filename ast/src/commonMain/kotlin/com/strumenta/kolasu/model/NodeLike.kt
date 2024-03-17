@@ -111,7 +111,7 @@ interface NodeLike {
         includeDerived: Boolean = false,
     ): List<NodeLike>
 
-    fun getReference(reference: Reference): ReferenceByName<*>
+    fun getReference(reference: Reference): ReferenceValue<*>
 
     fun getAttributeValue(attribute: Attribute): Any?
 
@@ -134,7 +134,7 @@ interface NodeLike {
         child: T,
     )
 
-    fun <T : PossiblyNamed> getReference(referenceName: String): ReferenceByName<T>
+    fun <T : PossiblyNamed> getReference(referenceName: String): ReferenceValue<T>
 
     fun <T : PossiblyNamed> setReferenceReferred(
         referenceName: String,

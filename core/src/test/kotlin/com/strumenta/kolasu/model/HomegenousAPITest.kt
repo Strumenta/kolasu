@@ -13,7 +13,7 @@ data class HNodeB(
 ) : Node()
 
 data class HNodeC(
-    val ref: ReferenceByName<HNodeA>,
+    val ref: ReferenceValue<HNodeA>,
 ) : Node()
 
 data class HNodeD(
@@ -67,7 +67,7 @@ class HomogenousAPITest {
     fun references() {
         val n1 = HNodeA("n1")
         val n2 = HNodeA("n2")
-        val c = HNodeC(ReferenceByName("@@@"))
+        val c = HNodeC(ReferenceValue("@@@"))
         assertEquals(null, c.getReference<HNodeA>("ref").referred)
         c.setReferenceReferred("ref", n1)
         assertEquals(n1, c.getReference<HNodeA>("ref").referred)

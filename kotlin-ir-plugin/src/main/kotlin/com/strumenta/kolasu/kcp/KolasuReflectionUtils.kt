@@ -4,7 +4,7 @@ import com.strumenta.kolasu.model.Derived
 import com.strumenta.kolasu.model.FeatureType
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import org.jetbrains.kotlin.backend.jvm.ir.getIoFile
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
@@ -105,7 +105,7 @@ fun IrType.isSingleOrOptionalAttribute(): Boolean {
 
 @ObsoleteDescriptorBasedAPI
 fun IrType.isReference(): Boolean {
-    return this.isAssignableTo(ReferenceByName::class)
+    return this.isAssignableTo(ReferenceValue::class)
 }
 
 @ObsoleteDescriptorBasedAPI

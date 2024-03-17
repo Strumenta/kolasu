@@ -103,7 +103,7 @@ class MetamodelBuilder(
         eclassTypeHandlers.add(NamedHandler)
         eclassTypeHandlers.add(RangeHandler)
         eclassTypeHandlers.add(PossiblyNamedHandler)
-        eclassTypeHandlers.add(ReferenceByNameHandler)
+        eclassTypeHandlers.add(ReferenceValueHandler)
         eclassTypeHandlers.add(ResultHandler)
 
         eclassTypeHandlers.add(StatementHandler)

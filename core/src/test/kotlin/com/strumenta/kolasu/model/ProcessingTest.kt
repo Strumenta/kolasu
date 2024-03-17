@@ -56,7 +56,7 @@ data class IntLit(
 sealed class MCStatement : Node()
 
 data class Assignment(
-    val ref: ReferenceByName<VarDeclaration>,
+    val ref: ReferenceValue<VarDeclaration>,
     val value: MCExpression,
 ) : MCStatement()
 
@@ -65,7 +65,7 @@ data class Print(
 ) : MCStatement()
 
 data class ValueReference(
-    val ref: ReferenceByName<VarDeclaration>,
+    val ref: ReferenceValue<VarDeclaration>,
 ) : MCExpression()
 
 class ProcessingTest {
@@ -217,8 +217,8 @@ class ProcessingTest {
             MiniCalcFile(
                 listOf(
                     VarDeclaration("A", IntLit("10")),
-                    Assignment(ReferenceByName("A"), IntLit("11")),
-                    Print(ValueReference(ReferenceByName("A"))),
+                    Assignment(ReferenceValue("A"), IntLit("11")),
+                    Print(ValueReference(ReferenceValue("A"))),
                 ),
             )
 
@@ -226,8 +226,8 @@ class ProcessingTest {
             MiniCalcFile(
                 listOf(
                     VarDeclaration("B", IntLit("10")),
-                    Assignment(ReferenceByName("B"), IntLit("11")),
-                    Print(ValueReference(ReferenceByName("B"))),
+                    Assignment(ReferenceValue("B"), IntLit("11")),
+                    Print(ValueReference(ReferenceValue("B"))),
                 ),
             )
 
@@ -242,8 +242,8 @@ class ProcessingTest {
                 nodesProcessed.add(it)
                 when (it) {
                     is VarDeclaration -> VarDeclaration("B", it.value)
-                    is ValueReference -> ValueReference(ReferenceByName("B"))
-                    is Assignment -> Assignment(ReferenceByName("B"), it.value)
+                    is ValueReference -> ValueReference(ReferenceValue("B"))
+                    is Assignment -> Assignment(ReferenceValue("B"), it.value)
                     else -> it
                 }
             }),

@@ -305,7 +305,7 @@ fun main() {
           import com.strumenta.kolasu.model.observable.ObservableList
           import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
         import com.strumenta.kolasu.model.Named
-        import com.strumenta.kolasu.model.ReferenceByName
+        import com.strumenta.kolasu.model.ReferenceValue
         import kotlin.test.Test
         import kotlin.test.assertEquals
         import com.strumenta.kolasu.model.observable.SimpleNodeObserver
@@ -313,7 +313,7 @@ fun main() {
 
 data class NamedNode(override val name: String) : Node(), Named
 
-data class NodeWithReference(val ref: ReferenceByName<NamedNode>, val id: Int) : Node()
+data class NodeWithReference(val ref: ReferenceValue<NamedNode>, val id: Int) : Node()
 
 class MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
@@ -359,8 +359,8 @@ fun main() {
             obsB.observations.clear()
         }
 
-        val nwr1 = NodeWithReference(ReferenceByName("foo"), 1)
-        val nwr2 = NodeWithReference(ReferenceByName("bar"), 2)
+        val nwr1 = NodeWithReference(ReferenceValue("foo"), 1)
+        val nwr2 = NodeWithReference(ReferenceValue("bar"), 2)
         val a = NamedNode("a")
         val b = NamedNode("b")
 
@@ -452,7 +452,7 @@ import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.observable.ObservableList
 import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
 import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import com.strumenta.kolasu.model.observable.SimpleNodeObserver
@@ -510,7 +510,7 @@ import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.observable.ObservableList
 import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
 import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import com.strumenta.kolasu.model.observable.SimpleNodeObserver

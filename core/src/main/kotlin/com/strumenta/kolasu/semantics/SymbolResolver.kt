@@ -3,7 +3,7 @@ package com.strumenta.kolasu.semantics
 import com.strumenta.kolasu.model.KReferenceByName
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.getReferredType
 import com.strumenta.kolasu.model.kReferenceByNameProperties
 import com.strumenta.kolasu.traversing.walkChildren
@@ -32,7 +32,7 @@ class SymbolResolver(
         property: KReferenceByName<out NodeLike>,
         node: NodeLike,
     ) {
-        (node.features.find { it.name == property.name }?.value as ReferenceByName<PossiblyNamed>?)?.apply {
+        (node.features.find { it.name == property.name }?.value as ReferenceValue<PossiblyNamed>?)?.apply {
             this.referred = scopeProvider.scopeFor(property, node).resolve(this.name, property.getReferredType())
         }
     }
