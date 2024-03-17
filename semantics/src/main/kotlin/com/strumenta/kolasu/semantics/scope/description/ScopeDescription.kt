@@ -2,7 +2,7 @@ package com.strumenta.kolasu.semantics.scope.description
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.semantics.symbol.description.SymbolDescription
 
 /**
@@ -44,14 +44,14 @@ class ScopeDescription(
     /**
      * Resolves the given reference in the current scope (or its parents).
      **/
-    fun resolve(reference: ReferenceByName<out PossiblyNamed>) {
+    fun resolve(reference: ReferenceValue<out PossiblyNamed>) {
         val name = reference.name.asKey()
         val node by lazy { this.namesToLocalSymbolNodes[name] }
         val identifier by lazy { this.namesToExternalSymbolIdentifiers[name] }
         when {
             node != null -> {
                 @Suppress("UNCHECKED_CAST")
-                (reference as ReferenceByName<PossiblyNamed>).referred = node
+                (reference as ReferenceValue<PossiblyNamed>).referred = node
             }
             identifier != null -> {
                 reference.identifier = identifier

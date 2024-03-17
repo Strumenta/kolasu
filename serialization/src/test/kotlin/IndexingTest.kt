@@ -2,7 +2,7 @@ package com.strumenta.kolasu.serialization
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.traversing.walkLeavesFirst
 import org.junit.Test
 import kotlin.test.assertContains
@@ -93,12 +93,12 @@ class IndexingTest {
 
     @Test
     fun computeIdsForReferencedNodesWithDefaultWalker() {
-        val parent = NodeWithReference(name = "root", reference = ReferenceByName(name = "self"))
+        val parent = NodeWithReference(name = "root", reference = ReferenceValue(name = "self"))
         parent.reference!!.referred = parent
-        val firstChild = NodeWithReference(name = "child", reference = ReferenceByName(name = "parent"))
+        val firstChild = NodeWithReference(name = "child", reference = ReferenceValue(name = "parent"))
         firstChild.reference!!.referred = parent
         parent.children.add(firstChild)
-        val secondChild = NodeWithReference(name = "child", reference = ReferenceByName(name = "previous"))
+        val secondChild = NodeWithReference(name = "child", reference = ReferenceValue(name = "previous"))
         secondChild.reference!!.referred = firstChild
         parent.children.add(secondChild)
         val ids = parent.computeIdsForReferencedNodes()
@@ -109,12 +109,12 @@ class IndexingTest {
 
     @Test
     fun computeIdsForReferencedNodesWithCustomWalker() {
-        val parent = NodeWithReference(name = "root", reference = ReferenceByName(name = "self"))
+        val parent = NodeWithReference(name = "root", reference = ReferenceValue(name = "self"))
         parent.reference!!.referred = parent
-        val firstChild = NodeWithReference(name = "child", reference = ReferenceByName(name = "parent"))
+        val firstChild = NodeWithReference(name = "child", reference = ReferenceValue(name = "parent"))
         firstChild.reference!!.referred = parent
         parent.children.add(firstChild)
-        val secondChild = NodeWithReference(name = "child", reference = ReferenceByName(name = "previous"))
+        val secondChild = NodeWithReference(name = "child", reference = ReferenceValue(name = "previous"))
         secondChild.reference!!.referred = firstChild
         parent.children.add(secondChild)
         val ids = parent.computeIdsForReferencedNodes(walker = NodeLike::walkLeavesFirst)

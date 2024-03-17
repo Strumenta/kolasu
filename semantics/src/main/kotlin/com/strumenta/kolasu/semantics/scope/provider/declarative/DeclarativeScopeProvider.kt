@@ -2,7 +2,7 @@ package com.strumenta.kolasu.semantics.scope.provider.declarative
 
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.semantics.scope.description.ScopeDescription
 import com.strumenta.kolasu.semantics.scope.description.ScopeDescriptionApi
 import com.strumenta.kolasu.semantics.scope.provider.ScopeProvider
@@ -15,7 +15,7 @@ import kotlin.reflect.full.isSuperclassOf
  **/
 inline fun <
     reified NodeTy : NodeLike,
-    PropertyTy : KProperty1<in NodeTy, ReferenceByName<out PossiblyNamed>?>,
+    PropertyTy : KProperty1<in NodeTy, ReferenceValue<out PossiblyNamed>?>,
     > scopeFor(
     property: PropertyTy,
     ignoreCase: Boolean = false,
@@ -52,7 +52,7 @@ open class DeclarativeScopeProvider(
 
     override fun <NodeType : NodeLike> scopeFor(
         node: NodeType,
-        reference: KProperty1<in NodeType, ReferenceByName<out PossiblyNamed>?>,
+        reference: KProperty1<in NodeType, ReferenceValue<out PossiblyNamed>?>,
     ): ScopeDescription =
         this
             .rules
@@ -85,7 +85,7 @@ class DeclarativeScopeProviderRule<NodeTy : NodeLike>(
 
     fun canBeInvokedWith(
         nodeType: KClass<*>,
-        property: KProperty1<*, ReferenceByName<out PossiblyNamed>?>,
+        property: KProperty1<*, ReferenceValue<out PossiblyNamed>?>,
     ): Boolean = this.nodeType.isSuperclassOf(nodeType) && this.propertyName == property.name
 
     override fun compareTo(other: DeclarativeScopeProviderRule<out NodeLike>): Int =

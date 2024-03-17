@@ -4,7 +4,7 @@ package com.strumenta.kolasu.kcp
 
 import com.strumenta.kolasu.model.MPNode
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.FirIncompatiblePluginAPI
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
@@ -64,10 +64,10 @@ class FieldObservableExtension(
             //        ref.setContainer(this, "ref")
             //    }
 
-            val referenceByNameSetContainerMethod =
+            val referenceValueSetContainerMethod =
                 pluginContext
                     .referenceFunctions(
-                        ReferenceByName::class,
+                        ReferenceValue::class,
                         "setContainer",
                     ).single()
 
@@ -86,7 +86,7 @@ class FieldObservableExtension(
                 DeclarationIrBuilder(pluginContext, anonymousInitializerSymbolImpl.symbol).irBlockBody(
                     IrFactoryImpl.createBlockBody(-1, -1),
                 ) {
-                    +irCall(referenceByNameSetContainerMethod).apply {
+                    +irCall(referenceValueSetContainerMethod).apply {
                         val thisValue = irClass.thisReceiver!!
                         // dispatchReceiver: p5 -> this.getP5()
                         dispatchReceiver =

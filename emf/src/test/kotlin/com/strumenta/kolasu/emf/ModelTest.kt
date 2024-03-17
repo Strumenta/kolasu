@@ -4,7 +4,7 @@ import com.strumenta.kolasu.antlr4j.parsing.withParseTreeNode
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.Statement
 import com.strumenta.kolasu.model.TextFileDestination
 import com.strumenta.kolasu.model.withOrigin
@@ -216,7 +216,7 @@ class ModelTest {
 
         val res = ResourceImpl()
         res.contents.add(ePackage)
-        val r1 = NodeWithReference("foo", ReferenceByName("foo"), mutableListOf())
+        val r1 = NodeWithReference("foo", ReferenceValue("foo"), mutableListOf())
         r1.singlePointer.referred = r1
         val eo1 = r1.toEObject(res)
         val reference = eo1.eGet("singlePointer") as EObject
@@ -251,10 +251,10 @@ class ModelTest {
 
         val res = ResourceImpl()
         res.contents.add(ePackage)
-        val r1 = NodeWithReference("foo", ReferenceByName("foo"), mutableListOf())
-        r1.pointers.add(ReferenceByName("a", r1))
-        r1.pointers.add(ReferenceByName("b", r1))
-        r1.pointers.add(ReferenceByName("c", r1))
+        val r1 = NodeWithReference("foo", ReferenceValue("foo"), mutableListOf())
+        r1.pointers.add(ReferenceValue("a", r1))
+        r1.pointers.add(ReferenceValue("b", r1))
+        r1.pointers.add(ReferenceValue("c", r1))
         val eo1 = r1.toEObject(res)
 
         val pointers = eo1.eGet("pointers") as EList<*>
@@ -327,11 +327,11 @@ class ModelTest {
         b.myChildren.add(d)
         d.myChildren.add(e)
 
-        a.pointer = ReferenceByName("e", e)
-        e.pointer = ReferenceByName("a", a)
-        b.pointer = ReferenceByName("c", c)
-        c.pointer = ReferenceByName("d", d)
-        d.pointer = ReferenceByName("b", b)
+        a.pointer = ReferenceValue("e", e)
+        e.pointer = ReferenceValue("a", a)
+        b.pointer = ReferenceValue("c", c)
+        c.pointer = ReferenceValue("d", d)
+        d.pointer = ReferenceValue("b", b)
 
         val eoA = a.toEObject(res)
 

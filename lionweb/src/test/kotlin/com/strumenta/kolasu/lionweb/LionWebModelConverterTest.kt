@@ -3,7 +3,7 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.withRange
@@ -258,11 +258,11 @@ class LionWebModelConverterTest {
             KolasuLanguage("com.strumenta.SimpleLang").apply {
                 addClass(SimpleRoot::class)
             }
-        val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
+        val a1 = SimpleNodeA("A1", ReferenceValue("A1"), null)
         a1.ref.referred = a1
         val b2 = SimpleNodeB("some magic value")
         val b31 = SimpleNodeB("some other value")
-        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b31)
+        val a3 = SimpleNodeA("A3", ReferenceValue("A1", a1), b31)
         val ast =
             SimpleRoot(
                 12345,
@@ -325,11 +325,11 @@ class LionWebModelConverterTest {
         val lwAST = mConverter.deserializeToNodes(serialized).first()
         val kAST = mConverter.importModelFromLionWeb(lwAST) as KNode
 
-        val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
+        val a1 = SimpleNodeA("A1", ReferenceValue("A1"), null)
         a1.ref.referred = a1
         val b2 = SimpleNodeB("some magic value")
         val b31 = SimpleNodeB("some other value")
-        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b31)
+        val a3 = SimpleNodeA("A3", ReferenceValue("A1", a1), b31)
         val expectedAST =
             SimpleRoot(
                 12345,
@@ -368,7 +368,7 @@ class LionWebModelConverterTest {
         mConverter.exportLanguageToLionWeb(kLanguage)
 
         val a1 =
-            SimpleNodeA("A1", ReferenceByName("A1"), null)
+            SimpleNodeA("A1", ReferenceValue("A1"), null)
                 .withRange(Range(Point(1, 1), Point(1, 10)))
         a1.ref.referred = a1
         val b2 =
@@ -378,7 +378,7 @@ class LionWebModelConverterTest {
             SimpleNodeB("some other value")
                 .withRange(Range(Point(2, 21), Point(2, 30)))
         val a3 =
-            SimpleNodeA("A3", ReferenceByName("A1", a1), b3s1)
+            SimpleNodeA("A3", ReferenceValue("A1", a1), b3s1)
                 .withRange(Range(Point(3, 4), Point(3, 12)))
         val initialAst =
             SimpleRoot(
@@ -410,7 +410,7 @@ class LionWebModelConverterTest {
     @Test
     fun exportParent() {
         val b2 = SimpleNodeB("some magic value")
-        val a1 = SimpleNodeA("A1", ReferenceByName("A1"), b2)
+        val a1 = SimpleNodeA("A1", ReferenceValue("A1"), b2)
         a1.assignParents()
         a1.source = SyntheticSource("ss1")
 

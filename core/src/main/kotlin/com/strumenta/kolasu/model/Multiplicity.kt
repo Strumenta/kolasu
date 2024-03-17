@@ -199,7 +199,7 @@ fun <N : Any> KProperty1<N, *>.isContainment(): Boolean {
 }
 
 fun <N : Any> KProperty1<N, *>.isReference(): Boolean {
-    return this.returnType.classifier == ReferenceByName::class
+    return this.returnType.classifier == ReferenceValue::class
 }
 
 fun <N : Any> KProperty1<N, *>.isAttribute(): Boolean {

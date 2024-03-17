@@ -12,7 +12,6 @@ import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.allFeatures
 import com.strumenta.kolasu.model.assignParents
@@ -29,7 +28,6 @@ import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.Node
-import io.lionweb.lioncore.java.model.ReferenceValue
 import io.lionweb.lioncore.java.model.impl.DynamicEnumerationValue
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.java.model.impl.ProxyNode
@@ -42,6 +40,8 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
+import com.strumenta.kolasu.model.ReferenceValue as KReferenceValue
+import io.lionweb.lioncore.java.model.ReferenceValue as LWReferenceValue
 
 interface PrimitiveValueSerialization<E> {
     fun serialize(value: E): String
@@ -199,16 +199,16 @@ class LionWebModelConverter(
                                 when {
                                     kValue.isRetrieved -> {
                                         val lwReferred: Node = nodesMapping.byA(kValue.referred!! as KNode)!!
-                                        lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
+                                        lwNode.addReferenceValue(feature, LWReferenceValue(lwReferred, kValue.name))
                                     }
                                     kValue.isResolved -> {
                                         // This is tricky, as we need to set a LW Node, but we have just an identifier...
                                         val lwReferred: Node =
                                             DynamicNode(kValue.identifier!!, LionCoreBuiltins.getNode())
-                                        lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
+                                        lwNode.addReferenceValue(feature, LWReferenceValue(lwReferred, kValue.name))
                                     }
                                     else -> {
-                                        lwNode.addReferenceValue(feature, ReferenceValue(null, kValue.name))
+                                        lwNode.addReferenceValue(feature, LWReferenceValue(null, kValue.name))
                                     }
                                 }
                             }
@@ -358,13 +358,13 @@ class LionWebModelConverter(
      * Track reference values, so that we can populate them once the nodes are instantiated.
      */
     private class ReferencesPostponer {
-        private val values = IdentityHashMap<ReferenceByName<PossiblyNamed>, LWNode?>()
+        private val values = IdentityHashMap<com.strumenta.kolasu.model.ReferenceValue<PossiblyNamed>, LWNode?>()
 
         fun registerPostponedReference(
-            referenceByName: ReferenceByName<PossiblyNamed>,
+            referenceValue: com.strumenta.kolasu.model.ReferenceValue<PossiblyNamed>,
             referred: LWNode?,
         ) {
-            values[referenceByName] = referred
+            values[referenceValue] = referred
         }
 
         fun populateReferences(nodesMapping: BiMap<Any, LWNode>) {
@@ -468,9 +468,10 @@ class LionWebModelConverter(
 
                             referenceValues.size == 1 -> {
                                 val rf = referenceValues.first()
-                                val referenceByName = ReferenceByName<PossiblyNamed>(rf.resolveInfo!!, null)
-                                referencesPostponer.registerPostponedReference(referenceByName, rf.referred)
-                                params[param] = referenceByName
+                                val referenceValue =
+                                    KReferenceValue<PossiblyNamed>(rf.resolveInfo!!, null)
+                                referencesPostponer.registerPostponedReference(referenceValue, rf.referred)
+                                params[param] = referenceValue
                             }
                         }
                     }

@@ -2,7 +2,7 @@ package com.strumenta.kolasu.serialization
 
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.traversing.ASTWalker
 import com.strumenta.kolasu.traversing.walk
 import java.util.IdentityHashMap
@@ -30,8 +30,8 @@ class OnlyReferencedIdProvider(
             .flatMap { node ->
                 node
                     .features
-                    .filter { property -> property.value is ReferenceByName<*> }
-                    .mapNotNull { property -> (property.value as ReferenceByName<*>).referred }
+                    .filter { property -> property.value is ReferenceValue<*> }
+                    .mapNotNull { property -> (property.value as ReferenceValue<*>).referred }
             }.toSet()
     }
 

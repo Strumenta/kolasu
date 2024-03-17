@@ -4,7 +4,7 @@ import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.utils.LanguageValidator
 import kotlin.test.Test
@@ -21,7 +21,7 @@ sealed class SimpleDecl : Node()
 
 data class SimpleNodeA(
     override val name: String,
-    val ref: ReferenceByName<SimpleNodeA>,
+    val ref: ReferenceValue<SimpleNodeA>,
     val child: SimpleNodeB?,
 ) : SimpleDecl(),
     Named,

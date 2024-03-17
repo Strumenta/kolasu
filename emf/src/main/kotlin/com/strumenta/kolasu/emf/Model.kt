@@ -11,7 +11,7 @@ import com.strumenta.kolasu.model.NodeOrigin
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.SimpleOrigin
 import com.strumenta.kolasu.model.TextFileDestination
 import com.strumenta.kolasu.model.processProperties
@@ -188,7 +188,7 @@ private fun toValue(
                     pdValue!!.dataToEObject(ePackage)
                 }
 
-                pdValue is ReferenceByName<*> -> {
+                pdValue is ReferenceValue<*> -> {
                     val refEC = STARLASU_METAMODEL.getEClass("ReferenceByName")
                     val refEO = STARLASU_METAMODEL.eFactoryInstance.create(refEC)
                     refEO.eSet(refEC.getEStructuralFeature("name")!!, pdValue.name)

@@ -4,7 +4,7 @@ import com.strumenta.kolasu.model.EntityDeclaration
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
@@ -57,15 +57,15 @@ data class AltCompilationUnit(
 
 data class NodeWithReference(
     override val name: String,
-    val singlePointer: ReferenceByName<NodeWithReference>,
-    val pointers: MutableList<ReferenceByName<NodeWithReference>>,
+    val singlePointer: ReferenceValue<NodeWithReference>,
+    val pointers: MutableList<ReferenceValue<NodeWithReference>>,
 ) : Node(),
     Named
 
 data class NodeWithForwardReference(
     override val name: String,
     val myChildren: MutableList<NodeWithForwardReference> = mutableListOf(),
-    var pointer: ReferenceByName<NodeWithForwardReference>? = null,
+    var pointer: ReferenceValue<NodeWithForwardReference>? = null,
 ) : Node(),
     Named
 

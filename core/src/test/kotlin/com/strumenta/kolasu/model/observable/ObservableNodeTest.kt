@@ -3,7 +3,7 @@ package com.strumenta.kolasu.model.observable
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -89,7 +89,7 @@ data class NamedNode(
     Named
 
 data class NodeWithReference(
-    val ref: ReferenceByName<NamedNode>,
+    val ref: ReferenceValue<NamedNode>,
     val id: Int,
 ) : Node() {
     init {
@@ -187,8 +187,8 @@ class ObservableNodeTest {
             obsB.observations.clear()
         }
 
-        val nwr1 = NodeWithReference(ReferenceByName("foo"), 1)
-        val nwr2 = NodeWithReference(ReferenceByName("bar"), 2)
+        val nwr1 = NodeWithReference(ReferenceValue("foo"), 1)
+        val nwr2 = NodeWithReference(ReferenceValue("bar"), 2)
         val a = NamedNode("a")
         val b = NamedNode("b")
 

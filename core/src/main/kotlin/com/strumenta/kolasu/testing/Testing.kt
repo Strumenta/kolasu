@@ -4,7 +4,7 @@ import com.strumenta.kolasu.model.FeatureType
 import com.strumenta.kolasu.model.KReferenceByName
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.kReferenceByNameProperties
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.traversing.walkChildren
@@ -220,7 +220,7 @@ fun assertASTsAreEqual(
                         }
                     }
                 } else if (expectedProperty.featureType == FeatureType.REFERENCE) {
-                    if (expectedPropValue is ReferenceByName<*> && actualPropValue is ReferenceByName<*>) {
+                    if (expectedPropValue is ReferenceValue<*> && actualPropValue is ReferenceValue<*>) {
                         assertEquals(
                             expectedPropValue.name,
                             actualPropValue.name,
@@ -266,7 +266,7 @@ fun NodeLike.assertReferencesResolved(forProperty: KReferenceByName<out NodeLike
         .kReferenceByNameProperties()
         .filter { it == forProperty }
         .mapNotNull { it.get(this) }
-        .forEach { assertTrue { (it as ReferenceByName<*>).isResolved } }
+        .forEach { assertTrue { (it as ReferenceValue<*>).isResolved } }
     this.walkChildren().forEach { it.assertReferencesResolved(forProperty = forProperty) }
 }
 
@@ -274,7 +274,7 @@ fun NodeLike.assertReferencesResolved(withReturnType: KClass<out PossiblyNamed> 
     this
         .kReferenceByNameProperties(targetClass = withReturnType)
         .mapNotNull { it.get(this) }
-        .forEach { assertTrue { (it as ReferenceByName<*>).isResolved } }
+        .forEach { assertTrue { (it as ReferenceValue<*>).isResolved } }
     this.walkChildren().forEach { it.assertReferencesResolved(withReturnType = withReturnType) }
 }
 
@@ -283,7 +283,7 @@ fun NodeLike.assertReferencesNotResolved(forProperty: KReferenceByName<out NodeL
         .kReferenceByNameProperties()
         .filter { it == forProperty }
         .mapNotNull { it.get(this) }
-        .forEach { assertFalse { (it as ReferenceByName<*>).isResolved } }
+        .forEach { assertFalse { (it as ReferenceValue<*>).isResolved } }
     this.walkChildren().forEach { it.assertReferencesNotResolved(forProperty = forProperty) }
 }
 
@@ -291,6 +291,6 @@ fun NodeLike.assertReferencesNotResolved(withReturnType: KClass<out PossiblyName
     this
         .kReferenceByNameProperties(targetClass = withReturnType)
         .mapNotNull { it.get(this) }
-        .forEach { assertFalse { (it as ReferenceByName<*>).isResolved } }
+        .forEach { assertFalse { (it as ReferenceValue<*>).isResolved } }
     this.walkChildren().forEach { it.assertReferencesNotResolved(withReturnType = withReturnType) }
 }

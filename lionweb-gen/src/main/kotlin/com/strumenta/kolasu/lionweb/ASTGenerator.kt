@@ -14,7 +14,7 @@ import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
@@ -228,7 +228,7 @@ class ASTGenerator(
             is Reference -> {
                 var type = typeName(feature.type!!)
                 type =
-                    ClassName.bestGuess(ReferenceByName::class.qualifiedName!!).parameterizedBy(type)
+                    ClassName.bestGuess(ReferenceValue::class.qualifiedName!!).parameterizedBy(type)
                 if (feature.isOptional) {
                     type = type.copy(nullable = true)
                 }

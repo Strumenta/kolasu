@@ -2,7 +2,7 @@ package com.strumenta.kolasu.semantics.symbol.resolver
 
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.model.kReferenceByNameType
 import com.strumenta.kolasu.model.nodeProperties
@@ -33,14 +33,14 @@ open class SymbolResolver(
      **/
     fun resolve(
         node: NodeLike,
-        reference: KProperty1<NodeLike, ReferenceByName<PossiblyNamed>?>,
+        reference: KProperty1<NodeLike, ReferenceValue<PossiblyNamed>?>,
     ) {
         node
             .features
             .find { it.name == reference.name }
             ?.let {
                 @Suppress("UNCHECKED_CAST")
-                it.value as ReferenceByName<PossiblyNamed>?
+                it.value as ReferenceValue<PossiblyNamed>?
             }?.let { this.scopeProvider.scopeFor(node, reference).resolve(it) }
     }
 
@@ -59,12 +59,12 @@ open class SymbolResolver(
     /**
      * Retrieve all reference properties of a given node.
      **/
-    private fun NodeLike.references(): List<KProperty1<NodeLike, ReferenceByName<PossiblyNamed>?>> =
+    private fun NodeLike.references(): List<KProperty1<NodeLike, ReferenceValue<PossiblyNamed>?>> =
         this
             .nodeProperties
             .filter { it.returnType.isSubtypeOf(kReferenceByNameType()) }
             .mapNotNull {
                 @Suppress("UNCHECKED_CAST")
-                it as? KProperty1<NodeLike, ReferenceByName<PossiblyNamed>?>
+                it as? KProperty1<NodeLike, ReferenceValue<PossiblyNamed>?>
             }
 }

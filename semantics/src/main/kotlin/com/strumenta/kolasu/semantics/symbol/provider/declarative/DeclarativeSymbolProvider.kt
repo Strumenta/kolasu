@@ -2,7 +2,7 @@ package com.strumenta.kolasu.semantics.symbol.provider.declarative
 
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.semantics.symbol.description.BooleanValueDescription
 import com.strumenta.kolasu.semantics.symbol.description.ContainmentValueDescription
 import com.strumenta.kolasu.semantics.symbol.description.IntegerValueDescription
@@ -121,7 +121,7 @@ class DeclarativeSymbolProviderRule<NodeTy : NodeLike>(
             is Int -> IntegerValueDescription(source)
             is String -> StringValueDescription(source)
             is NodeLike -> toContainmentValueDescription(nodeIdProvider, source)
-            is ReferenceByName<*> -> toReferenceValueDescription(nodeIdProvider, source)
+            is ReferenceValue<*> -> toReferenceValueDescription(nodeIdProvider, source)
             is List<*> -> toListValueDescription(nodeIdProvider, source)
             null -> NullValueDescription
             else -> throw RuntimeException("Unsupported value description for ${source::class.qualifiedName}")
@@ -129,7 +129,7 @@ class DeclarativeSymbolProviderRule<NodeTy : NodeLike>(
 
     private fun toReferenceValueDescription(
         nodeIdProvider: NodeIdProvider,
-        source: ReferenceByName<*>,
+        source: ReferenceValue<*>,
     ): ReferenceValueDescription =
         ReferenceValueDescription(
             source.referred?.let { it as? NodeLike }?.let { nodeIdProvider.id(it) },

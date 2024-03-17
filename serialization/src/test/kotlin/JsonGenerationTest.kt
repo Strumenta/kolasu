@@ -10,7 +10,7 @@ import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
@@ -34,7 +34,7 @@ data class ExtNode(
 
 data class NodeWithReference(
     override val name: String? = null,
-    val reference: ReferenceByName<NodeWithReference>? = null,
+    val reference: ReferenceValue<NodeWithReference>? = null,
     val children: MutableList<NodeLike> = mutableListOf(),
 ) : Node(),
     PossiblyNamed
@@ -199,7 +199,7 @@ class JsonGenerationTest {
 
     @Test
     fun nodeWithReferenceStreaming() {
-        val node = NodeWithReference(name = "nodeWithReference", reference = ReferenceByName(name = "self"))
+        val node = NodeWithReference(name = "nodeWithReference", reference = ReferenceValue(name = "self"))
         val writer = StringWriter()
         JsonGenerator().generateJSONWithStreaming(node, JsonWriter(writer))
         val json = writer.toString()
@@ -219,7 +219,7 @@ class JsonGenerationTest {
 
     @Test
     fun nodeWithReferenceStreamingShortNames() {
-        val node = NodeWithReference(name = "nodeWithReference", reference = ReferenceByName(name = "self"))
+        val node = NodeWithReference(name = "nodeWithReference", reference = ReferenceValue(name = "self"))
         val writer = StringWriter()
         JsonGenerator().generateJSONWithStreaming(root = node, writer = JsonWriter(writer), shortClassNames = true)
         val json = writer.toString()
@@ -317,7 +317,7 @@ class JsonGenerationTest {
 
     @Test
     fun nodeWithUnresolvedReferenceByName() {
-        val node = NodeWithReference(name = "nodeWithReference", reference = ReferenceByName(name = "self"))
+        val node = NodeWithReference(name = "nodeWithReference", reference = ReferenceValue(name = "self"))
         val json = JsonGenerator().generateString(node, withIds = node.computeIdsForReferencedNodes())
         assertEquals(
             """
@@ -339,7 +339,7 @@ class JsonGenerationTest {
         val node =
             NodeWithReference(
                 name = "nodeWithReference",
-                reference = ReferenceByName(name = "self"),
+                reference = ReferenceValue(name = "self"),
             ).apply { reference!!.referred = this }
         val json = JsonGenerator().generateString(node, withIds = node.computeIdsForReferencedNodes())
         assertEquals(

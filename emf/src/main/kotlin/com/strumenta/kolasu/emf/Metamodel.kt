@@ -10,7 +10,7 @@ import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PlaceholderElement
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.Statement
 import com.strumenta.kolasu.transformation.GenericNode
 import com.strumenta.kolasu.validation.Result
@@ -102,7 +102,7 @@ val NodeLikeHandler = KolasuClassHandler(NodeLike::class, STARLASU_METAMODEL.get
 val NamedHandler = KolasuClassHandler(Named::class, STARLASU_METAMODEL.getEClass("Named"))
 val RangeHandler = KolasuClassHandler(Range::class, STARLASU_METAMODEL.getEClass("Position"))
 val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, STARLASU_METAMODEL.getEClass("PossiblyNamed"))
-val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, STARLASU_METAMODEL.getEClass("ReferenceByName"))
+val ReferenceValueHandler = KolasuClassHandler(ReferenceValue::class, STARLASU_METAMODEL.getEClass("ReferenceByName"))
 
 // This class is saved with the name Position for compatibility reasons
 val ResultHandler = KolasuClassHandler(Result::class, STARLASU_METAMODEL.getEClass("Position"))
