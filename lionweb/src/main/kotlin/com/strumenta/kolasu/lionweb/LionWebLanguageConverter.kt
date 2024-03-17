@@ -1,12 +1,14 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.language.Attribute
-import com.strumenta.kolasu.language.ConceptInterface as KConceptInterface
 import com.strumenta.kolasu.language.ConceptLike
-import com.strumenta.kolasu.language.Concept as KConcept
 import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.EnumType
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.language.Reference
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.intType
+import com.strumenta.kolasu.language.stringType
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
@@ -28,14 +30,21 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotations
+import com.strumenta.kolasu.language.Concept as KConcept
+import com.strumenta.kolasu.language.ConceptInterface as KConceptInterface
 import com.strumenta.kolasu.language.DataType as KDataType
 
 /**
  * This class is able to convert between Kolasu and LionWeb languages, tracking the mapping.
  */
 class LionWebLanguageConverter {
+    @Deprecated("Use kConceptsAndLWConcepts")
     private val astClassesAndClassifiers = BiMap<KClass<*>, Classifier<*>>()
+    private val kConceptsAndLWConcepts = BiMap<ConceptLike, Classifier<*>>()
+
+    @Deprecated("Use kEnumerationAndLWEnumerations")
     private val classesAndEnumerations = BiMap<EnumKClass, Enumeration>()
+    private val kEnumerationAndLWEnumerations = BiMap<EnumType, Enumeration>()
     private val classesAndPrimitiveTypes = BiMap<KClass<*>, PrimitiveType>()
     private val languages = BiMap<KolasuLanguage, LWLanguage>()
 
@@ -49,6 +58,126 @@ class LionWebLanguageConverter {
         registerMapping(Point::class, StarLasuLWLanguage.Point)
     }
 
+    fun exportToLionWeb(starLasuLanguage: StarLasuLanguage): LWLanguage {
+        val lionwebLanguage = LWLanguage()
+        lionwebLanguage.version = "1"
+        lionwebLanguage.name = starLasuLanguage.qualifiedName
+        lionwebLanguage.key = starLasuLanguage.qualifiedName.replace('.', '-')
+        lionwebLanguage.id = "starlasu_language_${starLasuLanguage.qualifiedName.replace('.', '-')}"
+        lionwebLanguage.addDependency(StarLasuLWLanguage)
+
+//        kolasuLanguage.enumClasses.forEach { enumClass ->
+//            toLWEnumeration(enumClass, lionwebLanguage)
+//        }
+//
+//        kolasuLanguage.primitiveClasses.forEach { primitiveClass ->
+//            toLWPrimitiveType(primitiveClass, lionwebLanguage)
+//        }
+//
+//        // First we create all types
+//        kolasuLanguage.astClasses.forEach { astClass ->
+//            if (astClass.isConcept) {
+//                val concept = Concept(lionwebLanguage, astClass.simpleName)
+//                concept.isPartition = astClass.findAnnotations(LionWebPartition::class).isNotEmpty()
+//                concept.key = lionwebLanguage.key + "_" + concept.name
+//                concept.id = lionwebLanguage.id + "_" + concept.name
+//                concept.isAbstract = astClass.isAbstract || astClass.isSealed
+//                registerMapping(astClass, concept)
+//            } else if (astClass.isConceptInterface) {
+//                val conceptInterface = Interface(lionwebLanguage, astClass.simpleName)
+//                conceptInterface.key = lionwebLanguage.key + "_" + conceptInterface.name
+//                conceptInterface.id = lionwebLanguage.id + "_" + conceptInterface.name
+//                registerMapping(astClass, conceptInterface)
+//            }
+//        }
+//
+//        // Then we populate them, so that self-references can be described
+//        kolasuLanguage.astClasses.forEach { astClass ->
+//            val featuresContainer = astClassesAndClassifiers.byA(astClass)
+//
+//            if (astClass.java.isInterface) {
+//                val conceptInterface = featuresContainer as Interface
+//                val superInterfaces =
+//                    astClass
+//                        .supertypes
+//                        .map { it.classifier as KClass<*> }
+//                        .filter { it.java.isInterface }
+//                superInterfaces.filter { it.isConceptInterface }.forEach {
+//                    conceptInterface.addExtendedInterface(correspondingInterface(it))
+//                }
+//            } else {
+//                val concept = featuresContainer as Concept
+//                val superClasses =
+//                    astClass
+//                        .supertypes
+//                        .map { it.classifier as KClass<*> }
+//                        .filter { !it.java.isInterface }
+//                if (superClasses.size == 1) {
+//                    concept.extendedConcept = astClassesAndClassifiers.byA(superClasses.first()) as Concept
+//                } else {
+//                    throw IllegalStateException()
+//                }
+//                val interfaces = astClass.supertypes.map { it.classifier as KClass<*> }.filter { it.java.isInterface }
+//                interfaces.filter { it.isConceptInterface }.forEach {
+//                    concept.addImplementedInterface(correspondingInterface(it))
+//                }
+//            }
+//            val features =
+//                try {
+//                    astClass.declaredFeatures()
+//                } catch (e: RuntimeException) {
+//                    throw RuntimeException("Issue processing features for AST class ${astClass.qualifiedName}", e)
+//                }
+//
+//            features.forEach {
+//                when (it) {
+//                    is Attribute -> {
+//                        val prop = Property(it.name, featuresContainer)
+//                        prop.key = featuresContainer.key + "_" + prop.name
+//                        prop.id = featuresContainer.id + "_" + prop.name
+//                        prop.setOptional(it.optional)
+//                        prop.setType(toLWDataType(it.type, lionwebLanguage))
+//                        featuresContainer.addFeature(prop)
+//                    }
+//
+//                    is Reference -> {
+//                        val ref =
+//                            io
+//                                .lionweb
+//                                .lioncore
+//                                .java
+//                                .language
+//                                .Reference(it.name, featuresContainer)
+//                        ref.key = featuresContainer.key + "_" + ref.name
+//                        ref.id = featuresContainer.id + "_" + ref.name
+//                        ref.setOptional(it.optional)
+//                        ref.setType(toLWClassifier(lionwebLanguage, it.type))
+//                        featuresContainer.addFeature(ref)
+//                    }
+//
+//                    is Containment -> {
+//                        val cont =
+//                            io
+//                                .lionweb
+//                                .lioncore
+//                                .java
+//                                .language
+//                                .Containment(it.name, featuresContainer)
+//                        cont.key = featuresContainer.key + "_" + cont.name
+//                        cont.id = featuresContainer.id + "_" + cont.name
+//                        cont.setOptional(true)
+//                        cont.setMultiple(it.multiplicity == Multiplicity.MANY)
+//                        cont.setType(toLWClassifier(lionwebLanguage, it.type))
+//                        featuresContainer.addFeature(cont)
+//                    }
+//                }
+//            }
+//        }
+//        this.languages.associate(kolasuLanguage, lionwebLanguage)
+        return lionwebLanguage
+    }
+
+    @Deprecated("take a StarLasu Language instead")
     fun exportToLionWeb(kolasuLanguage: KolasuLanguage): LWLanguage {
         val lionwebLanguage = LWLanguage()
         lionwebLanguage.version = "1"
@@ -127,7 +256,7 @@ class LionWebLanguageConverter {
                         prop.key = featuresContainer.key + "_" + prop.name
                         prop.id = featuresContainer.id + "_" + prop.name
                         prop.setOptional(it.optional)
-                        prop.setType(toLWDataType(it.type, lionwebLanguage))
+                        prop.setType(toLWDataType(it.type.kClass().createType(), lionwebLanguage))
                         featuresContainer.addFeature(prop)
                     }
 
@@ -142,7 +271,8 @@ class LionWebLanguageConverter {
                         ref.key = featuresContainer.key + "_" + ref.name
                         ref.id = featuresContainer.id + "_" + ref.name
                         ref.setOptional(it.optional)
-                        ref.setType(toLWClassifier(it.type))
+                        // Here we deal with kclasses (not with the types), so we find the class from the type
+                        ref.setType(toLWClassifier(it.type.kClass()))
                         featuresContainer.addFeature(ref)
                     }
 
@@ -158,7 +288,8 @@ class LionWebLanguageConverter {
                         cont.id = featuresContainer.id + "_" + cont.name
                         cont.setOptional(true)
                         cont.setMultiple(it.multiplicity == Multiplicity.MANY)
-                        cont.setType(toLWClassifier(it.type))
+                        // Here we deal with kclasses (not with the types), so we find the class from the type
+                        cont.setType(toLWClassifier(it.type.kClass()))
                         featuresContainer.addFeature(cont)
                     }
                 }
@@ -289,10 +420,26 @@ class LionWebLanguageConverter {
         astClassesAndClassifiers.associate(kolasuClass, featuresContainer)
     }
 
-    private fun toLWClassifier(conceptLike: ConceptLike): Classifier<*> {
+    private fun registerMapping(
+        kConcept: ConceptLike,
+        lwConcept: Classifier<*>,
+    ) {
+        kConceptsAndLWConcepts.associate(kConcept, lwConcept)
+    }
+
+    private fun toLWClassifier(
+        lionwebLanguage: LWLanguage,
+        conceptLike: ConceptLike,
+    ): Classifier<*> {
         return when (conceptLike) {
             is KConcept -> {
-                TODO()
+                val concept = Concept(lionwebLanguage, conceptLike.name)
+                concept.isPartition = conceptLike.isPartition
+                concept.key = lionwebLanguage.key + "_" + concept.name
+                concept.id = lionwebLanguage.id + "_" + concept.name
+                concept.isAbstract = conceptLike.isAbstract
+                registerMapping(conceptLike, concept)
+                concept
             }
 
             is KConceptInterface -> {
@@ -346,7 +493,25 @@ class LionWebLanguageConverter {
         kDataType: KDataType,
         lionwebLanguage: LWLanguage,
     ): DataType<*> {
-        TODO()
+        return when {
+            intType == kDataType -> LionCoreBuiltins.getInteger()
+            stringType == kDataType -> LionCoreBuiltins.getString()
+            kDataType is EnumType -> {
+                val enumeration = kEnumerationAndLWEnumerations.byA(kDataType)
+                if (enumeration == null) {
+                    val newEnumeration = Enumeration(lionwebLanguage, kDataType.name)
+                    newEnumeration.id = (lionwebLanguage.id ?: "unknown_language") + "_" + newEnumeration.name
+                    newEnumeration.key = newEnumeration.name
+                    lionwebLanguage.addElement(newEnumeration)
+                    kEnumerationAndLWEnumerations.associate(kDataType, newEnumeration)
+                    // TODO add literals
+                    newEnumeration
+                } else {
+                    enumeration
+                }
+            }
+            else -> TODO(kDataType.toString())
+        }
     }
 
     private fun toLWDataType(
@@ -371,3 +536,12 @@ class LionWebLanguageConverter {
         }
     }
 }
+
+fun ConceptLike.kClass() = Class.forName(this.name).kotlin
+
+fun com.strumenta.kolasu.language.DataType.kClass(): KClass<*> =
+    when {
+        this == intType -> Int::class
+        this == stringType -> String::class
+        else -> Class.forName(this.name).kotlin
+    }

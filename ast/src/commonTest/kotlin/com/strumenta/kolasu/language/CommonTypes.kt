@@ -7,5 +7,3 @@ expect fun simpleType(
     classifier: KClass<*>,
     nullable: Boolean = false,
 ): KType
-
-val stringType = PrimitiveType("kotlin.String")

@@ -20,12 +20,16 @@ sealed class Type(
 sealed class ConceptLike(
     name: String,
     val features: MutableList<Feature> = mutableListOf(),
-) : Type(name)
+) : Type(name) {
+    var isPartition: Boolean = false
+}
 
 class Concept(
     name: String,
     features: MutableList<Feature> = mutableListOf(),
-) : ConceptLike(name, features)
+) : ConceptLike(name, features) {
+    var isAbstract: Boolean = false
+}
 
 class ConceptInterface(
     name: String,
