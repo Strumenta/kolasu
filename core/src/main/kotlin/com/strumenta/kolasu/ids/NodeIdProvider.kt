@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.ids
 
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.containingProperty
 import com.strumenta.kolasu.model.Node as KNode
 
 /**
@@ -9,11 +11,33 @@ import com.strumenta.kolasu.model.Node as KNode
  */
 interface NodeIdProvider {
     /**
+     * @param coordinates the coordinates at which the node is to be placed
      * @return a valid LionWeb Node ID
      */
-    fun id(kNode: KNode): String
+    fun idUsingCoordinates(kNode: KNode, coordinates: Coordinates): String
+
+    fun id(kNode: KNode, overriddenCoordinates: Coordinates? = null): String {
+        return idUsingCoordinates(kNode, overriddenCoordinates ?: calculatedCoordinates(kNode))
+    }
+
+    private fun calculatedCoordinates(kNode: Node): Coordinates {
+        return if (kNode.parent == null) {
+            RootCoordinates
+        } else {
+            NonRootCoordinates(this.id(kNode.parent!!), kNode.containingProperty()!!.name)
+        }
+    }
 }
 
 interface IDLogic {
-    val calculatedID: String
+    fun calculatedID(coordinates: Coordinates? = null): String
 }
+
+sealed class Coordinates
+
+object RootCoordinates : Coordinates()
+
+data class NonRootCoordinates(
+    val containerID: String,
+    val containmentName: String
+) : Coordinates()

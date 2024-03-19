@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.ids.ConstantSourceIdProvider
+import com.strumenta.kolasu.ids.Coordinates
 import com.strumenta.kolasu.ids.SimpleSourceIdProvider
 import com.strumenta.kolasu.ids.SourceIdProvider
 import com.strumenta.kolasu.ids.StructuralNodeIdProvider
@@ -12,8 +13,8 @@ class StructuralLionWebNodeIdProvider(sourceIdProvider: SourceIdProvider = Simpl
 
     constructor(customSourceId: String) : this(ConstantSourceIdProvider(customSourceId))
 
-    override fun id(kNode: Node): String {
-        val id = super.id(kNode)
+    override fun idUsingCoordinates(kNode: Node, coordinates: Coordinates): String {
+        val id = super.idUsingCoordinates(kNode, coordinates)
         if (!CommonChecks.isValidID(id)) {
             throw IllegalStateException("An invalid LionWeb Node ID has been produced")
         }

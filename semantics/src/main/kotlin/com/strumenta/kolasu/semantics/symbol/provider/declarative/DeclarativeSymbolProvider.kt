@@ -137,7 +137,9 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
         nodeIdProvider: NodeIdProvider,
         source: ReferenceByName<*>
     ): ReferenceValueDescription {
-        return ReferenceValueDescription(source.referred?.let { it as? Node }?.let { nodeIdProvider.id(it) })
+        return ReferenceValueDescription(
+            source.referred?.let { it as? Node }?.let { nodeIdProvider.id(it) }
+        )
     }
 
     private fun toContainmentValueDescription(
