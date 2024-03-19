@@ -1,6 +1,10 @@
 package com.strumenta.kolasu.lionweb
 
+import com.strumenta.kolasu.ids.Coordinates
+import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
+import com.strumenta.kolasu.ids.NonRootCoordinates
+import com.strumenta.kolasu.ids.RootCoordinates
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
@@ -8,6 +12,7 @@ import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.allFeatures
 import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.model.containingProperty
 import com.strumenta.kolasu.traversing.walk
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
@@ -80,12 +85,30 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
     fun exportModelToLionWeb(
         kolasuTree: KNode,
         nodeIdProvider: NodeIdProvider = this.nodeIdProvider,
-        considerParent: Boolean = true
+        considerParent: Boolean = true,
+        rootCoordinates: Coordinates? = null
     ): LWNode {
+        val myIDManager = object {
+
+            fun coordinatesFor(kNode: KNode): Coordinates {
+                return when {
+                    kolasuTree == kNode && rootCoordinates != null -> rootCoordinates
+                    kNode.parent == null -> RootCoordinates
+                    else -> {
+                        NonRootCoordinates(nodeId(kNode.parent!!), kNode.containingProperty()!!.name)
+                    }
+                }
+            }
+
+            fun nodeId(kNode: KNode): String {
+                return nodeIdProvider.idUsingCoordinates(kNode, coordinatesFor(kNode))
+            }
+        }
+
         if (!nodesMapping.containsA(kolasuTree)) {
             kolasuTree.walk().forEach { kNode ->
                 if (!nodesMapping.containsA(kNode)) {
-                    val lwNode = DynamicNode(nodeIdProvider.id(kNode), findConcept(kNode))
+                    val lwNode = DynamicNode(myIDManager.nodeId(kNode), findConcept(kNode))
                     associateNodes(kNode, lwNode)
                 }
             }
@@ -131,7 +154,11 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
                                         lwNode.addChild(StarLasuLWLanguage.ASTNodePosition, lwPositionValue)
                                     }
                                 } else {
-                                    val kContainment = kFeatures.find { it.name == feature.name }
+                                    val kContainment = (
+                                        kFeatures.find { it.name == feature.name } ?: throw IllegalStateException(
+                                            "Cannot find containment for ${feature.name} when considering node $kNode"
+                                        )
+                                        )
                                         as com.strumenta.kolasu.language.Containment
                                     val kValue = kNode.getChildren(kContainment)
                                     kValue.forEach { kChild ->
@@ -177,7 +204,16 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
 
         val result = nodesMapping.byA(kolasuTree)!!
         if (considerParent && kolasuTree.parent != null) {
-            (result as DynamicNode).parent = ProxyNode(nodeIdProvider.id(kolasuTree.parent!!))
+            val parentNodeId = try {
+                nodeIdProvider.id(kolasuTree.parent!!)
+            } catch (e: IDGenerationException) {
+                throw IDGenerationException(
+                    "Cannot produce an ID for ${kolasuTree.parent}, which was needed to " +
+                        "create a ProxyNode",
+                    e
+                )
+            }
+            (result as DynamicNode).parent = ProxyNode(parentNodeId)
         }
         return result
     }
@@ -442,7 +478,7 @@ class LionWebModelConverter(var nodeIdProvider: NodeIdProvider = StructuralLionW
     }
 
     private fun findConcept(kNode: com.strumenta.kolasu.model.Node): Concept {
-        return languageConverter.correspondingConcept(kNode.javaClass.kotlin)
+        return languageConverter.correspondingConcept(kNode.nodeType)
     }
 
     private fun associateNodes(kNode: Any, lwNode: LWNode) {

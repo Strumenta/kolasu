@@ -6,6 +6,8 @@ import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.SyntheticSource
 import java.io.File
 
+const val UNKNOWN_SOURCE_ID = "UNKNOWN_SOURCE"
+
 /**
  * Given a Source (even null), it generates a corresponding identifier.
  */
@@ -20,14 +22,18 @@ abstract class AbstractSourceIdProvider : SourceIdProvider {
         .replace(' ', '_')
 }
 
-class SimpleSourceIdProvider : AbstractSourceIdProvider() {
+class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSourceIdProvider() {
     override fun sourceId(source: Source?): String {
         if (source is IDLogic) {
-            return source!!.calculatedID
+            return source!!.calculatedID(null)
         }
         return when (source) {
             null -> {
-                "UNKNOWN_SOURCE"
+                if (acceptNullSource) {
+                    UNKNOWN_SOURCE_ID
+                } else {
+                    throw IDGenerationException("Source should not be null")
+                }
             }
             is FileSource -> {
                 cleanId("file_${source.file.path}")
@@ -45,11 +51,19 @@ class SimpleSourceIdProvider : AbstractSourceIdProvider() {
     }
 }
 
-class RelativeSourceIdProvider(val baseDir: File, var rootName: String? = null) : AbstractSourceIdProvider() {
+class RelativeSourceIdProvider(
+    val baseDir: File,
+    var rootName: String? = null,
+    var acceptNullSource: Boolean = false
+) : AbstractSourceIdProvider() {
     override fun sourceId(source: Source?): String {
         return when (source) {
             null -> {
-                "UNKNOWN_SOURCE"
+                if (acceptNullSource) {
+                    UNKNOWN_SOURCE_ID
+                } else {
+                    throw IDGenerationException("Source should not be null")
+                }
             }
             is FileSource -> {
                 val thisAbsPath = source.file.absolutePath
@@ -66,3 +80,5 @@ class RelativeSourceIdProvider(val baseDir: File, var rootName: String? = null) 
         }
     }
 }
+
+class IDGenerationException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)

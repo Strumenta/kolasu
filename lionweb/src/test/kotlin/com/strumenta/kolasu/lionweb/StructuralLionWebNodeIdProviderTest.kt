@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.traversing.walk
 import junit.framework.TestCase.assertNotNull
@@ -34,6 +35,7 @@ class StructuralLionWebNodeIdProviderTest {
             )
         )
         root.assignParents()
+        root.source = SyntheticSource("ss1")
         val ip = StructuralLionWebNodeIdProvider()
         val encounteredIDs = mutableSetOf<String>()
         root.walk().forEach { node ->
@@ -65,6 +67,8 @@ class StructuralLionWebNodeIdProviderTest {
                 )
             )
         )
+        root.setSourceForTree(SyntheticSource("foo-bar"))
+
         // we do NOT call assignParents
         val ip = StructuralLionWebNodeIdProvider()
         root.walk().forEach { node ->

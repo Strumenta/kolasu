@@ -23,8 +23,7 @@ open class DeclarativeNodeIdProvider(
     vararg rules: DeclarativeNodeIdProviderRule<out Node>
 ) : NodeIdProvider {
     private val rules: List<DeclarativeNodeIdProviderRule<out Node>> = rules.sorted()
-
-    override fun id(kNode: Node): String {
+    override fun idUsingCoordinates(kNode: Node, coordinates: Coordinates): String {
         return this.rules.firstOrNull { it.canBeInvokedWith(kNode::class) }?.invoke(this, kNode)
             ?: throw RuntimeException("Cannot find rule for node type: ${kNode::class.qualifiedName}")
     }
