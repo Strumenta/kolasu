@@ -30,7 +30,7 @@ interface NodeIdProvider {
 }
 
 interface IDLogic {
-    fun calculatedID(coordinates: Coordinates? = null): String
+    fun calculatedID(coordinates: Coordinates): String
 }
 
 sealed class Coordinates
