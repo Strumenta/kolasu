@@ -6,7 +6,7 @@ import com.strumenta.kolasu.model.Source
 
 data class LionWebRootSource(val sourceId: String) : Source(), IDLogic {
 
-    override fun calculatedID(coordinates: Coordinates?): String {
+    override fun calculatedID(coordinates: Coordinates): String {
         return sourceId
     }
 }

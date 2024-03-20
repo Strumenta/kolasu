@@ -25,7 +25,7 @@ abstract class AbstractSourceIdProvider : SourceIdProvider {
 class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSourceIdProvider() {
     override fun sourceId(source: Source?): String {
         if (source is IDLogic) {
-            return source!!.calculatedID(null)
+            return source!!.calculatedID(RootCoordinates)
         }
         return when (source) {
             null -> {
