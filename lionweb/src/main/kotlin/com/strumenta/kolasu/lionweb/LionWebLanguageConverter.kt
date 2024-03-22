@@ -266,6 +266,10 @@ class LionWebLanguageConverter {
         return toLWClassifier(kClass) as Concept
     }
 
+    fun correspondingConcept(nodeType: String): Concept {
+        return toLWClassifier(nodeType) as Concept
+    }
+
     fun correspondingKolasuClass(classifier: Classifier<*>): KClass<*>? {
         return this
             .astClassesAndClassifiers
@@ -287,6 +291,15 @@ class LionWebLanguageConverter {
 
     private fun toLWClassifier(kClass: KClass<*>): Classifier<*> {
         return astClassesAndClassifiers.byA(kClass) ?: throw IllegalArgumentException("Unknown KClass $kClass")
+    }
+
+    private fun toLWClassifier(nodeType: String): Classifier<*> {
+        val kClass =
+            astClassesAndClassifiers.`as`.find { it.qualifiedName == nodeType }
+                ?: throw IllegalArgumentException(
+                    "Unknown nodeType $nodeType",
+                )
+        return toLWClassifier(kClass)
     }
 
     private fun toLWEnumeration(

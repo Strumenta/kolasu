@@ -4,6 +4,7 @@ import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.withRange
 import com.strumenta.kolasu.testing.assertASTsAreEqual
@@ -36,7 +37,7 @@ class LionWebModelConverterTest {
   ],
   "nodes": [
     {
-      "id": "UNKNOWN_SOURCE_root",
+      "id": "synthetic_foo-bar-source_root",
       "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
@@ -60,9 +61,9 @@ class LionWebModelConverterTest {
             "key": "com-strumenta-SimpleLang_SimpleRoot_childrez"
           },
           "children": [
-            "UNKNOWN_SOURCE_root_childrez_0",
-            "UNKNOWN_SOURCE_root_childrez_1",
-            "UNKNOWN_SOURCE_root_childrez_2"
+            "synthetic_foo-bar-source_root_childrez",
+            "synthetic_foo-bar-source_root_childrez_1",
+            "synthetic_foo-bar-source_root_childrez_2"
           ]
         },
         {
@@ -79,7 +80,7 @@ class LionWebModelConverterTest {
       "parent": null
     },
     {
-      "id": "UNKNOWN_SOURCE_root_childrez_0",
+      "id": "synthetic_foo-bar-source_root_childrez",
       "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
@@ -123,16 +124,16 @@ class LionWebModelConverterTest {
           "targets": [
             {
               "resolveInfo": "A1",
-              "reference": "UNKNOWN_SOURCE_root_childrez_0"
+              "reference": "synthetic_foo-bar-source_root_childrez"
             }
           ]
         }
       ],
       "annotations": [],
-      "parent": "UNKNOWN_SOURCE_root"
+      "parent": "synthetic_foo-bar-source_root"
     },
     {
-      "id": "UNKNOWN_SOURCE_root_childrez_1",
+      "id": "synthetic_foo-bar-source_root_childrez_1",
       "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
@@ -160,10 +161,10 @@ class LionWebModelConverterTest {
       ],
       "references": [],
       "annotations": [],
-      "parent": "UNKNOWN_SOURCE_root"
+      "parent": "synthetic_foo-bar-source_root"
     },
     {
-      "id": "UNKNOWN_SOURCE_root_childrez_2",
+      "id": "synthetic_foo-bar-source_root_childrez_2",
       "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
@@ -187,7 +188,7 @@ class LionWebModelConverterTest {
             "key": "com-strumenta-SimpleLang_SimpleNodeA_child"
           },
           "children": [
-            "UNKNOWN_SOURCE_root_childrez_2_child"
+            "synthetic_foo-bar-source_root_childrez_2_child"
           ]
         },
         {
@@ -209,16 +210,16 @@ class LionWebModelConverterTest {
           "targets": [
             {
               "resolveInfo": "A1",
-              "reference": "UNKNOWN_SOURCE_root_childrez_0"
+              "reference": "synthetic_foo-bar-source_root_childrez"
             }
           ]
         }
       ],
       "annotations": [],
-      "parent": "UNKNOWN_SOURCE_root"
+      "parent": "synthetic_foo-bar-source_root"
     },
     {
-      "id": "UNKNOWN_SOURCE_root_childrez_2_child",
+      "id": "synthetic_foo-bar-source_root_childrez_2_child",
       "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
@@ -246,7 +247,7 @@ class LionWebModelConverterTest {
       ],
       "references": [],
       "annotations": [],
-      "parent": "UNKNOWN_SOURCE_root_childrez_2"
+      "parent": "synthetic_foo-bar-source_root_childrez_2"
     }
   ]
 }"""
@@ -271,6 +272,7 @@ class LionWebModelConverterTest {
                     a3,
                 ),
             )
+        ast.source = SyntheticSource("foo-bar-source")
         ast.assignParents()
 
         val exporter = LionWebModelConverter()
@@ -388,6 +390,7 @@ class LionWebModelConverterTest {
                 ),
             )
         initialAst.assignParents()
+        initialAst.source = SyntheticSource("ss1")
 
         val lwAST = mConverter.exportModelToLionWeb(initialAst)
         assertEquals(0, lwAST.getChildrenByContainmentName("range").size)
@@ -409,6 +412,7 @@ class LionWebModelConverterTest {
         val b2 = SimpleNodeB("some magic value")
         val a1 = SimpleNodeA("A1", ReferenceByName("A1"), b2)
         a1.assignParents()
+        a1.source = SyntheticSource("ss1")
 
         // if we store b2, child of a1, we expect the parent to be set
         val converter = LionWebModelConverter()
