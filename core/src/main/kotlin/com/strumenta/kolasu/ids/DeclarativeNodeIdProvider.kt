@@ -1,67 +1,145 @@
 package com.strumenta.kolasu.ids
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueSeverity
+import com.strumenta.kolasu.validation.IssueSeverity.ERROR
+import com.strumenta.kolasu.validation.IssueSeverity.INFO
+import com.strumenta.kolasu.validation.IssueSeverity.WARNING
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSuperclassOf
 
-/**
- * Declarative node id provider instances allow to define
- * language-specific or custom identifier construction policies.
- *
- * ```kotlin
- * object MyDeclarativeNodeIdProvider: DeclarativeNodeIdProvider(
- *     idFor(PackageDeclaration::class) { it.node.name }
- *     idFor(ClassDeclaration::class) { (node: ClassDeclaration, identifiers: NodeIdProvider) ->
- *         val packageIdentifier = node.findAncestorOfType(PackageDeclaration::class)?.let { identifiers.idFor(it) } ?: "__none__"
- *         "${packageIdentifier}::${node.name}"
- *     }
- * )
- * ```
- **/
-open class DeclarativeNodeIdProvider(
-    vararg rules: DeclarativeNodeIdProviderRule<out Node>
-) : NodeIdProvider {
-    private val rules: List<DeclarativeNodeIdProviderRule<out Node>> = rules.sorted()
+// TODO merge into NodeIdProvider.kt file
 
-    override fun id(kNode: Node): String {
-        return this.rules.firstOrNull { it.canBeInvokedWith(kNode::class) }?.invoke(this, kNode)
-            ?: throw RuntimeException("Cannot find rule for node type: ${kNode::class.qualifiedName}")
-    }
+/**
+ * Utility function to define a [NodeIdProvider] for a specific language.
+ * @param init the configuration rules for the [NodeIdProvider]
+ * @return a [NodeIdProvider] instance with the configured rules
+ **/
+fun nodeIdProvider(
+    init: NodeIdProviderConfigurationApi.() -> Unit
+): NodeIdProvider {
+    return ConfigurableNodeIdProvider().apply(init)
+}
+
+@DslMarker
+annotation class NodeIdProviderDsl
+
+/**
+ * Defines the NodeId Provider Configuration Api
+ * to use while configuring a [NodeIdProvider] instance.
+ **/
+@NodeIdProviderDsl
+sealed interface NodeIdProviderConfigurationApi {
+    /**
+     * Define the [String] identifier for the given [nodeType]
+     * using the given [rule].
+     * @param nodeType the node type for which this rule applies
+     * @param rule the node id provider rule
+     **/
+    fun <NodeTy : Node> idFor(
+        nodeType: KClass<out NodeTy>,
+        rule: NodeIdProviderConfigurationRuleApi.(NodeIdProviderConfigurationRuleContext<out NodeTy>) -> String
+    )
 }
 
 /**
- * Utility function to define declarative node id provider rules.
- * Can be used whenever listing the rules in the DeclarativeNodeIdProvider constructor.
+ * Defines the API when defining a node id provider
+ * rule for a specific node type.
  **/
-inline fun <reified NodeTy : Node> idFor(
-    noinline specification: NodeIdProvider.(NodeTy) -> String
-): DeclarativeNodeIdProviderRule<NodeTy> = DeclarativeNodeIdProviderRule(NodeTy::class, specification)
+@NodeIdProviderDsl
+sealed interface NodeIdProviderConfigurationRuleApi {
+    /**
+     * Add an information [message] during the rule execution.
+     * @param message the information message content
+     **/
+    fun info(message: String)
 
-/**
- * Class representing a single rule of a DeclarativeNodeIdProvider.
- **/
-class DeclarativeNodeIdProviderRule<NodeTy : Node>(
+    /**
+     * Add a warning [message] during the rule execution
+     **/
+    fun warning(message: String)
+
+    /**
+     * Add an error [message] during the rule execution
+     **/
+    fun error(message: String)
+}
+
+private class ConfigurableNodeIdProvider : NodeIdProviderConfigurationApi, NodeIdProvider {
+
+    private val rules: MutableList<ConfigurableNodeIdProviderRule<*>> = mutableListOf()
+
+    override fun <NodeTy : Node> idFor(
+        nodeType: KClass<out NodeTy>,
+        rule: NodeIdProviderConfigurationRuleApi.(NodeIdProviderConfigurationRuleContext<out NodeTy>) -> String
+    ) {
+        this.rules.add(ConfigurableNodeIdProviderRule(nodeType, rule))
+    }
+
+    override fun id(kNode: Node): String {
+        return this.rules.sorted()
+            .firstOrNull { it.canBeInvokedWithReceiver(kNode::class) }
+            ?.invoke(this, kNode, mutableListOf())
+            ?: throw RuntimeException("Error while retrieving node id - no compatible rule found")
+    }
+}
+
+private class ConfigurableNodeIdProviderRule<NodeTy : Node>(
     private val nodeType: KClass<NodeTy>,
-    private val specification: NodeIdProvider.(NodeTy) -> String
-) : Comparable<DeclarativeNodeIdProviderRule<*>>, (NodeIdProvider, Node) -> String {
-    override fun invoke(
-        nodeIdProvider: NodeIdProvider,
-        node: Node
-    ): String {
-        @Suppress("UNCHECKED_CAST")
-        return nodeIdProvider.specification(node as NodeTy)
+    private val configuration: NodeIdProviderConfigurationRuleApi
+    .(NodeIdProviderConfigurationRuleContext<NodeTy>) -> String
+) : NodeIdProviderConfigurationRuleApi,
+    (NodeIdProvider, Node, MutableList<Issue>) -> String,
+    Comparable<ConfigurableNodeIdProviderRule<*>> {
+
+    private lateinit var context: NodeIdProviderConfigurationRuleContext<NodeTy>
+    private lateinit var issues: MutableList<Issue>
+
+    override fun info(message: String) {
+        this.issue(message, INFO)
     }
 
-    fun canBeInvokedWith(type: KClass<*>): Boolean {
-        return this.nodeType.isSuperclassOf(type)
+    override fun warning(message: String) {
+        this.issue(message, WARNING)
     }
 
-    override fun compareTo(other: DeclarativeNodeIdProviderRule<*>): Int {
+    override fun error(message: String) {
+        this.issue(message, ERROR)
+    }
+
+    private fun issue(message: String, severity: IssueSeverity) {
+        this.issues.add(Issue.semantic(message, severity, this.context.node.position))
+    }
+
+    override fun compareTo(other: ConfigurableNodeIdProviderRule<*>): Int {
         return when {
             this.nodeType.isSuperclassOf(other.nodeType) -> 1
-            this.nodeType.isSubclassOf(other.nodeType) -> -1
+            other.nodeType.isSuperclassOf(this.nodeType) -> -1
             else -> (this.nodeType.qualifiedName ?: "") compareTo (other.nodeType.qualifiedName ?: "")
         }
     }
+
+    fun canBeInvokedWithReceiver(nodeType: KClass<*>): Boolean {
+        return this.nodeType.isSuperclassOf(nodeType)
+    }
+
+    override fun invoke(nodeIdProvider: NodeIdProvider, node: Node, issues: MutableList<Issue>): String {
+        check(this.canBeInvokedWithReceiver(node::class)) {
+            "Error while running node id provider rule - incompatible node received"
+        }
+        this.context = NodeIdProviderConfigurationRuleContext(node as NodeTy, nodeIdProvider)
+        this.issues = issues
+        return this.configuration(this.context)
+    }
 }
+
+/**
+ * The execution context while evaluating a node id provider rule.
+ * @property node the node for which the identifier is being computed
+ * @property nodeIdProvider the node id provider that we are configuring (self-reference)
+ **/
+data class NodeIdProviderConfigurationRuleContext<NodeTy : Node>(
+    val node: NodeTy,
+    val nodeIdProvider: NodeIdProvider
+)

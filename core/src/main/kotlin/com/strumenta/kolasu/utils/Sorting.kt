@@ -7,6 +7,6 @@ fun Iterable<KClass<*>>.sortBySubclassesFirst() = this.sortedWith { left, right 
     when {
         left.isSuperclassOf(right) -> 1
         right.isSuperclassOf(left) -> -1
-        else -> 0
+        else -> (left.qualifiedName ?: "") compareTo (right.qualifiedName ?: "")
     }
 }

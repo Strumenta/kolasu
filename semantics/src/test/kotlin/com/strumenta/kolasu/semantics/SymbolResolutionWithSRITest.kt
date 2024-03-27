@@ -1,74 +1,79 @@
 package com.strumenta.kolasu.semantics
 
 import com.strumenta.kolasu.ids.StructuralNodeIdProvider
-import com.strumenta.kolasu.model.*
-import com.strumenta.kolasu.semantics.scope.provider.ReferenceNode
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.SimpleOrigin
+import com.strumenta.kolasu.model.SyntheticSource
+import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.semantics.common.Todo
+import com.strumenta.kolasu.semantics.common.TodoProject
 import com.strumenta.kolasu.semantics.scope.provider.scopeProvider
 import com.strumenta.kolasu.semantics.symbol.description.SymbolDescription
+import com.strumenta.kolasu.semantics.symbol.importer.SymbolImporter
 import com.strumenta.kolasu.semantics.symbol.provider.SymbolProvider
 import com.strumenta.kolasu.semantics.symbol.provider.symbolProvider
+import com.strumenta.kolasu.semantics.symbol.repository.InMemorySymbolRepository
 import com.strumenta.kolasu.semantics.symbol.repository.SymbolRepository
-import com.strumenta.kolasu.traversing.findAncestorOfType
 import com.strumenta.kolasu.traversing.walk
-import com.strumenta.kolasu.traversing.walkDescendants
-import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import com.strumenta.kolasu.semantics.symbol.resolver.SymbolResolver as SR
-
-class TodoProject(override var name: String, val todos: MutableList<Todo>) : Node(), Named
-
-class Todo(
-    override var name: String,
-    var description: String,
-    val prerequisite: ReferenceNode<Todo>? = null
-) : Node(), Named
 
 class SymbolResolutionWithSRITest {
 
     @Test
     fun symbolResolutionPointingToNodes() {
         val todo1 = Todo("todo1", "stuff to do 1")
-        val todo2 = Todo("todo2", "stuff to do 2", prerequisite = ReferenceNode("todo1", Todo::class))
+        val todo2 = Todo("todo2", "stuff to do 2", prerequisite = ReferenceByName("todo1"))
         val todo3 = Todo("todo3", "stuff to do 3")
         val todoProject = TodoProject("Personal", mutableListOf(todo1, todo2, todo3))
         todoProject.assignParents()
 
         val scopeProvider = scopeProvider {
-            scopeFor(Todo::class) {
-                it.node.findAncestorOfType(TodoProject::class.java)?.todos?.forEach(this::defineLocalSymbol)
+            rule(TodoProject::class) { (node) ->
+                node.todos.forEach(this::include)
             }
         }
 
         val symbolResolver = SR(scopeProvider)
 
-        assertEquals(false, todo2.prerequisite!!.reference.resolved)
+        assertNotNull(todo2.prerequisite)
+        assertFalse(todo2.prerequisite.resolved)
+
         symbolResolver.resolveTree(todoProject)
-        assertEquals(true, todo2.prerequisite!!.reference.resolved)
-        assertEquals(todo1, todo2.prerequisite!!.reference.referred)
+
+        assertTrue(todo2.prerequisite.resolved)
+        assertEquals(todo1, todo2.prerequisite.referred)
     }
 
     @Test
     fun symbolResolutionPointingToNodesWithCustomIdProvider() {
         val todo1 = Todo("todo1", "stuff to do 1")
-        val todo2 = Todo("todo2", "stuff to do 2", prerequisite = ReferenceNode("todo1", Todo::class))
+        val todo2 = Todo("todo2", "stuff to do 2", prerequisite = ReferenceByName("todo1"))
         val todo3 = Todo("todo3", "stuff to do 3")
         val todoProject = TodoProject("Personal", mutableListOf(todo1, todo2, todo3))
         todoProject.assignParents()
 
-        val nodeIdProvider = StructuralNodeIdProvider("foo")
-
         val scopeProvider = scopeProvider {
-            scopeFor(Todo::class) {
-                it.node.findAncestorOfType(TodoProject::class.java)?.todos?.forEach(this::defineLocalSymbol)
+            rule(TodoProject::class) { (node) ->
+                node.todos.forEach(this::include)
             }
         }
         val symbolResolver = SR(scopeProvider)
 
-        assertEquals(false, todo2.prerequisite!!.reference.resolved)
+        assertNotNull(todo2.prerequisite)
+        assertFalse(todo2.prerequisite.resolved)
+
         symbolResolver.resolveTree(todoProject)
-        assertEquals(true, todo2.prerequisite!!.reference.resolved)
-        assertEquals(todo1, todo2.prerequisite!!.reference.referred)
+
+        assertTrue(todo2.prerequisite.resolved)
+        assertEquals(todo1, todo2.prerequisite.referred)
     }
 
     @Test
@@ -85,7 +90,7 @@ class SymbolResolutionWithSRITest {
             assertEquals(source1, it.source)
         }
 
-        val todo4 = Todo("todo4", "Some stuff to do", ReferenceNode("todo2", type = Todo::class))
+        val todo4 = Todo("todo4", "Some stuff to do", ReferenceByName("todo2"))
         val todoProjectErrands = TodoProject("Errands", mutableListOf(todo4))
         val source2 = SyntheticSource("Errands-Source")
         todoProjectErrands.assignParents()
@@ -97,41 +102,52 @@ class SymbolResolutionWithSRITest {
         val nodeIdProvider = StructuralNodeIdProvider()
 
         val symbolProvider = symbolProvider(nodeIdProvider) {
-            symbolFor(Todo::class) {
-                include("name", it.node.name)
+            rule(Todo::class) { (node) ->
+                include("name", node.name)
             }
         }
 
-        val sri: SymbolRepository = ASTsSymbolRepository(
-            symbolProvider,
-            todoProjectPersonal,
-            todoProjectErrands
-        )
+        val symbolRepository = InMemorySymbolRepository()
+
+        val symbolImporter = SymbolImporter(symbolProvider, symbolRepository)
+        symbolImporter.importTree(todoProjectPersonal)
+        symbolImporter.importTree(todoProjectErrands)
+
         val scopeProvider = scopeProvider {
-            scopeFor(Todo::class) {
-                it.node.findAncestorOfType(TodoProject::class.java)?.todos?.forEach(this::defineLocalSymbol)
-                sri.find(Todo::class).forEach(this::defineExternalSymbol)
+            rule(TodoProject::class) { (node) ->
+                node.todos.forEach(this::include)
+                parent {
+                    symbolRepository.findAll(Todo::class).forEach(this::include)
+                }
             }
         }
 
         // We can now resolve _only_ the nodes in the current AST, so we do not specify other ASTs
         val symbolResolver = SR(scopeProvider)
 
-        assertEquals(false, todo4.prerequisite!!.reference.resolved)
+        assertNotNull(todo4.prerequisite)
+        assertFalse(todo4.prerequisite.resolved)
+
         symbolResolver.resolveTree(todoProjectErrands)
-        assertEquals(true, todo4.prerequisite!!.reference.resolved)
-        assertEquals("synthetic_Personal-Source_root_todos_1", todo4.prerequisite.reference.identifier)
+
+        assertTrue(todo4.prerequisite.resolved)
+        assertEquals("synthetic_Personal-Source_root_todos_1", todo4.prerequisite.identifier)
     }
 }
 
 class ASTsSymbolRepository(
-    val symbolProvider: SymbolProvider,
-    vararg val roots: Node
+    private val symbolProvider: SymbolProvider,
+    private vararg val roots: Node
 ) : SymbolRepository {
+
+    override fun store(symbol: SymbolDescription) {
+        TODO("Not yet implemented")
+    }
+
     override fun load(identifier: String): SymbolDescription? {
         roots.forEach { root ->
             root.walk().forEach { node ->
-                val symbol = symbolProvider.symbolFor(node)
+                val symbol = symbolProvider.from(node)
                 if (symbol != null && symbol.identifier == identifier) {
                     return symbol
                 }
@@ -140,17 +156,23 @@ class ASTsSymbolRepository(
         return null
     }
 
-    override fun store(symbol: SymbolDescription) {
+    override fun delete(identifier: String): Boolean {
         TODO("Not yet implemented")
     }
 
-    override fun find(withType: KClass<out Node>): Sequence<SymbolDescription> {
+    override fun loadAll(filter: (SymbolDescription) -> Boolean): Sequence<SymbolDescription> {
         return sequence {
             roots.forEach { root ->
-                root.walkDescendants(withType).forEach { node ->
-                    yield(symbolProvider.symbolFor(node)!!)
+                root.walk().forEach { node ->
+                    symbolProvider.from(node)
+                        ?.takeIf(filter)
+                        ?.let { yield(it) }
                 }
             }
         }
+    }
+
+    override fun clear() {
+        TODO("Not yet implemented")
     }
 }

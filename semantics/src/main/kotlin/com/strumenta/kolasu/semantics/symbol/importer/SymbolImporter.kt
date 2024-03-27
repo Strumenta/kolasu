@@ -1,35 +1,37 @@
 package com.strumenta.kolasu.semantics.symbol.importer
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.semantics.symbol.provider.SymbolProvider
 import com.strumenta.kolasu.semantics.symbol.repository.SymbolRepository
+import com.strumenta.kolasu.traversing.walkDescendants
 
 /**
- * Symbol importer instances allow to import symbol descriptions
- * into symbol repositories. The descriptions can be specified using
- * a SymbolProvider, while the repository can be defined implementing
- * the SymbolRepository interface - could be an in-memory map or using
- * an external datasource.
+ * Component supporting the import process of symbol description
+ * from nodes into a [symbolRepository] using a [symbolProvider].
  *
- * Given an AST, the symbol importer uses the symbol provider to extract
- * symbol descriptions from nodes. The resulting description is then
- * stored into the repository for later usage.
+ * @property symbolProvider the symbol provider to use during the import process
+ * @property symbolRepository the repository where to store the obtained symbol descriptions
  **/
-open class SymbolImporter(
+class SymbolImporter(
     private val symbolProvider: SymbolProvider,
     private val symbolRepository: SymbolRepository
 ) {
+
     /**
-     * Extracts a symbol description from the given node
-     * and stores it in the symbol repository. Repeats the
-     * same process over its children, if `entireTree` is true.
+     * Imports symbols for all the nodes contained
+     * in a given tree in the symbol repository starting from its [root].
+     * @param root the root node of the tree
      **/
-    fun import(
-        node: Node,
-        entireTree: Boolean = false
-    ) {
-        this.symbolProvider.symbolFor(node)?.let { this.symbolRepository.store(it) }
-        node.children.forEach { this.import(it, entireTree) }
+    fun importTree(root: Node) {
+        this.importNode(root)
+        root.walkDescendants().forEach(this::importTree)
+    }
+
+    /**
+     * Imports the symbol for the given [node] in the symbol repository.
+     * @param node the node from which to compute the symbol description to import
+     **/
+    fun importNode(node: Node) {
+        this.symbolProvider.from(node)?.let(this.symbolRepository::store)
     }
 }

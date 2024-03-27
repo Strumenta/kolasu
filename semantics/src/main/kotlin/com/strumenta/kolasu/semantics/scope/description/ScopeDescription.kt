@@ -3,78 +3,87 @@ package com.strumenta.kolasu.semantics.scope.description
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.semantics.scope.provider.ReferenceNode
 import com.strumenta.kolasu.semantics.symbol.description.SymbolDescription
-
-// TODO documentation
+import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.isSuperclassOf
 
 class ScopeDescription(
-    private val ignoreCase: Boolean = false,
-    var parentScope: ScopeDescription? = null
+    var ignoreCase: Boolean = false,
+    var parent: ScopeDescription? = null
 ) {
 
-    private val namesToExternalSymbolIdentifiers: MutableMap<String, String> = mutableMapOf()
-    private val namesToLocalSymbolNodes: MutableMap<String, Node> = mutableMapOf()
+    private val namesToExternalSymbols: MutableMap<String, MutableList<SymbolDescription>> = mutableMapOf()
+    private val namesToLocalSymbols: MutableMap<String, MutableList<PossiblyNamed>> = mutableMapOf()
 
-    fun getSymbolNames(filter: String = ""): Sequence<String> =
-        this.getLocalSymbolNames(filter)
-            .plus(this.getExternalSymbolNames(filter))
-            .plus(this.parentScope?.getSymbolNames(filter) ?: emptySequence())
+    fun names(filter: String = ""): List<String> {
+        return this.namesToLocalSymbols.keys.filter { it.contains(filter) }
+            .plus(this.namesToExternalSymbols.keys.filter { it.contains(filter) })
+            .plus(this.parent?.names(filter) ?: emptyList())
+    }
 
-    fun getLocalSymbolNames(filter: String = "") =
-        this.namesToLocalSymbolNodes.keys.asSequence().filter { it.contains(filter) }
-
-    fun getExternalSymbolNames(filter: String = "") =
-        this.namesToExternalSymbolIdentifiers.keys.asSequence().filter { it.contains(filter) }
-
-    fun <SymbolTy> defineLocalSymbol(symbol: SymbolTy) where SymbolTy : Node, SymbolTy : PossiblyNamed {
-        check(symbol.name != null) {
-            "Error while adding local symbol in scope description - name is null"
+    fun include(symbol: Any?, name: String? = null) {
+        require(symbol != null) {
+            "Error while including symbol in scope description: symbol cannot be null."
         }
-        this.defineLocalSymbol(symbol.name!!, symbol)
-    }
-
-    fun defineLocalSymbol(name: String, symbol: Node) {
-        check(name.isNotBlank()) {
-            "Error while adding local symbol in scope description - name is blank"
+        require(symbol is SymbolDescription || symbol is Node) {
+            "Error while including symbol in scope description: " +
+                "expected Node or SymbolDescription, received ${symbol::class.qualifiedName}."
         }
-        this.namesToLocalSymbolNodes[name.asKey()] = symbol
-    }
-
-    fun defineExternalSymbol(symbol: SymbolDescription) {
-        this.defineExternalSymbol(symbol.name, symbol)
-    }
-
-    fun defineExternalSymbol(name: String, symbol: SymbolDescription) {
-        this.defineExternalSymbol(name, symbol.identifier)
-    }
-
-    fun defineExternalSymbol(name: String, identifier: String) {
-        check(name.isNotBlank()) {
-            "Error while adding external symbol in scope description - name is blank or null"
+        val symbolName = name ?: symbol.let { it as? PossiblyNamed }?.name
+        require(!symbolName.isNullOrBlank()) {
+            "Error while including symbol in scope description: name cannot be blank or null."
         }
-        check(identifier.isNotBlank()) {
-            "Error while adding external symbol in scope description - identifier is blank or null"
+        when (symbol) {
+            is SymbolDescription ->
+                this.namesToExternalSymbols.getOrPut(symbolName.asKey()) { mutableListOf() }.add(symbol)
+            is PossiblyNamed ->
+                this.namesToLocalSymbols.getOrPut(symbolName.asKey()) { mutableListOf() }.add(symbol)
         }
-        this.namesToExternalSymbolIdentifiers[name.asKey()] = identifier
     }
 
-    fun resolve(node: ReferenceNode<*>) {
-        val name = node.reference.name.asKey()
-        val localSymbolNode by lazy { this.namesToLocalSymbolNodes[name] as? PossiblyNamed }
-        val externalSymbolIdentifier by lazy { this.namesToExternalSymbolIdentifiers[name] }
-        when {
-            localSymbolNode != null -> {
-                @Suppress("UNCHECKED_CAST")
-                (node.reference as ReferenceByName<PossiblyNamed>).referred = localSymbolNode
-            }
-            externalSymbolIdentifier != null -> {
-                node.reference.identifier = externalSymbolIdentifier
-            }
-            else -> {
-                this.parentScope?.resolve(node)
+    fun resolve(reference: ReferenceByName<*>?, type: KClass<out PossiblyNamed> = PossiblyNamed::class) {
+        reference?.let {
+            when (val symbol = this.findSymbol(reference.name.asKey(), type)) {
+                is SymbolDescription -> reference.identifier = symbol.identifier
+                is PossiblyNamed -> (reference as ReferenceByName<PossiblyNamed>).referred = symbol
+                else -> this.parent?.resolve(reference, type)
             }
         }
+    }
+
+    private fun findSymbol(name: String, type: KClass<out PossiblyNamed>): Any? {
+        val localSymbol = this.findLocalSymbol(name, type)
+        val externalSymbol = this.findExternalSymbol(name, type)
+        return when {
+            localSymbol == null -> externalSymbol
+            externalSymbol == null -> localSymbol
+            else -> localSymbol.takeIf { externalSymbol.type.isSuperTypeOf(localSymbol::class) } ?: externalSymbol
+        }
+    }
+
+    private fun findLocalSymbol(name: String, type: KClass<out PossiblyNamed>): PossiblyNamed? {
+        return this.namesToLocalSymbols[name]
+            ?.let { it.filter { localSymbol -> localSymbol::class.isSubclassOf(type) } }
+            ?.sortedWith { left, right ->
+                when {
+                    left::class.isSuperclassOf(right::class) -> 1
+                    left::class.isSubclassOf(right::class) -> -1
+                    else -> (left::class.qualifiedName ?: "") compareTo (right::class.qualifiedName ?: "")
+                }
+            }?.firstOrNull()
+    }
+
+    private fun findExternalSymbol(name: String, type: KClass<out PossiblyNamed>): SymbolDescription ? {
+        return this.namesToExternalSymbols[name]
+            ?.let { it.filter { externalSymbol -> externalSymbol.type.isSubTypeOf(type) } }
+            ?.sortedWith { left, right ->
+                when {
+                    left.type.isSuperTypeOf(right.type) -> 1
+                    left.type.isSubTypeOf(right.type) -> -1
+                    else -> left.type.name compareTo right.type.name
+                }
+            }?.firstOrNull()
     }
 
     private fun String.asKey(): String {

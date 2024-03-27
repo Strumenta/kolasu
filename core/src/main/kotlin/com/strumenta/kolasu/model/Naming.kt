@@ -43,7 +43,8 @@ interface Named : PossiblyNamed {
 class ReferenceByName<N : PossiblyNamed>(
     val name: String,
     initialReferred: N? = null,
-    var identifier: String? = null
+    var identifier: String? = null,
+    var position: Position? = null
 ) : Serializable {
     var referred: N? = null
         set(value) {
@@ -81,6 +82,7 @@ class ReferenceByName<N : PossiblyNamed>(
         if (other !is ReferenceByName<*>) return false
         if (name != other.name) return false
         if (identifier != other.identifier) return false
+        if (position != other.position) return false
         if (referred != other.referred) return false
         return true
     }
@@ -132,7 +134,6 @@ fun kReferenceByNameType(targetClass: KClass<out PossiblyNamed> = PossiblyNamed:
 /**
  * Retrieves the referred type for a given reference property.
  **/
-@Suppress("unchecked_cast")
 fun KReferenceByName<*>.getReferredType(): KClass<out PossiblyNamed> {
     return this.returnType.arguments[0].type!!.classifier!! as KClass<out PossiblyNamed>
 }

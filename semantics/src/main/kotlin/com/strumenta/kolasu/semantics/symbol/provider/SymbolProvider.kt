@@ -3,183 +3,138 @@ package com.strumenta.kolasu.semantics.symbol.provider
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.semantics.symbol.description.*
+import com.strumenta.kolasu.model.withPosition
+import com.strumenta.kolasu.semantics.provider.SemanticsProvider
+import com.strumenta.kolasu.semantics.provider.SemanticsProviderConfigurator
+import com.strumenta.kolasu.semantics.provider.SemanticsProviderRule
+import com.strumenta.kolasu.semantics.symbol.description.BooleanValueDescription
+import com.strumenta.kolasu.semantics.symbol.description.ContainmentValueDescription
+import com.strumenta.kolasu.semantics.symbol.description.IntegerValueDescription
+import com.strumenta.kolasu.semantics.symbol.description.ListValueDescription
+import com.strumenta.kolasu.semantics.symbol.description.NullValueDescription
+import com.strumenta.kolasu.semantics.symbol.description.ReferenceValueDescription
+import com.strumenta.kolasu.semantics.symbol.description.StringValueDescription
+import com.strumenta.kolasu.semantics.symbol.description.SymbolDescription
+import com.strumenta.kolasu.semantics.symbol.description.TypeDescription
+import com.strumenta.kolasu.semantics.symbol.description.ValueDescription
 import com.strumenta.kolasu.validation.Issue
-import com.strumenta.kolasu.validation.IssueSeverity
 import kotlin.reflect.KClass
-import kotlin.reflect.full.allSuperclasses
-import kotlin.reflect.full.isSuperclassOf
+import kotlin.reflect.full.superclasses
 
-// TODO documentation
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-fun symbolProvider(
-    nodeIdProvider: NodeIdProvider,
-    init: SymbolProviderConfigurationApi.() -> Unit
-): SymbolProvider {
-    return ConfigurableSymbolProvider(nodeIdProvider).apply(init)
+fun symbolProvider(nodeIdProvider: NodeIdProvider, init: SymbolProviderConfigurator.() -> Unit): SymbolProvider {
+    return SymbolProvider().apply { SymbolProviderConfigurator(this, nodeIdProvider).init() }
 }
 
-interface SymbolProvider {
-    fun <NodeTy : Node> symbolFor(
-        node: NodeTy,
-        issues: MutableList<Issue> = mutableListOf(),
-        typedAs: KClass<in NodeTy>? = null
-    ): SymbolDescription?
-}
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @DslMarker
 annotation class SymbolProviderDsl
 
-@SymbolProviderDsl
-interface SymbolProviderConfigurationApi {
-    fun <NodeTy : Node> symbolFor(
-        nodeType: KClass<out NodeTy>,
-        rule: SymbolProviderConfigurationRuleApi.(SymbolProviderConfigurationRuleContext<out NodeTy>) -> Unit
-    )
-}
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class SymbolProvider : SemanticsProvider<SymbolDescription, SymbolProviderRule<*>>()
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @SymbolProviderDsl
-interface SymbolProviderConfigurationRuleApi {
-    fun info(message: String)
-
-    fun warning(message: String)
-
-    fun error(message: String)
-
-    fun include(propertyName: String, propertyValue: Any?)
-}
-
-private class ConfigurableSymbolProvider(
+class SymbolProviderConfigurator(
+    symbolProvider: SymbolProvider,
     private val nodeIdProvider: NodeIdProvider
-) : SymbolProviderConfigurationApi, SymbolProvider {
-
-    private val rules: MutableList<ConfigurableSymbolProviderRule<*>> = mutableListOf()
-
-    override fun <NodeTy : Node> symbolFor(
-        nodeType: KClass<out NodeTy>,
-        rule: SymbolProviderConfigurationRuleApi.(SymbolProviderConfigurationRuleContext<out NodeTy>) -> Unit
-    ) {
-        this.rules.add(ConfigurableSymbolProviderRule(this.nodeIdProvider, nodeType, rule))
-    }
-
-    override fun <NodeTy : Node> symbolFor(
-        node: NodeTy,
-        issues: MutableList<Issue>,
-        typedAs: KClass<in NodeTy>?
-    ): SymbolDescription? {
-        return this.rules.sorted()
-            .firstOrNull { it.isCompatibleWith(typedAs ?: node::class) }
-            ?.invoke(this, node, issues)
+) : SemanticsProviderConfigurator<SymbolProvider, SymbolProviderRule<*>, SymbolDescription>(symbolProvider) {
+    override fun <InputType : Node> createRule(nodeType: KClass<InputType>): SymbolProviderRule<*> {
+        return SymbolProviderRule<InputType>(this.nodeIdProvider)
     }
 }
 
-private class ConfigurableSymbolProviderRule<NodeTy : Node>(
-    private val nodeIdProvider: NodeIdProvider,
-    private val nodeType: KClass<NodeTy>,
-    private val configuration: SymbolProviderConfigurationRuleApi.(
-        SymbolProviderConfigurationRuleContext<NodeTy>
-    ) -> Unit
-) : SymbolProviderConfigurationRuleApi,
-    (SymbolProvider, Node, MutableList<Issue>) -> SymbolDescription,
-    Comparable<ConfigurableSymbolProviderRule<*>> {
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private lateinit var context: SymbolProviderConfigurationRuleContext<NodeTy>
-    private lateinit var issues: MutableList<Issue>
+@SymbolProviderDsl
+class SymbolProviderRule<InputType : Node>(
+    private val nodeIdProvider: NodeIdProvider
+) : SemanticsProviderRule<InputType, SymbolDescription>() {
 
-    private var name: String? = null
+    private lateinit var name: String
     private val fields: MutableMap<String, ValueDescription> = mutableMapOf()
 
-    override fun info(message: String) {
-        this.issue(message, IssueSeverity.INFO)
-    }
-
-    override fun warning(message: String) {
-        this.issue(message, IssueSeverity.WARNING)
-    }
-
-    override fun error(message: String) {
-        this.issue(message, IssueSeverity.ERROR)
-    }
-
-    private fun issue(message: String, severity: IssueSeverity) {
-        this.issues.add(Issue.semantic(message, severity, this.context.node.position))
-    }
-
-    override fun include(propertyName: String, propertyValue: Any?) {
-        propertyName.takeIf { it == "name" }?.also { this.name = propertyValue as? String }
-        this.fields[propertyName] = this.toValueDescription(propertyValue)
-    }
-
-    override fun compareTo(other: ConfigurableSymbolProviderRule<*>): Int {
-        return when {
-            this.nodeType.isSuperclassOf(other.nodeType) -> 1
-            other.nodeType.isSuperclassOf(this.nodeType) -> -1
-            else -> (this.nodeType.qualifiedName ?: "") compareTo (other.nodeType.qualifiedName ?: "")
+    @Suppress("UNUSED")
+    fun include(propertyName: String, propertyValue: Any?) {
+        propertyValue.toValueDescription().let { valueDescription ->
+            this.fields[propertyName] = valueDescription
+            if (propertyName == "name" && valueDescription is StringValueDescription) {
+                this.name = valueDescription.value
+            }
         }
     }
 
-    fun isCompatibleWith(nodeType: KClass<*>): Boolean {
-        return this.nodeType.isSuperclassOf(nodeType)
-    }
-
-    override fun invoke(
-        symbolProvider: SymbolProvider,
-        node: Node,
+    override fun getOutput(
+        input: InputType,
+        provider: SemanticsProvider<SymbolDescription, *>,
         issues: MutableList<Issue>
-    ): SymbolDescription {
-        check(this.isCompatibleWith(node::class)) {
-            "Error while running symbol provider rule - incompatible node received"
-        }
-        @Suppress("UNCHECKED_CAST")
-        this.context = SymbolProviderConfigurationRuleContext(node as NodeTy, symbolProvider)
-        this.issues = issues
-        this.configuration(this.context)
-        return this.createSymbolDescriptionFor(node)
-    }
-
-    private fun createSymbolDescriptionFor(node: NodeTy) = SymbolDescription(
-        name = this.getName(),
-        identifier = this.nodeIdProvider.id(node),
-        types = this.computeTypeFor(node),
+    ) = SymbolDescription(
+        name = this.getName(input),
+        identifier = this.nodeIdProvider.id(input),
+        type = input::class.toTypeDescription(),
         fields = this.fields
-    )
+    ).withPosition(input.position)
 
-    private fun getName(): String {
-        check(this.name != null) {
-            "Error while running symbol provider rule - symbol description name cannot be null"
+    private fun getName(input: InputType): String {
+        check(this::name.isInitialized && this.name.isNotBlank()) {
+            "Rule execution error: symbol description " +
+                "for ${input::class.qualifiedName} requires a non-blank name property"
         }
-        return this.name!!
+        return this.name
     }
 
-    private fun computeTypeFor(node: NodeTy): List<String> {
-        return listOfNotNull(node::class.qualifiedName)
-            .plus(node::class.allSuperclasses.mapNotNull(KClass<*>::qualifiedName))
+    private fun KClass<*>.toTypeDescription(): TypeDescription {
+        return TypeDescription(
+            name = this.qualifiedName!!,
+            superTypes = this.superclasses.map { it.toTypeDescription() }.toMutableList()
+        )
     }
 
-    private fun toValueDescription(source: Any?): ValueDescription {
-        return when (source) {
-            is Boolean -> BooleanValueDescription(source)
-            is Int -> IntegerValueDescription(source)
-            is String -> StringValueDescription(source)
-            is Node -> toContainmentValueDescription(source)
-            is ReferenceByName<*> -> toReferenceValueDescription(source)
-            is List<*> -> toListValueDescription(source)
+    private fun Any?.toValueDescription(): ValueDescription {
+        return when (this) {
+            is Boolean -> this.toBooleanValueDescription()
+            is Int -> this.toIntegerValueDescription()
+            is String -> this.toStringValueDescription()
+            is Node -> this.toContainmentValueDescription()
+            is ReferenceByName<*> -> this.toReferenceValueDescription()
+            is List<*> -> this.toListValueDescription()
             null -> NullValueDescription
-            else -> throw RuntimeException("Unsupported value description for ${source::class.qualifiedName}")
+            else -> throw RuntimeException(
+                "Rule execution error:" +
+                    " unsupported value description for ${this::class.qualifiedName}"
+            )
         }
     }
 
-    private fun toReferenceValueDescription(source: ReferenceByName<*>): ReferenceValueDescription {
-        return ReferenceValueDescription(source.referred?.let { it as? Node }?.let { this.nodeIdProvider.id(it) })
+    private fun Boolean.toBooleanValueDescription(): BooleanValueDescription {
+        return BooleanValueDescription(this)
     }
 
-    private fun toContainmentValueDescription(source: Node): ContainmentValueDescription {
-        return ContainmentValueDescription(this.nodeIdProvider.id(source))
+    private fun Int.toIntegerValueDescription(): IntegerValueDescription {
+        return IntegerValueDescription(this)
     }
 
-    private fun toListValueDescription(source: List<*>): ListValueDescription {
-        return ListValueDescription(source.map { this.toValueDescription(it) }.toList())
+    private fun String.toStringValueDescription(): StringValueDescription {
+        return StringValueDescription(this)
+    }
+
+    private fun Node.toContainmentValueDescription(): ContainmentValueDescription {
+        return ContainmentValueDescription(nodeIdProvider.id(this))
+    }
+
+    private fun ReferenceByName<*>.toReferenceValueDescription(): ReferenceValueDescription {
+        return ReferenceValueDescription(
+            this.identifier ?: this.referred?.let { it as? Node }?.let { nodeIdProvider.id(it) }
+        ).withPosition(this.position)
+    }
+
+    private fun List<*>.toListValueDescription(): ListValueDescription {
+        return ListValueDescription(this.map { it.toValueDescription() }.toList())
     }
 }
 
-data class SymbolProviderConfigurationRuleContext<NodeTy : Node>(val node: NodeTy, val symbolProvider: SymbolProvider)
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
