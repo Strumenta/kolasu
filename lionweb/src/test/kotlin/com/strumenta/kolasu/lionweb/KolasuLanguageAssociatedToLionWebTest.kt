@@ -57,25 +57,25 @@ class KolasuLanguageAssociatedToLionWebTest {
     fun conceptsAreAssociatedWithRightKey() {
         val lwLang =
             Language("LangA").apply {
-                setID("lang-id")
-                setKey("lang-key")
-                setVersion("45")
+                id = "lang-id"
+                key = "lang-key"
+                version = "45"
             }
         val lwRoot =
             Concept(lwLang, "Root").apply {
-                setKey("key-123")
+                key = "key-123"
             }
         val lwNodeA =
             Concept(lwLang, "NodeA").apply {
-                setKey("key-456")
+                key = "key-456"
             }
         val lwNodeB =
             Concept(lwLang, "NodeA").apply {
-                setKey("key-789")
+                key = "key-789"
             }
         val lwEnum =
             Enumeration(lwLang, "MyEnum").apply {
-                setKey("key-000")
+                key = "key-000"
             }
         val kolasuLanguage =
             KolasuLanguage("LangA").apply {
