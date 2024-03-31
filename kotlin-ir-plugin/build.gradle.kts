@@ -18,7 +18,7 @@ dependencies {
 
     testImplementation(kotlin("test-junit"))
     testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
-    testImplementation("dev.zacsweers.kctfork:core:0.5.0-alpha01")
+    testImplementation("dev.zacsweers.kctfork:core:0.5.0-alpha06")
 }
 
 buildConfig {
