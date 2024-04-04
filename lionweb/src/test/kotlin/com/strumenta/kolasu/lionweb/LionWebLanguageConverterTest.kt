@@ -224,4 +224,20 @@ class LionWebLanguageConverterTest {
         }
         val lwLanguage = LionWebLanguageConverter().exportToLionWeb(kLanguage)
     }
+
+    @Test
+    fun exportEnumLiterals() {
+        val converter = LionWebLanguageConverter()
+        val lwLanguage = converter.exportToLionWeb(
+            KolasuLanguage("myLanguage").apply {
+                addClass(NodeWithEnum::class)
+            }
+        )
+        val enumeration = lwLanguage.getEnumerationByName("AnEnum") ?: throw IllegalStateException()
+        assertEquals("AnEnum", enumeration.name)
+        assertEquals(3, enumeration.literals.size)
+        assertEquals("FOO", enumeration.literals[0].name)
+        assertEquals("BAR", enumeration.literals[1].name)
+        assertEquals("ZUM", enumeration.literals[2].name)
+    }
 }

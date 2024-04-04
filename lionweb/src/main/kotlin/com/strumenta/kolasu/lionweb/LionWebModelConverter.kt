@@ -18,6 +18,7 @@ import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Enumeration
+import io.lionweb.lioncore.java.language.EnumerationLiteral
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.PrimitiveType
@@ -25,7 +26,6 @@ import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.Node
 import io.lionweb.lioncore.java.model.ReferenceValue
-import io.lionweb.lioncore.java.model.impl.DynamicEnumerationValue
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
@@ -36,8 +36,6 @@ import kotlin.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
 interface PrimitiveValueSerialization<E> {
@@ -134,7 +132,19 @@ class LionWebModelConverter(
                                 as? com.strumenta.kolasu.language.Attribute
                                 ?: throw IllegalArgumentException("Property ${feature.name} not found in $kNode")
                             val kValue = kNode.getAttributeValue(kAttribute)
-                            lwNode.setPropertyValue(feature, kValue)
+                            if (kValue is Enum<*>) {
+                                val kClass: EnumKClass = kValue::class as EnumKClass
+                                val enumeration = languageConverter.getKolasuClassesToEnumerationsMapping()[kClass]
+                                    ?: throw IllegalStateException("No enumeration for enum class $kClass")
+                                val enumerationLiteral = enumeration.literals.find { it.name == kValue.name }
+                                    ?: throw IllegalStateException(
+                                        "No enumeration literal with name ${kValue.name} " +
+                                            "in enumeration $enumeration"
+                                    )
+                                lwNode.setPropertyValue(feature, enumerationLiteral)
+                            } else {
+                                lwNode.setPropertyValue(feature, kValue)
+                            }
                         }
 
                         is Containment -> {
@@ -424,7 +434,7 @@ class LionWebModelConverter(
                 when (feature) {
                     is Property -> {
                         val propValue = data.getPropertyValue(feature)
-                        if (propValue is DynamicEnumerationValue) {
+                        if (propValue is EnumerationLiteral) {
                             val enumeration = propValue.enumeration
                             val kClass: KClass<out Enum<*>>? = synchronized(languageConverter) {
                                 languageConverter
@@ -433,13 +443,10 @@ class LionWebModelConverter(
                             if (kClass == null) {
                                 throw IllegalStateException("Cannot find Kolasu class for Enumeration $enumeration")
                             }
-                            val entries = kClass.java.methods.find {
-                                it.name == "getEntries"
-                            }!!.invoke(null) as List<Any>
-                            val nameProp = kClass.memberProperties.find { it.name == "name" }!! as KProperty1<Any, *>
-                            val namesToFields = entries.associate { nameProp.invoke(it) as String to it }
-                            val nameToSearch = propValue.serializedValue.split("/").last()
-                            params[param] = namesToFields[nameToSearch]!!
+                            val entries = kClass.java.enumConstants
+                            val value = entries.find { it.name == propValue.name }
+                                ?: throw IllegalStateException()
+                            params[param] = value
                         } else {
                             params[param] = propValue
                         }
