@@ -2,11 +2,14 @@ package com.strumenta.kolasu.lionweb
 
 import java.util.IdentityHashMap
 
+/**
+ * This class is thread-safe.
+ */
 class BiMap<A, B>(val usingIdentity: Boolean = false) {
     val `as`: Set<A>
-        get() = _asToBs.keys
+        get() = synchronized(this) { _asToBs.keys }
     val bs: Set<B>
-        get() = _bsToAs.keys
+        get() = synchronized(this) { _bsToAs.keys }
     val asToBsMap: Map<A, B>
         get() = _asToBs
     val bsToAsMap: Map<B, A>
@@ -16,17 +19,21 @@ class BiMap<A, B>(val usingIdentity: Boolean = false) {
     private val _bsToAs = if (usingIdentity) IdentityHashMap() else mutableMapOf<B, A>()
 
     fun associate(a: A, b: B) {
-        _asToBs[a] = b
-        _bsToAs[b] = a
+        synchronized(this) {
+            _asToBs[a] = b
+            _bsToAs[b] = a
+        }
     }
 
-    fun byA(a: A): B? = _asToBs[a]
-    fun byB(b: B): A? = _bsToAs[b]
+    fun byA(a: A): B? = synchronized(this) { _asToBs[a] }
+    fun byB(b: B): A? = synchronized(this) { _bsToAs[b] }
 
-    fun containsA(a: A): Boolean = _asToBs.containsKey(a)
-    fun containsB(b: B): Boolean = _bsToAs.containsKey(b)
+    fun containsA(a: A): Boolean = synchronized(this) { _asToBs.containsKey(a) }
+    fun containsB(b: B): Boolean = synchronized(this) { _bsToAs.containsKey(b) }
     fun clear() {
-        _asToBs.clear()
-        _bsToAs.clear()
+        synchronized(this) {
+            _asToBs.clear()
+            _bsToAs.clear()
+        }
     }
 }
