@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.language.KolasuLanguage
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.ReferenceByName
@@ -9,12 +11,25 @@ import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.withPosition
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import io.lionweb.lioncore.java.language.Concept
+import io.lionweb.lioncore.java.language.EnumerationLiteral
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
+
+enum class AnEnum {
+    FOO,
+    BAR,
+    ZUM
+}
+
+data class NodeWithEnum(
+    override val name: String,
+    val e: AnEnum?
+) : Named, Node()
 
 class LionWebModelConverterTest {
 
@@ -415,5 +430,67 @@ class LionWebModelConverterTest {
         exported = converter.exportModelToLionWeb(b2, considerParent = true)
         assertNotNull(exported.parent)
         assertEquals(converter.nodeIdProvider.id(a1), exported.parent.id)
+    }
+
+    @Test
+    fun exportEnum() {
+        val n1 = NodeWithEnum("n1", AnEnum.BAR)
+        val n2 = NodeWithEnum("n2", AnEnum.FOO)
+        val n3 = NodeWithEnum("n3", AnEnum.ZUM)
+        val n4 = NodeWithEnum("n4", null)
+        n1.source = SyntheticSource("someSource")
+        n2.source = SyntheticSource("someSource")
+        n3.source = SyntheticSource("someSource")
+        n4.source = SyntheticSource("someSource")
+
+        // if we store b2, child of a1, we expect the parent to be set
+        val converter = LionWebModelConverter()
+        converter.exportLanguageToLionWeb(
+            KolasuLanguage("myLanguage").apply {
+                addClass(NodeWithEnum::class)
+            }
+        )
+        val exportedN1 = converter.exportModelToLionWeb(n1)
+        val exportedN2 = converter.exportModelToLionWeb(n2)
+        val exportedN3 = converter.exportModelToLionWeb(n3)
+        val exportedN4 = converter.exportModelToLionWeb(n4)
+
+        assertTrue(exportedN1.getPropertyValueByName("e") is EnumerationLiteral)
+        assertEquals("BAR", (exportedN1.getPropertyValueByName("e") as EnumerationLiteral).name)
+        assertTrue(exportedN2.getPropertyValueByName("e") is EnumerationLiteral)
+        assertEquals("FOO", (exportedN2.getPropertyValueByName("e") as EnumerationLiteral).name)
+        assertTrue(exportedN3.getPropertyValueByName("e") is EnumerationLiteral)
+        assertEquals("ZUM", (exportedN3.getPropertyValueByName("e") as EnumerationLiteral).name)
+        assertEquals(null, exportedN4.getPropertyValueByName("e"))
+    }
+
+    @Test
+    fun importEnum() {
+        val n1 = NodeWithEnum("n1", AnEnum.BAR)
+        val n2 = NodeWithEnum("n2", AnEnum.FOO)
+        val n3 = NodeWithEnum("n3", AnEnum.ZUM)
+        val n4 = NodeWithEnum("n4", null)
+        n1.source = SyntheticSource("someSource")
+        n2.source = SyntheticSource("someSource")
+        n3.source = SyntheticSource("someSource")
+        n4.source = SyntheticSource("someSource")
+
+        // if we store b2, child of a1, we expect the parent to be set
+        val converter = LionWebModelConverter()
+        converter.exportLanguageToLionWeb(
+            KolasuLanguage("myLanguage").apply {
+                addClass(NodeWithEnum::class)
+            }
+        )
+
+        val reimportedN1 = converter.importModelFromLionWeb(converter.exportModelToLionWeb(n1)) as NodeWithEnum
+        val reimportedN2 = converter.importModelFromLionWeb(converter.exportModelToLionWeb(n2)) as NodeWithEnum
+        val reimportedN3 = converter.importModelFromLionWeb(converter.exportModelToLionWeb(n3)) as NodeWithEnum
+        val reimportedN4 = converter.importModelFromLionWeb(converter.exportModelToLionWeb(n4)) as NodeWithEnum
+
+        assertASTsAreEqual(n1, reimportedN1)
+        assertASTsAreEqual(n2, reimportedN2)
+        assertASTsAreEqual(n3, reimportedN3)
+        assertASTsAreEqual(n4, reimportedN4)
     }
 }
