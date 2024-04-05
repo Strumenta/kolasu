@@ -1,13 +1,14 @@
 package com.strumenta.kolasu.emf
 
+import com.strumenta.kolasu.model.NodeType
 import com.strumenta.kolasu.model.PropertyTypeDescription
 import com.strumenta.kolasu.model.isANode
 import com.strumenta.kolasu.model.processProperties
 import org.eclipse.emf.ecore.*
 import org.eclipse.emf.ecore.resource.Resource
-import java.io.Serializable
 import java.util.*
 import kotlin.reflect.*
+import kotlin.reflect.full.findAnnotations
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.full.withNullability
@@ -180,7 +181,7 @@ class MetamodelBuilder(
         registerKClassForEClass(kClass, eClass)
 
         kClass.superclasses.forEach {
-            if (it != Any::class && it != Serializable::class) {
+            if (it != Any::class && (!it.java.isInterface || it.findAnnotations(NodeType::class).isNotEmpty())) {
                 eClass.eSuperTypes.add(provideClass(it))
             }
         }
