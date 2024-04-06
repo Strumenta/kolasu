@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.antlr4j.parsing.withParseTreeNode
+import com.strumenta.kolasu.ids.Coordinates
+import com.strumenta.kolasu.ids.IDLogic
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
@@ -27,6 +29,7 @@ import java.io.File
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 data class NodeFoo(
@@ -37,6 +40,12 @@ class MyRoot(
     val foo: Int,
 ) : Node(),
     Statement
+
+class MyRootWithIDLogic :
+    Node(),
+    IDLogic {
+    override fun calculatedID(coordinates: Coordinates): String = ""
+}
 
 class MySimpleLangCu : Node()
 
@@ -84,6 +93,15 @@ class ModelTest {
         assertEquals(cuClass, eObject.eClass())
         val stmts = eObject.eGet(cuClass.getEStructuralFeature("statements")) as EList<*>
         assertEquals(3, stmts.size)
+    }
+
+    @Test
+    fun generateSimpleModelWithIDLogic() {
+        val cu = MyRootWithIDLogic().withRange(Range(Point(1, 0), Point(1, 1)))
+        val nsURI = "https://strumenta.com/simplemmidlogic"
+        val metamodelBuilder = MetamodelBuilder(packageName(MyRootWithIDLogic::class), nsURI, "simplemmidlogic")
+        metamodelBuilder.provideClass(MyRootWithIDLogic::class)
+        assertNotNull(metamodelBuilder.generate())
     }
 
     @Test

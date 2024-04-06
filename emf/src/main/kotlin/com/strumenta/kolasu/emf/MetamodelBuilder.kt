@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.emf
 
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PropertyTypeDescription
 import com.strumenta.kolasu.model.isANode
 import com.strumenta.kolasu.model.processProperties
@@ -13,13 +14,13 @@ import org.eclipse.emf.ecore.ETypeParameter
 import org.eclipse.emf.ecore.ETypedElement
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.Resource
-import java.io.Serializable
 import java.util.LinkedList
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeParameter
 import kotlin.reflect.KTypeProjection
 import kotlin.reflect.KVariance
+import kotlin.reflect.full.allSupertypes
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.full.withNullability
@@ -197,7 +198,9 @@ class MetamodelBuilder(
         registerKClassForEClass(kClass, eClass)
 
         kClass.superclasses.forEach {
-            if (it != Any::class && it != Serializable::class) {
+            if (it != Any::class &&
+                (!it.java.isInterface || it.allSupertypes.map { it.classifier }.contains(NodeLike::class))
+            ) {
                 eClass.eSuperTypes.add(provideClass(it))
             }
         }
