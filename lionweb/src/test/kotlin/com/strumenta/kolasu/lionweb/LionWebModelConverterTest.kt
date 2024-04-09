@@ -443,7 +443,6 @@ class LionWebModelConverterTest {
         n3.source = SyntheticSource("someSource")
         n4.source = SyntheticSource("someSource")
 
-        // if we store b2, child of a1, we expect the parent to be set
         val converter = LionWebModelConverter()
         converter.exportLanguageToLionWeb(
             KolasuLanguage("myLanguage").apply {
@@ -475,7 +474,6 @@ class LionWebModelConverterTest {
         n3.source = SyntheticSource("someSource")
         n4.source = SyntheticSource("someSource")
 
-        // if we store b2, child of a1, we expect the parent to be set
         val converter = LionWebModelConverter()
         converter.exportLanguageToLionWeb(
             KolasuLanguage("myLanguage").apply {
