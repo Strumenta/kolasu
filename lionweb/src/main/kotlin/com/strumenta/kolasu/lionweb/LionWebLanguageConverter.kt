@@ -278,8 +278,8 @@ class LionWebLanguageConverter {
             entries.forEach { entry ->
                 newEnumeration.addLiteral(
                     EnumerationLiteral(newEnumeration, entry.name).apply {
-                        setID(newEnumeration.id + "-" + entry.name)
-                        setKey(id)
+                        id = newEnumeration.id + "-" + entry.name
+                        key = newEnumeration.key + "-" + entry.name
                     }
                 )
             }
