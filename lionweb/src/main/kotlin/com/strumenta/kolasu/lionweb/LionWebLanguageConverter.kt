@@ -17,6 +17,7 @@ import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.DataType
 import io.lionweb.lioncore.java.language.Enumeration
+import io.lionweb.lioncore.java.language.EnumerationLiteral
 import io.lionweb.lioncore.java.language.Interface
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.PrimitiveType
@@ -311,6 +312,17 @@ class LionWebLanguageConverter {
             val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
             newEnumeration.id = (lionwebLanguage.id ?: "unknown_language") + "_" + newEnumeration.name
             newEnumeration.key = newEnumeration.name
+
+            val entries = kClass.java.enumConstants
+            entries.forEach { entry ->
+                newEnumeration.addLiteral(
+                    EnumerationLiteral(newEnumeration, entry.name).apply {
+                        id = newEnumeration.id + "-" + entry.name
+                        key = newEnumeration.key + "-" + entry.name
+                    },
+                )
+            }
+
             lionwebLanguage.addElement(newEnumeration)
             classesAndEnumerations.associate(kClass, newEnumeration)
             return newEnumeration

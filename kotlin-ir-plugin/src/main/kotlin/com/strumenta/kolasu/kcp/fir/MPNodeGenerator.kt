@@ -41,7 +41,10 @@ class MPNodeGenerator(
 ) : FirDeclarationGenerationExtension(session) {
     private fun log(text: String) {
         if (COMPILER_PLUGIN_DEBUG) {
-            val file = File("/Users/federico/repos/kolasu-mp-example/compiler-plugin-log.txt")
+            var file = File("/Users/federico/repos/kolasu-mp-example/compiler-plugin-log.txt")
+            if (!file.parentFile.exists()) {
+                file = File("compiler-plugin-log.txt")
+            }
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
             val current = LocalDateTime.now().format(formatter)
             file.appendText("$current: $text\n")

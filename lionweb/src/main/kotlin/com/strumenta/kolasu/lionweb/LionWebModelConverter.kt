@@ -22,23 +22,24 @@ import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Enumeration
+import io.lionweb.lioncore.java.language.EnumerationLiteral
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.Node
-import io.lionweb.lioncore.java.model.impl.DynamicEnumerationValue
+import io.lionweb.lioncore.java.model.ReferenceValue
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import java.lang.IllegalArgumentException
 import java.util.IdentityHashMap
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import com.strumenta.kolasu.model.ReferenceValue as KReferenceValue
 import io.lionweb.lioncore.java.model.ReferenceValue as LWReferenceValue
@@ -52,19 +53,22 @@ interface PrimitiveValueSerialization<E> {
 /**
  * This class is able to convert between Kolasu and LionWeb models, tracking the mapping.
  *
+ * This class is thread-safe.
+ *
  * @param nodeIdProvider logic to be used to associate IDs to Kolasu nodes when exporting them to LionWeb
  */
 class LionWebModelConverter(
     var nodeIdProvider: NodeIdProvider = StructuralLionWebNodeIdProvider(),
+    initialLanguageConverter: LionWebLanguageConverter = LionWebLanguageConverter(),
 ) {
-    private val languageConverter = LionWebLanguageConverter()
+    private val languageConverter = initialLanguageConverter
 
     /**
      * We mostly map Kolasu Nodes to LionWeb Nodes, but we also map things that are not Kolasu Nodes such
      * as instances of Position and Point.
      */
     private val nodesMapping = BiMap<Any, LWNode>(usingIdentity = true)
-    private val primitiveValueSerializations = mutableMapOf<KClass<*>, PrimitiveValueSerialization<*>>()
+    private val primitiveValueSerializations = ConcurrentHashMap<KClass<*>, PrimitiveValueSerialization<*>>()
 
     fun clearNodesMapping() {
         nodesMapping.clear()
@@ -78,18 +82,24 @@ class LionWebModelConverter(
     }
 
     fun correspondingLanguage(kolasuLanguage: KolasuLanguage): Language {
-        return languageConverter.correspondingLanguage(kolasuLanguage)
+        synchronized(languageConverter) {
+            return languageConverter.correspondingLanguage(kolasuLanguage)
+        }
     }
 
     fun exportLanguageToLionWeb(kolasuLanguage: KolasuLanguage): Language {
-        return languageConverter.exportToLionWeb(kolasuLanguage)
+        synchronized(languageConverter) {
+            return languageConverter.exportToLionWeb(kolasuLanguage)
+        }
     }
 
     fun associateLanguages(
         lwLanguage: Language,
         kolasuLanguage: KolasuLanguage,
     ) {
-        this.languageConverter.associateLanguages(lwLanguage, kolasuLanguage)
+        synchronized(languageConverter) {
+            this.languageConverter.associateLanguages(lwLanguage, kolasuLanguage)
+        }
     }
 
     fun exportModelToLionWeb(
@@ -133,7 +143,21 @@ class LionWebModelConverter(
                                     as? Attribute
                                     ?: throw IllegalArgumentException("Property ${feature.name} not found in $kNode")
                             val kValue = kNode.getAttributeValue(kAttribute)
-                            lwNode.setPropertyValue(feature, kValue)
+                            if (kValue is Enum<*>) {
+                                val kClass: EnumKClass = kValue::class as EnumKClass
+                                val enumeration =
+                                    languageConverter.getKolasuClassesToEnumerationsMapping()[kClass]
+                                        ?: throw IllegalStateException("No enumeration for enum class $kClass")
+                                val enumerationLiteral =
+                                    enumeration.literals.find { it.name == kValue.name }
+                                        ?: throw IllegalStateException(
+                                            "No enumeration literal with name ${kValue.name} " +
+                                                "in enumeration $enumeration",
+                                        )
+                                lwNode.setPropertyValue(feature, enumerationLiteral)
+                            } else {
+                                lwNode.setPropertyValue(feature, kValue)
+                            }
                         }
 
                         is Containment -> {
@@ -239,8 +263,13 @@ class LionWebModelConverter(
         val referencesPostponer = ReferencesPostponer()
         lwTree.thisAndAllDescendants().reversed().forEach { lwNode ->
             val kClass =
-                languageConverter.correspondingKolasuClass(lwNode.concept)
-                    ?: throw RuntimeException("We do not have StarLasu AST class for LIonWeb Concept ${lwNode.concept}")
+                synchronized(languageConverter) {
+                    languageConverter.correspondingKolasuClass(lwNode.concept)
+                        ?: throw RuntimeException(
+                            "We do not have StarLasu AST class for " +
+                                "LIonWeb Concept ${lwNode.concept}",
+                        )
+                }
             try {
                 val instantiated = instantiate(kClass, lwNode, referencesPostponer)
                 if (instantiated is KNode) {
@@ -275,49 +304,56 @@ class LionWebModelConverter(
         jsonSerialization.primitiveValuesSerialization.registerDeserializer(
             StarLasuLWLanguage.char.id,
         ) { serialized -> serialized[0] }
-        languageConverter.knownLWLanguages().forEach {
-            jsonSerialization.classifierResolver.registerLanguage(it)
-        }
-        languageConverter.knownKolasuLanguages().forEach { kolasuLanguage ->
-            val lionwebLanguage = languageConverter.correspondingLanguage(kolasuLanguage)
-            kolasuLanguage.enumClasses.forEach { enumClass ->
-                val enumeration =
-                    lionwebLanguage.elements.filterIsInstance<Enumeration>().find { it.name == enumClass.simpleName }!!
-                val ec = enumClass
-                jsonSerialization.primitiveValuesSerialization.registerSerializer(
-                    enumeration.id!!,
-                ) { value -> (value as Enum<*>).name }
-                val values = ec.members.find { it.name == "values" }!!.call() as Array<Enum<*>>
-                jsonSerialization.primitiveValuesSerialization.registerDeserializer(
-                    enumeration.id!!,
-                ) { serialized ->
-                    if (serialized == null) {
-                        null
-                    } else {
-                        values.find { it.name == serialized }
-                            ?: throw RuntimeException(
-                                "Cannot find enumeration value for $serialized (enum ${enumClass.qualifiedName})",
-                            )
+        synchronized(languageConverter) {
+            languageConverter.knownLWLanguages().forEach {
+                jsonSerialization.classifierResolver.registerLanguage(it)
+            }
+            languageConverter.knownKolasuLanguages().forEach { kolasuLanguage ->
+                val lionwebLanguage = languageConverter.correspondingLanguage(kolasuLanguage)
+                kolasuLanguage.enumClasses.forEach { enumClass ->
+                    val enumeration =
+                        lionwebLanguage.elements.filterIsInstance<Enumeration>().find {
+                            it.name ==
+                                enumClass.simpleName
+                        }!!
+                    val ec = enumClass
+                    jsonSerialization.primitiveValuesSerialization.registerSerializer(
+                        enumeration.id!!,
+                    ) { value -> (value as Enum<*>).name }
+                    val values = ec.members.find { it.name == "values" }!!.call() as Array<Enum<*>>
+                    jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+                        enumeration.id!!,
+                    ) { serialized ->
+                        if (serialized == null) {
+                            null
+                        } else {
+                            values.find { it.name == serialized }
+                                ?: throw RuntimeException(
+                                    "Cannot find enumeration value for $serialized (enum ${enumClass.qualifiedName})",
+                                )
+                        }
                     }
                 }
-            }
-            kolasuLanguage.primitiveClasses.forEach { primitiveClass ->
-                if (primitiveValueSerializations.containsKey(primitiveClass)) {
-                    val lwPrimitiveType: PrimitiveType =
-                        languageConverter
-                            .getKolasuClassesToPrimitiveTypesMapping()[primitiveClass]
-                            ?: throw IllegalStateException(
-                                "No Primitive Type found associated to primitive value class " +
-                                    "${primitiveClass.qualifiedName}",
-                            )
-                    val serializer = primitiveValueSerializations[primitiveClass]!! as PrimitiveValueSerialization<Any>
-                    jsonSerialization.primitiveValuesSerialization.registerSerializer(
-                        lwPrimitiveType.id!!,
-                    ) { value -> serializer.serialize(value) }
+                kolasuLanguage.primitiveClasses.forEach { primitiveClass ->
+                    if (primitiveValueSerializations.containsKey(primitiveClass)) {
+                        val lwPrimitiveType: PrimitiveType =
+                            languageConverter
+                                .getKolasuClassesToPrimitiveTypesMapping()[primitiveClass]
+                                ?: throw IllegalStateException(
+                                    "No Primitive Type found associated to primitive value class " +
+                                        "${primitiveClass.qualifiedName}",
+                                )
+                        val serializer =
+                            primitiveValueSerializations[primitiveClass]!!
+                                as PrimitiveValueSerialization<Any>
+                        jsonSerialization.primitiveValuesSerialization.registerSerializer(
+                            lwPrimitiveType.id!!,
+                        ) { value -> serializer.serialize(value) }
 
-                    jsonSerialization.primitiveValuesSerialization.registerDeserializer(
-                        lwPrimitiveType.id!!,
-                    ) { serialized -> serializer.deserialize(serialized) }
+                        jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+                            lwPrimitiveType.id!!,
+                        ) { serialized -> serializer.deserialize(serialized) }
+                    }
                 }
             }
         }
@@ -339,19 +375,27 @@ class LionWebModelConverter(
     }
 
     fun knownLWLanguages(): Set<LWLanguage> {
-        return languageConverter.knownLWLanguages()
+        synchronized(languageConverter) {
+            return languageConverter.knownLWLanguages()
+        }
     }
 
     fun knownKolasuLanguages(): Set<KolasuLanguage> {
-        return languageConverter.knownKolasuLanguages()
+        synchronized(languageConverter) {
+            return languageConverter.knownKolasuLanguages()
+        }
     }
 
     fun getKolasuClassesToClassifiersMapping(): Map<KClass<*>, Classifier<*>> {
-        return languageConverter.getKolasuClassesToClassifiersMapping()
+        synchronized(languageConverter) {
+            return languageConverter.getKolasuClassesToClassifiersMapping()
+        }
     }
 
     fun getClassifiersToKolasuClassesMapping(): Map<Classifier<*>, KClass<*>> {
-        return languageConverter.getClassifiersToKolasuClassesMapping()
+        synchronized(languageConverter) {
+            return languageConverter.getClassifiersToKolasuClassesMapping()
+        }
     }
 
     /**
@@ -430,26 +474,21 @@ class LionWebModelConverter(
                 when (feature) {
                     is Property -> {
                         val propValue = data.getPropertyValue(feature)
-                        if (propValue is DynamicEnumerationValue) {
+                        if (propValue is EnumerationLiteral) {
                             val enumeration = propValue.enumeration
                             val kClass: KClass<out Enum<*>>? =
-                                languageConverter
-                                    .getEnumerationsToKolasuClassesMapping()[enumeration] as? KClass<out Enum<*>>
+                                synchronized(languageConverter) {
+                                    languageConverter
+                                        .getEnumerationsToKolasuClassesMapping()[enumeration] as? KClass<out Enum<*>>
+                                }
                             if (kClass == null) {
                                 throw IllegalStateException("Cannot find Kolasu class for Enumeration $enumeration")
                             }
-                            val entries =
-                                kClass
-                                    .java
-                                    .methods
-                                    .find {
-                                        it.name == "getEntries"
-                                    }!!
-                                    .invoke(null) as List<Any>
-                            val nameProp = kClass.memberProperties.find { it.name == "name" }!! as KProperty1<Any, *>
-                            val namesToFields = entries.associate { nameProp.invoke(it) as String to it }
-                            val nameToSearch = propValue.serializedValue.split("/").last()
-                            params[param] = namesToFields[nameToSearch]!!
+                            val entries = kClass.java.enumConstants
+                            val value =
+                                entries.find { it.name == propValue.name }
+                                    ?: throw IllegalStateException()
+                            params[param] = value
                         } else {
                             params[param] = propValue
                         }
@@ -529,7 +568,7 @@ class LionWebModelConverter(
     }
 
     private fun findConcept(kNode: NodeLike): Concept {
-        return languageConverter.correspondingConcept(kNode.nodeType)
+        return synchronized(languageConverter) { languageConverter.correspondingConcept(kNode.nodeType) }
     }
 
     private fun nodeID(
