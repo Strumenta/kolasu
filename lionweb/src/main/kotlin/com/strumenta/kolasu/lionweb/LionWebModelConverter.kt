@@ -18,7 +18,6 @@ import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Enumeration
-import io.lionweb.lioncore.java.language.EnumerationLiteral
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.PrimitiveType
@@ -27,6 +26,8 @@ import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.Node
 import io.lionweb.lioncore.java.model.ReferenceValue
 import io.lionweb.lioncore.java.model.impl.DynamicNode
+import io.lionweb.lioncore.java.model.impl.EnumerationValue
+import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import java.lang.IllegalArgumentException
@@ -141,7 +142,7 @@ class LionWebModelConverter(
                                         "No enumeration literal with name ${kValue.name} " +
                                             "in enumeration $enumeration"
                                     )
-                                lwNode.setPropertyValue(feature, enumerationLiteral)
+                                lwNode.setPropertyValue(feature, EnumerationValueImpl(enumerationLiteral))
                             } else {
                                 lwNode.setPropertyValue(feature, kValue)
                             }
@@ -281,33 +282,10 @@ class LionWebModelConverter(
         ) { serialized -> serialized[0] }
         synchronized(languageConverter) {
             languageConverter.knownLWLanguages().forEach {
+                jsonSerialization.primitiveValuesSerialization.registerLanguage(it)
                 jsonSerialization.classifierResolver.registerLanguage(it)
             }
             languageConverter.knownKolasuLanguages().forEach { kolasuLanguage ->
-                val lionwebLanguage = languageConverter.correspondingLanguage(kolasuLanguage)
-                kolasuLanguage.enumClasses.forEach { enumClass ->
-                    val enumeration =
-                        lionwebLanguage.elements.filterIsInstance<Enumeration>().find {
-                            it.name == enumClass.simpleName
-                        }!!
-                    val ec = enumClass
-                    jsonSerialization.primitiveValuesSerialization.registerSerializer(
-                        enumeration.id!!
-                    ) { value -> (value as Enum<*>).name }
-                    val values = ec.members.find { it.name == "values" }!!.call() as Array<Enum<*>>
-                    jsonSerialization.primitiveValuesSerialization.registerDeserializer(
-                        enumeration.id!!
-                    ) { serialized ->
-                        if (serialized == null) {
-                            null
-                        } else {
-                            values.find { it.name == serialized }
-                                ?: throw RuntimeException(
-                                    "Cannot find enumeration value for $serialized (enum ${enumClass.qualifiedName})"
-                                )
-                        }
-                    }
-                }
                 kolasuLanguage.primitiveClasses.forEach { primitiveClass ->
                     if (primitiveValueSerializations.containsKey(primitiveClass)) {
                         val lwPrimitiveType: PrimitiveType = languageConverter
@@ -434,22 +412,28 @@ class LionWebModelConverter(
                 when (feature) {
                     is Property -> {
                         val propValue = data.getPropertyValue(feature)
-                        if (propValue is EnumerationLiteral) {
-                            val enumeration = propValue.enumeration
-                            val kClass: KClass<out Enum<*>>? = synchronized(languageConverter) {
+                        val value = if (feature.type is Enumeration && propValue != null) {
+                            val enumerationLiteral = if (propValue is EnumerationValue) {
+                                propValue.enumerationLiteral
+                            } else {
+                                throw java.lang.IllegalStateException(
+                                    "Property value of property of enumeration type is " +
+                                        "not an EnumerationValue. It is instead " + propValue
+                                )
+                            }
+                            val enumKClass = synchronized(languageConverter) {
                                 languageConverter
-                                    .getEnumerationsToKolasuClassesMapping()[enumeration] as? KClass<out Enum<*>>
+                                    .getEnumerationsToKolasuClassesMapping()[enumerationLiteral.enumeration]
+                                    ?: throw java.lang.IllegalStateException()
                             }
-                            if (kClass == null) {
-                                throw IllegalStateException("Cannot find Kolasu class for Enumeration $enumeration")
-                            }
-                            val entries = kClass.java.enumConstants
-                            val value = entries.find { it.name == propValue.name }
+                            val entries = enumKClass.java.enumConstants
+                            entries.find { it.name == enumerationLiteral.name }
                                 ?: throw IllegalStateException()
-                            params[param] = value
                         } else {
-                            params[param] = propValue
+                            propValue
                         }
+
+                        params[param] = value
                     }
                     is Reference -> {
                         val referenceValues = data.getReferenceValues(feature)

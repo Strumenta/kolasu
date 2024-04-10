@@ -16,7 +16,7 @@ class StructuralLionWebNodeIdProvider(sourceIdProvider: SourceIdProvider = Simpl
     override fun idUsingCoordinates(kNode: Node, coordinates: Coordinates): String {
         val id = super.idUsingCoordinates(kNode, coordinates)
         if (!CommonChecks.isValidID(id)) {
-            throw IllegalStateException("An invalid LionWeb Node ID has been produced")
+            throw IllegalStateException("An invalid LionWeb Node ID has been produced: $id. Produced for $kNode")
         }
         return id
     }
