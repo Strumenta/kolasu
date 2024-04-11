@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.utils.isAbstract
 import org.jetbrains.kotlin.fir.declarations.utils.isSealed
 import org.jetbrains.kotlin.fir.expressions.builder.FirBlockBuilder
+import org.jetbrains.kotlin.fir.extensions.ExperimentalTopLevelDeclarationsGenerationApi
 import org.jetbrains.kotlin.fir.extensions.FirDeclarationGenerationExtension
 import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
 import org.jetbrains.kotlin.fir.extensions.NestedClassGenerationContext
@@ -51,6 +52,7 @@ class MPNodeGenerator(
         }
     }
 
+    @ExperimentalTopLevelDeclarationsGenerationApi
     override fun generateTopLevelClassLikeDeclaration(classId: ClassId): FirClassLikeSymbol<*>? {
         log("generateTopLevelClassLikeDeclaration $classId")
         return generateTopLevelClassLikeDeclaration(classId)
@@ -146,6 +148,7 @@ class MPNodeGenerator(
         return super.getNestedClassifiersNames(classSymbol, context)
     }
 
+    @ExperimentalTopLevelDeclarationsGenerationApi
     override fun getTopLevelClassIds(): Set<ClassId> {
         log("getTopLevelClassIds")
         return super.getTopLevelClassIds()
