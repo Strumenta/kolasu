@@ -13,6 +13,7 @@ import com.strumenta.kolasu.testing.assertASTsAreEqual
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.EnumerationLiteral
 import io.lionweb.lioncore.java.serialization.JsonSerialization
+import io.lionweb.lioncore.java.serialization.UnavailableNodePolicy
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -461,6 +462,10 @@ class LionWebModelConverterTest {
         assertTrue(exportedN3.getPropertyValueByName("e") is EnumerationLiteral)
         assertEquals("ZUM", (exportedN3.getPropertyValueByName("e") as EnumerationLiteral).name)
         assertEquals(null, exportedN4.getPropertyValueByName("e"))
+
+        val jsonSerialization = JsonSerialization.getStandardSerialization()
+        converter.prepareJsonSerialization(jsonSerialization)
+        jsonSerialization.serializeTreesToJsonString(exportedN1)
     }
 
     @Test

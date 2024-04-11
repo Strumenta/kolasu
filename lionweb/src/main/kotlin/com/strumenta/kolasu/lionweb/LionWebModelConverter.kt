@@ -293,7 +293,7 @@ class LionWebModelConverter(
                     val ec = enumClass
                     jsonSerialization.primitiveValuesSerialization.registerSerializer(
                         enumeration.id!!
-                    ) { value -> (value as Enum<*>).name }
+                    ) { value -> (value as EnumerationLiteral).name }
                     val values = ec.members.find { it.name == "values" }!!.call() as Array<Enum<*>>
                     jsonSerialization.primitiveValuesSerialization.registerDeserializer(
                         enumeration.id!!
