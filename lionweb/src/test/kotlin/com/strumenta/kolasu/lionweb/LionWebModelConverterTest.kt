@@ -13,7 +13,6 @@ import com.strumenta.kolasu.testing.assertASTsAreEqual
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.EnumerationLiteral
 import io.lionweb.lioncore.java.serialization.JsonSerialization
-import io.lionweb.lioncore.java.serialization.UnavailableNodePolicy
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
