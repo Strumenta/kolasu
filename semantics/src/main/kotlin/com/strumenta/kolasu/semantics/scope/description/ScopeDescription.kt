@@ -8,20 +8,50 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSuperclassOf
 
+/**
+ * Description of the visible names at a given point in time-space.
+ *
+ * @param ignoreCase flag indicating that name resolution should be case-insensitive (if true)
+ * @param parent the parent [ScopeDescription] containing this scope description
+ *
+ * @author Lorenzo Addazi <lorenzo.addazi@strumenta.com>
+ **/
 class ScopeDescription(
     var ignoreCase: Boolean = false,
     var parent: ScopeDescription? = null
 ) {
 
-    private val namesToExternalSymbols: MutableMap<String, MutableList<SymbolDescription>> = mutableMapOf()
-    private val namesToLocalSymbols: MutableMap<String, MutableList<PossiblyNamed>> = mutableMapOf()
+    /**
+     * Map associating symbol names with case-insensitive keys - used to keep
+     * case information about symbols (might change in keys when [ignoreCase] is true).
+     **/
+    private val namesToSymbolKeys: MutableMap<String, String> = mutableMapOf()
 
-    fun names(filter: String = ""): List<String> {
-        return this.namesToLocalSymbols.keys.filter { it.contains(filter) }
-            .plus(this.namesToExternalSymbols.keys.filter { it.contains(filter) })
-            .plus(this.parent?.names(filter) ?: emptyList())
+    /**
+     * Map associating symbol keys to external symbol definitions - [SymbolDescription] instances
+     **/
+    private val symbolKeysToExternalDefinitions: MutableMap<String, MutableList<SymbolDescription>> = mutableMapOf()
+
+    /**
+     * Map associating symbol keys to local symbol definitions - [Node] instances
+     **/
+    private val symbolKeysToLocalDefinitions: MutableMap<String, MutableList<Node>> = mutableMapOf()
+
+    /**
+     * Retrieve all names defines in this scope description.
+     * @param predicate optional filter over the names
+     * @return the names in this scope description (optionally filtered using [predicate])
+     **/
+    fun names(predicate: (String) -> Boolean = { true }): List<String> {
+        return this.namesToSymbolKeys.keys.filter(predicate)
+            .plus(this.parent?.names(predicate) ?: emptyList())
     }
 
+    /**
+     * Include the given [name]-[symbol] association in the scope description.
+     * @param symbol the symbol to include
+     * @param name the name of the symbol (possibly inferred from [symbol])
+     **/
     fun include(symbol: Any?, name: String? = null) {
         require(symbol != null) {
             "Error while including symbol in scope description: symbol cannot be null."
@@ -34,14 +64,21 @@ class ScopeDescription(
         require(!symbolName.isNullOrBlank()) {
             "Error while including symbol in scope description: name cannot be blank or null."
         }
+        val symbolKey = symbolName.asKey()
+        this.namesToSymbolKeys[symbolName] = symbolKey
         when (symbol) {
-            is SymbolDescription ->
-                this.namesToExternalSymbols.getOrPut(symbolName.asKey()) { mutableListOf() }.add(symbol)
-            is PossiblyNamed ->
-                this.namesToLocalSymbols.getOrPut(symbolName.asKey()) { mutableListOf() }.add(symbol)
+            is SymbolDescription -> this.symbolKeysToExternalDefinitions.getOrPut(symbolKey) { mutableListOf() }.add(
+                symbol
+            )
+            is Node -> this.symbolKeysToLocalDefinitions.getOrPut(symbolKey) { mutableListOf() }.add(symbol)
         }
     }
 
+    /**
+     * Resolve the given [reference] using this scope description, possibly narrowing the candidates with [type].
+     * @param reference the reference to resolve
+     * @param type the target type of the reference to resolve
+     **/
     fun resolve(reference: ReferenceByName<*>?, type: KClass<out PossiblyNamed> = PossiblyNamed::class) {
         reference?.let {
             when (val symbol = this.findSymbol(reference.name.asKey(), type)) {
@@ -52,6 +89,12 @@ class ScopeDescription(
         }
     }
 
+    /**
+     * Retrieve the first symbol with the given [name] and [type].
+     * @param name the name of the symbol
+     * @param type the type of the symbol
+     * @return the corresponding symbol (if any) - precedence is given to local symbol definitions
+     **/
     private fun findSymbol(name: String, type: KClass<out PossiblyNamed>): Any? {
         val localSymbol = this.findLocalSymbol(name, type)
         val externalSymbol = this.findExternalSymbol(name, type)
@@ -62,8 +105,14 @@ class ScopeDescription(
         }
     }
 
-    private fun findLocalSymbol(name: String, type: KClass<out PossiblyNamed>): PossiblyNamed? {
-        return this.namesToLocalSymbols[name]
+    /**
+     * Retrieve the first local symbol with the given [name] and [type].
+     * @param name the name of the symbol
+     * @param type the type of the symbol
+     * @return the corresponding local symbol (if any)
+     **/
+    private fun findLocalSymbol(name: String, type: KClass<out PossiblyNamed>): Node? {
+        return this.symbolKeysToLocalDefinitions[name]
             ?.let { it.filter { localSymbol -> localSymbol::class.isSubclassOf(type) } }
             ?.sortedWith { left, right ->
                 when {
@@ -74,8 +123,14 @@ class ScopeDescription(
             }?.firstOrNull()
     }
 
+    /**
+     * Retrieve the first external symbol with the given [name] and [type].
+     * @param name the name of the symbol
+     * @param type the type of the symbol
+     * @return the corresponding external symbol (if any)
+     **/
     private fun findExternalSymbol(name: String, type: KClass<out PossiblyNamed>): SymbolDescription ? {
-        return this.namesToExternalSymbols[name]
+        return this.symbolKeysToExternalDefinitions[name]
             ?.let { it.filter { externalSymbol -> externalSymbol.type.isSubTypeOf(type) } }
             ?.sortedWith { left, right ->
                 when {
@@ -86,6 +141,10 @@ class ScopeDescription(
             }?.firstOrNull()
     }
 
+    /**
+     * Converts a symbol name into a symbol key (possibly considering casing)
+     * @return the symbol key for the given name
+     **/
     private fun String.asKey(): String {
         return if (ignoreCase) this.lowercase() else this
     }

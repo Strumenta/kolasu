@@ -18,12 +18,13 @@ import kotlin.reflect.full.isSubtypeOf
  * to the identifier of the corresponding node.
  *
  * @property scopeProvider the scope provider defining the scoping rules to apply
+ *
+ * @author Lorenzo Addazi <lorenzo.addazi@strumenta.com>
  **/
 data class SymbolResolver(private val scopeProvider: ScopeProvider) {
 
     /**
-     * Resolves all reference by names properties
-     * for all nodes contained in a tree starting from the [root].
+     * Resolves all reference by names properties in the tree starting from its [root].
      * @param root the root of the tree for which to resolve all reference by names
      **/
     fun resolveTree(root: Node) {
@@ -32,7 +33,7 @@ data class SymbolResolver(private val scopeProvider: ScopeProvider) {
     }
 
     /**
-     * Resolves all reference by name properties of the given [node].
+     * Resolves all reference by name properties in the given [node].
      * @param node the node for which to resolve all reference by names
      **/
     fun resolveNode(node: Node) {
@@ -51,7 +52,7 @@ data class SymbolResolver(private val scopeProvider: ScopeProvider) {
     }
 
     private fun findScopeFrom(node: Node): Sequence<ScopeDescription> = sequence {
-        scopeProvider.from(node)?.let { yield(it) }
+        scopeProvider.getFor(node)?.let { yield(it) }
         node.parent?.let { yieldAll(findScopeFrom(it)) }
     }
 

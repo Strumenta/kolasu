@@ -117,7 +117,9 @@ class SymbolResolutionWithSRITest {
             rule(TodoProject::class) { (node) ->
                 node.todos.forEach(this::include)
                 parent {
-                    symbolRepository.findAll(Todo::class).forEach(this::include)
+                    symbolRepository
+                        .all { it.type.isSuperTypeOf(Todo::class) }
+                        .forEach(this::include)
                 }
             }
         }
@@ -147,7 +149,7 @@ class ASTsSymbolRepository(
     override fun load(identifier: String): SymbolDescription? {
         roots.forEach { root ->
             root.walk().forEach { node ->
-                val symbol = symbolProvider.from(node)
+                val symbol = symbolProvider.getFor(node)
                 if (symbol != null && symbol.identifier == identifier) {
                     return symbol
                 }
@@ -160,12 +162,12 @@ class ASTsSymbolRepository(
         TODO("Not yet implemented")
     }
 
-    override fun loadAll(filter: (SymbolDescription) -> Boolean): Sequence<SymbolDescription> {
+    override fun all(predicate: (SymbolDescription) -> Boolean): Sequence<SymbolDescription> {
         return sequence {
             roots.forEach { root ->
                 root.walk().forEach { node ->
-                    symbolProvider.from(node)
-                        ?.takeIf(filter)
+                    symbolProvider.getFor(node)
+                        ?.takeIf(predicate)
                         ?.let { yield(it) }
                 }
             }

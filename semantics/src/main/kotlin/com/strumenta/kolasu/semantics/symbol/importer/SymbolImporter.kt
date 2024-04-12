@@ -11,6 +11,8 @@ import com.strumenta.kolasu.traversing.walkDescendants
  *
  * @property symbolProvider the symbol provider to use during the import process
  * @property symbolRepository the repository where to store the obtained symbol descriptions
+ *
+ * @author Lorenzo Addazi <lorenzo.addazi@strumenta.com>
  **/
 class SymbolImporter(
     private val symbolProvider: SymbolProvider,
@@ -32,6 +34,6 @@ class SymbolImporter(
      * @param node the node from which to compute the symbol description to import
      **/
     fun importNode(node: Node) {
-        this.symbolProvider.from(node)?.let(this.symbolRepository::store)
+        this.symbolProvider.getFor(node)?.let(this.symbolRepository::store)
     }
 }

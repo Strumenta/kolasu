@@ -1,8 +1,12 @@
 package com.strumenta.kolasu.semantics.symbol.repository
 
 import com.strumenta.kolasu.semantics.symbol.description.SymbolDescription
-import kotlin.reflect.KClass
 
+/**
+ * Generic storage interface for [SymbolDescription] instances.
+ *
+ * @author Lorenzo Addazi <lorenzo.addazi@strumenta.com>
+ **/
 interface SymbolRepository {
 
     /**
@@ -26,19 +30,11 @@ interface SymbolRepository {
     fun delete(identifier: String): Boolean
 
     /**
-     * Retrieves all symbols from the repository with an optional [filter].
-     * @param filter optional filter over the elements
-     * @return sequence of symbols matching the [filter]
+     * Retrieves all symbols from the repository.
+     * @param predicate optional filter over the symbols
+     * @return sequence of symbols in the repository
      **/
-    fun loadAll(filter: (SymbolDescription) -> Boolean = { true }): Sequence<SymbolDescription>
-
-    /**
-     * Retrieves all symbols for the given [nodeType].
-     * @param nodeType the node type to look for
-     * @return sequence of symbols for nodes of the given [nodeType]
-     **/
-    fun findAll(nodeType: KClass<*>) =
-        this.loadAll { symbolDescription -> symbolDescription.type.isSubTypeOf(nodeType) }
+    fun all(predicate: (SymbolDescription) -> Boolean = { true }): Sequence<SymbolDescription>
 
     /**
      * Removes all symbols from the repository.

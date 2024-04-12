@@ -20,34 +20,36 @@ import kotlin.test.assertTrue
 
 class SymbolResolverTest {
 
-    // todo without any symbol reference
-    private val firstToDo = Todo(name = "first", description = "the first todo")
+    private val todoWithoutSymbolReferences = Todo(name = "first", description = "the first todo")
 
-    // todo with an internal symbol reference
-    private val secondToDo = Todo(
+    private val todoWithLocalSymbolReference = Todo(
         name = "second",
         description = "the secondo todo",
         prerequisite = ReferenceByName(name = "first")
     )
 
-    // todo with an external symbol reference
-    private val thirdToDo = Todo(
+    private val todoWithExternalSymbolReference = Todo(
         name = "third",
         description = "the third todo",
         prerequisite = ReferenceByName(name = "first")
     )
 
-    // todo with an internal symbol reference
-    private val fourthTodo = Todo(
+    private val anotherTodoWithInternalSymbolReference = Todo(
         name = "fourth",
         description = "the fourth todo",
         prerequisite = ReferenceByName(name = "third")
     )
 
-    private val firstProject = TodoProject(name = "firstProject", todos = mutableListOf(firstToDo, secondToDo))
+    private val firstProject = TodoProject(
+        name = "firstProject",
+        todos = mutableListOf(todoWithoutSymbolReferences, todoWithLocalSymbolReference)
+    )
         .apply(Node::assignParents)
 
-    private val secondProject = TodoProject(name = "secondProject", todos = mutableListOf(thirdToDo, fourthTodo))
+    private val secondProject = TodoProject(
+        name = "secondProject",
+        todos = mutableListOf(todoWithExternalSymbolReference, anotherTodoWithInternalSymbolReference)
+    )
         .apply(Node::assignParents)
 
     @Test
@@ -59,25 +61,25 @@ class SymbolResolverTest {
         // resolve all references in the second project only
         symbolResolver.resolveTree(secondProject)
         // verify first - no prerequisites
-        assertNull(firstToDo.prerequisite)
+        assertNull(todoWithoutSymbolReferences.prerequisite)
         // verify second - un-resolved internal reference to first
-        assertNotNull(secondToDo.prerequisite)
-        assertFalse(secondToDo.prerequisite.resolved)
-        assertFalse(secondToDo.prerequisite.retrieved)
-        assertNull(secondToDo.prerequisite.referred)
-        assertNull(secondToDo.prerequisite.identifier)
+        assertNotNull(todoWithLocalSymbolReference.prerequisite)
+        assertFalse(todoWithLocalSymbolReference.prerequisite.resolved)
+        assertFalse(todoWithLocalSymbolReference.prerequisite.retrieved)
+        assertNull(todoWithLocalSymbolReference.prerequisite.referred)
+        assertNull(todoWithLocalSymbolReference.prerequisite.identifier)
         // verify third - un-resolved and un-retrieved external reference to first
-        assertNotNull(thirdToDo.prerequisite)
-        assertFalse(thirdToDo.prerequisite.resolved)
-        assertFalse(thirdToDo.prerequisite.retrieved)
-        assertNull(thirdToDo.prerequisite.referred)
-        assertNull(thirdToDo.prerequisite.identifier)
+        assertNotNull(todoWithExternalSymbolReference.prerequisite)
+        assertFalse(todoWithExternalSymbolReference.prerequisite.resolved)
+        assertFalse(todoWithExternalSymbolReference.prerequisite.retrieved)
+        assertNull(todoWithExternalSymbolReference.prerequisite.referred)
+        assertNull(todoWithExternalSymbolReference.prerequisite.identifier)
         // verify fourth - resolved and retrieved internal reference to second
-        assertNotNull(fourthTodo.prerequisite)
-        assertTrue(fourthTodo.prerequisite.resolved)
-        assertTrue(fourthTodo.prerequisite.retrieved)
-        assertEquals(thirdToDo, fourthTodo.prerequisite.referred)
-        assertNull(fourthTodo.prerequisite.identifier)
+        assertNotNull(anotherTodoWithInternalSymbolReference.prerequisite)
+        assertTrue(anotherTodoWithInternalSymbolReference.prerequisite.resolved)
+        assertTrue(anotherTodoWithInternalSymbolReference.prerequisite.retrieved)
+        assertEquals(todoWithExternalSymbolReference, anotherTodoWithInternalSymbolReference.prerequisite.referred)
+        assertNull(anotherTodoWithInternalSymbolReference.prerequisite.identifier)
     }
 
     @Test
@@ -99,24 +101,27 @@ class SymbolResolverTest {
         // resolve all references in the second project only
         symbolResolver.resolveTree(secondProject)
         // verify first - no prerequisites
-        assertNull(firstToDo.prerequisite)
+        assertNull(todoWithoutSymbolReferences.prerequisite)
         // verify second - un-resolved internal reference to first
-        assertNotNull(secondToDo.prerequisite)
-        assertFalse(secondToDo.prerequisite.resolved)
-        assertFalse(secondToDo.prerequisite.retrieved)
-        assertNull(secondToDo.prerequisite.referred)
-        assertNull(secondToDo.prerequisite.identifier)
+        assertNotNull(todoWithLocalSymbolReference.prerequisite)
+        assertFalse(todoWithLocalSymbolReference.prerequisite.resolved)
+        assertFalse(todoWithLocalSymbolReference.prerequisite.retrieved)
+        assertNull(todoWithLocalSymbolReference.prerequisite.referred)
+        assertNull(todoWithLocalSymbolReference.prerequisite.identifier)
         // verify third - resolved but un-retrieved external reference to first
-        assertNotNull(thirdToDo.prerequisite)
-        assertTrue(thirdToDo.prerequisite.resolved)
-        assertFalse(thirdToDo.prerequisite.retrieved)
-        assertNull(thirdToDo.prerequisite.referred)
-        assertEquals(todosNodeIdProvider.id(firstToDo), thirdToDo.prerequisite.identifier)
+        assertNotNull(todoWithExternalSymbolReference.prerequisite)
+        assertTrue(todoWithExternalSymbolReference.prerequisite.resolved)
+        assertFalse(todoWithExternalSymbolReference.prerequisite.retrieved)
+        assertNull(todoWithExternalSymbolReference.prerequisite.referred)
+        assertEquals(
+            todosNodeIdProvider.id(todoWithoutSymbolReferences),
+            todoWithExternalSymbolReference.prerequisite.identifier
+        )
         // verify fourth - resolved and retrieved internal reference to second
-        assertNotNull(fourthTodo.prerequisite)
-        assertTrue(fourthTodo.prerequisite.resolved)
-        assertTrue(fourthTodo.prerequisite.retrieved)
-        assertEquals(thirdToDo, fourthTodo.prerequisite.referred)
-        assertNull(fourthTodo.prerequisite.identifier)
+        assertNotNull(anotherTodoWithInternalSymbolReference.prerequisite)
+        assertTrue(anotherTodoWithInternalSymbolReference.prerequisite.resolved)
+        assertTrue(anotherTodoWithInternalSymbolReference.prerequisite.retrieved)
+        assertEquals(todoWithExternalSymbolReference, anotherTodoWithInternalSymbolReference.prerequisite.referred)
+        assertNull(anotherTodoWithInternalSymbolReference.prerequisite.identifier)
     }
 }

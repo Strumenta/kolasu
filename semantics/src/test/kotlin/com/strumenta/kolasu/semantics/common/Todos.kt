@@ -28,7 +28,9 @@ fun todosScopeProvider(symbolRepository: SymbolRepository? = null) = scopeProvid
     rule(TodoProject::class) { (node) ->
         node.todos.forEach(this::include)
         parent {
-            symbolRepository?.findAll(Todo::class)?.forEach(this::include)
+            symbolRepository
+                ?.all { it.type.isSuperTypeOf(Todo::class) }
+                ?.forEach(this::include)
         }
     }
 }

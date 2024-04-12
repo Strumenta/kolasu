@@ -24,8 +24,8 @@ class InMemorySymbolRepository(
         return this.symbols.remove(identifier) != null
     }
 
-    override fun loadAll(filter: (SymbolDescription) -> Boolean): Sequence<SymbolDescription> {
-        return this.symbols.values.asSequence().filter(filter)
+    override fun all(predicate: (SymbolDescription) -> Boolean): Sequence<SymbolDescription> {
+        return this.symbols.values.asSequence().filter(predicate)
     }
 
     override fun clear() {
