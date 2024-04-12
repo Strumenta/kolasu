@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.ids.Coordinates
-import com.strumenta.kolasu.ids.IDLogic
+import com.strumenta.kolasu.ids.SemanticIDProvider
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.model.Statement
 import com.strumenta.kolasu.parsing.withParseTreeNode
@@ -28,7 +28,7 @@ import kotlin.test.assertTrue
 
 data class NodeFoo(val name: String) : Node()
 class MyRoot(val foo: Int) : Node(), Statement
-class MyRootWithIDLogic() : Node(), IDLogic {
+class MyRootWithIDLogic() : Node(), SemanticIDProvider {
     override fun calculatedID(coordinates: Coordinates): String {
         return ""
     }

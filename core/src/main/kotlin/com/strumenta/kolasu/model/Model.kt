@@ -327,3 +327,10 @@ annotation class NodeType
 fun checkFeatureName(featureName: String) {
     require(featureName !in RESERVED_FEATURE_NAMES) { "$featureName is not a valid feature name" }
 }
+
+/**
+ * Use this to mark a type representing an AST Root.
+ */
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ASTRoot

@@ -2,6 +2,7 @@ package com.strumenta.kolasu.ids
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.containingProperty
+import com.strumenta.kolasu.model.indexInContainingProperty
 import com.strumenta.kolasu.model.Node as KNode
 
 /**
@@ -24,13 +25,17 @@ interface NodeIdProvider {
         return if (kNode.parent == null) {
             RootCoordinates
         } else {
-            NonRootCoordinates(this.id(kNode.parent!!), kNode.containingProperty()!!.name)
+            NonRootCoordinates(
+                this.id(kNode.parent!!),
+                kNode.containingProperty()!!.name,
+                kNode.indexInContainingProperty()!!
+            )
         }
     }
 }
 
-interface IDLogic {
-    fun calculatedID(coordinates: Coordinates): String
+interface SemanticIDProvider {
+    fun calculatedID(): String
 }
 
 sealed class Coordinates
@@ -39,5 +44,6 @@ object RootCoordinates : Coordinates()
 
 data class NonRootCoordinates(
     val containerID: String,
-    val containmentName: String
+    val containmentName: String,
+    val indexInContainment: Int
 ) : Coordinates()

@@ -24,15 +24,15 @@ abstract class AbstractSourceIdProvider : SourceIdProvider {
 
 class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSourceIdProvider() {
     override fun sourceId(source: Source?): String {
-        if (source is IDLogic) {
-            return source!!.calculatedID(RootCoordinates)
+        if (source is SemanticIDProvider) {
+            return source!!.calculatedID()
         }
         return when (source) {
             null -> {
                 if (acceptNullSource) {
                     UNKNOWN_SOURCE_ID
                 } else {
-                    throw IDGenerationException("Source should not be null")
+                    throw SourceShouldBeSetException("Source should not be null")
                 }
             }
             is FileSource -> {
@@ -81,4 +81,11 @@ class RelativeSourceIdProvider(
     }
 }
 
-class IDGenerationException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+open class IDGenerationException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+class SourceShouldBeSetException(message: String, cause: Throwable? = null) : IDGenerationException(
+    message, cause)
+class NodeShouldNotBeRootException(message: String, cause: Throwable? = null) : IDGenerationException(
+    message, cause)
+class NodeShouldBeRootException(message: String, cause: Throwable? = null) : IDGenerationException(
+    message, cause)
+
