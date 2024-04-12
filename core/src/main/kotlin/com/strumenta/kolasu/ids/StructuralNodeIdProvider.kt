@@ -17,10 +17,11 @@ open class StructuralNodeIdProvider(var sourceIdProvider: SourceIdProvider = Sim
         if (kNode is SemanticIDProvider) {
             return kNode.calculatedID()
         }
-        val shouldTheNodeBeRoot = kNode::class.annotations.any { it is ASTRoot }
+        val canBeRoot = kNode::class.annotations.any { it is ASTRoot }
+        val mustBeRoot = kNode::class.annotations.any { it is ASTRoot && !it.canBeNotRoot }
         when (coordinates) {
             is RootCoordinates -> {
-                if (!shouldTheNodeBeRoot) {
+                if (!canBeRoot) {
                     throw NodeShouldNotBeRootException("Node $kNode should not be root")
                 }
                 val sourceId = try {
@@ -33,8 +34,8 @@ open class StructuralNodeIdProvider(var sourceIdProvider: SourceIdProvider = Sim
                 return "${sourceId}_root"
             }
             is NonRootCoordinates -> {
-                if (shouldTheNodeBeRoot) {
-                    throw NodeShouldBeRootException("Node $kNode should not root")
+                if (mustBeRoot) {
+                    throw NodeShouldBeRootException("Node $kNode should be root")
                 }
                 val index = coordinates.indexInContainment
                 val postfix = if (index == 0) coordinates.containmentName else "${coordinates.containmentName}_$index"

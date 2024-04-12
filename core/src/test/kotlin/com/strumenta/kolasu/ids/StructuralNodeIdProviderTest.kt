@@ -14,12 +14,11 @@ data class MyRoot(val foos: MutableList<MyNonRoot> = mutableListOf(), var other:
 
 data class MyNonRoot(val v: Int) : Node()
 
-data class MyOtherNode(override val name: String): Node(), Named, SemanticIDProvider {
+data class MyOtherNode(override val name: String) : Node(), Named, SemanticIDProvider {
     override fun calculatedID(): String {
         val n = (this.parent as MyRoot).foos.sumOf { it.v }
         return "MyName-$name-$n"
     }
-
 }
 
 @ASTRoot
@@ -29,20 +28,19 @@ data class MyOtherRoot(val s: String) : Node(), SemanticIDProvider {
     }
 }
 
-
 class StructuralNodeIdProviderTest {
 
     @Test(expected = SourceShouldBeSetException::class)
     fun rootNodeMustHaveSourceSet() {
         val idProvider = StructuralNodeIdProvider()
-        val ast = MyRoot(foos= mutableListOf(MyNonRoot(2), MyNonRoot(4), MyNonRoot(6)))
+        val ast = MyRoot(foos = mutableListOf(MyNonRoot(2), MyNonRoot(4), MyNonRoot(6)))
         idProvider.id(ast)
     }
 
     @Test
     fun rootNodeHasIDDependingOnSource() {
         val idProvider = StructuralNodeIdProvider()
-        val ast = MyRoot(foos= mutableListOf(MyNonRoot(2), MyNonRoot(4), MyNonRoot(6)))
+        val ast = MyRoot(foos = mutableListOf(MyNonRoot(2), MyNonRoot(4), MyNonRoot(6)))
         ast.setSourceForTree(SyntheticSource("S1"))
         val id1 = idProvider.id(ast)
         ast.setSourceForTree(SyntheticSource("S2"))
@@ -64,7 +62,7 @@ class StructuralNodeIdProviderTest {
     fun nodeOfNonRootTypeCanHaveIDWhenPlacedInAST() {
         val idProvider = StructuralNodeIdProvider()
         val n1 = MyNonRoot(2)
-        val ast = MyRoot(foos= mutableListOf(n1, MyNonRoot(4), MyNonRoot(6)))
+        val ast = MyRoot(foos = mutableListOf(n1, MyNonRoot(4), MyNonRoot(6)))
         ast.assignParents()
         ast.setSourceForTree(SyntheticSource("S1"))
         idProvider.id(n1)
@@ -76,7 +74,7 @@ class StructuralNodeIdProviderTest {
         val n1 = MyNonRoot(2)
         val n2 = MyNonRoot(4)
         val n3 = MyNonRoot(6)
-        val ast = MyRoot(foos= mutableListOf(n1, n2, n3))
+        val ast = MyRoot(foos = mutableListOf(n1, n2, n3))
         ast.assignParents()
         ast.setSourceForTree(SyntheticSource("S1"))
         val id1 = idProvider.id(n1)
@@ -110,7 +108,7 @@ class StructuralNodeIdProviderTest {
         val n2 = MyNonRoot(4)
         val n3 = MyNonRoot(6)
         val other = MyOtherNode("XYZ")
-        val ast = MyRoot(foos= mutableListOf(n1, n2, n3), other = other)
+        val ast = MyRoot(foos = mutableListOf(n1, n2, n3), other = other)
         ast.setSourceForTree(SyntheticSource("S1"))
         ast.assignParents()
         assertEquals("MyName-XYZ-12", idProvider.id(other))

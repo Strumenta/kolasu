@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.language.KolasuLanguage
+import com.strumenta.kolasu.model.ASTRoot
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
@@ -26,6 +27,7 @@ enum class AnEnum {
     ZUM
 }
 
+@ASTRoot(canBeNotRoot = true)
 data class NodeWithEnum(
     override val name: String,
     val e: AnEnum?

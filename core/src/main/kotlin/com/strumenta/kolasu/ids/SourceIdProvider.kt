@@ -83,9 +83,14 @@ class RelativeSourceIdProvider(
 
 open class IDGenerationException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
 class SourceShouldBeSetException(message: String, cause: Throwable? = null) : IDGenerationException(
-    message, cause)
+    message,
+    cause
+)
 class NodeShouldNotBeRootException(message: String, cause: Throwable? = null) : IDGenerationException(
-    message, cause)
+    message,
+    cause
+)
 class NodeShouldBeRootException(message: String, cause: Throwable? = null) : IDGenerationException(
-    message, cause)
-
+    message,
+    cause
+)

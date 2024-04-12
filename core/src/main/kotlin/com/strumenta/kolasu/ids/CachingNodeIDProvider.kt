@@ -22,4 +22,4 @@ class CachingNodeIDProvider(val wrapped: NodeIdProvider) : NodeIdProvider {
     }
 }
 
-fun NodeIdProvider.caching() : CachingNodeIDProvider = CachingNodeIDProvider(this)
+fun NodeIdProvider.caching(): CachingNodeIDProvider = CachingNodeIDProvider(this)

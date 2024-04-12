@@ -22,7 +22,7 @@ class CachingNodeIDProviderTest {
         val n1 = MyNonRoot(2)
         val n2 = MyNonRoot(4)
         val n3 = MyNonRoot(6)
-        val ast = MyRoot(foos= mutableListOf(n1, n2, n3))
+        val ast = MyRoot(foos = mutableListOf(n1, n2, n3))
         ast.assignParents()
         ast.setSourceForTree(SyntheticSource("S1"))
 
