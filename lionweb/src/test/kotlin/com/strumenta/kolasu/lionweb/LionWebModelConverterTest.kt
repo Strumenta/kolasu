@@ -11,7 +11,7 @@ import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.withRange
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.language.EnumerationLiteral
+import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import org.mkfl3x.jsondelta.JsonDelta
 import kotlin.test.Test
@@ -467,13 +467,17 @@ class LionWebModelConverterTest {
         val exportedN3 = converter.exportModelToLionWeb(n3)
         val exportedN4 = converter.exportModelToLionWeb(n4)
 
-        assertTrue(exportedN1.getPropertyValueByName("e") is EnumerationLiteral)
-        assertEquals("BAR", (exportedN1.getPropertyValueByName("e") as EnumerationLiteral).name)
-        assertTrue(exportedN2.getPropertyValueByName("e") is EnumerationLiteral)
-        assertEquals("FOO", (exportedN2.getPropertyValueByName("e") as EnumerationLiteral).name)
-        assertTrue(exportedN3.getPropertyValueByName("e") is EnumerationLiteral)
-        assertEquals("ZUM", (exportedN3.getPropertyValueByName("e") as EnumerationLiteral).name)
+        assertTrue(exportedN1.getPropertyValueByName("e") is EnumerationValue)
+        assertEquals("BAR", (exportedN1.getPropertyValueByName("e") as EnumerationValue).enumerationLiteral.name)
+        assertTrue(exportedN2.getPropertyValueByName("e") is EnumerationValue)
+        assertEquals("FOO", (exportedN2.getPropertyValueByName("e") as EnumerationValue).enumerationLiteral.name)
+        assertTrue(exportedN3.getPropertyValueByName("e") is EnumerationValue)
+        assertEquals("ZUM", (exportedN3.getPropertyValueByName("e") as EnumerationValue).enumerationLiteral.name)
         assertEquals(null, exportedN4.getPropertyValueByName("e"))
+
+        val jsonSerialization = JsonSerialization.getStandardSerialization()
+        converter.prepareJsonSerialization(jsonSerialization)
+        jsonSerialization.serializeTreesToJsonString(exportedN1)
     }
 
     @Test
