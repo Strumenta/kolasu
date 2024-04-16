@@ -14,19 +14,10 @@ data class MyRoot(val foos: MutableList<MyNonRoot> = mutableListOf(), var other:
 
 data class MyNonRoot(val v: Int) : Node()
 
-data class MyOtherNode(override val name: String) : Node(), Named, SemanticIDProvider {
-    override fun calculatedID(): String {
-        val n = (this.parent as MyRoot).foos.sumOf { it.v }
-        return "MyName-$name-$n"
-    }
-}
+data class MyOtherNode(override val name: String) : Node(), Named
 
 @ASTRoot
-data class MyOtherRoot(val s: String) : Node(), SemanticIDProvider {
-    override fun calculatedID(): String {
-        return "MyOtherRoot-$s"
-    }
-}
+data class MyOtherRoot(val s: String) : Node()
 
 class StructuralNodeIdProviderTest {
 
@@ -95,7 +86,13 @@ class StructuralNodeIdProviderTest {
 
     @Test
     fun semanticIDProviderForRootNode() {
-        val idProvider = StructuralNodeIdProvider()
+        val idProvider = CommonNodeIdProvider(
+            semanticIDProvider = DeclarativeNodeIdProvider(
+                idFor<MyOtherRoot> {
+                    "MyOtherRoot-${it.s}"
+                }
+            )
+        )
         val ast = MyOtherRoot("foo")
         // Note that the source is not set
         assertEquals("MyOtherRoot-foo", idProvider.id(ast))
@@ -103,7 +100,14 @@ class StructuralNodeIdProviderTest {
 
     @Test
     fun semanticIDProviderForNonRootNode() {
-        val idProvider = StructuralNodeIdProvider()
+        val idProvider = CommonNodeIdProvider(
+            semanticIDProvider = DeclarativeNodeIdProvider(
+                idFor<MyOtherNode> {
+                    val n = (it.parent as MyRoot).foos.sumOf { it.v }
+                    "MyName-${it.name}-$n"
+                }
+            )
+        )
         val n1 = MyNonRoot(2)
         val n2 = MyNonRoot(4)
         val n3 = MyNonRoot(6)

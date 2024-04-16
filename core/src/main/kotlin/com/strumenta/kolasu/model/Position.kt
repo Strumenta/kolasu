@@ -116,6 +116,11 @@ fun linePosition(lineNumber: Int, lineCode: String, source: Source? = null): Pos
 }
 
 abstract class Source : Serializable
+
+interface SourceWithID {
+    fun sourceID() : String
+}
+
 class SourceSet(val name: String, val root: Path)
 class SourceSetElement(val sourceSet: SourceSet, val relativePath: Path) : Source()
 data class FileSource(val file: File) : Source()

@@ -1,11 +1,8 @@
 package com.strumenta.kolasu.lionweb
 
-import com.strumenta.kolasu.ids.SemanticIDProvider
 import com.strumenta.kolasu.model.Source
+import com.strumenta.kolasu.model.SourceWithID
 
-data class LionWebRootSource(val sourceId: String) : Source(), SemanticIDProvider {
-
-    override fun calculatedID(): String {
-        return sourceId
-    }
+data class LionWebSource(val sourceId: String) : Source(), SourceWithID {
+    override fun sourceID(): String = sourceId
 }

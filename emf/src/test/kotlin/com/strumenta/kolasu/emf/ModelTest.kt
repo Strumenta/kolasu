@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.ids.SemanticIDProvider
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
@@ -33,12 +32,12 @@ import kotlin.test.assertTrue
 
 data class NodeFoo(val name: String) : Node()
 class MyRoot(val foo: Int) : Node(), Statement
-class MyRootWithIDLogic() : Node(), SemanticIDProvider {
+class MyRootWithIDLogic() : Node()/*, SemanticNodeIDProvider {
 
     override fun calculatedID(): String {
         return ""
     }
-}
+}*/
 
 class MySimpleLangCu() : Node()
 

@@ -3,6 +3,7 @@ package com.strumenta.kolasu.ids
 import com.strumenta.kolasu.model.CodeBaseSource
 import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.Source
+import com.strumenta.kolasu.model.SourceWithID
 import com.strumenta.kolasu.model.SyntheticSource
 import java.io.File
 
@@ -24,8 +25,8 @@ abstract class AbstractSourceIdProvider : SourceIdProvider {
 
 class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSourceIdProvider() {
     override fun sourceId(source: Source?): String {
-        if (source is SemanticIDProvider) {
-            return source!!.calculatedID()
+        if (source is SemanticNodeIDProvider) {
+            return source!!.semanticID(TODO())
         }
         return when (source) {
             null -> {
@@ -44,6 +45,7 @@ class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSo
             is CodeBaseSource -> {
                 cleanId("codebase_${source.codebaseName}_relpath_${source.relativePath}")
             }
+            is SourceWithID -> source.sourceID()
             else -> {
                 TODO("Unable to generate ID for Source $this (${source.javaClass.canonicalName})")
             }

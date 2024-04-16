@@ -8,12 +8,13 @@ import kotlin.test.assertEquals
 
 class CachingNodeIDProviderTest {
 
-    class CountingNodeIdProvider : NodeIdProvider {
+    class CountingNodeIdProvider() :
+        StructuralNodeIdProvider() {
         var count: Int = 0
 
-        override fun idUsingCoordinates(kNode: Node, coordinates: Coordinates): String {
+        override fun id(kNode: Node): String {
             count++
-            return StructuralNodeIdProvider().idUsingCoordinates(kNode, coordinates)
+            return super.id(kNode)
         }
     }
 

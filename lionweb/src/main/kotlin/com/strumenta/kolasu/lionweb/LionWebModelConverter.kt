@@ -1,10 +1,7 @@
 package com.strumenta.kolasu.lionweb
 
-import com.strumenta.kolasu.ids.Coordinates
 import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
-import com.strumenta.kolasu.ids.NonRootCoordinates
-import com.strumenta.kolasu.ids.RootCoordinates
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
@@ -12,8 +9,6 @@ import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.allFeatures
 import com.strumenta.kolasu.model.assignParents
-import com.strumenta.kolasu.model.containingProperty
-import com.strumenta.kolasu.model.indexInContainingProperty
 import com.strumenta.kolasu.traversing.walk
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
@@ -97,27 +92,26 @@ class LionWebModelConverter(
     fun exportModelToLionWeb(
         kolasuTree: KNode,
         nodeIdProvider: NodeIdProvider = this.nodeIdProvider,
-        considerParent: Boolean = true,
-        rootCoordinates: Coordinates? = null
+        considerParent: Boolean = true
     ): LWNode {
         val myIDManager = object {
 
-            fun coordinatesFor(kNode: KNode): Coordinates {
-                return when {
-                    kolasuTree == kNode && rootCoordinates != null -> rootCoordinates
-                    kNode.parent == null -> RootCoordinates
-                    else -> {
-                        NonRootCoordinates(
-                            nodeId(kNode.parent!!),
-                            kNode.containingProperty()!!.name,
-                            kNode.indexInContainingProperty()!!
-                        )
-                    }
-                }
-            }
+//            fun coordinatesFor(kNode: KNode): Coordinates {
+//                return when {
+//                    kolasuTree == kNode && rootCoordinates != null -> rootCoordinates
+//                    kNode.parent == null -> RootCoordinates
+//                    else -> {
+//                        NonRootCoordinates(
+//                            nodeId(kNode.parent!!),
+//                            kNode.containingProperty()!!.name,
+//                            kNode.indexInContainingProperty()!!
+//                        )
+//                    }
+//                }
+//            }
 
             fun nodeId(kNode: KNode): String {
-                return nodeIdProvider.idUsingCoordinates(kNode, coordinatesFor(kNode))
+                return nodeIdProvider.id(kNode)
             }
         }
 
