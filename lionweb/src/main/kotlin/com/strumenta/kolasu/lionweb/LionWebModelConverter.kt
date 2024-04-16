@@ -96,20 +96,6 @@ class LionWebModelConverter(
     ): LWNode {
         val myIDManager = object {
 
-//            fun coordinatesFor(kNode: KNode): Coordinates {
-//                return when {
-//                    kolasuTree == kNode && rootCoordinates != null -> rootCoordinates
-//                    kNode.parent == null -> RootCoordinates
-//                    else -> {
-//                        NonRootCoordinates(
-//                            nodeId(kNode.parent!!),
-//                            kNode.containingProperty()!!.name,
-//                            kNode.indexInContainingProperty()!!
-//                        )
-//                    }
-//                }
-//            }
-
             fun nodeId(kNode: KNode): String {
                 return nodeIdProvider.id(kNode)
             }

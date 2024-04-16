@@ -32,12 +32,7 @@ import kotlin.test.assertTrue
 
 data class NodeFoo(val name: String) : Node()
 class MyRoot(val foo: Int) : Node(), Statement
-class MyRootWithIDLogic() : Node()/*, SemanticNodeIDProvider {
-
-    override fun calculatedID(): String {
-        return ""
-    }
-}*/
+class MyRootWithIDLogic() : Node()
 
 class MySimpleLangCu() : Node()
 
