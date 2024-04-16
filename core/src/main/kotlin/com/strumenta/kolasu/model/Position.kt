@@ -118,7 +118,7 @@ fun linePosition(lineNumber: Int, lineCode: String, source: Source? = null): Pos
 abstract class Source : Serializable
 
 interface SourceWithID {
-    fun sourceID() : String
+    fun sourceID(): String
 }
 
 class SourceSet(val name: String, val root: Path)

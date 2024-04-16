@@ -59,5 +59,4 @@ open class StructuralNodeIdProvider(
             }
         }
     }
-
 }

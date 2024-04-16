@@ -24,7 +24,6 @@ class CachingNodeIDProvider(val wrapped: NodeIdProvider) : BaseNodeIdProvider() 
     init {
         wrapped.topLevelProvider.parentProvider = this
     }
-
 }
 
 fun NodeIdProvider.caching(): CachingNodeIDProvider = CachingNodeIDProvider(this)

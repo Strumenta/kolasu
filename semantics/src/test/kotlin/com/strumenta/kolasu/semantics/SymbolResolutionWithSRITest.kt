@@ -148,7 +148,7 @@ class SymbolResolutionWithSRITest {
         assertEquals(false, todo4.prerequisite!!.resolved)
         symbolResolver.resolve(todoProjectErrands, entireTree = true)
         assertEquals(true, todo4.prerequisite!!.resolved)
-        assertEquals("synthetic_Personal-Source_root_todos_1", todo4.prerequisite.identifier)
+        assertEquals("synthetic_Personal-Source_todos_1", todo4.prerequisite.identifier)
     }
 }
 

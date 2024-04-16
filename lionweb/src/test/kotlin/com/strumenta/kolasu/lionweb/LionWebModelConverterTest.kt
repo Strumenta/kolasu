@@ -53,7 +53,7 @@ class LionWebModelConverterTest {
   ],
   "nodes": [
     {
-      "id": "synthetic_foo-bar-source_root",
+      "id": "synthetic_foo-bar-source",
       "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
@@ -77,9 +77,9 @@ class LionWebModelConverterTest {
             "key": "com-strumenta-SimpleLang_SimpleRoot_childrez"
           },
           "children": [
-            "synthetic_foo-bar-source_root_childrez",
-            "synthetic_foo-bar-source_root_childrez_1",
-            "synthetic_foo-bar-source_root_childrez_2"
+            "synthetic_foo-bar-source_childrez",
+            "synthetic_foo-bar-source_childrez_1",
+            "synthetic_foo-bar-source_childrez_2"
           ]
         },
         {
@@ -96,7 +96,7 @@ class LionWebModelConverterTest {
       "parent": null
     },
     {
-      "id": "synthetic_foo-bar-source_root_childrez",
+      "id": "synthetic_foo-bar-source_childrez",
       "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
@@ -140,16 +140,16 @@ class LionWebModelConverterTest {
           "targets": [
             {
               "resolveInfo": "A1",
-              "reference": "synthetic_foo-bar-source_root_childrez"
+              "reference": "synthetic_foo-bar-source_childrez"
             }
           ]
         }
       ],
       "annotations": [],
-      "parent": "synthetic_foo-bar-source_root"
+      "parent": "synthetic_foo-bar-source"
     },
     {
-      "id": "synthetic_foo-bar-source_root_childrez_1",
+      "id": "synthetic_foo-bar-source_childrez_1",
       "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
@@ -177,10 +177,10 @@ class LionWebModelConverterTest {
       ],
       "references": [],
       "annotations": [],
-      "parent": "synthetic_foo-bar-source_root"
+      "parent": "synthetic_foo-bar-source"
     },
     {
-      "id": "synthetic_foo-bar-source_root_childrez_2",
+      "id": "synthetic_foo-bar-source_childrez_2",
       "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
@@ -204,7 +204,7 @@ class LionWebModelConverterTest {
             "key": "com-strumenta-SimpleLang_SimpleNodeA_child"
           },
           "children": [
-            "synthetic_foo-bar-source_root_childrez_2_child"
+            "synthetic_foo-bar-source_childrez_2_child"
           ]
         },
         {
@@ -226,16 +226,16 @@ class LionWebModelConverterTest {
           "targets": [
             {
               "resolveInfo": "A1",
-              "reference": "synthetic_foo-bar-source_root_childrez"
+              "reference": "synthetic_foo-bar-source_childrez"
             }
           ]
         }
       ],
       "annotations": [],
-      "parent": "synthetic_foo-bar-source_root"
+      "parent": "synthetic_foo-bar-source"
     },
     {
-      "id": "synthetic_foo-bar-source_root_childrez_2_child",
+      "id": "synthetic_foo-bar-source_childrez_2_child",
       "classifier": {
         "language": "com-strumenta-SimpleLang",
         "version": "1",
@@ -263,7 +263,7 @@ class LionWebModelConverterTest {
       ],
       "references": [],
       "annotations": [],
-      "parent": "synthetic_foo-bar-source_root_childrez_2"
+      "parent": "synthetic_foo-bar-source_childrez_2"
     }
   ]
 }"""
