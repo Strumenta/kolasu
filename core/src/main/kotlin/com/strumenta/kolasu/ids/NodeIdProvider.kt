@@ -26,6 +26,10 @@ abstract class BaseNodeIdProvider : NodeIdProvider {
         }
 }
 
+/**
+ * The common approach for calculating Node IDs is to use Semantic Node IDs where present,
+ * and Positional Node IDs in the other cases.
+ */
 class CommonNodeIdProvider(val semanticIDProvider: SemanticNodeIDProvider = DeclarativeNodeIdProvider()) :
     BaseNodeIdProvider() {
 
