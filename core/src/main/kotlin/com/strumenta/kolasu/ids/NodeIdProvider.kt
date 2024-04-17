@@ -42,7 +42,7 @@ class CommonNodeIdProvider(val semanticIDProvider: SemanticNodeIDProvider = Decl
     }
 
     private fun positionalID(kNode: Node): String {
-        return StructuralNodeIdProvider().apply { parentProvider = this }.caching().id(kNode)
+        return StructuralNodeIdProvider().apply { parentProvider = this }.id(kNode)
     }
 }
 
