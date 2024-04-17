@@ -25,9 +25,6 @@ abstract class AbstractSourceIdProvider : SourceIdProvider {
 
 class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSourceIdProvider() {
     override fun sourceId(source: Source?): String {
-        if (source is SemanticNodeIDProvider) {
-            return source!!.semanticID(TODO())
-        }
         return when (source) {
             null -> {
                 if (acceptNullSource) {
