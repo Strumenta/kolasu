@@ -11,6 +11,10 @@ import java.util.IdentityHashMap
 class CachingNodeIDProvider(val wrapped: NodeIdProvider) : BaseNodeIdProvider() {
     private val cache = IdentityHashMap<Node, String>()
 
+    init {
+        wrapped.topLevelProvider.parentProvider = this
+    }
+
     override fun id(kNode: Node): String {
         if (cache.containsKey(kNode)) {
             return cache[kNode]!!
@@ -21,9 +25,10 @@ class CachingNodeIDProvider(val wrapped: NodeIdProvider) : BaseNodeIdProvider() 
         }
     }
 
-    init {
-        wrapped.topLevelProvider.parentProvider = this
+    fun clear() {
+        cache.clear()
     }
+
 }
 
 fun NodeIdProvider.caching(): CachingNodeIDProvider = CachingNodeIDProvider(this)
