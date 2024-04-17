@@ -2,7 +2,8 @@ package com.strumenta.kolasu.ids
 
 /**
  * Coordinates indicate where a Node is stored with an AST. A root node will have RootCoordinates, a node that is not
- * a root node will have NonRootCoordinates. NonRootCoordinates indicates the parent (or its id), the containment property and index.
+ * a root node will have InternalCoordinates. InternalCoordinates indicates the parent (or its id), the containment
+ * property and index.
  *
  * For example, if I have this:
  *
@@ -18,9 +19,9 @@ package com.strumenta.kolasu.ids
  * ```
  * Then:
  * - myClass will have RootCoordinates
- * - F1 will have NonRootCoordinates(parent=myClass, property="members", index=0)
- * - F2 will have NonRootCoordinates(parent=myClass, property="members", index=1)
- * - F3 will have NonRootCoordinates(parent=myClass, property="members", index=2)
+ * - F1 will have InternalCoordinates(parent=myClass, property="members", index=0)
+ * - F2 will have InternalCoordinates(parent=myClass, property="members", index=1)
+ * - F3 will have InternalCoordinates(parent=myClass, property="members", index=2)
  */
 sealed class Coordinates
 
@@ -32,7 +33,7 @@ object RootCoordinates : Coordinates()
 /**
  * Coordinates indicating the position of all nodes but the root of the AST.
  */
-data class NonRootCoordinates(
+data class InternalCoordinates(
     val containerID: String,
     val containmentName: String,
     val indexInContainment: Int

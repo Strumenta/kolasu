@@ -25,7 +25,7 @@ open class StructuralNodeIdProvider(
         val coordinates: Coordinates = if (kNode.parent == null) {
             RootCoordinates
         } else {
-            NonRootCoordinates(
+            InternalCoordinates(
                 topLevelProvider.id(kNode.parent!!),
                 kNode.containingProperty()!!.name,
                 kNode.indexInContainingProperty()!!
@@ -49,7 +49,7 @@ open class StructuralNodeIdProvider(
                 }
                 "$sourceId"
             }
-            is NonRootCoordinates -> {
+            is InternalCoordinates -> {
                 if (mustBeRoot) {
                     throw NodeShouldBeRootException("Node $kNode should be root")
                 }

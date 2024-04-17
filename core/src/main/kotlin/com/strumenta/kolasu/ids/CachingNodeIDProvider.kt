@@ -28,7 +28,6 @@ class CachingNodeIDProvider(val wrapped: NodeIdProvider) : BaseNodeIdProvider() 
     fun clear() {
         cache.clear()
     }
-
 }
 
 fun NodeIdProvider.caching(): CachingNodeIDProvider = CachingNodeIDProvider(this)
