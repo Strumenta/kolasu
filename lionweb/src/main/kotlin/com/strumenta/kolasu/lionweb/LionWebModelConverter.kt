@@ -26,6 +26,7 @@ import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
+import io.lionweb.lioncore.java.utils.CommonChecks
 import java.lang.IllegalArgumentException
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
@@ -110,6 +111,12 @@ class LionWebModelConverter(
             }
             kolasuTree.walk().forEach { kNode ->
                 val lwNode = nodesMapping.byA(kNode)!!
+                if (!CommonChecks.isValidID(lwNode.id)) {
+                    throw RuntimeException(
+                        "Cannot export AST to LionWeb as we got an invalid Node ID: ${lwNode.id}. " +
+                            "It was produced while exporting this Kolasu Node: $kNode"
+                    )
+                }
                 val kFeatures = kNode.javaClass.kotlin.allFeatures()
                 lwNode.concept.allFeatures().forEach { feature ->
                     when (feature) {
