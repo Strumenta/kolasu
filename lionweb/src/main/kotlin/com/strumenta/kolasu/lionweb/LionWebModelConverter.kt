@@ -1,10 +1,7 @@
 package com.strumenta.kolasu.lionweb
 
-import com.strumenta.kolasu.ids.Coordinates
 import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
-import com.strumenta.kolasu.ids.NonRootCoordinates
-import com.strumenta.kolasu.ids.RootCoordinates
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
@@ -12,7 +9,6 @@ import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.allFeatures
 import com.strumenta.kolasu.model.assignParents
-import com.strumenta.kolasu.model.containingProperty
 import com.strumenta.kolasu.traversing.walk
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
@@ -30,6 +26,7 @@ import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
+import io.lionweb.lioncore.java.utils.CommonChecks
 import java.lang.IllegalArgumentException
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
@@ -96,23 +93,12 @@ class LionWebModelConverter(
     fun exportModelToLionWeb(
         kolasuTree: KNode,
         nodeIdProvider: NodeIdProvider = this.nodeIdProvider,
-        considerParent: Boolean = true,
-        rootCoordinates: Coordinates? = null
+        considerParent: Boolean = true
     ): LWNode {
         val myIDManager = object {
 
-            fun coordinatesFor(kNode: KNode): Coordinates {
-                return when {
-                    kolasuTree == kNode && rootCoordinates != null -> rootCoordinates
-                    kNode.parent == null -> RootCoordinates
-                    else -> {
-                        NonRootCoordinates(nodeId(kNode.parent!!), kNode.containingProperty()!!.name)
-                    }
-                }
-            }
-
             fun nodeId(kNode: KNode): String {
-                return nodeIdProvider.idUsingCoordinates(kNode, coordinatesFor(kNode))
+                return nodeIdProvider.id(kNode)
             }
         }
 
@@ -125,6 +111,12 @@ class LionWebModelConverter(
             }
             kolasuTree.walk().forEach { kNode ->
                 val lwNode = nodesMapping.byA(kNode)!!
+                if (!CommonChecks.isValidID(lwNode.id)) {
+                    throw RuntimeException(
+                        "Cannot export AST to LionWeb as we got an invalid Node ID: ${lwNode.id}. " +
+                            "It was produced while exporting this Kolasu Node: $kNode"
+                    )
+                }
                 val kFeatures = kNode.javaClass.kotlin.allFeatures()
                 lwNode.concept.allFeatures().forEach { feature ->
                     when (feature) {

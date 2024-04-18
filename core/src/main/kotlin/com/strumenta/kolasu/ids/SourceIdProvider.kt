@@ -3,6 +3,7 @@ package com.strumenta.kolasu.ids
 import com.strumenta.kolasu.model.CodeBaseSource
 import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.Source
+import com.strumenta.kolasu.model.SourceWithID
 import com.strumenta.kolasu.model.SyntheticSource
 import java.io.File
 
@@ -24,15 +25,12 @@ abstract class AbstractSourceIdProvider : SourceIdProvider {
 
 class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSourceIdProvider() {
     override fun sourceId(source: Source?): String {
-        if (source is IDLogic) {
-            return source!!.calculatedID(RootCoordinates)
-        }
         return when (source) {
             null -> {
                 if (acceptNullSource) {
                     UNKNOWN_SOURCE_ID
                 } else {
-                    throw IDGenerationException("Source should not be null")
+                    throw SourceShouldBeSetException("Source should not be null")
                 }
             }
             is FileSource -> {
@@ -44,6 +42,7 @@ class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSo
             is CodeBaseSource -> {
                 cleanId("codebase_${source.codebaseName}_relpath_${source.relativePath}")
             }
+            is SourceWithID -> source.sourceID()
             else -> {
                 TODO("Unable to generate ID for Source $this (${source.javaClass.canonicalName})")
             }
@@ -81,4 +80,16 @@ class RelativeSourceIdProvider(
     }
 }
 
-class IDGenerationException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+open class IDGenerationException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+class SourceShouldBeSetException(message: String, cause: Throwable? = null) : IDGenerationException(
+    message,
+    cause
+)
+class NodeShouldNotBeRootException(message: String, cause: Throwable? = null) : IDGenerationException(
+    message,
+    cause
+)
+class NodeShouldBeRootException(message: String, cause: Throwable? = null) : IDGenerationException(
+    message,
+    cause
+)

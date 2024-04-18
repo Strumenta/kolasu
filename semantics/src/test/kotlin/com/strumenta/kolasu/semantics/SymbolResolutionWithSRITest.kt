@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.semantics
 
 import com.strumenta.kolasu.ids.StructuralNodeIdProvider
+import com.strumenta.kolasu.model.ASTRoot
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
@@ -22,6 +23,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import com.strumenta.kolasu.semantics.symbol.resolver.SymbolResolver as SR
 
+@ASTRoot
 class TodoProject(override var name: String, val todos: MutableList<Todo>) : Node(), Named
 
 class Todo(
@@ -146,7 +148,7 @@ class SymbolResolutionWithSRITest {
         assertEquals(false, todo4.prerequisite!!.resolved)
         symbolResolver.resolve(todoProjectErrands, entireTree = true)
         assertEquals(true, todo4.prerequisite!!.resolved)
-        assertEquals("synthetic_Personal-Source_root_todos_1", todo4.prerequisite.identifier)
+        assertEquals("synthetic_Personal-Source_todos_1", todo4.prerequisite.identifier)
     }
 }
 

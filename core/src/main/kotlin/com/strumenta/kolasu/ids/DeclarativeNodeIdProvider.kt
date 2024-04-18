@@ -21,11 +21,20 @@ import kotlin.reflect.full.isSuperclassOf
  **/
 open class DeclarativeNodeIdProvider(
     vararg rules: DeclarativeNodeIdProviderRule<out Node>
-) : NodeIdProvider {
+) : SemanticNodeIDProvider {
     private val rules: List<DeclarativeNodeIdProviderRule<out Node>> = rules.sorted()
-    override fun idUsingCoordinates(kNode: Node, coordinates: Coordinates): String {
-        return this.rules.firstOrNull { it.canBeInvokedWith(kNode::class) }?.invoke(this, kNode)
+
+    override fun hasSemanticIdentity(kNode: Node): Boolean {
+        return tryToGetSemanticID(kNode) != null
+    }
+
+    override fun semanticID(kNode: Node): String {
+        return tryToGetSemanticID(kNode)
             ?: throw RuntimeException("Cannot find rule for node type: ${kNode::class.qualifiedName}")
+    }
+
+    private fun tryToGetSemanticID(kNode: Node): String? {
+        return this.rules.firstOrNull { it.canBeInvokedWith(kNode::class) }?.invoke(this, kNode)
     }
 }
 
@@ -34,7 +43,7 @@ open class DeclarativeNodeIdProvider(
  * Can be used whenever listing the rules in the DeclarativeNodeIdProvider constructor.
  **/
 inline fun <reified NodeTy : Node> idFor(
-    noinline specification: NodeIdProvider.(NodeTy) -> String
+    noinline specification: SemanticNodeIDProvider.(NodeTy) -> String
 ): DeclarativeNodeIdProviderRule<NodeTy> = DeclarativeNodeIdProviderRule(NodeTy::class, specification)
 
 /**
@@ -42,10 +51,10 @@ inline fun <reified NodeTy : Node> idFor(
  **/
 class DeclarativeNodeIdProviderRule<NodeTy : Node>(
     private val nodeType: KClass<NodeTy>,
-    private val specification: NodeIdProvider.(NodeTy) -> String
-) : Comparable<DeclarativeNodeIdProviderRule<*>>, (NodeIdProvider, Node) -> String {
+    private val specification: SemanticNodeIDProvider.(NodeTy) -> String
+) : Comparable<DeclarativeNodeIdProviderRule<*>>, (SemanticNodeIDProvider, Node) -> String {
     override fun invoke(
-        nodeIdProvider: NodeIdProvider,
+        nodeIdProvider: SemanticNodeIDProvider,
         node: Node
     ): String {
         @Suppress("UNCHECKED_CAST")

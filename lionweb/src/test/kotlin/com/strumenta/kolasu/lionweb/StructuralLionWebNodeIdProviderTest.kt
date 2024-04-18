@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.lionweb
 
+import com.strumenta.kolasu.model.ASTRoot
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
@@ -8,8 +9,13 @@ import junit.framework.TestCase.assertNotNull
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@ASTRoot
 data class A(val bs: MutableList<B> = mutableListOf()) : Node()
+
+@ASTRoot(canBeNotRoot = true)
 data class B(var name: String, var cs: MutableList<C> = mutableListOf()) : Node()
+
+@ASTRoot(canBeNotRoot = true)
 data class C(var value: Int) : Node()
 
 class StructuralLionWebNodeIdProviderTest {
@@ -48,7 +54,7 @@ class StructuralLionWebNodeIdProviderTest {
     }
 
     @Test
-    fun equalsNodesInNotInTreeGetDifferentIDs() {
+    fun equalsNodesNotInTreeGetSameIDs() {
         val root = A(
             mutableListOf(
                 B(

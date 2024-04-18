@@ -1,9 +1,13 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.ids.Coordinates
-import com.strumenta.kolasu.ids.IDLogic
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.Statement
+import com.strumenta.kolasu.model.TextFileDestination
+import com.strumenta.kolasu.model.withOrigin
+import com.strumenta.kolasu.model.withPosition
 import com.strumenta.kolasu.parsing.withParseTreeNode
 import com.strumenta.kolasu.transformation.GenericNode
 import com.strumenta.simplelang.SimpleLangLexer
@@ -28,11 +32,7 @@ import kotlin.test.assertTrue
 
 data class NodeFoo(val name: String) : Node()
 class MyRoot(val foo: Int) : Node(), Statement
-class MyRootWithIDLogic() : Node(), IDLogic {
-    override fun calculatedID(coordinates: Coordinates): String {
-        return ""
-    }
-}
+class MyRootWithIDLogic() : Node()
 
 class MySimpleLangCu() : Node()
 

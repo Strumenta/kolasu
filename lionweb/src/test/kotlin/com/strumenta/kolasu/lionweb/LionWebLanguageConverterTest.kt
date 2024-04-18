@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.language.KolasuLanguage
+import com.strumenta.kolasu.model.ASTRoot
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeType
@@ -12,18 +13,19 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
+@ASTRoot
 data class SimpleRoot(val id: Int, val childrez: MutableList<SimpleDecl>) : Node()
 
 sealed class SimpleDecl : Node()
 
+@ASTRoot(canBeNotRoot = true)
 data class SimpleNodeA(
     override val name: String,
     val ref: ReferenceByName<SimpleNodeA>,
     val child: SimpleNodeB?
 ) : Named, SimpleDecl(), MyRelevantInterface, MyIrrelevantInterface
 
-@LionWebPartition
-data class MyPartition(val roots: MutableList<SimpleRoot>) : Node()
+data class MyNonPartition(val roots: MutableList<SimpleRoot>) : Node()
 
 interface MyIrrelevantInterface
 
@@ -123,14 +125,14 @@ class LionWebLanguageConverterTest {
     fun exportSimpleLanguageWithPartitions() {
         val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
             addClass(SimpleRoot::class)
-            addClass(MyPartition::class)
+            addClass(MyNonPartition::class)
         }
         assertEquals(6, kLanguage.astClasses.size)
         val lwLanguage = LionWebLanguageConverter().exportToLionWeb(kLanguage)
         assertEquals("1", lwLanguage.version)
         assertEquals(6, lwLanguage.elements.size)
 
-        val myPartition = lwLanguage.getConceptByName("MyPartition")!!
+        val myNonPartition = lwLanguage.getConceptByName("MyNonPartition")!!
         val simpleRoot = lwLanguage.getConceptByName("SimpleRoot")!!
         val simpleDecl = lwLanguage.getConceptByName("SimpleDecl")!!
         val simpleNodeA = lwLanguage.getConceptByName("SimpleNodeA")!!
@@ -138,9 +140,9 @@ class LionWebLanguageConverterTest {
         val myRelevantInterface = lwLanguage.getInterfaceByName("MyRelevantInterface")!!
         assertNull(lwLanguage.getInterfaceByName("MyIrrelevantInterface"))
 
-        assertEquals("MyPartition", myPartition.name)
-        assertEquals(true, myPartition.isPartition)
-        assertSame(lwLanguage, myPartition.language)
+        assertEquals("MyNonPartition", myNonPartition.name)
+        assertEquals(false, myNonPartition.isPartition)
+        assertSame(lwLanguage, myNonPartition.language)
         assertEquals(StarLasuLWLanguage.ASTNode, simpleRoot.extendedConcept)
         assertEquals(emptyList(), simpleRoot.implemented)
         assertEquals(false, simpleRoot.isAbstract)

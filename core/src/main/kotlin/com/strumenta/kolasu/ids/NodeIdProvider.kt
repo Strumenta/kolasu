@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.ids
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.containingProperty
 import com.strumenta.kolasu.model.Node as KNode
 
 /**
@@ -10,34 +9,44 @@ import com.strumenta.kolasu.model.Node as KNode
  * It is important that the logic is implemented so that given the same Node, the same ID is returned.
  */
 interface NodeIdProvider {
-    /**
-     * @param coordinates the coordinates at which the node is to be placed
-     * @return a valid LionWeb Node ID
-     */
-    fun idUsingCoordinates(kNode: KNode, coordinates: Coordinates): String
+    fun id(kNode: KNode): String
+    var parentProvider: NodeIdProvider?
+    val topLevelProvider: NodeIdProvider
+        get() = if (parentProvider == null) this else parentProvider!!.topLevelProvider
+}
 
-    fun id(kNode: KNode, overriddenCoordinates: Coordinates? = null): String {
-        return idUsingCoordinates(kNode, overriddenCoordinates ?: calculatedCoordinates(kNode))
-    }
+abstract class BaseNodeIdProvider : NodeIdProvider {
+    override var parentProvider: NodeIdProvider? = null
+        set(value) {
+            field = if (value == this) {
+                null
+            } else {
+                value
+            }
+        }
+}
 
-    private fun calculatedCoordinates(kNode: Node): Coordinates {
-        return if (kNode.parent == null) {
-            RootCoordinates
+/**
+ * The common approach for calculating Node IDs is to use Semantic Node IDs where present,
+ * and Positional Node IDs in the other cases.
+ */
+class CommonNodeIdProvider(val semanticIDProvider: SemanticNodeIDProvider = DeclarativeNodeIdProvider()) :
+    BaseNodeIdProvider() {
+
+    override fun id(kNode: Node): String {
+        return if (semanticIDProvider.hasSemanticIdentity(kNode)) {
+            semanticIDProvider.semanticID(kNode)
         } else {
-            NonRootCoordinates(this.id(kNode.parent!!), kNode.containingProperty()!!.name)
+            positionalID(kNode)
         }
     }
+
+    private fun positionalID(kNode: Node): String {
+        return StructuralNodeIdProvider().apply { parentProvider = this }.id(kNode)
+    }
 }
 
-interface IDLogic {
-    fun calculatedID(coordinates: Coordinates): String
+interface SemanticNodeIDProvider {
+    fun hasSemanticIdentity(kNode: Node): Boolean
+    fun semanticID(kNode: Node): String
 }
-
-sealed class Coordinates
-
-object RootCoordinates : Coordinates()
-
-data class NonRootCoordinates(
-    val containerID: String,
-    val containmentName: String
-) : Coordinates()
