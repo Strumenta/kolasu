@@ -506,11 +506,11 @@ class LionWebModelConverterTest {
         }
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
-        val n1 = NodeWithPropertiesNotInConstructor("N1","foo")
+        val n1 = NodeWithPropertiesNotInConstructor("N1", "foo")
         n1.b = 10
-        val n2 = NodeWithPropertiesNotInConstructor("N2","bar")
+        val n2 = NodeWithPropertiesNotInConstructor("N2", "bar")
         n2.b = 11
-        val n3 = NodeWithPropertiesNotInConstructor("N3","zum")
+        val n3 = NodeWithPropertiesNotInConstructor("N3", "zum")
         n3.b = 12
         n1.c.add(n2)
         n1.c.add(n3)
@@ -549,11 +549,11 @@ class LionWebModelConverterTest {
         }
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
-        val n1 = NodeWithPropertiesNotInConstructorMutableProps("N1","foo")
+        val n1 = NodeWithPropertiesNotInConstructorMutableProps("N1", "foo")
         n1.b = 10
-        val n2 = NodeWithPropertiesNotInConstructorMutableProps("N2","bar")
+        val n2 = NodeWithPropertiesNotInConstructorMutableProps("N2", "bar")
         n2.b = 11
-        val n3 = NodeWithPropertiesNotInConstructorMutableProps("N3","zum")
+        val n3 = NodeWithPropertiesNotInConstructorMutableProps("N3", "zum")
         n3.b = 12
         n1.c.add(n2)
         n1.c.add(n3)

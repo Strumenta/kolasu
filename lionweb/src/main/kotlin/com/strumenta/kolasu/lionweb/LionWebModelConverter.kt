@@ -20,7 +20,6 @@ import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Enumeration
-import io.lionweb.lioncore.java.language.Feature
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.PrimitiveType
@@ -369,8 +368,8 @@ class LionWebModelConverter(
             }
         }
     }
-    
-    private fun attributeValue(data: LWNode, property: Property) : Any? {
+
+    private fun attributeValue(data: LWNode, property: Property): Any? {
         val propValue = data.getPropertyValue(property)
         val value = if (property.type is Enumeration && propValue != null) {
             val enumerationLiteral = if (propValue is EnumerationValue) {
@@ -378,7 +377,7 @@ class LionWebModelConverter(
             } else {
                 throw java.lang.IllegalStateException(
                     "Property value of property of enumeration type is " +
-                            "not an EnumerationValue. It is instead " + propValue
+                        "not an EnumerationValue. It is instead " + propValue
                 )
             }
             val enumKClass = synchronized(languageConverter) {
@@ -395,7 +394,7 @@ class LionWebModelConverter(
         return value
     }
 
-    private fun containmentValue(data: LWNode, containment: Containment) : Any? {
+    private fun containmentValue(data: LWNode, containment: Containment): Any? {
         val lwChildren = data.getChildren(containment)
         if (containment.isMultiple) {
             val kChildren = lwChildren.map { nodesMapping.byB(it)!! }
@@ -420,17 +419,21 @@ class LionWebModelConverter(
                 return null
             } else {
                 (
-                        return nodesMapping.byB(lwChild)
-                            ?: throw IllegalStateException(
-                                "Unable to find Kolasu Node corresponding to $lwChild"
-                            )
+                    return nodesMapping.byB(lwChild)
+                        ?: throw IllegalStateException(
+                            "Unable to find Kolasu Node corresponding to $lwChild"
                         )
+                    )
             }
         }
     }
 
-    private fun referenceValue(data: LWNode, reference: Reference, referencesPostponer: ReferencesPostponer,
-                               currentValue: ReferenceByName<PossiblyNamed>? = null) : Any? {
+    private fun referenceValue(
+        data: LWNode,
+        reference: Reference,
+        referencesPostponer: ReferencesPostponer,
+        currentValue: ReferenceByName<PossiblyNamed>? = null
+    ): Any? {
         val referenceValues = data.getReferenceValues(reference)
         return when {
             referenceValues.size > 1 -> {
@@ -449,8 +452,11 @@ class LionWebModelConverter(
         }
     }
 
-    private fun <T : Any> instantiate(kClass: KClass<T>, data: Node,
-                                      referencesPostponer: ReferencesPostponer):
+    private fun <T : Any> instantiate(
+        kClass: KClass<T>,
+        data: Node,
+        referencesPostponer: ReferencesPostponer
+    ):
         T {
         if (kClass == Position::class) {
             val start = instantiate(
@@ -509,13 +515,16 @@ class LionWebModelConverter(
         } catch (e: Exception) {
             throw RuntimeException(
                 "Issue instantiating using constructor $constructor with params " +
-                        "${params.map { "${it.key.name}=${it.value}" }}",
+                    "${params.map { "${it.key.name}=${it.value}" }}",
                 e
             )
         }
 
-        val propertiesNotSetAtConstructionTime = kClass.nodeOriginalProperties.filter { prop -> params.keys.none { param ->
-            param.name == prop.name } }
+        val propertiesNotSetAtConstructionTime = kClass.nodeOriginalProperties.filter { prop ->
+            params.keys.none { param ->
+                param.name == prop.name
+            }
+        }
         propertiesNotSetAtConstructionTime.forEach { property ->
             val feature = data.concept.getFeatureByName(property.name!!)
             if (property !is KMutableProperty<*>) {
@@ -526,12 +535,15 @@ class LionWebModelConverter(
                     currentValue.addAll(valueToSet)
                 } else if (property.isReference()) {
                     val currentValue = property.get(kNode) as ReferenceByName<PossiblyNamed>
-                    val valueToSet = referenceValue(data, feature as Reference, referencesPostponer, currentValue) as ReferenceByName<PossiblyNamed>
+                    val valueToSet = referenceValue(data, feature as Reference, referencesPostponer, currentValue)
+                        as ReferenceByName<PossiblyNamed>
                     currentValue.name = valueToSet.name
                     currentValue.referred = valueToSet.referred
                     currentValue.identifier = valueToSet.identifier
                 } else {
-                    throw java.lang.IllegalStateException("Cannot set this property, as it is immutable: ${property.name}")
+                    throw java.lang.IllegalStateException(
+                        "Cannot set this property, as it is immutable: ${property.name}"
+                    )
                 }
             } else {
                 when {
@@ -540,7 +552,8 @@ class LionWebModelConverter(
                         property.setter.call(kNode, value)
                     }
                     property.isReference() -> {
-                        val valueToSet = referenceValue(data, feature as Reference, referencesPostponer) as ReferenceByName<PossiblyNamed>
+                        val valueToSet = referenceValue(data, feature as Reference, referencesPostponer)
+                            as ReferenceByName<PossiblyNamed>
                         property.setter.call(kNode, valueToSet)
                     }
                     property.isContainment() -> {
