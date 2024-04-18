@@ -41,7 +41,7 @@ interface Named : PossiblyNamed {
  * actual node at a later stage.
  */
 class ReferenceByName<N : PossiblyNamed>(
-    val name: String,
+    var name: String,
     initialReferred: N? = null,
     var identifier: String? = null
 ) : Serializable {

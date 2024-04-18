@@ -506,17 +506,46 @@ class LionWebModelConverterTest {
         }
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
-        val n1 = NodeWithPropertiesNotInConstructor("foo")
+        val n1 = NodeWithPropertiesNotInConstructor("N1","foo")
         n1.b = 10
+        val n2 = NodeWithPropertiesNotInConstructor("N2","bar")
+        n2.b = 11
+        val n3 = NodeWithPropertiesNotInConstructor("N3","zum")
+        n3.b = 12
+        n1.c.add(n2)
+        n1.c.add(n3)
+        n2.r.referred = n3
         n1.source = SyntheticSource("JustForTest")
-        val json = mc.exportModelToLionWeb(n1)
-        val n1deserialized = mc.importModelFromLionWeb(json) as NodeWithPropertiesNotInConstructor
+        n1.assignParents()
+        val lwNode = mc.exportModelToLionWeb(n1)
+
+        val n1deserialized = mc.importModelFromLionWeb(lwNode) as NodeWithPropertiesNotInConstructor
+        assertEquals("N1", n1deserialized.name)
         assertEquals("foo", n1deserialized.a)
         assertEquals(10, n1deserialized.b)
+        assertEquals(listOf("N2", "N3"), n1deserialized.c.map { it.name })
+        assertEquals(null, n1deserialized.r.referred)
+
+        val n2deserialized = n1deserialized.c[0]
+        val n3deserialized = n1deserialized.c[1]
+
+        assertEquals("N2", n2deserialized.name)
+        assertEquals("bar", n2deserialized.a)
+        assertEquals(11, n2deserialized.b)
+        assertEquals(listOf(), n2deserialized.c.map { it.name })
+        assertEquals(n3deserialized, n2deserialized.r.referred)
+
+        assertEquals("N3", n3deserialized.name)
+        assertEquals("zum", n3deserialized.a)
+        assertEquals(12, n3deserialized.b)
+        assertEquals(listOf(), n3deserialized.c.map { it.name })
+        assertEquals(null, n3deserialized.r.referred)
     }
 }
 
-@ASTRoot
-data class NodeWithPropertiesNotInConstructor(var a: String) : Node() {
+@ASTRoot(canBeNotRoot = true)
+data class NodeWithPropertiesNotInConstructor(override val name: String, var a: String) : Node(), Named {
     var b: Int = 0
+    val c = mutableListOf<NodeWithPropertiesNotInConstructor>()
+    val r = ReferenceByName<NodeWithPropertiesNotInConstructor>("")
 }
