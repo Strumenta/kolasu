@@ -497,4 +497,26 @@ class LionWebModelConverterTest {
         assertASTsAreEqual(n3, reimportedN3)
         assertASTsAreEqual(n4, reimportedN4)
     }
+
+    // This verifies Issue #324
+    @Test
+    fun whenImportingConsiderAlsoPropertiesNotInConstructor() {
+        val kl = KolasuLanguage("my.language").apply {
+            addClass(NodeWithPropertiesNotInConstructor::class)
+        }
+        val mc = LionWebModelConverter()
+        mc.exportLanguageToLionWeb(kl)
+        val n1 = NodeWithPropertiesNotInConstructor("foo")
+        n1.b = 10
+        n1.source = SyntheticSource("JustForTest")
+        val json = mc.exportModelToLionWeb(n1)
+        val n1deserialized = mc.importModelFromLionWeb(json) as NodeWithPropertiesNotInConstructor
+        assertEquals("foo", n1deserialized.a)
+        assertEquals(10, n1deserialized.b)
+    }
+}
+
+@ASTRoot
+data class NodeWithPropertiesNotInConstructor(var a: String) : Node() {
+    var b: Int = 0
 }
