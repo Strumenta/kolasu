@@ -259,10 +259,6 @@ class LionWebModelConverter(
         }
         lwTree.thisAndAllDescendants().forEach { lwNode ->
             val kNode = nodesMapping.byB(lwNode)!!
-//            // TODO populate values not already set at construction time
-//            kNode.javaClass.processProperties { propertyDescription ->
-//                propertyDescription.
-//            }
             if (kNode is KNode) {
                 val lwPosition = lwNode.getOnlyChildByContainmentName("position")
                 if (lwPosition != null) {
@@ -543,9 +539,14 @@ class LionWebModelConverter(
                         val value = attributeValue(data, feature as Property)
                         property.setter.call(kNode, value)
                     }
-
-                    property.isReference() -> TODO()
-                    property.isContainment() -> TODO()
+                    property.isReference() -> {
+                        val valueToSet = referenceValue(data, feature as Reference, referencesPostponer) as ReferenceByName<PossiblyNamed>
+                        property.setter.call(kNode, valueToSet)
+                    }
+                    property.isContainment() -> {
+                        val valueToSet = containmentValue(data, feature as Containment) as List<KNode>
+                        property.setter.call(kNode, valueToSet)
+                    }
                 }
             }
         }
