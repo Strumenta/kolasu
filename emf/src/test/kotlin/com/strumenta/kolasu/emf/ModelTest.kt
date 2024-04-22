@@ -1,8 +1,6 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.antlr4j.parsing.withParseTreeNode
-import com.strumenta.kolasu.ids.Coordinates
-import com.strumenta.kolasu.ids.IDLogic
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
@@ -41,11 +39,7 @@ class MyRoot(
 ) : Node(),
     Statement
 
-class MyRootWithIDLogic :
-    Node(),
-    IDLogic {
-    override fun calculatedID(coordinates: Coordinates): String = ""
-}
+class MyRootWithIDLogic : Node()
 
 class MySimpleLangCu : Node()
 

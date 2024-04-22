@@ -1,7 +1,9 @@
 package com.strumenta.kolasu.ids
 
+import com.strumenta.kolasu.model.ASTRoot
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Source
+import com.strumenta.kolasu.model.containingProperty
 import com.strumenta.kolasu.model.indexInContainingProperty
 
 class ConstantSourceIdProvider(
@@ -12,31 +14,50 @@ class ConstantSourceIdProvider(
 
 open class StructuralNodeIdProvider(
     var sourceIdProvider: SourceIdProvider = SimpleSourceIdProvider(),
-) : NodeIdProvider {
-    constructor(customSourceId: String) : this(ConstantSourceIdProvider(customSourceId))
+) : BaseNodeIdProvider() {
+    constructor(customSourceId: String) : this(
+        ConstantSourceIdProvider(customSourceId),
+    )
 
-    override fun idUsingCoordinates(
-        kNode: NodeLike,
-        coordinates: Coordinates,
-    ): String {
-        if (kNode is IDLogic) {
-            return kNode.calculatedID(coordinates)
-        }
-        when (coordinates) {
+    override fun id(kNode: NodeLike): String {
+        val canBeRoot = kNode::class.annotations.any { it is ASTRoot }
+        val mustBeRoot = kNode::class.annotations.any { it is ASTRoot && !it.canBeNotRoot }
+        val coordinates: Coordinates =
+            if (kNode.parent == null) {
+                RootCoordinates
+            } else {
+                InternalCoordinates(
+                    topLevelProvider.id(kNode.parent!!),
+                    kNode.containingProperty()!!.name,
+                    kNode.indexInContainingProperty()!!,
+                )
+            }
+        return when (coordinates) {
             is RootCoordinates -> {
+                if (!canBeRoot) {
+                    throw NodeShouldNotBeRootException("Node $kNode should not be root")
+                }
                 val sourceId =
                     try {
                         sourceIdProvider.sourceId(kNode.source)
+                    } catch (e: SourceShouldBeSetException) {
+                        throw SourceShouldBeSetException(
+                            "Source should be set for node $kNode, as it is a root node " +
+                                "looking for a Positional ID",
+                            e,
+                        )
                     } catch (e: IDGenerationException) {
                         throw IDGenerationException("Cannot get source id for node $kNode", e)
                     }
-                return "${sourceId}_root"
+                "$sourceId"
             }
-            is NonRootCoordinates -> {
-                // TODO consider getting index from Coordinates
-                val index = kNode.indexInContainingProperty()!!
+            is InternalCoordinates -> {
+                if (mustBeRoot) {
+                    throw NodeShouldBeRootException("Node $kNode should be root")
+                }
+                val index = coordinates.indexInContainment
                 val postfix = if (index == 0) coordinates.containmentName else "${coordinates.containmentName}_$index"
-                return "${coordinates.containerID!!}_$postfix"
+                "${coordinates.containerID!!}_$postfix"
             }
         }
     }

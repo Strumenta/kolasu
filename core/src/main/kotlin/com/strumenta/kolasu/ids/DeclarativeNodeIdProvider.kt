@@ -21,15 +21,20 @@ import kotlin.reflect.full.isSuperclassOf
  **/
 open class DeclarativeNodeIdProvider(
     vararg rules: DeclarativeNodeIdProviderRule<out NodeLike>,
-) : NodeIdProvider {
+) : SemanticNodeIDProvider {
     private val rules: List<DeclarativeNodeIdProviderRule<out NodeLike>> = rules.sorted()
 
-    override fun idUsingCoordinates(
-        kNode: NodeLike,
-        coordinates: Coordinates,
-    ): String {
-        return this.rules.firstOrNull { it.canBeInvokedWith(kNode::class) }?.invoke(this, kNode)
+    override fun hasSemanticIdentity(kNode: NodeLike): Boolean {
+        return tryToGetSemanticID(kNode) != null
+    }
+
+    override fun semanticID(kNode: NodeLike): String {
+        return tryToGetSemanticID(kNode)
             ?: throw RuntimeException("Cannot find rule for node type: ${kNode::class.qualifiedName}")
+    }
+
+    private fun tryToGetSemanticID(kNode: NodeLike): String? {
+        return this.rules.firstOrNull { it.canBeInvokedWith(kNode::class) }?.invoke(this, kNode)
     }
 }
 
@@ -38,7 +43,7 @@ open class DeclarativeNodeIdProvider(
  * Can be used whenever listing the rules in the DeclarativeNodeIdProvider constructor.
  **/
 inline fun <reified NodeTy : NodeLike> idFor(
-    noinline specification: NodeIdProvider.(NodeTy) -> String,
+    noinline specification: SemanticNodeIDProvider.(NodeTy) -> String,
 ): DeclarativeNodeIdProviderRule<NodeTy> = DeclarativeNodeIdProviderRule(NodeTy::class, specification)
 
 /**
@@ -46,11 +51,11 @@ inline fun <reified NodeTy : NodeLike> idFor(
  **/
 class DeclarativeNodeIdProviderRule<NodeTy : NodeLike>(
     private val nodeType: KClass<NodeTy>,
-    private val specification: NodeIdProvider.(NodeTy) -> String,
+    private val specification: SemanticNodeIDProvider.(NodeTy) -> String,
 ) : Comparable<DeclarativeNodeIdProviderRule<*>>,
-    (NodeIdProvider, NodeLike) -> String {
+    (SemanticNodeIDProvider, NodeLike) -> String {
     override fun invoke(
-        nodeIdProvider: NodeIdProvider,
+        nodeIdProvider: SemanticNodeIDProvider,
         node: NodeLike,
     ): String {
         @Suppress("UNCHECKED_CAST")

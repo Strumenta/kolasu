@@ -6,6 +6,10 @@ abstract class Source : Comparable<Source> {
     override fun compareTo(other: Source): Int = this.stringDescription().compareTo(other.stringDescription())
 }
 
+interface SourceWithID {
+    fun sourceID(): String
+}
+
 fun lineRange(
     lineNumber: Int,
     lineCode: String,
