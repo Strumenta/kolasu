@@ -195,7 +195,15 @@ class LionWebModelConverter(
                             } else {
                                 when {
                                     kValue.retrieved -> {
-                                        val lwReferred: Node = nodesMapping.byA(kValue.referred!! as KNode)!!
+                                        val kReferred = (kValue.referred ?: throw IllegalStateException("Reference " +
+                                                "retrieved but referred is empty")) as KNode
+                                        // We may have a reference to a Kolasu Node that we are not exporting, and for
+                                        // which we have therefore no LionWeb node. In that case, if we have the
+                                        // identifier, we can produce a ProxyNode instead
+                                        val lwReferred: Node = nodesMapping.byA(kReferred) ?: ProxyNode(
+                                            kValue.identifier
+                                            ?: throw java.lang.IllegalStateException("Identifier of reference target " +
+                                                    "value not set. Referred: $kReferred, reference holder: $kNode"))
                                         lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
                                     }
 
