@@ -33,10 +33,8 @@ import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.utils.CommonChecks
-import java.lang.IllegalArgumentException
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty
@@ -508,7 +506,10 @@ class LionWebModelConverter(
         constructor.parameters.forEach { param ->
             val feature = data.concept.getFeatureByName(param.name!!)
             if (feature == null) {
-                TODO()
+                throw java.lang.IllegalStateException(
+                    "We could not find a feature named as the parameter ${param.name} " +
+                        "on class $kClass"
+                )
             } else {
                 when (feature) {
                     is Property -> {
@@ -557,7 +558,9 @@ class LionWebModelConverter(
                     currentValue.identifier = valueToSet.identifier
                 } else {
                     throw java.lang.IllegalStateException(
-                        "Cannot set this property, as it is immutable: ${property.name}"
+                        "Cannot set this property, as it is immutable: ${property.name} on $kNode. " +
+                            "The properties set at construction time are: " +
+                            params.keys.joinToString(", ") { it.name ?: "<UNNAMED>" }
                     )
                 }
             } else {
@@ -572,8 +575,12 @@ class LionWebModelConverter(
                         property.setter.call(kNode, valueToSet)
                     }
                     property.isContainment() -> {
-                        val valueToSet = containmentValue(data, feature as Containment) as List<KNode>
-                        property.setter.call(kNode, valueToSet)
+                        try {
+                            val valueToSet = containmentValue(data, feature as Containment)
+                            property.setter.call(kNode, valueToSet)
+                        } catch (e: java.lang.Exception) {
+                            throw RuntimeException("Unable to set containment $feature on node $kNode", e)
+                        }
                     }
                 }
             }
