@@ -5,15 +5,22 @@ import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.FileSource
+import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.allFeatures
+import com.strumenta.kolasu.model.asContainment
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.containingProperty
 import com.strumenta.kolasu.model.indexInContainingProperty
+import com.strumenta.kolasu.model.isAttribute
+import com.strumenta.kolasu.model.isContainment
+import com.strumenta.kolasu.model.isReference
+import com.strumenta.kolasu.model.nodeOriginalProperties
 import com.strumenta.kolasu.traversing.walk
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
@@ -25,22 +32,19 @@ import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.Node
-import io.lionweb.lioncore.java.model.ReferenceValue
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.utils.CommonChecks
-import java.lang.IllegalArgumentException
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.IllegalStateException
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
-import com.strumenta.kolasu.model.ReferenceValue as KReferenceValue
 import io.lionweb.lioncore.java.model.ReferenceValue as LWReferenceValue
 
 interface PrimitiveValueSerialization<E> {
@@ -106,6 +110,7 @@ class LionWebModelConverter(
         nodeIdProvider: NodeIdProvider = this.nodeIdProvider,
         considerParent: Boolean = true,
     ): LWNode {
+        kolasuTree.assignParents()
         val myIDManager =
             object {
                 fun nodeId(kNode: KNode): String {
@@ -216,7 +221,25 @@ class LionWebModelConverter(
                             } else {
                                 when {
                                     kValue.isRetrieved -> {
-                                        val lwReferred: Node = nodesMapping.byA(kValue.referred!! as KNode)!!
+                                        val kReferred =
+                                            (
+                                                kValue.referred ?: throw IllegalStateException(
+                                                    "Reference " +
+                                                        "retrieved but referred is empty",
+                                                )
+                                            ) as KNode
+                                        // We may have a reference to a Kolasu Node that we are not exporting, and for
+                                        // which we have therefore no LionWeb node. In that case, if we have the
+                                        // identifier, we can produce a ProxyNode instead
+                                        val lwReferred: Node =
+                                            nodesMapping.byA(kReferred) ?: ProxyNode(
+                                                kValue.identifier
+                                                    ?: throw java.lang.IllegalStateException(
+                                                        "Identifier of reference target " +
+                                                            "value not set. Referred: $kReferred, " +
+                                                            "reference holder: $kNode",
+                                                    ),
+                                            )
                                         lwNode.addReferenceValue(feature, LWReferenceValue(lwReferred, kValue.name))
                                     }
                                     kValue.isResolved -> {
@@ -276,7 +299,6 @@ class LionWebModelConverter(
         }
         lwTree.thisAndAllDescendants().forEach { lwNode ->
             val kNode = nodesMapping.byB(lwNode)!!
-            // TODO populate values not already set at construction time
             if (kNode is KNode) {
                 val lwRange = lwNode.getOnlyChildByContainmentName("range")
                 if (lwRange != null) {
@@ -396,9 +418,103 @@ class LionWebModelConverter(
         }
     }
 
+    private fun attributeValue(
+        data: LWNode,
+        property: Property,
+    ): Any? {
+        val propValue = data.getPropertyValue(property)
+        val value =
+            if (property.type is Enumeration && propValue != null) {
+                val enumerationLiteral =
+                    if (propValue is EnumerationValue) {
+                        propValue.enumerationLiteral
+                    } else {
+                        throw java.lang.IllegalStateException(
+                            "Property value of property of enumeration type is " +
+                                "not an EnumerationValue. It is instead " + propValue,
+                        )
+                    }
+                val enumKClass =
+                    synchronized(languageConverter) {
+                        languageConverter
+                            .getEnumerationsToKolasuClassesMapping()[enumerationLiteral.enumeration]
+                            ?: throw java.lang.IllegalStateException()
+                    }
+                val entries = enumKClass.java.enumConstants
+                entries.find { it.name == enumerationLiteral.name }
+                    ?: throw IllegalStateException()
+            } else {
+                propValue
+            }
+        return value
+    }
+
+    private fun containmentValue(
+        data: LWNode,
+        containment: Containment,
+    ): Any? {
+        val lwChildren = data.getChildren(containment)
+        if (containment.isMultiple) {
+            val kChildren = lwChildren.map { nodesMapping.byB(it)!! }
+            return kChildren
+        } else {
+            // Given we navigate the tree in reverse the child should have been already
+            // instantiated
+            val lwChild: Node? =
+                when (lwChildren.size) {
+                    0 -> {
+                        null
+                    }
+
+                    1 -> {
+                        lwChildren.first()
+                    }
+
+                    else -> {
+                        throw IllegalStateException()
+                    }
+                }
+            val kChild =
+                if (lwChild == null) {
+                    return null
+                } else {
+                    (
+                        return nodesMapping.byB(lwChild)
+                            ?: throw IllegalStateException(
+                                "Unable to find Kolasu Node corresponding to $lwChild",
+                            )
+                    )
+                }
+        }
+    }
+
+    private fun referenceValue(
+        data: LWNode,
+        reference: Reference,
+        referencesPostponer: ReferencesPostponer,
+        currentValue: ReferenceValue<PossiblyNamed>? = null,
+    ): Any? {
+        val referenceValues = data.getReferenceValues(reference)
+        return when {
+            referenceValues.size > 1 -> {
+                throw IllegalStateException()
+            }
+            referenceValues.size == 0 -> {
+                null
+            }
+            referenceValues.size == 1 -> {
+                val rf = referenceValues.first()
+                val referenceByName = currentValue ?: ReferenceValue<PossiblyNamed>(rf.resolveInfo!!, null)
+                referencesPostponer.registerPostponedReference(referenceByName, rf.referred)
+                referenceByName
+            }
+            else -> throw java.lang.IllegalStateException()
+        }
+    }
+
     private fun <T : Any> instantiate(
         kClass: KClass<T>,
-        data: LWNode,
+        data: Node,
         referencesPostponer: ReferencesPostponer,
     ): T {
         if (kClass == Range::class) {
@@ -439,110 +555,94 @@ class LionWebModelConverter(
         constructor.parameters.forEach { param ->
             val feature = data.concept.getFeatureByName(param.name!!)
             if (feature == null) {
-                TODO()
+                throw java.lang.IllegalStateException(
+                    "We could not find a feature named as the parameter ${param.name} " +
+                        "on class $kClass",
+                )
             } else {
                 when (feature) {
                     is Property -> {
-                        val propValue = data.getPropertyValue(feature)
-                        val value =
-                            if (feature.type is Enumeration && propValue != null) {
-                                val enumerationLiteral =
-                                    if (propValue is EnumerationValue) {
-                                        propValue.enumerationLiteral
-                                    } else {
-                                        throw java.lang.IllegalStateException(
-                                            "Property value of property of enumeration type is " +
-                                                "not an EnumerationValue. It is instead " + propValue,
-                                        )
-                                    }
-                                val enumKClass =
-                                    synchronized(languageConverter) {
-                                        languageConverter
-                                            .getEnumerationsToKolasuClassesMapping()[enumerationLiteral.enumeration]
-                                            ?: throw java.lang.IllegalStateException()
-                                    }
-                                val entries = enumKClass.java.enumConstants
-
-                                entries.find { it.name == enumerationLiteral.name }
-                                    ?: throw IllegalStateException()
-                            } else {
-                                propValue
-                            }
-
-                        params[param] = value
+                        params[param] = attributeValue(data, feature)
                     }
 
                     is Reference -> {
-                        val referenceValues = data.getReferenceValues(feature)
-                        when {
-                            referenceValues.size > 1 -> {
-                                throw IllegalStateException()
-                            }
-
-                            referenceValues.size == 0 -> {
-                                params[param] = null
-                            }
-
-                            referenceValues.size == 1 -> {
-                                val rf = referenceValues.first()
-                                val referenceValue =
-                                    KReferenceValue<PossiblyNamed>(rf.resolveInfo!!, null)
-                                referencesPostponer.registerPostponedReference(referenceValue, rf.referred)
-                                params[param] = referenceValue
-                            }
-                        }
+                        params[param] = referenceValue(data, feature, referencesPostponer)
                     }
 
                     is Containment -> {
-                        val lwChildren = data.getChildren(feature)
-                        if (feature.isMultiple) {
-                            val kChildren = lwChildren.map { nodesMapping.byB(it)!! }
-                            params[param] = kChildren
-                        } else {
-                            // Given we navigate the tree in reverse the child should have been already
-                            // instantiated
-                            val lwChild: Node? =
-                                when (lwChildren.size) {
-                                    0 -> {
-                                        null
-                                    }
-
-                                    1 -> {
-                                        lwChildren.first()
-                                    }
-
-                                    else -> {
-                                        throw IllegalStateException()
-                                    }
-                                }
-                            val kChild =
-                                if (lwChild == null) {
-                                    null
-                                } else {
-                                    (
-                                        nodesMapping.byB(lwChild)
-                                            ?: throw IllegalStateException(
-                                                "Unable to find Kolasu Node corresponding to $lwChild",
-                                            )
-                                    )
-                                }
-                            params[param] = kChild
-                        }
+                        params[param] = containmentValue(data, feature)
                     }
 
                     else -> throw IllegalStateException()
                 }
             }
         }
-        try {
-            return constructor.callBy(params) as T
-        } catch (e: Exception) {
-            throw RuntimeException(
-                "Issue instantiating using constructor $constructor with params " +
-                    "${params.map { "${it.key.name}=${it.value}" }}",
-                e,
-            )
+
+        val kNode =
+            try {
+                constructor.callBy(params) as T
+            } catch (e: Exception) {
+                throw RuntimeException(
+                    "Issue instantiating using constructor $constructor with params " +
+                        "${params.map { "${it.key.name}=${it.value}" }}",
+                    e,
+                )
+            }
+
+        val propertiesNotSetAtConstructionTime =
+            kClass.nodeOriginalProperties.filter { prop ->
+                params.keys.none { param ->
+                    param.name == prop.name
+                }
+            }
+        propertiesNotSetAtConstructionTime.forEach { property ->
+            val feature = data.concept.getFeatureByName(property.name!!)
+            if (property !is KMutableProperty<*>) {
+                if (property.isContainment() && property.asContainment().multiplicity == Multiplicity.MANY) {
+                    val currentValue = property.get(kNode) as MutableList<KNode>
+                    currentValue.clear()
+                    val valueToSet = containmentValue(data, feature as Containment) as List<KNode>
+                    currentValue.addAll(valueToSet)
+                } else if (property.isReference()) {
+                    val currentValue = property.get(kNode) as ReferenceValue<PossiblyNamed>
+                    val valueToSet =
+                        referenceValue(data, feature as Reference, referencesPostponer, currentValue)
+                            as ReferenceValue<PossiblyNamed>
+                    currentValue.name = valueToSet.name
+                    currentValue.referred = valueToSet.referred
+                    currentValue.identifier = valueToSet.identifier
+                } else {
+                    throw java.lang.IllegalStateException(
+                        "Cannot set this property, as it is immutable: ${property.name} on $kNode. " +
+                            "The properties set at construction time are: " +
+                            params.keys.joinToString(", ") { it.name ?: "<UNNAMED>" },
+                    )
+                }
+            } else {
+                when {
+                    property.isAttribute() -> {
+                        val value = attributeValue(data, feature as Property)
+                        property.setter.call(kNode, value)
+                    }
+                    property.isReference() -> {
+                        val valueToSet =
+                            referenceValue(data, feature as Reference, referencesPostponer)
+                                as ReferenceValue<PossiblyNamed>
+                        property.setter.call(kNode, valueToSet)
+                    }
+                    property.isContainment() -> {
+                        try {
+                            val valueToSet = containmentValue(data, feature as Containment)
+                            property.setter.call(kNode, valueToSet)
+                        } catch (e: java.lang.Exception) {
+                            throw RuntimeException("Unable to set containment $feature on node $kNode", e)
+                        }
+                    }
+                }
+            }
         }
+
+        return kNode
     }
 
     private fun findConcept(kNode: NodeLike): Concept {

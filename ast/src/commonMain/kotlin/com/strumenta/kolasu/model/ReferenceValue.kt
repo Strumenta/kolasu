@@ -21,7 +21,7 @@ import com.badoo.reaktive.subject.publish.PublishSubject
  * actual node at a later stage.
  */
 class ReferenceValue<N>(
-    val name: String,
+    var name: String,
     initialReferred: N? = null,
     var identifier: String? = null,
     var range: Range? = null,
