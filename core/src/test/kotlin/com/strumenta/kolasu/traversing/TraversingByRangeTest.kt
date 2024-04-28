@@ -1,14 +1,27 @@
 package com.strumenta.kolasu.traversing
 
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.traversing.TraversingStructurallyTest.Box
+import com.strumenta.kolasu.traversing.TraversingStructurallyTest.Item
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.fail
 
 internal class TraversingByRangeTest {
+    object StarLasuLanguageInstance : StarLasuLanguage("com.strumenta.kolasu.traversing.TraversingByRangeTest") {
+        init {
+            explore(
+                Box::class,
+                Item::class,
+            )
+        }
+    }
+
     class Box(
         val name: String,
         val contents: List<NodeLike>,
@@ -19,6 +32,10 @@ internal class TraversingByRangeTest {
         val name: String,
         specifiedRange: Range? = null,
     ) : Node(specifiedRange)
+
+    init {
+        StarLasuLanguageInstance.ensureIsRegistered()
+    }
 
     private fun printSequence(sequence: Sequence<NodeLike>): String =
         sequence

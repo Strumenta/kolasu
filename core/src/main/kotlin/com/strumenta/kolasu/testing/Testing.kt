@@ -1,12 +1,14 @@
 package com.strumenta.kolasu.testing
 
-import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.model.KReferenceByName
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.kReferenceByNameProperties
 import com.strumenta.kolasu.parsing.ParsingResult
+import com.strumenta.kolasu.transformation.GenericNode
 import com.strumenta.kolasu.traversing.walkChildren
 import kotlin.reflect.KClass
 import kotlin.test.assertEquals
@@ -150,19 +152,27 @@ fun assertASTsAreEqual(
     considerRange: Boolean = false,
     useLightweightAttributeEquality: Boolean = false,
 ) {
+    if (actual is GenericNode && expected is GenericNode) {
+        assertEquals(expected.specifiedConcept, actual.specifiedConcept, "$context.genericNodeConcept")
+        return
+    }
     if (expected.nodeType == actual.nodeType) {
         if (considerRange) {
             assertEquals(expected.range, actual.range, "$context.range")
         }
-        expected.originalFeatures.forEach { expectedProperty ->
+        if (actual is GenericNode) {
+            if (expected is GenericNode) {
+                return
+            } else {
+                fail("Generic node found")
+            }
+        }
+        expected.concept.allFeatures.filter { !it.derived }.forEach { feature ->
             try {
-                val actualProperty =
-                    actual.originalFeatures.find { it.name == expectedProperty.name }
-                        ?: fail("No property ${expectedProperty.name} found at $context")
-                val actualPropValue = actualProperty.value
-                val expectedPropValue = expectedProperty.value
-                if (expectedProperty.featureType == FeatureType.CONTAINMENT) {
-                    if (expectedProperty.isMultiple) {
+                val actualPropValue = feature.value(actual)
+                val expectedPropValue = feature.value(expected)
+                if (feature is Containment) {
+                    if (feature.isMultiple) {
                         if (expectedPropValue is IgnoreChildren<*>) {
                             // Nothing to do
                         } else {
@@ -171,7 +181,7 @@ fun assertASTsAreEqual(
                             assertEquals(
                                 actualPropValueCollection == null,
                                 expectedPropValueCollection == null,
-                                "$context.${expectedProperty.name} nullness: expected value " +
+                                "$context.${feature.name} nullness: expected value " +
                                     "to be $expectedPropValueCollection but was $actualPropValueCollection " +
                                     "(node type ${actual.nodeType})",
                             )
@@ -179,7 +189,7 @@ fun assertASTsAreEqual(
                                 assertEquals(
                                     expectedPropValueCollection?.size,
                                     actualPropValueCollection?.size,
-                                    "$context.${expectedProperty.name} length",
+                                    "$context.${feature.name} length",
                                 )
                                 val expectedIt = expectedPropValueCollection.iterator()
                                 val actualIt = actualPropValueCollection.iterator()
@@ -187,7 +197,7 @@ fun assertASTsAreEqual(
                                     assertASTsAreEqual(
                                         expectedIt.next(),
                                         actualIt.next(),
-                                        "$context.${expectedProperty.name}[$i]",
+                                        "$context.${feature.name}[$i]",
                                         considerRange = considerRange,
                                         useLightweightAttributeEquality = useLightweightAttributeEquality,
                                     )
@@ -199,13 +209,13 @@ fun assertASTsAreEqual(
                             assertEquals<Any?>(
                                 expectedPropValue,
                                 actualPropValue,
-                                "$context.${expectedProperty.name}",
+                                "$context.${feature.name}",
                             )
                         } else if (expectedPropValue != null && actualPropValue == null) {
                             assertEquals<Any?>(
                                 expectedPropValue,
                                 actualPropValue,
-                                "$context.${expectedProperty.name}",
+                                "$context.${feature.name}",
                             )
                         } else if (expectedPropValue == null && actualPropValue == null) {
                             // that is ok
@@ -213,23 +223,23 @@ fun assertASTsAreEqual(
                             assertASTsAreEqual(
                                 expectedPropValue as NodeLike,
                                 actualPropValue as NodeLike,
-                                context = "$context.${expectedProperty.name}",
+                                context = "$context.${feature.name}",
                                 considerRange = considerRange,
                                 useLightweightAttributeEquality = useLightweightAttributeEquality,
                             )
                         }
                     }
-                } else if (expectedProperty.featureType == FeatureType.REFERENCE) {
+                } else if (feature is Reference) {
                     if (expectedPropValue is ReferenceValue<*> && actualPropValue is ReferenceValue<*>) {
                         assertEquals(
                             expectedPropValue.name,
                             actualPropValue.name,
-                            "$context, comparing reference name of ${expectedProperty.name} of ${expected.nodeType}",
+                            "$context, comparing reference name of ${feature.name} of ${expected.nodeType}",
                         )
                         assertEquals(
                             expectedPropValue.referred?.toString(),
                             actualPropValue.referred?.toString(),
-                            "$context, comparing reference pointer ${expectedProperty.name} of ${expected.nodeType}",
+                            "$context, comparing reference pointer ${feature.name} of ${expected.nodeType}",
                         )
                     } else {
                         TODO()
@@ -239,18 +249,18 @@ fun assertASTsAreEqual(
                         assertEquals(
                             expectedPropValue?.toString(),
                             actualPropValue?.toString(),
-                            "$context, comparing property ${expectedProperty.name} of ${expected.nodeType}",
+                            "$context, comparing property ${feature.name} of ${expected.nodeType}",
                         )
                     } else {
                         assertEquals(
                             expectedPropValue,
                             actualPropValue,
-                            "$context, comparing property ${expectedProperty.name} of ${expected.nodeType}",
+                            "$context, comparing property ${feature.name} of ${expected.nodeType}",
                         )
                     }
                 }
             } catch (e: Exception) {
-                throw RuntimeException("Issue while processing property $expectedProperty of $expected", e)
+                throw RuntimeException("Issue while processing property $feature of $expected", e)
             }
         }
     } else {

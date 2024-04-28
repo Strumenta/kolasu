@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.ids
 
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.model.ASTRoot
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
@@ -8,6 +10,12 @@ import com.strumenta.kolasu.model.assignParents
 import junit.framework.TestCase.assertEquals
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
+
+object StarLasuLanguageInstance : StarLasuLanguage("com.strumenta.kolasu.ids") {
+    init {
+        explore(MyRoot::class, MyNonRoot::class, MyOtherNode::class, MyOtherRoot::class)
+    }
+}
 
 @ASTRoot
 data class MyRoot(
@@ -30,6 +38,10 @@ data class MyOtherRoot(
 ) : Node()
 
 class StructuralNodeIdProviderTest {
+    init {
+        StarLasuLanguageInstance.ensureIsRegistered()
+    }
+
     @Test(expected = SourceShouldBeSetException::class)
     fun rootNodeMustHaveSourceSet() {
         val idProvider = StructuralNodeIdProvider()

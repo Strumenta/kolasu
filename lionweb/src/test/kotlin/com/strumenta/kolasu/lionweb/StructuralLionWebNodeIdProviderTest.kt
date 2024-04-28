@@ -1,6 +1,9 @@
 package com.strumenta.kolasu.lionweb
 
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.model.ASTRoot
+import com.strumenta.kolasu.model.LanguageAssociation
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
@@ -9,10 +12,19 @@ import junit.framework.TestCase.assertNotNull
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@ASTRoot data class A(
+object YetAnotherStarLasuLanguageInstance : StarLasuLanguage("com.strumenta.kolasu.lionweb") {
+    init {
+        explore(A::class, B::class, C::class)
+    }
+}
+
+@LanguageAssociation(YetAnotherStarLasuLanguageInstance::class)
+@ASTRoot
+data class A(
     val bs: MutableList<B> = mutableListOf(),
 ) : Node()
 
+@LanguageAssociation(YetAnotherStarLasuLanguageInstance::class)
 @ASTRoot(
     canBeNotRoot = true,
 )
@@ -21,6 +33,7 @@ data class B(
     var cs: MutableList<C> = mutableListOf(),
 ) : Node()
 
+@LanguageAssociation(YetAnotherStarLasuLanguageInstance::class)
 @ASTRoot(canBeNotRoot = true)
 data class C(
     var value: Int,

@@ -4,9 +4,11 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.model.asConceptLike
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
@@ -34,6 +36,7 @@ class JsonDeserializer {
     private fun deserializeType(
         typeToDeserialize: KType,
         json: JsonElement?,
+        language: StarLasuLanguage,
     ): Any? {
         if (json == null) {
             return null
@@ -44,27 +47,32 @@ class JsonDeserializer {
                 NodeLike::class.java.isAssignableFrom(rawClass) -> {
                     val className = json.asJsonObject[JSON_TYPE_KEY].asString
                     val actualClass =
-                        try {
-                            Class.forName(className)
-                        } catch (ex: ClassNotFoundException) {
-                            // This handles only the case when the serialized JSON used the simple name
-                            // rather than the canonical name for indicating the type of the serialized object.
-                            // The rawClass is the class we are expecting,
-                            // while className is the type in the JSON serialization.
-                            // These two types could be different: rawClass could be a sealed or abstract type,
-                            // while className could be a compatible concrete class.
-                            // So, when className is a simple name and we cannot resolve it directly,
-                            // we need to get the package name of the rawClass and apply it to className.
-                            Class.forName(
-                                "${
-                                    rawClass.canonicalName.substring(
-                                        0,
-                                        rawClass.canonicalName.lastIndexOf('.') + 1,
+                        language.getConcept(className).explicitlySetKotlinClass?.java
+                            ?: try {
+                                Class.forName(className)
+                            } catch (ex: ClassNotFoundException) {
+                                // This handles only the case when the serialized JSON used the simple name
+                                // rather than the canonical name for indicating the type of the serialized object.
+                                // The rawClass is the class we are expecting,
+                                // while className is the type in the JSON serialization.
+                                // These two types could be different: rawClass could be a sealed or abstract type,
+                                // while className could be a compatible concrete class.
+                                // So, when className is a simple name and we cannot resolve it directly,
+                                // we need to get the package name of the rawClass and apply it to className.
+                                try {
+                                    Class.forName(
+                                        "${
+                                            rawClass.canonicalName.substring(
+                                                0,
+                                                rawClass.canonicalName.lastIndexOf('.') + 1,
+                                            )
+                                        }$className",
                                     )
-                                }$className",
-                            )
-                        }
-                    return deserialize(actualClass.asSubclass(NodeLike::class.java), json.asJsonObject)
+                                } catch (ex: ClassNotFoundException) {
+                                    rawClass
+                                }
+                            }
+                    return deserialize(actualClass.asSubclass(NodeLike::class.java), json.asJsonObject, language)
                 }
 
                 Collection::class.java.isAssignableFrom(rawClass) -> {
@@ -73,7 +81,7 @@ class JsonDeserializer {
                     val ja = json.asJsonArray
                     val list = LinkedList<Any>()
                     for (jel in ja) {
-                        list.add(deserializeType(elementType.type!!, jel)!!)
+                        list.add(deserializeType(elementType.type!!, jel, language)!!)
                     }
                     return list
                 }
@@ -106,7 +114,7 @@ class JsonDeserializer {
                             if (clazz == null) {
                                 throw IllegalStateException("Unable to find class $type")
                             } else {
-                                return deserializeType(clazz.kotlin.createType(), json)
+                                return deserializeType(clazz.kotlin.createType(), json, language)
                             }
                         }
                     }
@@ -120,14 +128,16 @@ class JsonDeserializer {
     fun <T : NodeLike> deserialize(
         clazz: Class<T>,
         json: String,
+        language: StarLasuLanguage = clazz.kotlin.asConceptLike().language,
     ): T {
         val jo = JsonParser().parse(json).asJsonObject
-        return deserialize(clazz, jo)
+        return deserialize(clazz, jo, language)
     }
 
     fun <T : NodeLike> deserialize(
         clazz: Class<T>,
         jo: JsonObject,
+        language: StarLasuLanguage,
     ): T {
         val instance: T?
         val primaryConstructor = clazz.kotlin.primaryConstructor
@@ -135,7 +145,7 @@ class JsonDeserializer {
             val args = HashMap<KParameter, Any?>()
             for (p in primaryConstructor.parameters) {
                 try {
-                    val value = deserializeType(p.type, jo.get(p.name))
+                    val value = deserializeType(p.type, jo.get(p.name), language)
                     args[p] = value
                 } catch (t: Throwable) {
                     throw RuntimeException(
@@ -178,6 +188,7 @@ class JsonDeserializer {
     fun <T : NodeLike> deserializeResult(
         rootClass: Class<T>,
         json: String,
+        language: StarLasuLanguage = rootClass.kotlin.asConceptLike().language,
     ): Result<T> {
         val jo = JsonParser().parse(json).asJsonObject
         val errors =
@@ -190,7 +201,7 @@ class JsonDeserializer {
             }
         val root =
             if (jo.has("root")) {
-                deserialize(rootClass, jo["root"].asJsonObject)
+                deserialize(rootClass, jo["root"].asJsonObject, language)
             } else {
                 null
             }
@@ -201,6 +212,7 @@ class JsonDeserializer {
     fun <T : NodeLike> deserializeParsingResult(
         rootClass: Class<T>,
         json: String,
+        language: StarLasuLanguage,
     ): ParsingResult<T> {
         val jo = JsonParser().parse(json).asJsonObject
         val issues =
@@ -212,7 +224,7 @@ class JsonDeserializer {
             }
         val root =
             if (jo.has("root")) {
-                deserialize(rootClass, jo["root"].asJsonObject)
+                deserialize(rootClass, jo["root"].asJsonObject, language)
             } else {
                 null
             }

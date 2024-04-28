@@ -132,7 +132,7 @@ class DeclarativeSymbolProviderRule<NodeTy : NodeLike>(
         source: ReferenceValue<*>,
     ): ReferenceValueDescription =
         ReferenceValueDescription(
-            source.referred?.let { it as? NodeLike }?.let { nodeIdProvider.id(it) },
+            source.referred?.let { nodeIdProvider.id(it) },
         )
 
     private fun toContainmentValueDescription(

@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.transformation
 
+import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.traversing.children
@@ -9,10 +10,14 @@ import com.strumenta.kolasu.traversing.children
  */
 class GenericNode(
     parent: NodeLike? = null,
+    val specifiedConcept: Concept? = null,
 ) : Node() {
     init {
         this.parent = parent
     }
+
+    override val concept: Concept
+        get() = specifiedConcept ?: throw IllegalStateException("No specified concept for this GenericNode")
 }
 
 fun NodeLike.findGenericNode(): GenericNode? =

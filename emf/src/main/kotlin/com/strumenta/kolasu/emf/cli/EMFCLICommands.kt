@@ -46,6 +46,7 @@ class EMFModelCommand<R : NodeLike, P>(
         e: Exception,
     ) {
         // Nothing to do
+        e.printStackTrace()
     }
 
     override fun processResult(

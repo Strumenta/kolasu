@@ -1,5 +1,8 @@
 package com.strumenta.kolasu.serialization
 
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
+import com.strumenta.kolasu.model.LanguageAssociation
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.ReferenceValue
@@ -8,10 +11,18 @@ import org.junit.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
+object MyLanguageForSerialization : StarLasuLanguage("MyLanguageForSerialization") {
+    init {
+        explore(A::class, B::class)
+    }
+}
+
+@LanguageAssociation(MyLanguageForSerialization::class)
 data class A(
     val s: String,
 ) : Node()
 
+@LanguageAssociation(MyLanguageForSerialization::class)
 data class B(
     val a: A,
     val manyAs: List<A>,

@@ -3,7 +3,7 @@ package com.strumenta.kolasu.ids
 import com.strumenta.kolasu.model.ASTRoot
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Source
-import com.strumenta.kolasu.model.containingProperty
+import com.strumenta.kolasu.model.containingContainment
 import com.strumenta.kolasu.model.indexInContainingProperty
 
 class ConstantSourceIdProvider(
@@ -28,7 +28,7 @@ open class StructuralNodeIdProvider(
             } else {
                 InternalCoordinates(
                     topLevelProvider.id(kNode.parent!!),
-                    kNode.containingProperty()!!.name,
+                    kNode.containingContainment()!!.name,
                     kNode.indexInContainingProperty()!!,
                 )
             }

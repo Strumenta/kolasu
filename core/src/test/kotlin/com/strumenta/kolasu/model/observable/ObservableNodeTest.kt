@@ -1,5 +1,11 @@
 package com.strumenta.kolasu.model.observable
 
+import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Reference
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
+import com.strumenta.kolasu.language.intType
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
@@ -7,10 +13,17 @@ import com.strumenta.kolasu.model.ReferenceValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+object StarLasuLanguageInstance : StarLasuLanguage("com.strumenta.kolasu.model.observable") {
+    init {
+        explore(MyObservableNodeMP::class, NodeWithReference::class)
+    }
+}
+
 class MyObservableNode : Node() {
     var p1: Int = 0
         set(value) {
-            notifyOfPropertyChange("p1", field, value)
+            val attr = Attribute("p1", false, intType, { TODO() })
+            notifyOfAttributeChange(attr, field, value)
             field = value
         }
 }
@@ -22,56 +35,56 @@ class MyObserver(
 
     override fun <V> onAttributeChange(
         node: NodeLike,
-        attributeName: String,
+        attribute: Attribute,
         oldValue: V,
         newValue: V,
     ) {
-        observations.add("$attributeName: $oldValue -> $newValue")
+        observations.add("${attribute.name}: $oldValue -> $newValue")
     }
 
     override fun onChildAdded(
         node: NodeLike,
-        containmentName: String,
+        containment: Containment,
         added: NodeLike,
     ) {
-        observations.add("$containmentName: added $added")
+        observations.add("${containment.name}: added $added")
     }
 
     override fun onChildRemoved(
         node: NodeLike,
-        containmentName: String,
+        containment: Containment,
         removed: NodeLike,
     ) {
-        observations.add("$containmentName: removed $removed")
+        observations.add("${containment.name}: removed $removed")
     }
 
     override fun onReferenceSet(
         node: NodeLike,
-        referenceName: String,
+        reference: Reference,
         oldReferredNode: NodeLike?,
         newReferredNode: NodeLike?,
     ) {
         val oldName = if (oldReferredNode == null) "null" else (oldReferredNode as? Named)?.name ?: "<UNKNOWN>"
         val newName = if (newReferredNode == null) "null" else (newReferredNode as? Named)?.name ?: "<UNKNOWN>"
-        observations.add("$referenceName: changed from $oldName to $newName")
+        observations.add("${reference.name}: changed from $oldName to $newName")
     }
 
     override fun onReferringAdded(
         node: NodeLike,
-        referenceName: String,
+        reference: Reference,
         referring: NodeLike,
     ) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
-        observations.add("$myName is now referred to by $referring.$referenceName")
+        observations.add("$myName is now referred to by $referring.${reference.name}")
     }
 
     override fun onReferringRemoved(
         node: NodeLike,
-        referenceName: String,
+        reference: Reference,
         referring: NodeLike,
     ) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
-        observations.add("$myName is not referred anymore by $referring.$referenceName")
+        observations.add("$myName is not referred anymore by $referring.${reference.name}")
     }
 }
 
@@ -79,7 +92,7 @@ class MyObservableNodeMP : Node() {
     val p5 = ObservableList<MyObservableNodeMP>()
 
     init {
-        p5.subscribe(MultiplePropertyListObserver(this, "p5"))
+        p5.subscribe(MultiplePropertyListObserver(this, concept.requireContainment("p5")))
     }
 }
 
@@ -93,7 +106,7 @@ data class NodeWithReference(
     val id: Int,
 ) : Node() {
     init {
-        ref.setContainer(this, "ref")
+        ref.setContainer(this, concept.requireReference("ref"))
     }
 }
 
@@ -114,6 +127,7 @@ class ObservableNodeTest {
 
     @Test
     fun observeMultipleContainmentsChanges() {
+        StarLasuLanguageInstance.ensureIsRegistered()
         val n1 = MyObservableNodeMP()
         val n2 = MyObservableNodeMP()
         val n3 = MyObservableNodeMP()
@@ -175,6 +189,7 @@ class ObservableNodeTest {
 
     @Test
     fun observeReferences() {
+        StarLasuLanguageInstance.ensureIsRegistered()
         val obs1 = MyObserver("Observer to nwr1")
         val obs2 = MyObserver("Observer to nwr2")
         val obsA = MyObserver("Observer to a")

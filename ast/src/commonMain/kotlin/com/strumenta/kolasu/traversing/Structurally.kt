@@ -23,13 +23,9 @@ fun NodeLike.walkAncestors(): Sequence<NodeLike> {
 fun NodeLike.walkChildren(includeDerived: Boolean = false): Sequence<NodeLike> {
     return sequence {
         (
-            if (includeDerived) {
-                this@walkChildren.features
-            } else {
-                this@walkChildren.originalFeatures
-            }
-        ).forEach { property ->
-            when (val value = property.value) {
+            concept.allContainments.filter { includeDerived || !it.derived }
+        ).forEach { containment ->
+            when (val value = containment.value(this@walkChildren)) {
                 is NodeLike -> yield(value)
                 is Collection<*> -> value.forEach { if (it is NodeLike) yield(it) }
             }

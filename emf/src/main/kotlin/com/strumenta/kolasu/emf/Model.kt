@@ -3,8 +3,9 @@ package com.strumenta.kolasu.emf
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.strumenta.kolasu.antlr4j.parsing.ParseTreeOrigin
+import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.model.Destination
-import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.model.NodeDestination
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.NodeOrigin
@@ -14,7 +15,7 @@ import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.SimpleOrigin
 import com.strumenta.kolasu.model.TextFileDestination
-import com.strumenta.kolasu.model.processProperties
+import com.strumenta.kolasu.model.processFeatures
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.common.util.EList
@@ -457,12 +458,12 @@ fun NodeLike.toEObject(
         require(this.destinations.size < 2)
         setDestination(eo, this.destinations.firstOrNull(), eResource, mapping)
 
-        this.processProperties { pd ->
+        this.processFeatures { pd, node ->
             val esf = ec.eAllStructuralFeatures.find { it.name == pd.name }!!
-            if (pd.featureType == FeatureType.CONTAINMENT) {
+            if (pd is Containment) {
                 if (pd.isMultiple) {
                     val elist = eo.eGet(esf) as MutableList<EObject?>
-                    (pd.value as List<*>?)?.forEach {
+                    (pd.value(node) as List<*>?)?.forEach {
                         try {
                             val childEO = (it as NodeLike?)?.getOrCreateEObject(eResource, mapping)
                             elist.add(childEO)
@@ -471,16 +472,16 @@ fun NodeLike.toEObject(
                         }
                     }
                 } else {
-                    if (pd.value == null) {
+                    if (pd.value(node) == null) {
                         eo.eSet(esf, null)
                     } else {
-                        eo.eSet(esf, (pd.value as NodeLike).getOrCreateEObject(eResource, mapping))
+                        eo.eSet(esf, (pd.value(node) as NodeLike).getOrCreateEObject(eResource, mapping))
                     }
                 }
             } else {
                 if (pd.isMultiple) {
                     val elist = eo.eGet(esf) as MutableList<Any>
-                    (pd.value as List<*>?)?.forEach {
+                    (pd.value(node) as List<*>?)?.forEach {
                         try {
                             val childValue = toValue(ec.ePackage, it, mapping)
                             elist.add(childValue!!)
@@ -490,12 +491,15 @@ fun NodeLike.toEObject(
                     }
                 } else {
                     try {
-                        eo.eSet(esf, toValue(ec.ePackage, pd.value, mapping))
+                        eo.eSet(esf, toValue(ec.ePackage, pd.value(node), mapping))
                     } catch (e: Exception) {
                         throw RuntimeException("Unable to set property $pd. Structural feature: $esf", e)
                     }
                 }
             }
+        }
+        if (this is GenericErrorNode) {
+            eo.eSet(ec.getEStructuralFeature("message"), this.message)
         }
         return eo
     } catch (e: Exception) {

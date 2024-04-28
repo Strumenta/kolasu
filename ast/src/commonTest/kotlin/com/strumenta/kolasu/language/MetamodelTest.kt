@@ -8,22 +8,31 @@ import kotlin.test.assertEquals
 
 class MyNode : MPNode()
 
+enum class MyEnum
+
 class MetamodelTest {
     @Test
     fun attributeMultiplicity() {
-        assertEquals(Multiplicity.OPTIONAL, Attribute("MyAttribute", true, stringType).multiplicity)
-        assertEquals(Multiplicity.SINGULAR, Attribute("MyAttribute", false, stringType).multiplicity)
-    }
-
-    @Test
-    fun attributeNullableType() {
-        assertThrows { Attribute("MyAttribute", true, nullableStringType) }
+        assertEquals(Multiplicity.OPTIONAL, Attribute("MyAttribute", true, stringType, { TODO() }).multiplicity)
+        assertEquals(Multiplicity.SINGULAR, Attribute("MyAttribute", false, stringType, { TODO() }).multiplicity)
     }
 
     @Test
     fun referenceMultiplicity() {
-        assertEquals(Multiplicity.OPTIONAL, Reference("MyReference", true, MyNode::class).multiplicity)
-        assertEquals(Multiplicity.SINGULAR, Reference("MyReference", false, MyNode::class).multiplicity)
+        val l = StarLasuLanguage("my.foo.language")
+        assertEquals(
+            Multiplicity.OPTIONAL,
+            Reference("MyReference", true, Concept(l, "com.strumenta.kolasu.language.MyNode"), { TODO() }).multiplicity,
+        )
+        assertEquals(
+            Multiplicity.SINGULAR,
+            Reference(
+                "MyReference",
+                false,
+                Concept(l, "com.strumenta.kolasu.language.MyNode"),
+                { TODO() },
+            ).multiplicity,
+        )
     }
 }
 

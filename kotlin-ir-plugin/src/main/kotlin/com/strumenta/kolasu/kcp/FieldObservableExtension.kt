@@ -25,7 +25,6 @@ import org.jetbrains.kotlin.ir.symbols.impl.IrAnonymousInitializerSymbolImpl
 import org.jetbrains.kotlin.ir.util.allParameters
 import org.jetbrains.kotlin.ir.util.parentAsClass
 import org.jetbrains.kotlin.ir.util.statements
-import org.jetbrains.kotlin.ir.util.toIrConst
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -38,17 +37,17 @@ class FieldObservableExtension(
     val pluginContext: IrPluginContext,
     isMPNode: Boolean,
 ) : IrElementTransformerVoidWithContext() {
-    val notifyOfPropertyChange: IrSimpleFunctionSymbol by lazy {
+    val notifyOfAttributeChange: IrSimpleFunctionSymbol by lazy {
         val callableId =
             if (isMPNode) {
                 CallableId(
                     ClassId.topLevel(FqName(MPNode::class.qualifiedName!!)),
-                    Name.identifier("notifyOfPropertyChange"),
+                    Name.identifier("notifyOfAttributeChange"),
                 )
             } else {
                 CallableId(
                     ClassId.topLevel(FqName(Node::class.qualifiedName!!)),
-                    Name.identifier("notifyOfPropertyChange"),
+                    Name.identifier("notifyOfAttributeChange"),
                 )
             }
         pluginContext
@@ -95,24 +94,29 @@ class FieldObservableExtension(
                             }
                         // passing "this"
                         putValueArgument(0, irGet(thisValue))
-                        // passing the name of the reference
+                        // passing the reference
+                        val nodeSubClass = declaration.parentAsClass
                         putValueArgument(
                             1,
-                            declaration.name.identifier.toIrConst(pluginContext.irBuiltIns.stringType),
+                            referenceByName(
+                                pluginContext, irGet(thisValue),
+                                declaration.name.identifier,
+                            ),
                         )
                     }
                 }
             anonymousInitializerSymbolImpl.parent = irClass
             irClass.declarations.add(anonymousInitializerSymbolImpl)
-        } else {
+        } else if (declaration.declareContainment()) {
+        } else if (declaration.declareAttribute()) {
             val irContext = pluginContext
             val prevBody = declaration.setter?.body
             if (prevBody != null && declaration.setter!!.origin == IrDeclarationOrigin.DEFAULT_PROPERTY_ACCESSOR) {
                 declaration.setter!!.body =
                     DeclarationIrBuilder(irContext, declaration.setter!!.symbol).irBlockBody(declaration.setter!!) {
-                        // notifyOfPropertyChange("<name of property>", field, value)
+                        // notifyOfAttributeChange("<name of property>", field, value)
                         +irCall(
-                            notifyOfPropertyChange,
+                            notifyOfAttributeChange,
                             pluginContext.irBuiltIns.unitType,
                             valueArgumentsCount = 3,
                             typeArgumentsCount = 0,
@@ -123,8 +127,15 @@ class FieldObservableExtension(
 
                             this.dispatchReceiver = irGet(thisParameter)
 
-                            // "<name of property>"
-                            putValueArgument(0, declaration.name.identifier.toIrConst(irContext.irBuiltIns.stringType))
+                            // attribute: myClass.concept.attribute(attributeName)
+                            val nodeSubClass = declaration.parentAsClass
+                            putValueArgument(
+                                0,
+                                attributeByName(
+                                    pluginContext, nodeSubClass,
+                                    declaration.name.identifier,
+                                ),
+                            )
                             // current backing field value
                             putValueArgument(1, irGetField(irGet(thisParameter), declaration.backingField!!))
                             // value passed to the setter

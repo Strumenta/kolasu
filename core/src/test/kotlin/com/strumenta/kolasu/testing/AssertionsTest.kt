@@ -1,10 +1,22 @@
 package com.strumenta.kolasu.testing
 
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
+import com.strumenta.kolasu.model.LanguageAssociation
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import org.junit.ComparisonFailure
 import org.junit.Test
 
+object MyExampleLanguageForAssertions : StarLasuLanguage("com.foo.MyExampleLanguageForAssertions") {
+    init {
+        explore(
+            MyBigNode::class,
+        )
+    }
+}
+
+@LanguageAssociation(MyExampleLanguageForAssertions::class)
 data class MyBigNode(
     override val name: String,
     val foo: MySmallNode? = null,
@@ -12,10 +24,12 @@ data class MyBigNode(
 ) : Node(),
     Named
 
+@LanguageAssociation(MyExampleLanguageForAssertions::class)
 data class MySmallNode(
     val value: Long,
 ) : Node()
 
+@LanguageAssociation(MyExampleLanguageForAssertions::class)
 data class MyOtherNode(
     val flag: Boolean,
     val s: String,

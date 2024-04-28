@@ -3,6 +3,7 @@ package com.strumenta.kolasu.model
 import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 
@@ -10,32 +11,31 @@ typealias NodeObserver = ObservableObserver<in NodeNotification<in NodeLike>>
 
 interface NodeLike {
     @property:Internal
+    val concept: Concept
+
+    @property:Internal
     val changes: PublishSubject<NodeNotification<in NodeLike>>
 
     @Internal
     val destinations: MutableList<Destination>
 
+    @Deprecated("Use concept.name")
     @Internal
     val nodeType: String
+        get() = concept.name
 
-    /**
-     * The properties of this AST nodes, including attributes, children, and references.
-     */
-    @property:Internal
-    val features: List<FeatureDescription>
+    @Deprecated("Use concept.qualifiedName")
+    @Internal
+    val qualifiedNodeType: String
+        get() = concept.qualifiedName
 
-    /**
-     * The features of this AST nodes, including attributes, children, and references, but excluding derived
-     * features.
-     */
     @property:Internal
-    open val originalFeatures: List<FeatureDescription>
-        get() =
-            try {
-                features.filter { !it.derived }
-            } catch (e: Throwable) {
-                throw RuntimeException("Issue while getting features of node ${this::class}", e)
-            }
+    val containments: List<Containment>
+        get() = concept.declaredFeatures.filterIsInstance<Containment>()
+
+    @property:Internal
+    val allContainments: List<Containment>
+        get() = concept.allContainments
 
     /**
      * The origin from which this AST Node has been generated, if any.
@@ -106,23 +106,36 @@ interface NodeLike {
 
     fun hasAnnotation(annotation: Annotation): Boolean = allAnnotations.contains(annotation)
 
-    fun getChildren(
-        containment: Containment,
-        includeDerived: Boolean = false,
-    ): List<NodeLike>
+    fun getChildren(containment: Containment): List<NodeLike> {
+        return when (val rawValue = containment.value(this)) {
+            null -> {
+                emptyList()
+            }
 
-    fun getReference(reference: Reference): ReferenceValue<*>
+            is List<*> -> {
+                rawValue as List<NodeLike>
+            }
 
-    fun getAttributeValue(attribute: Attribute): Any?
+            else -> {
+                listOf(rawValue as NodeLike)
+            }
+        }
+    }
+
+    fun getAttributeValue(attribute: Attribute): Any? {
+        return attribute.value(this)
+    }
 
     fun <T : Any?> setAttribute(
         attributeName: String,
         value: T,
     )
 
-    fun <T : Any?> getAttribute(attributeName: String): T
+    fun <T : Any?> getAttribute(attributeName: String): T {
+        return concept.requireAttribute(attributeName).value(this) as T
+    }
 
-    fun <T : NodeLike> getContainment(containmentName: String): List<T>
+    fun <T : NodeLike> getContainmentValue(containmentName: String): List<T>
 
     fun <T : NodeLike> addToContainment(
         containmentName: String,
@@ -134,7 +147,15 @@ interface NodeLike {
         child: T,
     )
 
-    fun <T : PossiblyNamed> getReference(referenceName: String): ReferenceValue<T>
+    fun getReference(reference: Reference): ReferenceValue<*> {
+        val rawValue = reference.value(this)
+        return rawValue as ReferenceValue<*>
+    }
+
+    fun <T : PossiblyNamed> getReference(name: String): ReferenceValue<T> {
+        val rawValue = concept.requireReference(name).value(this)
+        return rawValue as ReferenceValue<T>
+    }
 
     fun <T : PossiblyNamed> setReferenceReferred(
         referenceName: String,

@@ -14,7 +14,6 @@ import org.jetbrains.kotlin.fir.declarations.builder.buildSimpleFunction
 import org.jetbrains.kotlin.fir.declarations.impl.FirResolvedDeclarationStatusImpl
 import org.jetbrains.kotlin.fir.declarations.origin
 import org.jetbrains.kotlin.fir.extensions.ExperimentalTopLevelDeclarationsGenerationApi
-import org.jetbrains.kotlin.fir.extensions.FirDeclarationGenerationExtension
 import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
 import org.jetbrains.kotlin.fir.moduleData
 import org.jetbrains.kotlin.fir.scopes.kotlinScopeProvider
@@ -23,10 +22,7 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
-import org.jetbrains.kotlin.fir.types.ConeClassLikeType
-import org.jetbrains.kotlin.fir.types.ConeTypeProjection
 import org.jetbrains.kotlin.fir.types.builder.buildResolvedTypeRef
-import org.jetbrains.kotlin.fir.types.impl.ConeClassLikeTypeImpl
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -34,7 +30,7 @@ import org.jetbrains.kotlin.name.Name
 
 class ConceptGenerator(
     session: FirSession,
-) : FirDeclarationGenerationExtension(session) {
+) : BaseFirExtension(session) {
     companion object {
         val MY_CLASS_ID = ClassId(FqName.fromSegments(listOf("foo", "bar")), Name.identifier("MyClass"))
     }
@@ -59,11 +55,6 @@ class ConceptGenerator(
                 superTypeRefs.add(session.builtinTypes.anyType)
             }
         return klass.symbol
-    }
-
-    private fun ClassId.toConeType(typeArguments: Array<ConeTypeProjection> = emptyArray()): ConeClassLikeType {
-        val lookupTag = ConeClassLikeLookupTagImpl(this)
-        return ConeClassLikeTypeImpl(lookupTag, typeArguments, isNullable = false)
     }
 
     override fun generateConstructors(context: MemberGenerationContext): List<FirConstructorSymbol> {

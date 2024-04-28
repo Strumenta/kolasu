@@ -118,13 +118,19 @@ class SettingParentExtension(
                                 val multiplePropertyListObserverConstructor =
                                     pluginContext
                                         .referenceConstructors(MultiplePropertyListObserver::class)
-                                        .single()
+                                        .find {
+                                            it
+                                                .owner
+                                                .valueParameters[1]
+                                                .name
+                                                .identifier == "containmentName"
+                                        }!!
                                 // dispatchReceiver: p5 -> this.getP5()
                                 dispatchReceiver =
                                     irCall(propertyGetter).apply {
                                         dispatchReceiver = irGet(thisValue)
                                     }
-                                // MultiplePropertyListObserver(this, "p5")
+                                // MultiplePropertyListObserver(this, concept.requireContainment("p5"))
                                 putValueArgument(
                                     0,
                                     irCallConstructor(multiplePropertyListObserverConstructor, emptyList()).apply {

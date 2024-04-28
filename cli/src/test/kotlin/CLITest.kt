@@ -2,6 +2,9 @@ package com.strumenta.kolasu.cli
 
 import com.github.ajalt.clikt.core.PrintHelpMessage
 import com.github.ajalt.clikt.output.CliktConsole
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
+import com.strumenta.kolasu.model.LanguageAssociation
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Source
@@ -17,16 +20,25 @@ import kotlin.io.path.pathString
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
+object MyLanguage : StarLasuLanguage("com.strumenta.kolasu.cli") {
+    init {
+        explore(MyCompilationUnit::class)
+    }
+}
+
+@LanguageAssociation(MyLanguage::class)
 data class MyCompilationUnit(
     val decls: List<MyEntityDecl>,
 ) : Node()
 
+@LanguageAssociation(MyLanguage::class)
 data class MyEntityDecl(
     override var name: String,
     val fields: List<MyFieldDecl>,
 ) : Node(),
     Named
 
+@LanguageAssociation(MyLanguage::class)
 data class MyFieldDecl(
     override var name: String,
 ) : Node(),

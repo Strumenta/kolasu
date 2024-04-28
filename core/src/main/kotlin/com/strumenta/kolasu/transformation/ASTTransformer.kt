@@ -7,16 +7,18 @@ import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.PropertyTypeDescription
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.children
-import com.strumenta.kolasu.model.processProperties
+import com.strumenta.kolasu.model.processFeatures
 import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.full.superclasses
 
 /**
@@ -112,7 +114,7 @@ open class ASTTransformer(
         source: Any,
         node: NodeLike,
     ) {
-        node::class.processProperties { pd ->
+        node::class.processFeatures { pd ->
             val childKey = node::class.qualifiedName + "#" + pd.name
             var childNodeTransformer = transformer.getChildNodeTransformer<NodeLike, Any, Any>(node::class, pd.name)
             if (childNodeTransformer != null) {
@@ -176,7 +178,7 @@ open class ASTTransformer(
     ): List<NodeLike> {
         val nodes =
             try {
-                transformer.constructor(source, this, transformer)
+                transformer.constructorToUse(source, this, transformer)
             } catch (e: Exception) {
                 if (allowGenericNode) {
                     listOf(GenericErrorNode(e))
@@ -350,7 +352,7 @@ open class ASTTransformer(
                             val paramName = kParameter.name!!
                             throw RuntimeException(
                                 "Issue while populating parameter $paramName in " +
-                                    "constructor ${target.qualifiedName}.${target.preferredConstructor()}",
+                                    "constructor ${target.qualifiedName}.${target.pickConstructor()}",
                                 t,
                             )
                         }
@@ -361,7 +363,7 @@ open class ASTTransformer(
                     // we actually invoke
                     // the transformer.
                     if (thisTransformer.childrenSetAtConstruction) {
-                        val constructor = target.preferredConstructor()
+                        val constructor = target.pickConstructor()
                         val constructorParamValues =
                             constructor
                                 .parameters
@@ -429,5 +431,21 @@ open class ASTTransformer(
         val issue = Issue.semantic(message, severity, range)
         issues.add(issue)
         return issue
+    }
+}
+
+fun <T : Any> KClass<T>.pickConstructor(): KFunction<T> {
+    val constructors = this.constructors
+    return if (constructors.size != 1) {
+        if (this.primaryConstructor != null) {
+            this.primaryConstructor!!
+        } else {
+            throw RuntimeException(
+                "Node Factories support only classes with exactly one constructor or a " +
+                    "primary constructor. Class ${this.qualifiedName} has ${constructors.size}",
+            )
+        }
+    } else {
+        constructors.first()
     }
 }

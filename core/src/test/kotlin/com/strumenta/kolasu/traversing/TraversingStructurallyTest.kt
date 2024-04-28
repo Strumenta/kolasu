@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.traversing
 
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Range
@@ -12,10 +14,19 @@ import kotlin.test.assertEquals
 import kotlin.test.fail
 
 internal class TraversingStructurallyTest {
+    object StarLasuLanguageInstance : StarLasuLanguage("com.strumenta.kolasu.traversing.TraversingStructurallyTest") {
+        init {
+            explore(
+                Box::class,
+                Item::class,
+            )
+        }
+    }
+
     class Box(
         val name: String,
         val contents: List<NodeLike> = listOf(),
-        val set: Set<NodeLike> = setOf(),
+        val set: List<NodeLike> = listOf(),
         specifiedRange: Range? = null,
     ) : Node(specifiedRange)
 
@@ -23,6 +34,10 @@ internal class TraversingStructurallyTest {
         val name: String,
         specifiedRange: Range? = null,
     ) : Node(specifiedRange)
+
+    init {
+        StarLasuLanguageInstance.ensureIsRegistered()
+    }
 
     private fun printSequence(sequence: Sequence<NodeLike>): String {
         return sequence
@@ -173,11 +188,11 @@ internal class TraversingStructurallyTest {
             Box(
                 "root",
                 set =
-                    hashSetOf(
+                    mutableListOf(
                         Box(
                             "first",
                             set =
-                                hashSetOf(
+                                mutableListOf(
                                     Item("1", specifiedRange = Range(3, 6, 3, 12)),
                                 ),
                             specifiedRange = Range(2, 3, 4, 3),
@@ -186,11 +201,11 @@ internal class TraversingStructurallyTest {
                         Box(
                             "big",
                             set =
-                                hashSetOf(
+                                mutableListOf(
                                     Box(
                                         "small",
                                         set =
-                                            hashSetOf(
+                                            mutableListOf(
                                                 Item("3", specifiedRange = Range(8, 7, 8, 13)),
                                                 Item("4", specifiedRange = Range(9, 7, 9, 13)),
                                                 Item("5", specifiedRange = Range(10, 7, 10, 13)),
@@ -204,7 +219,7 @@ internal class TraversingStructurallyTest {
                     ),
                 specifiedRange = Range(1, 1, 14, 1),
             )
-        val set = mutableSetOf<String>()
+        val set = mutableListOf<String>()
         testCase
             .walk()
             .map {
@@ -216,6 +231,6 @@ internal class TraversingStructurallyTest {
             }.forEach {
                 set.add(it)
             }
-        assertEquals(setOf("root", "first", "1", "2", "big", "small", "3", "4", "5", "6"), set)
+        assertEquals(mutableListOf("root", "first", "1", "2", "big", "small", "3", "4", "5", "6"), set)
     }
 }

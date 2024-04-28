@@ -4,16 +4,20 @@ import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.exceptions.IllegalStateException
 import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.language.Containment
-import com.strumenta.kolasu.language.Reference
 
 /**
  * This represents a Multi-platform Kotlin Code. It should be used with the kolasu-multiplatform
  * gradle plugin.
+ *
+ * Eventually, it should be the only type of node used.
  */
 abstract class MPNode : NodeLike {
-    @Internal
-    override val nodeType: String = calculateNodeType()
+    @property:Internal
+    override val concept: Concept by lazy {
+        calculateConcept()
+    }
 
     /**
      * The origin from which this AST Node has been generated, if any.
@@ -30,24 +34,8 @@ abstract class MPNode : NodeLike {
     /**
      * This is overriden by the compiler plugin
      */
-    protected open fun calculateFeatures(): List<FeatureDescription> {
-        TODO("calculateFeatures should be overridden by compiler plugin")
-    }
-
-    /**
-     * This is overriden by the compiler plugin
-     */
-    protected open fun calculateNodeType(): String {
-        // We do not want this to crash when initializing subclasses
-        return "<UNSPECIFIED>"
-    }
-
-    /**
-     * The properties of this AST nodes, including attributes, children, and references.
-     */
-    @property:Internal
-    override val features: List<FeatureDescription> by lazy {
-        calculateFeatures()
+    protected open fun calculateConcept(): Concept {
+        TODO("calculateConcept should be overridden by compiler plugin for $this")
     }
 
     /**
@@ -116,31 +104,8 @@ abstract class MPNode : NodeLike {
         TODO("Not yet implemented")
     }
 
-    override fun <T : Any?> getAttribute(attributeName: String): T {
-        val feature = features.find { it.name == attributeName }!!
-        return feature.value as T
-    }
-
-    override fun getAttributeValue(attribute: Attribute): Any? {
-        return features.find { it.name == attribute.name }!!.value
-    }
-
-    fun getAttributeValue(name: String): Any? {
-        return features.find { it.name == name }!!.value
-    }
-
-    override fun getChildren(
-        containment: Containment,
-        includeDerived: Boolean,
-    ): List<NodeLike> {
-        val property =
-            (if (includeDerived) features else originalFeatures)
-                .find { it.name == containment.name }
-        require(property != null) {
-            "Property ${containment.name} not found in node of type ${this.nodeType} " +
-                "(considering derived properties? $includeDerived)"
-        }
-        return when (val rawValue = property!!.value) {
+    override fun getChildren(containment: Containment): List<NodeLike> {
+        return when (val rawValue = containment.value(this)) {
             null -> {
                 emptyList()
             }
@@ -155,31 +120,9 @@ abstract class MPNode : NodeLike {
         }
     }
 
-    override fun <T : NodeLike> getContainment(containmentName: String): List<T> {
-        val feature = features.find { it.name == containmentName }!!
-        return when (val res = feature.value) {
-            null -> {
-                emptyList()
-            }
-
-            is List<*> -> {
-                res as List<T>
-            }
-
-            else -> {
-                listOf(res as T)
-            }
-        }
-    }
-
-    override fun getReference(reference: Reference): ReferenceValue<*> {
-        val rawValue = features.find { it.name == reference.name }!!.value
-        return rawValue as ReferenceValue<*>
-    }
-
-    override fun <T : PossiblyNamed> getReference(name: String): ReferenceValue<T> {
-        val rawValue = features.find { it.name == name }!!.value
-        return rawValue as ReferenceValue<T>
+    override fun <T : NodeLike> getContainmentValue(containmentName: String): List<T> {
+        val containment = concept.requireContainment(containmentName)
+        return getChildren(containment) as List<T>
     }
 
     override fun <T : NodeLike> removeFromContainment(
@@ -194,7 +137,6 @@ abstract class MPNode : NodeLike {
         attributeName: String,
         value: T,
     ) {
-        // TODO change FeatureDescription to support also setters
         TODO("Not yet implemented")
     }
 
@@ -210,12 +152,12 @@ abstract class MPNode : NodeLike {
         this.changes.subscribe(observer)
     }
 
-    fun notifyOfPropertyChange(
-        propertyName: String,
+    fun notifyOfAttributeChange(
+        attribute: Attribute,
         oldValue: Any?,
         newValue: Any?,
     ) {
-        changes.onNext(AttributeChangedNotification(this, propertyName, oldValue, newValue))
+        changes.onNext(AttributeChangedNotification(this, attribute, oldValue, newValue))
     }
 
     @property:Internal

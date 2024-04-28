@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.kcp.fir
 
-import com.strumenta.kolasu.model.FeatureDescription
+import com.strumenta.kolasu.kcp.fir.MPNodesCollector.knownMPNodeSubclasses
+import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.model.MPNode
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.fir.FirSession
@@ -8,12 +9,12 @@ import org.jetbrains.kotlin.fir.declarations.utils.isAbstract
 import org.jetbrains.kotlin.fir.declarations.utils.isSealed
 import org.jetbrains.kotlin.fir.expressions.builder.FirBlockBuilder
 import org.jetbrains.kotlin.fir.extensions.ExperimentalTopLevelDeclarationsGenerationApi
-import org.jetbrains.kotlin.fir.extensions.FirDeclarationGenerationExtension
 import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
 import org.jetbrains.kotlin.fir.extensions.NestedClassGenerationContext
-import org.jetbrains.kotlin.fir.plugin.createConeType
 import org.jetbrains.kotlin.fir.plugin.createMemberFunction
+import org.jetbrains.kotlin.fir.resolve.firClassLike
 import org.jetbrains.kotlin.fir.resolve.providers.toSymbol
+import org.jetbrains.kotlin.fir.resolve.transformers.ensureResolvedTypeDeclaration
 import org.jetbrains.kotlin.fir.symbols.SymbolInternals
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
@@ -21,41 +22,25 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.types.ConeKotlinType
+import org.jetbrains.kotlin.fir.types.FirErrorTypeRef
 import org.jetbrains.kotlin.fir.types.classId
 import org.jetbrains.kotlin.fir.types.impl.FirImplicitAnyTypeRef
 import org.jetbrains.kotlin.fir.types.impl.FirResolvedTypeRefImpl
+import org.jetbrains.kotlin.fir.types.impl.FirUserTypeRefImpl
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
-import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
-const val GENERATED_CALCULATE_FEATURES = "calculateFeatures"
-const val GENERATED_CALCULATE_NODE_TYPE = "calculateNodeType"
-
-const val COMPILER_PLUGIN_DEBUG = true
+const val GENERATED_CALCULATE_CONCEPT = "calculateConcept"
 
 class MPNodeGenerator(
     session: FirSession,
-) : FirDeclarationGenerationExtension(session) {
-    private fun log(text: String) {
-        if (COMPILER_PLUGIN_DEBUG) {
-            var file = File("/Users/federico/repos/kolasu-mp-example/compiler-plugin-log.txt")
-            if (!file.parentFile.exists()) {
-                file = File("compiler-plugin-log.txt")
-            }
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-            val current = LocalDateTime.now().format(formatter)
-            file.appendText("$current: $text\n")
-        }
-    }
-
+) : BaseFirExtension(session) {
     @ExperimentalTopLevelDeclarationsGenerationApi
     override fun generateTopLevelClassLikeDeclaration(classId: ClassId): FirClassLikeSymbol<*>? {
         log("generateTopLevelClassLikeDeclaration $classId")
-        return generateTopLevelClassLikeDeclaration(classId)
+        return super.generateTopLevelClassLikeDeclaration(classId)
     }
 
     override fun generateNestedClassLikeDeclaration(
@@ -72,31 +57,9 @@ class MPNodeGenerator(
         context: MemberGenerationContext?,
     ): List<FirNamedFunctionSymbol> {
         log("generateFunctions $callableId $context")
-        if (callableId.callableName.identifier == GENERATED_CALCULATE_FEATURES) {
-            val name = Name.identifier(GENERATED_CALCULATE_FEATURES)
-            val listClassId = ClassId.fromString(List::class.qualifiedName!!.replace(".", "/"))
-            val featureDescriptionClassId =
-                ClassId.fromString(
-                    FeatureDescription::class.qualifiedName!!.replace(".", "/"),
-                )
-            val type: ConeKotlinType =
-                listClassId.createConeType(
-                    session,
-                    typeArguments = arrayOf(featureDescriptionClassId.createConeType(session)),
-                )
-            val classSymbol = callableId.classId!!.toSymbol(session) as FirClassSymbol<*>
-            val function =
-                createMemberFunction(classSymbol, Key, name, type) {
-                }
-            function.replaceBody(
-                FirBlockBuilder()
-                    .build(),
-            )
-            return listOf(function.symbol)
-        }
-        if (callableId.callableName.identifier == GENERATED_CALCULATE_NODE_TYPE) {
-            val name = Name.identifier(GENERATED_CALCULATE_NODE_TYPE)
-            val type: ConeKotlinType = session.builtinTypes.stringType.type
+        if (callableId.callableName.identifier == GENERATED_CALCULATE_CONCEPT) {
+            val name = Name.identifier(GENERATED_CALCULATE_CONCEPT)
+            val type: ConeKotlinType = ClassId.fromString(Concept::class.qualifiedName!!.replace(".", "/")).toConeType()
             val classSymbol = callableId.classId!!.toSymbol(session) as FirClassSymbol<*>
             val function =
                 createMemberFunction(classSymbol, Key, name, type) {
@@ -128,14 +91,16 @@ class MPNodeGenerator(
         context: MemberGenerationContext,
     ): Set<Name> {
         log("getCallableNamesForClass $classSymbol $context")
-        if (classSymbol.extendMPNode(session) && !classSymbol.isAbstract && !classSymbol.isSealed) {
+        if (classSymbol.extendMPNode(session)) {
             log("  ${classSymbol.classId.asSingleFqName().asString()} extends MPNode")
-            val set =
-                mutableSetOf(
-                    Name.identifier(GENERATED_CALCULATE_FEATURES),
-                    Name.identifier(GENERATED_CALCULATE_NODE_TYPE),
-                )
-            return set
+            knownMPNodeSubclasses.add(classSymbol.name)
+            if (!classSymbol.isAbstract && !classSymbol.isSealed) {
+                val set =
+                    mutableSetOf(
+                        Name.identifier(GENERATED_CALCULATE_CONCEPT),
+                    )
+                return set
+            }
         }
         return super.getCallableNamesForClass(classSymbol, context)
     }
@@ -179,6 +144,24 @@ fun FirClassSymbol<*>.extendMPNode(firSession: FirSession): Boolean =
             }
             is FirImplicitAnyTypeRef -> {
                 false
+            }
+            is FirErrorTypeRef -> {
+                false
+            }
+            is FirUserTypeRefImpl -> {
+                if (it.qualifier.any { it.name.identifier == "MPNode" }) {
+                    true
+                } else {
+                    it.ensureResolvedTypeDeclaration(firSession)
+                    val classLike = it.firClassLike(firSession)
+                    if (classLike == null) {
+                        MPNodesCollector.knownMPNodeSubclasses.any { sc ->
+                            it.qualifier.any { it.name.identifier == sc.identifier }
+                        }
+                    } else {
+                        TODO()
+                    }
+                }
             }
 
             else -> {

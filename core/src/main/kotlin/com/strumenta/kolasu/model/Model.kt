@@ -46,16 +46,6 @@ fun <N : NodeLike> N.withRange(range: Range?): N {
     return this
 }
 
-fun <N : NodeLike> N.withOrigin(origin: Origin?): N {
-    this.origin =
-        if (origin == NodeOrigin(this)) {
-            null
-        } else {
-            origin
-        }
-    return this
-}
-
 val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.kotlin.nodeProperties
 val <T : Any> Class<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>

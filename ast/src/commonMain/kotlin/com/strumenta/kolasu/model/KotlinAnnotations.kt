@@ -16,6 +16,8 @@ annotation class Internal
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Derived
 
+// TODO: decide if we either support it properly or we drop it
+
 /**
  * Use this to mark all the properties that return a Node or a list of Nodes which are not
  * contained by the Node having the properties. In other words: they are just references.

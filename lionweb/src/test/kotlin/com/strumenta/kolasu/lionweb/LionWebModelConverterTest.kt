@@ -2,6 +2,7 @@ package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.ASTRoot
+import com.strumenta.kolasu.model.LanguageAssociation
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
@@ -602,6 +603,7 @@ class LionWebModelConverterTest {
 }
 
 @ASTRoot(canBeNotRoot = true)
+@LanguageAssociation(StarLasuLanguageInstance::class)
 data class NodeWithPropertiesNotInConstructor(
     override val name: String,
     var a: String,
@@ -613,6 +615,7 @@ data class NodeWithPropertiesNotInConstructor(
 }
 
 @ASTRoot(canBeNotRoot = true)
+@LanguageAssociation(StarLasuLanguageInstance::class)
 data class NodeWithPropertiesNotInConstructorMutableProps(
     override val name: String,
     var a: String,

@@ -1,69 +1,92 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
 import java.util.LinkedList
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import org.junit.Test as test
 
+object MyLanguage3 : StarLasuLanguage("com.foo.a3") {
+    init {
+        explore(A::class, AW::class, BW::class, DW::class, B::class, CW::class)
+    }
+}
+
+@LanguageAssociation(MyLanguage3::class)
 data class A(
     val s: String,
 ) : Node()
 
+@LanguageAssociation(MyLanguage3::class)
 data class B(
     val a: A,
     val manyAs: List<A>,
 ) : Node()
 
+@LanguageAssociation(MyLanguage3::class)
 data class AW(
     var s: String,
 ) : Node()
 
+@LanguageAssociation(MyLanguage3::class)
 data class BW(
     var a: AW,
     val manyAs: MutableList<AW>,
 ) : Node()
 
+@LanguageAssociation(MyLanguage3::class)
 data class CW(
     var a: AW,
-    val manyAs: MutableSet<AW>,
+    val manyAs: MutableList<AW>,
 ) : Node()
 
+@LanguageAssociation(MyLanguage3::class)
 data class DW(
     var a: BW,
     val manyAs: MutableList<AW>,
 ) : Node()
 
+@LanguageAssociation(MyLanguage3::class)
 interface FooNodeType : NodeLike
 
 interface BarNotNodeType
 
+@LanguageAssociation(MyLanguage3::class)
 data class MiniCalcFile(
     val elements: List<MCStatement>,
 ) : Node()
 
+@LanguageAssociation(MyLanguage3::class)
 data class VarDeclaration(
     override val name: String,
     val value: MCExpression,
 ) : MCStatement(),
     Named
 
+@LanguageAssociation(MyLanguage3::class)
 sealed class MCExpression : Node()
 
+@LanguageAssociation(MyLanguage3::class)
 data class IntLit(
     val value: String,
 ) : MCExpression()
 
+@LanguageAssociation(MyLanguage3::class)
 sealed class MCStatement : Node()
 
+@LanguageAssociation(MyLanguage3::class)
 data class Assignment(
     val ref: ReferenceValue<VarDeclaration>,
     val value: MCExpression,
 ) : MCStatement()
 
+@LanguageAssociation(MyLanguage3::class)
 data class Print(
     val value: MCExpression,
 ) : MCStatement()
 
+@LanguageAssociation(MyLanguage3::class)
 data class ValueReference(
     val ref: ReferenceValue<VarDeclaration>,
 ) : MCExpression()
@@ -149,17 +172,6 @@ class ProcessingTest {
         val b = BW(a1, mutableListOf(a2, a3))
         b.assignParents()
         a1.replaceWithSeveral(listOf(a4, a5))
-    }
-
-    @test(expected = UnsupportedOperationException::class)
-    fun replaceInSet() {
-        val a1 = AW("1")
-        val a2 = AW("2")
-        val a3 = AW("3")
-        val a4 = AW("4")
-        val b = CW(a1, mutableSetOf(a2, a3))
-        b.assignParents()
-        a2.replaceWith(a4)
     }
 
     @test
@@ -302,11 +314,11 @@ class ProcessingTest {
         val a4 = AW("4")
         val b = BW(a1, mutableListOf(a2, a3, a4))
         b.assignParents()
-        assertEquals(null, b.containingProperty())
-        assertEquals("a", a1.containingProperty()?.name)
-        assertEquals("manyAs", a2.containingProperty()?.name)
-        assertEquals("manyAs", a3.containingProperty()?.name)
-        assertEquals("manyAs", a4.containingProperty()?.name)
+        assertEquals(null, b.containingContainment())
+        assertEquals("a", a1.containingContainment()?.name)
+        assertEquals("manyAs", a2.containingContainment()?.name)
+        assertEquals("manyAs", a3.containingContainment()?.name)
+        assertEquals("manyAs", a4.containingContainment()?.name)
     }
 
     @test
@@ -317,11 +329,11 @@ class ProcessingTest {
         val a4 = AW("4")
         val b = BW(a1, mutableListOf(a2, a3, a4))
         b.assignParents()
-        assertEquals(null, b.containingProperty())
-        assertEquals("a", a1.containingProperty()?.name)
-        assertEquals("manyAs", a2.containingProperty()?.name)
-        assertEquals("manyAs", a3.containingProperty()?.name)
-        assertEquals("manyAs", a4.containingProperty()?.name)
+        assertEquals(null, b.containingContainment())
+        assertEquals("a", a1.containingContainment()?.name)
+        assertEquals("manyAs", a2.containingContainment()?.name)
+        assertEquals("manyAs", a3.containingContainment()?.name)
+        assertEquals("manyAs", a4.containingContainment()?.name)
     }
 
     @test

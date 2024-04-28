@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.language
 
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.asDataType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -22,6 +23,26 @@ data class C3(
 ) : C1()
 
 class KolasuLanguageTest {
+    @Test
+    fun recognizeEnum() {
+        assertEquals(
+            EnumType(
+                "com.strumenta.kolasu.language.E1",
+                mutableListOf(
+                    EnumerationLiteral("A"),
+                    EnumerationLiteral("B"),
+                    EnumerationLiteral("C"),
+                ),
+            ),
+            E1::class.asDataType(),
+        )
+    }
+
+    @Test
+    fun recognizeString() {
+        assertEquals(PrimitiveType("kotlin.String"), String::class.asDataType())
+    }
+
     @Test
     fun allElementsAreFound() {
         val kolasuLanguage = KolasuLanguage("MyLanguage")

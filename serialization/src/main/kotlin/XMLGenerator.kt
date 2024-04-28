@@ -1,10 +1,10 @@
 package com.strumenta.kolasu.serialization
 
-import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.processProperties
+import com.strumenta.kolasu.model.processFeatures
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.Result
 import org.w3c.dom.Document
@@ -136,20 +136,21 @@ private fun NodeLike.toXML(
     this.range?.let {
         element.addChild(it.toXML(document = document))
     }
-    this.processProperties {
-        if (it.value == null) {
+    this.processFeatures { it, node ->
+        val value = it.value(node)
+        if (value == null) {
             element.addNullChild(it.name, document)
         } else if (it.isMultiple) {
-            if (it.featureType == FeatureType.CONTAINMENT) {
-                element.addListOfNodes(it.name, (it.value as Collection<*>).map { it as NodeLike }, document)
+            if (it is Containment) {
+                element.addListOfNodes(it.name, (value as Collection<*>).map { it as NodeLike }, document)
             } else {
-                element.addAttributesList(it.name, it.value as Collection<*>, document)
+                element.addAttributesList(it.name, value as Collection<*>, document)
             }
         } else {
-            if (it.featureType == FeatureType.CONTAINMENT) {
-                element.addChild((it.value as NodeLike).toXML(it.name, document))
+            if (it is Containment) {
+                element.addChild((value as NodeLike).toXML(it.name, document))
             } else {
-                element.addAttribute(it.name, it.value!!)
+                element.addAttribute(it.name, value!!)
             }
         }
     }

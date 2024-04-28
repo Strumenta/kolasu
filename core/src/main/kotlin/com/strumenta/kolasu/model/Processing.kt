@@ -2,6 +2,9 @@
 
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Feature
+import com.strumenta.kolasu.transformation.GenericNode
 import com.strumenta.kolasu.traversing.ASTWalker
 import com.strumenta.kolasu.traversing.children
 import com.strumenta.kolasu.traversing.searchByType
@@ -67,13 +70,16 @@ fun <T : NodeLike> T.withParent(parent: NodeLike?): T {
  * @param propertyOperation the operation to perform on each property.
  */
 @JvmOverloads
-fun NodeLike.processProperties(
+fun NodeLike.processFeatures(
     propertiesToIgnore: Set<String> = emptySet(),
-    propertyOperation: (FeatureDescription) -> Unit,
+    propertyOperation: (Feature, NodeLike) -> Unit,
 ) {
-    this.features.filter { it.name !in propertiesToIgnore }.forEach {
+    if (this is GenericNode) {
+        return
+    }
+    this.concept.declaredFeatures.filter { it.name !in propertiesToIgnore }.forEach {
         try {
-            propertyOperation(it)
+            propertyOperation(it, this)
         } catch (t: Throwable) {
             throw java.lang.RuntimeException("Issue processing property $it in $this", t)
         }
@@ -82,17 +88,17 @@ fun NodeLike.processProperties(
 
 /**
  * Executes an operation on the properties of a node.
- * @param propertiesToIgnore which properties to ignore
- * @param propertyOperation the operation to perform on each property.
+ * @param featuresToIgnore which properties to ignore
+ * @param featureHandler the operation to perform on each property.
  */
 @JvmOverloads
-fun NodeLike.processOriginalProperties(
-    propertiesToIgnore: Set<String> = emptySet(),
-    propertyOperation: (FeatureDescription) -> Unit,
+fun NodeLike.processFeatures(
+    featuresToIgnore: Set<String> = emptySet(),
+    featureHandler: (Feature) -> Unit,
 ) {
-    this.originalFeatures.filter { it.name !in propertiesToIgnore }.forEach {
+    this.concept.declaredFeatures.filter { it.name !in featuresToIgnore }.forEach {
         try {
-            propertyOperation(it)
+            featureHandler(it)
         } catch (t: Throwable) {
             throw java.lang.RuntimeException("Issue processing property $it in $this", t)
         }
@@ -104,10 +110,10 @@ fun NodeLike.processOriginalProperties(
  * @param propertiesToIgnore which properties to ignore
  * @param propertyTypeOperation the operation to perform on each property.
  */
-fun <T : Any> Class<T>.processProperties(
+fun <T : Any> Class<T>.processFeatures(
     propertiesToIgnore: Set<String> = emptySet(),
     propertyTypeOperation: (PropertyTypeDescription) -> Unit,
-) = kotlin.processProperties(propertiesToIgnore, propertyTypeOperation)
+) = kotlin.processFeatures(propertiesToIgnore, propertyTypeOperation)
 
 /**
  * @param walker the function that generates the nodes to operate on in the desired sequence.
@@ -136,34 +142,13 @@ fun <T> NodeLike.processNodesOfType(
 }
 
 /**
- * Recursively execute [operation] on this node, and all nodes below this node.
- * Every node is informed about its [parent] node. (But not about the parent's parent!)
- */
-fun NodeLike.processConsideringDirectParent(
-    operation: (NodeLike, NodeLike?) -> Unit,
-    parent: NodeLike? = null,
-) {
-    operation(this, parent)
-    this.features.forEach { p ->
-        when (val v = p.value) {
-            is NodeLike -> v.processConsideringDirectParent(operation, this)
-            is Collection<*> -> v.forEach { (it as? NodeLike)?.processConsideringDirectParent(operation, this) }
-        }
-    }
-}
-
-/**
  * @return all direct children of this node.
  */
 val NodeLike.children: List<NodeLike>
     get() {
         val children = mutableListOf<NodeLike>()
-        this.originalFeatures.forEach { p ->
-            val v = p.value
-            when (v) {
-                is NodeLike -> children.add(v)
-                is Collection<*> -> v.forEach { if (it is NodeLike) children.add(it) }
-            }
+        this.concept.allContainments.filter { !it.derived }.forEach { containment ->
+            children.addAll(this.getChildren(containment))
         }
         return children
     }
@@ -202,20 +187,14 @@ val NodeLike.previousSibling: NodeLike?
 val NodeLike.nextSamePropertySibling: NodeLike?
     get() {
         if (this.parent != null) {
-            val siblings =
-                this
-                    .parent!!
-                    .features
-                    .find { p ->
-                        val v = p.value
-                        when (v) {
-                            is Collection<*> -> v.contains(this)
-                            else -> false
-                        }
-                    }?.value as? Collection<*> ?: emptyList<NodeLike>()
-
-            val index = siblings.indexOf(this)
-            return if (index == siblings.size - 1 || index == -1) null else siblings.elementAt(index + 1) as NodeLike
+            val containment = this.containingContainment() ?: throw IllegalStateException()
+            val siblingsAndMe = this.parent!!.getChildren(containment)
+            val index = this.indexInContainingProperty() ?: throw IllegalStateException()
+            return if (index == siblingsAndMe.size - 1) {
+                null
+            } else {
+                siblingsAndMe[index + 1]
+            }
         }
         return null
     }
@@ -226,20 +205,14 @@ val NodeLike.nextSamePropertySibling: NodeLike?
 val NodeLike.previousSamePropertySibling: NodeLike?
     get() {
         if (this.parent != null) {
-            val siblings =
-                this
-                    .parent!!
-                    .features
-                    .find { p ->
-                        val v = p.value
-                        when (v) {
-                            is Collection<*> -> v.contains(this)
-                            else -> false
-                        }
-                    }?.value as? Collection<*> ?: emptyList<NodeLike>()
-
-            val index = siblings.indexOf(this)
-            return if (index == 0 || index == -1) null else siblings.elementAt(index - 1) as NodeLike
+            val containment = this.containingContainment() ?: throw IllegalStateException()
+            val siblingsAndMe = this.parent!!.getChildren(containment)
+            val index = this.indexInContainingProperty() ?: throw IllegalStateException()
+            return if (index == 0) {
+                null
+            } else {
+                siblingsAndMe[index - 1]
+            }
         }
         return null
     }
@@ -247,18 +220,13 @@ val NodeLike.previousSamePropertySibling: NodeLike?
 /**
  * Return the property containing this Node, if any. Null should be returned for root nodes.
  */
-fun NodeLike.containingProperty(): FeatureDescription? {
+fun NodeLike.containingContainment(): Containment? {
     if (this.parent == null) {
         return null
     }
-    return this.parent!!.features.find { p ->
-        val v = p.value
-        when {
-            v is Collection<*> -> v.any { it === this }
-            v === this -> true
-            else -> false
-        }
-    } ?: throw IllegalStateException("No containing property for $this with parent ${this.parent}")
+    return this.parent!!.containments.find { c ->
+        c.contained(this.parent!!).any { it === this }
+    } ?: throw IllegalStateException("No containing feature for $this with parent ${this.parent}")
 }
 
 /**
@@ -266,14 +234,9 @@ fun NodeLike.containingProperty(): FeatureDescription? {
  * The index is always 0 for Nodes in singular containment properties.
  */
 fun NodeLike.indexInContainingProperty(): Int? {
-    val p = this.containingProperty()
-    return if (p == null) {
-        null
-    } else if (p.value is Collection<*>) {
-        (p.value as Collection<*>).indexOfFirst { this === it }
-    } else {
-        0
-    }
+    val containment = this.containingContainment() ?: return null
+    val children = this.parent!!.getChildren(containment)
+    return children.indexOfFirst { this === it }
 }
 
 /**

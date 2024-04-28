@@ -71,9 +71,25 @@ fun IrProperty.declareSingleOrOptionalContainment(): Boolean {
 }
 
 @ObsoleteDescriptorBasedAPI
+fun IrProperty.declareSingleOrOptionalAttribute(): Boolean {
+    val propertyType = this.backingField?.type
+    return propertyType?.isSingleOrOptionalAttribute() ?: false
+}
+
+@ObsoleteDescriptorBasedAPI
 fun IrProperty.declareReference(): Boolean {
     val propertyType = this.backingField?.type
     return propertyType?.isReference() ?: false
+}
+
+@ObsoleteDescriptorBasedAPI
+fun IrProperty.declareAttribute(): Boolean {
+    return declareSingleOrOptionalAttribute()
+}
+
+@ObsoleteDescriptorBasedAPI
+fun IrProperty.declareContainment(): Boolean {
+    return declareSingleOrOptionalContainment() || declareMultipleContainment()
 }
 
 @ObsoleteDescriptorBasedAPI

@@ -7,12 +7,11 @@ import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.stream.JsonWriter
-import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceValue
-import com.strumenta.kolasu.model.processOriginalProperties
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
@@ -262,10 +261,10 @@ class JsonGenerator {
         withOriginIds: IdentityHashMap<NodeLike, String>? = null,
         withDestinationIds: IdentityHashMap<NodeLike, String>? = null,
     ): JsonElement {
-        val nodeType = node.nodeType
+        val nodeType = if (shortClassNames) node.nodeType else node.qualifiedNodeType
         val jsonObject =
             jsonObject(
-                JSON_TYPE_KEY to if (shortClassNames) nodeType.substring(nodeType.lastIndexOf('.') + 1) else nodeType,
+                JSON_TYPE_KEY to nodeType,
                 JSON_RANGE_KEY to node.range?.toJson(),
             )
         if (withIds != null) {
@@ -285,15 +284,15 @@ class JsonGenerator {
                 jsonObject.addProperty(JSON_DESTINATION_KEY, destinationId)
             }
         }
-        node.processOriginalProperties {
+        node.concept.allFeatures.filter { !it.derived }.forEach {
             try {
-                if (it.value == null) {
+                if (it.value(node) == null) {
                     jsonObject.add(it.name, JsonNull.INSTANCE)
                 } else if (it.isMultiple) {
-                    if (it.featureType == FeatureType.CONTAINMENT) {
+                    if (it is Containment) {
                         jsonObject.add(
                             it.name,
-                            (it.value as Collection<*>)
+                            (it.value(node) as Collection<*>)
                                 .map { el ->
                                     nodeToJson(
                                         el as NodeLike,
@@ -305,14 +304,14 @@ class JsonGenerator {
                                 }.toJsonArray(),
                         )
                     } else {
-                        jsonObject.add(it.name, valueToJson(it.value, withIds))
+                        jsonObject.add(it.name, valueToJson(it.value(node), withIds))
                     }
                 } else {
-                    if (it.featureType == FeatureType.CONTAINMENT) {
+                    if (it is Containment) {
                         jsonObject.add(
                             it.name,
                             nodeToJson(
-                                it.value as NodeLike,
+                                it.value(node) as NodeLike,
                                 shortClassNames,
                                 withIds = withIds,
                                 withOriginIds = withOriginIds,
@@ -320,7 +319,7 @@ class JsonGenerator {
                             ),
                         )
                     } else {
-                        jsonObject.add(it.name, valueToJson(it.value, withIds))
+                        jsonObject.add(it.name, valueToJson(it.value(node), withIds))
                     }
                 }
             } catch (e: Exception) {
@@ -342,27 +341,27 @@ private fun NodeLike.toJsonStreaming(
         writer.name(JSON_RANGE_KEY)
         this.range!!.toJsonStreaming(writer)
     }
-    this.processOriginalProperties {
+    this.concept.declaredFeatures.filter { !it.derived }.forEach {
         writer.name(it.name)
-        if (it.value == null) {
+        if (it.value(this) == null) {
             writer.nullValue()
         } else if (it.isMultiple) {
             writer.beginArray()
-            if (it.featureType == FeatureType.CONTAINMENT) {
-                (it.value as Collection<*>).forEach {
+            if (it is Containment) {
+                (it.value(this) as Collection<*>).forEach {
                     (it as NodeLike).toJsonStreaming(writer, shortClassNames)
                 }
             } else {
-                (it.value as Collection<*>).forEach {
+                (it.value(this) as Collection<*>).forEach {
                     it.toJsonStreaming(writer)
                 }
             }
             writer.endArray()
         } else {
-            if (it.featureType == FeatureType.CONTAINMENT) {
-                (it.value as NodeLike).toJsonStreaming(writer, shortClassNames)
+            if (it is Containment) {
+                (it.value(this) as NodeLike).toJsonStreaming(writer, shortClassNames)
             } else {
-                it.value.toJsonStreaming(writer)
+                it.value(this).toJsonStreaming(writer)
             }
         }
     }

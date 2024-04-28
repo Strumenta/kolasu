@@ -5,7 +5,10 @@ import com.strumenta.kolasu.antlr4j.mapping.TrivialFactoryOfParseTreeToASTNodeTr
 import com.strumenta.kolasu.antlr4j.mapping.registerTrivialPTtoASTConversion
 import com.strumenta.kolasu.antlr4j.mapping.unwrap
 import com.strumenta.kolasu.antlr4j.parsing.withParseTreeNode
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.model.GenericErrorNode
+import com.strumenta.kolasu.model.Internal
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
@@ -41,17 +44,31 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
+object StarLasuLanguageInstance : StarLasuLanguage("com.strumenta.kolasu.antlr.mapping") {
+    init {
+        explore(
+            CU::class, SetStatement::class, DisplayIntStatement::class,
+            SCreateStatement::class, SIntegerLiteral::class, SInstanceById::class,
+            SSetStatement::class, SPrintStatement::class, SScript::class,
+            EModule::class, Ent::class, EntStringType::class,
+        )
+    }
+}
+
 data class CU(
+    @property:Internal
     val specifiedRange: Range? = null,
     var statements: List<NodeLike> = listOf(),
 ) : Node(specifiedRange)
 
 data class DisplayIntStatement(
+    @property:Internal
     val specifiedRange: Range? = null,
     val value: Int,
 ) : Node(specifiedRange)
 
 data class SetStatement(
+    @property:Internal
     val specifiedRange: Range? = null,
     var variable: String = "",
     val value: Int = 0,
@@ -152,6 +169,10 @@ data class SInstanceById(
 ) : SExpression()
 
 class ParseTreeToASTTransformerTest {
+    init {
+        StarLasuLanguageInstance.ensureIsRegistered()
+    }
+
     @Test
     fun testParseTreeTransformer() {
         val code = "set foo = 123\ndisplay 456"

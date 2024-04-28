@@ -3,8 +3,10 @@ package com.strumenta.kolasu.model
 import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.language.Attribute
-import com.strumenta.kolasu.language.Containment
-import com.strumenta.kolasu.language.Reference
+import com.strumenta.kolasu.language.Concept
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.StarLasuLanguagesRegistry
+import com.strumenta.kolasu.transformation.GenericNode
 import com.strumenta.kolasu.traversing.walk
 import kotlin.reflect.KMutableProperty
 
@@ -30,32 +32,6 @@ open class Node : NodeLike {
     constructor(origin: Origin?) : this() {
         this.origin = origin
     }
-
-    @Internal
-    override val nodeType: String
-        get() = this::class.qualifiedName!!
-
-    /**
-     * The properties of this AST nodes, including attributes, children, and references.
-     */
-    @property:Internal
-    override val features: List<FeatureDescription>
-        get() =
-            try {
-                nodeProperties.map { FeatureDescription.buildFor(it, this) }
-            } catch (e: Throwable) {
-                throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
-            }.also { properties ->
-                val alreadyFound = mutableSetOf<String>()
-                properties.forEach { property ->
-                    val name = property.name
-                    if (alreadyFound.contains(name)) {
-                        throw IllegalStateException("Duplicate property with name $name")
-                    } else {
-                        alreadyFound.add(name)
-                    }
-                }
-            }
 
     /**
      * The origin from which this AST Node has been generated, if any.
@@ -123,15 +99,20 @@ open class Node : NodeLike {
      * of circular graphs.
      */
     final override fun toString(): String {
-        return "${this.nodeType}(${features.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
+        if (this is GenericNode) {
+            return "GenericNode"
+        }
+        return "${this.qualifiedNodeType}(${concept.declaredFeatures.joinToString(
+            ", ",
+        ) { "${it.name}=${it.valueToString(this)}" }})"
     }
 
-    protected fun notifyOfPropertyChange(
-        propertyName: String,
+    protected fun notifyOfAttributeChange(
+        attribute: Attribute,
         oldValue: Any?,
         newValue: Any?,
     ) {
-        changes.onNext(AttributeChangedNotification(this, propertyName, oldValue, newValue))
+        changes.onNext(AttributeChangedNotification(this, attribute, oldValue, newValue))
     }
 
     @Internal
@@ -156,48 +137,9 @@ open class Node : NodeLike {
         annotation.detach()
     }
 
-    override fun getChildren(
-        containment: Containment,
-        includeDerived: Boolean,
-    ): List<NodeLike> {
-        val property =
-            (if (includeDerived) features else originalFeatures)
-                .find { it.name == containment.name }
-        require(property != null) {
-            "Property ${containment.name} not found in node of type ${this.nodeType} " +
-                "(considering derived properties? $includeDerived)"
-        }
-        return when (val rawValue = property!!.value) {
-            null -> {
-                emptyList()
-            }
-
-            is List<*> -> {
-                rawValue as List<NodeLike>
-            }
-
-            else -> {
-                listOf(rawValue as NodeLike)
-            }
-        }
-    }
-
-    override fun getReference(reference: Reference): ReferenceValue<*> {
-        val rawValue = nodeProperties.find { it.name == reference.name }!!.get(this)
-        return rawValue as ReferenceValue<*>
-    }
-
-    override fun <T : PossiblyNamed> getReference(name: String): ReferenceValue<T> {
-        val rawValue = features.find { it.name == name }!!.value
-        return rawValue as ReferenceValue<T>
-    }
-
-    override fun getAttributeValue(attribute: Attribute): Any? {
-        return features.find { it.name == attribute.name }!!.value
-    }
-
     fun getAttributeValue(name: String): Any? {
-        return features.find { it.name == name }!!.value
+        // In the future, when we set AttributeValue it will be different
+        return getAttribute(name)
     }
 
     override fun <T : Any?> setAttribute(
@@ -213,7 +155,7 @@ open class Node : NodeLike {
         return prop.call(this) as T
     }
 
-    override fun <T : NodeLike> getContainment(containmentName: String): List<T> {
+    override fun <T : NodeLike> getContainmentValue(containmentName: String): List<T> {
         val prop = nodeProperties.find { it.name == containmentName }!!
         return when (val res = prop.call(this)) {
             null -> {
@@ -269,4 +211,21 @@ open class Node : NodeLike {
     override fun subscribe(observer: ObservableObserver<NodeNotification<in NodeLike>>) {
         this.changes.subscribe(observer)
     }
+
+    @property:Internal
+    override val concept: Concept
+        get() {
+            try {
+                val annotation = this.javaClass.getAnnotation(LanguageAssociation::class.java)
+                val language: StarLasuLanguage =
+                    if (annotation != null) {
+                        annotation.language.objectInstance ?: throw IllegalStateException()
+                    } else {
+                        StarLasuLanguagesRegistry.getLanguage(this.javaClass.kotlin.packageName)
+                    }
+                return language.getConcept(this.javaClass.simpleName)
+            } catch (e: Exception) {
+                throw RuntimeException("Issue while retrieving concept for class ${this.javaClass.canonicalName}", e)
+            }
+        }
 }

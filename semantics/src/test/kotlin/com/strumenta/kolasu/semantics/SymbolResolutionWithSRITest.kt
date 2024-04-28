@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.semantics
 
 import com.strumenta.kolasu.ids.StructuralNodeIdProvider
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.model.ASTRoot
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
@@ -24,6 +26,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import com.strumenta.kolasu.semantics.symbol.resolver.SymbolResolver as SR
 
+object StarLasuLanguageInstance : StarLasuLanguage("com.strumenta.kolasu.semantics") {
+    init {
+        explore(TodoProject::class)
+    }
+}
+
 @ASTRoot
 class TodoProject(
     override var name: String,
@@ -39,6 +47,10 @@ class Todo(
     Named
 
 class SymbolResolutionWithSRITest {
+    init {
+        StarLasuLanguageInstance.ensureIsRegistered()
+    }
+
     @Test
     fun symbolResolutionPointingToNodes() {
         val todo1 = Todo("todo1", "stuff to do 1")

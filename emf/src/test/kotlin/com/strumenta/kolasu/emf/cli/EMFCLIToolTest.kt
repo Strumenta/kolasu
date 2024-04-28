@@ -7,6 +7,8 @@ import com.strumenta.kolasu.antlr4j.parsing.KolasuANTLRToken
 import com.strumenta.kolasu.antlr4j.parsing.ParsingResultWithFirstStage
 import com.strumenta.kolasu.emf.EcoreEnabledParser
 import com.strumenta.kolasu.emf.MetamodelBuilder
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Source
@@ -25,6 +27,14 @@ import kotlin.io.path.createTempDirectory
 import kotlin.io.path.pathString
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+
+object StarLasuLanguageInstance : StarLasuLanguage("com.strumenta.kolasu.emf.cli") {
+    init {
+        explore(
+            MyCompilationUnit::class,
+        )
+    }
+}
 
 data class MyCompilationUnit(
     val decls: List<MyEntityDecl>,
@@ -115,6 +125,10 @@ class CapturingCliktConsole : CliktConsole {
 }
 
 class EMFCLIToolTest {
+    init {
+        StarLasuLanguageInstance.ensureIsRegistered()
+    }
+
     @Test
     fun runSimpleASTSaverWithoutSpecifyingCommands() {
         val parserInstantiator = { file: File ->
@@ -792,8 +806,6 @@ class EMFCLIToolTest {
         val cliTool = EMFCLITool(parserInstantiator, mmSupport, console)
         cliTool.parse(arrayOf("model", myDir.toString(), "-o", outDir.pathString, "-v"))
         println(console.stdOutput)
-//        assertEquals("", console.stdOutput)
-//        assertEquals("", console.errOutput)
         val outMyFile1 = File(outDir.toFile(), "myfile1.json")
         val outMyFile2 = File(File(outDir.toFile(), "mySubDir"), "myfile2.json")
         assert(outMyFile1.exists())

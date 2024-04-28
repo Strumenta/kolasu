@@ -112,9 +112,9 @@ class NodeStatsCollector(
         result: ParsingResult<out NodeLike>,
     ) {
         result.root?.apply {
-            nodePrevalence[this.nodeType] = nodePrevalence.getOrDefault(this.nodeType, 0) + 1
+            nodePrevalence[this.qualifiedNodeType] = nodePrevalence.getOrDefault(this.qualifiedNodeType, 0) + 1
             walkDescendants().forEach {
-                nodePrevalence[it.nodeType] = nodePrevalence.getOrDefault(it.nodeType, 0) + 1
+                nodePrevalence[it.qualifiedNodeType] = nodePrevalence.getOrDefault(it.qualifiedNodeType, 0) + 1
             }
         }
     }

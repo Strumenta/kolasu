@@ -15,7 +15,7 @@ import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.allFeatures
 import com.strumenta.kolasu.model.asContainment
 import com.strumenta.kolasu.model.assignParents
-import com.strumenta.kolasu.model.containingProperty
+import com.strumenta.kolasu.model.containingContainment
 import com.strumenta.kolasu.model.indexInContainingProperty
 import com.strumenta.kolasu.model.isAttribute
 import com.strumenta.kolasu.model.isContainment
@@ -669,7 +669,7 @@ private val KNode.positionalID: String
         return if (this.parent == null) {
             "root"
         } else {
-            val cp = this.containingProperty()!!
+            val cp = this.containingContainment()!!
             val postfix = if (cp.isMultiple) "${cp.name}_${this.indexInContainingProperty()!!}" else cp.name
             "${this.parent!!.positionalID}_$postfix"
         }

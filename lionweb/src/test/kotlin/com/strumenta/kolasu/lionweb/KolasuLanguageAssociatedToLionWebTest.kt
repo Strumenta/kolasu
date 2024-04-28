@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.language.KolasuLanguage
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceValue
@@ -37,6 +39,17 @@ data class LWNodeB(
     val value: String,
     val anotherValue: MyEnum,
 ) : Node()
+
+object StarLasuLanguageInstance : StarLasuLanguage("com.strumenta.kolasu.lionweb") {
+    init {
+        explore(
+            LWRoot::class,
+            NodeWithEnum::class,
+            NodeWithPropertiesNotInConstructor::class,
+            NodeWithPropertiesNotInConstructorMutableProps::class,
+        )
+    }
+}
 
 class KolasuLanguageAssociatedToLionWebTest {
     @Test

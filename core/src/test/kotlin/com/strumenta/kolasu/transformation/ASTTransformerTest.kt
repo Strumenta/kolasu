@@ -1,5 +1,8 @@
 package com.strumenta.kolasu.transformation
 
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
+import com.strumenta.kolasu.model.LanguageAssociation
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.NodeOrigin
@@ -14,106 +17,163 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
+object MyExampleLanguageForTransformation : StarLasuLanguage("com.foo.MyExampleLanguageForTransformation") {
+    init {
+        explore(
+            CU::class,
+            SetStatement::class,
+            DisplayIntStatement::class,
+            Mult::class,
+            TypedSum::class,
+            BLangMult::class,
+            BazRoot::class,
+            Sum::class,
+        )
+    }
+}
+
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class CU(
     val specifiedRange: Range? = null,
     var statements: List<NodeLike> = listOf(),
 ) : Node(specifiedRange)
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class DisplayIntStatement(
     val specifiedRange: Range? = null,
     val value: Int,
 ) : Node(specifiedRange)
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class SetStatement(
     val specifiedRange: Range? = null,
     var variable: String = "",
     val value: Int = 0,
 ) : Node(specifiedRange)
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 enum class Operator {
     PLUS,
     MULT,
 }
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 sealed class Expression : Node()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class IntLiteral(
     val value: Int,
 ) : Expression()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class GenericBinaryExpression(
     val operator: Operator,
     val left: Expression,
     val right: Expression,
 ) : Node()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class Mult(
     val left: Expression,
     val right: Expression,
 ) : Node()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class Sum(
     val left: Expression,
     val right: Expression,
 ) : Node()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 sealed class ALangExpression : Node()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class ALangIntLiteral(
     val value: Int,
 ) : ALangExpression()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class ALangSum(
     val left: ALangExpression,
     val right: ALangExpression,
 ) : ALangExpression()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class ALangMult(
     val left: ALangExpression,
     val right: ALangExpression,
 ) : ALangExpression()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 sealed class BLangExpression : Node()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class BLangIntLiteral(
     val value: Int,
 ) : BLangExpression()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class BLangSum(
     val left: BLangExpression,
     val right: BLangExpression,
 ) : BLangExpression()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class BLangMult(
     val left: BLangExpression,
     val right: BLangExpression,
 ) : BLangExpression()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 enum class Type {
     INT,
     STR,
 }
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 sealed class TypedExpression(
     open var type: Type? = null,
 ) : Node()
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class TypedLiteral(
     var value: String,
     override var type: Type?,
 ) : TypedExpression(type)
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class TypedSum(
     var left: TypedExpression,
     var right: TypedExpression,
     override var type: Type? = null,
 ) : TypedExpression(type)
 
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class TypedConcat(
     var left: TypedExpression,
     var right: TypedExpression,
     override var type: Type? = null,
 ) : TypedExpression(type)
+
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
+data class BazRoot(
+    var stmts: MutableList<BazStmt> = mutableListOf(),
+) : Node()
+
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
+data class BazStmt(
+    val desc: String,
+) : Node()
+
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
+data class BarRoot(
+    var stmts: MutableList<BarStmt> = mutableListOf(),
+) : Node()
+
+@LanguageAssociation(MyExampleLanguageForTransformation::class)
+data class BarStmt(
+    val desc: String,
+) : Node()
 
 class ASTTransformerTest {
     @Test
@@ -350,7 +410,7 @@ class ASTTransformerTest {
             .registerNodeTransformer(CU::class, CU::class)
             .withChild(CU::statements, CU::statements)
         transformer.registerNodeTransformer(DisplayIntStatement::class) { s ->
-            s.withOrigin(GenericNode())
+            s.withOrigin(NodeOrigin(GenericNode()))
         }
 
         val cu =
@@ -400,19 +460,3 @@ class ASTTransformerTest {
         )
     }
 }
-
-data class BazRoot(
-    var stmts: MutableList<BazStmt> = mutableListOf(),
-) : Node()
-
-data class BazStmt(
-    val desc: String,
-) : Node()
-
-data class BarRoot(
-    var stmts: MutableList<BarStmt> = mutableListOf(),
-) : Node()
-
-data class BarStmt(
-    val desc: String,
-) : Node()

@@ -3,7 +3,7 @@ package com.strumenta.kolasu.emf
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.PropertyTypeDescription
 import com.strumenta.kolasu.model.isANode
-import com.strumenta.kolasu.model.processProperties
+import com.strumenta.kolasu.model.processFeatures
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EDataType
@@ -219,7 +219,7 @@ class MetamodelBuilder(
             )
         }
 
-        kClass.processProperties { prop ->
+        kClass.processFeatures { prop ->
             try {
                 if (eClass.eAllStructuralFeatures.any { sf -> sf.name == prop.name }) {
                     // skip

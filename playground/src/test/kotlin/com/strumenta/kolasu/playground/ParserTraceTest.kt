@@ -18,6 +18,7 @@ class ParserTraceTest {
     val mm = MetamodelsBuilder(JsonResource(URI.createFileURI("mm.json")))
 
     init {
+        StarLasuLanguageInstance.ensureIsRegistered()
         mm.addMetamodel(
             "com.strumenta.kolasu.playground",
             "http://mypackage.com",

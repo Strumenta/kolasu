@@ -3,7 +3,6 @@ package com.strumenta.kolasu.language
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.asAttribute
 import com.strumenta.kolasu.model.containedType
 import com.strumenta.kolasu.model.isAttribute
 import com.strumenta.kolasu.model.isConceptInterface
@@ -20,6 +19,7 @@ import kotlin.reflect.full.superclasses
  * There is no explicit Language defined in Kolasu, it is just a bunch of AST classes.
  * We create this Class to represent that collection of AST classes.
  */
+@Deprecated("Use a StarLasuLanguage instead")
 class KolasuLanguage(
     val qualifiedName: String,
 ) {
@@ -137,7 +137,7 @@ class KolasuLanguage(
                     tentativeAddClass(nodeProperty.referredType(), exceptions)
                 } else if (nodeProperty.isAttribute()) {
                     try {
-                        val attributeKClass = nodeProperty.asAttribute().type.classifier as? KClass<*>
+                        val attributeKClass = nodeProperty.returnType.classifier as? KClass<*>
                         if (attributeKClass != null) {
                             if (attributeKClass.superclasses.contains(Enum::class)) {
                                 addEnumClass(attributeKClass as KClass<out Enum<*>>)

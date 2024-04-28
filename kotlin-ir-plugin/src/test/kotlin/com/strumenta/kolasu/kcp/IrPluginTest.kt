@@ -1,33 +1,14 @@
-@file:OptIn(ExperimentalCompilerApi::class, ExperimentalCompilerApi::class)
+@file:OptIn(ExperimentalCompilerApi::class)
 
 package com.strumenta.kolasu.kcp
 
-import com.tschuchort.compiletesting.CompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Test
-import java.io.File
-import java.net.URLClassLoader
 import kotlin.test.assertEquals
 
-fun CompilationResultWithClassLoader.assertHasMessage(regex: Regex) {
-    val messageLines = this.messages.lines()
-    assert(messageLines.any { regex.matches(it) })
-}
-
-fun CompilationResultWithClassLoader.assertHasMessage(msg: String) {
-    val messageLines = this.messages.lines()
-    assert(messageLines.any { msg == it })
-}
-
-fun CompilationResultWithClassLoader.assertHasNotMessage(regex: Regex) {
-    val messageLines = this.messages.lines()
-    assert(messageLines.none { regex.matches(it) })
-}
-
-class IrPluginTest {
+class IrPluginTest : AbstractIrPluginTest() {
     @Test
     fun `IR plugin success`() {
         val result =
@@ -56,6 +37,9 @@ fun debug() = "Hello, World!"
                         "main.kt",
                         """
           import com.strumenta.kolasu.model.MPNode
+          import com.strumenta.kolasu.language.StarLasuLanguage
+
+    object LanguageMyTest : StarLasuLanguage("mytest")
 
     data class MyNode(var p1: Int) : MPNode()
 
@@ -87,6 +71,9 @@ fun main() {
                         "main.kt",
                         """
           import com.strumenta.kolasu.model.MPNode
+import com.strumenta.kolasu.language.StarLasuLanguage
+
+    object LanguageMyTest : StarLasuLanguage("mytest")
 
     data class MyNode(val p1: Int, var p2: String) : MPNode()
 
@@ -122,15 +109,19 @@ fun main() {
           package mytest
 
           import com.strumenta.kolasu.model.MPNode
+          import com.strumenta.kolasu.language.Attribute
           import com.strumenta.kolasu.model.NodeLike
           import com.strumenta.kolasu.model.observable.SimpleNodeObserver
 
+import com.strumenta.kolasu.language.StarLasuLanguage
+
+    object LanguageMyTest : StarLasuLanguage("mytest")
     data class MyNode(var p1: Int) : MPNode()
 
 class Foo : MPNode() {
 var p2 : Int = 0 
     set(value) {
-        notifyOfPropertyChange("p2", field, value)
+        notifyOfAttributeChange(Foo.concept.attribute("p2")!!, field, value)
         field = value
     }
 }
@@ -139,11 +130,11 @@ object MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
     override fun <V : Any?>onAttributeChange(
         node: NodeLike,
-        attributeName: String,
+        attribute: Attribute,
         oldValue: V,
         newValue: V
     ) {
-        observations.add("${'$'}attributeName: ${'$'}oldValue -> ${'$'}newValue")
+        observations.add("${'$'}{attribute.name}: ${'$'}oldValue -> ${'$'}newValue")
     }
 
 }
@@ -161,7 +152,7 @@ fun main() {
 """,
                     ),
             )
-        result.assertHasMessage(Regex("i: file:///[a-zA-Z0-9/\\-.]*:6:6 MPNode class mytest.MyNode identified"))
+        result.assertHasMessage(Regex("i: file:///[a-zA-Z0-9/\\-.]*:10:10 MPNode class mytest.MyNode identified"))
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
@@ -187,11 +178,12 @@ fun main() {
                     SourceFile.kotlin(
                         "main.kt",
                         """
-          package mytest
+package mytest
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.model.MPNode
 
-          import com.strumenta.kolasu.model.MPNode
-
-    data class MyNode(var p1: MyNode? = null) : MPNode()
+object LanguageMyTest : StarLasuLanguage("mytest")
+data class MyNode(var p1: MyNode? = null) : MPNode()
 
 fun main() {
   val n1 = MyNode()
@@ -262,7 +254,9 @@ fun main() {
           import com.strumenta.kolasu.model.MPNode
           import com.strumenta.kolasu.model.observable.ObservableList
           import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
+import com.strumenta.kolasu.language.StarLasuLanguage
 
+object LanguageMyTest : StarLasuLanguage("mytest")
     data class MyNode(var p4: ObservableList<MyNode> = ObservableList()) : MPNode()
 
 fun main() {
@@ -300,6 +294,9 @@ fun main() {
                         """
           package mytest
 
+        import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Reference
           import com.strumenta.kolasu.model.NodeLike
           import com.strumenta.kolasu.model.Node
           import com.strumenta.kolasu.model.observable.ObservableList
@@ -309,7 +306,14 @@ fun main() {
         import kotlin.test.Test
         import kotlin.test.assertEquals
         import com.strumenta.kolasu.model.observable.SimpleNodeObserver
+import com.strumenta.kolasu.language.explore
+import com.strumenta.kolasu.language.StarLasuLanguage
 
+object StarLasuLanguageInstance : StarLasuLanguage("mytest") {
+    init {
+        explore(NamedNode::class, NodeWithReference::class)
+    }
+}
 
 data class NamedNode(override val name: String) : Node(), Named
 
@@ -317,36 +321,37 @@ data class NodeWithReference(val ref: ReferenceValue<NamedNode>, val id: Int) : 
 
 class MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
-    override fun <V> onAttributeChange(node: NodeLike, attributeName: String, oldValue: V, newValue: V) {
-        observations.add("${'$'}attributeName: ${'$'}oldValue -> ${'$'}newValue")
+    override fun <V> onAttributeChange(node: NodeLike, attribute: Attribute, oldValue: V, newValue: V) {
+        observations.add("${'$'}{attribute.name}: ${'$'}oldValue -> ${'$'}newValue")
     }
 
-    override fun onChildAdded(node: NodeLike, containmentName: String, added: NodeLike) {
-        observations.add("${'$'}containmentName: added ${'$'}added")
+    override fun onChildAdded(node: NodeLike, containment: Containment, added: NodeLike) {
+        observations.add("${'$'}{containment.name}: added ${'$'}added")
     }
 
-    override fun onChildRemoved(node: NodeLike, containmentName: String, removed: NodeLike) {
-        observations.add("${'$'}containmentName: removed ${'$'}removed")
+    override fun onChildRemoved(node: NodeLike, containment: Containment, removed: NodeLike) {
+        observations.add("${'$'}{containment.name}: removed ${'$'}removed")
     }
 
-    override fun onReferenceSet(node: NodeLike, referenceName: String, oldReferredNode: NodeLike?, newReferredNode: NodeLike?) {
+    override fun onReferenceSet(node: NodeLike, reference: Reference, oldReferredNode: NodeLike?, newReferredNode: NodeLike?) {
         val oldName = if (oldReferredNode == null) "null" else (oldReferredNode as? Named)?.name ?: "<UNKNOWN>"
         val newName = if (newReferredNode == null) "null" else (newReferredNode as? Named)?.name ?: "<UNKNOWN>"
-        observations.add("${'$'}referenceName: changed from ${'$'}oldName to ${'$'}newName")
+        observations.add("${'$'}{reference.name}: changed from ${'$'}oldName to ${'$'}newName")
     }
 
-    override fun onReferringAdded(node: NodeLike, referenceName: String, referring: NodeLike) {
+    override fun onReferringAdded(node: NodeLike, reference: Reference, referring: NodeLike) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
-        observations.add("${'$'}myName is now referred to by ${'$'}referring.${'$'}referenceName")
+        observations.add("${'$'}myName is now referred to by ${'$'}referring.${'$'}{reference.name}")
     }
 
-    override fun onReferringRemoved(node: NodeLike, referenceName: String, referring: NodeLike) {
+    override fun onReferringRemoved(node: NodeLike, reference: Reference, referring: NodeLike) {
         val myName = (node as? Named)?.name ?: "<UNKNOWN>"
-        observations.add("${'$'}myName is not referred anymore by ${'$'}referring.${'$'}referenceName")
+        observations.add("${'$'}myName is not referred anymore by ${'$'}referring.${'$'}{reference.name}")
     }
 }
 
 fun main() {
+    StarLasuLanguageInstance.ensureIsRegistered()
        val obs1 = MyObserver()
         val obs2 = MyObserver()
         val obsA = MyObserver()
@@ -447,6 +452,9 @@ package mytest
 
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.MPNode
+import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.PrimitiveType
+import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.model.FeatureType
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.observable.ObservableList
@@ -456,6 +464,9 @@ import com.strumenta.kolasu.model.ReferenceValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import com.strumenta.kolasu.model.observable.SimpleNodeObserver
+import com.strumenta.kolasu.language.StarLasuLanguage
+
+object LanguageMyTest : StarLasuLanguage("mytest")
 
 data class A(val f1: String, val f2: Int, val f3: A? = null) : MPNode()
 
@@ -464,25 +475,28 @@ fun main() {
     val a2 = A("Bar", 18, a1)
     val a3 = A("Zum", 99, a2)
 
-    assertEquals(3, a1.features.size)
+    assertEquals(3, a1.concept.declaredFeatures.size)
     
-    assertEquals("f1", a1.features[0].name)
-    assertEquals("Foo", a1.features[0].value)
-    assertEquals(FeatureType.ATTRIBUTE, a1.features[0].featureType)
-    assertEquals(Multiplicity.SINGULAR, a1.features[0].multiplicity)
-    assertEquals(false, a1.features[0].derived)
+    assertEquals("f1", a1.concept.declaredFeatures[0].name)
+    assertEquals("Foo", a1.concept.declaredFeatures[0].value(a1))
+    assertEquals(true, a1.concept.declaredFeatures[0] is Attribute)
+    assertEquals(PrimitiveType("kotlin.String"), a1.concept.declaredFeatures[0].type)
+    assertEquals(Multiplicity.SINGULAR, a1.concept.declaredFeatures[0].multiplicity)
+    assertEquals(false, a1.concept.declaredFeatures[0].derived)
 
-    assertEquals("f2", a1.features[1].name)
-    assertEquals(6, a1.features[1].value)
-    assertEquals(FeatureType.ATTRIBUTE, a1.features[1].featureType)
-    assertEquals(Multiplicity.SINGULAR, a1.features[1].multiplicity)
-    assertEquals(false, a1.features[1].derived)
+    assertEquals("f2", a1.concept.declaredFeatures[1].name)
+    assertEquals(6, a1.concept.declaredFeatures[1].value(a1))
+    assertEquals(true, a1.concept.declaredFeatures[1] is Attribute)
+    assertEquals(PrimitiveType("kotlin.Int"), a1.concept.declaredFeatures[1].type)
+    assertEquals(Multiplicity.SINGULAR, a1.concept.declaredFeatures[1].multiplicity)
+    assertEquals(false, a1.concept.declaredFeatures[1].derived)
     
-    assertEquals("f3", a1.features[2].name)
-    assertEquals(null, a1.features[2].value)
-    assertEquals(FeatureType.CONTAINMENT, a1.features[2].featureType)
-    assertEquals(Multiplicity.OPTIONAL, a1.features[2].multiplicity)
-    assertEquals(false, a1.features[2].derived)
+    assertEquals("f3", a1.concept.declaredFeatures[2].name)
+    assertEquals(null, a1.concept.declaredFeatures[2].value(a1))
+    assertEquals(true, a1.concept.declaredFeatures[2] is Containment)
+    assertEquals(a1.concept, a1.concept.declaredFeatures[2].type)
+    assertEquals(Multiplicity.OPTIONAL, a1.concept.declaredFeatures[2].multiplicity)
+    assertEquals(false, a1.concept.declaredFeatures[2].derived)
 }
 
 """,
@@ -514,6 +528,9 @@ import com.strumenta.kolasu.model.ReferenceValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import com.strumenta.kolasu.model.observable.SimpleNodeObserver
+import com.strumenta.kolasu.language.StarLasuLanguage
+
+object LanguageMyTest : StarLasuLanguage("mytest")
 
 sealed class Expression : MPNode()
 
@@ -551,66 +568,82 @@ fun main() {
         result.invokeMainMethod("mytest.MainKt")
     }
 
-    private fun CompilationResultWithClassLoader.invokeMainMethod(className: String) {
-        val mainKt = this.classLoader.loadClass(className)
-        val mainMethod =
-            mainKt.methods.find { it.name == "main" }
-                ?: throw IllegalArgumentException("Main method not found in compiled code")
-        when (mainMethod.parameterCount) {
-            0 -> {
-                mainMethod.invoke(null)
-            }
+    @Test
+    fun `get concept on class`() {
+        val result =
+            compile(
+                sourceFile =
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
+package mytest
 
-            1 -> {
-                mainMethod.invoke(null, arrayOf<String>())
-            }
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.MPNode
+import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.model.Multiplicity
+import com.strumenta.kolasu.model.observable.ObservableList
+import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.ReferenceValue
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import com.strumenta.kolasu.model.observable.SimpleNodeObserver
+import com.strumenta.kolasu.language.StarLasuLanguage
 
-            else -> {
-                throw IllegalStateException(
-                    "The main method found expect these parameters: ${mainMethod.parameters}. " +
-                        "Main method: $mainMethod",
-                )
-            }
-        }
+object LanguageMyTest : StarLasuLanguage("mytest")
+data class SimpleNode(var foo: String, var other: SimpleNode? = null) : MPNode()
+
+fun main() {
+    assertEquals("SimpleNode", SimpleNode.concept.name)
+}
+
+""",
+                    ),
+            )
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+
+        result.invokeMainMethod("mytest.MainKt")
+    }
+
+    @Test
+    fun `get concept on instance`() {
+        val result =
+            compile(
+                sourceFile =
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
+package mytest
+
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.MPNode
+import com.strumenta.kolasu.model.FeatureType
+import com.strumenta.kolasu.model.Multiplicity
+import com.strumenta.kolasu.model.observable.ObservableList
+import com.strumenta.kolasu.model.observable.MultiplePropertyListObserver
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.ReferenceValue
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import com.strumenta.kolasu.model.observable.SimpleNodeObserver
+import com.strumenta.kolasu.language.StarLasuLanguage
+
+object LanguageMyTest : StarLasuLanguage("mytest")
+
+data class SimpleNode(var foo: String, var other: SimpleNode? = null) : MPNode()
+
+fun main() {
+    val n1 = SimpleNode("a")
+
+    assertEquals("SimpleNode", n1.concept.name)
+}
+
+""",
+                    ),
+            )
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+
+        result.invokeMainMethod("mytest.MainKt")
     }
 }
-
-@ExperimentalCompilerApi
-fun compile(
-    sourceFiles: List<SourceFile>,
-    plugin: CompilerPluginRegistrar = StarLasuComponentRegistrar(),
-): CompilationResultWithClassLoader {
-    val kotlinCompilation =
-        KotlinCompilation().apply {
-            sources = sourceFiles
-            // useIR = true
-            compilerPluginRegistrars = listOf(plugin)
-            inheritClassPath = true
-        }
-    val result = kotlinCompilation.compile()
-    return CompilationResultWithClassLoader(result, kotlinCompilation.classpaths, kotlinCompilation.classesDir)
-}
-
-data class CompilationResultWithClassLoader(
-    val compilationResult: CompilationResult,
-    val classpaths: kotlin.collections.List<java.io.File>,
-    val outputDirectory: File,
-) {
-    val messages: String
-        get() = compilationResult.messages
-    val exitCode: KotlinCompilation.ExitCode
-        get() = compilationResult.exitCode
-
-    // It is important to REUSE the classloader and not re-create it
-    val classLoader =
-        URLClassLoader(
-            // Include the original classpaths and the output directory to be able to load classes from dependencies.
-            classpaths.plus(outputDirectory).map { it.toURI().toURL() }.toTypedArray(),
-            this::class.java.classLoader,
-        )
-}
-
-fun compile(
-    sourceFile: SourceFile,
-    plugin: CompilerPluginRegistrar = StarLasuComponentRegistrar(),
-): CompilationResultWithClassLoader = compile(listOf(sourceFile), plugin)

@@ -1,9 +1,7 @@
 package com.strumenta.kolasu.transformation
 
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
-import kotlin.reflect.full.primaryConstructor
 
 /**
  * A child of an AST node that is automatically populated from a source tree.
@@ -36,22 +34,6 @@ internal class PresentParameterValue(
 ) : ParameterValue()
 
 internal object AbsentParameterValue : ParameterValue()
-
-inline fun <T : Any> KClass<T>.preferredConstructor(): KFunction<T> {
-    val constructors = this.constructors
-    return if (constructors.size != 1) {
-        if (this.primaryConstructor != null) {
-            this.primaryConstructor!!
-        } else {
-            throw RuntimeException(
-                "Node Factories support only classes with exactly one constructor or a " +
-                    "primary constructor. Class ${this.qualifiedName} has ${constructors.size}",
-            )
-        }
-    } else {
-        constructors.first()
-    }
-}
 
 interface ParameterConverter {
     fun isApplicable(

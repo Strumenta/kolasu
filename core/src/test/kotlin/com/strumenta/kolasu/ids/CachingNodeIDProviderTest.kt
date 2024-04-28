@@ -16,6 +16,10 @@ class CachingNodeIDProviderTest {
         }
     }
 
+    init {
+        StarLasuLanguageInstance.ensureIsRegistered()
+    }
+
     @Test
     fun invocationHappensTheRightAmountOfTime() {
         val n1 = MyNonRoot(2)

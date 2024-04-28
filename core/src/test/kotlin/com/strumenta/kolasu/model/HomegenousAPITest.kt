@@ -1,21 +1,33 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+object MyLanguage : StarLasuLanguage("com.foo.a1") {
+    init {
+        explore(HNodeA::class, HNodeB::class, HNodeC::class, HNodeD::class)
+    }
+}
+
+@LanguageAssociation(MyLanguage::class)
 class HNodeA(
     override var name: String,
 ) : Node(),
     Named
 
+@LanguageAssociation(MyLanguage::class)
 data class HNodeB(
     val nodes: MutableList<HNodeA> = mutableListOf(),
 ) : Node()
 
+@LanguageAssociation(MyLanguage::class)
 data class HNodeC(
     val ref: ReferenceValue<HNodeA>,
 ) : Node()
 
+@LanguageAssociation(MyLanguage::class)
 data class HNodeD(
     var node: HNodeA? = null,
 ) : Node()
@@ -37,12 +49,12 @@ class HomogenousAPITest {
         val n2 = HNodeA("n2")
         val n3 = HNodeA("n3")
         val c = HNodeB()
-        assertEquals(emptyList(), c.getContainment<HNodeA>("nodes"))
+        assertEquals(emptyList(), c.getContainmentValue<HNodeA>("nodes"))
         c.addToContainment("nodes", n1)
-        assertEquals(listOf(n1), c.getContainment<HNodeA>("nodes"))
+        assertEquals(listOf(n1), c.getContainmentValue<HNodeA>("nodes"))
         c.nodes.add(n2)
         c.removeFromContainment("nodes", n1)
-        assertEquals(listOf(n2), c.getContainment<HNodeA>("nodes"))
+        assertEquals(listOf(n2), c.getContainmentValue<HNodeA>("nodes"))
     }
 
     @Test
@@ -51,16 +63,16 @@ class HomogenousAPITest {
         val n2 = HNodeA("n2")
         val n3 = HNodeA("n3")
         val c = HNodeD()
-        assertEquals(emptyList(), c.getContainment<HNodeA>("node"))
+        assertEquals(emptyList(), c.getContainmentValue<HNodeA>("node"))
         c.addToContainment("node", n1)
-        assertEquals(listOf(n1), c.getContainment<HNodeA>("node"))
+        assertEquals(listOf(n1), c.getContainmentValue<HNodeA>("node"))
         c.node = n2
-        assertEquals(listOf(n2), c.getContainment<HNodeA>("node"))
+        assertEquals(listOf(n2), c.getContainmentValue<HNodeA>("node"))
         c.addToContainment("node", n1)
         c.addToContainment("node", n3)
-        assertEquals(listOf(n3), c.getContainment<HNodeA>("node"))
+        assertEquals(listOf(n3), c.getContainmentValue<HNodeA>("node"))
         c.removeFromContainment("node", n3)
-        assertEquals(listOf(), c.getContainment<HNodeA>("node"))
+        assertEquals(listOf(), c.getContainmentValue<HNodeA>("node"))
     }
 
     @Test

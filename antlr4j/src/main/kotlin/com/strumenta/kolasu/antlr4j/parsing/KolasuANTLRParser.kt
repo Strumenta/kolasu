@@ -1,13 +1,13 @@
 package com.strumenta.kolasu.antlr4j.parsing
 
-import com.strumenta.kolasu.model.FeatureDescription
+import com.strumenta.kolasu.language.Feature
 import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.assignParents
-import com.strumenta.kolasu.model.processProperties
+import com.strumenta.kolasu.model.processFeatures
 import com.strumenta.kolasu.parsing.ASTParser
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult
@@ -262,11 +262,11 @@ abstract class KolasuANTLRParser<R : NodeLike, P : Parser, C : ParserRuleContext
     fun walk(node: NodeLike) = node.walk()
 
     @JvmOverloads
-    fun processProperties(
+    fun processFeatures(
         node: NodeLike,
-        propertyOperation: (FeatureDescription) -> Unit,
-        propertiesToIgnore: Set<String> = emptySet(),
-    ) = node.processProperties(propertiesToIgnore, propertyOperation)
+        featureHandler: (Feature) -> Unit,
+        featuresToIgnore: Set<String> = emptySet(),
+    ) = node.processFeatures(featuresToIgnore, featureHandler)
 
     /**
      * Traverses the AST to ensure that parent nodes are correctly assigned.

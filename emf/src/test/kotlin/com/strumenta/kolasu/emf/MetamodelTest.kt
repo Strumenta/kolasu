@@ -46,7 +46,7 @@ class LocalDateTimeLiteral(
 ) : Expression()
 
 data class CompilationUnit(
-    val statements: List<Statement>?,
+    val statements: List<Statement>,
 ) : Node()
 
 interface SomeInterface : NodeLike
@@ -58,9 +58,13 @@ data class AltCompilationUnit(
 data class NodeWithReference(
     override val name: String,
     val singlePointer: ReferenceValue<NodeWithReference>,
-    val pointers: MutableList<ReferenceValue<NodeWithReference>>,
+    val pointers: MutableList<PointerHolder>,
 ) : Node(),
     Named
+
+data class PointerHolder(
+    val value: ReferenceValue<NodeWithReference>,
+) : Node()
 
 data class NodeWithForwardReference(
     override val name: String,
@@ -241,7 +245,7 @@ class MetamodelTest {
         metamodelBuilder.provideClass(NodeWithReference::class)
         val ePackage = metamodelBuilder.generate()
         assertEquals("com.strumenta.kolasu.emf", ePackage.name)
-        assertEquals(1, ePackage.eClassifiers.size)
+        assertEquals(2, ePackage.eClassifiers.size)
 
         val nodeWithReference: EClass = ePackage.eClassifiers.find { it.name == "NodeWithReference" } as EClass
         assertEquals(false, nodeWithReference.isInterface)

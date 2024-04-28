@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.semantics.Scope
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -7,37 +9,57 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.Test as test
 
+object MyLanguage2 : StarLasuLanguage("com.foo.a2") {
+    init {
+        explore(
+            MyNode::class,
+            ASymbol::class,
+            BSymbol::class,
+            ExtNode::class,
+            NodeOverridingName::class,
+            USymbol::class,
+        )
+    }
+}
+
+@LanguageAssociation(MyLanguage2::class)
 class MyNode(
     override val name: String,
 ) : Node(),
     Named
 
+@LanguageAssociation(MyLanguage2::class)
 data class ASymbol(
     override val name: String,
     val index: Int = 0,
 ) : Node(),
     Named
 
+@LanguageAssociation(MyLanguage2::class)
 data class BSymbol(
     override val name: String,
     val index: Int = 0,
 ) : Node(),
     Named
 
+@LanguageAssociation(MyLanguage2::class)
 data class USymbol(
     override val name: String? = null,
 ) : Node(),
     PossiblyNamed
 
+@LanguageAssociation(MyLanguage2::class)
 data class NodeOverridingName(
     override var name: String,
 ) : Node(),
     Named
 
+@LanguageAssociation(MyLanguage2::class)
 open class BaseNode(
     open var attr1: Int,
 ) : Node()
 
+@LanguageAssociation(MyLanguage2::class)
 data class ExtNode(
     override var attr1: Int,
 ) : BaseNode(attr1)
@@ -186,6 +208,12 @@ class ModelTest {
 
     @test
     fun nameIsProperty() {
-        assertTrue { MyNode("").features.map { it.name }.contains("name") }
+        assertTrue {
+            MyNode("")
+                .concept
+                .allFeatures
+                .map { it.name }
+                .contains("name")
+        }
     }
 }

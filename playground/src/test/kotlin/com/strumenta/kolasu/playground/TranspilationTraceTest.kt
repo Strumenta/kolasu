@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.playground
 
 import com.strumenta.kolasu.emf.MetamodelBuilder
+import com.strumenta.kolasu.model.NodeOrigin
 import com.strumenta.kolasu.model.plusAssign
 import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.validation.Issue
@@ -17,6 +18,10 @@ class TranspilationTraceTest {
             "http://mypackage.com",
             "myp",
         ).apply { provideClass(ANode::class) }.generate()
+
+    init {
+        StarLasuLanguageInstance.ensureIsRegistered()
+    }
 
     @Test
     fun serializeTranslationIssues() {
@@ -138,7 +143,7 @@ class TranspilationTraceTest {
         val aRoot = ANode("a", 1)
         val bRoot = ANode("b", 2)
         aRoot.destinations += bRoot
-        bRoot.withOrigin(aRoot)
+        bRoot.withOrigin(NodeOrigin(aRoot))
         val tt =
             TranspilationTrace(
                 "a:1",

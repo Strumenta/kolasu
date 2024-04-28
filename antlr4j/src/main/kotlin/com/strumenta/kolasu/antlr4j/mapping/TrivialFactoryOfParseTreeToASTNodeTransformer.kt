@@ -5,16 +5,18 @@ import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.transformation.ASTTransformer
-import com.strumenta.kolasu.transformation.preferredConstructor
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.TerminalNode
 import kotlin.reflect.KCallable
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
 
 object TrivialFactoryOfParseTreeToASTNodeTransformer {
     fun convertString(
@@ -86,7 +88,7 @@ object TrivialFactoryOfParseTreeToASTNodeTransformer {
         ASTTransformer,
     ) -> T? =
         { parseTreeNode, astTransformer ->
-            val constructor = T::class.preferredConstructor()
+            val constructor = T::class.pickConstructor()
             val args: Array<Any?> =
                 constructor
                     .parameters
@@ -155,5 +157,22 @@ inline fun <reified S : RuleContext, reified T : NodeLike> ParseTreeToASTTransfo
     this.registerNodeTransformer(S::class) { parseTreeNode, astTransformer ->
         val wrapped = wrappingMember.call(parseTreeNode)
         astTransformer.transform(wrapped) as T?
+    }
+}
+
+// This code has been duplicated because import stop working, for some reason...
+fun <T : Any> KClass<T>.pickConstructor(): KFunction<T> {
+    val constructors = this.constructors
+    return if (constructors.size != 1) {
+        if (this.primaryConstructor != null) {
+            this.primaryConstructor!!
+        } else {
+            throw RuntimeException(
+                "Node Factories support only classes with exactly one constructor or a " +
+                    "primary constructor. Class ${this.qualifiedName} has ${constructors.size}",
+            )
+        }
+    } else {
+        constructors.first()
     }
 }

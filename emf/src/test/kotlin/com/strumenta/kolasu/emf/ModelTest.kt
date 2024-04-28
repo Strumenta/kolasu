@@ -1,7 +1,10 @@
 package com.strumenta.kolasu.emf
 
 import com.strumenta.kolasu.antlr4j.parsing.withParseTreeNode
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeOrigin
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceValue
@@ -30,6 +33,21 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+object StarLasuLanguageInstance : StarLasuLanguage("com.strumenta.kolasu.emf") {
+    init {
+        explore(
+            MyRoot::class,
+            MyRootWithIDLogic::class,
+            NodeFoo::class,
+            MySimpleLangCu::class,
+            NodeWithReference::class,
+            AltCompilationUnit::class,
+            CompilationUnit::class,
+            NodeWithForwardReference::class,
+        )
+    }
+}
+
 data class NodeFoo(
     val name: String,
 ) : Node()
@@ -44,6 +62,10 @@ class MyRootWithIDLogic : Node()
 class MySimpleLangCu : Node()
 
 class ModelTest {
+    init {
+        StarLasuLanguageInstance.ensureIsRegistered()
+    }
+
     @Test
     fun generateSimpleModel() {
         val cu =
@@ -100,7 +122,7 @@ class ModelTest {
 
     @Test
     fun nullCollection() {
-        val cu = CompilationUnit(null)
+        val cu = CompilationUnit(emptyList())
         val nsURI = "https://strumenta.com/simplemm"
         val metamodelBuilder = MetamodelBuilder(packageName(CompilationUnit::class), nsURI, "simplemm")
         metamodelBuilder.provideClass(CompilationUnit::class)
@@ -136,7 +158,7 @@ class ModelTest {
     @Test
     fun originIsSerialized() {
         val n1 = NodeFoo("abc")
-        val n2 = NodeFoo("def").withOrigin(n1)
+        val n2 = NodeFoo("def").withOrigin(NodeOrigin(n1))
         val ePackage =
             MetamodelBuilder("com.strumenta.kolasu.emf", "http://foo.com", "foo")
                 .apply {
@@ -259,52 +281,70 @@ class ModelTest {
                 "simplemm",
             )
         metamodelBuilder.provideClass(NodeWithReference::class)
+        metamodelBuilder.provideClass(PointerHolder::class)
         val ePackage = metamodelBuilder.generate()
 
         val res = ResourceImpl()
         res.contents.add(ePackage)
         val r1 = NodeWithReference("foo", ReferenceValue("foo"), mutableListOf())
-        r1.pointers.add(ReferenceValue("a", r1))
-        r1.pointers.add(ReferenceValue("b", r1))
-        r1.pointers.add(ReferenceValue("c", r1))
+        r1.pointers.add(PointerHolder(ReferenceValue("a", r1)))
+        r1.pointers.add(PointerHolder(ReferenceValue("b", r1)))
+        r1.pointers.add(PointerHolder(ReferenceValue("c", r1)))
         val eo1 = r1.toEObject(res)
 
         val pointers = eo1.eGet("pointers") as EList<*>
         assertEquals(3, pointers.size)
 
-        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[0] as EObject).eClass())
-        assertEquals("a", (pointers[0] as EObject).eGet("name"))
-        assertEquals(eo1, (pointers[0] as EObject).eGet("referenced"))
+        var holder: EObject
 
-        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[1] as EObject).eClass())
-        assertEquals("b", (pointers[1] as EObject).eGet("name"))
-        assertEquals(eo1, (pointers[1] as EObject).eGet("referenced"))
+        assertEquals(ePackage.getEClassifier("PointerHolder"), (pointers[0] as EObject).eClass())
+        holder = (pointers[0] as EObject).eGet("value") as EObject
 
-        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), (pointers[2] as EObject).eClass())
-        assertEquals("c", (pointers[2] as EObject).eGet("name"))
-        assertEquals(eo1, (pointers[2] as EObject).eGet("referenced"))
+        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), holder.eClass())
+        assertEquals("a", holder.eGet("name"))
+        assertEquals(eo1, holder.eGet("referenced"))
+
+        assertEquals(ePackage.getEClassifier("PointerHolder"), (pointers[1] as EObject).eClass())
+        holder = (pointers[1] as EObject).eGet("value") as EObject
+
+        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), holder.eClass())
+        assertEquals("b", holder.eGet("name"))
+        assertEquals(eo1, holder.eGet("referenced"))
+
+        assertEquals(ePackage.getEClassifier("PointerHolder"), (pointers[2] as EObject).eClass())
+        holder = (pointers[2] as EObject).eGet("value") as EObject
+
+        assertEquals(STARLASU_METAMODEL.getEClassifier("ReferenceByName"), holder.eClass())
+        assertEquals("c", holder.eGet("name"))
+        assertEquals(eo1, holder.eGet("referenced"))
 
         assertEquals(
             """{
   "eClass" : "#//NodeWithReference",
   "name" : "foo",
   "pointers" : [ {
-    "name" : "a",
-    "referenced" : {
-      "eClass" : "#//NodeWithReference",
-      "${'$'}ref" : "/"
+    "value" : {
+      "name" : "a",
+      "referenced" : {
+        "eClass" : "#//NodeWithReference",
+        "${'$'}ref" : "/"
+      }
     }
   }, {
-    "name" : "b",
-    "referenced" : {
-      "eClass" : "#//NodeWithReference",
-      "${'$'}ref" : "/"
+    "value" : {
+      "name" : "b",
+      "referenced" : {
+        "eClass" : "#//NodeWithReference",
+        "${'$'}ref" : "/"
+      }
     }
   }, {
-    "name" : "c",
-    "referenced" : {
-      "eClass" : "#//NodeWithReference",
-      "${'$'}ref" : "/"
+    "value" : {
+      "name" : "c",
+      "referenced" : {
+        "eClass" : "#//NodeWithReference",
+        "${'$'}ref" : "/"
+      }
     }
   } ],
   "singlePointer" : {
@@ -441,7 +481,7 @@ class ModelTest {
     @Test
     fun saveToJSONNodeOrigin() {
         val someOtherNode = MyRoot(123)
-        val ast = MySimpleLangCu().withOrigin(someOtherNode)
+        val ast = MySimpleLangCu().withOrigin(NodeOrigin(someOtherNode))
         val metamodelBuilder =
             MetamodelBuilder(
                 "com.strumenta.kolasu.emf",

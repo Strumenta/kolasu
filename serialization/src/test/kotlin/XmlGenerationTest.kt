@@ -77,7 +77,7 @@ class XmlGenerationTest {
                         "Section1",
                         listOf(
                             Content(1, null),
-                            OtherContent(listOf(1, 2, 3, 100, -122)),
+                            OtherContent(listOf(1, 2, 3, 100, -122).map { IntHolder(it) }),
                             Content(2, Content(3, Content(4, null))),
                         ),
                     ),
@@ -92,11 +92,11 @@ class XmlGenerationTest {
             <annidatedContent/>
         </contents>
         <contents type="OtherContent">
-            <values value="1"/>
-            <values value="2"/>
-            <values value="3"/>
-            <values value="100"/>
-            <values value="-122"/>
+            <values type="IntHolder" value="1"/>
+            <values type="IntHolder" value="2"/>
+            <values type="IntHolder" value="3"/>
+            <values type="IntHolder" value="100"/>
+            <values type="IntHolder" value="-122"/>
         </contents>
         <contents id="2" type="Content">
             <annidatedContent id="3" type="Content">

@@ -36,11 +36,11 @@ open class SymbolResolver(
         reference: KProperty1<NodeLike, ReferenceValue<PossiblyNamed>?>,
     ) {
         node
-            .features
-            .find { it.name == reference.name }
+            .concept
+            .reference(reference.name)
             ?.let {
                 @Suppress("UNCHECKED_CAST")
-                it.value as ReferenceValue<PossiblyNamed>?
+                it.value(node) as ReferenceValue<PossiblyNamed>?
             }?.let { this.scopeProvider.scopeFor(node, reference).resolve(it) }
     }
 

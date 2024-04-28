@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.ids
 
-import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.NodeLike as KNode
 
 /**
@@ -35,21 +34,21 @@ abstract class BaseNodeIdProvider : NodeIdProvider {
 class CommonNodeIdProvider(
     val semanticIDProvider: SemanticNodeIDProvider = DeclarativeNodeIdProvider(),
 ) : BaseNodeIdProvider() {
-    override fun id(kNode: NodeLike): String =
+    override fun id(kNode: KNode): String =
         if (semanticIDProvider.hasSemanticIdentity(kNode)) {
             semanticIDProvider.semanticID(kNode)
         } else {
             positionalID(kNode)
         }
 
-    private fun positionalID(kNode: NodeLike): String =
+    private fun positionalID(kNode: KNode): String =
         StructuralNodeIdProvider().apply { parentProvider = this }.id(
             kNode,
         )
 }
 
 interface SemanticNodeIDProvider {
-    fun hasSemanticIdentity(kNode: NodeLike): Boolean
+    fun hasSemanticIdentity(kNode: KNode): Boolean
 
-    fun semanticID(kNode: NodeLike): String
+    fun semanticID(kNode: KNode): String
 }

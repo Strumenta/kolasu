@@ -22,5 +22,6 @@ class StarLasuComponentRegistrar : CompilerPluginRegistrar() {
 
         FirExtensionRegistrarAdapter.registerExtension(StarLasuFirExtensionsRegistrar(messageCollector))
         IrGenerationExtension.registerExtension(StarLasuIrGenerationExtension(messageCollector))
+        IrGenerationExtension.registerExtension(LanguageIrGenerationExtension(messageCollector))
     }
 }

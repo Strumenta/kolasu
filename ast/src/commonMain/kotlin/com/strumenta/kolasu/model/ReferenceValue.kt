@@ -6,6 +6,7 @@ import com.badoo.reaktive.observable.filter
 import com.badoo.reaktive.observable.map
 import com.badoo.reaktive.subject.getObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
+import com.strumenta.kolasu.language.Reference
 
 /**
  * A reference associated by using a name.
@@ -38,7 +39,7 @@ class ReferenceValue<N>(
         }
 
     private var container: NodeLike? = null
-    private var referenceName: String? = null
+    private var reference: Reference? = null
 
     /**
      * When we instantiate the reference by name, we wired it so that changes to the reference by name will
@@ -47,22 +48,22 @@ class ReferenceValue<N>(
      */
     fun setContainer(
         node: NodeLike,
-        referenceName: String,
+        reference: Reference,
     ) {
         if (container == node) {
             return
         }
         if (container != null) {
-            throw IllegalStateException("$this is already contained in $container as ${this.referenceName}")
+            throw IllegalStateException("$this is already contained in $container as ${this.reference}")
         }
         changes
             .map {
                 // When the reference is changed, we propagate it to the container
-                ReferenceSet(node, referenceName, it.oldValue as NodeLike?, it.newValue as NodeLike?)
+                ReferenceSet(node, reference, it.oldValue as NodeLike?, it.newValue as NodeLike?)
             }.subscribe(node.changes.getObserver { })
         changes
             .filter { it.oldValue != null }
-            .map { ReferencedToRemoved(it.oldValue as NodeLike, referenceName, node) }
+            .map { ReferencedToRemoved(it.oldValue as NodeLike, reference, node) }
             .subscribe(
                 object : ObservableObserver<ReferencedToRemoved<NodeLike>> {
                     override fun onComplete() {
@@ -83,7 +84,7 @@ class ReferenceValue<N>(
             )
         changes
             .filter { it.newValue != null }
-            .map { ReferencedToAdded(it.newValue as NodeLike, referenceName, node) }
+            .map { ReferencedToAdded(it.newValue as NodeLike, reference, node) }
             .subscribe(
                 object : ObservableObserver<ReferencedToAdded<NodeLike>> {
                     override fun onComplete() {
@@ -103,7 +104,7 @@ class ReferenceValue<N>(
                 },
             )
         container = node
-        this.referenceName = referenceName
+        this.reference = reference
     }
 
     init {
