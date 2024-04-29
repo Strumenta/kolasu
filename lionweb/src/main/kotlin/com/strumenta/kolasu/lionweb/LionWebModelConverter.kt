@@ -32,6 +32,8 @@ import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
+import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
+import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.java.utils.CommonChecks
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
@@ -60,8 +62,8 @@ class LionWebModelConverter(
     private val languageConverter = initialLanguageConverter
 
     /**
-     * We mostly map Kolasu Nodes to LionWeb Nodes, but we also map things that are not Kolasu Nodes such
-     * as instances of Position and Point.
+     * We mostly map Kolasu Nodes to LionWeb Nodes, but we also map things that are not Kolasu Nodes but are nodes
+     * for LionWeb (this used to be the case for Positions and Points).
      */
     private val nodesMapping = BiMap<Any, LWNode>(usingIdentity = true)
     private val primitiveValueSerializations = ConcurrentHashMap<KClass<*>, PrimitiveValueSerialization<*>>()
@@ -127,65 +129,41 @@ class LionWebModelConverter(
                 lwNode.concept.allFeatures().forEach { feature ->
                     when (feature) {
                         is Property -> {
-                            val kAttribute = kFeatures.find { it.name == feature.name }
-                                as? com.strumenta.kolasu.language.Attribute
-                                ?: throw IllegalArgumentException("Property ${feature.name} not found in $kNode")
-                            val kValue = kNode.getAttributeValue(kAttribute)
-                            if (kValue is Enum<*>) {
-                                val kClass: EnumKClass = kValue::class as EnumKClass
-                                val enumeration = languageConverter.getKolasuClassesToEnumerationsMapping()[kClass]
-                                    ?: throw IllegalStateException("No enumeration for enum class $kClass")
-                                val enumerationLiteral = enumeration.literals.find { it.name == kValue.name }
-                                    ?: throw IllegalStateException(
-                                        "No enumeration literal with name ${kValue.name} " +
-                                            "in enumeration $enumeration"
-                                    )
-                                lwNode.setPropertyValue(feature, EnumerationValueImpl(enumerationLiteral))
+                            if (feature == StarLasuLWLanguage.ASTNodePosition) {
+                                lwNode.setPropertyValue(StarLasuLWLanguage.ASTNodePosition, kNode.position)
                             } else {
-                                lwNode.setPropertyValue(feature, kValue)
+                                val kAttribute = kFeatures.find { it.name == feature.name }
+                                    as? com.strumenta.kolasu.language.Attribute
+                                    ?: throw IllegalArgumentException("Property ${feature.name} not found in $kNode")
+                                val kValue = kNode.getAttributeValue(kAttribute)
+                                if (kValue is Enum<*>) {
+                                    val kClass: EnumKClass = kValue::class as EnumKClass
+                                    val enumeration = languageConverter.getKolasuClassesToEnumerationsMapping()[kClass]
+                                        ?: throw IllegalStateException("No enumeration for enum class $kClass")
+                                    val enumerationLiteral = enumeration.literals.find { it.name == kValue.name }
+                                        ?: throw IllegalStateException(
+                                            "No enumeration literal with name ${kValue.name} " +
+                                                "in enumeration $enumeration"
+                                        )
+                                    lwNode.setPropertyValue(feature, EnumerationValueImpl(enumerationLiteral))
+                                } else {
+                                    lwNode.setPropertyValue(feature, kValue)
+                                }
                             }
                         }
 
                         is Containment -> {
                             try {
-                                if (feature == StarLasuLWLanguage.ASTNodePosition) {
-                                    if (kNode.position != null) {
-                                        val lwPositionStartValue = DynamicNode(
-                                            lwNode.id + "_position_start",
-                                            StarLasuLWLanguage.Point
-                                        )
-                                        lwPositionStartValue.setPropertyValueByName("line", kNode.position!!.start.line)
-                                        lwPositionStartValue.setPropertyValueByName(
-                                            "column",
-                                            kNode.position!!.start.column
-                                        )
-
-                                        val lwPositionEndValue = DynamicNode(
-                                            lwNode.id + "_position_end",
-                                            StarLasuLWLanguage.Point
-                                        )
-                                        lwPositionEndValue.setPropertyValueByName("line", kNode.position!!.end.line)
-                                        lwPositionEndValue.setPropertyValueByName("column", kNode.position!!.end.column)
-
-                                        val lwPositionValue =
-                                            DynamicNode(lwNode.id + "_position", StarLasuLWLanguage.Position)
-                                        lwPositionValue.addChild(StarLasuLWLanguage.PositionStart, lwPositionStartValue)
-                                        lwPositionValue.addChild(StarLasuLWLanguage.PositionEnd, lwPositionEndValue)
-
-                                        lwNode.addChild(StarLasuLWLanguage.ASTNodePosition, lwPositionValue)
-                                    }
-                                } else {
-                                    val kContainment = (
-                                        kFeatures.find { it.name == feature.name } ?: throw IllegalStateException(
-                                            "Cannot find containment for ${feature.name} when considering node $kNode"
-                                        )
-                                        )
-                                        as com.strumenta.kolasu.language.Containment
-                                    val kValue = kNode.getChildren(kContainment)
-                                    kValue.forEach { kChild ->
-                                        val lwChild = nodesMapping.byA(kChild)!!
-                                        lwNode.addChild(feature, lwChild)
-                                    }
+                                val kContainment = (
+                                    kFeatures.find { it.name == feature.name } ?: throw IllegalStateException(
+                                        "Cannot find containment for ${feature.name} when considering node $kNode"
+                                    )
+                                    )
+                                    as com.strumenta.kolasu.language.Containment
+                                val kValue = kNode.getChildren(kContainment)
+                                kValue.forEach { kChild ->
+                                    val lwChild = nodesMapping.byA(kChild)!!
+                                    lwNode.addChild(feature, lwChild)
                                 }
                             } catch (e: Exception) {
                                 throw RuntimeException("Issue while processing containment ${feature.name}", e)
@@ -272,9 +250,9 @@ class LionWebModelConverter(
         lwTree.thisAndAllDescendants().forEach { lwNode ->
             val kNode = nodesMapping.byB(lwNode)!!
             if (kNode is KNode) {
-                val lwPosition = lwNode.getOnlyChildByContainmentName("position")
+                val lwPosition = lwNode.getPropertyValue(StarLasuLWLanguage.ASTNodePosition)
                 if (lwPosition != null) {
-                    kNode.position = nodesMapping.byB(lwPosition) as Position
+                    kNode.position = lwPosition as Position
                 }
             }
         }
@@ -292,6 +270,48 @@ class LionWebModelConverter(
         jsonSerialization.primitiveValuesSerialization.registerDeserializer(
             StarLasuLWLanguage.char.id
         ) { serialized -> serialized[0] }
+        val pointSerializer: PrimitiveSerializer<Point> =
+            PrimitiveSerializer<Point> { value ->
+                if (value == null) {
+                    return@PrimitiveSerializer null
+                }
+                "L${value.line}:${value.column}"
+            }
+        val pointDeserializer: PrimitiveDeserializer<Point> =
+            PrimitiveDeserializer<Point> { serialized ->
+                if (serialized == null) {
+                    return@PrimitiveDeserializer null
+                }
+                require(serialized.startsWith("L"))
+                require(serialized.removePrefix("L").isNotEmpty())
+                val parts = serialized.removePrefix("L").split(":")
+                require(parts.size == 2)
+                Point(parts[0].toInt(), parts[1].toInt())
+            }
+        jsonSerialization.primitiveValuesSerialization.registerSerializer(
+            StarLasuLWLanguage.Point.id,
+            pointSerializer
+        )
+        jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+            StarLasuLWLanguage.Point.id,
+            pointDeserializer
+        )
+        jsonSerialization.primitiveValuesSerialization.registerSerializer(
+            StarLasuLWLanguage.Position.id
+        ) { value ->
+            "${pointSerializer.serialize((value as Position).start)} to ${pointSerializer.serialize(value.end)}"
+        }
+        jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+            StarLasuLWLanguage.Position.id
+        ) { serialized ->
+            if (serialized == null) {
+                null
+            } else {
+                val parts = serialized.split(" to ")
+                require(parts.size == 2)
+                Position(pointDeserializer.deserialize(parts[0]), pointDeserializer.deserialize(parts[1]))
+            }
+        }
         synchronized(languageConverter) {
             languageConverter.knownLWLanguages().forEach {
                 jsonSerialization.primitiveValuesSerialization.registerLanguage(it)
@@ -471,26 +491,6 @@ class LionWebModelConverter(
         referencesPostponer: ReferencesPostponer
     ):
         T {
-        if (kClass == Position::class) {
-            val start = instantiate(
-                Point::class,
-                data.getOnlyChildByContainmentName("start")!!,
-                referencesPostponer
-            )
-            val end = instantiate(
-                Point::class,
-                data.getOnlyChildByContainmentName("end")!!,
-                referencesPostponer
-            )
-            return Position(start, end) as T
-        }
-        if (kClass == Point::class) {
-            return Point(
-                data.getPropertyValueByName("line") as Int,
-                data.getPropertyValueByName("column") as Int
-            ) as T
-        }
-
         val constructor: KFunction<Any> = when {
             kClass.constructors.size == 1 -> {
                 kClass.constructors.first()
