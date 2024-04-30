@@ -2,6 +2,7 @@ package com.strumenta.kolasu.language
 
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.ReferenceValue
 
 val RESERVED_FEATURE_NAMES = setOf("parent", "position", "features")
 
@@ -26,7 +27,7 @@ sealed class Feature {
 
     abstract val valueProvider: (node: NodeLike) -> Any?
 
-    fun value(node: NodeLike): Any? = valueProvider.invoke(node)
+    open fun value(node: NodeLike): Any? = valueProvider.invoke(node)
 }
 
 data class Attribute(
@@ -52,7 +53,7 @@ data class Reference(
     override val name: String,
     val optional: Boolean,
     override val type: ConceptLike,
-    override val valueProvider: (node: NodeLike) -> Any?,
+    override val valueProvider: (node: NodeLike) -> ReferenceValue<*>?,
     override val derived: Boolean = false,
 ) : Link() {
     override val multiplicity: Multiplicity
@@ -60,6 +61,10 @@ data class Reference(
 
     init {
         checkFeatureName(name)
+    }
+
+    override fun value(node: NodeLike): ReferenceValue<*>? {
+        return super.value(node) as ReferenceValue<*>
     }
 }
 

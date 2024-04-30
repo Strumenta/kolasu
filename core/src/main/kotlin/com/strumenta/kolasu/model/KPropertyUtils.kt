@@ -33,7 +33,7 @@ fun <N : Any> KProperty1<N, *>.asReference(language: StarLasuLanguage? = null): 
         this.name,
         optional,
         kClass.asConceptLike(language),
-        { node -> this.get(node as N) },
+        { node -> this.get(node as N) as? ReferenceValue<*> },
     )
 }
 

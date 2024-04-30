@@ -45,20 +45,15 @@ fun <N : Any> KClass<N>.declaredFeatures(): List<Feature> {
                         .toSet()
                 val notInheritedProps = nodeProperties.filter { it.name !in inheritedNamed }
                 notInheritedProps.map {
-                    when {
-                        it.isAttribute() -> {
-                            it.asAttribute()
+                    try {
+                        when {
+                            it.isAttribute() -> it.asAttribute()
+                            it.isReference() -> it.asReference()
+                            it.isContainment() -> it.asContainment()
+                            else -> throw IllegalStateException()
                         }
-
-                        it.isReference() -> {
-                            it.asReference()
-                        }
-
-                        it.isContainment() -> {
-                            it.asContainment()
-                        }
-
-                        else -> throw IllegalStateException()
+                    } catch (e: Exception) {
+                        throw RuntimeException("Issue while processing feature $it", e)
                     }
                 }
             }
