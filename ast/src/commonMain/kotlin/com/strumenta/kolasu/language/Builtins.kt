@@ -2,9 +2,10 @@ package com.strumenta.kolasu.language
 
 val intType = PrimitiveType.get("kotlin.Int")
 val stringType = PrimitiveType.get("kotlin.String")
+val booleanType = PrimitiveType.get("kotlin.Boolean")
 // TODO add all supported primitive types
 
-val builtinStarLasuTypes = setOf(intType, stringType)
+val builtinStarLasuTypes = setOf(intType, stringType, booleanType)
 
 object BaseStarLasuLanguage : StarLasuLanguage("com.strumenta.basestarlasulanguage") {
     init {

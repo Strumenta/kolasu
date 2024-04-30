@@ -36,6 +36,7 @@ import com.strumenta.kolasu.language.ConceptInterface as KConceptInterface
 import com.strumenta.kolasu.language.DataType as KDataType
 import com.strumenta.kolasu.language.PrimitiveType as KPrimitiveType
 import io.lionweb.lioncore.java.language.PrimitiveType as LWPrimitiveType
+import com.strumenta.kolasu.language.booleanType
 
 /**
  * This class is able to convert between Kolasu and LionWeb languages, tracking the mapping.
@@ -454,29 +455,6 @@ class LionWebLanguageConverter {
         kConceptsAndLWConcepts.associate(kConcept, lwConcept)
     }
 
-//    private fun toLWClassifier(
-//        lionwebLanguage: LWLanguage,
-//        conceptLike: ConceptLike,
-//    ): Classifier<*> {
-//        return when (conceptLike) {
-//            is KConcept -> {
-//                val concept = Concept(lionwebLanguage, conceptLike.name)
-//                concept.isPartition = conceptLike.isPartition
-//                concept.key = lionwebLanguage.key + "_" + concept.name
-//                concept.id = lionwebLanguage.id + "_" + concept.name
-//                concept.isAbstract = conceptLike.isAbstract
-//                registerMapping(conceptLike, concept)
-//                concept
-//            }
-//
-//            is KConceptInterface -> {
-//                TODO()
-//            }
-//
-//            else -> throw IllegalStateException()
-//        }
-//    }
-
     private fun toLWClassifier(kClass: KClass<*>): Classifier<*> {
         return astClassesAndClassifiers.byA(kClass) ?: throw IllegalArgumentException("Unknown KClass $kClass")
     }
@@ -637,5 +615,6 @@ fun com.strumenta.kolasu.language.DataType.kClass(): KClass<*> =
     when {
         this == intType -> Int::class
         this == stringType -> String::class
+        this == booleanType -> Boolean::class
         else -> Class.forName(this.name).kotlin
     }
