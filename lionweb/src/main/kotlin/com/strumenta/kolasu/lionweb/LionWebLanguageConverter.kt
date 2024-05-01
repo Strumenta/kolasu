@@ -9,14 +9,13 @@ import com.strumenta.kolasu.language.EnumType
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.booleanType
 import com.strumenta.kolasu.language.intType
 import com.strumenta.kolasu.language.stringType
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.declaredFeatures
 import com.strumenta.kolasu.model.isConcept
 import com.strumenta.kolasu.model.isConceptInterface
@@ -36,7 +35,6 @@ import com.strumenta.kolasu.language.ConceptInterface as KConceptInterface
 import com.strumenta.kolasu.language.DataType as KDataType
 import com.strumenta.kolasu.language.PrimitiveType as KPrimitiveType
 import io.lionweb.lioncore.java.language.PrimitiveType as LWPrimitiveType
-import com.strumenta.kolasu.language.booleanType
 
 /**
  * This class is able to convert between Kolasu and LionWeb languages, tracking the mapping.
@@ -65,8 +63,6 @@ class LionWebLanguageConverter {
         registerMapping(NodeLike::class, StarLasuLWLanguage.ASTNode)
         registerMapping(Node::class, StarLasuLWLanguage.ASTNode)
         registerMapping(Named::class, LionCoreBuiltins.getINamed())
-        registerMapping(Range::class, StarLasuLWLanguage.Range)
-        registerMapping(Point::class, StarLasuLWLanguage.Point)
 
         registerMapping(BaseStarLasuLanguage.iNamed, LionCoreBuiltins.getINamed())
     }

@@ -69,6 +69,14 @@ class LionWebModelConverterTest {
             "key": "com-strumenta-SimpleLang_SimpleRoot_id"
           },
           "value": "12345"
+        },
+        {
+          "property": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-range-key"
+          },
+          "value": null
         }
       ],
       "containments": [
@@ -83,14 +91,6 @@ class LionWebModelConverterTest {
             "synthetic_foo-bar-source_childrez_1",
             "synthetic_foo-bar-source_childrez_2"
           ]
-        },
-        {
-          "containment": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-range-key"
-          },
-          "children": []
         }
       ],
       "references": [],
@@ -112,6 +112,14 @@ class LionWebModelConverterTest {
             "key": "LionCore-builtins-INamed-name"
           },
           "value": "A1"
+        },
+        {
+          "property": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-range-key"
+          },
+          "value": null
         }
       ],
       "containments": [
@@ -120,14 +128,6 @@ class LionWebModelConverterTest {
             "language": "com-strumenta-SimpleLang",
             "version": "1",
             "key": "com-strumenta-SimpleLang_SimpleNodeA_child"
-          },
-          "children": []
-        },
-        {
-          "containment": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-range-key"
           },
           "children": []
         }
@@ -165,18 +165,17 @@ class LionWebModelConverterTest {
             "key": "com-strumenta-SimpleLang_SimpleNodeB_value"
           },
           "value": "some magic value"
-        }
-      ],
-      "containments": [
+        },
         {
-          "containment": {
+          "property": {
             "language": "com_strumenta_starlasu",
             "version": "1",
             "key": "com_strumenta_starlasu-ASTNode-range-key"
           },
-          "children": []
+          "value": null
         }
       ],
+      "containments": [],
       "references": [],
       "annotations": [],
       "parent": "synthetic_foo-bar-source"
@@ -196,6 +195,14 @@ class LionWebModelConverterTest {
             "key": "LionCore-builtins-INamed-name"
           },
           "value": "A3"
+        },
+        {
+          "property": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-range-key"
+          },
+          "value": null
         }
       ],
       "containments": [
@@ -208,14 +215,6 @@ class LionWebModelConverterTest {
           "children": [
             "synthetic_foo-bar-source_childrez_2_child"
           ]
-        },
-        {
-          "containment": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-range-key"
-          },
-          "children": []
         }
       ],
       "references": [
@@ -251,18 +250,17 @@ class LionWebModelConverterTest {
             "key": "com-strumenta-SimpleLang_SimpleNodeB_value"
           },
           "value": "some other value"
-        }
-      ],
-      "containments": [
+        },
         {
-          "containment": {
+          "property": {
             "language": "com_strumenta_starlasu",
             "version": "1",
             "key": "com_strumenta_starlasu-ASTNode-range-key"
           },
-          "children": []
+          "value": null
         }
       ],
+      "containments": [],
       "references": [],
       "annotations": [],
       "parent": "synthetic_foo-bar-source_childrez_2"
@@ -411,14 +409,14 @@ class LionWebModelConverterTest {
         initialAst.source = SyntheticSource("ss1")
 
         val lwAST = mConverter.exportModelToLionWeb(initialAst)
-        assertEquals(0, lwAST.getChildrenByContainmentName("range").size)
+        assertEquals(null, lwAST.getPropertyValueByName("range"))
         assertEquals(3, lwAST.children.size)
         val lwASTChild0 = lwAST.children[0]
-        assertEquals(1, lwASTChild0.getChildrenByContainmentName("range").size)
+        assertEquals(Range(Point(1, 1), Point(1, 10)), lwASTChild0.getPropertyValueByName("range"))
         val lwASTChild1 = lwAST.children[1]
-        assertEquals(1, lwASTChild1.getChildrenByContainmentName("range").size)
+        assertEquals(Range(Point(2, 1), Point(2, 10)), lwASTChild1.getPropertyValueByName("range"))
         val lwASTChild2 = lwAST.children[2]
-        assertEquals(1, lwASTChild2.getChildrenByContainmentName("range").size)
+        assertEquals(Range(Point(3, 4), Point(3, 12)), lwASTChild2.getPropertyValueByName("range"))
 
         val deserializedAST = mConverter.importModelFromLionWeb(lwAST) as KNode
 
@@ -599,6 +597,68 @@ class LionWebModelConverterTest {
         assertEquals(12, n3deserialized.b)
         assertEquals(listOf(), n3deserialized.c.map { it.name })
         assertEquals(null, n3deserialized.r.referred)
+    }
+
+    @Test
+    fun nodesAreNotProducedForRangesAndPoints() {
+        val kl =
+            KolasuLanguage("my.language").apply {
+                addClass(NodeWithEnum::class)
+            }
+        val mc = LionWebModelConverter()
+        mc.exportLanguageToLionWeb(kl)
+        val n1 =
+            NodeWithEnum("foo", AnEnum.FOO)
+                .withRange(Range(Point(3, 5), Point(27, 200)))
+                .setSourceForTree(LionWebSource("MySource"))
+        val lwNodes = mc.exportModelToLionWeb(n1)
+        assertEquals(emptyList(), lwNodes.children)
+    }
+
+    @Test
+    fun canSerializeRange() {
+        val kl =
+            KolasuLanguage("my.language").apply {
+                addClass(NodeWithEnum::class)
+            }
+        val mc = LionWebModelConverter()
+        mc.exportLanguageToLionWeb(kl)
+        val n1 =
+            NodeWithEnum("foo", AnEnum.FOO)
+                .withRange(Range(Point(3, 5), Point(27, 200)))
+                .setSourceForTree(LionWebSource("MySource"))
+        val lwNode = mc.exportModelToLionWeb(n1)
+        val jsonSerialization = JsonSerialization.getStandardSerialization()
+        mc.prepareJsonSerialization(jsonSerialization)
+        val serializationBlock = jsonSerialization.serializeNodesToSerializationBlock(lwNode)
+        assertEquals(
+            "L3:5 to L27:200",
+            serializationBlock
+                .classifierInstancesByID["MySource"]!!
+                .getPropertyValue("com_strumenta_starlasu-ASTNode-range-key"),
+        )
+    }
+
+    @Test
+    fun canDeserializeRange() {
+        val kl =
+            KolasuLanguage("my.language").apply {
+                addClass(NodeWithEnum::class)
+            }
+        val mc = LionWebModelConverter()
+        mc.exportLanguageToLionWeb(kl)
+        val n1 =
+            NodeWithEnum("foo", AnEnum.FOO)
+                .withRange(Range(Point(3, 5), Point(27, 200)))
+                .setSourceForTree(LionWebSource("MySource"))
+        val lwNode = mc.exportModelToLionWeb(n1)
+        val jsonSerialization = JsonSerialization.getStandardSerialization()
+        jsonSerialization.enableDynamicNodes()
+        mc.prepareJsonSerialization(jsonSerialization)
+        val json = jsonSerialization.serializeNodesToJsonString(lwNode)
+        val deserializeLWNode = jsonSerialization.deserializeToNodes(json).first()
+        val deserializeN1 = mc.importModelFromLionWeb(deserializeLWNode) as NodeWithEnum
+        assertEquals(Range(Point(3, 5), Point(27, 200)), deserializeN1.range)
     }
 }
 

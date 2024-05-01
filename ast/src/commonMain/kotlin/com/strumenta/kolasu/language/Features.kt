@@ -63,9 +63,7 @@ data class Reference(
         checkFeatureName(name)
     }
 
-    override fun value(node: NodeLike): ReferenceValue<*>? {
-        return super.value(node) as ReferenceValue<*>
-    }
+    override fun value(node: NodeLike): ReferenceValue<*>? = super.value(node) as? ReferenceValue<*>
 }
 
 data class Containment(
