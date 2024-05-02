@@ -4,6 +4,7 @@ plugins {
     id("com.github.gmazzo.buildconfig")
     id("maven-publish")
     id("com.gradle.plugin-publish") version "1.2.0"
+    `kotlin-dsl`
 }
 
 dependencies {
@@ -20,6 +21,8 @@ buildConfig {
 }
 
 gradlePlugin {
+    website.set("https://github.com/strumenta/kolasu")
+    vcsUrl.set("https://github.com/strumenta/kolasu.git")
     plugins {
         create("kotlinIrPluginTemplate") {
             id = rootProject.extra["kotlinPluginID"] as String
@@ -32,6 +35,11 @@ gradlePlugin {
 
 publishing {
     addSonatypeRepo(project)
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 afterEvaluate {

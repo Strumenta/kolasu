@@ -1,6 +1,6 @@
 plugins {
     id("java-gradle-plugin")
-    id("org.jetbrains.kotlin.jvm")
+    kotlin("jvm")
     id("com.github.gmazzo.buildconfig") version "3.1.0"
     id("maven-publish")
     id("com.gradle.plugin-publish") version "1.2.0"

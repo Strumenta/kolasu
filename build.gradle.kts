@@ -109,12 +109,7 @@ subprojects {
 
         tasks
             .withType(
-                org
-                    .jetbrains
-                    .kotlin
-                    .gradle
-                    .tasks
-                    .KotlinCompile::class,
+                    KotlinCompile::class,
             ).all {
                 kotlinOptions {
                     jvmTarget = "$jvmVersion"
@@ -150,7 +145,7 @@ subprojects {
 }
 
 release {
-    buildTasks.set(listOf("publish", ":lionweb-gen-gradle:publishPlugins"))
+    buildTasks.set(listOf("publish", ":lionweb-gen-gradle:publishPlugins", ":lionweb-ir-plugin-gradle:publishPlugins"))
     git {
         requireBranch.set("master")
         pushToRemote.set("origin")
@@ -158,6 +153,6 @@ release {
 }
 
 tasks.wrapper {
-    gradleVersion = "8.5"
+    gradleVersion = "8.7"
     distributionType = Wrapper.DistributionType.ALL
 }
