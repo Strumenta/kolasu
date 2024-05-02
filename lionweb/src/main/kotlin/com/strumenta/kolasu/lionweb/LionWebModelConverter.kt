@@ -416,11 +416,17 @@ class LionWebModelConverter(
             val enumKClass = synchronized(languageConverter) {
                 languageConverter
                     .getEnumerationsToKolasuClassesMapping()[enumerationLiteral.enumeration]
-                    ?: throw java.lang.IllegalStateException()
+                    ?: throw java.lang.IllegalStateException(
+                        "Cannot find enum class for enumeration " +
+                            "${enumerationLiteral.enumeration?.name}"
+                    )
             }
             val entries = enumKClass.java.enumConstants
             entries.find { it.name == enumerationLiteral.name }
-                ?: throw IllegalStateException()
+                ?: throw IllegalStateException(
+                    "Cannot find enum constant named ${enumerationLiteral.name} in enum " +
+                        "class ${enumKClass.qualifiedName}"
+                )
         } else {
             propValue
         }
