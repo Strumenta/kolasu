@@ -109,7 +109,7 @@ subprojects {
 
         tasks
             .withType(
-                    KotlinCompile::class,
+                KotlinCompile::class,
             ).all {
                 kotlinOptions {
                     jvmTarget = "$jvmVersion"
@@ -145,7 +145,7 @@ subprojects {
 }
 
 release {
-    buildTasks.set(listOf("publish", ":lionweb-gen-gradle:publishPlugins", ":lionweb-ir-plugin-gradle:publishPlugins"))
+    buildTasks.set(listOf("publish", ":lionweb-gen-gradle:publishPlugins", ":kotlin-ir-plugin-gradle:publishPlugins"))
     git {
         requireBranch.set("master")
         pushToRemote.set("origin")
