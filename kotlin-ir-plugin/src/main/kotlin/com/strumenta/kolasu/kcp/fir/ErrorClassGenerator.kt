@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.FirClass
 import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
+import org.jetbrains.kotlin.fir.declarations.builder.FirConstructorBuilder
 import org.jetbrains.kotlin.fir.declarations.builder.FirRegularClassBuilder
 import org.jetbrains.kotlin.fir.declarations.impl.FirDeclarationStatusImpl
 import org.jetbrains.kotlin.fir.declarations.origin
@@ -57,6 +58,17 @@ class ErrorClassGenerator(
                     this.classKind = ClassKind.CLASS
                     this.scopeProvider = FirKotlinScopeProvider()
                     this.symbol = FirRegularClassSymbol(classId)
+                    this.declarations.add(FirConstructorBuilder()
+                        .apply {
+                            this.moduleData = owner.fir.moduleData
+                            this.origin = FirDeclarationOrigin.Plugin(Key)
+                            this.status = FirDeclarationStatusImpl(
+                                Visibilities.Public,
+                                null
+                            )
+                            this.returnTypeRef = TODO()
+                        }
+                        .build())
                 }
                 .build()
             firClass.symbol
