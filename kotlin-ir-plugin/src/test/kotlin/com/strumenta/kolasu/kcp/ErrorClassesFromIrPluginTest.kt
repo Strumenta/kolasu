@@ -27,7 +27,8 @@ class ErrorClassesFromIrPluginTest : AbstractIrPluginTest() {
     data class MyNode(var p1: Int) : MPNode()
 
 fun main() {
-  val n : MyNode = MyNodeError("I could not create MyNode")
+  val n = MyNode.Error("I could not create MyNode")
+  assertEquals(true, n is MyNode)  
   assertEquals("MyNode", n.concept.name)
 }
 

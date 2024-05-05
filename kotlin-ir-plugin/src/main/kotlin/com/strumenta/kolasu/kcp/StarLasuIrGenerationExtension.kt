@@ -108,6 +108,7 @@ class StarLasuIrGenerationExtension(
     /**
      * Return an expression calculating the ConceptLike
      */
+    @OptIn(ObsoleteDescriptorBasedAPI::class)
     private fun IrBuilderWithScope.conceptLike(
         pluginContext: IrPluginContext,
         irType: IrType,
