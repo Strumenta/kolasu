@@ -8,4 +8,4 @@ antlr4jRuntime = { module = "org.antlr:antlr4-runtime", version.ref= "antlr4" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version="3.5.2"}
 
 [plugins]
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.0" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.1" }
