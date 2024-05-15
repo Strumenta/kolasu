@@ -1,6 +1,6 @@
 plugins {
     kotlin("multiplatform")
-    id("org.jlleitschuh.gradle.ktlint")
+    alias(libs.plugins.ktlint)
     id("maven-publish")
     id("signing")
     id("org.jetbrains.dokka")
