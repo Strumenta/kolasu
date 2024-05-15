@@ -147,7 +147,7 @@ subprojects {
 release {
     buildTasks.set(listOf("publish", ":lionweb-gen-gradle:publishPlugins", ":kotlin-ir-plugin-gradle:publishPlugins"))
     git {
-        requireBranch.set("master")
+        requireBranch.set("")
         pushToRemote.set("origin")
     }
 }
