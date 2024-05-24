@@ -3,25 +3,23 @@ package com.strumenta.kolasu.language
 import com.strumenta.kolasu.model.MPNode
 import kotlin.reflect.KClass
 
-sealed class ConceptLike(
+sealed class Classifier(
     val language: StarLasuLanguage,
     override var name: String,
 ) : Type(name) {
-    @Deprecated("AST Nodes should not be partition")
-    var isPartition: Boolean = false
-    abstract val superConceptLikes: List<ConceptLike>
+    abstract val superClassifiers: List<Classifier>
     val declaredFeatures: MutableList<Feature> = mutableListOf()
     val allFeatures: List<Feature>
         get() {
             val res = mutableListOf<Feature>()
             res.addAll(declaredFeatures)
-            this.superConceptLikes.forEach { scl ->
+            this.superClassifiers.forEach { scl ->
                 res.addAll(scl.allFeatures)
             }
             return res
         }
-    val allAttributes: List<Attribute>
-        get() = allFeatures.filterIsInstance<Attribute>()
+    val allProperties: List<Property>
+        get() = allFeatures.filterIsInstance<Property>()
     val allContainments: List<Containment>
         get() = allFeatures.filterIsInstance<Containment>()
     val allReferences: List<Reference>
@@ -29,14 +27,14 @@ sealed class ConceptLike(
 
     fun feature(name: String): Feature? = allFeatures.find { it.name == name }
 
-    fun attribute(name: String): Attribute? = allAttributes.find { it.name == name }
+    fun property(name: String): Property? = allProperties.find { it.name == name }
 
     fun containment(name: String): Containment? = allContainments.find { it.name == name }
 
     fun reference(name: String): Reference? = allReferences.find { it.name == name }
 
-    fun requireAttribute(name: String): Attribute =
-        attribute(name) ?: throw IllegalArgumentException("Cannot find attribute $name in ${this.name}")
+    fun requireProperty(name: String): Property =
+        property(name) ?: throw IllegalArgumentException("Cannot find property $name in ${this.name}")
 
     fun requireContainment(name: String): Containment =
         containment(name) ?: throw IllegalArgumentException("Cannot find containment $name in ${this.name}")
@@ -51,9 +49,9 @@ sealed class ConceptLike(
 class ConceptInterface(
     language: StarLasuLanguage,
     name: String,
-) : ConceptLike(language, name) {
+) : Classifier(language, name) {
     var superInterfaces: MutableList<ConceptInterface> = mutableListOf()
-    override val superConceptLikes: List<ConceptLike>
+    override val superClassifiers: List<Classifier>
         get() = superInterfaces
 
     override fun equals(other: Any?): Boolean {
@@ -73,13 +71,13 @@ class ConceptInterface(
 class Concept(
     language: StarLasuLanguage,
     name: String,
-) : ConceptLike(language, name) {
+) : Classifier(language, name) {
     var superConcept: Concept? = null
     var conceptInterfaces: MutableList<ConceptInterface> = mutableListOf()
     var isAbstract: Boolean = false
     var explicitlySetKotlinClass: KClass<*>? = null
 
-    override val superConceptLikes: List<ConceptLike>
+    override val superClassifiers: List<Classifier>
         get() = if (superConcept == null) conceptInterfaces else listOf(superConcept!!) + conceptInterfaces
 
     fun instantiateNode(featureValues: Map<Feature, Any?>): MPNode {
@@ -102,4 +100,16 @@ class Concept(
     override fun hashCode(): Int = name.hashCode()
 
     override fun toString(): String = "Concept(${this.qualifiedName})"
+}
+
+class Annotation(
+    language: StarLasuLanguage,
+    name: String,
+) : Classifier(language, name) {
+    var superAnnotation: Annotation? = null
+    var conceptInterfaces: MutableList<ConceptInterface> = mutableListOf()
+    var annotates: Classifier? = null
+
+    override val superClassifiers: List<Classifier>
+        get() = if (superAnnotation == null) conceptInterfaces else listOf(superAnnotation!!) + conceptInterfaces
 }

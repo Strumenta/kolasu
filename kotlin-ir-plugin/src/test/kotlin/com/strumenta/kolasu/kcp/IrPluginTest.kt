@@ -109,7 +109,7 @@ fun main() {
           package mytest
 
           import com.strumenta.kolasu.model.MPNode
-          import com.strumenta.kolasu.language.Attribute
+          import com.strumenta.kolasu.language.Property
           import com.strumenta.kolasu.model.NodeLike
           import com.strumenta.kolasu.model.observable.SimpleNodeObserver
 
@@ -121,20 +121,20 @@ import com.strumenta.kolasu.language.StarLasuLanguage
 class Foo : MPNode() {
 var p2 : Int = 0 
     set(value) {
-        notifyOfAttributeChange(Foo.concept.attribute("p2")!!, field, value)
+        notifyOfPropertyChange(Foo.concept.property("p2")!!, field, value)
         field = value
     }
 }
 
 object MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
-    override fun <V : Any?>onAttributeChange(
+    override fun <V : Any?>onPropertyChange(
         node: NodeLike,
-        attribute: Attribute,
+        property: Property,
         oldValue: V,
         newValue: V
     ) {
-        observations.add("${'$'}{attribute.name}: ${'$'}oldValue -> ${'$'}newValue")
+        observations.add("${'$'}{property.name}: ${'$'}oldValue -> ${'$'}newValue")
     }
 
 }
@@ -294,7 +294,7 @@ fun main() {
                         """
           package mytest
 
-        import com.strumenta.kolasu.language.Attribute
+        import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
           import com.strumenta.kolasu.model.NodeLike
@@ -321,8 +321,8 @@ data class NodeWithReference(val ref: ReferenceValue<NamedNode>, val id: Int) : 
 
 class MyObserver : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
-    override fun <V> onAttributeChange(node: NodeLike, attribute: Attribute, oldValue: V, newValue: V) {
-        observations.add("${'$'}{attribute.name}: ${'$'}oldValue -> ${'$'}newValue")
+    override fun <V> onPropertyChange(node: NodeLike, property: Property, oldValue: V, newValue: V) {
+        observations.add("${'$'}{property.name}: ${'$'}oldValue -> ${'$'}newValue")
     }
 
     override fun onChildAdded(node: NodeLike, containment: Containment, added: NodeLike) {
@@ -452,7 +452,7 @@ package mytest
 
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.MPNode
-import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.PrimitiveType
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.model.FeatureType
@@ -479,14 +479,14 @@ fun main() {
     
     assertEquals("f1", a1.concept.declaredFeatures[0].name)
     assertEquals("Foo", a1.concept.declaredFeatures[0].value(a1))
-    assertEquals(true, a1.concept.declaredFeatures[0] is Attribute)
+    assertEquals(true, a1.concept.declaredFeatures[0] is Property)
     assertEquals(PrimitiveType("kotlin.String"), a1.concept.declaredFeatures[0].type)
     assertEquals(Multiplicity.SINGULAR, a1.concept.declaredFeatures[0].multiplicity)
     assertEquals(false, a1.concept.declaredFeatures[0].derived)
 
     assertEquals("f2", a1.concept.declaredFeatures[1].name)
     assertEquals(6, a1.concept.declaredFeatures[1].value(a1))
-    assertEquals(true, a1.concept.declaredFeatures[1] is Attribute)
+    assertEquals(true, a1.concept.declaredFeatures[1] is Property)
     assertEquals(PrimitiveType("kotlin.Int"), a1.concept.declaredFeatures[1].type)
     assertEquals(Multiplicity.SINGULAR, a1.concept.declaredFeatures[1].multiplicity)
     assertEquals(false, a1.concept.declaredFeatures[1].derived)

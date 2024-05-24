@@ -105,7 +105,7 @@ fun StarLasuLanguage.explore(vararg kClasses: KClass<*>) {
 
     // populate
     classesCollected.forEach { kClass ->
-        val conceptLike: ConceptLike? =
+        val classifier: Classifier? =
             if (kClass.isConcept) {
                 getConcept(kClass.simpleName!!)
             } else if (kClass.isConceptInterface) {
@@ -113,17 +113,17 @@ fun StarLasuLanguage.explore(vararg kClasses: KClass<*>) {
             } else {
                 null
             }
-        if (conceptLike != null) {
+        if (classifier != null) {
             kClass.nodeProperties.forEach { prop ->
                 if (prop.isContainment()) {
                     val containment = prop.asContainment(this)
-                    conceptLike.declaredFeatures.add(containment)
+                    classifier.declaredFeatures.add(containment)
                 }
                 if (prop.isReference()) {
-                    conceptLike.declaredFeatures.add(prop.asReference(this))
+                    classifier.declaredFeatures.add(prop.asReference(this))
                 }
                 if (prop.isAttribute()) {
-                    conceptLike.declaredFeatures.add(prop.asAttribute())
+                    classifier.declaredFeatures.add(prop.asAttribute())
                 }
             }
         }

@@ -1,10 +1,10 @@
 package com.strumenta.kolasu.serialization
 
 import com.google.gson.stream.JsonWriter
-import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Feature
+import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.language.intType
@@ -381,7 +381,7 @@ class JsonGenerationTest {
         val myLanguage = StarLasuLanguage("MyLanguage")
         val myConcept = Concept(myLanguage, "MyNode")
         myConcept.declaredFeatures.add(
-            Attribute(
+            Property(
                 "someAttr",
                 false,
                 intType,
@@ -416,7 +416,7 @@ class JsonGenerationTest {
             DynamicNode(
                 myConcept,
                 mutableMapOf(
-                    myConcept.requireAttribute("someAttr") to 123,
+                    myConcept.requireProperty("someAttr") to 123,
                     myConcept.requireContainment("someChild") to BaseNode(456),
                     myConcept.requireContainment("someChildren") to listOf(BaseNode(78), BaseNode(90)),
                 ),

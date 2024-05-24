@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.language.BaseStarLasuLanguage
-import com.strumenta.kolasu.language.ConceptLike
+import com.strumenta.kolasu.language.Classifier
 import com.strumenta.kolasu.language.DataType
 import com.strumenta.kolasu.language.EnumType
 import com.strumenta.kolasu.language.EnumerationLiteral
@@ -64,7 +64,7 @@ fun <N : Any> KClass<N>.declaredFeatures(): List<Feature> {
 val KClass<*>.packageName: String
     get() = this.qualifiedName!!.removeSuffix(".${this.simpleName}")
 
-fun KClass<*>.asConceptLike(language: StarLasuLanguage? = null): ConceptLike {
+fun KClass<*>.asConceptLike(language: StarLasuLanguage? = null): Classifier {
     if (this == NodeLike::class) {
         return BaseStarLasuLanguage.astNode
     }

@@ -13,8 +13,8 @@ enum class MyEnum
 class MetamodelTest {
     @Test
     fun attributeMultiplicity() {
-        assertEquals(Multiplicity.OPTIONAL, Attribute("MyAttribute", true, stringType, { TODO() }).multiplicity)
-        assertEquals(Multiplicity.SINGULAR, Attribute("MyAttribute", false, stringType, { TODO() }).multiplicity)
+        assertEquals(Multiplicity.OPTIONAL, Property("MyAttribute", true, stringType, { TODO() }).multiplicity)
+        assertEquals(Multiplicity.SINGULAR, Property("MyAttribute", false, stringType, { TODO() }).multiplicity)
     }
 
     @Test

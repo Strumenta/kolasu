@@ -92,22 +92,22 @@ fun IrBuilderWithScope.conceptGetter(
     return conceptInstance
 }
 
-fun IrBuilderWithScope.attributeByName(
+fun IrBuilderWithScope.propertyByName(
     pluginContext: IrPluginContext,
     nodeSubclass: IrClass,
-    attributeName: String,
+    propertyName: String,
 ): IrExpression {
-    val attributeMethod = pluginContext.referenceFunctions(Concept::class, "requireAttribute").single()
-    val attributeName = attributeName.toIrConst(pluginContext.irBuiltIns.stringType)
+    val propertyMethod = pluginContext.referenceFunctions(Concept::class, "requireProperty").single()
+    val propertyNameExpr = propertyName.toIrConst(pluginContext.irBuiltIns.stringType)
 
     val conceptInstance: IrExpression = conceptGetter(nodeSubclass)
 
-    val attribute =
-        irCall(attributeMethod).apply {
+    val property =
+        irCall(propertyMethod).apply {
             dispatchReceiver = conceptInstance
-            putValueArgument(0, attributeName)
+            putValueArgument(0, propertyNameExpr)
         }
-    return attribute
+    return property
 }
 
 fun IrBuilderWithScope.referenceByName(

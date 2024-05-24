@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.stringType
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,10 +13,10 @@ class NotificationsTest {
     @Test
     fun attributeChange() {
         val n1 = SimpleNode("x")
-        val attr = Attribute("foo", false, stringType, { TODO() })
-        val notif1 = AttributeChangedNotification(n1, attr, "x", "y")
+        val attr = Property("foo", false, stringType, { TODO() })
+        val notif1 = PropertyChangedNotification(n1, attr, "x", "y")
         assertEquals(n1, notif1.node)
-        assertEquals(attr, notif1.attribute)
+        assertEquals(attr, notif1.property)
         assertEquals("x", notif1.oldValue)
         assertEquals("y", notif1.newValue)
     }

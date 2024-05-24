@@ -2,22 +2,22 @@ package com.strumenta.kolasu.model.observable
 
 import com.badoo.reaktive.disposable.Disposable
 import com.badoo.reaktive.observable.ObservableObserver
-import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.Reference
-import com.strumenta.kolasu.model.AttributeChangedNotification
 import com.strumenta.kolasu.model.ChildAdded
 import com.strumenta.kolasu.model.ChildRemoved
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.NodeNotification
+import com.strumenta.kolasu.model.PropertyChangedNotification
 import com.strumenta.kolasu.model.ReferenceSet
 import com.strumenta.kolasu.model.ReferencedToAdded
 import com.strumenta.kolasu.model.ReferencedToRemoved
 
 open class SimpleNodeObserver : ObservableObserver<NodeNotification<in NodeLike>> {
-    open fun <V : Any?> onAttributeChange(
+    open fun <V : Any?> onPropertyChange(
         node: NodeLike,
-        attribute: Attribute,
+        property: Property,
         oldValue: V,
         newValue: V,
     ) {
@@ -70,10 +70,10 @@ open class SimpleNodeObserver : ObservableObserver<NodeNotification<in NodeLike>
 
     override fun onNext(notification: NodeNotification<in NodeLike>) {
         when (notification) {
-            is AttributeChangedNotification<NodeLike, *> ->
-                onAttributeChange(
+            is PropertyChangedNotification<NodeLike, *> ->
+                onPropertyChange(
                     notification.node,
-                    notification.attribute,
+                    notification.property,
                     notification.oldValue,
                     notification.newValue,
                 )

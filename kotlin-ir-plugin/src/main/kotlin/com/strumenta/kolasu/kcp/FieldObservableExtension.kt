@@ -37,17 +37,17 @@ class FieldObservableExtension(
     val pluginContext: IrPluginContext,
     isMPNode: Boolean,
 ) : IrElementTransformerVoidWithContext() {
-    val notifyOfAttributeChange: IrSimpleFunctionSymbol by lazy {
+    val notifyOfPropertyChange: IrSimpleFunctionSymbol by lazy {
         val callableId =
             if (isMPNode) {
                 CallableId(
                     ClassId.topLevel(FqName(MPNode::class.qualifiedName!!)),
-                    Name.identifier("notifyOfAttributeChange"),
+                    Name.identifier("notifyOfPropertyChange"),
                 )
             } else {
                 CallableId(
                     ClassId.topLevel(FqName(Node::class.qualifiedName!!)),
-                    Name.identifier("notifyOfAttributeChange"),
+                    Name.identifier("notifyOfPropertyChange"),
                 )
             }
         pluginContext
@@ -114,9 +114,9 @@ class FieldObservableExtension(
             if (prevBody != null && declaration.setter!!.origin == IrDeclarationOrigin.DEFAULT_PROPERTY_ACCESSOR) {
                 declaration.setter!!.body =
                     DeclarationIrBuilder(irContext, declaration.setter!!.symbol).irBlockBody(declaration.setter!!) {
-                        // notifyOfAttributeChange("<name of property>", field, value)
+                        // notifyOfPropertyChange("<name of property>", field, value)
                         +irCall(
-                            notifyOfAttributeChange,
+                            notifyOfPropertyChange,
                             pluginContext.irBuiltIns.unitType,
                             valueArgumentsCount = 3,
                             typeArgumentsCount = 0,
@@ -127,11 +127,11 @@ class FieldObservableExtension(
 
                             this.dispatchReceiver = irGet(thisParameter)
 
-                            // attribute: myClass.concept.attribute(attributeName)
+                            // attribute: myClass.concept.property(attributeName)
                             val nodeSubClass = declaration.parentAsClass
                             putValueArgument(
                                 0,
-                                attributeByName(
+                                propertyByName(
                                     pluginContext, nodeSubClass,
                                     declaration.name.identifier,
                                 ),

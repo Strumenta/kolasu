@@ -1,8 +1,8 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Feature
+import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.language.explore
 import org.junit.Test
@@ -49,7 +49,7 @@ class FeatureDescriptionTest {
         assertEquals("name", f.name)
         assertEquals(Multiplicity.SINGULAR, f.multiplicity)
         assertEquals("gino", value)
-        assert(f is Attribute)
+        assert(f is Property)
         assertFalse(f.derived)
     }
 

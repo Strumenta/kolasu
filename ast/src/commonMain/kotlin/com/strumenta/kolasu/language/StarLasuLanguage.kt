@@ -23,8 +23,8 @@ open class StarLasuLanguage(
     val simpleName: String
         get() = qualifiedName.split(".").last()
 
-    fun getConceptLike(name: String): ConceptLike =
-        types.filterIsInstance<ConceptLike>().find {
+    fun getConceptLike(name: String): Classifier =
+        types.filterIsInstance<Classifier>().find {
             it.name == name ||
                 it.name == "${this.qualifiedName}.$name" ||
                 it.name.split(".").last() == name
@@ -71,6 +71,6 @@ open class StarLasuLanguage(
     val primitives: List<PrimitiveType>
         get() = this.types.filterIsInstance<PrimitiveType>()
 
-    val conceptLikes: List<ConceptLike>
-        get() = this.types.filterIsInstance<ConceptLike>()
+    val classifiers: List<Classifier>
+        get() = this.types.filterIsInstance<Classifier>()
 }

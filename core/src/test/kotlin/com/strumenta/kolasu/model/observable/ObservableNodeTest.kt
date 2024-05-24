@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.model.observable
 
-import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.language.explore
@@ -22,8 +22,8 @@ object StarLasuLanguageInstance : StarLasuLanguage("com.strumenta.kolasu.model.o
 class MyObservableNode : Node() {
     var p1: Int = 0
         set(value) {
-            val attr = Attribute("p1", false, intType, { TODO() })
-            notifyOfAttributeChange(attr, field, value)
+            val attr = Property("p1", false, intType, { TODO() })
+            notifyOfPropertyChange(attr, field, value)
             field = value
         }
 }
@@ -33,13 +33,13 @@ class MyObserver(
 ) : SimpleNodeObserver() {
     val observations = mutableListOf<String>()
 
-    override fun <V> onAttributeChange(
+    override fun <V> onPropertyChange(
         node: NodeLike,
-        attribute: Attribute,
+        property: Property,
         oldValue: V,
         newValue: V,
     ) {
-        observations.add("${attribute.name}: $oldValue -> $newValue")
+        observations.add("${property.name}: $oldValue -> $newValue")
     }
 
     override fun onChildAdded(

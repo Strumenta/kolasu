@@ -2,9 +2,9 @@ package com.strumenta.kolasu.model
 
 import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
-import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.Reference
 
 typealias NodeObserver = ObservableObserver<in NodeNotification<in NodeLike>>
@@ -122,17 +122,17 @@ interface NodeLike {
         }
     }
 
-    fun getAttributeValue(attribute: Attribute): Any? {
-        return attribute.value(this)
+    fun getPropertyValue(property: Property): Any? {
+        return property.value(this)
     }
 
-    fun <T : Any?> setAttribute(
-        attributeName: String,
+    fun <T : Any?> setProperty(
+        propertyName: String,
         value: T,
     )
 
-    fun <T : Any?> getAttribute(attributeName: String): T {
-        return concept.requireAttribute(attributeName).value(this) as T
+    fun <T : Any?> getProperty(propertyName: String): T {
+        return concept.requireProperty(propertyName).value(this) as T
     }
 
     fun <T : NodeLike> getContainmentValue(containmentName: String): List<T>

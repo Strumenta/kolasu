@@ -2,7 +2,6 @@ package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
-import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.Multiplicity
@@ -144,11 +143,11 @@ class LionWebModelConverter(
                             } else {
                                 val kAttribute =
                                     kFeatures.find { it.name == feature.name }
-                                        as? Attribute
+                                        as? com.strumenta.kolasu.language.Property
                                         ?: throw IllegalArgumentException(
                                             "Property ${feature.name} not found in $kNode",
                                         )
-                                val kValue = kNode.getAttributeValue(kAttribute)
+                                val kValue = kNode.getPropertyValue(kAttribute)
                                 if (kValue is Enum<*>) {
                                     val kClass: EnumKClass = kValue::class as EnumKClass
                                     val enumeration =

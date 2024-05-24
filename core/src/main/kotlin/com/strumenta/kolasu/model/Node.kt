@@ -2,8 +2,8 @@ package com.strumenta.kolasu.model
 
 import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
-import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Concept
+import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.language.StarLasuLanguagesRegistry
 import com.strumenta.kolasu.transformation.GenericNode
@@ -107,12 +107,12 @@ open class Node : NodeLike {
         ) { "${it.name}=${it.valueToString(this)}" }})"
     }
 
-    protected fun notifyOfAttributeChange(
-        attribute: Attribute,
+    protected fun notifyOfPropertyChange(
+        property: Property,
         oldValue: Any?,
         newValue: Any?,
     ) {
-        changes.onNext(AttributeChangedNotification(this, attribute, oldValue, newValue))
+        changes.onNext(PropertyChangedNotification(this, property, oldValue, newValue))
     }
 
     @Internal
@@ -139,19 +139,19 @@ open class Node : NodeLike {
 
     fun getAttributeValue(name: String): Any? {
         // In the future, when we set AttributeValue it will be different
-        return getAttribute(name)
+        return getProperty(name)
     }
 
-    override fun <T : Any?> setAttribute(
-        attributeName: String,
+    override fun <T : Any?> setProperty(
+        propertyName: String,
         value: T,
     ) {
-        val prop = nodeProperties.find { it.name == attributeName } as KMutableProperty<T>
+        val prop = nodeProperties.find { it.name == propertyName } as KMutableProperty<T>
         prop.setter.call(this, value)
     }
 
-    override fun <T : Any?> getAttribute(attributeName: String): T {
-        val prop = nodeProperties.find { it.name == attributeName }!!
+    override fun <T : Any?> getProperty(propertyName: String): T {
+        val prop = nodeProperties.find { it.name == propertyName }!!
         return prop.call(this) as T
     }
 

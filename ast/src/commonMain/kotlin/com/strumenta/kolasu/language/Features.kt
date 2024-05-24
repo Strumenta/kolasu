@@ -30,7 +30,7 @@ sealed class Feature {
     open fun value(node: NodeLike): Any? = valueProvider.invoke(node)
 }
 
-data class Attribute(
+data class Property(
     override val name: String,
     val optional: Boolean,
     override val type: DataType,
@@ -46,13 +46,13 @@ data class Attribute(
 }
 
 sealed class Link : Feature() {
-    abstract override val type: ConceptLike
+    abstract override val type: Classifier
 }
 
 data class Reference(
     override val name: String,
     val optional: Boolean,
-    override val type: ConceptLike,
+    override val type: Classifier,
     override val valueProvider: (node: NodeLike) -> ReferenceValue<*>?,
     override val derived: Boolean = false,
 ) : Link() {
@@ -69,7 +69,7 @@ data class Reference(
 data class Containment(
     override val name: String,
     override val multiplicity: Multiplicity,
-    override val type: ConceptLike,
+    override val type: Classifier,
     override val valueProvider: (node: NodeLike) -> Any?,
     override val derived: Boolean = false,
 ) : Link() {

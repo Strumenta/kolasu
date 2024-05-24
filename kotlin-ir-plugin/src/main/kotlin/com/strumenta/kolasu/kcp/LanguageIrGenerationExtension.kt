@@ -1,9 +1,9 @@
 package com.strumenta.kolasu.kcp
 
-import com.strumenta.kolasu.language.Attribute
+import com.strumenta.kolasu.language.Classifier
 import com.strumenta.kolasu.language.Concept
-import com.strumenta.kolasu.language.ConceptLike
 import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.model.Internal
 import com.strumenta.kolasu.model.Multiplicity
@@ -190,7 +190,7 @@ class LanguageIrGenerationExtension(
                     dispatchReceiver = irGet(conceptInstance)
                 }
             val attributeConstructor =
-                pluginContext.referenceConstructors(Attribute::class).first()
+                pluginContext.referenceConstructors(Property::class).first()
             val getDataType =
                 pluginContext
                     .referenceClass(StarLasuLanguage::class.classId)!!
@@ -266,7 +266,7 @@ class LanguageIrGenerationExtension(
 
     private fun IrPluginContext.conceptLikeFeaturesField(): IrProperty {
         return this
-            .referenceClass(ConceptLike::class.classId)!!
+            .referenceClass(Classifier::class.classId)!!
             .owner
             .properties
             .find { it.name.identifier == "declaredFeatures" }!!

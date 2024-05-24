@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.language.StarLasuLanguage
 import kotlin.reflect.KClass
@@ -46,7 +46,7 @@ fun <N : Any> KProperty1<N, *>.asFeature(): com.strumenta.kolasu.language.Featur
     }
 }
 
-fun <N : Any> KProperty1<N, *>.asAttribute(): Attribute {
+fun <N : Any> KProperty1<N, *>.asAttribute(): Property {
     val optional =
         when {
             (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
@@ -56,7 +56,7 @@ fun <N : Any> KProperty1<N, *>.asAttribute(): Attribute {
             this.returnType.isMarkedNullable -> true
             else -> false
         }
-    return Attribute(
+    return Property(
         this.name,
         optional,
         (

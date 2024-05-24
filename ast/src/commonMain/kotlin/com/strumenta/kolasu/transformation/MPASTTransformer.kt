@@ -107,7 +107,7 @@ open class MPASTTransformer(
         } else {
             // TODO here we should get the Concept and all of its super concepts
             // TODO here for classes that we know are mapped to concepts we also consider super concepts
-            for (superConcept in concept.superConceptLikes) {
+            for (superConcept in concept.superClassifiers) {
                 val superClassNodeTransformer = getNodeTransformer<S, T>(superConcept as Concept)
                 if (superClassNodeTransformer != null) {
                     return superClassNodeTransformer

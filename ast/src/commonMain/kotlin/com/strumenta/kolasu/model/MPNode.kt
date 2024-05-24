@@ -3,9 +3,9 @@ package com.strumenta.kolasu.model
 import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
 import com.strumenta.kolasu.exceptions.IllegalStateException
-import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Property
 
 /**
  * This represents a Multi-platform Kotlin Code. It should be used with the kolasu-multiplatform
@@ -133,8 +133,8 @@ abstract class MPNode : NodeLike {
         TODO("Not yet implemented")
     }
 
-    override fun <T> setAttribute(
-        attributeName: String,
+    override fun <T> setProperty(
+        propertyName: String,
         value: T,
     ) {
         TODO("Not yet implemented")
@@ -152,12 +152,12 @@ abstract class MPNode : NodeLike {
         this.changes.subscribe(observer)
     }
 
-    fun notifyOfAttributeChange(
-        attribute: Attribute,
+    fun notifyOfPropertyChange(
+        property: Property,
         oldValue: Any?,
         newValue: Any?,
     ) {
-        changes.onNext(AttributeChangedNotification(this, attribute, oldValue, newValue))
+        changes.onNext(PropertyChangedNotification(this, property, oldValue, newValue))
     }
 
     @property:Internal

@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.lionweb
 
-import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.BaseStarLasuLanguage
 import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.language.ConceptInterface
@@ -9,6 +8,7 @@ import com.strumenta.kolasu.language.EnumType
 import com.strumenta.kolasu.language.EnumerationLiteral
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.language.PrimitiveType
+import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.language.explore
@@ -190,7 +190,7 @@ class LionWebLanguageConverterTest {
                 types.add(kAPrimitiveType)
 
                 kSimpleRoot.declaredFeatures.add(
-                    Attribute("id", false, intType, { n ->
+                    Property("id", false, intType, { n ->
                         (n as SimpleRoot).id
                     }),
                 )
@@ -212,12 +212,12 @@ class LionWebLanguageConverterTest {
                 )
 
                 kSimpleNodeB.declaredFeatures.add(
-                    Attribute("value", false, stringType, { n ->
+                    Property("value", false, stringType, { n ->
                         (n as SimpleNodeB).value
                     }),
                 )
             }
-        assertEquals(5, sLanguage.conceptLikes.size)
+        assertEquals(5, sLanguage.classifiers.size)
         assertEquals(1, sLanguage.primitives.size)
         assertEquals(1, sLanguage.enums.size)
         val lwLanguage = LionWebLanguageConverter().exportToLionWeb(sLanguage)

@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.language
 
+import kotlin.Annotation
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KType

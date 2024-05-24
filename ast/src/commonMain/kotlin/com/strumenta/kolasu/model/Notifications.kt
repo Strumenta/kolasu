@@ -1,16 +1,16 @@
 package com.strumenta.kolasu.model
 
-import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.Reference
 
 sealed class NodeNotification<N : NodeLike> {
     abstract val node: N
 }
 
-data class AttributeChangedNotification<N : NodeLike, V : Any?>(
+data class PropertyChangedNotification<N : NodeLike, V : Any?>(
     override val node: N,
-    val attribute: Attribute,
+    val property: Property,
     val oldValue: V,
     val newValue: V,
 ) : NodeNotification<N>()
