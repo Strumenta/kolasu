@@ -4,7 +4,6 @@ import com.strumenta.kolasu.validation.Issue
 
 // instance
 
-@Deprecated("The corresponding component in the semantics module should be used instead.")
 class Semantics(
     issues: MutableList<Issue> = mutableListOf(),
     configuration: SemanticsConfiguration
@@ -23,7 +22,6 @@ class Semantics(
 
 // configuration
 
-@Deprecated("The corresponding component in the semantics module should be used instead.")
 class SemanticsConfiguration(
     var typeComputer: TypeComputerConfiguration? = null,
     var symbolResolver: SymbolResolverConfiguration? = null
