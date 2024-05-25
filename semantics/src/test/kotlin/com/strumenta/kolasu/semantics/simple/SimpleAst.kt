@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.semantics
+package com.strumenta.kolasu.semantics.simple
 
 import com.strumenta.kolasu.model.*
 
