@@ -89,7 +89,7 @@ fun StarLasuLanguage.explore(vararg kClasses: KClass<*>) {
             classesCollected.forEach { kClass ->
                 if (kClass.isConcept) {
                     val concept = Concept(this, kClass.simpleName!!)
-                    concept.explicitlySetKotlinClass = kClass
+                    concept.correspondingKotlinClass = kClass
                     this.types.add(concept)
                 } else if (kClass.isConceptInterface) {
                     val conceptInterface = ConceptInterface(this, kClass.simpleName!!)

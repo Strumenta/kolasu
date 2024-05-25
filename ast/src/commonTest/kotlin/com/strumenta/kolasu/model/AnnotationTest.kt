@@ -1,9 +1,14 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.language.Annotation
+import com.strumenta.kolasu.language.StarLasuLanguage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class MySingleAnnotation : SimpleSingleAnnotation("MySingleAnnotation")
+val myLanguage = StarLasuLanguage("foo.bar.MyLanguage")
+val mySingleAnnotation = Annotation(myLanguage, "MySingleAnnotation")
+
+class MySingleAnnotation : AnnotationInstance(mySingleAnnotation)
 
 class MySimpleNode : MPNode()
 
@@ -18,14 +23,14 @@ class AnnotationTest {
         assertEquals(false, n1.hasAnnotation(a1))
         assertEquals(false, a1.isAttached)
         assertEquals(null, a1.annotatedNode)
-        assertEquals(emptyList(), n1.allAnnotations)
-        assertEquals(emptyList(), n1.annotationsByType("MySingleAnnotation"))
+        assertEquals(emptyList(), n1.allAnnotationInstances)
+        assertEquals(emptyList(), n1.annotationsByType(mySingleAnnotation))
         n1.addAnnotation(a1)
-        assertEquals(listOf(a1), n1.allAnnotations)
+        assertEquals(listOf(a1), n1.allAnnotationInstances)
         assertEquals(true, n1.hasAnnotation(a1))
         assertEquals(true, a1.isAttached)
         assertEquals(n1, a1.annotatedNode)
-        assertEquals(listOf(a1), n1.annotationsByType("MySingleAnnotation"))
+        assertEquals(listOf(a1), n1.annotationsByType(mySingleAnnotation))
     }
 
     @Test
@@ -40,7 +45,7 @@ class AnnotationTest {
         assertEquals(false, n1.hasAnnotation(a1))
         assertEquals(false, a1.isAttached)
         assertEquals(null, a1.annotatedNode)
-        assertEquals(emptyList(), n1.allAnnotations)
-        assertEquals(emptyList(), n1.annotationsByType("MySingleAnnotation"))
+        assertEquals(emptyList(), n1.allAnnotationInstances)
+        assertEquals(emptyList(), n1.annotationsByType(mySingleAnnotation))
     }
 }

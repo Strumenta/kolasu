@@ -55,7 +55,7 @@ open class MPASTTransformer(
 
     private fun conceptOf(source: Any): Concept? {
         return this.conceptBaseNodeTransformers.keys.find { concept ->
-            concept.explicitlySetKotlinClass?.isInstance(source) ?: false
+            concept.correspondingKotlinClass?.isInstance(source) ?: false
         }
     }
 

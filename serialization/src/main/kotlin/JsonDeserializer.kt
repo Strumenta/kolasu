@@ -47,7 +47,7 @@ class JsonDeserializer {
                 NodeLike::class.java.isAssignableFrom(rawClass) -> {
                     val className = json.asJsonObject[JSON_TYPE_KEY].asString
                     val actualClass =
-                        language.getConcept(className).explicitlySetKotlinClass?.java
+                        language.getConcept(className).correspondingKotlinClass?.java
                             ?: try {
                                 Class.forName(className)
                             } catch (ex: ClassNotFoundException) {

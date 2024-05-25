@@ -2,6 +2,7 @@ package com.strumenta.kolasu.model
 
 import com.badoo.reaktive.observable.ObservableObserver
 import com.badoo.reaktive.subject.publish.PublishSubject
+import com.strumenta.kolasu.language.Annotation
 import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Property
@@ -83,28 +84,31 @@ interface NodeLike {
     val sourceText: String?
 
     @Internal
-    val allAnnotations: List<Annotation>
+    val allAnnotationInstances: List<AnnotationInstance>
 
-    fun annotationsByType(annotationType: String): List<Annotation> {
-        return allAnnotations.filter { it.annotationType == annotationType }
+    fun annotationsByType(annotation: Annotation): List<AnnotationInstance> {
+        return allAnnotationInstances.filter { it.annotation == annotation }
     }
 
-    fun getSingleAnnotation(annotationType: String): Annotation? {
-        val instances = annotationsByType(annotationType)
+    fun getSingleAnnotation(annotation: Annotation): AnnotationInstance? {
+        val instances = annotationsByType(annotation)
         return if (instances.isEmpty()) {
             null
         } else if (instances.size == 1) {
             instances.first()
         } else {
-            throw IllegalStateException("More than one instance of $annotationType found")
+            throw IllegalStateException("More than one instance of $annotation found")
         }
     }
 
-    fun <A : Annotation> addAnnotation(annotation: A): A
+    fun <A : AnnotationInstance> addAnnotation(annotation: A): A
 
-    fun removeAnnotation(annotation: Annotation)
+    fun removeAnnotation(annotationInstance: AnnotationInstance)
 
-    fun hasAnnotation(annotation: Annotation): Boolean = allAnnotations.contains(annotation)
+    fun hasAnnotation(annotationInstance: AnnotationInstance): Boolean =
+        allAnnotationInstances.contains(
+            annotationInstance,
+        )
 
     fun getChildren(containment: Containment): List<NodeLike> {
         return when (val rawValue = containment.value(this)) {

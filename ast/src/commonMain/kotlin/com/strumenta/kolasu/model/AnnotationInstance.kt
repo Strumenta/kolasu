@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.language.Annotation
+
 /**
  * Annotations are useful to attach additional data to nodes, without having to modify the node classes.
  * For example, things like comments, types, or other data calculated by processes successive to parsing
@@ -7,7 +9,9 @@ package com.strumenta.kolasu.model
  *
  * Each Node will be aware of the annotations attach to itself.
  */
-sealed class Annotation {
+abstract class AnnotationInstance(
+    val annotation: Annotation,
+) {
     var annotatedNode: NodeLike? = null
 
     /**
@@ -31,39 +35,14 @@ sealed class Annotation {
     }
 
     @Internal
-    abstract val annotationType: String
-
-    @Internal
     val isSingle: Boolean
-        get() = !isMultiple
+        get() = annotation.isSingle
 
     @Internal
-    abstract val isMultiple: Boolean
+    val isMultiple: Boolean
+        get() = annotation.isMultiple
 
     @Internal
     val isAttached: Boolean
         get() = annotatedNode?.hasAnnotation(this) ?: false
-}
-
-/**
- * A Single Annotation. Each Node can have at most one instance attached for each type of SingleAnnotation.
- */
-abstract class SingleAnnotation : Annotation() {
-    override val isMultiple: Boolean
-        get() = false
-}
-
-open class SimpleSingleAnnotation(
-    override val annotationType: String,
-) : Annotation() {
-    override val isMultiple: Boolean
-        get() = false
-}
-
-/**
- * A Multiple Annotation. Each Node can have any number of instances attached for each type of MultipleAnnotation.
- */
-abstract class MultipleAnnotation : Annotation() {
-    override val isMultiple: Boolean
-        get() = true
 }

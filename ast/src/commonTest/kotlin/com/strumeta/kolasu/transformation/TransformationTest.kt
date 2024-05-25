@@ -29,7 +29,7 @@ data class FSumExpr(
 val KClass<FIntLiteral>.concept: Concept
     get() {
         val c = Concept(MyLanguage, "FIntLiteral")
-        c.explicitlySetKotlinClass = FIntLiteral::class
+        c.correspondingKotlinClass = FIntLiteral::class
         return c
     }
 

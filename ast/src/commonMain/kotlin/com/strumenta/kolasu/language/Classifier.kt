@@ -75,17 +75,40 @@ class Concept(
     var superConcept: Concept? = null
     var conceptInterfaces: MutableList<ConceptInterface> = mutableListOf()
     var isAbstract: Boolean = false
-    var explicitlySetKotlinClass: KClass<*>? = null
+
+    /**
+     * This must be set explicitly, because we cannot use reflection to retrieve it.
+     * If this is not set, we assume there is no Kotlin Class, and the concept can only be used with dynamic
+     * nodes.
+     */
+    var correspondingKotlinClass: KClass<*>? = null
+
+    /**
+     * This must be set explicitly, because we cannot use reflection to retrieve it.
+     * If this is not set, we assume there is no Error Kotlin Class, and the concept can only be used with dynamic
+     * error nodes.
+     */
+    var correspondingErrorKotlinClass: KClass<*>? = null
 
     override val superClassifiers: List<Classifier>
         get() = if (superConcept == null) conceptInterfaces else listOf(superConcept!!) + conceptInterfaces
 
+    // To be addressed in https://github.com/Strumenta/kolasu/issues/342
     fun instantiateNode(featureValues: Map<Feature, Any?>): MPNode {
-        TODO()
+        if (correspondingKotlinClass == null) {
+            TODO("Instantiate dynamic node")
+        } else {
+            TODO("Instantiate node through specific class")
+        }
     }
 
+    // To be addressed in https://github.com/Strumenta/kolasu/issues/343
     fun instantiateErrorNode(message: String): MPNode {
-        TODO()
+        if (correspondingErrorKotlinClass == null) {
+            TODO("Instantiate dynamic error node")
+        } else {
+            TODO("Instantiate error node through specific class")
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -112,4 +135,14 @@ class Annotation(
 
     override val superClassifiers: List<Classifier>
         get() = if (superAnnotation == null) conceptInterfaces else listOf(superAnnotation!!) + conceptInterfaces
+
+    // To be addressed in https://github.com/Strumenta/kolasu/issues/344
+    fun instantiate(featureValues: Map<Feature, Any?>): MPNode {
+        TODO()
+    }
+
+    val isSingle: Boolean
+        get() = !isMultiple
+
+    var isMultiple: Boolean = false
 }

@@ -78,22 +78,22 @@ abstract class MPNode : NodeLike {
     override val sourceText: String?
         get() = origin?.sourceText
 
-    override fun <A : Annotation> addAnnotation(annotation: A): A {
+    override fun <A : AnnotationInstance> addAnnotation(annotation: A): A {
         if (annotation.annotatedNode != null) {
             throw IllegalStateException("Annotation already attached")
         }
         annotation.attachTo(this)
         if (annotation.isSingle) {
-            annotations.filter { it.annotationType == annotation.annotationType }.forEach { removeAnnotation(it) }
+            annotationInstances.filter { it.annotation == annotation.annotation }.forEach { removeAnnotation(it) }
         }
-        annotations.add(annotation)
+        annotationInstances.add(annotation)
         return annotation
     }
 
-    override fun removeAnnotation(annotation: Annotation) {
-        require(annotation.annotatedNode == this)
-        annotations.remove(annotation)
-        annotation.detach()
+    override fun removeAnnotation(annotationInstance: AnnotationInstance) {
+        require(annotationInstance.annotatedNode == this)
+        annotationInstances.remove(annotationInstance)
+        annotationInstance.detach()
     }
 
     override fun <T : NodeLike> addToContainment(
@@ -164,11 +164,11 @@ abstract class MPNode : NodeLike {
     override val changes = PublishSubject<NodeNotification<in NodeLike>>()
 
     @Internal
-    private val annotations: MutableList<Annotation> = mutableListOf()
+    private val annotationInstances: MutableList<AnnotationInstance> = mutableListOf()
 
     @Internal
-    override val allAnnotations: List<Annotation>
-        get() = annotations
+    override val allAnnotationInstances: List<AnnotationInstance>
+        get() = annotationInstances
 
     @Internal
     override val destinations = mutableListOf<Destination>()
