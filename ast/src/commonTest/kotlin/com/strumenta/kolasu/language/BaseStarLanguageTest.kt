@@ -35,6 +35,7 @@ class BaseStarLanguageTest {
         assertEquals("name", nameProp.name)
         assertEquals(stringType, nameProp.type)
         assertEquals(Multiplicity.SINGULAR, nameProp.multiplicity)
+        assertEquals(listOf(BaseStarLasuLanguage.iPossiblyNamed), BaseStarLasuLanguage.iNamed.superClassifiers)
     }
 
     @Test
