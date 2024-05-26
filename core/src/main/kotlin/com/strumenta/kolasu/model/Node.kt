@@ -141,10 +141,10 @@ open class Node : NodeLike {
 
     fun getAttributeValue(name: String): Any? {
         // In the future, when we set AttributeValue it will be different
-        return getProperty(name)
+        return getPropertySimpleValue(name)
     }
 
-    override fun <T : Any?> setProperty(
+    override fun <T : Any?> setPropertySimpleValue(
         propertyName: String,
         value: T,
     ) {
@@ -152,7 +152,7 @@ open class Node : NodeLike {
         prop.setter.call(this, value)
     }
 
-    override fun <T : Any?> getProperty(propertyName: String): T {
+    override fun <T : Any?> getPropertySimpleValue(propertyName: String): T {
         val prop = nodeProperties.find { it.name == propertyName }!!
         return prop.call(this) as T
     }

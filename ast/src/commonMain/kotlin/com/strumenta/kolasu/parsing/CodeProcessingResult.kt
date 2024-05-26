@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.Result
@@ -39,27 +38,6 @@ open class CodeProcessingResult<D>(
         return result
     }
 }
-
-data class TokenCategory(
-    val type: String,
-) {
-    companion object {
-        val COMMENT = TokenCategory("Comment")
-        val KEYWORD = TokenCategory("Keyword")
-        val NUMERIC_LITERAL = TokenCategory("Numeric literal")
-        val STRING_LITERAL = TokenCategory("String literal")
-        val PLAIN_TEXT = TokenCategory("Plain text")
-    }
-}
-
-/**
- * A token is a portion of text that has been assigned a category.
- */
-open class KolasuToken(
-    open val category: TokenCategory,
-    open val range: Range,
-    open val text: String,
-)
 
 /**
  * The result of lexing (tokenizing) a stream.

@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.model
 
-data class AttributeValue<V>(
+data class PropertyValue<V>(
     var value: V?,
     var range: Range? = null,
 )

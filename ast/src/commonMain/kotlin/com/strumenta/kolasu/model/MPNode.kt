@@ -34,9 +34,10 @@ abstract class MPNode : NodeLike {
     /**
      * This is overriden by the compiler plugin
      */
-    protected open fun calculateConcept(): Concept {
-        TODO("calculateConcept should be overridden by compiler plugin for $this")
-    }
+    protected open fun calculateConcept(): Concept =
+        throw IllegalStateException(
+            "calculateConcept should be overridden by compiler plugin for $this",
+        )
 
     /**
      * The range of this node in the source text.
@@ -133,7 +134,7 @@ abstract class MPNode : NodeLike {
         TODO("Not yet implemented")
     }
 
-    override fun <T> setProperty(
+    override fun <T> setPropertySimpleValue(
         propertyName: String,
         value: T,
     ) {

@@ -126,16 +126,21 @@ interface NodeLike {
         }
     }
 
-    fun getPropertyValue(property: Property): Any? {
-        return property.value(this)
+    fun <T : Any?> getPropertySimpleValue(property: Property): T? {
+        return property.value(this) as T?
     }
 
-    fun <T : Any?> setProperty(
+    fun <T : Any?> getPropertyValue(property: Property): PropertyValue<T>? {
+        // TODO: specify range properly
+        return PropertyValue(getPropertySimpleValue(property), null)
+    }
+
+    fun <T : Any?> setPropertySimpleValue(
         propertyName: String,
         value: T,
     )
 
-    fun <T : Any?> getProperty(propertyName: String): T {
+    fun <T : Any?> getPropertySimpleValue(propertyName: String): T {
         return concept.requireProperty(propertyName).value(this) as T
     }
 

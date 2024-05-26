@@ -147,7 +147,7 @@ class LionWebModelConverter(
                                         ?: throw IllegalArgumentException(
                                             "Property ${feature.name} not found in $kNode",
                                         )
-                                val kValue = kNode.getPropertyValue(kAttribute)
+                                val kValue = kNode.getPropertySimpleValue<Any>(kAttribute)
                                 if (kValue is Enum<*>) {
                                     val kClass: EnumKClass = kValue::class as EnumKClass
                                     val enumeration =
