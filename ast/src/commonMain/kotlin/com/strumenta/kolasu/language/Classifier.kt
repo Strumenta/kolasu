@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.language
 
+import com.strumenta.kolasu.model.AnnotationInstance
 import com.strumenta.kolasu.model.MPNode
 import kotlin.reflect.KClass
 
@@ -138,12 +139,23 @@ class Annotation(
         get() = if (superAnnotation == null) conceptInterfaces else listOf(superAnnotation!!) + conceptInterfaces
 
     // To be addressed in https://github.com/Strumenta/kolasu/issues/344
-    fun instantiate(featureValues: Map<Feature, Any?>): MPNode {
-        TODO()
+    fun instantiate(featureValues: Map<Feature, Any?>): AnnotationInstance {
+        if (correspondingKotlinClass == null) {
+            TODO("Instantiate dynamic annotation instance")
+        } else {
+            TODO("Instantiate annotation through specific class")
+        }
     }
 
     val isSingle: Boolean
         get() = !isMultiple
 
     var isMultiple: Boolean = false
+
+    /**
+     * This must be set explicitly, because we cannot use reflection to retrieve it.
+     * If this is not set, we assume there is no Kotlin Class, and the concept can only be used with dynamic
+     * nodes.
+     */
+    var correspondingKotlinClass: KClass<*>? = null
 }
