@@ -59,6 +59,10 @@ open class StarLasuLanguage(
             it.name == name
         }!!
 
+    fun getAnnotation(name: String): Annotation =
+        types.filterIsInstance<Annotation>().find { it.name == name || it.qualifiedName == name }
+            ?: throw IllegalArgumentException("Cannot find annotation $name in language $this. Known types: $types")
+
     fun ensureIsRegistered() {
         StarLasuLanguagesRegistry.registerLanguage(this)
     }

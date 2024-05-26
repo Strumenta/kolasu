@@ -5,11 +5,11 @@ import kotlin.test.assertEquals
 
 data class DocumentationAnnotation(
     val text: String,
-) : JVMSingleAnnotation()
+) : JVMAnnotationInstance(true)
 
 data class CommentAnnotation(
     val text: String,
-) : JVMMultipleAnnotation()
+) : JVMAnnotationInstance(false)
 
 class N1 : Node()
 

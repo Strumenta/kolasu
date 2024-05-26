@@ -9,9 +9,9 @@ import com.strumenta.kolasu.language.Annotation
  *
  * Each Node will be aware of the annotations attach to itself.
  */
-abstract class AnnotationInstance(
-    val annotation: Annotation,
-) {
+abstract class AnnotationInstance {
+    abstract val annotation: Annotation
+
     var annotatedNode: NodeLike? = null
 
     /**
@@ -46,3 +46,7 @@ abstract class AnnotationInstance(
     val isAttached: Boolean
         get() = annotatedNode?.hasAnnotation(this) ?: false
 }
+
+open class SimpleAnnotationInstance(
+    override val annotation: Annotation,
+) : AnnotationInstance()
