@@ -15,6 +15,8 @@ object BaseStarLasuLanguage : StarLasuLanguage("com.strumenta.basestarlasulangua
         types.add(baseStarLasuConcept)
         val iNamed = ConceptInterface(this, "INamed")
         types.add(iNamed)
+        val iPossiblyNamed = ConceptInterface(this, "IPossiblyNamed")
+        types.add(iPossiblyNamed)
         val primitiveType = PrimitiveType("Range")
         types.add(primitiveType)
         val point = PrimitiveType("Point")
@@ -23,6 +25,9 @@ object BaseStarLasuLanguage : StarLasuLanguage("com.strumenta.basestarlasulangua
 
     val astNode: Concept
         get() = getConcept("ASTNode")
+
+    val iPossiblyNamed: ConceptInterface
+        get() = getConceptInterface("IPossiblyNamed")
 
     val iNamed: ConceptInterface
         get() = getConceptInterface("INamed")

@@ -65,4 +65,13 @@ open class StarLasuLanguage(
 
     val classifiers: List<Classifier>
         get() = this.types.filterIsInstance<Classifier>()
+
+    val annotations: List<Annotation>
+        get() = this.types.filterIsInstance<Annotation>()
+
+    val concepts: List<Concept>
+        get() = this.types.filterIsInstance<Concept>()
+
+    val conceptInterfaces: List<ConceptInterface>
+        get() = this.types.filterIsInstance<ConceptInterface>()
 }
