@@ -113,6 +113,12 @@ class Annotation(
     var superAnnotation: Annotation? = null
     var conceptInterfaces: MutableList<ConceptInterface> = mutableListOf()
     var annotates: Classifier? = null
+        set(value) {
+            if (value is Annotation) {
+                throw IllegalArgumentException("An annotation can only annotatate Concepts or ConceptInterfaces")
+            }
+            field = value
+        }
 
     override val superClassifiers: List<Classifier>
         get() = if (superAnnotation == null) conceptInterfaces else listOf(superAnnotation!!) + conceptInterfaces

@@ -2,7 +2,6 @@ package com.strumenta.kolasu.language
 
 import com.strumenta.kolasu.model.MPNode
 import com.strumenta.kolasu.model.Multiplicity
-import kotlin.test.DefaultAsserter.fail
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -33,13 +32,5 @@ class MetamodelTest {
                 { TODO() },
             ).multiplicity,
         )
-    }
-}
-
-fun assertThrows(op: () -> Unit) {
-    try {
-        op.invoke()
-        fail("exception not thrown")
-    } catch (t: Throwable) {
     }
 }
