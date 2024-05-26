@@ -1,8 +1,5 @@
 package com.strumenta.kolasu.language
 
-import com.strumenta.kolasu.model.AnnotationInstance
-import com.strumenta.kolasu.model.MPNode
-import com.strumenta.kolasu.model.dynamic.DynamicAnnotationInstance
 import kotlin.reflect.KClass
 
 sealed class Classifier(
@@ -95,24 +92,6 @@ class Concept(
     override val superClassifiers: List<Classifier>
         get() = if (superConcept == null) conceptInterfaces else listOf(superConcept!!) + conceptInterfaces
 
-    // To be addressed in https://github.com/Strumenta/kolasu/issues/342
-    fun instantiateNode(featureValues: Map<Feature, Any?>): MPNode {
-        if (correspondingKotlinClass == null) {
-            TODO("Instantiate dynamic node")
-        } else {
-            TODO("Instantiate node through specific class")
-        }
-    }
-
-    // To be addressed in https://github.com/Strumenta/kolasu/issues/343
-    fun instantiateErrorNode(message: String): MPNode {
-        if (correspondingErrorKotlinClass == null) {
-            TODO("Instantiate dynamic error node")
-        } else {
-            TODO("Instantiate error node through specific class")
-        }
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
@@ -137,19 +116,6 @@ class Annotation(
 
     override val superClassifiers: List<Classifier>
         get() = if (superAnnotation == null) conceptInterfaces else listOf(superAnnotation!!) + conceptInterfaces
-
-    // To be addressed in https://github.com/Strumenta/kolasu/issues/344
-    fun instantiate(featureValues: Map<Feature, Any?>): AnnotationInstance {
-        if (correspondingKotlinClass == null) {
-            val instance = DynamicAnnotationInstance(this)
-            allFeatures.forEach { feature ->
-                TODO()
-            }
-            return instance
-        } else {
-            TODO("We have no reflecting capabilities here")
-        }
-    }
 
     val isSingle: Boolean
         get() = !isMultiple

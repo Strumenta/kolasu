@@ -1,7 +1,5 @@
 package com.strumenta.kolasu.language
 
-import com.strumenta.kolasu.model.MPNode
-
 open class StarLasuLanguage(
     val qualifiedName: String,
     val types: MutableList<Type> = mutableListOf(),
@@ -9,16 +7,6 @@ open class StarLasuLanguage(
     init {
         StarLasuLanguagesRegistry.registerLanguage(this)
     }
-
-    fun instantiateNode(
-        concept: Concept,
-        featureValues: Map<Feature, Any?>,
-    ): MPNode = concept.instantiateNode(featureValues)
-
-    fun instantiateErrorNode(
-        concept: Concept,
-        message: String,
-    ): MPNode = concept.instantiateErrorNode(message)
 
     val simpleName: String
         get() = qualifiedName.split(".").last()
