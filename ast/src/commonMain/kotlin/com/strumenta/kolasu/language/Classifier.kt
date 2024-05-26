@@ -2,6 +2,7 @@ package com.strumenta.kolasu.language
 
 import com.strumenta.kolasu.model.AnnotationInstance
 import com.strumenta.kolasu.model.MPNode
+import com.strumenta.kolasu.model.dynamic.DynamicAnnotationInstance
 import kotlin.reflect.KClass
 
 sealed class Classifier(
@@ -133,7 +134,6 @@ class Annotation(
     var superAnnotation: Annotation? = null
     var conceptInterfaces: MutableList<ConceptInterface> = mutableListOf()
     var annotates: Classifier? = null
-    val features: List<Feature> = mutableListOf()
 
     override val superClassifiers: List<Classifier>
         get() = if (superAnnotation == null) conceptInterfaces else listOf(superAnnotation!!) + conceptInterfaces
@@ -141,9 +141,13 @@ class Annotation(
     // To be addressed in https://github.com/Strumenta/kolasu/issues/344
     fun instantiate(featureValues: Map<Feature, Any?>): AnnotationInstance {
         if (correspondingKotlinClass == null) {
-            TODO("Instantiate dynamic annotation instance")
+            val instance = DynamicAnnotationInstance(this)
+            allFeatures.forEach { feature ->
+                TODO()
+            }
+            return instance
         } else {
-            TODO("Instantiate annotation through specific class")
+            TODO("We have no reflecting capabilities here")
         }
     }
 
