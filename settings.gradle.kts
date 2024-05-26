@@ -6,8 +6,6 @@ pluginManagement {
         id("org.jetbrains.kotlin.multiplatform") version "$kotlinVersion"
         id("org.jetbrains.kotlin.kapt") version "$kotlinVersion"
         id("org.jetbrains.dokka") version "$dokkaVersion"
-        id("com.github.gmazzo.buildconfig") version "3.1.0"
-        id("org.jetbrains.kotlinx.kover") version "0.7.1"
     }
 }
 

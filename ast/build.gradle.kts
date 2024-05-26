@@ -4,7 +4,7 @@ plugins {
     id("maven-publish")
     id("signing")
     id("org.jetbrains.dokka")
-    id("org.jetbrains.kotlinx.kover")
+    alias(libs.plugins.kover)
 }
 
 kotlin {

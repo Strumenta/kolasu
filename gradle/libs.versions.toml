@@ -9,5 +9,6 @@ clikt = { module = "com.github.ajalt.clikt:clikt", version="3.5.2"}
 
 [plugins]
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.1" }
-buildconfig = { id = "com.github.gmazzo.buildconfig", version = "3.1.0" }
+buildconfig = { id = "com.github.gmazzo.buildconfig", version = "5.3.5" }
 gradlepublish = { id = "com.gradle.plugin-publish", version = "1.2.1" }
+kover = { id = "org.jetbrains.kotlinx.kover", version = "0.8.0" }
