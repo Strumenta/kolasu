@@ -132,6 +132,7 @@ class Annotation(
     var superAnnotation: Annotation? = null
     var conceptInterfaces: MutableList<ConceptInterface> = mutableListOf()
     var annotates: Classifier? = null
+    val features: List<Feature> = mutableListOf()
 
     override val superClassifiers: List<Classifier>
         get() = if (superAnnotation == null) conceptInterfaces else listOf(superAnnotation!!) + conceptInterfaces

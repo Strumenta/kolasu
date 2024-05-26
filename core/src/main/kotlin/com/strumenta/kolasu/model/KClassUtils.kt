@@ -117,6 +117,9 @@ val KClass<*>.isConcept: Boolean
 val KClass<*>.isConceptInterface: Boolean
     get() = isANode() && this.java.isInterface && this != NodeLike::class
 
+val KClass<*>.isAnnotation: Boolean
+    get() = this.isSubclassOf(JVMAnnotationInstance::class)
+
 internal fun providesNodes(kclass: KClass<*>?): Boolean = kclass?.isANode() ?: false
 
 /**

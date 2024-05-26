@@ -1,15 +1,25 @@
 package com.strumenta.kolasu.model
 
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+object MyAnnotationsLanguage : StarLasuLanguage("con.strumenta.kolasu.model") {
+    init {
+        explore(DocumentationAnnotation::class, CommentAnnotation::class)
+    }
+}
+
+@LanguageAssociation(MyAnnotationsLanguage::class)
 data class DocumentationAnnotation(
     val text: String,
-) : JVMSingleAnnotation()
+) : JVMSingleAnnotationInstance()
 
+@LanguageAssociation(MyAnnotationsLanguage::class)
 data class CommentAnnotation(
     val text: String,
-) : JVMMultipleAnnotation()
+) : JVMMultipleAnnotationInstance()
 
 class N1 : Node()
 

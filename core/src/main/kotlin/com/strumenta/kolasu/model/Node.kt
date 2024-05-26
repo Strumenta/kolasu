@@ -102,9 +102,11 @@ open class Node : NodeLike {
         if (this is GenericNode) {
             return "GenericNode"
         }
-        return "${this.qualifiedNodeType}(${concept.declaredFeatures.joinToString(
-            ", ",
-        ) { "${it.name}=${it.valueToString(this)}" }})"
+        return "${this.qualifiedNodeType}(${
+            concept.declaredFeatures.joinToString(
+                ", ",
+            ) { "${it.name}=${it.valueToString(this)}" }
+        })"
     }
 
     protected fun notifyOfPropertyChange(
@@ -213,19 +215,18 @@ open class Node : NodeLike {
     }
 
     @property:Internal
-    override val concept: Concept
-        get() {
-            try {
-                val annotation = this.javaClass.getAnnotation(LanguageAssociation::class.java)
-                val language: StarLasuLanguage =
-                    if (annotation != null) {
-                        annotation.language.objectInstance ?: throw IllegalStateException()
-                    } else {
-                        StarLasuLanguagesRegistry.getLanguage(this.javaClass.kotlin.packageName)
-                    }
-                return language.getConcept(this.javaClass.simpleName)
-            } catch (e: Exception) {
-                throw RuntimeException("Issue while retrieving concept for class ${this.javaClass.canonicalName}", e)
-            }
+    override val concept: Concept by lazy {
+        try {
+            val annotation = this.javaClass.getAnnotation(LanguageAssociation::class.java)
+            val language: StarLasuLanguage =
+                if (annotation != null) {
+                    annotation.language.objectInstance ?: throw IllegalStateException()
+                } else {
+                    StarLasuLanguagesRegistry.getLanguage(this.javaClass.kotlin.packageName)
+                }
+            language.getConcept(this.javaClass.simpleName)
+        } catch (e: Exception) {
+            throw RuntimeException("Issue while retrieving concept for class ${this.javaClass.canonicalName}", e)
         }
+    }
 }

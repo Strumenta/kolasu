@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 val myLanguage = StarLasuLanguage("foo.bar.MyLanguage")
 val mySingleAnnotation = Annotation(myLanguage, "MySingleAnnotation")
 
-class MySingleAnnotation : AnnotationInstance(mySingleAnnotation)
+class MySingleAnnotation : SimpleAnnotationInstance(mySingleAnnotation)
 
 class MySimpleNode : MPNode()
 

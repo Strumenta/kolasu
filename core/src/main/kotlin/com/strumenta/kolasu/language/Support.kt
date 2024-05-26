@@ -1,9 +1,11 @@
 package com.strumenta.kolasu.language
 
+import com.strumenta.kolasu.model.JVMMultipleAnnotationInstance
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.asAttribute
 import com.strumenta.kolasu.model.asContainment
 import com.strumenta.kolasu.model.asReference
+import com.strumenta.kolasu.model.isAnnotation
 import com.strumenta.kolasu.model.isAttribute
 import com.strumenta.kolasu.model.isConcept
 import com.strumenta.kolasu.model.isConceptInterface
@@ -13,6 +15,7 @@ import com.strumenta.kolasu.model.nodeProperties
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.allSupertypes
+import kotlin.reflect.full.isSubclassOf
 
 fun StarLasuLanguage.explore(vararg classes: Class<*>) {
     explore(*classes.map { it.kotlin }.toTypedArray())
@@ -94,6 +97,10 @@ fun StarLasuLanguage.explore(vararg kClasses: KClass<*>) {
                 } else if (kClass.isConceptInterface) {
                     val conceptInterface = ConceptInterface(this, kClass.simpleName!!)
                     this.types.add(conceptInterface)
+                } else if (kClass.isAnnotation) {
+                    val annotation = Annotation(this, kClass.simpleName!!)
+                    annotation.isMultiple = kClass.isSubclassOf(JVMMultipleAnnotationInstance::class)
+                    this.types.add(annotation)
                 } else if (kClass.allSupertypes.any { it.classifier == List::class }) {
                     throw IllegalStateException("This should not happen")
                 } else {
