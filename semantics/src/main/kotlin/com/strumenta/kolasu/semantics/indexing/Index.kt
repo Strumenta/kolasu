@@ -66,5 +66,3 @@ class InMemoryIndex(
         this.values.add(value)
     }
 }
-
-// TODO consider limited buffer size
