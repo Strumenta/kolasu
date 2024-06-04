@@ -1,7 +1,16 @@
 package com.strumenta.kolasu.semantics.scoping
 
 /**
- * Abstract storage for scope computation results.
+ * Abstract storage for storing scope computation results.
+ *
+ * Scope computation caches are meant to support the scope
+ * computer not to repeat calculations. While a persistent
+ * version of a scope computation cache can be implemented,
+ * it is meant to be volatile by default.
+ *
+ * Persistent implementations should design dedicated
+ * mechanisms for emptying, allocating and deallocating the cache.
+ *
  * @author Lorenzo Addazi <lorenzo.addazi@strumenta.com>
  **/
 interface ScopeComputerCache {
