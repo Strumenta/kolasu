@@ -1,7 +1,17 @@
 package com.strumenta.kolasu.semantics.typing
 
 /**
- * Abstract storage for type computation results.
+ * Abstract storage for storing type computation results.
+ *
+ * Type computation caches are meant to support type computers
+ * not to repeat calculations. While a persistent version of a
+ * type computer cache can be implemented, it is meant to be
+ * volatile by default.
+ *
+ * Persistent implementations should design dedicated mechanisms
+ * for emptying, allocating and deallocating the cache.
+ *
+ * @author Lorenzo Addazi <lorenzo.addazi@strumenta.com>
  **/
 interface TypeComputerCache {
     /**
@@ -20,7 +30,10 @@ interface TypeComputerCache {
 }
 
 /**
- * In-memory storage for type computation results.
+ * In-memory implementation of a type computation cache.
+ * @property types in-memory map associating inputs to types
+ *
+ * @author Lorenzo Addazi <lorenzo.addazi@strumenta.com>
  **/
 class InMemoryTypeComputerCache(
     private val types: MutableMap<Any, Any> = mutableMapOf()

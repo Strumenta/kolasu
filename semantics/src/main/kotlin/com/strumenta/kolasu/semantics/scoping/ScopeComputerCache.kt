@@ -30,8 +30,10 @@ interface ScopeComputerCache {
 }
 
 /**
- * In-memory storage for scoping results.
+ * In-memory implementation of a scope computation cache.
  * @property results in-memory map associating inputs to scopes
+ *
+ * @author Lorenzo Addazi <lorenzo.addazi@strumenta.com>
  **/
 class InMemoryScopeComputerCache(
     private val results: MutableMap<Any, Scope> = mutableMapOf()
