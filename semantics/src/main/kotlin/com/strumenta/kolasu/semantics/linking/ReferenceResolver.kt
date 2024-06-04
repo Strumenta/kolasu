@@ -12,8 +12,8 @@ import kotlin.reflect.safeCast
 
 /**
  * Type-safe builder to create resolver instances.
- * @param index optional index for external symbols
- * @param cache optional storage to cache computations
+ * @param index index for external symbols (default: [InMemoryIndex])
+ * @param cache storage to cache computations (default: [InMemoryReferenceResolverCache])
  * @param configuration the resolver configuration
  * @return the configured resolver instance
  **/
