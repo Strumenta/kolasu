@@ -297,12 +297,12 @@ class LionWebModelConverterTest {
         val simpleNodeA = lwLanguage.getConceptByName("SimpleNodeA")!!
         val simpleNodeB = lwLanguage.getConceptByName("SimpleNodeB")!!
 
-        assertSame(simpleRoot, lwAST.concept)
+        assertSame(simpleRoot, lwAST.classifier)
         assertEquals(12345, lwAST.getPropertyValueByName("id"))
         assertEquals(3, lwAST.getChildrenByContainmentName("childrez").size)
 
         val child1 = lwAST.getChildrenByContainmentName("childrez")[0]
-        assertSame(simpleNodeA, child1.concept)
+        assertSame(simpleNodeA, child1.classifier)
         assertEquals("A1", child1.getPropertyValueByName("name"))
         val refValue1 = child1.getReferenceValueByName("ref")
         assertEquals(1, refValue1.size)
@@ -310,11 +310,11 @@ class LionWebModelConverterTest {
         assertSame(child1, refValue1[0].referred)
 
         val child2 = lwAST.getChildrenByContainmentName("childrez")[1]
-        assertSame(simpleNodeB, child2.concept)
+        assertSame(simpleNodeB, child2.classifier)
         assertEquals("some magic value", child2.getPropertyValueByName("value"))
 
         val child3 = lwAST.getChildrenByContainmentName("childrez")[2]
-        assertSame(simpleNodeA, child3.concept)
+        assertSame(simpleNodeA, child3.classifier)
         assertEquals("A3", child3.getPropertyValueByName("name"))
         val refValue3 = child3.getReferenceValueByName("ref")
         assertEquals(1, refValue3.size)
