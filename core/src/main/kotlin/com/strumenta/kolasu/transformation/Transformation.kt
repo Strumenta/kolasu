@@ -8,18 +8,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.createInstance
-import kotlin.reflect.full.createType
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.memberFunctions
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.full.superclasses
-
-/**
- * A child of an AST node that is automatically populated from a source tree.
- */
-annotation class Mapped(val path: String = "")
+import kotlin.reflect.full.*
 
 /**
  * Factory that, given a tree node, will instantiate the corresponding transformed node.
@@ -165,9 +154,10 @@ class NodeFactory<Source, Output : Node>(
      * ```
      *
      * However, if the result of `transformer.transform(ctx.children[0])` is an instance of a Node with a child
-     * annotated with `@Mapped("someProperty")`, the transformer will think that it has to populate that child,
+     * for which `withChild` was configured, the transformer will think that it has to populate that child,
      * according to the configuration determined by reflection. When it tries to do so, the "source" of the node will
-     * be an instance of `XYZContext` that does not have a child named `someProperty`, and the transformation will fail.
+     * be an instance of `XYZContext` that may not have a child with a corresponding name, and the transformation will
+     * fail – or worse, it will map an unrelated node.
      */
     fun skipChildren(skip: Boolean = true): NodeFactory<Source, Output> {
         this.skipChildren = skip
@@ -215,7 +205,7 @@ data class ChildNodeFactory<Source, Target, Child>(
 ) {
     fun set(node: Target, child: Child?) {
         if (setter == null) {
-            throw java.lang.IllegalStateException("Unable to set value $name in  $node")
+            throw IllegalStateException("Unable to set value $name in $node")
         }
         try {
             setter!!(node, child)
@@ -317,27 +307,14 @@ open class ASTTransformer(
         node: Node
     ) {
         node::class.processProperties { pd ->
-            val childKey = node::class.qualifiedName + "#" + pd.name
-            var childNodeFactory = factory.getChildNodeFactory<Node, Any, Any>(node::class, pd.name)
+            val childNodeFactory = factory.getChildNodeFactory<Any, Node, Any>(node::class, pd.name)
             if (childNodeFactory != null) {
                 if (childNodeFactory != NO_CHILD_NODE) {
                     setChild(childNodeFactory, source, node, pd)
                 }
             } else {
-                val targetProp = node::class.memberProperties.find { it.name == pd.name }
-                val mapped = targetProp?.findAnnotation<Mapped>()
-                if (targetProp is KMutableProperty1 && mapped != null) {
-                    val path = (mapped.path.ifEmpty { targetProp.name })
-                    childNodeFactory = ChildNodeFactory(
-                        childKey,
-                        factory.getter(path),
-                        (targetProp as KMutableProperty1<Any, Any?>)::set
-                    )
-                    factory.children[childKey] = childNodeFactory as ChildNodeFactory<Any, *, *>
-                    setChild(childNodeFactory, source, node, pd)
-                } else {
-                    factory.children[childKey] = NO_CHILD_NODE
-                }
+                val childKey = node.nodeType + "#" + pd.name
+                factory.children[childKey] = NO_CHILD_NODE
             }
         }
     }
@@ -353,7 +330,7 @@ open class ASTTransformer(
         val childFactory = childNodeFactory as ChildNodeFactory<Any, Any, Any>
         val childrenSource = childFactory.get(getSource(node, source))
         val child: Any? = if (pd.multiple) {
-            (childrenSource as List<*>).map { transformIntoNodes(it, node) }.flatten() ?: listOf<Node>()
+            (childrenSource as List<*>?)?.map { transformIntoNodes(it, node) }?.flatten() ?: listOf<Node>()
         } else {
             transform(childrenSource, node)
         }
@@ -577,8 +554,8 @@ open class ASTTransformer(
     }
 }
 
-private fun <Source : Any, Target, Child> NodeFactory<*, *>.getChildNodeFactory(
-    nodeClass: KClass<out Source>,
+private fun <Source : Any, Target : Any, Child> NodeFactory<*, *>.getChildNodeFactory(
+    nodeClass: KClass<out Target>,
     parameterName: String
 ): ChildNodeFactory<Source, Target, Child>? {
     val childKey = nodeClass.qualifiedName + "#" + parameterName
