@@ -3,7 +3,6 @@ package com.strumenta.kolasu.emf.rpgast
 import com.smeup.rpgparser.parsing.ast.Expression
 import com.strumenta.kolasu.model.*
 import java.math.BigDecimal
-import java.util.*
 
 abstract class AbstractDataDefinition(
     override val name: String,
@@ -249,8 +248,8 @@ fun encodeBinary(inValue: BigDecimal, size: Int): String {
         buffer[2] = ((lsb shr 8) and 0x0000FFFF).toByte()
         buffer[3] = (lsb and 0x0000FFFF).toByte()
 
-        return buffer[3].toInt().toChar().toString() + buffer[2].toInt().toChar().toString() + buffer[1].toInt().toChar().toString() +
-            buffer[0].toInt().toChar().toString()
+        return buffer[3].toInt().toChar().toString() + buffer[2].toInt().toChar().toString() +
+            buffer[1].toInt().toChar().toString() + buffer[0].toInt().toChar().toString()
     }
     if (size == 8) {
         val llsb = inValue.toLong()
@@ -263,10 +262,10 @@ fun encodeBinary(inValue: BigDecimal, size: Int): String {
         buffer[6] = ((llsb shr 8) and 0x0000FFFF).toByte()
         buffer[7] = (llsb and 0x0000FFFF).toByte()
 
-        return buffer[7].toInt().toChar().toString() + buffer[6].toInt().toChar().toString() + buffer[5].toInt().toChar().toString() +
-            buffer[4].toInt().toChar().toString() +
-            buffer[3].toInt().toChar().toString() + buffer[2].toInt().toChar().toString() + buffer[1].toInt().toChar().toString() +
-            buffer[0].toInt().toChar().toString()
+        return buffer[7].toInt().toChar().toString() + buffer[6].toInt().toChar().toString() +
+            buffer[5].toInt().toChar().toString() + buffer[4].toInt().toChar().toString() +
+            buffer[3].toInt().toChar().toString() + buffer[2].toInt().toChar().toString() +
+            buffer[1].toInt().toChar().toString() + buffer[0].toInt().toChar().toString()
     }
     TODO("encode binary for $size not implemented")
 }
