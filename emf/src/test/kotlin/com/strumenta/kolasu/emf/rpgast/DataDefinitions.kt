@@ -260,8 +260,7 @@ fun encodeBinary(
         buffer[3] = (lsb and 0x0000FFFF).toByte()
 
         return buffer[3].toInt().toChar().toString() + buffer[2].toInt().toChar().toString() +
-            buffer[1].toInt().toChar().toString() +
-            buffer[0].toInt().toChar().toString()
+            buffer[1].toInt().toChar().toString() + buffer[0].toInt().toChar().toString()
     }
     if (size == 8) {
         val llsb = inValue.toLong()
@@ -275,11 +274,9 @@ fun encodeBinary(
         buffer[7] = (llsb and 0x0000FFFF).toByte()
 
         return buffer[7].toInt().toChar().toString() + buffer[6].toInt().toChar().toString() +
-            buffer[5].toInt().toChar().toString() +
-            buffer[4].toInt().toChar().toString() +
+            buffer[5].toInt().toChar().toString() + buffer[4].toInt().toChar().toString() +
             buffer[3].toInt().toChar().toString() + buffer[2].toInt().toChar().toString() +
-            buffer[1].toInt().toChar().toString() +
-            buffer[0].toInt().toChar().toString()
+            buffer[1].toInt().toChar().toString() + buffer[0].toInt().toChar().toString()
     }
     TODO("encode binary for $size not implemented")
 }
@@ -489,7 +486,7 @@ fun decodeFromZoned(
                     builder.append('0')
                 } else {
                     builder.insert(0, '-')
-                    builder.append((it.code - 0x0049 + 0x0030).toChar())
+                    builder.append((it.code - 0x0049 + 0x0030).toInt().toChar())
                 }
             }
         }
@@ -566,25 +563,25 @@ fun decodeFromDS(
 
     var sign: String = ""
     var number: String = ""
-    var nibble = ((buffer[buffer.size - 1]).toInt() and 0x0F)
+    var nibble = ((buffer[buffer.size - 1]) and 0x0F)
     if (nibble == 0x0B || nibble == 0x0D) {
         sign = "-"
     }
 
     var offset = 0
     while (offset < (buffer.size - 1)) {
-        nibble = (buffer[offset].toInt() and 0xFF).ushr(4)
+        nibble = (buffer[offset] and 0xFF).ushr(4)
         number += Character.toString((nibble or 0x30).toChar())
-        nibble = buffer[offset].toInt() and 0x0F or 0x30
+        nibble = buffer[offset] and 0x0F or 0x30
         number += Character.toString((nibble or 0x30).toChar())
 
         offset++
     }
 
     // read last digit
-    nibble = (buffer[offset].toInt() and 0xFF).ushr(4)
+    nibble = (buffer[offset] and 0xFF).ushr(4)
     if (nibble <= 9) {
-        number += Character.toString((nibble or 0x30).toChar())
+        number += (nibble or 0x30).toChar().toString()
     }
     // adjust the scale
     if (scale > 0 && number != "0") {

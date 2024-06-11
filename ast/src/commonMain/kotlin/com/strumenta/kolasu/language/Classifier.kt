@@ -14,8 +14,13 @@ sealed class Classifier(
             res.addAll(declaredFeatures)
             this.superClassifiers.forEach { scl ->
                 // declared features can override inherited features
-                res.addAll(scl.allFeatures.filter { inheritedFeature -> declaredFeatures.none { declaredFeature ->
-                    declaredFeature.name == inheritedFeature.name } })
+                res.addAll(
+                    scl.allFeatures.filter { inheritedFeature ->
+                        declaredFeatures.none { declaredFeature ->
+                            declaredFeature.name == inheritedFeature.name
+                        }
+                    },
+                )
             }
             return res
         }

@@ -6,7 +6,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class ConceptTest {
-
     @Test
     fun testAllContainments() {
         val l = StarLasuLanguage("my.language")

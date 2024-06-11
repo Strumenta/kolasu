@@ -13,11 +13,8 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
-import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.createInstance
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.full.superclasses
 
@@ -115,28 +112,14 @@ open class ASTTransformer(
         node: NodeLike,
     ) {
         node::class.processFeatures { pd ->
-            val childKey = node::class.qualifiedName + "#" + pd.name
-            var childNodeTransformer = transformer.getChildNodeTransformer<NodeLike, Any, Any>(node::class, pd.name)
+            val childNodeTransformer = transformer.getChildNodeTransformer<Any, NodeLike, Any>(node::class, pd.name)
             if (childNodeTransformer != null) {
                 if (childNodeTransformer != NO_CHILD_NODE) {
                     setChild(childNodeTransformer, source, node, pd)
                 }
             } else {
-                val targetProp = node::class.memberProperties.find { it.name == pd.name }
-                val mapped = targetProp?.findAnnotation<Mapped>()
-                if (targetProp is KMutableProperty1 && mapped != null) {
-                    val path = (mapped.path.ifEmpty { targetProp.name })
-                    childNodeTransformer =
-                        ChildNodeTransformer(
-                            childKey,
-                            transformer.getter(path),
-                            (targetProp as KMutableProperty1<Any, Any?>)::set,
-                        )
-                    transformer.children[childKey] = childNodeTransformer as ChildNodeTransformer<Any, *, *>
-                    setChild(childNodeTransformer, source, node, pd)
-                } else {
-                    transformer.children[childKey] = NO_CHILD_NODE
-                }
+                val childKey = node::class.qualifiedName + "#" + pd.name
+                transformer.children[childKey] = NO_CHILD_NODE
             }
         }
     }

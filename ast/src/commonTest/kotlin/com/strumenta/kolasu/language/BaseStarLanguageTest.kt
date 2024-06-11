@@ -5,7 +5,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class BaseStarLanguageTest {
-
     @Test
     fun checkASTNode() {
         assertEquals("ASTNode", BaseStarLasuLanguage.astNode.name)

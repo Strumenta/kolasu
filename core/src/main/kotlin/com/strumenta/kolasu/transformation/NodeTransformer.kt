@@ -154,9 +154,10 @@ class NodeTransformer<Source, Output : NodeLike>(
      * ```
      *
      * However, if the result of `transformer.transform(ctx.children[0])` is an instance of a Node with a child
-     * annotated with `@Mapped("someProperty")`, the transformer will think that it has to populate that child,
+     * for which `withChild` was configured, the transformer will think that it has to populate that child,
      * according to the configuration determined by reflection. When it tries to do so, the "source" of the node will
-     * be an instance of `XYZContext` that does not have a child named `someProperty`, and the transformation will fail.
+     * be an instance of `XYZContext` that may not have a child with a corresponding name, and the transformation will
+     * fail – or worse, it will map an unrelated node.
      */
     fun skipChildren(skip: Boolean = true): NodeTransformer<Source, Output> {
         this.skipChildren = skip
