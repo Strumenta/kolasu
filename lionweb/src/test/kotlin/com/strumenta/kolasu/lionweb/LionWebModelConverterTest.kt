@@ -92,7 +92,24 @@ class LionWebModelConverterTest {
           ]
         }
       ],
-      "references": [],
+      "references": [
+        {
+          "reference": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
+          },
+          "targets": []
+        },
+        {
+          "reference": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-transpiledNode-key"
+          },
+          "targets": []
+        }
+      ],
       "annotations": [],
       "parent": null
     },
@@ -144,6 +161,22 @@ class LionWebModelConverterTest {
               "reference": "synthetic_foo-bar-source_childrez"
             }
           ]
+        },
+        {
+          "reference": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
+          },
+          "targets": []
+        },
+        {
+          "reference": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-transpiledNode-key"
+          },
+          "targets": []
         }
       ],
       "annotations": [],
@@ -175,7 +208,24 @@ class LionWebModelConverterTest {
         }
       ],
       "containments": [],
-      "references": [],
+      "references": [
+        {
+          "reference": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
+          },
+          "targets": []
+        },
+        {
+          "reference": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-transpiledNode-key"
+          },
+          "targets": []
+        }
+      ],
       "annotations": [],
       "parent": "synthetic_foo-bar-source"
     },
@@ -229,6 +279,22 @@ class LionWebModelConverterTest {
               "reference": "synthetic_foo-bar-source_childrez"
             }
           ]
+        },
+        {
+          "reference": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
+          },
+          "targets": []
+        },
+        {
+          "reference": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-transpiledNode-key"
+          },
+          "targets": []
         }
       ],
       "annotations": [],
@@ -260,7 +326,24 @@ class LionWebModelConverterTest {
         }
       ],
       "containments": [],
-      "references": [],
+      "references": [
+        {
+          "reference": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
+          },
+          "targets": []
+        },
+        {
+          "reference": {
+            "language": "com_strumenta_starlasu",
+            "version": "1",
+            "key": "com_strumenta_starlasu-ASTNode-transpiledNode-key"
+          },
+          "targets": []
+        }
+      ],
       "annotations": [],
       "parent": "synthetic_foo-bar-source_childrez_2"
     }
@@ -641,13 +724,29 @@ class LionWebModelConverterTest {
 
     @Test
     fun canSerializeAndDeserializeTheOriginalNodeLink() {
-        val node1 = SimpleRoot(1, mutableListOf())
-        val node2 = SimpleRoot(2, mutableListOf())
+        val kl = KolasuLanguage("my.language").apply {
+            addClass(SimpleRoot::class)
+        }
+        val mc = LionWebModelConverter()
+        mc.exportLanguageToLionWeb(kl)
+
+        val node1 = SimpleRoot(1, mutableListOf()).setSourceForTree(LionWebSource("MySource1"))
+        val node2 = SimpleRoot(2, mutableListOf()).setSourceForTree(LionWebSource("MySource2"))
+
+        mc.externalNodeResolver = object : NodeResolver {
+            override fun resolve(nodeID: String): KNode? {
+                return if (nodeID == "MySource2") {
+                    node2
+                } else {
+                    null
+                }
+            }
+        }
 
         node1.origin = node2
 
-        val lwNode1 = LionWebModelConverter().exportModelToLionWeb(node1)
-        val deserializedNode1 = LionWebModelConverter().importModelFromLionWeb(lwNode1) as SimpleRoot
+        val lwNode1 = mc.exportModelToLionWeb(node1)
+        val deserializedNode1 = mc.importModelFromLionWeb(lwNode1) as SimpleRoot
         assertEquals(1, deserializedNode1.id)
         assert(deserializedNode1.origin is SimpleRoot)
         assertEquals(2, (deserializedNode1.origin as SimpleRoot).id)
@@ -655,28 +754,62 @@ class LionWebModelConverterTest {
 
     @Test
     fun canSerializeAndDeserializeTheTranspiledNodesLinkSingleCase() {
-        val node1 = SimpleRoot(1, mutableListOf())
-        val node3 = SimpleRoot(2, mutableListOf())
+        val kl = KolasuLanguage("my.language").apply {
+            addClass(SimpleRoot::class)
+        }
+        val mc = LionWebModelConverter()
+        mc.exportLanguageToLionWeb(kl)
+
+        val node1 = SimpleRoot(1, mutableListOf()).setSourceForTree(LionWebSource("MySource1"))
+        val node3 = SimpleRoot(3, mutableListOf()).setSourceForTree(LionWebSource("MySource3"))
 
         node3.destination = node1
 
-        val lwNode3 = LionWebModelConverter().exportModelToLionWeb(node3)
-        val deserializedNode3 = LionWebModelConverter().importModelFromLionWeb(lwNode3) as SimpleRoot
+        mc.externalNodeResolver = object : NodeResolver {
+            override fun resolve(nodeID: String): KNode? {
+                return if (nodeID == "MySource1") {
+                    node1
+                } else {
+                    null
+                }
+            }
+        }
+
+        val lwNode3 = mc.exportModelToLionWeb(node3)
+        val deserializedNode3 = mc.importModelFromLionWeb(lwNode3) as SimpleRoot
         assertEquals(3, deserializedNode3.id)
-        assert(deserializedNode3.origin is SimpleRoot)
+        assert(deserializedNode3.destination is SimpleRoot)
         assertEquals(1, (deserializedNode3.destination as SimpleRoot).id)
     }
 
     @Test
     fun canSerializeAndDeserializeTheTranspiledNodesLinkMultipleCase() {
-        val node1 = SimpleRoot(1, mutableListOf())
-        val node2 = SimpleRoot(2, mutableListOf())
-        val node3 = SimpleRoot(2, mutableListOf())
+        val kl = KolasuLanguage("my.language").apply {
+            addClass(SimpleRoot::class)
+        }
+        val mc = LionWebModelConverter()
+        mc.exportLanguageToLionWeb(kl)
+
+        val node1 = SimpleRoot(1, mutableListOf()).setSourceForTree(LionWebSource("MySource1"))
+        val node2 = SimpleRoot(2, mutableListOf()).setSourceForTree(LionWebSource("MySource2"))
+        val node3 = SimpleRoot(3, mutableListOf()).setSourceForTree(LionWebSource("MySource3"))
 
         node3.destination = CompositeDestination(node1, node2)
 
-        val lwNode3 = LionWebModelConverter().exportModelToLionWeb(node3)
-        val deserializedNode3 = LionWebModelConverter().importModelFromLionWeb(lwNode3) as SimpleRoot
+        mc.externalNodeResolver = object : NodeResolver {
+            override fun resolve(nodeID: String): KNode? {
+                return if (nodeID == "MySource1") {
+                    node1
+                } else if (nodeID == "MySource2") {
+                    node2
+                } else {
+                    null
+                }
+            }
+        }
+
+        val lwNode3 = mc.exportModelToLionWeb(node3)
+        val deserializedNode3 = mc.importModelFromLionWeb(lwNode3) as SimpleRoot
         assertEquals(3, deserializedNode3.id)
         assert(deserializedNode3.destination is CompositeDestination)
         assertEquals(1, ((deserializedNode3.destination as CompositeDestination).elements[0] as SimpleRoot).id)

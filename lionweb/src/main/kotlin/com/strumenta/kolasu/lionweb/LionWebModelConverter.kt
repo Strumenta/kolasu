@@ -3,6 +3,7 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.language.KolasuLanguage
+import com.strumenta.kolasu.model.CompositeDestination
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
@@ -48,6 +49,14 @@ interface PrimitiveValueSerialization<E> {
     fun deserialize(serialized: String): E
 }
 
+interface NodeResolver {
+    fun resolve(nodeID: String): KNode?
+}
+
+class DummyNodeResolver : NodeResolver {
+    override fun resolve(nodeID: String): KNode? = null
+}
+
 /**
  * This class is able to convert between Kolasu and LionWeb models, tracking the mapping.
  *
@@ -67,6 +76,8 @@ class LionWebModelConverter(
      */
     private val nodesMapping = BiMap<Any, LWNode>(usingIdentity = true)
     private val primitiveValueSerializations = ConcurrentHashMap<KClass<*>, PrimitiveValueSerialization<*>>()
+
+    var externalNodeResolver: NodeResolver = DummyNodeResolver()
 
     fun clearNodesMapping() {
         nodesMapping.clear()
@@ -172,9 +183,34 @@ class LionWebModelConverter(
 
                         is Reference -> {
                             if (feature == StarLasuLWLanguage.ASTNodeOriginalNode) {
-                                TODO()
+                                if (kNode.origin is KNode) {
+                                    val targetID = myIDManager.nodeId(kNode.origin as KNode)
+                                    lwNode.setReferenceValues(
+                                        StarLasuLWLanguage.ASTNodeOriginalNode,
+                                        listOf(
+                                            ReferenceValue(ProxyNode(targetID), null)
+                                        )
+                                    )
+                                } else {
+                                    lwNode.setReferenceValues(StarLasuLWLanguage.ASTNodeOriginalNode, emptyList())
+                                }
                             } else if (feature == StarLasuLWLanguage.ASTNodeTranspiledNodes) {
-                                TODO()
+                                val destinationNodes = mutableListOf<KNode>()
+                                if (kNode.destination != null) {
+                                    if (kNode.destination is KNode) {
+                                        destinationNodes.add(kNode.destination as KNode)
+                                    } else if (kNode.destination is CompositeDestination) {
+                                        destinationNodes.addAll(
+                                            (kNode.destination as CompositeDestination).elements
+                                                .filterIsInstance<KNode>()
+                                        )
+                                    }
+                                }
+                                val referenceValues = destinationNodes.map { destinationNode ->
+                                    val targetID = myIDManager.nodeId(destinationNode)
+                                    ReferenceValue(ProxyNode(targetID), null)
+                                }
+                                lwNode.setReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes, referenceValues)
                             } else {
                                 val kReference = kFeatures.find { it.name == feature.name }
                                     as com.strumenta.kolasu.language.Reference
@@ -265,15 +301,20 @@ class LionWebModelConverter(
                 }
                 val originalNodes = lwNode.getReferenceValues(StarLasuLWLanguage.ASTNodeOriginalNode)
                 if (originalNodes.isNotEmpty()) {
-                    TODO()
+                    require(originalNodes.size == 1)
+                    val originalNode = originalNodes.first()
+                    val originalNodeID = originalNode.referredID
+                    require(originalNodeID != null)
+                    referencesPostponer.registerPostponedOriginReference(kNode, originalNodeID)
                 }
                 val transpiledNodes = lwNode.getReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes)
                 if (transpiledNodes.isNotEmpty()) {
-                    TODO()
+                    val transpiledNodeIDs = transpiledNodes.map { it.referredID!! }
+                    referencesPostponer.registerPostponedTranspiledReference(kNode, transpiledNodeIDs)
                 }
             }
         }
-        referencesPostponer.populateReferences(nodesMapping)
+        referencesPostponer.populateReferences(nodesMapping, externalNodeResolver)
         return nodesMapping.byB(lwTree)!!
     }
 
@@ -399,12 +440,14 @@ class LionWebModelConverter(
      */
     private class ReferencesPostponer {
         private val values = IdentityHashMap<ReferenceByName<PossiblyNamed>, LWNode?>()
+        private val originValues = IdentityHashMap<KNode, String>()
+        private val destinationValues = IdentityHashMap<KNode, List<String>>()
 
         fun registerPostponedReference(referenceByName: ReferenceByName<PossiblyNamed>, referred: LWNode?) {
             values[referenceByName] = referred
         }
 
-        fun populateReferences(nodesMapping: BiMap<Any, LWNode>) {
+        fun populateReferences(nodesMapping: BiMap<Any, LWNode>, externalNodeResolver: NodeResolver) {
             values.forEach { entry ->
                 if (entry.value == null) {
                     entry.key.referred = null
@@ -416,6 +459,43 @@ class LionWebModelConverter(
                     }
                 }
             }
+            originValues.forEach { entry ->
+                val lwNode = nodesMapping.bs.find { it.id == entry.value }
+                if (lwNode != null) {
+                    val correspondingKNode = nodesMapping.byB(lwNode) as KNode
+                    entry.key.origin = correspondingKNode
+                } else {
+                    val correspondingKNode = externalNodeResolver.resolve(entry.value) ?: throw IllegalStateException(
+                        "Unable to resolve node with ID ${entry.value}"
+                    )
+                    entry.key.origin = correspondingKNode
+                }
+            }
+            destinationValues.forEach { entry ->
+                val values = entry.value.map { targetID ->
+                    val lwNode = nodesMapping.bs.find { it.id == targetID }
+                    if (lwNode != null) {
+                        nodesMapping.byB(lwNode) as KNode
+                    } else {
+                        externalNodeResolver.resolve(targetID) ?: throw IllegalStateException(
+                            "Unable to resolve node with ID $targetID"
+                        )
+                    }
+                }
+                if (values.size == 1) {
+                    entry.key.destination = values.first()
+                } else {
+                    entry.key.destination = CompositeDestination(values)
+                }
+            }
+        }
+
+        fun registerPostponedOriginReference(kNode: KNode, originalNodeID: String) {
+            originValues[kNode] = originalNodeID
+        }
+
+        fun registerPostponedTranspiledReference(kNode: KNode, transpiledNodeIDs: List<String>) {
+            destinationValues[kNode] = transpiledNodeIDs
         }
     }
 
