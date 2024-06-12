@@ -135,7 +135,7 @@ class LionWebModelConverter(
                     )
                 }
                 val kFeatures = kNode.javaClass.kotlin.allFeatures()
-                lwNode.concept.allFeatures().forEach { feature ->
+                lwNode.classifier.allFeatures().forEach { feature ->
                     when (feature) {
                         is Property -> {
                             if (feature == StarLasuLWLanguage.ASTNodeRange) {
@@ -255,10 +255,10 @@ class LionWebModelConverter(
         lwTree.thisAndAllDescendants().reversed().forEach { lwNode ->
             val kClass =
                 synchronized(languageConverter) {
-                    languageConverter.correspondingKolasuClass(lwNode.concept)
+                    languageConverter.correspondingKolasuClass(lwNode.classifier)
                         ?: throw RuntimeException(
                             "We do not have StarLasu AST class for " +
-                                "LIonWeb Concept ${lwNode.concept}",
+                                "LIonWeb Concept ${lwNode.classifier}",
                         )
                 }
             try {
@@ -553,7 +553,7 @@ class LionWebModelConverter(
             }
         val params = mutableMapOf<KParameter, Any?>()
         constructor.parameters.forEach { param ->
-            val feature = data.concept.getFeatureByName(param.name!!)
+            val feature = data.classifier.getFeatureByName(param.name!!)
             if (feature == null) {
                 throw java.lang.IllegalStateException(
                     "We could not find a feature named as the parameter ${param.name} " +
@@ -596,7 +596,7 @@ class LionWebModelConverter(
                 }
             }
         propertiesNotSetAtConstructionTime.forEach { property ->
-            val feature = data.concept.getFeatureByName(property.name!!)
+            val feature = data.classifier.getFeatureByName(property.name!!)
             if (property !is KMutableProperty<*>) {
                 if (property.isContainment() && property.asContainment().multiplicity == Multiplicity.MANY) {
                     val currentValue = property.get(kNode) as MutableList<KNode>
