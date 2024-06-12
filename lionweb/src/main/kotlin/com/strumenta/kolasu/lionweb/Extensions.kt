@@ -2,6 +2,8 @@ package com.strumenta.kolasu.lionweb
 
 import io.lionweb.lioncore.java.model.ClassifierInstanceUtils
 
+// Eventually all these methods should be moved to LionWeb Kotlin
+
 fun LWNode.getPropertyValueByName(propertyName: String) =
     ClassifierInstanceUtils.getPropertyValueByName(this, propertyName)
 
