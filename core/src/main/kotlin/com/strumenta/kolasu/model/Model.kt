@@ -32,7 +32,9 @@ data class CompositeOrigin(
 
 interface Destination
 
-data class CompositeDestination(val elements: List<Destination>) : Destination, Serializable
+data class CompositeDestination(val elements: List<Destination>) : Destination, Serializable {
+    constructor(vararg elements: Destination) : this(elements.toList())
+}
 data class TextFileDestination(val position: Position?) : Destination, Serializable
 
 val RESERVED_FEATURE_NAMES = setOf("parent", "position")

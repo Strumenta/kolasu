@@ -80,7 +80,7 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                         } else {
                             typeSpec.superclass(typeName(element.extendedConcept!!))
                             (element.extendedConcept as Concept).allFeatures().forEach {
-                                if (it != StarLasuLWLanguage.ASTNodePosition) {
+                                if (it !in StarLasuLWLanguage.ASTNode.features) {
                                     typeSpec.addSuperclassConstructorParameter(it.name!!)
                                 }
                             }
@@ -90,14 +90,14 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
                         }
                         val constructor = FunSpec.constructorBuilder()
                         element.inheritedFeatures().forEach { feature ->
-                            if (feature == StarLasuLWLanguage.ASTNodePosition) {
+                            if (feature in StarLasuLWLanguage.ASTNode.features) {
                                 // skip it
                             } else {
                                 processFeature(feature, constructor, typeSpec, true, element.isAbstract)
                             }
                         }
                         element.features.forEach { feature ->
-                            if (feature == StarLasuLWLanguage.ASTNodePosition) {
+                            if (feature in StarLasuLWLanguage.ASTNode.features) {
                                 // skip it
                             } else {
                                 processFeature(feature, constructor, typeSpec, false, element.isAbstract)

@@ -171,42 +171,49 @@ class LionWebModelConverter(
                         }
 
                         is Reference -> {
-                            val kReference = kFeatures.find { it.name == feature.name }
-                                as com.strumenta.kolasu.language.Reference
-                            val kValue = kNode.getReference(kReference)
-                            if (kValue == null) {
-                                lwNode.addReferenceValue(feature, null)
+                            if (feature == StarLasuLWLanguage.ASTNodeOriginalNode) {
+                                TODO()
+                            } else if (feature == StarLasuLWLanguage.ASTNodeTranspiledNodes) {
+                                TODO()
                             } else {
-                                when {
-                                    kValue.retrieved -> {
-                                        val kReferred = (
-                                            kValue.referred ?: throw IllegalStateException(
-                                                "Reference " +
-                                                    "retrieved but referred is empty"
-                                            )
-                                            ) as KNode
-                                        // We may have a reference to a Kolasu Node that we are not exporting, and for
-                                        // which we have therefore no LionWeb node. In that case, if we have the
-                                        // identifier, we can produce a ProxyNode instead
-                                        val lwReferred: Node = nodesMapping.byA(kReferred) ?: ProxyNode(
-                                            kValue.identifier
-                                                ?: throw java.lang.IllegalStateException(
-                                                    "Identifier of reference target " +
-                                                        "value not set. Referred: $kReferred, reference holder: $kNode"
+                                val kReference = kFeatures.find { it.name == feature.name }
+                                    as com.strumenta.kolasu.language.Reference
+                                val kValue = kNode.getReference(kReference)
+                                if (kValue == null) {
+                                    lwNode.addReferenceValue(feature, null)
+                                } else {
+                                    when {
+                                        kValue.retrieved -> {
+                                            val kReferred = (
+                                                kValue.referred ?: throw IllegalStateException(
+                                                    "Reference " +
+                                                        "retrieved but referred is empty"
                                                 )
-                                        )
-                                        lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
-                                    }
+                                                ) as KNode
+                                            // We may have a reference to a Kolasu Node that we are not exporting, and for
+                                            // which we have therefore no LionWeb node. In that case, if we have the
+                                            // identifier, we can produce a ProxyNode instead
+                                            val lwReferred: Node = nodesMapping.byA(kReferred) ?: ProxyNode(
+                                                kValue.identifier
+                                                    ?: throw java.lang.IllegalStateException(
+                                                        "Identifier of reference target " +
+                                                            "value not set. Referred: $kReferred, " +
+                                                            "reference holder: $kNode"
+                                                    )
+                                            )
+                                            lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
+                                        }
 
-                                    kValue.resolved -> {
-                                        // This is tricky, as we need to set a LW Node, but we have just an identifier...
-                                        val lwReferred: Node =
-                                            DynamicNode(kValue.identifier!!, LionCoreBuiltins.getNode())
-                                        lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
-                                    }
+                                        kValue.resolved -> {
+                                            // This is tricky, as we need to set a LW Node, but we have just an identifier...
+                                            val lwReferred: Node =
+                                                DynamicNode(kValue.identifier!!, LionCoreBuiltins.getNode())
+                                            lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
+                                        }
 
-                                    else -> {
-                                        lwNode.addReferenceValue(feature, ReferenceValue(null, kValue.name))
+                                        else -> {
+                                            lwNode.addReferenceValue(feature, ReferenceValue(null, kValue.name))
+                                        }
                                     }
                                 }
                             }
@@ -255,6 +262,14 @@ class LionWebModelConverter(
                 val lwPosition = lwNode.getPropertyValue(StarLasuLWLanguage.ASTNodePosition)
                 if (lwPosition != null) {
                     kNode.position = lwPosition as Position
+                }
+                val originalNodes = lwNode.getReferenceValues(StarLasuLWLanguage.ASTNodeOriginalNode)
+                if (originalNodes.isNotEmpty()) {
+                    TODO()
+                }
+                val transpiledNodes = lwNode.getReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes)
+                if (transpiledNodes.isNotEmpty()) {
+                    TODO()
                 }
             }
         }
