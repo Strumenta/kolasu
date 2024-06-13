@@ -18,7 +18,8 @@ class NodeFactory<Source, Output : Node>(
     var children: MutableMap<String, ChildNodeFactory<Source, *, *>?> = mutableMapOf(),
     var finalizer: (Output) -> Unit = {},
     var skipChildren: Boolean = false,
-    var childrenSetAtConstruction: Boolean = false
+    var childrenSetAtConstruction: Boolean = false,
+    var errorHandlers: Map<KClass<out Exception>, (Exception) -> Unit> = mapOf()
 ) {
 
     companion object {
@@ -141,6 +142,26 @@ class NodeFactory<Source, Output : Node>(
     fun withFinalizer(finalizer: (Output) -> Unit): NodeFactory<Source, Output> {
         this.finalizer = finalizer
         return this
+    }
+
+    fun on(exception: KClass<out Exception>, action: (Exception) -> Unit) {
+        errorHandlers = errorHandlers + (exception to action)
+    }
+
+    fun handle(exception: Exception) {
+        var exClass: KClass<out Exception>? = exception::class
+        var handler = errorHandlers[exClass]
+        while (handler == null && exClass != null) {
+            exClass = exClass.superclasses.find { it.isSubclassOf(Exception::class) } as KClass<Exception>?
+            if (exClass != null) {
+                handler = errorHandlers[exClass]
+            }
+        }
+        if (handler != null) {
+            handler(exception)
+        } else {
+            throw exception
+        }
     }
 
     /**
@@ -275,7 +296,12 @@ open class ASTTransformer(
         val factory = getNodeFactory<Any, Node>(source::class as KClass<Any>)
         val nodes: List<Node>
         if (factory != null) {
-            nodes = makeNodes(factory, source, allowGenericNode = allowGenericNode)
+            nodes = try {
+                makeNodes(factory, source, allowGenericNode = allowGenericNode)
+            } catch (e: Exception) {
+                factory.handle(e)
+                listOf()
+            }
             if (!factory.skipChildren && !factory.childrenSetAtConstruction) {
                 nodes.forEach { node -> setChildren(factory, source, node) }
             }
@@ -310,7 +336,7 @@ open class ASTTransformer(
             val childNodeFactory = factory.getChildNodeFactory<Any, Node, Any>(node::class, pd.name)
             if (childNodeFactory != null) {
                 if (childNodeFactory != NO_CHILD_NODE) {
-                    setChild(childNodeFactory, source, node, pd)
+                    setChild(factory, childNodeFactory, source, node, pd)
                 }
             } else {
                 val childKey = node.nodeType + "#" + pd.name
@@ -322,6 +348,7 @@ open class ASTTransformer(
     protected open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
 
     protected open fun setChild(
+        factory: NodeFactory<Any, Node>,
         childNodeFactory: ChildNodeFactory<*, *, *>,
         source: Any,
         node: Node,
@@ -330,14 +357,25 @@ open class ASTTransformer(
         val childFactory = childNodeFactory as ChildNodeFactory<Any, Any, Any>
         val childrenSource = childFactory.get(getSource(node, source))
         val child: Any? = if (pd.multiple) {
-            (childrenSource as List<*>?)?.map { transformIntoNodes(it, node) }?.flatten() ?: listOf<Node>()
+            (childrenSource as List<*>?)?.map {
+                try {
+                    transformIntoNodes(it, node)
+                } catch (e: Exception) {
+                    factory.handle(e)
+                    listOf()
+                }
+            }?.flatten() ?: listOf<Node>()
         } else {
-            transform(childrenSource, node)
+            try {
+                transform(childrenSource, node)
+            } catch (e: Exception) {
+                factory.handle(e)
+            }
         }
         try {
             childNodeFactory.set(node, child)
-        } catch (e: IllegalArgumentException) {
-            throw Error("Could not set child $childNodeFactory", e)
+        } catch (e: Exception) {
+            factory.handle(Exception("Could not set child $childNodeFactory", e))
         }
     }
 

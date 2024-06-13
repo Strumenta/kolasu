@@ -10,6 +10,7 @@ import com.strumenta.kolasu.validation.IssueSeverity
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 data class CU(var statements: List<Node> = listOf()) : Node()
@@ -349,6 +350,30 @@ class ASTTransformerTest {
         assertEquals(2, transformedCU.statements.size)
         assertIs<TodoStatement>(transformedCU.statements[0])
         assertASTsAreEqual(cu.statements[1], transformedCU.statements[1])
+    }
+
+    @Test
+    fun testExceptionHandling() {
+        var ex: Exception? = null
+        val transformer = ASTTransformer(allowGenericNode = false)
+        transformer.registerNodeFactory(CU::class, CU::class)
+            .withChild(CU::statements, CU::statements)
+            .on(Exception::class) { ex = it }
+        transformer.registerIdentityTransformation(SetStatement::class)
+
+        val cu = CU(
+            statements = listOf(
+                DisplayIntStatement(value = 456),
+                SetStatement(variable = "foo", value = 123)
+            )
+        )
+        val transformedCU = transformer.transform(cu)!! as CU
+        assertTrue { transformedCU.hasValidParents() }
+        assertEquals(transformedCU.origin, cu)
+        assertEquals(1, transformedCU.statements.size)
+        assertASTsAreEqual(cu.statements[1], transformedCU.statements[0])
+        assertNotNull(ex)
+        assertIs<IllegalStateException>(ex)
     }
 }
 
