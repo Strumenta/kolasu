@@ -17,7 +17,7 @@ abstract class Statement : Node()
 data class DisplayIntStatement(val value: Int) : Statement()
 data class SetStatement(var variable: String = "", val value: Int = 0) : Statement()
 
-data class TodoStatement(override val message: String = "todo"): Statement(), TodoNode
+data class TodoStatement(override val message: String = "todo") : Statement(), TodoNode
 
 enum class Operator {
     PLUS, MULT
