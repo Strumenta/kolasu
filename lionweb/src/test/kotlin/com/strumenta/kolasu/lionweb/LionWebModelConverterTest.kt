@@ -730,7 +730,9 @@ class LionWebModelConverterTest {
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
 
-        val node1 = SimpleRoot(1, mutableListOf()).setSourceForTree(LionWebSource("MySource1"))
+        val node1 = SimpleRoot(1, mutableListOf())
+            .apply { position = Position(Point(10, 20), Point(30, 40)) }
+            .setSourceForTree(LionWebSource("MySource1"))
         val node2 = SimpleRoot(2, mutableListOf()).setSourceForTree(LionWebSource("MySource2"))
 
         mc.externalNodeResolver = object : NodeResolver {
@@ -744,12 +746,25 @@ class LionWebModelConverterTest {
         }
 
         node1.origin = node2
+        assertSame(node2, node1.origin)
 
+        // We verify the data is correct before exporting
+        assertEquals(LionWebSource("MySource1"), node1.source)
+        assertEquals(node2, node1.origin)
+        assertEquals(Position(Point(10, 20), Point(30, 40)), node1.position)
         val lwNode1 = mc.exportModelToLionWeb(node1)
+
+        // We verify the exported data is correct
+        val lwNode1Origins = lwNode1.getReferenceValueByName("originalNode")
+        assertEquals(1, lwNode1Origins.size)
+        assertEquals("MySource2", lwNode1Origins.first().referredID)
+
+        // We verify the re-imported data is correct
         val deserializedNode1 = mc.importModelFromLionWeb(lwNode1) as SimpleRoot
         assertEquals(1, deserializedNode1.id)
         assert(deserializedNode1.origin is SimpleRoot)
         assertEquals(2, (deserializedNode1.origin as SimpleRoot).id)
+        assertEquals(Position(Point(10, 20), Point(30, 40)), deserializedNode1.position)
     }
 
     @Test
@@ -761,7 +776,9 @@ class LionWebModelConverterTest {
         mc.exportLanguageToLionWeb(kl)
 
         val node1 = SimpleRoot(1, mutableListOf()).setSourceForTree(LionWebSource("MySource1"))
-        val node3 = SimpleRoot(3, mutableListOf()).setSourceForTree(LionWebSource("MySource3"))
+        val node3 = SimpleRoot(3, mutableListOf())
+            .setSourceForTree(LionWebSource("MySource3"))
+            .apply { position = Position(Point(1, 2), Point(3, 4)) }
 
         node3.destination = node1
 
@@ -780,6 +797,7 @@ class LionWebModelConverterTest {
         assertEquals(3, deserializedNode3.id)
         assert(deserializedNode3.destination is SimpleRoot)
         assertEquals(1, (deserializedNode3.destination as SimpleRoot).id)
+        assertEquals(Position(Point(1, 2), Point(3, 4)), deserializedNode3.position)
     }
 
     @Test
@@ -792,18 +810,24 @@ class LionWebModelConverterTest {
 
         val node1 = SimpleRoot(1, mutableListOf()).setSourceForTree(LionWebSource("MySource1"))
         val node2 = SimpleRoot(2, mutableListOf()).setSourceForTree(LionWebSource("MySource2"))
-        val node3 = SimpleRoot(3, mutableListOf()).setSourceForTree(LionWebSource("MySource3"))
+        val node3 = SimpleRoot(3, mutableListOf())
+            .apply { position = Position(Point(1, 2), Point(3, 4)) }
+            .setSourceForTree(LionWebSource("MySource3"))
 
         node3.destination = CompositeDestination(node1, node2)
 
         mc.externalNodeResolver = object : NodeResolver {
             override fun resolve(nodeID: String): KNode? {
-                return if (nodeID == "MySource1") {
-                    node1
-                } else if (nodeID == "MySource2") {
-                    node2
-                } else {
-                    null
+                return when (nodeID) {
+                    "MySource1" -> {
+                        node1
+                    }
+                    "MySource2" -> {
+                        node2
+                    }
+                    else -> {
+                        null
+                    }
                 }
             }
         }
@@ -814,6 +838,7 @@ class LionWebModelConverterTest {
         assert(deserializedNode3.destination is CompositeDestination)
         assertEquals(1, ((deserializedNode3.destination as CompositeDestination).elements[0] as SimpleRoot).id)
         assertEquals(2, ((deserializedNode3.destination as CompositeDestination).elements[1] as SimpleRoot).id)
+        assertEquals(Position(Point(1, 2), Point(3, 4)), deserializedNode3.position)
     }
 }
 

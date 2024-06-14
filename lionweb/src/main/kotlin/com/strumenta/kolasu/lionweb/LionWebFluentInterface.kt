@@ -11,7 +11,7 @@ import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import kotlin.random.Random
 
-// TODO: move this to LionWeb Kotlin
+// TODO: move this to LionWeb Kotlin, once that project is created
 
 /**
  * Create a LionWeb Language with the given name.

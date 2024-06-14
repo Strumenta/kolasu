@@ -463,11 +463,13 @@ class LionWebModelConverter(
                 val lwNode = nodesMapping.bs.find { it.id == entry.value }
                 if (lwNode != null) {
                     val correspondingKNode = nodesMapping.byB(lwNode) as KNode
+                    // TODO keep also position
                     entry.key.origin = correspondingKNode
                 } else {
                     val correspondingKNode = externalNodeResolver.resolve(entry.value) ?: throw IllegalStateException(
                         "Unable to resolve node with ID ${entry.value}"
                     )
+                    // TODO keep also position
                     entry.key.origin = correspondingKNode
                 }
             }
