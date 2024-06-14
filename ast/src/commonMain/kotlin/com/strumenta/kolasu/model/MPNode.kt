@@ -63,12 +63,7 @@ abstract class MPNode : NodeLike {
     override var source: Source?
         get() = explicitlySetSource ?: origin?.source
         set(value) {
-            // This is a limit of the current API: to specify a Source we need to specify coordinates
-            if (this.range == null) {
-                explicitlySetSource = value
-            } else {
-                this.origin = SimpleOrigin(this.range!!.copy(source = value))
-            }
+            explicitlySetSource = value
             require(this.source === value)
         }
 

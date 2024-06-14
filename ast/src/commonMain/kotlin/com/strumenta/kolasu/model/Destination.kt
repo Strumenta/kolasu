@@ -2,10 +2,6 @@ package com.strumenta.kolasu.model
 
 interface Destination
 
-data class CompositeDestination(
-    val elements: List<Destination>,
-) : Destination
-
 data class TextFileDestination(
     val range: Range?,
 ) : Destination

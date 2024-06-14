@@ -46,7 +46,7 @@ data class ReferencedToRemoved<N : NodeLike>(
     val referringNode: NodeLike,
 ) : NodeNotification<N>()
 
-data class ReferenceChangeNotification<N : PossiblyNamed>(
+data class ReferenceChangeNotification<N : NodeLike>(
     val oldValue: N?,
     val newValue: N?,
 )

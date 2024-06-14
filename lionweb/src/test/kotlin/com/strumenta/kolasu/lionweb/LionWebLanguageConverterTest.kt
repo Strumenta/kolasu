@@ -97,7 +97,7 @@ class LionWebLanguageConverterTest {
         assertEquals(emptyList(), simpleRoot.implemented)
         assertEquals(false, simpleRoot.isAbstract)
         assertEquals(2, simpleRoot.features.size)
-        assertEquals(3, simpleRoot.allFeatures().size)
+        assertEquals(5, simpleRoot.allFeatures().size)
 
         val simpleRootID = simpleRoot.getPropertyByName("id")!!
         assertEquals("id", simpleRootID.name)
@@ -122,7 +122,7 @@ class LionWebLanguageConverterTest {
         assertEquals(listOf(LionCoreBuiltins.getINamed(), myRelevantInterface), simpleNodeA.implemented)
         assertEquals(false, simpleNodeA.isAbstract)
         assertEquals(2, simpleNodeA.features.size)
-        assertEquals(4, simpleNodeA.allFeatures().size)
+        assertEquals(6, simpleNodeA.allFeatures().size)
 
         assertEquals(
             true,
@@ -146,7 +146,7 @@ class LionWebLanguageConverterTest {
         assertEquals(simpleDecl, simpleNodeB.extendedConcept)
         assertEquals(false, simpleNodeB.isAbstract)
         assertEquals(1, simpleNodeB.features.size)
-        assertEquals(2, simpleNodeB.allFeatures().size)
+        assertEquals(4, simpleNodeB.allFeatures().size)
 
         val simpleNodeBValue = simpleNodeB.getPropertyByName("value")!!
         assertEquals("value", simpleNodeBValue.name)
@@ -239,7 +239,7 @@ class LionWebLanguageConverterTest {
         assertEquals(emptyList(), simpleRoot.implemented)
         assertEquals(false, simpleRoot.isAbstract)
         assertEquals(2, simpleRoot.features.size)
-        assertEquals(3, simpleRoot.allFeatures().size)
+        assertEquals(5, simpleRoot.allFeatures().size)
 
         val simpleRootID = simpleRoot.getPropertyByName("id")!!
         assertEquals("id", simpleRootID.name)
@@ -264,7 +264,7 @@ class LionWebLanguageConverterTest {
         assertEquals(listOf(LionCoreBuiltins.getINamed(), myRelevantInterface), simpleNodeA.implemented)
         assertEquals(false, simpleNodeA.isAbstract)
         assertEquals(2, simpleNodeA.features.size)
-        assertEquals(4, simpleNodeA.allFeatures().size)
+        assertEquals(6, simpleNodeA.allFeatures().size)
 
         assertEquals(
             true,
@@ -288,7 +288,7 @@ class LionWebLanguageConverterTest {
         assertEquals(simpleDecl, simpleNodeB.extendedConcept)
         assertEquals(false, simpleNodeB.isAbstract)
         assertEquals(1, simpleNodeB.features.size)
-        assertEquals(2, simpleNodeB.allFeatures().size)
+        assertEquals(4, simpleNodeB.allFeatures().size)
 
         val simpleNodeBValue = simpleNodeB.getPropertyByName("value")!!
         assertEquals("value", simpleNodeBValue.name)
@@ -322,11 +322,11 @@ class LionWebLanguageConverterTest {
         assertEquals("MyNonPartition", myNonPartition.name)
         assertEquals(false, myNonPartition.isPartition)
         assertSame(lwLanguage, myNonPartition.language)
-        assertEquals(StarLasuLWLanguage.ASTNode, simpleRoot.extendedConcept)
-        assertEquals(emptyList(), simpleRoot.implemented)
-        assertEquals(false, simpleRoot.isAbstract)
-        assertEquals(2, simpleRoot.features.size)
-        assertEquals(3, simpleRoot.allFeatures().size)
+        assertEquals(StarLasuLWLanguage.ASTNode, myNonPartition.extendedConcept)
+        assertEquals(emptyList(), myNonPartition.implemented)
+        assertEquals(false, myNonPartition.isAbstract)
+        assertEquals(1, myNonPartition.features.size)
+        assertEquals(4, myNonPartition.allFeatures().size)
 
         assertEquals("SimpleRoot", simpleRoot.name)
         assertEquals(false, simpleRoot.isPartition)
@@ -335,7 +335,7 @@ class LionWebLanguageConverterTest {
         assertEquals(emptyList(), simpleRoot.implemented)
         assertEquals(false, simpleRoot.isAbstract)
         assertEquals(2, simpleRoot.features.size)
-        assertEquals(3, simpleRoot.allFeatures().size)
+        assertEquals(5, simpleRoot.allFeatures().size)
 
         val simpleRootID = simpleRoot.getPropertyByName("id")!!
         assertEquals("id", simpleRootID.name)
@@ -362,7 +362,7 @@ class LionWebLanguageConverterTest {
         assertEquals(listOf(LionCoreBuiltins.getINamed(), myRelevantInterface), simpleNodeA.implemented)
         assertEquals(false, simpleNodeA.isAbstract)
         assertEquals(2, simpleNodeA.features.size)
-        assertEquals(4, simpleNodeA.allFeatures().size)
+        assertEquals(6, simpleNodeA.allFeatures().size)
 
         assertEquals(
             true,
@@ -387,7 +387,7 @@ class LionWebLanguageConverterTest {
         assertEquals(simpleDecl, simpleNodeB.extendedConcept)
         assertEquals(false, simpleNodeB.isAbstract)
         assertEquals(1, simpleNodeB.features.size)
-        assertEquals(2, simpleNodeB.allFeatures().size)
+        assertEquals(4, simpleNodeB.allFeatures().size)
 
         val simpleNodeBValue = simpleNodeB.getPropertyByName("value")!!
         assertEquals("value", simpleNodeBValue.name)

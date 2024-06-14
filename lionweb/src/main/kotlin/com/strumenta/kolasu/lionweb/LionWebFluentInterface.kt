@@ -1,13 +1,17 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.model.Multiplicity
+import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
+import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import kotlin.random.Random
+
+// TODO: move this to LionWeb Kotlin, once that project is created
 
 /**
  * Create a LionWeb Language with the given name.
@@ -93,6 +97,30 @@ fun Concept.addProperty(
         }
     this.addFeature(property)
     return property
+}
+
+val Multiplicity.optional
+    get() = this == Multiplicity.OPTIONAL || this == Multiplicity.MANY
+
+val Multiplicity.multiple
+    get() = this == Multiplicity.MANY
+
+fun Concept.addReference(
+    name: String,
+    type: Classifier<*>,
+    multiplicity: Multiplicity = Multiplicity.SINGULAR,
+): Reference {
+    val reference =
+        Reference().apply {
+            this.name = name
+            this.id = "${this@addReference.id!!.removeSuffix("-id")}-$name-id"
+            this.key = "${this@addReference.key!!.removeSuffix("-key")}-$name-key"
+            this.type = type
+            this.setOptional(multiplicity.optional)
+            this.setMultiple(multiplicity.multiple)
+        }
+    this.addFeature(reference)
+    return reference
 }
 
 /**

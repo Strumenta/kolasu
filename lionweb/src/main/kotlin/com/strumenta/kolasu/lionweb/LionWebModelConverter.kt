@@ -5,11 +5,12 @@ import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.Multiplicity
+import com.strumenta.kolasu.model.NodeDestination
 import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.NodeOrigin
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.allFeatures
 import com.strumenta.kolasu.model.asContainment
@@ -46,12 +47,21 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
+import com.strumenta.kolasu.model.ReferenceValue as KReferenceValue
 import io.lionweb.lioncore.java.model.ReferenceValue as LWReferenceValue
 
 interface PrimitiveValueSerialization<E> {
     fun serialize(value: E): String
 
     fun deserialize(serialized: String): E
+}
+
+interface NodeResolver {
+    fun resolve(nodeID: String): KNode?
+}
+
+class DummyNodeResolver : NodeResolver {
+    override fun resolve(nodeID: String): KNode? = null
 }
 
 /**
@@ -73,6 +83,8 @@ class LionWebModelConverter(
      */
     private val nodesMapping = BiMap<Any, LWNode>(usingIdentity = true)
     private val primitiveValueSerializations = ConcurrentHashMap<KClass<*>, PrimitiveValueSerialization<*>>()
+
+    var externalNodeResolver: NodeResolver = DummyNodeResolver()
 
     fun clearNodesMapping() {
         nodesMapping.clear()
@@ -186,44 +198,71 @@ class LionWebModelConverter(
                             }
                         }
                         is Reference -> {
-                            val kReference =
-                                kFeatures.find { it.name == feature.name }
-                                    as com.strumenta.kolasu.language.Reference
-                            val kValue = kNode.getReference(kReference)
-                            if (kValue == null) {
-                                lwNode.addReferenceValue(feature, null)
+                            if (feature == StarLasuLWLanguage.ASTNodeOriginalNode) {
+                                if (kNode.origin is NodeOrigin) {
+                                    val targetID = myIDManager.nodeId((kNode.origin as NodeOrigin).node)
+                                    lwNode.setReferenceValues(
+                                        StarLasuLWLanguage.ASTNodeOriginalNode,
+                                        listOf(
+                                            LWReferenceValue(ProxyNode(targetID), null),
+                                        ),
+                                    )
+                                } else {
+                                    lwNode.setReferenceValues(StarLasuLWLanguage.ASTNodeOriginalNode, emptyList())
+                                }
+                            } else if (feature == StarLasuLWLanguage.ASTNodeTranspiledNodes) {
+                                val destinationNodes = mutableListOf<KNode>()
+                                kNode.destinations.forEach { kd ->
+                                    if (kd is NodeDestination) {
+                                        destinationNodes.add(kd.node)
+                                    }
+                                }
+                                val referenceValues =
+                                    destinationNodes.map { destinationNode ->
+                                        val targetID = myIDManager.nodeId(destinationNode)
+                                        LWReferenceValue(ProxyNode(targetID), null)
+                                    }
+                                lwNode.setReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes, referenceValues)
                             } else {
-                                when {
-                                    kValue.isRetrieved -> {
-                                        val kReferred =
-                                            (
-                                                kValue.referred ?: throw IllegalStateException(
-                                                    "Reference " +
-                                                        "retrieved but referred is empty",
+                                val kReference =
+                                    kFeatures.find { it.name == feature.name }
+                                        as com.strumenta.kolasu.language.Reference
+                                val kValue = kNode.getReference(kReference)
+                                if (kValue == null) {
+                                    lwNode.addReferenceValue(feature, null)
+                                } else {
+                                    when {
+                                        kValue.isRetrieved -> {
+                                            val kReferred =
+                                                (
+                                                    kValue.referred ?: throw IllegalStateException(
+                                                        "Reference " +
+                                                            "retrieved but referred is empty",
+                                                    )
+                                                ) as KNode
+                                            // We may have a reference to a Kolasu Node that we are not exporting, and for
+                                            // which we have therefore no LionWeb node. In that case, if we have the
+                                            // identifier, we can produce a ProxyNode instead
+                                            val lwReferred: Node =
+                                                nodesMapping.byA(kReferred) ?: ProxyNode(
+                                                    kValue.identifier
+                                                        ?: throw java.lang.IllegalStateException(
+                                                            "Identifier of reference target " +
+                                                                "value not set. Referred: $kReferred, " +
+                                                                "reference holder: $kNode",
+                                                        ),
                                                 )
-                                            ) as KNode
-                                        // We may have a reference to a Kolasu Node that we are not exporting, and for
-                                        // which we have therefore no LionWeb node. In that case, if we have the
-                                        // identifier, we can produce a ProxyNode instead
-                                        val lwReferred: Node =
-                                            nodesMapping.byA(kReferred) ?: ProxyNode(
-                                                kValue.identifier
-                                                    ?: throw java.lang.IllegalStateException(
-                                                        "Identifier of reference target " +
-                                                            "value not set. Referred: $kReferred, " +
-                                                            "reference holder: $kNode",
-                                                    ),
-                                            )
-                                        lwNode.addReferenceValue(feature, LWReferenceValue(lwReferred, kValue.name))
-                                    }
-                                    kValue.isResolved -> {
-                                        // This is tricky, as we need to set a LW Node, but we have just an identifier...
-                                        val lwReferred: Node =
-                                            DynamicNode(kValue.identifier!!, LionCoreBuiltins.getNode())
-                                        lwNode.addReferenceValue(feature, LWReferenceValue(lwReferred, kValue.name))
-                                    }
-                                    else -> {
-                                        lwNode.addReferenceValue(feature, LWReferenceValue(null, kValue.name))
+                                            lwNode.addReferenceValue(feature, LWReferenceValue(lwReferred, kValue.name))
+                                        }
+                                        kValue.isResolved -> {
+                                            // This is tricky, as we need to set a LW Node, but we have just an identifier...
+                                            val lwReferred: Node =
+                                                DynamicNode(kValue.identifier!!, LionCoreBuiltins.getNode())
+                                            lwNode.addReferenceValue(feature, LWReferenceValue(lwReferred, kValue.name))
+                                        }
+                                        else -> {
+                                            lwNode.addReferenceValue(feature, LWReferenceValue(null, kValue.name))
+                                        }
                                     }
                                 }
                             }
@@ -278,9 +317,22 @@ class LionWebModelConverter(
                 if (lwRange != null) {
                     kNode.range = lwRange as Range
                 }
+                val originalNodes = lwNode.getReferenceValues(StarLasuLWLanguage.ASTNodeOriginalNode)
+                if (originalNodes.isNotEmpty()) {
+                    require(originalNodes.size == 1)
+                    val originalNode = originalNodes.first()
+                    val originalNodeID = originalNode.referredID
+                    require(originalNodeID != null)
+                    referencesPostponer.registerPostponedOriginReference(kNode, originalNodeID)
+                }
+                val transpiledNodes = lwNode.getReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes)
+                if (transpiledNodes.isNotEmpty()) {
+                    val transpiledNodeIDs = transpiledNodes.map { it.referredID!! }
+                    referencesPostponer.registerPostponedTranspiledReference(kNode, transpiledNodeIDs)
+                }
             }
         }
-        referencesPostponer.populateReferences(nodesMapping)
+        referencesPostponer.populateReferences(nodesMapping, externalNodeResolver)
         return nodesMapping.byB(lwTree)!!
     }
 
@@ -411,6 +463,8 @@ class LionWebModelConverter(
      */
     private class ReferencesPostponer {
         private val values = IdentityHashMap<com.strumenta.kolasu.model.ReferenceValue<PossiblyNamed>, LWNode?>()
+        private val originValues = IdentityHashMap<KNode, String>()
+        private val destinationValues = IdentityHashMap<KNode, List<String>>()
 
         fun registerPostponedReference(
             referenceValue: com.strumenta.kolasu.model.ReferenceValue<PossiblyNamed>,
@@ -419,7 +473,10 @@ class LionWebModelConverter(
             values[referenceValue] = referred
         }
 
-        fun populateReferences(nodesMapping: BiMap<Any, LWNode>) {
+        fun populateReferences(
+            nodesMapping: BiMap<Any, LWNode>,
+            externalNodeResolver: NodeResolver,
+        ) {
             values.forEach { entry ->
                 if (entry.value == null) {
                     entry.key.referred = null
@@ -431,6 +488,51 @@ class LionWebModelConverter(
                     }
                 }
             }
+            originValues.forEach { entry ->
+                val lwNode = nodesMapping.bs.find { it.id == entry.value }
+                if (lwNode != null) {
+                    val correspondingKNode = nodesMapping.byB(lwNode) as KNode
+                    // TODO keep also position
+                    entry.key.origin = NodeOrigin(correspondingKNode)
+                } else {
+                    val correspondingKNode =
+                        externalNodeResolver.resolve(entry.value) ?: throw IllegalStateException(
+                            "Unable to resolve node with ID ${entry.value}",
+                        )
+                    // TODO keep also position
+                    entry.key.origin = NodeOrigin(correspondingKNode)
+                }
+            }
+            destinationValues.forEach { entry ->
+                val values =
+                    entry.value.map { targetID ->
+                        val lwNode = nodesMapping.bs.find { it.id == targetID }
+                        val targetNode =
+                            if (lwNode != null) {
+                                nodesMapping.byB(lwNode) as KNode
+                            } else {
+                                externalNodeResolver.resolve(targetID) ?: throw IllegalStateException(
+                                    "Unable to resolve node with ID $targetID",
+                                )
+                            }
+                        NodeDestination(targetNode)
+                    }
+                entry.key.destinations.addAll(values)
+            }
+        }
+
+        fun registerPostponedOriginReference(
+            kNode: KNode,
+            originalNodeID: String,
+        ) {
+            originValues[kNode] = originalNodeID
+        }
+
+        fun registerPostponedTranspiledReference(
+            kNode: KNode,
+            transpiledNodeIDs: List<String>,
+        ) {
+            destinationValues[kNode] = transpiledNodeIDs
         }
     }
 
@@ -514,7 +616,7 @@ class LionWebModelConverter(
         data: LWNode,
         reference: Reference,
         referencesPostponer: ReferencesPostponer,
-        currentValue: ReferenceValue<PossiblyNamed>? = null,
+        currentValue: KReferenceValue<PossiblyNamed>? = null,
     ): Any? {
         val referenceValues = data.getReferenceValues(reference)
         return when {
@@ -526,7 +628,7 @@ class LionWebModelConverter(
             }
             referenceValues.size == 1 -> {
                 val rf = referenceValues.first()
-                val referenceByName = currentValue ?: ReferenceValue<PossiblyNamed>(rf.resolveInfo!!, null)
+                val referenceByName = currentValue ?: KReferenceValue<PossiblyNamed>(rf.resolveInfo!!, null)
                 referencesPostponer.registerPostponedReference(referenceByName, rf.referred)
                 referenceByName
             }
@@ -604,10 +706,10 @@ class LionWebModelConverter(
                     val valueToSet = containmentValue(data, feature as Containment) as List<KNode>
                     currentValue.addAll(valueToSet)
                 } else if (property.isReference()) {
-                    val currentValue = property.get(kNode) as ReferenceValue<PossiblyNamed>
+                    val currentValue = property.get(kNode) as KReferenceValue<PossiblyNamed>
                     val valueToSet =
                         referenceValue(data, feature as Reference, referencesPostponer, currentValue)
-                            as ReferenceValue<PossiblyNamed>
+                            as KReferenceValue<PossiblyNamed>
                     currentValue.name = valueToSet.name
                     currentValue.referred = valueToSet.referred
                     currentValue.identifier = valueToSet.identifier
@@ -627,7 +729,7 @@ class LionWebModelConverter(
                     property.isReference() -> {
                         val valueToSet =
                             referenceValue(data, feature as Reference, referencesPostponer)
-                                as ReferenceValue<PossiblyNamed>
+                                as KReferenceValue<PossiblyNamed>
                         property.setter.call(kNode, valueToSet)
                     }
                     property.isContainment() -> {

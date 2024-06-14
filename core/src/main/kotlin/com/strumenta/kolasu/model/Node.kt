@@ -52,29 +52,19 @@ open class Node : NodeLike {
      */
     @property:Internal
     override var range: Range?
-        get() = origin?.range
+        get() = explicitlySetRange ?: origin?.range
         set(value) {
-            if (origin == null) {
-                if (value != null) {
-                    origin = SimpleOrigin(value)
-                }
-            } else {
-                origin!!.range = value
-            }
+            explicitlySetRange = value
         }
 
+    private var explicitlySetRange: Range? = null
     private var explicitlySetSource: Source? = null
 
     @property:Internal
     override var source: Source?
         get() = explicitlySetSource ?: origin?.source
         set(value) {
-            // This is a limit of the current API: to specify a Source we need to specify coordinates
-            if (this.range == null) {
-                explicitlySetSource = value
-            } else {
-                this.origin = SimpleOrigin(this.range!!.copy(source = value))
-            }
+            explicitlySetSource = value
             require(this.source === value)
         }
 

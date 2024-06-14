@@ -51,7 +51,7 @@ class OriginTest {
         assertEquals(Range(1, 2, 3, 4), node.range)
         node.detachFromParseTree(keepRange = false)
         assertNull(node.origin)
-        assertEquals(null, node.range)
+        assertEquals(Range(1, 2, 3, 4), node.range)
     }
 
     @test
