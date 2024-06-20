@@ -2,6 +2,7 @@ package com.strumenta.kolasu.codegen
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.transformation.MissingASTTransformation
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -59,5 +60,28 @@ class ASTCodeGeneratorTest {
             }
         }.printToString(ex)
         assertEquals("""this.myMethod(YYY, XXX, YYY)""", codeWithNodePrinterOverrider)
+    }
+
+    @Test
+    fun printUntranslatedNodes() {
+        val failedNode = KImport("my.imported.stuff")
+        failedNode.origin = MissingASTTransformation(failedNode)
+        val cu = KCompilationUnit(
+            KPackageDecl("my.splendid.packag"),
+            mutableListOf(failedNode),
+            mutableListOf(KFunctionDeclaration("foo"))
+        )
+        val code = KotlinPrinter().printToString(cu)
+        assertEquals(
+            """package my.splendid.packag
+            |
+            |/* Translation of a node is not yet implemented: com.strumenta.kolasu.codegen.KImport */
+            |
+            |fun foo() {
+            |}
+            |
+            """.trimMargin(),
+            code
+        )
     }
 }

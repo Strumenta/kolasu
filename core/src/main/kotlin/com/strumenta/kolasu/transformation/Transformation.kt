@@ -66,8 +66,18 @@ class NodeFactory<Source, Output : Node>(
         get = { source -> source.sourceAccessor() },
         set = (targetProperty as KMutableProperty1<Any, Any?>)::set,
         targetProperty.name,
-        scopedToType
+        scopedToType,
+        getPropertyType(targetProperty)
     )
+
+    private fun getPropertyType(targetProperty: KProperty1<out Any, *>): KClass<out Node> {
+        val returnType = targetProperty.asContainment().type
+        return if (returnType.isSubclassOf(Node::class)) {
+            returnType as KClass<out Node>
+        } else {
+            Node::class
+        }
+    }
 
     /**
      * Specify how to convert a child. The value obtained from the conversion could either be used
@@ -75,13 +85,14 @@ class NodeFactory<Source, Output : Node>(
      * the parent has been instantiated.
      */
     fun withChild(
-        targetProperty: KMutableProperty1<*, *>,
+        targetProperty: KMutableProperty1<out Any, *>,
         sourceAccessor: Source.() -> Any?
     ): NodeFactory<Source, Output> = withChild(
         get = { source -> source.sourceAccessor() },
         set = (targetProperty as KMutableProperty1<Any, Any?>)::set,
         targetProperty.name,
-        null
+        null,
+        getPropertyType(targetProperty)
     )
 
     /**
@@ -90,13 +101,14 @@ class NodeFactory<Source, Output : Node>(
      * the parent has been instantiated, because the property is not mutable.
      */
     fun withChild(
-        targetProperty: KProperty1<*, *>,
+        targetProperty: KProperty1<out Any, *>,
         sourceAccessor: Source.() -> Any?
     ): NodeFactory<Source, Output> = withChild<Any, Any>(
         get = { source -> source.sourceAccessor() },
         null,
         targetProperty.name,
-        null
+        null,
+        getPropertyType(targetProperty)
     )
 
     /**
@@ -108,14 +120,15 @@ class NodeFactory<Source, Output : Node>(
      * as it would not permit to specify the lambda outside the list of method parameters.
      */
     fun withChild(
-        targetProperty: KProperty1<*, *>,
+        targetProperty: KProperty1<out Any, *>,
         sourceAccessor: Source.() -> Any?,
         scopedToType: KClass<*>
     ): NodeFactory<Source, Output> = withChild<Any, Any>(
         get = { source -> source.sourceAccessor() },
         null,
         targetProperty.name,
-        scopedToType
+        scopedToType,
+        getPropertyType(targetProperty)
     )
 
     /**
@@ -127,14 +140,16 @@ class NodeFactory<Source, Output : Node>(
         get: (Source) -> Any?,
         set: ((Target, Child?) -> Unit)?,
         name: String,
-        scopedToType: KClass<*>? = null
+        scopedToType: KClass<*>? = null,
+        childType: KClass<out Node> = Node::class
     ): NodeFactory<Source, Output> {
         val prefix = if (scopedToType != null) scopedToType.qualifiedName + "#" else ""
         if (set == null) {
             // given we have no setter we MUST set the children at construction
             childrenSetAtConstruction = true
         }
-        children[prefix + name] = ChildNodeFactory(prefix + name, get, set)
+
+        children[prefix + name] = ChildNodeFactory(prefix + name, get, set, childType)
         return this
     }
 
@@ -197,11 +212,14 @@ class NodeFactory<Source, Output : Node>(
  *
  * The setter could be null, if the property is not mutable. In that case the value
  * must necessarily be passed when constructing the parent.
+ *
+ * @param type the property type if single, the collection's element type if multiple
  */
-data class ChildNodeFactory<Source, Target, Child>(
+data class ChildNodeFactory<Source, Target, Child : Any>(
     val name: String,
     val get: (Source) -> Any?,
-    val setter: ((Target, Child?) -> Unit)?
+    val setter: ((Target, Child?) -> Unit)?,
+    val type: KClass<out Node>
 ) {
     fun set(node: Target, child: Child?) {
         if (setter == null) {
@@ -218,7 +236,14 @@ data class ChildNodeFactory<Source, Target, Child>(
 /**
  * Sentinel value used to represent the information that a given property is not a child node.
  */
-private val NO_CHILD_NODE = ChildNodeFactory<Any, Any, Any>("", { x -> x }, { _, _ -> })
+private val NO_CHILD_NODE = ChildNodeFactory<Any, Any, Any>("", { x -> x }, { _, _ -> }, Node::class)
+
+class MissingASTTransformation(val origin: Origin?) : Origin {
+    override val position: Position?
+        get() = origin?.position
+    override val sourceText: String?
+        get() = origin?.sourceText
+}
 
 /**
  * Implementation of a tree-to-tree transformation. For each source node type, we can register a factory that knows how
@@ -232,7 +257,9 @@ open class ASTTransformer(
      * Additional issues found during the transformation process.
      */
     val issues: MutableList<Issue> = mutableListOf(),
-    val allowGenericNode: Boolean = true
+    @Deprecated("To be removed in Kolasu 1.6")
+    val allowGenericNode: Boolean = true,
+    val throwOnUnmappedNode: Boolean = false
 ) {
     /**
      * Factories that map from source tree node to target tree node.
@@ -265,7 +292,11 @@ open class ASTTransformer(
      * Performs the transformation of a node and, recursively, its descendants.
      */
     @JvmOverloads
-    open fun transformIntoNodes(source: Any?, parent: Node? = null): List<Node> {
+    open fun transformIntoNodes(
+        source: Any?,
+        parent: Node? = null,
+        expectedType: KClass<out Node> = Node::class
+    ): List<Node> {
         if (source == null) {
             return emptyList()
         }
@@ -294,8 +325,19 @@ open class ASTTransformer(
                         origin?.position
                     )
                 )
+            } else if (!expectedType.isAbstract && expectedType != Node::class && !throwOnUnmappedNode) {
+                try {
+                    val node = expectedType.createInstance()
+                    node.origin = MissingASTTransformation(asOrigin(source))
+                    nodes = listOf(node)
+                } catch (e: Exception) {
+                    throw IllegalStateException(
+                        "Unable to instantiate desired node type ${expectedType.qualifiedName}",
+                        e
+                    )
+                }
             } else {
-                throw IllegalStateException("Unable to translate node $source (class ${source.javaClass})")
+                throw IllegalStateException("Unable to translate node $source (class ${source::class.qualifiedName})")
             }
         }
         return nodes
@@ -330,7 +372,9 @@ open class ASTTransformer(
         val childFactory = childNodeFactory as ChildNodeFactory<Any, Any, Any>
         val childrenSource = childFactory.get(getSource(node, source))
         val child: Any? = if (pd.multiple) {
-            (childrenSource as List<*>?)?.map { transformIntoNodes(it, node) }?.flatten() ?: listOf<Node>()
+            (childrenSource as List<*>?)?.map {
+                transformIntoNodes(it, node, childFactory.type)
+            }?.flatten() ?: listOf<Node>()
         } else {
             transform(childrenSource, node)
         }
@@ -430,6 +474,39 @@ open class ASTTransformer(
         )
     }
 
+    private fun <S : Any, T : Node> parameterValue(
+        kParameter: KParameter,
+        source: S,
+        childNodeFactory: ChildNodeFactory<Any, T, Any>
+    ): ParameterValue {
+        return when (val childSource = childNodeFactory.get.invoke(source)) {
+            null -> {
+                AbsentParameterValue
+            }
+
+            is List<*> -> {
+                PresentParameterValue(
+                    childSource.map { transformIntoNodes(it) }
+                        .flatten().toMutableList()
+                )
+            }
+
+            is String -> {
+                PresentParameterValue(childSource)
+            }
+
+            else -> {
+                if (kParameter.type == String::class.createType() && childSource is ParseTree) {
+                    PresentParameterValue(childSource.text)
+                } else if ((kParameter.type.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
+                    PresentParameterValue(transformIntoNodes(childSource))
+                } else {
+                    PresentParameterValue(transform(childSource))
+                }
+            }
+        }
+    }
+
     fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeFactory<S, T> {
         registerKnownClass(target)
         // We are looking for any constructor with does not take parameters or have default
@@ -448,37 +525,10 @@ open class ASTTransformer(
                                 return AbsentParameterValue
                             }
                             throw java.lang.IllegalStateException(
-                                "We do not know how to produce " +
-                                    "parameter ${kParameter.name!!} for $target"
+                                "We do not know how to produce parameter ${kParameter.name!!} for $target"
                             )
                         } else {
-                            return when (val childSource = childNodeFactory.get.invoke(source)) {
-                                null -> {
-                                    AbsentParameterValue
-                                }
-                                is List<*> -> {
-                                    PresentParameterValue(
-                                        childSource.map { transformIntoNodes(it) }
-                                            .flatten().toMutableList()
-                                    )
-                                }
-
-                                is String -> {
-                                    PresentParameterValue(childSource)
-                                }
-
-                                else -> {
-                                    if (kParameter.type == String::class.createType() && childSource is ParseTree) {
-                                        PresentParameterValue(childSource.text)
-                                    } else if ((kParameter.type.classifier as? KClass<*>)
-                                        ?.isSubclassOf(Collection::class) == true
-                                    ) {
-                                        PresentParameterValue(transformIntoNodes(childSource))
-                                    } else {
-                                        PresentParameterValue(transform(childSource))
-                                    }
-                                }
-                            }
+                            return parameterValue(kParameter, source, childNodeFactory)
                         }
                     } catch (t: Throwable) {
                         throw RuntimeException(
@@ -512,7 +562,7 @@ open class ASTTransformer(
                 } else {
                     if (emptyLikeConstructor == null) {
                         throw RuntimeException(
-                            "childrenSetAtConstruction is set but there is no empty like " +
+                            "childrenSetAtConstruction is not set but there is no empty like " +
                                 "constructor for $target"
                         )
                     }
@@ -554,7 +604,7 @@ open class ASTTransformer(
     }
 }
 
-private fun <Source : Any, Target : Any, Child> NodeFactory<*, *>.getChildNodeFactory(
+private fun <Source : Any, Target : Any, Child : Any> NodeFactory<*, *>.getChildNodeFactory(
     nodeClass: KClass<out Target>,
     parameterName: String
 ): ChildNodeFactory<Source, Target, Child>? {

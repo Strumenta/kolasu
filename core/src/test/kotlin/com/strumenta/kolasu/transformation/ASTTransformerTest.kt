@@ -325,11 +325,35 @@ class ASTTransformerTest {
             transformed
         )
     }
+
+    @Test
+    fun testUnmappedNode() {
+        val transformer1 = ASTTransformer(allowGenericNode = false)
+        transformer1.registerNodeFactory(BarRoot::class, BazRoot::class)
+            .withChild(BazRoot::stmts, BarRoot::stmts)
+        val original = BarRoot(
+            stmts = mutableListOf(
+                BarStmt("a"),
+                BarStmt("b")
+            )
+        )
+        val bazRoot1 = transformer1.transform(original) as BazRoot
+        assertASTsAreEqual(
+            BazRoot(
+                mutableListOf(
+                    BazStmt(null),
+                    BazStmt(null)
+                )
+            ),
+            bazRoot1
+        )
+        assertIs<MissingASTTransformation>(bazRoot1.stmts[0].origin)
+    }
 }
 
 data class BazRoot(var stmts: MutableList<BazStmt> = mutableListOf()) : Node()
 
-data class BazStmt(val desc: String) : Node()
+data class BazStmt(val desc: String? = null) : Node()
 
 data class BarRoot(var stmts: MutableList<BarStmt> = mutableListOf()) : Node()
 data class BarStmt(val desc: String) : Node()
