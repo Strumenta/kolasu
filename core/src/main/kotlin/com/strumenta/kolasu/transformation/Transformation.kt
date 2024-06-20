@@ -70,22 +70,13 @@ class NodeFactory<Source, Output : Node>(
         getPropertyType(targetProperty)
     )
 
-    private fun getPropertyType(targetProperty: KProperty1<*, *>): KClass<out Node> {
-        val returnType = targetProperty.returnType
-        if (returnType is KClass<*>) {
-            if (returnType.isSubclassOf(Node::class)) {
-                return returnType as KClass<out Node>
-            }
+    private fun getPropertyType(targetProperty: KProperty1<out Any, *>): KClass<out Node> {
+        val returnType = targetProperty.asContainment().type
+        return if (returnType.isSubclassOf(Node::class)) {
+            returnType as KClass<out Node>
         } else {
-            val classifier = returnType.classifier
-            if (classifier is KClass<*> && classifier.isSubclassOf(List::class)) {
-                val typeArg = returnType.arguments[0].type?.classifier
-                if (typeArg is KClass<*> && typeArg.isSubclassOf(Node::class)) {
-                    return typeArg as KClass<out Node>
-                }
-            }
+            Node::class
         }
-        return Node::class
     }
 
     /**
@@ -94,7 +85,7 @@ class NodeFactory<Source, Output : Node>(
      * the parent has been instantiated.
      */
     fun withChild(
-        targetProperty: KMutableProperty1<*, *>,
+        targetProperty: KMutableProperty1<out Any, *>,
         sourceAccessor: Source.() -> Any?
     ): NodeFactory<Source, Output> = withChild(
         get = { source -> source.sourceAccessor() },
@@ -110,7 +101,7 @@ class NodeFactory<Source, Output : Node>(
      * the parent has been instantiated, because the property is not mutable.
      */
     fun withChild(
-        targetProperty: KProperty1<*, *>,
+        targetProperty: KProperty1<out Any, *>,
         sourceAccessor: Source.() -> Any?
     ): NodeFactory<Source, Output> = withChild<Any, Any>(
         get = { source -> source.sourceAccessor() },
@@ -129,7 +120,7 @@ class NodeFactory<Source, Output : Node>(
      * as it would not permit to specify the lambda outside the list of method parameters.
      */
     fun withChild(
-        targetProperty: KProperty1<*, *>,
+        targetProperty: KProperty1<out Any, *>,
         sourceAccessor: Source.() -> Any?,
         scopedToType: KClass<*>
     ): NodeFactory<Source, Output> = withChild<Any, Any>(
@@ -247,7 +238,7 @@ data class ChildNodeFactory<Source, Target, Child : Any>(
  */
 private val NO_CHILD_NODE = ChildNodeFactory<Any, Any, Any>("", { x -> x }, { _, _ -> }, Node::class)
 
-class FailedASTTransformation(val origin: Origin?) : Origin {
+class MissingASTTransformation(val origin: Origin?) : Origin {
     override val position: Position?
         get() = origin?.position
     override val sourceText: String?
@@ -337,7 +328,7 @@ open class ASTTransformer(
             } else if (!expectedType.isAbstract && expectedType != Node::class && !throwOnUnmappedNode) {
                 try {
                     val node = expectedType.createInstance()
-                    node.origin = FailedASTTransformation(asOrigin(source))
+                    node.origin = MissingASTTransformation(asOrigin(source))
                     nodes = listOf(node)
                 } catch (e: Exception) {
                     throw IllegalStateException(

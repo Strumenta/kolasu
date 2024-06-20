@@ -2,7 +2,7 @@ package com.strumenta.kolasu.codegen
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.transformation.FailedASTTransformation
+import com.strumenta.kolasu.transformation.MissingASTTransformation
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -65,7 +65,7 @@ class ASTCodeGeneratorTest {
     @Test
     fun printUntranslatedNodes() {
         val failedNode = KImport("my.imported.stuff")
-        failedNode.origin = FailedASTTransformation(failedNode)
+        failedNode.origin = MissingASTTransformation(failedNode)
         val cu = KCompilationUnit(
             KPackageDecl("my.splendid.packag"),
             mutableListOf(failedNode),

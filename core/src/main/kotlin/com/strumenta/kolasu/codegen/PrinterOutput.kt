@@ -4,7 +4,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.START_POINT
 import com.strumenta.kolasu.model.TextFileDestination
-import com.strumenta.kolasu.transformation.FailedASTTransformation
+import com.strumenta.kolasu.transformation.MissingASTTransformation
 import kotlin.reflect.KClass
 import kotlin.reflect.full.superclasses
 
@@ -22,7 +22,7 @@ fun interface NodePrinter {
 class PrinterOutput(
     private val nodePrinters: Map<KClass<*>, NodePrinter>,
     private var nodePrinterOverrider: (node: Node) -> NodePrinter? = { _ -> null },
-    private val failedASTTransformationNodePrinter: NodePrinter? = null
+    private val placeholderNodePrinter: NodePrinter? = null
 ) {
     private val sb = StringBuilder()
     private var currentPoint = START_POINT
@@ -99,8 +99,8 @@ class PrinterOutput(
         if (overrider != null) {
             return overrider
         }
-        val properPrinter = if (ast.origin is FailedASTTransformation && failedASTTransformationNodePrinter != null) {
-            failedASTTransformationNodePrinter
+        val properPrinter = if (ast.origin is MissingASTTransformation && placeholderNodePrinter != null) {
+            placeholderNodePrinter
         } else {
             nodePrinters[kclass]
         }

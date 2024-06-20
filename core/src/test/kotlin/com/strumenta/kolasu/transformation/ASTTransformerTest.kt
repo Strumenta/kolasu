@@ -347,7 +347,7 @@ class ASTTransformerTest {
             ),
             bazRoot1
         )
-        assertIs<FailedASTTransformation>(bazRoot1.stmts[0].origin)
+        assertIs<MissingASTTransformation>(bazRoot1.stmts[0].origin)
     }
 }
 
