@@ -3,40 +3,20 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.language.KolasuLanguage
-import com.strumenta.kolasu.model.CompositeDestination
-import com.strumenta.kolasu.model.Multiplicity
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.allFeatures
-import com.strumenta.kolasu.model.asContainment
-import com.strumenta.kolasu.model.assignParents
-import com.strumenta.kolasu.model.isAttribute
-import com.strumenta.kolasu.model.isContainment
-import com.strumenta.kolasu.model.isReference
-import com.strumenta.kolasu.model.nodeOriginalProperties
+import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.transformation.MissingASTTransformation
 import com.strumenta.kolasu.traversing.walk
-import io.lionweb.lioncore.java.language.Classifier
-import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.language.Containment
+import io.lionweb.lioncore.java.language.*
 import io.lionweb.lioncore.java.language.Enumeration
-import io.lionweb.lioncore.java.language.Language
-import io.lionweb.lioncore.java.language.LionCoreBuiltins
-import io.lionweb.lioncore.java.language.PrimitiveType
-import io.lionweb.lioncore.java.language.Property
-import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.Node
 import io.lionweb.lioncore.java.model.ReferenceValue
-import io.lionweb.lioncore.java.model.impl.DynamicNode
-import io.lionweb.lioncore.java.model.impl.EnumerationValue
-import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
+import io.lionweb.lioncore.java.model.impl.*
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.java.utils.CommonChecks
-import java.util.IdentityHashMap
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -193,6 +173,18 @@ class LionWebModelConverter(
                                     )
                                 } else {
                                     lwNode.setReferenceValues(StarLasuLWLanguage.ASTNodeOriginalNode, emptyList())
+                                    if (kNode.origin is MissingASTTransformation) {
+                                        if (lwNode is DynamicNode) {
+                                            lwNode.addAnnotation(
+                                                DynamicAnnotationInstance(
+                                                    StarLasuLWLanguage.PlaceholderNode.id,
+                                                    StarLasuLWLanguage.PlaceholderNode
+                                                )
+                                            )
+                                        } else {
+                                            throw Exception("MissingASTTransformation origin not supported on non-dynamic node $lwNode")
+                                        }
+                                    }
                                 }
                             } else if (feature == StarLasuLWLanguage.ASTNodeTranspiledNodes) {
                                 val destinationNodes = mutableListOf<KNode>()
@@ -306,6 +298,10 @@ class LionWebModelConverter(
                     val originalNodeID = originalNode.referredID
                     require(originalNodeID != null)
                     referencesPostponer.registerPostponedOriginReference(kNode, originalNodeID)
+                } else if (lwNode.annotations.find { it.classifier == StarLasuLWLanguage.PlaceholderNode } != null) {
+                    // TODO we could also store a reference to the origin, but then we won't have a way to restore it
+                    // using the reference postponer
+                    kNode.origin = MissingASTTransformation(null)
                 }
                 val transpiledNodes = lwNode.getReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes)
                 if (transpiledNodes.isNotEmpty()) {
