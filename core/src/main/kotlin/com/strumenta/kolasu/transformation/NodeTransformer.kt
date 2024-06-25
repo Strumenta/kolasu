@@ -64,7 +64,17 @@ class NodeTransformer<Source, Output : NodeLike>(
             set = (targetProperty as KMutableProperty1<Any, Any?>)::set,
             targetProperty.name,
             scopedToType,
+            getPropertyType(targetProperty)
         )
+
+    private fun getPropertyType(targetProperty: KProperty1<out Any, *>): KClass<out Node> {
+        val returnType = targetProperty.asContainment().type
+        return if (returnType.isSubclassOf(Node::class)) {
+            returnType as KClass<out Node>
+        } else {
+            Node::class
+        }
+    }
 
     /**
      * Specify how to convert a child. The value obtained from the conversion could either be used
@@ -72,7 +82,7 @@ class NodeTransformer<Source, Output : NodeLike>(
      * the parent has been instantiated.
      */
     fun withChild(
-        targetProperty: KMutableProperty1<*, *>,
+        targetProperty: KMutableProperty1<out Any, *>,
         sourceAccessor: Source.() -> Any?,
     ): NodeTransformer<Source, Output> =
         withChild(
@@ -80,6 +90,7 @@ class NodeTransformer<Source, Output : NodeLike>(
             set = (targetProperty as KMutableProperty1<Any, Any?>)::set,
             targetProperty.name,
             null,
+            getPropertyType(targetProperty)
         )
 
     /**
@@ -88,7 +99,7 @@ class NodeTransformer<Source, Output : NodeLike>(
      * the parent has been instantiated, because the property is not mutable.
      */
     fun withChild(
-        targetProperty: KProperty1<*, *>,
+        targetProperty: KProperty1<out Any, *>,
         sourceAccessor: Source.() -> Any?,
     ): NodeTransformer<Source, Output> =
         withChild<Any, Any>(
@@ -96,6 +107,7 @@ class NodeTransformer<Source, Output : NodeLike>(
             null,
             targetProperty.name,
             null,
+            getPropertyType(targetProperty)
         )
 
     /**
@@ -107,7 +119,7 @@ class NodeTransformer<Source, Output : NodeLike>(
      * as it would not permit to specify the lambda outside the list of method parameters.
      */
     fun withChild(
-        targetProperty: KProperty1<*, *>,
+        targetProperty: KProperty1<out Any, *>,
         sourceAccessor: Source.() -> Any?,
         scopedToType: KClass<*>,
     ): NodeTransformer<Source, Output> =
@@ -116,6 +128,7 @@ class NodeTransformer<Source, Output : NodeLike>(
             null,
             targetProperty.name,
             scopedToType,
+            getPropertyType(targetProperty)
         )
 
     /**
@@ -128,13 +141,14 @@ class NodeTransformer<Source, Output : NodeLike>(
         set: ((Target, Child?) -> Unit)?,
         name: String,
         scopedToType: KClass<*>? = null,
+        childType: KClass<out NodeLike> = NodeLike::class
     ): NodeTransformer<Source, Output> {
         val prefix = if (scopedToType != null) scopedToType.qualifiedName + "#" else ""
         if (set == null) {
             // given we have no setter we MUST set the children at construction
             childrenSetAtConstruction = true
         }
-        children[prefix + name] = ChildNodeTransformer(prefix + name, get, set)
+        children[prefix + name] = ChildNodeTransformer(prefix + name, get, set, childType)
         return this
     }
 
