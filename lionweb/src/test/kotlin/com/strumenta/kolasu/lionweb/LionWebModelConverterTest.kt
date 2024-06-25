@@ -837,15 +837,33 @@ class LionWebModelConverterTest {
         mc.exportLanguageToLionWeb(kl)
 
         val node1 = SimpleRoot(1, mutableListOf()).setSourceForTree(LionWebSource("MySource1"))
-        node1.origin = MissingASTTransformation(null)
+        val node2 = SimpleRoot(2, mutableListOf()).setSourceForTree(LionWebSource("MySource2"))
+        node1.origin = MissingASTTransformation(node2)
         val lwNode1 = mc.exportModelToLionWeb(node1)
         // We verify the exported data is correct
         val lwNode1Origins = lwNode1.getReferenceValueByName("originalNode")
-        assertEquals(listOf(), lwNode1Origins)
+        assertEquals(1, lwNode1Origins.size)
         assertEquals(1, lwNode1.annotations.size)
         // We verify the re-imported data is correct
+        mc.externalNodeResolver = object : NodeResolver {
+            override fun resolve(nodeID: String): KNode? {
+                return when (nodeID) {
+                    "MySource1" -> {
+                        node1
+                    }
+                    "MySource2" -> {
+                        node2
+                    }
+                    else -> {
+                        null
+                    }
+                }
+            }
+        }
         val deserializedNode1 = mc.importModelFromLionWeb(lwNode1) as SimpleRoot
         assertIs<MissingASTTransformation>(deserializedNode1.origin)
+        assertIs<SimpleRoot>((deserializedNode1.origin as MissingASTTransformation).origin)
+        assertEquals(2, ((deserializedNode1.origin as MissingASTTransformation).origin as SimpleRoot).id)
     }
 }
 

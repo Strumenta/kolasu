@@ -163,27 +163,23 @@ class LionWebModelConverter(
 
                         is Reference -> {
                             if (feature == StarLasuLWLanguage.ASTNodeOriginalNode) {
-                                if (kNode.origin is KNode) {
-                                    val targetID = myIDManager.nodeId(kNode.origin as KNode)
-                                    lwNode.setReferenceValues(
-                                        StarLasuLWLanguage.ASTNodeOriginalNode,
-                                        listOf(
-                                            ReferenceValue(ProxyNode(targetID), null)
+                                val origin = kNode.origin
+                                if (origin is KNode) {
+                                    val targetID = myIDManager.nodeId(origin)
+                                    setOriginalNode(lwNode, targetID)
+                                } else if (origin is MissingASTTransformation) {
+                                    if (lwNode is DynamicNode) {
+                                        val instance = DynamicAnnotationInstance(
+                                            StarLasuLWLanguage.PlaceholderNode.id,
+                                            StarLasuLWLanguage.PlaceholderNode
                                         )
-                                    )
-                                } else {
-                                    lwNode.setReferenceValues(StarLasuLWLanguage.ASTNodeOriginalNode, emptyList())
-                                    if (kNode.origin is MissingASTTransformation) {
-                                        if (lwNode is DynamicNode) {
-                                            lwNode.addAnnotation(
-                                                DynamicAnnotationInstance(
-                                                    StarLasuLWLanguage.PlaceholderNode.id,
-                                                    StarLasuLWLanguage.PlaceholderNode
-                                                )
-                                            )
-                                        } else {
-                                            throw Exception("MissingASTTransformation origin not supported on non-dynamic node $lwNode")
+                                        if (origin.origin is KNode) {
+                                            val targetID = myIDManager.nodeId(origin.origin as KNode)
+                                            setOriginalNode(lwNode, targetID)
                                         }
+                                        lwNode.addAnnotation(instance)
+                                    } else {
+                                        throw Exception("MissingASTTransformation origin not supported on non-dynamic node $lwNode")
                                     }
                                 }
                             } else if (feature == StarLasuLWLanguage.ASTNodeTranspiledNodes) {
@@ -267,6 +263,15 @@ class LionWebModelConverter(
         return result
     }
 
+    private fun setOriginalNode(lwNode: LWNode, targetID: String) {
+        lwNode.setReferenceValues(
+            StarLasuLWLanguage.ASTNodeOriginalNode,
+            listOf(
+                ReferenceValue(ProxyNode(targetID), null)
+            )
+        )
+    }
+
     fun importModelFromLionWeb(lwTree: LWNode): Any {
         val referencesPostponer = ReferencesPostponer()
         lwTree.thisAndAllDescendants().reversed().forEach { lwNode ->
@@ -284,6 +289,7 @@ class LionWebModelConverter(
                 throw RuntimeException("Issue instantiating $kClass from LionWeb node $lwNode", e)
             }
         }
+        val placeholderNodes = mutableListOf<KNode>()
         lwTree.thisAndAllDescendants().forEach { lwNode ->
             val kNode = nodesMapping.byB(lwNode)!!
             if (kNode is KNode) {
@@ -298,10 +304,10 @@ class LionWebModelConverter(
                     val originalNodeID = originalNode.referredID
                     require(originalNodeID != null)
                     referencesPostponer.registerPostponedOriginReference(kNode, originalNodeID)
-                } else if (lwNode.annotations.find { it.classifier == StarLasuLWLanguage.PlaceholderNode } != null) {
-                    // TODO we could also store a reference to the origin, but then we won't have a way to restore it
-                    // using the reference postponer
-                    kNode.origin = MissingASTTransformation(null)
+                }
+                val placeholderNodeAnnotation = lwNode.annotations.find { it.classifier == StarLasuLWLanguage.PlaceholderNode }
+                if (placeholderNodeAnnotation != null) {
+                    placeholderNodes.add(kNode)
                 }
                 val transpiledNodes = lwNode.getReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes)
                 if (transpiledNodes.isNotEmpty()) {
@@ -311,6 +317,7 @@ class LionWebModelConverter(
             }
         }
         referencesPostponer.populateReferences(nodesMapping, externalNodeResolver)
+        placeholderNodes.forEach { it.origin = MissingASTTransformation(it.origin) }
         return nodesMapping.byB(lwTree)!!
     }
 
