@@ -19,12 +19,11 @@ annotation class Mapped(
 internal val NO_CHILD_NODE = ChildNodeTransformer<Any, Any, Any>("", { x -> x }, { _, _ -> }, NodeLike::class)
 
 class MissingASTTransformation(
-    val origin: Origin?,
+    val node: NodeLike,
 ) : Origin {
-    override val range: Range?
-        get() = origin?.range
+    override var range: Range? = node?.range
     override val sourceText: String?
-        get() = origin?.sourceText
+        get() = node?.sourceText
 }
 
 internal fun <Source : Any, Target, Child : Any> NodeTransformer<*, *>.getChildNodeTransformer(

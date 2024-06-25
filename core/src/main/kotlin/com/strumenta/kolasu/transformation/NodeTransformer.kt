@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.transformation
 
+import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.asContainment
 import kotlin.reflect.KClass
@@ -70,11 +71,7 @@ class NodeTransformer<Source, Output : NodeLike>(
 
     private fun getPropertyType(targetProperty: KProperty1<out Any, *>): KClass<out NodeLike> {
         val returnType = targetProperty.asContainment().type
-        return if (returnType.isSubclassOf(NodeLike::class)) {
-            returnType as KClass<out NodeLike>
-        } else {
-            NodeLike::class
-        }
+        return ((returnType as Concept).correspondingKotlinClass as KClass<out NodeLike>?)!!
     }
 
     /**

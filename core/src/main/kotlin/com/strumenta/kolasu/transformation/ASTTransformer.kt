@@ -105,7 +105,7 @@ open class ASTTransformer(
             } else if (!expectedType.isAbstract && expectedType != NodeLike::class && !throwOnUnmappedNode) {
                 try {
                     val node = expectedType.createInstance()
-                    node.origin = MissingASTTransformation(asOrigin(source))
+                    node.origin = MissingASTTransformation(source as NodeLike)
                     nodes = listOf(node)
                 } catch (e: Exception) {
                     throw IllegalStateException(
