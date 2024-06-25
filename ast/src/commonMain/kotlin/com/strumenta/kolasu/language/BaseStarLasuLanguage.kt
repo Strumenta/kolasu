@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.language
 
+import com.strumenta.kolasu.model.NodeLike
+
 val intType = PrimitiveType.get("kotlin.Int")
 val stringType = PrimitiveType.get("kotlin.String")
 val booleanType = PrimitiveType.get("kotlin.Boolean")
@@ -12,6 +14,7 @@ object BaseStarLasuLanguage : StarLasuLanguage("com.strumenta.basestarlasulangua
     init {
         types.addAll(builtinStarLasuTypes)
         val baseStarLasuConcept = Concept(this, "ASTNode")
+        baseStarLasuConcept.correspondingKotlinClass = NodeLike::class
         types.add(baseStarLasuConcept)
         val iPossiblyNamed = ConceptInterface(this, "IPossiblyNamed")
         iPossiblyNamed.declaredFeatures.add(Property("name", true, stringType, { TODO() }))

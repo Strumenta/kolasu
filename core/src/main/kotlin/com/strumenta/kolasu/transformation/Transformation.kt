@@ -1,5 +1,8 @@
 package com.strumenta.kolasu.transformation
 
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.Origin
+import com.strumenta.kolasu.model.Range
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 
@@ -13,9 +16,17 @@ annotation class Mapped(
 /**
  * Sentinel value used to represent the information that a given property is not a child node.
  */
-internal val NO_CHILD_NODE = ChildNodeTransformer<Any, Any, Any>("", { x -> x }, { _, _ -> })
+internal val NO_CHILD_NODE = ChildNodeTransformer<Any, Any, Any>("", { x -> x }, { _, _ -> }, NodeLike::class)
 
-internal fun <Source : Any, Target, Child> NodeTransformer<*, *>.getChildNodeTransformer(
+class MissingASTTransformation(
+    val node: NodeLike,
+) : Origin {
+    override var range: Range? = node?.range
+    override val sourceText: String?
+        get() = node?.sourceText
+}
+
+internal fun <Source : Any, Target, Child : Any> NodeTransformer<*, *>.getChildNodeTransformer(
     nodeClass: KClass<out Source>,
     parameterName: String,
 ): ChildNodeTransformer<Source, Target, Child>? {

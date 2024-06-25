@@ -162,7 +162,7 @@ data class BazRoot(
 
 @LanguageAssociation(MyExampleLanguageForTransformation::class)
 data class BazStmt(
-    val desc: String,
+    val desc: String? = null,
 ) : Node()
 
 @LanguageAssociation(MyExampleLanguageForTransformation::class)
@@ -458,5 +458,32 @@ class ASTTransformerTest {
             ),
             transformed,
         )
+    }
+
+    @Test
+    fun testUnmappedNode() {
+        val transformer1 = ASTTransformer(allowGenericNode = false)
+        transformer1
+            .registerNodeTransformer(BarRoot::class, BazRoot::class)
+            .withChild(BazRoot::stmts, BarRoot::stmts)
+        val original =
+            BarRoot(
+                stmts =
+                    mutableListOf(
+                        BarStmt("a"),
+                        BarStmt("b"),
+                    ),
+            )
+        val bazRoot1 = transformer1.transform(original) as BazRoot
+        assertASTsAreEqual(
+            BazRoot(
+                mutableListOf(
+                    BazStmt(null),
+                    BazStmt(null),
+                ),
+            ),
+            bazRoot1,
+        )
+        assertIs<MissingASTTransformation>(bazRoot1.stmts[0].origin)
     }
 }

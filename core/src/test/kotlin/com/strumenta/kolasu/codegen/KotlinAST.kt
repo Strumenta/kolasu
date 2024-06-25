@@ -1,19 +1,30 @@
 package com.strumenta.kolasu.codegen
 
+import com.strumenta.kolasu.language.StarLasuLanguage
+import com.strumenta.kolasu.language.explore
+import com.strumenta.kolasu.model.LanguageAssociation
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceValue
+
+object KotlinLanguage : StarLasuLanguage("com.strumenta.kolasu.codegen") {
+    init {
+        explore(KCompilationUnit::class)
+    }
+}
 
 // This file contains the AST definition for the Kotlin language
 // It is partially based on the specifications https://kotlinlang.org/docs/reference/grammar.html
 // This could be potentially moved to a separate project in the future
 
+@LanguageAssociation(KotlinLanguage::class)
 data class KCompilationUnit(
     var packageDecl: KPackageDecl? = null,
     val imports: MutableList<KImport> = mutableListOf(),
     val elements: MutableList<KTopLevelDeclaration> = mutableListOf(),
 ) : Node()
 
+@LanguageAssociation(KotlinLanguage::class)
 data class KImport(
     val imported: String,
 ) : Node()

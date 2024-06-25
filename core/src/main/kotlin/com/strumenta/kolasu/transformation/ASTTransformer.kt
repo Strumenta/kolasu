@@ -30,7 +30,9 @@ open class ASTTransformer(
      * Additional issues found during the transformation process.
      */
     val issues: MutableList<Issue> = mutableListOf(),
+    @Deprecated("To be removed in Kolasu 1.6")
     val allowGenericNode: Boolean = true,
+    val throwOnUnmappedNode: Boolean = false,
 ) {
     /**
      * NodeTransformers that map from source tree node to target tree node.
@@ -70,6 +72,7 @@ open class ASTTransformer(
     open fun transformIntoNodes(
         source: Any?,
         parent: NodeLike? = null,
+        expectedType: KClass<out NodeLike> = NodeLike::class,
     ): List<NodeLike> {
         if (source == null) {
             return emptyList()
@@ -99,8 +102,19 @@ open class ASTTransformer(
                         origin?.range,
                     ),
                 )
+            } else if (!expectedType.isAbstract && expectedType != NodeLike::class && !throwOnUnmappedNode) {
+                try {
+                    val node = expectedType.createInstance()
+                    node.origin = MissingASTTransformation(source as NodeLike)
+                    nodes = listOf(node)
+                } catch (e: Exception) {
+                    throw IllegalStateException(
+                        "Unable to instantiate desired node type ${expectedType.qualifiedName}",
+                        e,
+                    )
+                }
             } else {
-                throw IllegalStateException("Unable to translate node $source (class ${source.javaClass})")
+                throw IllegalStateException("Unable to translate node $source (class ${source::class.qualifiedName})")
             }
         }
         return nodes
@@ -136,7 +150,10 @@ open class ASTTransformer(
         val childrenSource = childFactory.get(getSource(node, source))
         val child: Any? =
             if (pd.multiple) {
-                (childrenSource as List<*>).map { transformIntoNodes(it, node) }.flatten() ?: listOf<NodeLike>()
+                (childrenSource as List<*>)
+                    .map {
+                        transformIntoNodes(it, node, childFactory.type)
+                    }.flatten() ?: listOf<NodeLike>()
             } else {
                 transform(childrenSource, node)
             }
@@ -265,6 +282,44 @@ open class ASTTransformer(
             )
         }
 
+    private fun <S : Any, T : NodeLike> parameterValue(
+        kParameter: KParameter,
+        source: S,
+        childNodeFactory: ChildNodeTransformer<Any, T, Any>,
+        parameterConverters: List<ParameterConverter> = emptyList(),
+    ): ParameterValue {
+        return when (val childSource = childNodeFactory.get.invoke(source)) {
+            null -> {
+                AbsentParameterValue
+            }
+
+            is List<*> -> {
+                PresentParameterValue(
+                    childSource
+                        .map { transformIntoNodes(it) }
+                        .flatten()
+                        .toMutableList(),
+                )
+            }
+
+            is String -> {
+                PresentParameterValue(childSource)
+            }
+
+            else -> {
+                val paramConverter =
+                    parameterConverters.find {
+                        it.isApplicable(kParameter, childSource)
+                    }
+                if (paramConverter != null) {
+                    PresentParameterValue(paramConverter.convert(kParameter, childSource))
+                } else {
+                    PresentParameterValue(transform(childSource))
+                }
+            }
+        }
+    }
+
     fun <S : Any, T : NodeLike> registerNodeTransformer(
         source: KClass<S>,
         target: KClass<T>,
@@ -299,36 +354,7 @@ open class ASTTransformer(
                                         "parameter $paramName for $target",
                                 )
                             } else {
-                                return when (val childSource = childNodeTransformer.get.invoke(source)) {
-                                    null -> {
-                                        AbsentParameterValue
-                                    }
-
-                                    is List<*> -> {
-                                        PresentParameterValue(
-                                            childSource
-                                                .map { transformIntoNodes(it) }
-                                                .flatten()
-                                                .toMutableList(),
-                                        )
-                                    }
-
-                                    is String -> {
-                                        PresentParameterValue(childSource)
-                                    }
-
-                                    else -> {
-                                        val paramConverter =
-                                            parameterConverters.find {
-                                                it.isApplicable(kParameter, childSource)
-                                            }
-                                        if (paramConverter != null) {
-                                            PresentParameterValue(paramConverter.convert(kParameter, childSource))
-                                        } else {
-                                            PresentParameterValue(transform(childSource))
-                                        }
-                                    }
-                                }
+                                return parameterValue(kParameter, source, childNodeTransformer, parameterConverters)
                             }
                         } catch (t: Throwable) {
                             // See https://youtrack.jetbrains.com/issue/KT-65341
@@ -370,7 +396,7 @@ open class ASTTransformer(
                     } else {
                         if (emptyLikeConstructor == null) {
                             throw RuntimeException(
-                                "childrenSetAtConstruction is set but there is no empty like " +
+                                "childrenSetAtConstruction is not set but there is no empty like " +
                                     "constructor for $target",
                             )
                         }

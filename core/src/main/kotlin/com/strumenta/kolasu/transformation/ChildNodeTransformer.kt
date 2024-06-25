@@ -1,15 +1,21 @@
 package com.strumenta.kolasu.transformation
 
+import com.strumenta.kolasu.model.NodeLike
+import kotlin.reflect.KClass
+
 /**
  * Information on how to retrieve a child node.
  *
  * The setter could be null, if the property is not mutable. In that case the value
  * must necessarily be passed when constructing the parent.
+ *
+ * @param type the property type if single, the collection's element type if multiple
  */
-data class ChildNodeTransformer<Source, Target, Child>(
+data class ChildNodeTransformer<Source, Target, Child : Any>(
     val name: String,
     val get: (Source) -> Any?,
     val setter: ((Target, Child?) -> Unit)?,
+    val type: KClass<out NodeLike>,
 ) {
     fun set(
         node: Target,

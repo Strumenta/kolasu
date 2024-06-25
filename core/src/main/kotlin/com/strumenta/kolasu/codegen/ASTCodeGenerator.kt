@@ -16,6 +16,8 @@ import kotlin.reflect.KClass
 abstract class ASTCodeGenerator<R : NodeLike> {
     protected val nodePrinters: MutableMap<KClass<*>, NodePrinter> = HashMap()
     var nodePrinterOverrider: (node: NodeLike) -> NodePrinter? = { _ -> null }
+    protected open val placeholderNodePrinter: NodePrinter?
+        get() = null
 
     protected abstract fun registerRecordPrinters()
 
@@ -33,7 +35,7 @@ abstract class ASTCodeGenerator<R : NodeLike> {
     }
 
     fun printToString(ast: R): String {
-        val printerOutput = PrinterOutput(this.nodePrinters, nodePrinterOverrider)
+        val printerOutput = PrinterOutput(this.nodePrinters, nodePrinterOverrider, placeholderNodePrinter)
         configurePrinter(printerOutput)
         return printerOutput.apply { this.print(ast, prefix, postfix) }.text()
     }
