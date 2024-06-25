@@ -179,7 +179,9 @@ class LionWebModelConverter(
                                         }
                                         lwNode.addAnnotation(instance)
                                     } else {
-                                        throw Exception("MissingASTTransformation origin not supported on non-dynamic node $lwNode")
+                                        throw Exception(
+                                            "MissingASTTransformation origin not supported on non-dynamic node $lwNode"
+                                        )
                                     }
                                 }
                             } else if (feature == StarLasuLWLanguage.ASTNodeTranspiledNodes) {
@@ -305,7 +307,9 @@ class LionWebModelConverter(
                     require(originalNodeID != null)
                     referencesPostponer.registerPostponedOriginReference(kNode, originalNodeID)
                 }
-                val placeholderNodeAnnotation = lwNode.annotations.find { it.classifier == StarLasuLWLanguage.PlaceholderNode }
+                val placeholderNodeAnnotation = lwNode.annotations.find {
+                    it.classifier == StarLasuLWLanguage.PlaceholderNode
+                }
                 if (placeholderNodeAnnotation != null) {
                     placeholderNodes.add(kNode)
                 }
@@ -650,7 +654,7 @@ class LionWebModelConverter(
             }
         }
         propertiesNotSetAtConstructionTime.forEach { property ->
-            val feature = data.classifier.getFeatureByName(property.name!!)
+            val feature = data.classifier.getFeatureByName(property.name)
             if (property !is KMutableProperty<*>) {
                 if (property.isContainment() && property.asContainment().multiplicity == Multiplicity.MANY) {
                     val currentValue = property.get(kNode) as MutableList<KNode>
