@@ -20,7 +20,7 @@ open class ParseTreeToASTTransformer(
     issues: MutableList<Issue> = mutableListOf(),
     allowGenericNode: Boolean = true,
     val source: Source? = null,
-    throwOnUnmappedNode: Boolean = true
+    throwOnUnmappedNode: Boolean = true,
 ) : ASTTransformer(issues, allowGenericNode, throwOnUnmappedNode) {
     /**
      * Performs the transformation of a node and, recursively, its descendants. In addition to the overridden method,
@@ -30,7 +30,7 @@ open class ParseTreeToASTTransformer(
     override fun transformIntoNodes(
         source: Any?,
         parent: NodeLike?,
-        expectedType: KClass<out NodeLike>
+        expectedType: KClass<out NodeLike>,
     ): List<NodeLike> {
         val transformed = super.transformIntoNodes(source, parent, expectedType)
         return transformed

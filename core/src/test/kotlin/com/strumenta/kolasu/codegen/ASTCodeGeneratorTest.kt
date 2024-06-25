@@ -71,11 +71,12 @@ class ASTCodeGeneratorTest {
     fun printUntranslatedNodes() {
         val failedNode = KImport("my.imported.stuff")
         failedNode.origin = MissingASTTransformation(failedNode)
-        val cu = KCompilationUnit(
-            KPackageDecl("my.splendid.packag"),
-            mutableListOf(failedNode),
-            mutableListOf(KFunctionDeclaration("foo"))
-        )
+        val cu =
+            KCompilationUnit(
+                KPackageDecl("my.splendid.packag"),
+                mutableListOf(failedNode),
+                mutableListOf(KFunctionDeclaration("foo")),
+            )
         val code = KotlinPrinter().printToString(cu)
         assertEquals(
             """package my.splendid.packag
@@ -86,7 +87,7 @@ class ASTCodeGeneratorTest {
             |}
             |
             """.trimMargin(),
-            code
+            code,
         )
     }
 }

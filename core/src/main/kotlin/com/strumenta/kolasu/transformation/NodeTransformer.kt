@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.transformation
 
 import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.asContainment
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
@@ -64,15 +65,15 @@ class NodeTransformer<Source, Output : NodeLike>(
             set = (targetProperty as KMutableProperty1<Any, Any?>)::set,
             targetProperty.name,
             scopedToType,
-            getPropertyType(targetProperty)
+            getPropertyType(targetProperty),
         )
 
-    private fun getPropertyType(targetProperty: KProperty1<out Any, *>): KClass<out Node> {
+    private fun getPropertyType(targetProperty: KProperty1<out Any, *>): KClass<out NodeLike> {
         val returnType = targetProperty.asContainment().type
-        return if (returnType.isSubclassOf(Node::class)) {
-            returnType as KClass<out Node>
+        return if (returnType.isSubclassOf(NodeLike::class)) {
+            returnType as KClass<out NodeLike>
         } else {
-            Node::class
+            NodeLike::class
         }
     }
 
@@ -90,7 +91,7 @@ class NodeTransformer<Source, Output : NodeLike>(
             set = (targetProperty as KMutableProperty1<Any, Any?>)::set,
             targetProperty.name,
             null,
-            getPropertyType(targetProperty)
+            getPropertyType(targetProperty),
         )
 
     /**
@@ -107,7 +108,7 @@ class NodeTransformer<Source, Output : NodeLike>(
             null,
             targetProperty.name,
             null,
-            getPropertyType(targetProperty)
+            getPropertyType(targetProperty),
         )
 
     /**
@@ -128,7 +129,7 @@ class NodeTransformer<Source, Output : NodeLike>(
             null,
             targetProperty.name,
             scopedToType,
-            getPropertyType(targetProperty)
+            getPropertyType(targetProperty),
         )
 
     /**
@@ -141,7 +142,7 @@ class NodeTransformer<Source, Output : NodeLike>(
         set: ((Target, Child?) -> Unit)?,
         name: String,
         scopedToType: KClass<*>? = null,
-        childType: KClass<out NodeLike> = NodeLike::class
+        childType: KClass<out NodeLike> = NodeLike::class,
     ): NodeTransformer<Source, Output> {
         val prefix = if (scopedToType != null) scopedToType.qualifiedName + "#" else ""
         if (set == null) {

@@ -18,14 +18,16 @@ annotation class Mapped(
  */
 internal val NO_CHILD_NODE = ChildNodeTransformer<Any, Any, Any>("", { x -> x }, { _, _ -> }, NodeLike::class)
 
-class MissingASTTransformation(val origin: Origin?) : Origin {
+class MissingASTTransformation(
+    val origin: Origin?,
+) : Origin {
     override val range: Range?
         get() = origin?.range
     override val sourceText: String?
         get() = origin?.sourceText
 }
 
-internal fun <Source : Any, Target, Child: Any> NodeTransformer<*, *>.getChildNodeTransformer(
+internal fun <Source : Any, Target, Child : Any> NodeTransformer<*, *>.getChildNodeTransformer(
     nodeClass: KClass<out Source>,
     parameterName: String,
 ): ChildNodeTransformer<Source, Target, Child>? {

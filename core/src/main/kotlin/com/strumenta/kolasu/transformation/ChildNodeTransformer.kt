@@ -11,11 +11,11 @@ import kotlin.reflect.KClass
  *
  * @param type the property type if single, the collection's element type if multiple
  */
-data class ChildNodeTransformer<Source, Target, Child: Any>(
+data class ChildNodeTransformer<Source, Target, Child : Any>(
     val name: String,
     val get: (Source) -> Any?,
     val setter: ((Target, Child?) -> Unit)?,
-    val type: KClass<out NodeLike>
+    val type: KClass<out NodeLike>,
 ) {
     fun set(
         node: Target,
