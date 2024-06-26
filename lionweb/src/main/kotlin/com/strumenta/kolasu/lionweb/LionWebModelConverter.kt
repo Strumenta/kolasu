@@ -168,7 +168,7 @@ class LionWebModelConverter(
                                     val targetID = myIDManager.nodeId(origin)
                                     setOriginalNode(lwNode, targetID)
                                 } else if (origin is MissingASTTransformation) {
-                                    if (lwNode is DynamicNode) {
+                                    if (lwNode is AbstractClassifierInstance<*>) {
                                         val instance = DynamicAnnotationInstance(
                                             StarLasuLWLanguage.PlaceholderNode.id,
                                             StarLasuLWLanguage.PlaceholderNode
@@ -180,7 +180,8 @@ class LionWebModelConverter(
                                         lwNode.addAnnotation(instance)
                                     } else {
                                         throw Exception(
-                                            "MissingASTTransformation origin not supported on non-dynamic node $lwNode"
+                                            "MissingASTTransformation origin not supported on nodes " +
+                                                    "that are not AbstractClassifierInstances: $lwNode"
                                         )
                                     }
                                 }
