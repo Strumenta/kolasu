@@ -1,8 +1,12 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.model.Multiplicity
-import io.lionweb.lioncore.java.language.*
 import io.lionweb.lioncore.java.language.Annotation
+import io.lionweb.lioncore.java.language.Concept
+import io.lionweb.lioncore.java.language.Language
+import io.lionweb.lioncore.java.language.PrimitiveType
+import io.lionweb.lioncore.java.language.Property
+import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.self.LionCore
 
 private const val PLACEHOLDER_NODE = "PlaceholderNode"
