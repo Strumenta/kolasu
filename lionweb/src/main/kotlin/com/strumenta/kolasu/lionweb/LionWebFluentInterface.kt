@@ -1,7 +1,13 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.model.Multiplicity
-import io.lionweb.lioncore.java.language.*
+import io.lionweb.lioncore.java.language.Classifier
+import io.lionweb.lioncore.java.language.Concept
+import io.lionweb.lioncore.java.language.Containment
+import io.lionweb.lioncore.java.language.Language
+import io.lionweb.lioncore.java.language.PrimitiveType
+import io.lionweb.lioncore.java.language.Property
+import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import kotlin.random.Random
 

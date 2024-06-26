@@ -3,24 +3,8 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.language.KolasuLanguage
-import com.strumenta.kolasu.model.FileSource
-import com.strumenta.kolasu.model.Multiplicity
-import com.strumenta.kolasu.model.NodeDestination
-import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.model.NodeOrigin
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.PossiblyNamed
-import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.Source
-import com.strumenta.kolasu.model.allFeatures
-import com.strumenta.kolasu.model.asContainment
-import com.strumenta.kolasu.model.assignParents
-import com.strumenta.kolasu.model.containingContainment
-import com.strumenta.kolasu.model.indexInContainingProperty
-import com.strumenta.kolasu.model.isAttribute
-import com.strumenta.kolasu.model.isContainment
-import com.strumenta.kolasu.model.isReference
-import com.strumenta.kolasu.model.nodeOriginalProperties
+import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.transformation.MissingASTTransformation
 import com.strumenta.kolasu.traversing.walk
 import io.lionweb.lioncore.java.language.*
 import io.lionweb.lioncore.java.language.Enumeration
@@ -200,8 +184,8 @@ class LionWebModelConverter(
                                             StarLasuLWLanguage.PlaceholderNode.id,
                                             StarLasuLWLanguage.PlaceholderNode
                                         )
-                                        if (origin.origin is KNode) {
-                                            val targetID = myIDManager.nodeId(origin.origin as KNode)
+                                        if (origin.node != null) {
+                                            val targetID = myIDManager.nodeId(origin.node!!)
                                             setOriginalNode(lwNode, targetID)
                                         }
                                         lwNode.addAnnotation(instance)
@@ -351,7 +335,15 @@ class LionWebModelConverter(
             }
         }
         referencesPostponer.populateReferences(nodesMapping, externalNodeResolver)
-        placeholderNodes.forEach { it.origin = MissingASTTransformation(it.origin) }
+        placeholderNodes.forEach {
+            it.origin = MissingASTTransformation(
+                if (it.origin is NodeLike) {
+                    it.origin as NodeLike
+                } else {
+                    null
+                }
+            )
+        }
         return nodesMapping.byB(lwTree)!!
     }
 
