@@ -181,7 +181,7 @@ class LionWebModelConverter(
                                     } else {
                                         throw Exception(
                                             "MissingASTTransformation origin not supported on nodes " +
-                                                    "that are not AbstractClassifierInstances: $lwNode"
+                                                "that are not AbstractClassifierInstances: $lwNode"
                                         )
                                     }
                                 }
