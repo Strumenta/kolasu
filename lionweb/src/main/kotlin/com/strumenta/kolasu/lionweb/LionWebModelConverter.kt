@@ -22,25 +22,16 @@ import com.strumenta.kolasu.model.isContainment
 import com.strumenta.kolasu.model.isReference
 import com.strumenta.kolasu.model.nodeOriginalProperties
 import com.strumenta.kolasu.traversing.walk
-import io.lionweb.lioncore.java.language.Classifier
-import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.language.Containment
+import io.lionweb.lioncore.java.language.*
 import io.lionweb.lioncore.java.language.Enumeration
-import io.lionweb.lioncore.java.language.Language
-import io.lionweb.lioncore.java.language.LionCoreBuiltins
-import io.lionweb.lioncore.java.language.PrimitiveType
-import io.lionweb.lioncore.java.language.Property
-import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.Node
-import io.lionweb.lioncore.java.model.impl.DynamicNode
-import io.lionweb.lioncore.java.model.impl.EnumerationValue
-import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
+import io.lionweb.lioncore.java.model.impl.*
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.java.utils.CommonChecks
-import java.util.IdentityHashMap
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -199,16 +190,27 @@ class LionWebModelConverter(
                         }
                         is Reference -> {
                             if (feature == StarLasuLWLanguage.ASTNodeOriginalNode) {
-                                if (kNode.origin is NodeOrigin) {
-                                    val targetID = myIDManager.nodeId((kNode.origin as NodeOrigin).node)
-                                    lwNode.setReferenceValues(
-                                        StarLasuLWLanguage.ASTNodeOriginalNode,
-                                        listOf(
-                                            LWReferenceValue(ProxyNode(targetID), null),
-                                        ),
-                                    )
-                                } else {
-                                    lwNode.setReferenceValues(StarLasuLWLanguage.ASTNodeOriginalNode, emptyList())
+                                val origin = kNode.origin
+                                if (origin is KNode) {
+                                    val targetID = myIDManager.nodeId(origin)
+                                    setOriginalNode(lwNode, targetID)
+                                } else if (origin is MissingASTTransformation) {
+                                    if (lwNode is AbstractClassifierInstance<*>) {
+                                        val instance = DynamicAnnotationInstance(
+                                            StarLasuLWLanguage.PlaceholderNode.id,
+                                            StarLasuLWLanguage.PlaceholderNode
+                                        )
+                                        if (origin.origin is KNode) {
+                                            val targetID = myIDManager.nodeId(origin.origin as KNode)
+                                            setOriginalNode(lwNode, targetID)
+                                        }
+                                        lwNode.addAnnotation(instance)
+                                    } else {
+                                        throw Exception(
+                                            "MissingASTTransformation origin not supported on nodes " +
+                                                "that are not AbstractClassifierInstances: $lwNode"
+                                        )
+                                    }
                                 }
                             } else if (feature == StarLasuLWLanguage.ASTNodeTranspiledNodes) {
                                 val destinationNodes = mutableListOf<KNode>()
@@ -289,6 +291,15 @@ class LionWebModelConverter(
         return result
     }
 
+    private fun setOriginalNode(lwNode: LWNode, targetID: String) {
+        lwNode.setReferenceValues(
+            StarLasuLWLanguage.ASTNodeOriginalNode,
+            listOf(
+                LWReferenceValue(ProxyNode(targetID), null)
+            )
+        )
+    }
+
     fun importModelFromLionWeb(lwTree: LWNode): Any {
         val referencesPostponer = ReferencesPostponer()
         lwTree.thisAndAllDescendants().reversed().forEach { lwNode ->
@@ -310,6 +321,7 @@ class LionWebModelConverter(
                 throw RuntimeException("Issue instantiating $kClass from LionWeb node $lwNode", e)
             }
         }
+        val placeholderNodes = mutableListOf<KNode>()
         lwTree.thisAndAllDescendants().forEach { lwNode ->
             val kNode = nodesMapping.byB(lwNode)!!
             if (kNode is KNode) {
@@ -325,6 +337,12 @@ class LionWebModelConverter(
                     require(originalNodeID != null)
                     referencesPostponer.registerPostponedOriginReference(kNode, originalNodeID)
                 }
+                val placeholderNodeAnnotation = lwNode.annotations.find {
+                    it.classifier == StarLasuLWLanguage.PlaceholderNode
+                }
+                if (placeholderNodeAnnotation != null) {
+                    placeholderNodes.add(kNode)
+                }
                 val transpiledNodes = lwNode.getReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes)
                 if (transpiledNodes.isNotEmpty()) {
                     val transpiledNodeIDs = transpiledNodes.map { it.referredID!! }
@@ -333,6 +351,7 @@ class LionWebModelConverter(
             }
         }
         referencesPostponer.populateReferences(nodesMapping, externalNodeResolver)
+        placeholderNodes.forEach { it.origin = MissingASTTransformation(it.origin) }
         return nodesMapping.byB(lwTree)!!
     }
 
@@ -698,7 +717,7 @@ class LionWebModelConverter(
                 }
             }
         propertiesNotSetAtConstructionTime.forEach { property ->
-            val feature = data.classifier.getFeatureByName(property.name!!)
+            val feature = data.classifier.getFeatureByName(property.name)
             if (property !is KMutableProperty<*>) {
                 if (property.isContainment() && property.asContainment().multiplicity == Multiplicity.MANY) {
                     val currentValue = property.get(kNode) as MutableList<KNode>
