@@ -8,7 +8,7 @@ class KotlinPrinter : ASTCodeGenerator<KCompilationUnit>() {
         get() =
             NodePrinter { output: PrinterOutput, ast: NodeLike ->
                 val node = (ast.origin as MissingASTTransformation).node
-                val nodeType = node.qualifiedNodeType
+                val nodeType = node?.concept?.qualifiedName
                 output.print("/* Translation of a node is not yet implemented: $nodeType */")
             }
 
