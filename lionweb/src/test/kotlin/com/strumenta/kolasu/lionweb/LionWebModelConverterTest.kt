@@ -1,18 +1,7 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.language.KolasuLanguage
-import com.strumenta.kolasu.model.ASTRoot
-import com.strumenta.kolasu.model.LanguageAssociation
-import com.strumenta.kolasu.model.Named
-import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.NodeDestination
-import com.strumenta.kolasu.model.NodeOrigin
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Range
-import com.strumenta.kolasu.model.ReferenceValue
-import com.strumenta.kolasu.model.SyntheticSource
-import com.strumenta.kolasu.model.assignParents
-import com.strumenta.kolasu.model.withRange
+import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.transformation.MissingASTTransformation
 import io.lionweb.lioncore.java.language.Concept
@@ -908,8 +897,8 @@ class LionWebModelConverterTest {
         }
         val deserializedNode1 = mc.importModelFromLionWeb(lwNode1) as SimpleRoot
         assertIs<MissingASTTransformation>(deserializedNode1.origin)
-        assertIs<SimpleRoot>((deserializedNode1.origin as MissingASTTransformation).origin)
-        assertEquals(2, ((deserializedNode1.origin as MissingASTTransformation).origin as SimpleRoot).id)
+        assertIs<SimpleRoot>((deserializedNode1.origin as MissingASTTransformation).node)
+        assertEquals(2, ((deserializedNode1.origin as MissingASTTransformation).node as SimpleRoot).id)
     }
 }
 
