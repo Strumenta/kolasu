@@ -3,20 +3,48 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.language.KolasuLanguage
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.FileSource
+import com.strumenta.kolasu.model.Multiplicity
+import com.strumenta.kolasu.model.NodeDestination
+import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.NodeOrigin
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.model.Source
+import com.strumenta.kolasu.model.allFeatures
+import com.strumenta.kolasu.model.asContainment
+import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.model.containingContainment
+import com.strumenta.kolasu.model.indexInContainingProperty
+import com.strumenta.kolasu.model.isAttribute
+import com.strumenta.kolasu.model.isContainment
+import com.strumenta.kolasu.model.isReference
+import com.strumenta.kolasu.model.nodeOriginalProperties
 import com.strumenta.kolasu.transformation.MissingASTTransformation
 import com.strumenta.kolasu.traversing.walk
-import io.lionweb.lioncore.java.language.*
+import io.lionweb.lioncore.java.language.Classifier
+import io.lionweb.lioncore.java.language.Concept
+import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Enumeration
+import io.lionweb.lioncore.java.language.Language
+import io.lionweb.lioncore.java.language.LionCoreBuiltins
+import io.lionweb.lioncore.java.language.PrimitiveType
+import io.lionweb.lioncore.java.language.Property
+import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.Node
-import io.lionweb.lioncore.java.model.impl.*
+import io.lionweb.lioncore.java.model.impl.AbstractClassifierInstance
+import io.lionweb.lioncore.java.model.impl.DynamicAnnotationInstance
+import io.lionweb.lioncore.java.model.impl.DynamicNode
+import io.lionweb.lioncore.java.model.impl.EnumerationValue
+import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.java.utils.CommonChecks
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.IdentityHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty
@@ -180,10 +208,11 @@ class LionWebModelConverter(
                                     setOriginalNode(lwNode, targetID)
                                 } else if (origin is MissingASTTransformation) {
                                     if (lwNode is AbstractClassifierInstance<*>) {
-                                        val instance = DynamicAnnotationInstance(
-                                            StarLasuLWLanguage.PlaceholderNode.id,
-                                            StarLasuLWLanguage.PlaceholderNode
-                                        )
+                                        val instance =
+                                            DynamicAnnotationInstance(
+                                                StarLasuLWLanguage.PlaceholderNode.id,
+                                                StarLasuLWLanguage.PlaceholderNode,
+                                            )
                                         if (origin.node != null) {
                                             val targetID = myIDManager.nodeId(origin.node!!)
                                             setOriginalNode(lwNode, targetID)
@@ -192,7 +221,7 @@ class LionWebModelConverter(
                                     } else {
                                         throw Exception(
                                             "MissingASTTransformation origin not supported on nodes " +
-                                                "that are not AbstractClassifierInstances: $lwNode"
+                                                "that are not AbstractClassifierInstances: $lwNode",
                                         )
                                     }
                                 }
@@ -275,12 +304,15 @@ class LionWebModelConverter(
         return result
     }
 
-    private fun setOriginalNode(lwNode: LWNode, targetID: String) {
+    private fun setOriginalNode(
+        lwNode: LWNode,
+        targetID: String,
+    ) {
         lwNode.setReferenceValues(
             StarLasuLWLanguage.ASTNodeOriginalNode,
             listOf(
-                LWReferenceValue(ProxyNode(targetID), null)
-            )
+                LWReferenceValue(ProxyNode(targetID), null),
+            ),
         )
     }
 
@@ -321,9 +353,10 @@ class LionWebModelConverter(
                     require(originalNodeID != null)
                     referencesPostponer.registerPostponedOriginReference(kNode, originalNodeID)
                 }
-                val placeholderNodeAnnotation = lwNode.annotations.find {
-                    it.classifier == StarLasuLWLanguage.PlaceholderNode
-                }
+                val placeholderNodeAnnotation =
+                    lwNode.annotations.find {
+                        it.classifier == StarLasuLWLanguage.PlaceholderNode
+                    }
                 if (placeholderNodeAnnotation != null) {
                     placeholderNodes.add(kNode)
                 }
@@ -336,13 +369,14 @@ class LionWebModelConverter(
         }
         referencesPostponer.populateReferences(nodesMapping, externalNodeResolver)
         placeholderNodes.forEach {
-            it.origin = MissingASTTransformation(
-                if (it.origin is NodeLike) {
-                    it.origin as NodeLike
-                } else {
-                    null
-                }
-            )
+            it.origin =
+                MissingASTTransformation(
+                    if (it.origin is NodeLike) {
+                        it.origin as NodeLike
+                    } else {
+                        null
+                    },
+                )
         }
         return nodesMapping.byB(lwTree)!!
     }

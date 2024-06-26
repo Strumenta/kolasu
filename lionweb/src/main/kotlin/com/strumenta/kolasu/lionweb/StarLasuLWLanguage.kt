@@ -27,12 +27,13 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
     }
 
     private fun addPlaceholderNodeAnnotation(astNode: Concept) {
-        val placeholderNodeAnnotation = Annotation(
-            this,
-            PLACEHOLDER_NODE,
-            idForContainedElement(PLACEHOLDER_NODE),
-            keyForContainedElement(PLACEHOLDER_NODE)
-        )
+        val placeholderNodeAnnotation =
+            Annotation(
+                this,
+                PLACEHOLDER_NODE,
+                idForContainedElement(PLACEHOLDER_NODE),
+                keyForContainedElement(PLACEHOLDER_NODE),
+            )
         placeholderNodeAnnotation.annotates = LionCore.getConcept()
         val reference =
             Reference().apply {
