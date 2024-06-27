@@ -16,13 +16,13 @@ fun PublishingExtension.addSonatypeRepo(project: Project) {
             val snapshotRepo = "https://oss.sonatype.org/content/repositories/snapshots/"
             url = URI(if (project.isReleaseVersion()) releaseRepo else snapshotRepo)
             credentials {
-                username = if (project.hasProperty("ossrhUsername")) {
-                    project.properties["ossrhUsername"] as String
+                username = if (project.hasProperty("ossrhTokenUsername")) {
+                    project.properties["ossrhTokenUsername"] as String
                 } else {
                     "Unknown user"
                 }
-                password = if (project.hasProperty("ossrhPassword")) {
-                    project.properties["ossrhPassword"] as String
+                password = if (project.hasProperty("ossrhTokenPassword")) {
+                    project.properties["ossrhTokenPassword"] as String
                 } else {
                     "Unknown password"
                 }

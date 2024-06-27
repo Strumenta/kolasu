@@ -93,7 +93,7 @@ Instructions available here: https://selectfrom.dev/publishing-your-first-open-s
 Please note that you may have to export the
 keys (`gpg --keyring secring.gpg --export-secret-keys > ~/.gnupg/secring.gpg`)
 
-You will need to store in ~/.gradle/gradle.properties your sonatype credentials under ossrhUsername and ossrhPassword
+You will need to store in ~/.gradle/gradle.properties your sonatype credentials under ossrhTokenUsername and ossrhTokenPassword.
 
 New release can be made by running:
 
