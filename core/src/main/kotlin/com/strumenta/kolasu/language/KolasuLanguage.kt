@@ -2,6 +2,7 @@ package com.strumenta.kolasu.language
 
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.asAttribute
 import com.strumenta.kolasu.model.containedType
 import com.strumenta.kolasu.model.isAttribute
@@ -75,11 +76,14 @@ class KolasuLanguage(val qualifiedName: String) {
     }
 
     private fun processSuperType(superType: KType, exceptions: MutableList<Exception> = mutableListOf<Exception>()) {
+        // In case the super type is already mapped to another language we may want to not add it into this language,
+        // once we introduce the concept of extending languages
         val kClass = superType.classifier as? KClass<*>
         when (kClass) {
             null -> Unit
             Node::class -> Unit
             Named::class -> Unit
+            PossiblyNamed::class -> Unit
             Any::class -> Unit
             else -> {
                 if (kClass.java.isInterface) {
@@ -111,7 +115,7 @@ class KolasuLanguage(val qualifiedName: String) {
         kClass: KClass<N>,
         exceptions: MutableList<Exception> = mutableListOf<Exception>()
     ): Attempt<Boolean, Exception> {
-        if (kClass == Node::class) {
+        if (kClass == Node::class || kClass == Named::class || kClass == PossiblyNamed::class) {
             return Attempt(false, exceptions)
         }
         if (!_astClasses.contains(kClass) && _astClasses.add(kClass)) {
