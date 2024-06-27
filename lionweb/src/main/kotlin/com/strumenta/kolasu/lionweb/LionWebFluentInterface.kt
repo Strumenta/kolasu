@@ -138,8 +138,8 @@ private fun Language.idPrefixForContainedElements(): String = this.id!!.removePr
 
 private fun Language.keyPrefixForContainedElements(): String = this.key!!.removePrefix("language-").removeSuffix("-key")
 
-private fun Language.idForContainedElement(containedElementName: String): String =
+fun Language.idForContainedElement(containedElementName: String): String =
     "${this.idPrefixForContainedElements()}-${containedElementName.lwIDCleanedVersion()}-id"
 
-private fun Language.keyForContainedElement(containedElementName: String): String =
+fun Language.keyForContainedElement(containedElementName: String): String =
     "${this.keyPrefixForContainedElements()}-${containedElementName.lwIDCleanedVersion()}-key"

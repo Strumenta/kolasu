@@ -14,12 +14,14 @@ import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.withRange
 import com.strumenta.kolasu.testing.assertASTsAreEqual
+import com.strumenta.kolasu.transformation.MissingASTTransformation
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import org.mkfl3x.jsondelta.JsonDelta
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
@@ -876,6 +878,45 @@ class LionWebModelConverterTest {
         assertEquals(1, (deserializedNode3Destination0 as SimpleRoot).id)
         assertEquals(2, (deserializedNode3Destination1 as SimpleRoot).id)
         assertEquals(Range(Point(1, 2), Point(3, 4)), deserializedNode3.range)
+    }
+
+    @Test
+    fun canSerializeAndDeserializePlaceholderNodes() {
+        val kl =
+            KolasuLanguage("my.language").apply {
+                addClass(SimpleRoot::class)
+            }
+        val mc = LionWebModelConverter()
+        mc.exportLanguageToLionWeb(kl)
+
+        val node1 = SimpleRoot(1, mutableListOf()).setSourceForTree(LionWebSource("MySource1"))
+        val node2 = SimpleRoot(2, mutableListOf()).setSourceForTree(LionWebSource("MySource2"))
+        node1.origin = MissingASTTransformation(node2)
+        val lwNode1 = mc.exportModelToLionWeb(node1)
+        // We verify the exported data is correct
+        val lwNode1Origins = lwNode1.getReferenceValueByName("originalNode")
+        assertEquals(1, lwNode1Origins.size)
+        assertEquals(1, lwNode1.annotations.size)
+        // We verify the re-imported data is correct
+        mc.externalNodeResolver =
+            object : NodeResolver {
+                override fun resolve(nodeID: String): KNode? =
+                    when (nodeID) {
+                        "MySource1" -> {
+                            node1
+                        }
+                        "MySource2" -> {
+                            node2
+                        }
+                        else -> {
+                            null
+                        }
+                    }
+            }
+        val deserializedNode1 = mc.importModelFromLionWeb(lwNode1) as SimpleRoot
+        assertIs<MissingASTTransformation>(deserializedNode1.origin)
+        assertIs<SimpleRoot>((deserializedNode1.origin as MissingASTTransformation).node)
+        assertEquals(2, ((deserializedNode1.origin as MissingASTTransformation).node as SimpleRoot).id)
     }
 }
 
