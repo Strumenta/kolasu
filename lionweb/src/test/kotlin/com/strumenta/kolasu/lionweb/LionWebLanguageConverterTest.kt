@@ -2,6 +2,7 @@ package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.ASTRoot
+import com.strumenta.kolasu.model.EntityDeclaration
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeType
@@ -16,7 +17,7 @@ import kotlin.test.assertSame
 @ASTRoot
 data class SimpleRoot(val id: Int, val childrez: MutableList<SimpleDecl>) : Node()
 
-sealed class SimpleDecl : Node()
+sealed class SimpleDecl : Node(), EntityDeclaration
 
 @ASTRoot(canBeNotRoot = true)
 data class SimpleNodeA(
