@@ -11,6 +11,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.superclasses
 import kotlin.reflect.full.withNullability
 
 fun <T : Node> T.relevantMemberProperties(
@@ -170,7 +171,8 @@ val KClass<*>.isConceptInterface: Boolean
  * @return is [this] class annotated with NodeType?
  */
 fun KClass<*>.isMarkedAsNodeType(): Boolean {
-    return this.annotations.any { it.annotationClass == NodeType::class }
+    return this.annotations.any { it.annotationClass == NodeType::class } ||
+        this.superclasses.any { it.isMarkedAsNodeType() }
 }
 
 data class PropertyTypeDescription(

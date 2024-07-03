@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.language
 
+import com.strumenta.kolasu.model.CommonElement
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.PossiblyNamed
@@ -65,7 +66,7 @@ class KolasuLanguage(val qualifiedName: String) {
 
     fun tentativeAddInterfaceClass(
         kClass: KClass<*>,
-        exceptions: MutableList<Exception> = mutableListOf<Exception>()
+        exceptions: MutableList<Exception> = mutableListOf()
     ): Attempt<Boolean, Exception> {
         if (!_astClasses.contains(kClass) && _astClasses.add(kClass)) {
             kClass.supertypes.forEach { superType -> processSuperType(superType, exceptions) }
@@ -75,7 +76,7 @@ class KolasuLanguage(val qualifiedName: String) {
         }
     }
 
-    private fun processSuperType(superType: KType, exceptions: MutableList<Exception> = mutableListOf<Exception>()) {
+    private fun processSuperType(superType: KType, exceptions: MutableList<Exception> = mutableListOf()) {
         // In case the super type is already mapped to another language we may want to not add it into this language,
         // once we introduce the concept of extending languages
         val kClass = superType.classifier as? KClass<*>
@@ -87,7 +88,7 @@ class KolasuLanguage(val qualifiedName: String) {
             Any::class -> Unit
             else -> {
                 if (kClass.java.isInterface) {
-                    if (kClass.isMarkedAsNodeType()) {
+                    if (kClass.isMarkedAsNodeType() && !kClass.isSubclassOf(CommonElement::class)) {
                         tentativeAddInterfaceClass(kClass, exceptions)
                     }
                 } else {
