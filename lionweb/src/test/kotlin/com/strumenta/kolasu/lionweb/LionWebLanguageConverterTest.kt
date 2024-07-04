@@ -15,6 +15,7 @@ import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.language.intType
 import com.strumenta.kolasu.language.stringType
 import com.strumenta.kolasu.model.ASTRoot
+import com.strumenta.kolasu.model.EntityDeclaration
 import com.strumenta.kolasu.model.LanguageAssociation
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Named
@@ -36,7 +37,9 @@ data class SimpleRoot(
 ) : Node()
 
 @LanguageAssociation(MyOtherStarLasuLanguageInstance::class)
-sealed class SimpleDecl : Node()
+sealed class SimpleDecl :
+    Node(),
+    EntityDeclaration
 
 @LanguageAssociation(MyOtherStarLasuLanguageInstance::class)
 @ASTRoot(canBeNotRoot = true)
@@ -119,6 +122,7 @@ class LionWebLanguageConverterTest {
         assertEquals("SimpleNodeA", simpleNodeA.name)
         assertSame(lwLanguage, simpleNodeA.language)
         assertEquals(simpleDecl, simpleNodeA.extendedConcept)
+        assertEquals(listOf(StarLasuLWLanguage.EntityDeclaration), simpleNodeA.extendedConcept!!.implemented)
         assertEquals(listOf(LionCoreBuiltins.getINamed(), myRelevantInterface), simpleNodeA.implemented)
         assertEquals(false, simpleNodeA.isAbstract)
         assertEquals(2, simpleNodeA.features.size)

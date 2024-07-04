@@ -10,11 +10,21 @@ import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.language.booleanType
 import com.strumenta.kolasu.language.intType
 import com.strumenta.kolasu.language.stringType
+import com.strumenta.kolasu.model.BehaviorDeclaration
+import com.strumenta.kolasu.model.CommonElement
+import com.strumenta.kolasu.model.Documentation
+import com.strumenta.kolasu.model.EntityDeclaration
+import com.strumenta.kolasu.model.EntityGroupDeclaration
+import com.strumenta.kolasu.model.Expression
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.Parameter
+import com.strumenta.kolasu.model.PlaceholderElement
 import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.Statement
+import com.strumenta.kolasu.model.TypeAnnotation
 import com.strumenta.kolasu.model.declaredFeatures
 import com.strumenta.kolasu.model.isConcept
 import com.strumenta.kolasu.model.isConceptInterface
@@ -70,6 +80,16 @@ class LionWebLanguageConverter {
 
         registerMapping(BaseStarLasuLanguage.iNamed, LionCoreBuiltins.getINamed())
         registerMapping(BaseStarLasuLanguage.iPossiblyNamed, LionCoreBuiltins.getINamed())
+        registerMapping(CommonElement::class, StarLasuLWLanguage.CommonElement)
+        registerMapping(BehaviorDeclaration::class, StarLasuLWLanguage.BehaviorDeclaration)
+        registerMapping(Documentation::class, StarLasuLWLanguage.Documentation)
+        registerMapping(EntityDeclaration::class, StarLasuLWLanguage.EntityDeclaration)
+        registerMapping(EntityGroupDeclaration::class, StarLasuLWLanguage.EntityGroupDeclaration)
+        registerMapping(Expression::class, StarLasuLWLanguage.Expression)
+        registerMapping(Parameter::class, StarLasuLWLanguage.Parameter)
+        registerMapping(PlaceholderElement::class, StarLasuLWLanguage.PlaceholderElement)
+        registerMapping(Statement::class, StarLasuLWLanguage.Statement)
+        registerMapping(TypeAnnotation::class, StarLasuLWLanguage.TypeAnnotation)
     }
 
     fun exportToLionWeb(starLasuLanguage: StarLasuLanguage): LWLanguage {

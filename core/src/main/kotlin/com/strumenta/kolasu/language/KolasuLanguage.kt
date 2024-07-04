@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.language
 
+import com.strumenta.kolasu.model.CommonElement
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
@@ -68,7 +69,7 @@ class KolasuLanguage(
 
     fun tentativeAddInterfaceClass(
         kClass: KClass<*>,
-        exceptions: MutableList<Exception> = mutableListOf<Exception>(),
+        exceptions: MutableList<Exception> = mutableListOf(),
     ): Attempt<Boolean, Exception> {
         if (!_astClasses.contains(kClass) && _astClasses.add(kClass)) {
             kClass.supertypes.forEach { superType -> processSuperType(superType, exceptions) }
@@ -80,7 +81,7 @@ class KolasuLanguage(
 
     private fun processSuperType(
         superType: KType,
-        exceptions: MutableList<Exception> = mutableListOf<Exception>(),
+        exceptions: MutableList<Exception> = mutableListOf(),
     ) {
         // In case the super type is already mapped to another language we may want to not add it into this language,
         // once we introduce the concept of extending languages
@@ -94,8 +95,9 @@ class KolasuLanguage(
             Any::class -> Unit
             else -> {
                 if (kClass.java.isInterface) {
-                    if (kClass.isConceptInterface) {
-                        tentativeAddInterfaceClass(kClass)
+                    if (kClass.isConceptInterface && !kClass.isSubclassOf(CommonElement::class)) {
+                        // Note: CommonElement subclasses are added to the Starlasu LW language manually
+                        tentativeAddInterfaceClass(kClass, exceptions)
                     }
                 } else {
                     if (kClass.isSubclassOf(NodeLike::class)) {

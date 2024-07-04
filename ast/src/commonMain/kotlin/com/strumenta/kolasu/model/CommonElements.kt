@@ -1,13 +1,46 @@
 package com.strumenta.kolasu.model
 
-interface Statement : NodeLike
-
-interface Expression : NodeLike
+sealed interface CommonElement : NodeLike
 
 /**
- * This should be used for definitions of classes, interfaces, structures
+ * Used to mark nodes as statements (instructions used primarily for their side effects)
  */
-interface EntityDeclaration : NodeLike
+interface Statement : CommonElement
+
+/**
+ * Used to mark nodes as expressions (descriptions of computations producing a value and, possibly, side effects)
+ */
+interface Expression : CommonElement
+
+/**
+ * This should be used for definitions of classes, interfaces, records, structures, and the like.
+ */
+interface EntityDeclaration : CommonElement
+
+/**
+ * This should be used for definitions of functions, methods, etc.
+ */
+interface BehaviorDeclaration : CommonElement
+
+/**
+ * Used to mark nodes as formal parameters (such as function/method parameters, type parameters, etc.)
+ */
+interface Parameter : CommonElement
+
+/**
+ * This should be used for documentation elements, such as docstrings and Javadoc-style comments
+ */
+interface Documentation : CommonElement
+
+/**
+ * This should be used for definitions of modules, packages, namespaces, and similar
+ */
+interface EntityGroupDeclaration : CommonElement
+
+/**
+ * This should be used for explicit type annotations (e.g. int, String, etc.)
+ */
+interface TypeAnnotation : CommonElement
 
 /**
  * PlaceholderElements can be used to represent elements in code matchers templates and code templates. They represent
@@ -24,7 +57,7 @@ interface EntityDeclaration : NodeLike
  * Conversely, in a code template the PlaceholderElement indicates where to insert parameters provided to populate the
  * template.
  */
-interface PlaceholderElement : NodeLike {
+interface PlaceholderElement : CommonElement {
     var placeholderName: String?
 
     @property:Internal

@@ -3,6 +3,7 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.model.Multiplicity
 import io.lionweb.lioncore.java.language.Annotation
 import io.lionweb.lioncore.java.language.Concept
+import io.lionweb.lioncore.java.language.Interface
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
@@ -28,6 +29,17 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
         astNode.addReference("transpiledNode", astNode, Multiplicity.MANY)
 
         addPlaceholderNodeAnnotation(astNode)
+
+        val commonElement = addInterface("CommonElement")
+        addInterface("BehaviorDeclaration").apply { addExtendedInterface(commonElement) }
+        addInterface("Documentation").apply { addExtendedInterface(commonElement) }
+        addInterface("EntityDeclaration").apply { addExtendedInterface(commonElement) }
+        addInterface("EntityGroupDeclaration").apply { addExtendedInterface(commonElement) }
+        addInterface("Expression").apply { addExtendedInterface(commonElement) }
+        addInterface("Parameter").apply { addExtendedInterface(commonElement) }
+        addInterface("PlaceholderElement").apply { addExtendedInterface(commonElement) }
+        addInterface("Statement").apply { addExtendedInterface(commonElement) }
+        addInterface("TypeAnnotation").apply { addExtendedInterface(commonElement) }
     }
 
     private fun addPlaceholderNodeAnnotation(astNode: Concept) {
@@ -78,4 +90,25 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
 
     val PlaceholderNodeOriginalNode: Reference
         get() = PlaceholderNode.getReferenceByName("originalNode")!!
+
+    val BehaviorDeclaration: Interface
+        get() = StarLasuLWLanguage.getInterfaceByName("BehaviorDeclaration")!!
+    val Documentation: Interface
+        get() = StarLasuLWLanguage.getInterfaceByName("Documentation")!!
+    val EntityDeclaration: Interface
+        get() = StarLasuLWLanguage.getInterfaceByName("EntityDeclaration")!!
+    val EntityGroupDeclaration: Interface
+        get() = StarLasuLWLanguage.getInterfaceByName("EntityGroupDeclaration")!!
+    val Expression: Interface
+        get() = StarLasuLWLanguage.getInterfaceByName("Expression")!!
+    val Parameter: Interface
+        get() = StarLasuLWLanguage.getInterfaceByName("Parameter")!!
+    val PlaceholderElement: Interface
+        get() = StarLasuLWLanguage.getInterfaceByName("PlaceholderElement")!!
+    val Statement: Interface
+        get() = StarLasuLWLanguage.getInterfaceByName("Statement")!!
+    val TypeAnnotation: Interface
+        get() = StarLasuLWLanguage.getInterfaceByName("TypeAnnotation")!!
+    val CommonElement: Interface
+        get() = StarLasuLWLanguage.getInterfaceByName("CommonElement")!!
 }
