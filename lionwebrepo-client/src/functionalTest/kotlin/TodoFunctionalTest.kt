@@ -3,12 +3,13 @@ import com.strumenta.kolasu.lionwebclient.KolasuClient
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
+import io.lionweb.lioncore.kotlin.repoclient.testing.AbstractRepoClientFunctionalTest
 import org.testcontainers.junit.jupiter.Testcontainers
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @Testcontainers
-class TodoFunctionalTest : AbstractFunctionalTest() {
+class TodoFunctionalTest : AbstractRepoClientFunctionalTest() {
     @Test
     fun noPartitionsOnNewModelRepository() {
         val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort)
