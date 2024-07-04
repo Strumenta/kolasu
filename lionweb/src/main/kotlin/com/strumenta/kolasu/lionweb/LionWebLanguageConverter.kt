@@ -5,6 +5,7 @@ import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.model.BehaviorDeclaration
+import com.strumenta.kolasu.model.CommonElement
 import com.strumenta.kolasu.model.Documentation
 import com.strumenta.kolasu.model.EntityDeclaration
 import com.strumenta.kolasu.model.EntityGroupDeclaration
@@ -49,6 +50,7 @@ class LionWebLanguageConverter {
         registerMapping(Node::class, StarLasuLWLanguage.ASTNode)
         registerMapping(Named::class, LionCoreBuiltins.getINamed())
         registerMapping(PossiblyNamed::class, LionCoreBuiltins.getINamed())
+        registerMapping(CommonElement::class, StarLasuLWLanguage.CommonElement)
         registerMapping(BehaviorDeclaration::class, StarLasuLWLanguage.BehaviorDeclaration)
         registerMapping(Documentation::class, StarLasuLWLanguage.Documentation)
         registerMapping(EntityDeclaration::class, StarLasuLWLanguage.EntityDeclaration)
