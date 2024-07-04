@@ -84,6 +84,16 @@ mavenPublishing {
                 name.set("Federico Tomassetti")
                 url.set("https://github.com/ftomassetti/")
             }
+            developer {
+                id.set("alessiostalla")
+                name.set("Alessio Stalla")
+                email.set("alessio.stalla@strumenta.com")
+            }
+            developer {
+                id.set("lorenzoaddazi")
+                name.set("Lorenzo Addazi")
+                email.set("lorenzo.addazi@strumenta.com")
+            }
         }
         scm {
             url.set("https://github.com/Strumenta/kolasu/")
