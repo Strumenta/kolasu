@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.model
 
 @NodeType
-interface CommonElement
+sealed interface CommonElement
 
 /**
  * Used to mark nodes as statements (instructions used primarily for their side effects)

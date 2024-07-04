@@ -89,6 +89,7 @@ class KolasuLanguage(val qualifiedName: String) {
             else -> {
                 if (kClass.java.isInterface) {
                     if (kClass.isMarkedAsNodeType() && !kClass.isSubclassOf(CommonElement::class)) {
+                        // Note: CommonElement subclasses are added to the Starlasu LW language manually
                         tentativeAddInterfaceClass(kClass, exceptions)
                     }
                 } else {
