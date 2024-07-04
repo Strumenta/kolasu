@@ -84,6 +84,7 @@ class LionWebLanguageConverterTest {
         assertEquals("SimpleNodeA", simpleNodeA.name)
         assertSame(lwLanguage, simpleNodeA.language)
         assertEquals(simpleDecl, simpleNodeA.extendedConcept)
+        assertEquals(listOf(StarLasuLWLanguage.EntityDeclaration), simpleNodeA.extendedConcept!!.implemented)
         assertEquals(listOf(LionCoreBuiltins.getINamed(), myRelevantInterface), simpleNodeA.implemented)
         assertEquals(false, simpleNodeA.isAbstract)
         assertEquals(2, simpleNodeA.features.size)

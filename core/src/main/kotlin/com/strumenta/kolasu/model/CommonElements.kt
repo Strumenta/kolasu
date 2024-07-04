@@ -1,52 +1,47 @@
 package com.strumenta.kolasu.model
 
+@NodeType
+sealed interface CommonElement
+
 /**
  * Used to mark nodes as statements (instructions used primarily for their side effects)
  */
-@NodeType
-interface Statement
+interface Statement : CommonElement
 
 /**
  * Used to mark nodes as expressions (descriptions of computations producing a value and, possibly, side effects)
  */
-@NodeType
-interface Expression
+interface Expression : CommonElement
 
 /**
  * This should be used for definitions of classes, interfaces, records, structures, and the like.
  */
-@NodeType
-interface EntityDeclaration
+interface EntityDeclaration : CommonElement
 
 /**
  * This should be used for definitions of functions, methods, etc.
  */
-@NodeType
-interface BehaviorDeclaration
+interface BehaviorDeclaration : CommonElement
 
 /**
  * Used to mark nodes as formal parameters (such as function/method parameters, type parameters, etc.)
  */
-@NodeType
-interface Parameter
+interface Parameter : CommonElement
 
 /**
  * This should be used for documentation elements, such as docstrings and Javadoc-style comments
  */
-@NodeType
-interface Documentation
+interface Documentation : CommonElement
 
 /**
  * This should be used for definitions of modules, packages, namespaces, and similar
  */
-@NodeType
-interface EntityGroupDeclaration
+interface EntityGroupDeclaration : CommonElement
 
 /**
  * This should be used for explicit type annotations (e.g. int, String, etc.)
  */
-@NodeType
-interface TypeAnnotation
+interface TypeAnnotation : CommonElement
 
 /**
  * PlaceholderElements can be used to represent elements in code matchers templates and code templates. They represent
@@ -63,8 +58,7 @@ interface TypeAnnotation
  * Conversely, in a code template the PlaceholderElement indicates where to insert parameters provided to populate the
  * template.
  */
-@NodeType
-interface PlaceholderElement {
+interface PlaceholderElement : CommonElement {
     var placeholderName: String?
 
     @property:Internal
