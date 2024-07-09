@@ -92,7 +92,7 @@ class LionWebModelConverterTest {
           "reference": {
             "language": "com_strumenta_starlasu",
             "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNode-key"
+            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
           },
           "targets": []
         }
@@ -161,7 +161,7 @@ class LionWebModelConverterTest {
           "reference": {
             "language": "com_strumenta_starlasu",
             "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNode-key"
+            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
           },
           "targets": []
         }
@@ -208,7 +208,7 @@ class LionWebModelConverterTest {
           "reference": {
             "language": "com_strumenta_starlasu",
             "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNode-key"
+            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
           },
           "targets": []
         }
@@ -279,7 +279,7 @@ class LionWebModelConverterTest {
           "reference": {
             "language": "com_strumenta_starlasu",
             "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNode-key"
+            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
           },
           "targets": []
         }
@@ -326,7 +326,7 @@ class LionWebModelConverterTest {
           "reference": {
             "language": "com_strumenta_starlasu",
             "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNode-key"
+            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
           },
           "targets": []
         }
