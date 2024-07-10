@@ -1,10 +1,13 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.model.Multiplicity
+import com.strumenta.kolasu.validation.IssueSeverity
+import com.strumenta.kolasu.validation.IssueType
 import io.lionweb.lioncore.java.language.Annotation
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Interface
 import io.lionweb.lioncore.java.language.Language
+import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
@@ -39,6 +42,13 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
         addInterface("PlaceholderElement").apply { addExtendedInterface(commonElement) }
         addInterface("Statement").apply { addExtendedInterface(commonElement) }
         addInterface("TypeAnnotation").apply { addExtendedInterface(commonElement) }
+
+        addConcept("Issue").apply {
+            addProperty("type", addEnumerationFromClass(this@StarLasuLWLanguage, IssueType::class))
+            addProperty("message", LionCoreBuiltins.getString())
+            addProperty("severity", addEnumerationFromClass(this@StarLasuLWLanguage, IssueSeverity::class))
+            addProperty("position", position, Multiplicity.OPTIONAL)
+        }
     }
 
     private fun addPlaceholderNodeAnnotation(astNode: Concept) {
@@ -109,4 +119,7 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
         get() = StarLasuLWLanguage.getInterfaceByName("TypeAnnotation")!!
     val CommonElement: Interface
         get() = StarLasuLWLanguage.getInterfaceByName("CommonElement")!!
+
+    val Issue: Concept
+        get() = StarLasuLWLanguage.getConceptByName("Issue")!!
 }

@@ -4,6 +4,9 @@ import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.transformation.MissingASTTransformation
+import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueSeverity
+import com.strumenta.kolasu.validation.IssueType
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.serialization.JsonSerialization
@@ -864,6 +867,22 @@ class LionWebModelConverterTest {
         assertIs<MissingASTTransformation>(deserializedNode1.origin)
         assertIs<SimpleRoot>((deserializedNode1.origin as MissingASTTransformation).origin)
         assertEquals(2, ((deserializedNode1.origin as MissingASTTransformation).origin as SimpleRoot).id)
+    }
+
+    @Test
+    fun exportImportIssue() {
+        val i1 = Issue(IssueType.LEXICAL, "An issue")
+        val i2 = Issue(IssueType.SYNTACTIC, "Another issue", IssueSeverity.WARNING)
+        val i3 = Issue(IssueType.SEMANTIC, "Yet another issue", IssueSeverity.INFO, pos(1, 2, 3, 4))
+
+        val converter = LionWebModelConverter()
+        val reimportedI1 = converter.importModelFromLionWeb(converter.exportIssueToLionweb(i1, "id1")) as Issue
+        val reimportedI2 = converter.importModelFromLionWeb(converter.exportIssueToLionweb(i2, "id2")) as Issue
+        val reimportedI3 = converter.importModelFromLionWeb(converter.exportIssueToLionweb(i3, "id3")) as Issue
+
+        assertEquals(i1, reimportedI1)
+        assertEquals(i2, reimportedI2)
+        assertEquals(i3, reimportedI3)
     }
 }
 

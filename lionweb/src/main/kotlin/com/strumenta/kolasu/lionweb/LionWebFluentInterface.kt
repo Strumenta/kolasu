@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.Multiplicity
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
+import io.lionweb.lioncore.java.language.DataType
 import io.lionweb.lioncore.java.language.Interface
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.PrimitiveType
@@ -90,7 +91,7 @@ fun Concept.addContainment(
 
 fun Concept.addProperty(
     name: String,
-    type: PrimitiveType,
+    type: DataType<*>,
     multiplicity: Multiplicity = Multiplicity.SINGULAR
 ): Property {
     require(multiplicity != Multiplicity.MANY)

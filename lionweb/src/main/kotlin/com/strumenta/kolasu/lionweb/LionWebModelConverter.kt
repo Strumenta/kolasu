@@ -3,20 +3,46 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.language.KolasuLanguage
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.CompositeDestination
+import com.strumenta.kolasu.model.Multiplicity
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.allFeatures
+import com.strumenta.kolasu.model.asContainment
+import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.model.isAttribute
+import com.strumenta.kolasu.model.isContainment
+import com.strumenta.kolasu.model.isReference
+import com.strumenta.kolasu.model.nodeOriginalProperties
 import com.strumenta.kolasu.transformation.MissingASTTransformation
 import com.strumenta.kolasu.traversing.walk
-import io.lionweb.lioncore.java.language.*
+import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueSeverity
+import com.strumenta.kolasu.validation.IssueType
+import io.lionweb.lioncore.java.language.Classifier
+import io.lionweb.lioncore.java.language.Concept
+import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Enumeration
+import io.lionweb.lioncore.java.language.Language
+import io.lionweb.lioncore.java.language.LionCoreBuiltins
+import io.lionweb.lioncore.java.language.PrimitiveType
+import io.lionweb.lioncore.java.language.Property
+import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.model.Node
 import io.lionweb.lioncore.java.model.ReferenceValue
-import io.lionweb.lioncore.java.model.impl.*
+import io.lionweb.lioncore.java.model.impl.AbstractClassifierInstance
+import io.lionweb.lioncore.java.model.impl.DynamicAnnotationInstance
+import io.lionweb.lioncore.java.model.impl.DynamicNode
+import io.lionweb.lioncore.java.model.impl.EnumerationValue
+import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.java.utils.CommonChecks
-import java.util.*
+import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -128,15 +154,7 @@ class LionWebModelConverter(
                                     ?: throw IllegalArgumentException("Property ${feature.name} not found in $kNode")
                                 val kValue = kNode.getAttributeValue(kAttribute)
                                 if (kValue is Enum<*>) {
-                                    val kClass: EnumKClass = kValue::class as EnumKClass
-                                    val enumeration = languageConverter.getKolasuClassesToEnumerationsMapping()[kClass]
-                                        ?: throw IllegalStateException("No enumeration for enum class $kClass")
-                                    val enumerationLiteral = enumeration.literals.find { it.name == kValue.name }
-                                        ?: throw IllegalStateException(
-                                            "No enumeration literal with name ${kValue.name} " +
-                                                "in enumeration $enumeration"
-                                        )
-                                    lwNode.setPropertyValue(feature, EnumerationValueImpl(enumerationLiteral))
+                                    setEnumProperty(lwNode, feature, kValue)
                                 } else {
                                     lwNode.setPropertyValue(feature, kValue)
                                 }
@@ -264,6 +282,22 @@ class LionWebModelConverter(
             (result as DynamicNode).parent = ProxyNode(parentNodeId)
         }
         return result
+    }
+
+    private fun setEnumProperty(
+        lwNode: LWNode,
+        feature: Property,
+        kValue: Enum<*>
+    ) {
+        val kClass: EnumKClass = kValue::class
+        val enumeration = languageConverter.getKolasuClassesToEnumerationsMapping()[kClass]
+            ?: throw IllegalStateException("No enumeration for enum class $kClass")
+        val enumerationLiteral = enumeration.literals.find { it.name == kValue.name }
+            ?: throw IllegalStateException(
+                "No enumeration literal with name ${kValue.name} " +
+                        "in enumeration $enumeration"
+            )
+        lwNode.setPropertyValue(feature, EnumerationValueImpl(enumerationLiteral))
     }
 
     private fun setOriginalNode(lwNode: LWNode, targetID: String) {
@@ -604,6 +638,10 @@ class LionWebModelConverter(
         referencesPostponer: ReferencesPostponer
     ):
         T {
+        val specialObject = maybeInstantiateSpecialObject(kClass, data)
+        if (specialObject != null) {
+            return specialObject
+        }
         val constructor: KFunction<Any> = when {
             kClass.constructors.size == 1 -> {
                 kClass.constructors.first()
@@ -702,11 +740,33 @@ class LionWebModelConverter(
         return kNode
     }
 
+    private fun <T : Any> maybeInstantiateSpecialObject(kClass: KClass<T>, data: Node): T? {
+        return if (kClass == Issue::class) {
+            Issue(
+                attributeValue(data, data.classifier.getPropertyByName("type")!!) as IssueType,
+                attributeValue(data, data.classifier.getPropertyByName("message")!!) as String,
+                attributeValue(data, data.classifier.getPropertyByName("severity")!!) as IssueSeverity,
+                attributeValue(data, data.classifier.getPropertyByName("position")!!) as Position?,
+            ) as T
+        } else {
+            null
+        }
+    }
+
     private fun findConcept(kNode: com.strumenta.kolasu.model.Node): Concept {
         return synchronized(languageConverter) { languageConverter.correspondingConcept(kNode.nodeType) }
     }
 
     private fun associateNodes(kNode: Any, lwNode: LWNode) {
         nodesMapping.associate(kNode, lwNode)
+    }
+
+    fun exportIssueToLionweb(issue: Issue, id: String): DynamicNode {
+        val issueNode = DynamicNode(id, StarLasuLWLanguage.Issue)
+        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName("message")!!, issue.message)
+        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName("position")!!, issue.position)
+        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName("severity")!!, issue.severity)
+        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName("type")!!, issue.type)
+        return issueNode
     }
 }
