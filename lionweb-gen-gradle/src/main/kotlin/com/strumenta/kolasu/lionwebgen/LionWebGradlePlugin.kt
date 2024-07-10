@@ -194,6 +194,9 @@ class LionWebGradlePlugin : Plugin<Project> {
         project.dependencies.add("ksp", "com.strumenta.kolasu:kolasu-lionweb-ksp:${project.kolasuVersion}")
 
         project.dependencies.add("api", "com.github.ajalt.clikt:clikt:3.5.0")
-        project.dependencies.add("api", "io.lionweb.lionweb-java:lionweb-java-2023.1-core:${project.lionwebVersion}")
+        project.dependencies.add(
+            "api",
+            "io.lionweb.lionweb-java:lionweb-java-2023.1-core:${project.lionwebJavaVersion}",
+        )
     }
 }

@@ -25,5 +25,5 @@ val Project.sourceSets: SourceSetContainer
 val Project.kolasuVersion
     get() = project.propertyValue("kolasuVersion", BuildConfig.PLUGIN_VERSION)
 
-val Project.lionwebVersion
-    get() = project.propertyValue("lionwebVersion", BuildConfig.LIONCORE_VERSION)
+val Project.lionwebJavaVersion
+    get() = project.propertyValue("lionwebJavaVersion", BuildConfig.LIONCORE_VERSION)

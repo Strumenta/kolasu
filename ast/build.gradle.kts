@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     kotlin("multiplatform")
     alias(libs.plugins.ktlint)
@@ -10,6 +12,9 @@ plugins {
 kotlin {
     jvm {
         withJava()
+        compilations.all {
+            kotlinOptions.jvmTarget = "1.8"
+        }
     }
     js {
         browser()
@@ -30,6 +35,11 @@ kotlin {
         val jsMain by getting
         val jvmMain by getting
     }
+    jvm().compilations.all {
+        compilerOptions.configure {
+            jvmTarget.set(JvmTarget.JVM_1_8)
+        }
+    }
 }
 
 publishing {
@@ -39,4 +49,10 @@ publishing {
 
 signing {
 //    sign(publishing.publications["kolasu_ast"])
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
 }

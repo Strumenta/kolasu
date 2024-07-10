@@ -5,7 +5,7 @@ plugins {
     id("org.jetbrains.dokka")
 }
 
-val lionwebVersion = extra["lionwebVersion"]
+val lionwebJavaVersion = extra["lionwebJavaVersion"]
 val kotlinVersion = extra["kotlinVersion"]
 
 dependencies {
@@ -13,7 +13,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
     testImplementation(libs.gson)
     testImplementation("io.github.mkfl3x:json-delta:1.3")
-    api("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebVersion")
+    api("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebJavaVersion")
     api(project(":core"))
     api(project(":ast"))
 

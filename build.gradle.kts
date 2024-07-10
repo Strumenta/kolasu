@@ -43,12 +43,13 @@ subprojects {
 
         val kotlinVersion = extra["kotlinVersion"]
 
-        dependencies {
-            implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-            // implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-            implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+        if (this.name != "lionwebrepo-client") {
+            dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+                implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
 
-            testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
+                testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
+            }
         }
 
         java {
@@ -61,7 +62,6 @@ subprojects {
                 named("main") {
                     includeNonPublic.set(true)
                     moduleName.set("kolasu-" + moduleName.get())
-                    // includes.from("src/main/dokka/module.md")
                 }
             }
         }

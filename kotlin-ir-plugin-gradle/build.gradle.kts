@@ -1,9 +1,9 @@
 plugins {
     id("java-gradle-plugin")
     kotlin("jvm")
-    alias(libs.plugins.buildconfig)
+    alias(libs.plugins.buildConfig)
     id("maven-publish")
-    alias(libs.plugins.gradlepublish)
+    alias(libs.plugins.gradlePublish)
     `kotlin-dsl`
 }
 

@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm")
     kotlin("kapt")
-    alias(libs.plugins.buildconfig)
+    alias(libs.plugins.buildConfig)
     id("maven-publish")
 }
 
