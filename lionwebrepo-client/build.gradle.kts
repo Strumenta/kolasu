@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     java
     `jvm-test-suite`
@@ -64,6 +66,9 @@ dependencies {
 }
 
 mavenPublishing {
+    publishToMavenCentral(SonatypeHost.DEFAULT)
+    signAllPublications()
+
     coordinates(project.group!! as String, "kolasu-${project.name}", version as String)
 
     pom {
