@@ -19,7 +19,7 @@ class TodoFunctionalTest : AbstractRepoClientFunctionalTest() {
     @Test
     fun storePartitionAndGetItBack() {
         val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort, debug = true)
-        kolasuClient.registerLanguage(todoLanguage)
+        kolasuClient.registerLanguage(TodoStarLasuLanguageInstance)
         kolasuClient.registerLanguage(todoAccountLanguage)
 
         assertEquals(emptyList(), kolasuClient.getPartitionIDs())
@@ -83,7 +83,7 @@ class TodoFunctionalTest : AbstractRepoClientFunctionalTest() {
     @Test
     fun checkNodeIDs() {
         val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort, debug = true)
-        kolasuClient.registerLanguage(todoLanguage)
+        kolasuClient.registerLanguage(TodoStarLasuLanguageInstance)
         kolasuClient.registerLanguage(todoAccountLanguage)
 
         assertEquals(emptyList(), kolasuClient.getPartitionIDs())
@@ -118,7 +118,7 @@ class TodoFunctionalTest : AbstractRepoClientFunctionalTest() {
     @Test
     fun sourceIsRetrievedCorrectly() {
         val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort, debug = true)
-        kolasuClient.registerLanguage(todoLanguage)
+        kolasuClient.registerLanguage(TodoStarLasuLanguageInstance)
         kolasuClient.registerLanguage(todoAccountLanguage)
 
         // We create an empty partition

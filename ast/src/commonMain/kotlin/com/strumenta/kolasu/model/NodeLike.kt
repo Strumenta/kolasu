@@ -156,9 +156,9 @@ interface NodeLike {
         child: T,
     )
 
-    fun getReference(reference: Reference): ReferenceValue<*> {
+    fun getReference(reference: Reference): ReferenceValue<*>? {
         val rawValue = reference.value(this)
-        return rawValue as ReferenceValue<*>
+        return rawValue as ReferenceValue<*>?
     }
 
     fun <T : PossiblyNamed> getReference(name: String): ReferenceValue<T> {

@@ -1,5 +1,4 @@
 import com.strumenta.kolasu.ids.NodeIdProvider
-import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.lionweb.addConcept
@@ -51,11 +50,6 @@ data class Todo(
     Named {
     constructor(name: String) : this(name, name)
 }
-
-val todoLanguage =
-    KolasuLanguage("TodoLanguage").apply {
-        addClass(TodoProject::class)
-    }
 
 object TodoStarLasuLanguageInstance : StarLasuLanguage("Todo") {
     init {

@@ -3,6 +3,7 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.language.KolasuLanguage
+import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.NodeDestination
@@ -109,6 +110,12 @@ class LionWebModelConverter(
     fun exportLanguageToLionWeb(kolasuLanguage: KolasuLanguage): Language {
         synchronized(languageConverter) {
             return languageConverter.exportToLionWeb(kolasuLanguage)
+        }
+    }
+
+    fun exportLanguageToLionWeb(starLasuLanguage: StarLasuLanguage): Language {
+        synchronized(languageConverter) {
+            return languageConverter.exportToLionWeb(starLasuLanguage)
         }
     }
 

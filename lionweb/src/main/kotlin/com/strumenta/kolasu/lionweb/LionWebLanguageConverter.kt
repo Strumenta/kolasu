@@ -444,6 +444,20 @@ class LionWebLanguageConverter {
     }
 
     fun correspondingKolasuClass(classifier: LWClassifier<*>): KClass<*>? {
+        val partialResult =
+            this
+                .kConceptsAndLWConcepts
+                .bsToAsMap
+                .entries
+                .find {
+                    it.key.key == classifier.key &&
+                        it.key.language!!.id == classifier.language!!.id &&
+                        it.key.language!!.version == classifier.language!!.version
+                }?.value
+                ?.kClass()
+        if (partialResult != null) {
+            return partialResult
+        }
         return this
             .astClassesAndClassifiers
             .bsToAsMap
@@ -474,6 +488,16 @@ class LionWebLanguageConverter {
     }
 
     private fun toLWClassifier(nodeType: String): LWClassifier<*> {
+        val kClassifier: LWClassifier<*>? =
+            kConceptsAndLWConcepts
+                .asToBsMap
+                .entries
+                .find {
+                    it.key.name == nodeType
+                }?.value
+        if (kClassifier != null) {
+            return kClassifier
+        }
         val kClass =
             astClassesAndClassifiers.`as`.find { it.qualifiedName == nodeType || it.simpleName == nodeType }
                 ?: throw IllegalArgumentException(
@@ -623,7 +647,12 @@ class LionWebLanguageConverter {
     }
 }
 
-fun com.strumenta.kolasu.language.Classifier.kClass() = Class.forName(this.qualifiedName).kotlin
+fun com.strumenta.kolasu.language.Classifier.kClass(): KClass<*> =
+    if (this is com.strumenta.kolasu.language.Concept) {
+        this.correspondingKotlinClass
+    } else {
+        null
+    } ?: Class.forName(this.qualifiedName).kotlin
 
 fun com.strumenta.kolasu.language.DataType.kClass(): KClass<*> =
     when {

@@ -4,6 +4,7 @@ import com.strumenta.kolasu.ids.CommonNodeIdProvider
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.ids.caching
 import com.strumenta.kolasu.language.KolasuLanguage
+import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.lionweb.KNode
 import com.strumenta.kolasu.lionweb.LWLanguage
 import com.strumenta.kolasu.lionweb.LWNode
@@ -100,6 +101,11 @@ class KolasuClient(
     //
     // Configuration
     //
+
+    fun registerLanguage(starLasuLanguage: StarLasuLanguage) {
+        val lionwebLanguage = nodeConverter.exportLanguageToLionWeb(starLasuLanguage)
+        lionWebClient.registerLanguage(lionwebLanguage)
+    }
 
     fun registerLanguage(kolasuLanguage: KolasuLanguage) {
         val lionwebLanguage = nodeConverter.exportLanguageToLionWeb(kolasuLanguage)
