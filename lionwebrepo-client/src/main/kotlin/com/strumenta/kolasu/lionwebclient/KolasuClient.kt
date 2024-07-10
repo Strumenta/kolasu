@@ -16,6 +16,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.traversing.walkDescendants
 import io.lionweb.lioncore.java.language.Concept
+import io.lionweb.lioncore.java.model.HasSettableParent
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.serialization.UnavailableNodePolicy
 import io.lionweb.lioncore.kotlin.repoclient.ClassifierResult
@@ -250,11 +251,12 @@ class KolasuClient(
         }
         kNode.assignParents()
         val lwNode = toLionWeb(kNode)
+        require(lwNode is HasSettableParent) // In the future we may relax that
         // Now, if the parent of this node is null we need to find the real parent from the model repository
         // Otherwise we need to be sure to set the parent anyway
         if (lwNode.parent == null) {
             val parentIdOnServer = lionWebClient.getParentId(lwNode.id!!)
-            lwNode.setParentID(parentIdOnServer)
+            (lwNode as HasSettableParent).setParentID(parentIdOnServer)
         }
         lionWebClient.storeTree(lwNode)
         return lwNode.id!!
