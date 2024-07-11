@@ -295,7 +295,7 @@ class LionWebModelConverter(
         val enumerationLiteral = enumeration.literals.find { it.name == kValue.name }
             ?: throw IllegalStateException(
                 "No enumeration literal with name ${kValue.name} " +
-                        "in enumeration $enumeration"
+                    "in enumeration $enumeration"
             )
         lwNode.setPropertyValue(feature, EnumerationValueImpl(enumerationLiteral))
     }
@@ -746,7 +746,7 @@ class LionWebModelConverter(
                 attributeValue(data, data.classifier.getPropertyByName("type")!!) as IssueType,
                 attributeValue(data, data.classifier.getPropertyByName("message")!!) as String,
                 attributeValue(data, data.classifier.getPropertyByName("severity")!!) as IssueSeverity,
-                attributeValue(data, data.classifier.getPropertyByName("position")!!) as Position?,
+                attributeValue(data, data.classifier.getPropertyByName("position")!!) as Position?
             ) as T
         } else {
             null

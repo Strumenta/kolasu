@@ -65,8 +65,14 @@ class LionWebLanguageConverter {
         registerMapping(TypeAnnotation::class, StarLasuLWLanguage.TypeAnnotation)
 
         registerMapping(Issue::class, StarLasuLWLanguage.Issue)
-        toLWEnumeration(IssueSeverity::class, StarLasuLWLanguage)
-        toLWEnumeration(IssueType::class, StarLasuLWLanguage)
+        classesAndEnumerations.associate(
+            IssueSeverity::class,
+            (StarLasuLWLanguage.Issue.getFeatureByName("severity") as Property).type as Enumeration
+        )
+        classesAndEnumerations.associate(
+            IssueType::class,
+            (StarLasuLWLanguage.Issue.getFeatureByName("type") as Property).type as Enumeration
+        )
     }
 
     fun exportToLionWeb(kolasuLanguage: KolasuLanguage): LWLanguage {
