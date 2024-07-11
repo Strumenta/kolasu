@@ -69,7 +69,8 @@ mavenPublishing {
     publishToMavenCentral(SonatypeHost.DEFAULT)
     signAllPublications()
 
-    coordinates(project.group!! as String, "kolasu-${project.name}", version as String)
+
+    // coordinates(project.group!! as String, "kolasu-${project.name}", version as String)
 
     pom {
         name.set("kolasu-${project.name}")
