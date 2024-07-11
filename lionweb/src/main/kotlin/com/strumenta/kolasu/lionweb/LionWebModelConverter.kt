@@ -42,9 +42,11 @@ import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
 import io.lionweb.lioncore.java.model.impl.ProxyNode
+import io.lionweb.lioncore.java.serialization.AbstractSerialization
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
+import io.lionweb.lioncore.java.serialization.SerializationProvider
 import io.lionweb.lioncore.java.utils.CommonChecks
 import io.lionweb.lioncore.kotlin.BaseNode
 import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
@@ -366,14 +368,14 @@ class LionWebModelConverter(
         return nodesMapping.byB(lwTree)!!
     }
 
-    fun prepareJsonSerialization(
-        jsonSerialization: JsonSerialization =
-            JsonSerialization.getStandardSerialization()
-    ): JsonSerialization {
-        jsonSerialization.primitiveValuesSerialization.registerSerializer(
+    fun prepareSerialization(
+        serialization: AbstractSerialization =
+            SerializationProvider.getStandardJsonSerialization()
+    ): AbstractSerialization {
+        serialization.primitiveValuesSerialization.registerSerializer(
             StarLasuLWLanguage.char.id
         ) { value -> "$value" }
-        jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+        serialization.primitiveValuesSerialization.registerDeserializer(
             StarLasuLWLanguage.char.id
         ) { serialized -> serialized[0] }
         val pointSerializer: PrimitiveSerializer<Point> =
@@ -394,20 +396,20 @@ class LionWebModelConverter(
                 require(parts.size == 2)
                 Point(parts[0].toInt(), parts[1].toInt())
             }
-        jsonSerialization.primitiveValuesSerialization.registerSerializer(
+        serialization.primitiveValuesSerialization.registerSerializer(
             StarLasuLWLanguage.Point.id,
             pointSerializer
         )
-        jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+        serialization.primitiveValuesSerialization.registerDeserializer(
             StarLasuLWLanguage.Point.id,
             pointDeserializer
         )
-        jsonSerialization.primitiveValuesSerialization.registerSerializer(
+        serialization.primitiveValuesSerialization.registerSerializer(
             StarLasuLWLanguage.Position.id
         ) { value ->
             "${pointSerializer.serialize((value as Position).start)} to ${pointSerializer.serialize(value.end)}"
         }
-        jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+        serialization.primitiveValuesSerialization.registerDeserializer(
             StarLasuLWLanguage.Position.id
         ) { serialized ->
             if (serialized == null) {
@@ -420,8 +422,8 @@ class LionWebModelConverter(
         }
         synchronized(languageConverter) {
             languageConverter.knownLWLanguages().forEach {
-                jsonSerialization.primitiveValuesSerialization.registerLanguage(it)
-                jsonSerialization.classifierResolver.registerLanguage(it)
+                serialization.primitiveValuesSerialization.registerLanguage(it)
+                serialization.classifierResolver.registerLanguage(it)
             }
             languageConverter.knownKolasuLanguages().forEach { kolasuLanguage ->
                 kolasuLanguage.primitiveClasses.forEach { primitiveClass ->
@@ -434,25 +436,25 @@ class LionWebModelConverter(
                             )
                         val serializer = primitiveValueSerializations[primitiveClass]!!
                             as PrimitiveValueSerialization<Any>
-                        jsonSerialization.primitiveValuesSerialization.registerSerializer(
+                        serialization.primitiveValuesSerialization.registerSerializer(
                             lwPrimitiveType.id!!
                         ) { value -> serializer.serialize(value) }
 
-                        jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+                        serialization.primitiveValuesSerialization.registerDeserializer(
                             lwPrimitiveType.id!!
                         ) { serialized -> serializer.deserialize(serialized) }
                     }
                 }
             }
         }
-        return jsonSerialization
+        return serialization
     }
 
     /**
      * Deserialize nodes, taking into accaount the known languages.
      */
     fun deserializeToNodes(json: String, useDynamicNodesIfNeeded: Boolean = true): List<LWNode> {
-        val js = prepareJsonSerialization()
+        val js = prepareSerialization() as JsonSerialization
         if (useDynamicNodesIfNeeded) {
             js.enableDynamicNodes()
         }

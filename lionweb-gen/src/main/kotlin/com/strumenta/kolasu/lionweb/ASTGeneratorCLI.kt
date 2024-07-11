@@ -6,7 +6,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.types.file
 import io.lionweb.lioncore.java.language.Language
-import io.lionweb.lioncore.java.serialization.JsonSerialization
+import io.lionweb.lioncore.java.serialization.SerializationProvider
 import java.io.File
 import java.io.FileInputStream
 
@@ -19,7 +19,7 @@ class ASTGeneratorCommand : CliktCommand() {
     override fun run() {
         val existingKotlinClasses = KotlinCodeProcessor().classesDeclaredInDir(existingKotlinCode)
 
-        val jsonser = JsonSerialization.getStandardSerialization()
+        val jsonser = SerializationProvider.getStandardJsonSerialization()
         jsonser.instanceResolver.addTree(StarLasuLWLanguage)
         val language = jsonser.deserializeToNodes(FileInputStream(languageFile)).first() as Language
         val ktFiles = ASTGenerator(packageName, language).generateClasses(existingKotlinClasses)

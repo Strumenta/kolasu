@@ -1,9 +1,9 @@
 [plugins]
 buildConfig = { id = "com.github.gmazzo.buildconfig", version = "5.3.5" }
-superPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
+superPublish = { id = "com.vanniktech.maven.publish", version = "0.22.0" }
 
 [versions]
-lwkotlin = "0.2.2"
+lwkotlin = "0.2.3-SNAPSHOT"
 
 [libraries]
 lionwebjava = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2023.1-core", version = "0.2.17" }
