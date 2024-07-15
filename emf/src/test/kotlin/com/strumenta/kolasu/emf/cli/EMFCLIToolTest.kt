@@ -519,6 +519,26 @@ class EMFCLIToolTest {
     "interface" : true
   }, {
     "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "EntityGroupDeclaration",
+    "interface" : true
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "TypeAnnotation",
+    "interface" : true
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "BehaviorDeclaration",
+    "interface" : true
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "Parameter",
+    "interface" : true
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+    "name" : "Documentation",
+    "interface" : true
+  }, {
+    "eClass" : "http://www.eclipse.org/emf/2002/Ecore#//EClass",
     "name" : "PlaceholderElement",
     "interface" : true,
     "eStructuralFeatures" : [ {

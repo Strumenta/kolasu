@@ -110,6 +110,11 @@ class MetamodelBuilder(
         eclassTypeHandlers.add(StatementHandler)
         eclassTypeHandlers.add(ExpressionHandler)
         eclassTypeHandlers.add(EntityDeclarationHandler)
+        eclassTypeHandlers.add(EntityGroupDeclarationHandler)
+        eclassTypeHandlers.add(TypeAnnotationHandler)
+        eclassTypeHandlers.add(BehaviorDeclarationHandler)
+        eclassTypeHandlers.add(ParameterHandler)
+        eclassTypeHandlers.add(DocumentationHandler)
         eclassTypeHandlers.add(PlaceholderElementHandler)
 
         eclassTypeHandlers.add(ErrorNodeHandler)

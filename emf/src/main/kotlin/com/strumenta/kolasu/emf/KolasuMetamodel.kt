@@ -1,5 +1,13 @@
 package com.strumenta.kolasu.emf
 
+import com.strumenta.kolasu.model.BehaviorDeclaration
+import com.strumenta.kolasu.model.Documentation
+import com.strumenta.kolasu.model.EntityDeclaration
+import com.strumenta.kolasu.model.EntityGroupDeclaration
+import com.strumenta.kolasu.model.Expression
+import com.strumenta.kolasu.model.Parameter
+import com.strumenta.kolasu.model.Statement
+import com.strumenta.kolasu.model.TypeAnnotation
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import org.eclipse.emf.ecore.EClass
@@ -7,6 +15,7 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.EcorePackage
 import java.io.File
+import kotlin.reflect.KClass
 
 val STARLASU_METAMODEL by lazy { createStarlasuMetamodel() }
 val ASTNODE_ECLASS by lazy { STARLASU_METAMODEL.eClassifiers.find { it.name == "ASTNode" }!! as EClass }
@@ -96,15 +105,15 @@ private fun createStarlasuMetamodel(): EPackage {
             addContainment("position", position, 0, 1)
         }
 
-    ePackage.createEClass("Statement").apply {
-        this.isInterface = true
-    }
-    ePackage.createEClass("Expression").apply {
-        this.isInterface = true
-    }
-    ePackage.createEClass("EntityDeclaration").apply {
-        this.isInterface = true
-    }
+    ePackage.addCorrespondingTo(Statement::class)
+    ePackage.addCorrespondingTo(Expression::class)
+    ePackage.addCorrespondingTo(EntityDeclaration::class)
+    ePackage.addCorrespondingTo(EntityGroupDeclaration::class)
+    ePackage.addCorrespondingTo(TypeAnnotation::class)
+    ePackage.addCorrespondingTo(BehaviorDeclaration::class)
+    ePackage.addCorrespondingTo(Parameter::class)
+    ePackage.addCorrespondingTo(Documentation::class)
+
     ePackage.createEClass("PlaceholderElement").apply {
         this.isInterface = true
         addAttribute("placeholderName", stringDT, 0, 1)
@@ -213,4 +222,10 @@ fun main() {
     STARLASU_METAMODEL.saveEcore(File("kolasu-2.0.ecore"))
     STARLASU_METAMODEL.saveEcore(File("kolasu-2.0.xmi"))
     STARLASU_METAMODEL.saveAsJson(File("kolasu-2.0.json"))
+}
+
+fun EPackage.addCorrespondingTo(kClass: KClass<*>): EClass {
+    return this.createEClass(kClass.simpleName!!).apply {
+        this.isInterface = kClass.java.isInterface
+    }
 }

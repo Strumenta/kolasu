@@ -80,6 +80,16 @@ class KolasuClassHandler(
     ): EClass = kolasuEClass
 
     override fun external(): Boolean = true
+
+    companion object {
+        fun forKClass(kclass: KClass<*>): KolasuClassHandler {
+            return KolasuClassHandler(
+                kclass,
+                STARLASU_METAMODEL
+                    .getEClass(kclass.simpleName!!)
+            )
+        }
+    }
 }
 
 class KolasuDataTypeHandler(
@@ -107,20 +117,15 @@ val ReferenceValueHandler = KolasuClassHandler(ReferenceValue::class, STARLASU_M
 // This class is saved with the name Position for compatibility reasons
 val ResultHandler = KolasuClassHandler(Result::class, STARLASU_METAMODEL.getEClass("Position"))
 
-val StatementHandler = KolasuClassHandler(Statement::class, STARLASU_METAMODEL.getEClass("Statement"))
-val ExpressionHandler = KolasuClassHandler(Expression::class, STARLASU_METAMODEL.getEClass("Expression"))
-val EntityDeclarationHandler =
-    KolasuClassHandler(
-        EntityDeclaration::class,
-        STARLASU_METAMODEL
-            .getEClass("EntityDeclaration"),
-    )
-val PlaceholderElementHandler =
-    KolasuClassHandler(
-        PlaceholderElement::class,
-        STARLASU_METAMODEL
-            .getEClass("PlaceholderElement"),
-    )
+val StatementHandler = KolasuClassHandler.forKClass(Statement::class)
+val ExpressionHandler = KolasuClassHandler.forKClass(Expression::class)
+val EntityDeclarationHandler = KolasuClassHandler.forKClass(EntityDeclaration::class)
+val EntityGroupDeclarationHandler = KolasuClassHandler.forKClass(EntityGroupDeclaration::class)
+val TypeAnnotationHandler = KolasuClassHandler.forKClass(TypeAnnotation::class)
+val PlaceholderElementHandler = KolasuClassHandler.forKClass(PlaceholderElement::class)
+val BehaviorDeclarationHandler = KolasuClassHandler.forKClass(BehaviorDeclaration::class)
+val ParameterHandler = KolasuClassHandler.forKClass(Parameter::class)
+val DocumentationHandler = KolasuClassHandler.forKClass(Documentation::class)
 
 val ErrorNodeHandler = KolasuClassHandler(ErrorNode::class, STARLASU_METAMODEL.getEClass("ErrorNode"))
 val GenericErrorNodeHandler =
