@@ -224,8 +224,7 @@ fun main() {
     STARLASU_METAMODEL.saveAsJson(File("kolasu-2.0.json"))
 }
 
-fun EPackage.addCorrespondingTo(kClass: KClass<*>): EClass {
-    return this.createEClass(kClass.simpleName!!).apply {
+fun EPackage.addCorrespondingTo(kClass: KClass<*>): EClass =
+    this.createEClass(kClass.simpleName!!).apply {
         this.isInterface = kClass.java.isInterface
     }
-}

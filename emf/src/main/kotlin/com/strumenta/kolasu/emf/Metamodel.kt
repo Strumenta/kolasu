@@ -1,17 +1,22 @@
 package com.strumenta.kolasu.emf
 
+import com.strumenta.kolasu.model.BehaviorDeclaration
+import com.strumenta.kolasu.model.Documentation
 import com.strumenta.kolasu.model.EntityDeclaration
+import com.strumenta.kolasu.model.EntityGroupDeclaration
 import com.strumenta.kolasu.model.ErrorNode
 import com.strumenta.kolasu.model.Expression
 import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.Parameter
 import com.strumenta.kolasu.model.PlaceholderElement
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.Statement
+import com.strumenta.kolasu.model.TypeAnnotation
 import com.strumenta.kolasu.transformation.GenericNode
 import com.strumenta.kolasu.validation.Result
 import org.eclipse.emf.ecore.EClass
@@ -82,13 +87,12 @@ class KolasuClassHandler(
     override fun external(): Boolean = true
 
     companion object {
-        fun forKClass(kclass: KClass<*>): KolasuClassHandler {
-            return KolasuClassHandler(
+        fun forKClass(kclass: KClass<*>): KolasuClassHandler =
+            KolasuClassHandler(
                 kclass,
                 STARLASU_METAMODEL
-                    .getEClass(kclass.simpleName!!)
+                    .getEClass(kclass.simpleName!!),
             )
-        }
     }
 }
 
