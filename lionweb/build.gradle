@@ -22,6 +22,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testImplementation "com.google.code.gson:gson:$gson_version"
     api("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebVersion")
+    api("io.lionweb.lionweb-kotlin:lionweb-kotlin-2024.1-core:0.2.2")
     api(project(":core"))
 }
 

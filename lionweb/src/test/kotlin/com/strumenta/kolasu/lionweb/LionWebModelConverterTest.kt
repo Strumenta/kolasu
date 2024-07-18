@@ -1,7 +1,17 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.language.KolasuLanguage
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.ASTRoot
+import com.strumenta.kolasu.model.CompositeDestination
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.SyntheticSource
+import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.model.pos
+import com.strumenta.kolasu.model.withPosition
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.transformation.MissingASTTransformation
 import com.strumenta.kolasu.validation.Issue
@@ -10,7 +20,13 @@ import com.strumenta.kolasu.validation.IssueType
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.serialization.JsonSerialization
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 enum class AnEnum {
     FOO,
@@ -876,9 +892,11 @@ class LionWebModelConverterTest {
         val i3 = Issue(IssueType.SEMANTIC, "Yet another issue", IssueSeverity.INFO, pos(1, 2, 3, 4))
 
         val converter = LionWebModelConverter()
-        val reimportedI1 = converter.importModelFromLionWeb(converter.exportIssueToLionweb(i1, "id1")) as Issue
-        val reimportedI2 = converter.importModelFromLionWeb(converter.exportIssueToLionweb(i2, "id2")) as Issue
-        val reimportedI3 = converter.importModelFromLionWeb(converter.exportIssueToLionweb(i3, "id3")) as Issue
+        val exportedI1 = converter.exportIssueToLionweb(i1)
+        assertNull(exportedI1.id)
+        val reimportedI1 = converter.importModelFromLionWeb(exportedI1) as Issue
+        val reimportedI2 = converter.importModelFromLionWeb(converter.exportIssueToLionweb(i2)) as Issue
+        val reimportedI3 = converter.importModelFromLionWeb(converter.exportIssueToLionweb(i3)) as Issue
 
         assertEquals(i1, reimportedI1)
         assertEquals(i2, reimportedI2)

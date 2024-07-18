@@ -42,6 +42,7 @@ import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.java.utils.CommonChecks
+import io.lionweb.lioncore.kotlin.BaseNode
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
@@ -761,12 +762,23 @@ class LionWebModelConverter(
         nodesMapping.associate(kNode, lwNode)
     }
 
-    fun exportIssueToLionweb(issue: Issue, id: String): DynamicNode {
-        val issueNode = DynamicNode(id, StarLasuLWLanguage.Issue)
+    fun exportIssueToLionweb(issue: Issue): DynamicNode {
+        val issueNode = IssueNode()
         issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName("message")!!, issue.message)
         issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName("position")!!, issue.position)
         setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName("severity")!!, issue.severity)
         setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName("type")!!, issue.type)
         return issueNode
+    }
+}
+
+class IssueNode : BaseNode() {
+    var type: IssueType? by property("type")
+    var message: String? by property("message")
+    var severity: IssueSeverity? by property("severity")
+    var position: Position? by property("position")
+
+    override fun getClassifier(): Concept {
+        return StarLasuLWLanguage.Issue
     }
 }
