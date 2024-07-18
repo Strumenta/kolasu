@@ -119,7 +119,7 @@ open class Node() : Origin, Destination, Serializable {
 
     @property:Internal
     override var source: Source?
-        get() = explicitlySetSource ?: origin?.source
+        get() = explicitlySetSource ?: position?.source ?: origin?.source
         set(value) {
             explicitlySetSource = value
             // This is a limit of the current API: to specify a Source we need to specify coordinates

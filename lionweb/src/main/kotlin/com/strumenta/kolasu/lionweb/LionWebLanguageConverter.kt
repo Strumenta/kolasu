@@ -22,6 +22,7 @@ import com.strumenta.kolasu.model.declaredFeatures
 import com.strumenta.kolasu.model.isConcept
 import com.strumenta.kolasu.model.isConceptInterface
 import com.strumenta.kolasu.model.isMarkedAsNodeType
+import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
@@ -73,6 +74,7 @@ class LionWebLanguageConverter {
             IssueType::class,
             (StarLasuLWLanguage.Issue.getFeatureByName("type") as Property).type as Enumeration
         )
+        registerMapping(ParsingResult::class, StarLasuLWLanguage.ParsingResult)
     }
 
     fun exportToLionWeb(kolasuLanguage: KolasuLanguage): LWLanguage {

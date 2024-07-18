@@ -1,10 +1,22 @@
 package com.strumenta.kolasu.parsing
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.FileSource
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PropertyDescription
+import com.strumenta.kolasu.model.Source
+import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueType
-import org.antlr.v4.runtime.*
+import org.antlr.v4.runtime.CharStream
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.Lexer
+import org.antlr.v4.runtime.Parser
+import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.Token
+import org.antlr.v4.runtime.TokenStream
 import org.antlr.v4.runtime.atn.ParserATNSimulator
 import org.antlr.v4.runtime.atn.PredictionContextCache
 import org.antlr.v4.runtime.misc.Interval
@@ -14,7 +26,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.nio.charset.Charset
-import java.util.*
+import java.util.LinkedList
 import kotlin.reflect.full.memberFunctions
 import kotlin.system.measureTimeMillis
 
@@ -42,7 +54,7 @@ interface TokenFactory<T : KolasuToken> {
             extractTokensFromParseTree(ptRoot)
             antlrTerminals.sortBy { it.symbol.tokenIndex }
             val tokens = antlrTerminals.map { convertToken(it) }.toMutableList()
-            LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime)
+            LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime, result.source)
         } else {
             null
         }
@@ -70,7 +82,8 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<
     override fun lex(
         inputStream: InputStream,
         charset: Charset,
-        onlyFromDefaultChannel: Boolean
+        onlyFromDefaultChannel: Boolean,
+        source: Source?
     ): LexingResult<T> {
         val issues = mutableListOf<Issue>()
         val tokens = mutableListOf<T>()
@@ -96,7 +109,7 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<
             }
         }
 
-        return LexingResult(issues, tokens, null, time)
+        return LexingResult(issues, tokens, null, time, source)
     }
 
     protected open fun attachListeners(lexer: Lexer, issues: MutableList<Issue>) {
@@ -215,7 +228,11 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
      * the [parse] method, that returns an AST which is simpler to use and query.
      */
     @JvmOverloads
-    fun parseFirstStage(inputStream: CharStream, measureLexingTime: Boolean = false): FirstStageParsingResult<C> {
+    fun parseFirstStage(
+        inputStream: CharStream,
+        measureLexingTime: Boolean = false,
+        source: Source? = null
+    ): FirstStageParsingResult<C> {
         val issues = LinkedList<Issue>()
         var root: C?
         var lexingTime: Long? = null
@@ -236,7 +253,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
                 verifyParseTree(parser, issues, root!!)
             }
         }
-        return FirstStageParsingResult(issues, root, null, null, time, lexingTime)
+        return FirstStageParsingResult(issues, root, null, null, time, lexingTime, source)
     }
 
     @JvmOverloads
@@ -279,7 +296,8 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
             inputStream.getText(Interval(0, inputStream.index() + 1)),
             null,
             firstStage,
-            now - start
+            now - start,
+            source
         )
     }
 

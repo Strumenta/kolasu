@@ -2,6 +2,8 @@ package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
+import com.strumenta.kolasu.ids.SimpleSourceIdProvider
+import com.strumenta.kolasu.ids.SourceShouldBeSetException
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.CompositeDestination
 import com.strumenta.kolasu.model.Multiplicity
@@ -9,6 +11,7 @@ import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.allFeatures
 import com.strumenta.kolasu.model.asContainment
 import com.strumenta.kolasu.model.assignParents
@@ -16,6 +19,7 @@ import com.strumenta.kolasu.model.isAttribute
 import com.strumenta.kolasu.model.isContainment
 import com.strumenta.kolasu.model.isReference
 import com.strumenta.kolasu.model.nodeOriginalProperties
+import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.transformation.MissingASTTransformation
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
@@ -43,6 +47,7 @@ import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.Primi
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.java.utils.CommonChecks
 import io.lionweb.lioncore.kotlin.BaseNode
+import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
@@ -742,15 +747,25 @@ class LionWebModelConverter(
     }
 
     private fun <T : Any> maybeInstantiateSpecialObject(kClass: KClass<T>, data: Node): T? {
-        return if (kClass == Issue::class) {
-            Issue(
-                attributeValue(data, data.classifier.getPropertyByName("type")!!) as IssueType,
-                attributeValue(data, data.classifier.getPropertyByName("message")!!) as String,
-                attributeValue(data, data.classifier.getPropertyByName("severity")!!) as IssueSeverity,
-                attributeValue(data, data.classifier.getPropertyByName("position")!!) as Position?
-            ) as T
-        } else {
-            null
+        return when (kClass) {
+            Issue::class -> {
+                Issue(
+                    attributeValue(data, data.classifier.getPropertyByName("type")!!) as IssueType,
+                    attributeValue(data, data.classifier.getPropertyByName("message")!!) as String,
+                    attributeValue(data, data.classifier.getPropertyByName("severity")!!) as IssueSeverity,
+                    attributeValue(data, data.classifier.getPropertyByName("position")!!) as Position?
+                ) as T
+            }
+            ParsingResult::class -> {
+                val root = data.getOnlyChildByContainmentName("root")
+                ParsingResult(
+                    data.getChildrenByContainmentName("issues").map { importModelFromLionWeb(it) as Issue },
+                    if (root != null) importModelFromLionWeb(root) as KNode else null
+                ) as T
+            }
+            else -> {
+                null
+            }
         }
     }
 
@@ -762,7 +777,7 @@ class LionWebModelConverter(
         nodesMapping.associate(kNode, lwNode)
     }
 
-    fun exportIssueToLionweb(issue: Issue): DynamicNode {
+    fun exportIssueToLionweb(issue: Issue): IssueNode {
         val issueNode = IssueNode()
         issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName("message")!!, issue.message)
         issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName("position")!!, issue.position)
@@ -770,15 +785,42 @@ class LionWebModelConverter(
         setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName("type")!!, issue.type)
         return issueNode
     }
+
+    fun exportParsingResultToLionweb(pr: ParsingResult<*>): ParsingResultNode {
+        val resultNode = ParsingResultNode(pr.source)
+        resultNode.setPropertyValue(StarLasuLWLanguage.ParsingResult.getPropertyByName("code")!!, pr.code)
+        val root = if (pr.root != null) exportModelToLionWeb(pr.root!!, considerParent = false) else null
+        resultNode.addChild(StarLasuLWLanguage.ParsingResult.getContainmentByName("root")!!, root)
+        val issuesContainment = StarLasuLWLanguage.ParsingResult.getContainmentByName("issues")!!
+        pr.issues.forEach {
+            resultNode.addChild(issuesContainment, exportIssueToLionweb(it))
+        }
+        return resultNode
+    }
 }
 
 class IssueNode : BaseNode() {
-    var type: IssueType? by property("type")
+    var type: EnumerationValue? by property("type")
     var message: String? by property("message")
-    var severity: IssueSeverity? by property("severity")
+    var severity: EnumerationValue? by property("severity")
     var position: Position? by property("position")
 
     override fun getClassifier(): Concept {
         return StarLasuLWLanguage.Issue
+    }
+}
+
+class ParsingResultNode(val source: Source?) : BaseNode() {
+    override fun calculateID(): String? {
+        try {
+            return SimpleSourceIdProvider().sourceId(source) + "_ParsingResult"
+        } catch (_: SourceShouldBeSetException) {
+            // return null
+        }
+        return super.calculateID()
+    }
+
+    override fun getClassifier(): Concept {
+        return StarLasuLWLanguage.ParsingResult
     }
 }

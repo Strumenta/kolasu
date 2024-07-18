@@ -17,6 +17,10 @@ private const val PLACEHOLDER_NODE = "PlaceholderNode"
 
 object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
 
+    val CommonElement: Interface
+    val Issue: Concept
+    val ParsingResult: Concept
+
     init {
         id = "com-strumenta-StarLasu"
         key = "com_strumenta_starlasu"
@@ -32,22 +36,28 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
 
         addPlaceholderNodeAnnotation(astNode)
 
-        val commonElement = addInterface("CommonElement")
-        addInterface("BehaviorDeclaration").apply { addExtendedInterface(commonElement) }
-        addInterface("Documentation").apply { addExtendedInterface(commonElement) }
-        addInterface("EntityDeclaration").apply { addExtendedInterface(commonElement) }
-        addInterface("EntityGroupDeclaration").apply { addExtendedInterface(commonElement) }
-        addInterface("Expression").apply { addExtendedInterface(commonElement) }
-        addInterface("Parameter").apply { addExtendedInterface(commonElement) }
-        addInterface("PlaceholderElement").apply { addExtendedInterface(commonElement) }
-        addInterface("Statement").apply { addExtendedInterface(commonElement) }
-        addInterface("TypeAnnotation").apply { addExtendedInterface(commonElement) }
+        CommonElement = addInterface("CommonElement")
+        addInterface("BehaviorDeclaration").apply { addExtendedInterface(CommonElement) }
+        addInterface("Documentation").apply { addExtendedInterface(CommonElement) }
+        addInterface("EntityDeclaration").apply { addExtendedInterface(CommonElement) }
+        addInterface("EntityGroupDeclaration").apply { addExtendedInterface(CommonElement) }
+        addInterface("Expression").apply { addExtendedInterface(CommonElement) }
+        addInterface("Parameter").apply { addExtendedInterface(CommonElement) }
+        addInterface("PlaceholderElement").apply { addExtendedInterface(CommonElement) }
+        addInterface("Statement").apply { addExtendedInterface(CommonElement) }
+        addInterface("TypeAnnotation").apply { addExtendedInterface(CommonElement) }
 
-        addConcept("Issue").apply {
+        Issue = addConcept("Issue").apply {
             addProperty("type", addEnumerationFromClass(this@StarLasuLWLanguage, IssueType::class))
             addProperty("message", LionCoreBuiltins.getString())
             addProperty("severity", addEnumerationFromClass(this@StarLasuLWLanguage, IssueSeverity::class))
             addProperty("position", position, Multiplicity.OPTIONAL)
+        }
+
+        ParsingResult = addConcept("ParsingResult").apply {
+            addContainment("issues", Issue, Multiplicity.MANY)
+            addContainment("root", ASTNode, Multiplicity.OPTIONAL)
+            addProperty("code", LionCoreBuiltins.getString(), Multiplicity.OPTIONAL)
         }
     }
 
@@ -117,9 +127,5 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
         get() = StarLasuLWLanguage.getInterfaceByName("Statement")!!
     val TypeAnnotation: Interface
         get() = StarLasuLWLanguage.getInterfaceByName("TypeAnnotation")!!
-    val CommonElement: Interface
-        get() = StarLasuLWLanguage.getInterfaceByName("CommonElement")!!
 
-    val Issue: Concept
-        get() = StarLasuLWLanguage.getConceptByName("Issue")!!
 }

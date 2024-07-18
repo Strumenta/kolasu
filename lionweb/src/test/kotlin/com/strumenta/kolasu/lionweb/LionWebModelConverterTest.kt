@@ -3,6 +3,7 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.ASTRoot
 import com.strumenta.kolasu.model.CompositeDestination
+import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
@@ -12,6 +13,7 @@ import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.pos
 import com.strumenta.kolasu.model.withPosition
+import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.transformation.MissingASTTransformation
 import com.strumenta.kolasu.validation.Issue
@@ -20,6 +22,7 @@ import com.strumenta.kolasu.validation.IssueType
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.serialization.JsonSerialization
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -894,13 +897,52 @@ class LionWebModelConverterTest {
         val converter = LionWebModelConverter()
         val exportedI1 = converter.exportIssueToLionweb(i1)
         assertNull(exportedI1.id)
+        assertEquals("LEXICAL", exportedI1.type?.enumerationLiteral?.name)
+        assertEquals("An issue", exportedI1.message)
+        assertEquals("ERROR", exportedI1.severity?.enumerationLiteral?.name)
+        assertNull(exportedI1.position)
         val reimportedI1 = converter.importModelFromLionWeb(exportedI1) as Issue
         val reimportedI2 = converter.importModelFromLionWeb(converter.exportIssueToLionweb(i2)) as Issue
-        val reimportedI3 = converter.importModelFromLionWeb(converter.exportIssueToLionweb(i3)) as Issue
+        val exportedI3 = converter.exportIssueToLionweb(i3)
+        assertEquals(exportedI3.position, pos(1, 2, 3, 4))
+        val reimportedI3 = converter.importModelFromLionWeb(exportedI3) as Issue
 
         assertEquals(i1, reimportedI1)
         assertEquals(i2, reimportedI2)
         assertEquals(i3, reimportedI3)
+    }
+
+    @Test
+    fun exportImportParsingResult() {
+        val source = FileSource(File(""))
+        val i1 = Issue(IssueType.LEXICAL, "An issue")
+        val i2 = Issue(IssueType.SYNTACTIC, "Another issue", IssueSeverity.WARNING)
+        val i3 = Issue(IssueType.SEMANTIC, "Yet another issue", IssueSeverity.INFO, pos(1, 2, 3, 4))
+        val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
+        a1.ref.referred = a1
+        val b2 = SimpleNodeB("some magic value")
+        val b3_1 = SimpleNodeB("some other value")
+        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b3_1)
+        val root = SimpleRoot(
+            12345,
+            mutableListOf(
+                a1,
+                b2,
+                a3
+            )
+        ).withPosition(Position(Point(1, 2), Point(3, 4), source))
+        root.assignParents()
+        val parsingResult = ParsingResult(listOf(i1, i2, i3), root, "bla bla", source = source)
+
+        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
+            addClass(SimpleRoot::class)
+        }
+        val converter = LionWebModelConverter()
+        converter.exportLanguageToLionWeb(kLanguage)
+        val reimported = converter.importModelFromLionWeb(converter.exportParsingResultToLionweb(parsingResult)) as ParsingResult<*>
+        assertASTsAreEqual(parsingResult.root!!, reimported.root!!)
+        assertEquals(3, parsingResult.issues.size)
+        assertEquals("bla bla", parsingResult.code)
     }
 }
 
