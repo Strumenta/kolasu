@@ -939,7 +939,8 @@ class LionWebModelConverterTest {
         }
         val converter = LionWebModelConverter()
         converter.exportLanguageToLionWeb(kLanguage)
-        val reimported = converter.importModelFromLionWeb(converter.exportParsingResultToLionweb(parsingResult)) as ParsingResult<*>
+        val exported = converter.exportParsingResultToLionweb(parsingResult)
+        val reimported = converter.importModelFromLionWeb(exported) as ParsingResult<*>
         assertASTsAreEqual(parsingResult.root!!, reimported.root!!)
         assertEquals(3, parsingResult.issues.size)
         assertEquals("bla bla", parsingResult.code)

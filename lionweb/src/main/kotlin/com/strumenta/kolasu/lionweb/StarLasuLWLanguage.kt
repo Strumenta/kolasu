@@ -127,5 +127,4 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
         get() = StarLasuLWLanguage.getInterfaceByName("Statement")!!
     val TypeAnnotation: Interface
         get() = StarLasuLWLanguage.getInterfaceByName("TypeAnnotation")!!
-
 }
