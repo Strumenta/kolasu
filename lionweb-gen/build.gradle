@@ -21,8 +21,8 @@ dependencies {
     cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    implementation("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebVersion")
-    implementation("io.lionweb.lionweb-java:lionweb-java-2023.1-emf:$lionwebVersion")
+    implementation("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebJavaVersion")
+    implementation("io.lionweb.lionweb-java:lionweb-java-2023.1-emf:$lionwebJavaVersion")
     api(project(":core"))
     api(project(":emf"))
     api(project(":lionweb"))

@@ -32,7 +32,7 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
             addProperty("position", position, Multiplicity.OPTIONAL)
         }
         astNode.addReference("originalNode", astNode, Multiplicity.OPTIONAL)
-        astNode.addReference("transpiledNode", astNode, Multiplicity.MANY)
+        astNode.addReference("transpiledNodes", astNode, Multiplicity.MANY)
 
         addPlaceholderNodeAnnotation(astNode)
 
@@ -95,7 +95,7 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
         get() = ASTNode.getReferenceByName("originalNode")!!
 
     val ASTNodeTranspiledNodes: Reference
-        get() = ASTNode.getReferenceByName("transpiledNode")!!
+        get() = ASTNode.getReferenceByName("transpiledNodes")!!
 
     val ASTNode: Concept
         get() = StarLasuLWLanguage.getConceptByName("ASTNode")!!

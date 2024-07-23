@@ -20,4 +20,4 @@ jobs:
         distribution: 'adopt'
         java-version: ${{ matrix.java }}
     - name: Test
-      run: ./gradlew check
+      run: ./gradlew functionalTest

@@ -10,7 +10,7 @@ plugins {
 
 val kspVersion = extra["kspVersion"] as String
 val kotlin_version = extra["kotlin_version"] as String
-val lionwebVersion = extra["lionwebVersion"] as String
+val lionwebJavaVersion = extra["lionwebJavaVersion"] as String
 val gson_version = extra["gson_version"] as String
 val lionwebGenGradlePluginID = extra["lionwebGenGradlePluginID"] as String
 val completeKspVersion = if (kspVersion.contains("-")) kspVersion else "${kotlin_version}-${kspVersion}"
@@ -19,7 +19,7 @@ dependencies {
     api("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
-    implementation("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebVersion")
+    implementation("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebJavaVersion")
     api(project(":lionweb-gen"))
     testImplementation(project(":lionweb-ksp"))
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
@@ -34,7 +34,7 @@ buildConfig {
     buildConfigField("String", "PLUGIN_GROUP", "\"${project.group}\"")
     buildConfigField("String", "PLUGIN_NAME", "\"${project.name}\"")
     buildConfigField("String", "PLUGIN_VERSION", "\"${project.version}\"")
-    buildConfigField("String", "LIONCORE_VERSION", "\"${lionwebVersion}\"")
+    buildConfigField("String", "LIONCORE_VERSION", "\"${lionwebJavaVersion}\"")
 }
 
 gradlePlugin {

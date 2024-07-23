@@ -11,4 +11,5 @@ include 'lionweb'
 include 'lionweb-gen'
 include 'lionweb-ksp'
 include 'lionweb-gen-gradle'
+include 'lionwebrepo-client'
 

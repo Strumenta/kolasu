@@ -53,6 +53,16 @@ class KolasuClassHandler(val kolasuKClass: KClass<*>, val kolasuEClass: EClass) 
     }
 
     override fun external(): Boolean = true
+
+    companion object {
+        fun forKClass(kclass: KClass<*>): KolasuClassHandler {
+            return KolasuClassHandler(
+                kclass,
+                STARLASU_METAMODEL
+                    .getEClass(kclass.simpleName!!)
+            )
+        }
+    }
 }
 
 class KolasuDataTypeHandler(val kolasuKClass: KClass<*>, val kolasuDataType: EDataType) : EDataTypeHandler {
@@ -78,18 +88,15 @@ val PossiblyNamedHandler = KolasuClassHandler(PossiblyNamed::class, STARLASU_MET
 val ReferenceByNameHandler = KolasuClassHandler(ReferenceByName::class, STARLASU_METAMODEL.getEClass("ReferenceByName"))
 val ResultHandler = KolasuClassHandler(Result::class, STARLASU_METAMODEL.getEClass("Result"))
 
-val StatementHandler = KolasuClassHandler(Statement::class, STARLASU_METAMODEL.getEClass("Statement"))
-val ExpressionHandler = KolasuClassHandler(Expression::class, STARLASU_METAMODEL.getEClass("Expression"))
-val EntityDeclarationHandler = KolasuClassHandler(
-    EntityDeclaration::class,
-    STARLASU_METAMODEL
-        .getEClass("EntityDeclaration")
-)
-val PlaceholderElementHandler = KolasuClassHandler(
-    PlaceholderElement::class,
-    STARLASU_METAMODEL
-        .getEClass("PlaceholderElement")
-)
+val StatementHandler = KolasuClassHandler.forKClass(Statement::class)
+val ExpressionHandler = KolasuClassHandler.forKClass(Expression::class)
+val EntityDeclarationHandler = KolasuClassHandler.forKClass(EntityDeclaration::class)
+val EntityGroupDeclarationHandler = KolasuClassHandler.forKClass(EntityGroupDeclaration::class)
+val TypeAnnotationHandler = KolasuClassHandler.forKClass(TypeAnnotation::class)
+val PlaceholderElementHandler = KolasuClassHandler.forKClass(PlaceholderElement::class)
+val BehaviorDeclarationHandler = KolasuClassHandler.forKClass(BehaviorDeclaration::class)
+val ParameterHandler = KolasuClassHandler.forKClass(Parameter::class)
+val DocumentationHandler = KolasuClassHandler.forKClass(Documentation::class)
 
 val ErrorNodeHandler = KolasuClassHandler(ErrorNode::class, STARLASU_METAMODEL.getEClass("ErrorNode"))
 val GenericErrorNodeHandler = KolasuClassHandler(
