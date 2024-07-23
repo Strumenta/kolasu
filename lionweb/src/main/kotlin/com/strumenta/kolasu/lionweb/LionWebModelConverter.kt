@@ -764,7 +764,9 @@ class LionWebModelConverter(
             ParsingResult::class -> {
                 val root = data.getOnlyChildByContainmentName(ParsingResult<*>::root.name)
                 ParsingResult(
-                    data.getChildrenByContainmentName(ParsingResult<*>::issues.name).map { importModelFromLionWeb(it) as Issue },
+                    data.getChildrenByContainmentName(ParsingResult<*>::issues.name).map {
+                        importModelFromLionWeb(it) as Issue
+                    },
                     if (root != null) importModelFromLionWeb(root) as KNode else null
                 )
             }
