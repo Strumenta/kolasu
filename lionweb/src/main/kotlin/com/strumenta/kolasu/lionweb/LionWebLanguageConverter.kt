@@ -68,11 +68,11 @@ class LionWebLanguageConverter {
         registerMapping(Issue::class, StarLasuLWLanguage.Issue)
         classesAndEnumerations.associate(
             IssueSeverity::class,
-            (StarLasuLWLanguage.Issue.getFeatureByName("severity") as Property).type as Enumeration
+            (StarLasuLWLanguage.Issue.getFeatureByName(Issue::severity.name) as Property).type as Enumeration
         )
         classesAndEnumerations.associate(
             IssueType::class,
-            (StarLasuLWLanguage.Issue.getFeatureByName("type") as Property).type as Enumeration
+            (StarLasuLWLanguage.Issue.getFeatureByName(Issue::type.name) as Property).type as Enumeration
         )
         registerMapping(ParsingResult::class, StarLasuLWLanguage.ParsingResult)
     }

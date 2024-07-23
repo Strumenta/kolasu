@@ -646,7 +646,7 @@ class LionWebModelConverter(
         T {
         val specialObject = maybeInstantiateSpecialObject(kClass, data)
         if (specialObject != null) {
-            return specialObject
+            return specialObject as T
         }
         val constructor: KFunction<Any> = when {
             kClass.constructors.size == 1 -> {
@@ -746,22 +746,27 @@ class LionWebModelConverter(
         return kNode
     }
 
-    private fun <T : Any> maybeInstantiateSpecialObject(kClass: KClass<T>, data: Node): T? {
+    /**
+     * We treat some Kolasu classes that are not Nodes specially, such as Issue or ParsingResult.
+     * This method checks if we are to instantiate one of those, and returns the instance with all properties filled;
+     * or it returns null when it detects that we're going to instantiate a proper Node.
+     */
+    private fun maybeInstantiateSpecialObject(kClass: KClass<*>, data: Node): Any? {
         return when (kClass) {
             Issue::class -> {
                 Issue(
-                    attributeValue(data, data.classifier.getPropertyByName("type")!!) as IssueType,
-                    attributeValue(data, data.classifier.getPropertyByName("message")!!) as String,
-                    attributeValue(data, data.classifier.getPropertyByName("severity")!!) as IssueSeverity,
-                    attributeValue(data, data.classifier.getPropertyByName("position")!!) as Position?
-                ) as T
+                    attributeValue(data, data.classifier.getPropertyByName(Issue::type.name)!!) as IssueType,
+                    attributeValue(data, data.classifier.getPropertyByName(Issue::message.name)!!) as String,
+                    attributeValue(data, data.classifier.getPropertyByName(Issue::severity.name)!!) as IssueSeverity,
+                    attributeValue(data, data.classifier.getPropertyByName(Issue::position.name)!!) as Position?
+                )
             }
             ParsingResult::class -> {
-                val root = data.getOnlyChildByContainmentName("root")
+                val root = data.getOnlyChildByContainmentName(ParsingResult<*>::root.name)
                 ParsingResult(
-                    data.getChildrenByContainmentName("issues").map { importModelFromLionWeb(it) as Issue },
+                    data.getChildrenByContainmentName(ParsingResult<*>::issues.name).map { importModelFromLionWeb(it) as Issue },
                     if (root != null) importModelFromLionWeb(root) as KNode else null
-                ) as T
+                )
             }
             else -> {
                 null
@@ -812,12 +817,11 @@ class IssueNode : BaseNode() {
 
 class ParsingResultNode(val source: Source?) : BaseNode() {
     override fun calculateID(): String? {
-        try {
-            return SimpleSourceIdProvider().sourceId(source) + "_ParsingResult"
+        return try {
+            SimpleSourceIdProvider().sourceId(source) + "_ParsingResult"
         } catch (_: SourceShouldBeSetException) {
-            // return null
+            super.calculateID()
         }
-        return super.calculateID()
     }
 
     override fun getClassifier(): Concept {
