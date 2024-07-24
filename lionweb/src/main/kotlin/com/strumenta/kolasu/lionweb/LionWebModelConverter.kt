@@ -2,6 +2,8 @@ package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
+import com.strumenta.kolasu.ids.SimpleSourceIdProvider
+import com.strumenta.kolasu.ids.SourceShouldBeSetException
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.model.FileSource
@@ -44,6 +46,8 @@ import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.java.utils.CommonChecks
+import io.lionweb.lioncore.kotlin.BaseNode
+import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
@@ -171,17 +175,7 @@ class LionWebModelConverter(
                                         )
                                 val kValue = kNode.getPropertySimpleValue<Any>(kAttribute)
                                 if (kValue is Enum<*>) {
-                                    val kClass: EnumKClass = kValue::class as EnumKClass
-                                    val enumeration =
-                                        languageConverter.getKolasuClassesToEnumerationsMapping()[kClass]
-                                            ?: throw IllegalStateException("No enumeration for enum class $kClass")
-                                    val enumerationLiteral =
-                                        enumeration.literals.find { it.name == kValue.name }
-                                            ?: throw IllegalStateException(
-                                                "No enumeration literal with name ${kValue.name} " +
-                                                    "in enumeration $enumeration",
-                                            )
-                                    lwNode.setPropertyValue(feature, EnumerationValueImpl(enumerationLiteral))
+                                    setEnumProperty(lwNode, feature, kValue)
                                 } else {
                                     lwNode.setPropertyValue(feature, kValue)
                                 }
@@ -309,6 +303,22 @@ class LionWebModelConverter(
             (result as DynamicNode).parent = ProxyNode(parentNodeId)
         }
         return result
+    }
+
+    private fun setEnumProperty(
+        lwNode: LWNode,
+        feature: Property,
+        kValue: Enum<*>
+    ) {
+        val kClass: EnumKClass = kValue::class
+        val enumeration = languageConverter.getKolasuClassesToEnumerationsMapping()[kClass]
+            ?: throw IllegalStateException("No enumeration for enum class $kClass")
+        val enumerationLiteral = enumeration.literals.find { it.name == kValue.name }
+            ?: throw IllegalStateException(
+                "No enumeration literal with name ${kValue.name} " +
+                    "in enumeration $enumeration"
+            )
+        lwNode.setPropertyValue(feature, EnumerationValueImpl(enumerationLiteral))
     }
 
     private fun setOriginalNode(
@@ -693,6 +703,10 @@ class LionWebModelConverter(
         data: Node,
         referencesPostponer: ReferencesPostponer,
     ): T {
+        val specialObject = maybeInstantiateSpecialObject(kClass, data)
+        if (specialObject != null) {
+            return specialObject as T
+        }
         val constructor: KFunction<Any> =
             when {
                 kClass.constructors.size == 1 -> {
@@ -799,6 +813,36 @@ class LionWebModelConverter(
         return kNode
     }
 
+    /**
+     * We treat some Kolasu classes that are not Nodes specially, such as Issue or ParsingResult.
+     * This method checks if we are to instantiate one of those, and returns the instance with all properties filled;
+     * or it returns null when it detects that we're going to instantiate a proper Node.
+     */
+    private fun maybeInstantiateSpecialObject(kClass: KClass<*>, data: Node): Any? {
+        return when (kClass) {
+            Issue::class -> {
+                Issue(
+                    attributeValue(data, data.classifier.getPropertyByName(Issue::type.name)!!) as IssueType,
+                    attributeValue(data, data.classifier.getPropertyByName(Issue::message.name)!!) as String,
+                    attributeValue(data, data.classifier.getPropertyByName(Issue::severity.name)!!) as IssueSeverity,
+                    attributeValue(data, data.classifier.getPropertyByName(Issue::position.name)!!) as Position?
+                )
+            }
+            ParsingResult::class -> {
+                val root = data.getOnlyChildByContainmentName(ParsingResult<*>::root.name)
+                ParsingResult(
+                    data.getChildrenByContainmentName(ParsingResult<*>::issues.name).map {
+                        importModelFromLionWeb(it) as Issue
+                    },
+                    if (root != null) importModelFromLionWeb(root) as KNode else null
+                )
+            }
+            else -> {
+                null
+            }
+        }
+    }
+
     private fun findConcept(kNode: NodeLike): Concept {
         return synchronized(languageConverter) { languageConverter.correspondingConcept(kNode.nodeType) }
     }
@@ -815,6 +859,52 @@ class LionWebModelConverter(
         lwNode: LWNode,
     ) {
         nodesMapping.associate(kNode, lwNode)
+    }
+
+    fun exportIssueToLionweb(issue: Issue): IssueNode {
+        val issueNode = IssueNode()
+        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName("message")!!, issue.message)
+        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName("position")!!, issue.position)
+        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName("severity")!!, issue.severity)
+        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName("type")!!, issue.type)
+        return issueNode
+    }
+
+    fun exportParsingResultToLionweb(pr: ParsingResult<*>): ParsingResultNode {
+        val resultNode = ParsingResultNode(pr.source)
+        resultNode.setPropertyValue(StarLasuLWLanguage.ParsingResult.getPropertyByName("code")!!, pr.code)
+        val root = if (pr.root != null) exportModelToLionWeb(pr.root!!, considerParent = false) else null
+        resultNode.addChild(StarLasuLWLanguage.ParsingResult.getContainmentByName("root")!!, root)
+        val issuesContainment = StarLasuLWLanguage.ParsingResult.getContainmentByName("issues")!!
+        pr.issues.forEach {
+            resultNode.addChild(issuesContainment, exportIssueToLionweb(it))
+        }
+        return resultNode
+    }
+}
+
+class IssueNode : BaseNode() {
+    var type: EnumerationValue? by property("type")
+    var message: String? by property("message")
+    var severity: EnumerationValue? by property("severity")
+    var position: Position? by property("position")
+
+    override fun getClassifier(): Concept {
+        return StarLasuLWLanguage.Issue
+    }
+}
+
+class ParsingResultNode(val source: Source?) : BaseNode() {
+    override fun calculateID(): String? {
+        return try {
+            SimpleSourceIdProvider().sourceId(source) + "_ParsingResult"
+        } catch (_: SourceShouldBeSetException) {
+            super.calculateID()
+        }
+    }
+
+    override fun getClassifier(): Concept {
+        return StarLasuLWLanguage.ParsingResult
     }
 }
 

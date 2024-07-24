@@ -90,6 +90,17 @@ class LionWebLanguageConverter {
         registerMapping(PlaceholderElement::class, StarLasuLWLanguage.PlaceholderElement)
         registerMapping(Statement::class, StarLasuLWLanguage.Statement)
         registerMapping(TypeAnnotation::class, StarLasuLWLanguage.TypeAnnotation)
+
+        registerMapping(Issue::class, StarLasuLWLanguage.Issue)
+        classesAndEnumerations.associate(
+            IssueSeverity::class,
+            (StarLasuLWLanguage.Issue.getFeatureByName(Issue::severity.name) as Property).type as Enumeration
+        )
+        classesAndEnumerations.associate(
+            IssueType::class,
+            (StarLasuLWLanguage.Issue.getFeatureByName(Issue::type.name) as Property).type as Enumeration
+        )
+        registerMapping(ParsingResult::class, StarLasuLWLanguage.ParsingResult)
     }
 
     fun exportToLionWeb(starLasuLanguage: StarLasuLanguage): LWLanguage {
@@ -513,21 +524,7 @@ class LionWebLanguageConverter {
     ): Enumeration {
         val enumeration = classesAndEnumerations.byA(kClass as EnumKClass)
         if (enumeration == null) {
-            val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
-            newEnumeration.id = (lionwebLanguage.id ?: "unknown_language") + "_" + newEnumeration.name
-            newEnumeration.key = newEnumeration.name
-
-            val entries = kClass.java.enumConstants
-            entries.forEach { entry ->
-                newEnumeration.addLiteral(
-                    EnumerationLiteral(newEnumeration, entry.name).apply {
-                        id = newEnumeration.id + "-" + entry.name
-                        key = newEnumeration.key + "-" + entry.name
-                    },
-                )
-            }
-
-            lionwebLanguage.addElement(newEnumeration)
+            val newEnumeration = addEnumerationFromClass(lionwebLanguage, kClass)
             classesAndEnumerations.associate(kClass, newEnumeration)
             return newEnumeration
         } else {
@@ -661,3 +658,25 @@ fun com.strumenta.kolasu.language.DataType.kClass(): KClass<*> =
         this == booleanType -> Boolean::class
         else -> Class.forName(this.name).kotlin
     }
+
+fun addEnumerationFromClass(
+    lionwebLanguage: LWLanguage,
+    kClass: EnumKClass
+): Enumeration {
+    val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
+    newEnumeration.id = (lionwebLanguage.id ?: "unknown_language") + "_" + newEnumeration.name
+    newEnumeration.key = newEnumeration.name
+
+    val entries = kClass.java.enumConstants
+    entries.forEach { entry ->
+        newEnumeration.addLiteral(
+            EnumerationLiteral(newEnumeration, entry.name).apply {
+                id = newEnumeration.id + "-" + entry.name
+                key = newEnumeration.key + "-" + entry.name
+            }
+        )
+    }
+
+    lionwebLanguage.addElement(newEnumeration)
+    return newEnumeration
+}

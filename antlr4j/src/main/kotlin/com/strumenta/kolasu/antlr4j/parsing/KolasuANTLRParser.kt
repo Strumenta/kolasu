@@ -165,6 +165,7 @@ abstract class KolasuANTLRParser<R : NodeLike, P : Parser, C : ParserRuleContext
     fun parseFirstStage(
         inputStream: CharStream,
         measureLexingTime: Boolean = false,
+        source: Source? = null
     ): FirstStageParsingResult<C> {
         val issues = LinkedList<Issue>()
         var root: C?
@@ -188,7 +189,7 @@ abstract class KolasuANTLRParser<R : NodeLike, P : Parser, C : ParserRuleContext
                     verifyParseTree(parser, issues, root!!)
                 }
             }
-        return FirstStageParsingResult(issues, root, null, null, time, lexingTime)
+        return FirstStageParsingResult(issues, root, null, null, time, lexingTime, source)
     }
 
     @JvmOverloads
@@ -241,6 +242,7 @@ abstract class KolasuANTLRParser<R : NodeLike, P : Parser, C : ParserRuleContext
             null,
             now - start,
             firstStage,
+            source
         )
     }
 

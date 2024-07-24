@@ -30,6 +30,7 @@ interface KolasuLexer<T : KolasuToken> {
         inputStream: InputStream,
         charset: Charset = Charsets.UTF_8,
         onlyFromDefaultChannel: Boolean = true,
+        source: Source? = null
     ): LexingResult<T>
 
     /**

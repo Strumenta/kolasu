@@ -8,9 +8,9 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.traversing.walk
-import junit.framework.TestCase.assertNotNull
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 object YetAnotherStarLasuLanguageInstance : StarLasuLanguage("com.strumenta.kolasu.lionweb") {
     init {
