@@ -1,6 +1,9 @@
 package com.strumenta.kolasu.serialization
 
-import com.google.gson.*
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
@@ -9,11 +12,8 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
-import java.lang.IllegalStateException
-import java.lang.UnsupportedOperationException
 import java.lang.reflect.InvocationTargetException
-import java.util.*
-import kotlin.collections.HashMap
+import java.util.LinkedList
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -171,7 +171,7 @@ class JsonDeserializer {
     }
 
     fun <T : Node> deserializeParsingResult(rootClass: Class<T>, json: String): ParsingResult<T> {
-        val jo = JsonParser().parse(json).asJsonObject
+        val jo = JsonParser.parseString(json).asJsonObject
         val issues = jo["issues"].asJsonArray.map { it.asJsonObject }.map {
             val type = IssueType.valueOf(it["type"].asString)
             val message = it["message"].asString

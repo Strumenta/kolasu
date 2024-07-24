@@ -3,12 +3,20 @@ package com.strumenta.kolasu.parsing
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.utils.capitalize
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
-import org.antlr.v4.runtime.*
+import org.antlr.v4.runtime.BaseErrorListener
+import org.antlr.v4.runtime.CommonToken
+import org.antlr.v4.runtime.Lexer
+import org.antlr.v4.runtime.Parser
+import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.RecognitionException
+import org.antlr.v4.runtime.Recognizer
+import org.antlr.v4.runtime.Token
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -23,11 +31,13 @@ import java.nio.charset.Charset
  * @param issues a list of issues encountered while processing the code.
  * @param data the result of the process.
  * @param code the processed source code.
+ * @param source where the source code comes from.
  */
 open class CodeProcessingResult<D>(
     val issues: List<Issue>,
     val data: D?,
-    val code: String? = null
+    val code: String? = null,
+    val source: Source? = null
 ) : Serializable {
     val correct: Boolean
         get() = issues.none { it.severity != IssueSeverity.INFO }
@@ -84,8 +94,9 @@ class LexingResult<T : KolasuToken>(
     issues: List<Issue>,
     val tokens: List<T>,
     code: String? = null,
-    val time: Long? = null
-) : CodeProcessingResult<List<T>>(issues, tokens, code) {
+    val time: Long? = null,
+    source: Source? = null
+) : CodeProcessingResult<List<T>>(issues, tokens, code, source) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -113,8 +124,9 @@ class FirstStageParsingResult<C : ParserRuleContext>(
     code: String? = null,
     val incompleteNode: Node? = null,
     val time: Long? = null,
-    val lexingTime: Long? = null
-) : CodeProcessingResult<C>(issues, root, code) {
+    val lexingTime: Long? = null,
+    source: Source? = null
+) : CodeProcessingResult<C>(issues, root, code, source) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is FirstStageParsingResult<*>) return false
@@ -149,8 +161,9 @@ class ParsingResult<RootNode : Node>(
     code: String? = null,
     val incompleteNode: Node? = null,
     val firstStage: FirstStageParsingResult<*>? = null,
-    val time: Long? = null
-) : CodeProcessingResult<RootNode>(issues, root, code) {
+    val time: Long? = null,
+    source: Source? = null
+) : CodeProcessingResult<RootNode>(issues, root, code, source) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -194,7 +207,8 @@ interface KolasuLexer<T : KolasuToken> : Serializable {
     fun lex(
         inputStream: InputStream,
         charset: Charset = Charsets.UTF_8,
-        onlyFromDefaultChannel: Boolean = true
+        onlyFromDefaultChannel: Boolean = true,
+        source: Source? = null
     ): LexingResult<T>
 
     /**

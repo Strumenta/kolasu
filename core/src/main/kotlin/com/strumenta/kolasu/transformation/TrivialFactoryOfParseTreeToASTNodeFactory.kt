@@ -134,7 +134,7 @@ inline fun <reified S : RuleContext, reified T : Node> ParseTreeToASTTransformer
     }
 }
 
-inline fun <T : Any> KClass<T>.preferredConstructor(): KFunction<T> {
+fun <T : Any> KClass<T>.preferredConstructor(): KFunction<T> {
     val constructors = this.constructors
     return if (constructors.size != 1) {
         if (this.primaryConstructor != null) {
