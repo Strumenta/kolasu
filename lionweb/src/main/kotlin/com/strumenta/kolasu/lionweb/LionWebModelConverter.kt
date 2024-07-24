@@ -49,6 +49,7 @@ import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.Primi
 import io.lionweb.lioncore.java.serialization.SerializationProvider
 import io.lionweb.lioncore.java.utils.CommonChecks
 import io.lionweb.lioncore.kotlin.BaseNode
+import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
 import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
