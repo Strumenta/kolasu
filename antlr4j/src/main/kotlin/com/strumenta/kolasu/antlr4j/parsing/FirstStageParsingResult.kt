@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.antlr4j.parsing
 
 import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.parsing.CodeProcessingResult
 import com.strumenta.kolasu.validation.Issue
 import org.antlr.v4.runtime.ParserRuleContext
@@ -12,7 +13,8 @@ class FirstStageParsingResult<C : ParserRuleContext>(
     val incompleteNode: NodeLike? = null,
     val time: Long? = null,
     val lexingTime: Long? = null,
-) : CodeProcessingResult<C>(issues, root, code) {
+    source: Source? = null,
+) : CodeProcessingResult<C>(issues, root, code, source) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is FirstStageParsingResult<*>) return false

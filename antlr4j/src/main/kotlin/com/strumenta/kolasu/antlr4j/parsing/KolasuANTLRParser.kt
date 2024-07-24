@@ -165,7 +165,7 @@ abstract class KolasuANTLRParser<R : NodeLike, P : Parser, C : ParserRuleContext
     fun parseFirstStage(
         inputStream: CharStream,
         measureLexingTime: Boolean = false,
-        source: Source? = null
+        source: Source? = null,
     ): FirstStageParsingResult<C> {
         val issues = LinkedList<Issue>()
         var root: C?
@@ -242,7 +242,7 @@ abstract class KolasuANTLRParser<R : NodeLike, P : Parser, C : ParserRuleContext
             null,
             now - start,
             firstStage,
-            source
+            source,
         )
     }
 
@@ -344,4 +344,5 @@ class ParsingResultWithFirstStage<RootNode : NodeLike, P : ParserRuleContext>(
     incompleteNode: NodeLike? = null,
     time: Long? = null,
     val firstStage: FirstStageParsingResult<P>,
-) : ParsingResult<RootNode>(issues, root, code, incompleteNode, time)
+    source: Source? = null,
+) : ParsingResult<RootNode>(issues, root, code, incompleteNode, time, source)

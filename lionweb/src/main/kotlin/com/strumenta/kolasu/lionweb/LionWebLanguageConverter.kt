@@ -28,6 +28,10 @@ import com.strumenta.kolasu.model.TypeAnnotation
 import com.strumenta.kolasu.model.declaredFeatures
 import com.strumenta.kolasu.model.isConcept
 import com.strumenta.kolasu.model.isConceptInterface
+import com.strumenta.kolasu.parsing.ParsingResult
+import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueSeverity
+import com.strumenta.kolasu.validation.IssueType
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.DataType
 import io.lionweb.lioncore.java.language.Enumeration
@@ -71,8 +75,8 @@ class LionWebLanguageConverter {
     private val sLanguagesMapping = BiMap<StarLasuLanguage, LWLanguage>()
 
     init {
-        val starLasuKLanguage = KolasuLanguage(StarLasuLWLanguage.name)
-        kLanguagesMapping.associate(starLasuKLanguage, StarLasuLWLanguage)
+        val starLasuKLanguage = StarLasuLanguage(StarLasuLWLanguage.name)
+        sLanguagesMapping.associate(starLasuKLanguage, StarLasuLWLanguage)
         registerMapping(NodeLike::class, StarLasuLWLanguage.ASTNode)
         registerMapping(Node::class, StarLasuLWLanguage.ASTNode)
         registerMapping(Named::class, LionCoreBuiltins.getINamed())
@@ -92,13 +96,14 @@ class LionWebLanguageConverter {
         registerMapping(TypeAnnotation::class, StarLasuLWLanguage.TypeAnnotation)
 
         registerMapping(Issue::class, StarLasuLWLanguage.Issue)
+        // Note: we use the deprecated map because getKolasuClassesToEnumerationsMapping refers to it
         classesAndEnumerations.associate(
             IssueSeverity::class,
-            (StarLasuLWLanguage.Issue.getFeatureByName(Issue::severity.name) as Property).type as Enumeration
+            (StarLasuLWLanguage.Issue.getFeatureByName(Issue::severity.name) as LWProperty).type as Enumeration,
         )
         classesAndEnumerations.associate(
             IssueType::class,
-            (StarLasuLWLanguage.Issue.getFeatureByName(Issue::type.name) as Property).type as Enumeration
+            (StarLasuLWLanguage.Issue.getFeatureByName(Issue::type.name) as LWProperty).type as Enumeration,
         )
         registerMapping(ParsingResult::class, StarLasuLWLanguage.ParsingResult)
     }
@@ -661,7 +666,7 @@ fun com.strumenta.kolasu.language.DataType.kClass(): KClass<*> =
 
 fun addEnumerationFromClass(
     lionwebLanguage: LWLanguage,
-    kClass: EnumKClass
+    kClass: EnumKClass,
 ): Enumeration {
     val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
     newEnumeration.id = (lionwebLanguage.id ?: "unknown_language") + "_" + newEnumeration.name
@@ -673,7 +678,7 @@ fun addEnumerationFromClass(
             EnumerationLiteral(newEnumeration, entry.name).apply {
                 id = newEnumeration.id + "-" + entry.name
                 key = newEnumeration.key + "-" + entry.name
-            }
+            },
         )
     }
 

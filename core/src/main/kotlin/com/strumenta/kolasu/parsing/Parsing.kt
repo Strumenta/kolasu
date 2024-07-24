@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.parsing
 
+import com.strumenta.kolasu.model.Source
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -30,7 +31,7 @@ interface KolasuLexer<T : KolasuToken> {
         inputStream: InputStream,
         charset: Charset = Charsets.UTF_8,
         onlyFromDefaultChannel: Boolean = true,
-        source: Source? = null
+        source: Source? = null,
     ): LexingResult<T>
 
     /**

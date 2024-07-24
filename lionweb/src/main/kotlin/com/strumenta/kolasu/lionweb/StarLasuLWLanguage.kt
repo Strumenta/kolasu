@@ -53,7 +53,7 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
             addProperty("type", addEnumerationFromClass(this@StarLasuLWLanguage, IssueType::class))
             addProperty("message", LionCoreBuiltins.getString())
             addProperty("severity", addEnumerationFromClass(this@StarLasuLWLanguage, IssueSeverity::class))
-            addProperty("position", position, Multiplicity.OPTIONAL)
+            addProperty("range", range, Multiplicity.OPTIONAL)
         }
 
         ParsingResult = addConcept("ParsingResult").apply {

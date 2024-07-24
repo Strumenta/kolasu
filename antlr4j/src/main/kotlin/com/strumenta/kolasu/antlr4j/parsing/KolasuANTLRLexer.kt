@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.antlr4j.parsing
 
 import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.parsing.KolasuLexer
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.LexingResult
@@ -79,6 +80,7 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(
         inputStream: InputStream,
         charset: Charset,
         onlyFromDefaultChannel: Boolean,
+        source: Source?,
     ): LexingResult<T> {
         val issues = mutableListOf<Issue>()
         val tokens = mutableListOf<T>()
@@ -105,7 +107,7 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(
                 }
             }
 
-        return LexingResult(issues, tokens, null, time)
+        return LexingResult(issues, tokens, null, time, source)
     }
 
     protected open fun categoryOf(t: Token): TokenCategory = TokenCategory.PLAIN_TEXT

@@ -24,8 +24,12 @@ import com.strumenta.kolasu.model.isAttribute
 import com.strumenta.kolasu.model.isContainment
 import com.strumenta.kolasu.model.isReference
 import com.strumenta.kolasu.model.nodeOriginalProperties
+import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.transformation.MissingASTTransformation
 import com.strumenta.kolasu.traversing.walk
+import com.strumenta.kolasu.validation.Issue
+import com.strumenta.kolasu.validation.IssueSeverity
+import com.strumenta.kolasu.validation.IssueType
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
@@ -308,10 +312,11 @@ class LionWebModelConverter(
     private fun setEnumProperty(
         lwNode: LWNode,
         feature: Property,
-        kValue: Enum<*>
+        kValue: Enum<*>,
     ) {
         val kClass: EnumKClass = kValue::class
-        val enumeration = languageConverter.getKolasuClassesToEnumerationsMapping()[kClass]
+        val enumeration =
+            languageConverter.getKolasuClassesToEnumerationsMapping()[kClass]
             ?: throw IllegalStateException("No enumeration for enum class $kClass")
         val enumerationLiteral = enumeration.literals.find { it.name == kValue.name }
             ?: throw IllegalStateException(
@@ -825,7 +830,7 @@ class LionWebModelConverter(
                     attributeValue(data, data.classifier.getPropertyByName(Issue::type.name)!!) as IssueType,
                     attributeValue(data, data.classifier.getPropertyByName(Issue::message.name)!!) as String,
                     attributeValue(data, data.classifier.getPropertyByName(Issue::severity.name)!!) as IssueSeverity,
-                    attributeValue(data, data.classifier.getPropertyByName(Issue::position.name)!!) as Position?
+                    attributeValue(data, data.classifier.getPropertyByName(Issue::range.name)!!) as Range?
                 )
             }
             ParsingResult::class -> {
@@ -863,10 +868,10 @@ class LionWebModelConverter(
 
     fun exportIssueToLionweb(issue: Issue): IssueNode {
         val issueNode = IssueNode()
-        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName("message")!!, issue.message)
-        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName("position")!!, issue.position)
-        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName("severity")!!, issue.severity)
-        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName("type")!!, issue.type)
+        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::message.name)!!, issue.message)
+        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::range.name)!!, issue.range)
+        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName(Issue::severity.name)!!, issue.severity)
+        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName(Issue::type.name)!!, issue.type)
         return issueNode
     }
 
@@ -884,10 +889,10 @@ class LionWebModelConverter(
 }
 
 class IssueNode : BaseNode() {
-    var type: EnumerationValue? by property("type")
-    var message: String? by property("message")
-    var severity: EnumerationValue? by property("severity")
-    var position: Position? by property("position")
+    var type: EnumerationValue? by property(Issue::type.name)
+    var message: String? by property(Issue::message.name)
+    var severity: EnumerationValue? by property(Issue::severity.name)
+    var range: Range? by property(Issue::range.name)
 
     override fun getClassifier(): Concept {
         return StarLasuLWLanguage.Issue

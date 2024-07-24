@@ -14,6 +14,9 @@ dependencies {
     testImplementation(libs.gson)
     testImplementation("io.github.mkfl3x:json-delta:1.3")
     api("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebJavaVersion")
+    api("io.lionweb.lionweb-kotlin:lionweb-kotlin-2024.1-core:0.2.2") {
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-test-junit5")
+    }
     api(project(":core"))
     api(project(":ast"))
 

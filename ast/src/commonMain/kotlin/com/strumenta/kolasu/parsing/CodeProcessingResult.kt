@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.Result
@@ -16,6 +17,7 @@ open class CodeProcessingResult<D>(
     val issues: List<Issue>,
     val data: D?,
     val code: String? = null,
+    val source: Source? = null,
 ) {
     val isCorrect: Boolean
         get() = issues.none { it.severity != IssueSeverity.INFO }
@@ -47,7 +49,8 @@ class LexingResult<T : KolasuToken>(
     val tokens: List<T>,
     code: String? = null,
     val time: Long? = null,
-) : CodeProcessingResult<List<T>>(issues, tokens, code) {
+    source: Source? = null,
+) : CodeProcessingResult<List<T>>(issues, tokens, code, source) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is LexingResult<*>) return false
@@ -71,7 +74,8 @@ open class ParsingResult<RootNode : NodeLike>(
     code: String? = null,
     val incompleteNode: NodeLike? = null,
     val time: Long? = null,
-) : CodeProcessingResult<RootNode>(issues, root, code) {
+    source: Source? = null,
+) : CodeProcessingResult<RootNode>(issues, root, code, source) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ParsingResult<*>) return false
