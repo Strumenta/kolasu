@@ -4,6 +4,11 @@ import java.io.File
 
 object PerformanceLogger {
     var file = File("performance-log.csv")
+    val sumByStep = mutableMapOf<String, Long>()
+
+    fun sumByStep(description: String) : Long {
+        return sumByStep.getOrDefault(description, 0)
+    }
 
     private fun ensureFileIsReady() {
         if (!file.exists()) {
@@ -17,7 +22,9 @@ object PerformanceLogger {
         if (baseTime == null) {
             file.appendText("\"${description}\",${t},\n")
         } else {
-            file.appendText("\"${description}\",${t},${t-baseTime}\n")
+            val delta = t - baseTime
+            file.appendText("\"${description}\",${t},${delta}\n")
+            sumByStep[description] = sumByStep.getOrDefault(description, 0) + delta
         }
         return t
     }
