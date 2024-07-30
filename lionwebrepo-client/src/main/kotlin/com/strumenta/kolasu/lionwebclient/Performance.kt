@@ -24,7 +24,8 @@ object PerformanceLogger {
         } else {
             val delta = t - baseTime
             file.appendText("\"${description}\",${t},${delta}\n")
-            sumByStep[description] = sumByStep.getOrDefault(description, 0) + delta
+            val baseDescription = description.removeSuffix(" - end")
+            sumByStep[baseDescription] = sumByStep.getOrDefault(baseDescription, 0) + delta
         }
         return t
     }
