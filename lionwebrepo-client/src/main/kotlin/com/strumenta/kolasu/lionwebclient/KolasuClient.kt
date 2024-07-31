@@ -19,6 +19,7 @@ import com.strumenta.kolasu.traversing.walkDescendants
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.model.HasSettableParent
 import io.lionweb.lioncore.java.serialization.JsonSerialization
+import io.lionweb.lioncore.java.serialization.SerializationProvider
 import io.lionweb.lioncore.java.serialization.UnavailableNodePolicy
 import io.lionweb.lioncore.kotlin.repoclient.ClassifierResult
 import io.lionweb.lioncore.kotlin.repoclient.LionWebClient
@@ -89,13 +90,13 @@ class KolasuClient(
      */
     val jsonSerialization: JsonSerialization
         get() {
-            return nodeConverter.prepareJsonSerialization(
-                JsonSerialization.getStandardSerialization().apply {
+            return nodeConverter.prepareSerialization(
+                SerializationProvider.getStandardJsonSerialization().apply {
                     enableDynamicNodes()
                     unavailableParentPolicy = UnavailableNodePolicy.NULL_REFERENCES
                     unavailableReferenceTargetPolicy = UnavailableNodePolicy.PROXY_NODES
                 },
-            )
+            ) as JsonSerialization
         }
 
     //
@@ -199,12 +200,17 @@ class KolasuClient(
             "The class of root of the passed is not marked as ASTRoot (root: $kNode)"
         }
         val lwTreeToAppend = toLionWeb(kNode, containerID, containmentName, containmentIndex)
+        considerLogging("attachAST - prepared lwTreeToAppend")
         debugFile("createNode-${lwTreeToAppend.id}.json") {
-            nodeConverter.prepareJsonSerialization().serializeTreesToJsonString(lwTreeToAppend)
+            (nodeConverter.prepareSerialization() as JsonSerialization).serializeTreesToJsonString(lwTreeToAppend)
         }
+        considerLogging("attachAST - debug file prepared")
         lionWebClient.appendTree(lwTreeToAppend, containerID, containmentName, containmentIndex)
+        considerLogging("attachAST - actual lionweb appending done")
         return lwTreeToAppend.id!!
     }
+
+    var performanceLogging: Boolean = false
 
     fun attachAST(
         kNode: Node,
@@ -212,7 +218,14 @@ class KolasuClient(
         containmentName: String,
     ): String {
         val containmentIndex = lionWebClient.childrenInContainment(containerID, containmentName).size
+        considerLogging("got containment index")
         return attachAST(kNode, containerID, containmentName, containmentIndex)
+    }
+
+    private fun considerLogging(message: String) {
+        if (performanceLogging) {
+            PerformanceLogger.log(message)
+        }
     }
 
     fun attachAST(

@@ -25,7 +25,11 @@ import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.model.impl.EnumerationValue
-import io.lionweb.lioncore.java.serialization.JsonSerialization
+import io.lionweb.lioncore.java.serialization.SerializationProvider
+import io.lionweb.lioncore.kotlin.children
+import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
+import io.lionweb.lioncore.kotlin.getPropertyValueByName
+import io.lionweb.lioncore.kotlin.getReferenceValueByName
 import org.mkfl3x.jsondelta.JsonDelta
 import java.io.File
 import kotlin.test.Test
@@ -421,7 +425,7 @@ class LionWebModelConverterTest {
         assertEquals("A1", refValue3[0].resolveInfo)
         assertSame(child1, refValue3[0].referred)
 
-        val js = JsonSerialization.getStandardSerialization()
+        val js = SerializationProvider.getStandardJsonSerialization()
         val report = JsonDelta().compare(serialized, js.serializeTreeToJsonString(lwAST))
         assertTrue(report.success, message = "Mismatches: ${report.mismatches}")
     }
@@ -572,8 +576,8 @@ class LionWebModelConverterTest {
         assertEquals("ZUM", (exportedN3.getPropertyValueByName("e") as EnumerationValue).enumerationLiteral.name)
         assertEquals(null, exportedN4.getPropertyValueByName("e"))
 
-        val jsonSerialization = JsonSerialization.getStandardSerialization()
-        converter.prepareJsonSerialization(jsonSerialization)
+        val jsonSerialization = SerializationProvider.getStandardJsonSerialization()
+        converter.prepareSerialization(jsonSerialization)
         jsonSerialization.serializeTreesToJsonString(exportedN1)
     }
 
@@ -724,8 +728,8 @@ class LionWebModelConverterTest {
                 .withRange(Range(Point(3, 5), Point(27, 200)))
                 .setSourceForTree(LionWebSource("MySource"))
         val lwNode = mc.exportModelToLionWeb(n1)
-        val jsonSerialization = JsonSerialization.getStandardSerialization()
-        mc.prepareJsonSerialization(jsonSerialization)
+        val jsonSerialization = SerializationProvider.getStandardJsonSerialization()
+        mc.prepareSerialization(jsonSerialization)
         val serializationBlock = jsonSerialization.serializeNodesToSerializationBlock(lwNode)
         assertEquals(
             "L3:5 to L27:200",
@@ -748,9 +752,9 @@ class LionWebModelConverterTest {
                 .withRange(Range(Point(3, 5), Point(27, 200)))
                 .setSourceForTree(LionWebSource("MySource"))
         val lwNode = mc.exportModelToLionWeb(n1)
-        val jsonSerialization = JsonSerialization.getStandardSerialization()
+        val jsonSerialization = SerializationProvider.getStandardJsonSerialization()
         jsonSerialization.enableDynamicNodes()
-        mc.prepareJsonSerialization(jsonSerialization)
+        mc.prepareSerialization(jsonSerialization)
         val json = jsonSerialization.serializeNodesToJsonString(lwNode)
         val deserializeLWNode = jsonSerialization.deserializeToNodes(json).first()
         val deserializeN1 = mc.importModelFromLionWeb(deserializeLWNode) as NodeWithEnum
@@ -961,23 +965,25 @@ class LionWebModelConverterTest {
         val a1 = SimpleNodeA("A1", ReferenceValue("A1"), null)
         a1.ref.referred = a1
         val b2 = SimpleNodeB("some magic value")
-        val b3_1 = SimpleNodeB("some other value")
-        val a3 = SimpleNodeA("A3", ReferenceValue("A1", a1), b3_1)
-        val root = SimpleRoot(
-            12345,
-            mutableListOf(
-                a1,
-                b2,
-                a3
-            )
-        ).withRange(Range(Point(1, 2), Point(3, 4)))
+        val b3bis = SimpleNodeB("some other value")
+        val a3 = SimpleNodeA("A3", ReferenceValue("A1", a1), b3bis)
+        val root =
+            SimpleRoot(
+                12345,
+                mutableListOf(
+                    a1,
+                    b2,
+                    a3,
+                ),
+            ).withRange(Range(Point(1, 2), Point(3, 4)))
         root.source = source
         root.assignParents()
         val parsingResult = ParsingResult(listOf(i1, i2, i3), root, "bla bla", source = source)
 
-        val kLanguage = StarLasuLanguage("com.strumenta.SimpleLang").apply {
-            explore(SimpleRoot::class)
-        }
+        val kLanguage =
+            StarLasuLanguage("com.strumenta.SimpleLang").apply {
+                explore(SimpleRoot::class)
+            }
         val converter = LionWebModelConverter()
         converter.exportLanguageToLionWeb(kLanguage)
         val exported = converter.exportParsingResultToLionweb(parsingResult)

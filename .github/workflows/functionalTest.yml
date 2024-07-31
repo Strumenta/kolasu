@@ -1,4 +1,4 @@
-name: BuildAndTest
+name: FunctionalTests
 
 on: [push]
 

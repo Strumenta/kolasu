@@ -5,7 +5,7 @@ import com.strumenta.kolasu.lionweb.ASTGenerator
 import com.strumenta.kolasu.lionweb.KotlinCodeProcessor
 import com.strumenta.kolasu.lionweb.StarLasuLWLanguage
 import io.lionweb.lioncore.java.language.Language
-import io.lionweb.lioncore.java.serialization.JsonSerialization
+import io.lionweb.lioncore.java.serialization.SerializationProvider
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -47,7 +47,7 @@ class LionWebGradlePlugin : Plugin<Project> {
                     println("processing languageFile $languageFile")
                     when (languageFile.extension) {
                         "json" -> {
-                            val jsonser = JsonSerialization.getStandardSerialization()
+                            val jsonser = SerializationProvider.getStandardJsonSerialization()
                             jsonser.instanceResolver.addTree(StarLasuLWLanguage)
                             val language = jsonser.deserializeToNodes(FileInputStream(languageFile)).first() as Language
                             val existingKotlinClasses =

@@ -1,3 +1,5 @@
+package com.strumenta.kolasu.lionwebclient
+
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.language.explore

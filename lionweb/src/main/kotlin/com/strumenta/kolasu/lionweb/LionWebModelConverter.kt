@@ -46,11 +46,14 @@ import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
 import io.lionweb.lioncore.java.model.impl.ProxyNode
+import io.lionweb.lioncore.java.serialization.AbstractSerialization
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
+import io.lionweb.lioncore.java.serialization.SerializationProvider
 import io.lionweb.lioncore.java.utils.CommonChecks
 import io.lionweb.lioncore.kotlin.BaseNode
+import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
 import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
@@ -317,12 +320,13 @@ class LionWebModelConverter(
         val kClass: EnumKClass = kValue::class
         val enumeration =
             languageConverter.getKolasuClassesToEnumerationsMapping()[kClass]
-            ?: throw IllegalStateException("No enumeration for enum class $kClass")
-        val enumerationLiteral = enumeration.literals.find { it.name == kValue.name }
-            ?: throw IllegalStateException(
-                "No enumeration literal with name ${kValue.name} " +
-                    "in enumeration $enumeration"
-            )
+                ?: throw IllegalStateException("No enumeration for enum class $kClass")
+        val enumerationLiteral =
+            enumeration.literals.find { it.name == kValue.name }
+                ?: throw IllegalStateException(
+                    "No enumeration literal with name ${kValue.name} " +
+                        "in enumeration $enumeration",
+                )
         lwNode.setPropertyValue(feature, EnumerationValueImpl(enumerationLiteral))
     }
 
@@ -403,14 +407,14 @@ class LionWebModelConverter(
         return nodesMapping.byB(lwTree)!!
     }
 
-    fun prepareJsonSerialization(
-        jsonSerialization: JsonSerialization =
-            JsonSerialization.getStandardSerialization(),
-    ): JsonSerialization {
-        jsonSerialization.primitiveValuesSerialization.registerSerializer(
+    fun prepareSerialization(
+        serialization: AbstractSerialization =
+            SerializationProvider.getStandardJsonSerialization(),
+    ): AbstractSerialization {
+        serialization.primitiveValuesSerialization.registerSerializer(
             StarLasuLWLanguage.char.id,
         ) { value -> "$value" }
-        jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+        serialization.primitiveValuesSerialization.registerDeserializer(
             StarLasuLWLanguage.char.id,
         ) { serialized -> serialized[0] }
         val pointSerializer: PrimitiveSerializer<Point> =
@@ -431,20 +435,20 @@ class LionWebModelConverter(
                 require(parts.size == 2)
                 Point(parts[0].toInt(), parts[1].toInt())
             }
-        jsonSerialization.primitiveValuesSerialization.registerSerializer(
+        serialization.primitiveValuesSerialization.registerSerializer(
             StarLasuLWLanguage.Point.id,
             pointSerializer,
         )
-        jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+        serialization.primitiveValuesSerialization.registerDeserializer(
             StarLasuLWLanguage.Point.id,
             pointDeserializer,
         )
-        jsonSerialization.primitiveValuesSerialization.registerSerializer(
+        serialization.primitiveValuesSerialization.registerSerializer(
             StarLasuLWLanguage.Range.id,
         ) { value ->
             "${pointSerializer.serialize((value as Range).start)} to ${pointSerializer.serialize(value.end)}"
         }
-        jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+        serialization.primitiveValuesSerialization.registerDeserializer(
             StarLasuLWLanguage.Range.id,
         ) { serialized ->
             if (serialized == null) {
@@ -457,8 +461,8 @@ class LionWebModelConverter(
         }
         synchronized(languageConverter) {
             languageConverter.knownLWLanguages().forEach {
-                jsonSerialization.primitiveValuesSerialization.registerLanguage(it)
-                jsonSerialization.classifierResolver.registerLanguage(it)
+                serialization.primitiveValuesSerialization.registerLanguage(it)
+                serialization.classifierResolver.registerLanguage(it)
             }
             languageConverter.knownKolasuLanguages().forEach { kolasuLanguage ->
                 kolasuLanguage.primitiveClasses.forEach { primitiveClass ->
@@ -473,18 +477,18 @@ class LionWebModelConverter(
                         val serializer =
                             primitiveValueSerializations[primitiveClass]!!
                                 as PrimitiveValueSerialization<Any>
-                        jsonSerialization.primitiveValuesSerialization.registerSerializer(
+                        serialization.primitiveValuesSerialization.registerSerializer(
                             lwPrimitiveType.id!!,
                         ) { value -> serializer.serialize(value) }
 
-                        jsonSerialization.primitiveValuesSerialization.registerDeserializer(
+                        serialization.primitiveValuesSerialization.registerDeserializer(
                             lwPrimitiveType.id!!,
                         ) { serialized -> serializer.deserialize(serialized) }
                     }
                 }
             }
         }
-        return jsonSerialization
+        return serialization
     }
 
     /**
@@ -494,7 +498,7 @@ class LionWebModelConverter(
         json: String,
         useDynamicNodesIfNeeded: Boolean = true,
     ): List<LWNode> {
-        val js = prepareJsonSerialization()
+        val js = prepareSerialization() as JsonSerialization
         if (useDynamicNodesIfNeeded) {
             js.enableDynamicNodes()
         }
@@ -823,14 +827,17 @@ class LionWebModelConverter(
      * This method checks if we are to instantiate one of those, and returns the instance with all properties filled;
      * or it returns null when it detects that we're going to instantiate a proper Node.
      */
-    private fun maybeInstantiateSpecialObject(kClass: KClass<*>, data: Node): Any? {
+    private fun maybeInstantiateSpecialObject(
+        kClass: KClass<*>,
+        data: Node,
+    ): Any? {
         return when (kClass) {
             Issue::class -> {
                 Issue(
                     attributeValue(data, data.classifier.getPropertyByName(Issue::type.name)!!) as IssueType,
                     attributeValue(data, data.classifier.getPropertyByName(Issue::message.name)!!) as String,
                     attributeValue(data, data.classifier.getPropertyByName(Issue::severity.name)!!) as IssueSeverity,
-                    attributeValue(data, data.classifier.getPropertyByName(Issue::range.name)!!) as Range?
+                    attributeValue(data, data.classifier.getPropertyByName(Issue::range.name)!!) as Range?,
                 )
             }
             ParsingResult::class -> {
@@ -839,7 +846,7 @@ class LionWebModelConverter(
                     data.getChildrenByContainmentName(ParsingResult<*>::issues.name).map {
                         importModelFromLionWeb(it) as Issue
                     },
-                    if (root != null) importModelFromLionWeb(root) as KNode else null
+                    if (root != null) importModelFromLionWeb(root) as KNode else null,
                 )
             }
             else -> {
@@ -899,7 +906,9 @@ class IssueNode : BaseNode() {
     }
 }
 
-class ParsingResultNode(val source: Source?) : BaseNode() {
+class ParsingResultNode(
+    val source: Source?,
+) : BaseNode() {
     override fun calculateID(): String? {
         return try {
             SimpleSourceIdProvider().sourceId(source) + "_ParsingResult"

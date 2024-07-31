@@ -10,15 +10,15 @@ plugins {
 
 val kspVersion = extra["kspVersion"] as String
 val kotlinVersion = extra["kotlinVersion"] as String
-val lionwebJavaVersion = extra["lionwebJavaVersion"] as String
 val lionwebGenGradlePluginID = extra["lionwebGenGradlePluginID"] as String
 val completeKspVersion = if (kspVersion.contains("-")) kspVersion else "$kotlinVersion-$kspVersion"
+val lionwebJavaVersion = libs.lionwebjava.get().version
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    implementation("io.lionweb.lionweb-java:lionweb-java-2023.1-core:$lionwebJavaVersion")
+    implementation(libs.lionwebjava)
     api(project(":lionweb-gen"))
     testImplementation(project(":lionweb-ksp"))
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
@@ -52,10 +52,6 @@ gradlePlugin {
 tasks.named("compileKotlin") {
     dependsOn("generateBuildConfig")
 }
-
-// test {
-//    useJUnitPlatform()
-// }
 
 tasks.findByName("dokkaJavadoc")!!.dependsOn("generateBuildConfig")
 tasks.findByName("dokkaJavadoc")!!.dependsOn(":core:compileKotlin")

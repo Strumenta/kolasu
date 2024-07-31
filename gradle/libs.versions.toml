@@ -1,6 +1,7 @@
 [versions]
 antlr4 = "4.9.3"
-lwkotlin = "0.2.2"
+lwjava = "0.2.18"
+lwkotlin = "0.2.3"
 
 [plugins]
 buildConfig = { id = "com.github.gmazzo.buildconfig", version = "5.3.5" }
@@ -14,7 +15,8 @@ gson = { module = "com.google.code.gson:gson", version = "2.10.1" }
 antlr4Tool = { module = "org.antlr:antlr4", version.ref = "antlr4" }
 antlr4jRuntime = { module = "org.antlr:antlr4-runtime", version.ref= "antlr4" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version="3.5.2"}
-lionwebjava = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2023.1-core", version = "0.2.17" }
+lionwebjava = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2023.1-core", version.ref = "lwjava" }
+lionwebjavaemf = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2023.1-emf", version.ref = "lwjava" }
 lionwebkotlinrepoclient = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-repo-client", version.ref = "lwkotlin" }
 lionwebkotlinrepoclienttesting = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-repo-client-testing", version.ref = "lwkotlin" }
 lionwebkotlincore = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-core", version.ref = "lwkotlin" }

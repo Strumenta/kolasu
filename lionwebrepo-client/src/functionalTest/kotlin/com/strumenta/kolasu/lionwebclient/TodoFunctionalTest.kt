@@ -1,8 +1,9 @@
-import com.strumenta.kolasu.lionweb.getChildrenByContainmentName
-import com.strumenta.kolasu.lionwebclient.KolasuClient
+package com.strumenta.kolasu.lionwebclient
+
 import com.strumenta.kolasu.model.ReferenceValue
 import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
+import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
 import io.lionweb.lioncore.kotlin.repoclient.testing.AbstractRepoClientFunctionalTest
 import org.testcontainers.junit.jupiter.Testcontainers
 import kotlin.test.Test

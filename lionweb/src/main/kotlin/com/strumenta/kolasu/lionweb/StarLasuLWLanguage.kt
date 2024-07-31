@@ -16,7 +16,6 @@ import io.lionweb.lioncore.java.self.LionCore
 private const val PLACEHOLDER_NODE = "PlaceholderNode"
 
 object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
-
     val CommonElement: Interface
     val Issue: Concept
     val ParsingResult: Concept
@@ -49,18 +48,20 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
         addInterface("Statement").apply { addExtendedInterface(CommonElement) }
         addInterface("TypeAnnotation").apply { addExtendedInterface(CommonElement) }
 
-        Issue = addConcept("Issue").apply {
-            addProperty("type", addEnumerationFromClass(this@StarLasuLWLanguage, IssueType::class))
-            addProperty("message", LionCoreBuiltins.getString())
-            addProperty("severity", addEnumerationFromClass(this@StarLasuLWLanguage, IssueSeverity::class))
-            addProperty("range", range, Multiplicity.OPTIONAL)
-        }
+        Issue =
+            addConcept("Issue").apply {
+                addProperty("type", addEnumerationFromClass(this@StarLasuLWLanguage, IssueType::class))
+                addProperty("message", LionCoreBuiltins.getString())
+                addProperty("severity", addEnumerationFromClass(this@StarLasuLWLanguage, IssueSeverity::class))
+                addProperty("range", range, Multiplicity.OPTIONAL)
+            }
 
-        ParsingResult = addConcept("ParsingResult").apply {
-            addContainment("issues", Issue, Multiplicity.MANY)
-            addContainment("root", ASTNode, Multiplicity.OPTIONAL)
-            addProperty("code", LionCoreBuiltins.getString(), Multiplicity.OPTIONAL)
-        }
+        ParsingResult =
+            addConcept("ParsingResult").apply {
+                addContainment("issues", Issue, Multiplicity.MANY)
+                addContainment("root", ASTNode, Multiplicity.OPTIONAL)
+                addProperty("code", LionCoreBuiltins.getString(), Multiplicity.OPTIONAL)
+            }
     }
 
     private fun addPlaceholderNodeAnnotation(astNode: Concept) {
