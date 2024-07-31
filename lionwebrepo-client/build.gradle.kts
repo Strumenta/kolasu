@@ -69,9 +69,6 @@ mavenPublishing {
     publishToMavenCentral(SonatypeHost.DEFAULT)
     signAllPublications()
 
-
-    // coordinates(project.group!! as String, "kolasu-${project.name}", version as String)
-
     pom {
         name.set("kolasu-${project.name}")
         description.set("The Kotlin client for working with StarLasu ASTSs and the lionweb-repository")
