@@ -22,6 +22,10 @@ import com.strumenta.kolasu.validation.IssueType
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.serialization.SerializationProvider
+import io.lionweb.lioncore.kotlin.children
+import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
+import io.lionweb.lioncore.kotlin.getPropertyValueByName
+import io.lionweb.lioncore.kotlin.getReferenceValueByName
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
