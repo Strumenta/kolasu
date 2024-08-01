@@ -153,6 +153,11 @@ release {
 }
 
 tasks.wrapper {
-    gradleVersion = "8.7"
+    gradleVersion = "8.9"
     distributionType = Wrapper.DistributionType.ALL
+}
+
+tasks {
+    getByPath(":lionwebrepo-client:signMavenPublication")
+        .dependsOn(":kolasu-release:kolasu-release:lionwebrepo-client:kdocJar")
 }
