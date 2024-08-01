@@ -159,5 +159,5 @@ tasks.wrapper {
 
 tasks {
     getByPath(":lionwebrepo-client:signMavenPublication")
-        .dependsOn(":kolasu-release:kolasu-release:lionwebrepo-client:kdocJar")
+        .dependsOn(":lionwebrepo-client:kdocJar")
 }
