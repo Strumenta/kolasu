@@ -40,3 +40,4 @@ generated-test-src
 .netlify
 .kotlin
 yarn.lock
+.java-version
