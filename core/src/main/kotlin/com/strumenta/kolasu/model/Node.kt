@@ -65,7 +65,7 @@ open class Node : NodeLike {
         get() = explicitlySetSource ?: origin?.source
         set(value) {
             explicitlySetSource = value
-            require(this.source === value)
+            require((this.source == null && value == null) || this.source === value)
         }
 
     fun setSourceForTree(source: Source): NodeLike {
