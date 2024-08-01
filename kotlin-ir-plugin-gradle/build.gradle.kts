@@ -29,8 +29,10 @@ gradlePlugin {
             displayName = "Kolasu Multiplatform"
             description = "Kolasu Multiplatform"
             implementationClass = "com.strumenta.kolasu.kcp.gradle.StarLasuGradlePlugin"
+            tags = listOf("StarLasu", "Kolasu", "Kotlin Compiler Plugin")
         }
     }
+
 }
 
 publishing {
