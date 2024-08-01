@@ -156,8 +156,3 @@ tasks.wrapper {
     gradleVersion = "8.9"
     distributionType = Wrapper.DistributionType.ALL
 }
-
-tasks {
-    getByPath(":lionwebrepo-client:signMavenPublication")
-        .dependsOn(":lionwebrepo-client:kdocJar")
-}

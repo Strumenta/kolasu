@@ -154,3 +154,8 @@ buildConfig {
         useKotlinOutput()
     }
 }
+
+tasks {
+    getByName("signMavenPublication")
+        .dependsOn("kdocJar", "sourcesJar")
+}
