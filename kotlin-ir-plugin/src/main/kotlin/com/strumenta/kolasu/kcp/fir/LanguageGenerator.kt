@@ -57,6 +57,13 @@ class LanguageGenerator(
 
     object Key : GeneratedDeclarationKey()
 
+    @OptIn(
+        org
+            .jetbrains
+            .kotlin
+            .fir
+            .FirImplementationDetail::class,
+    )
     override fun generateProperties(
         callableId: CallableId,
         context: MemberGenerationContext?,

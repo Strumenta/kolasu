@@ -8,15 +8,12 @@ import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.symbols.IrClassifierSymbol
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
-import org.jetbrains.kotlin.ir.symbols.impl.IrClassPublicSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.superTypes
-import org.jetbrains.kotlin.ir.util.IdSignature
 import org.jetbrains.kotlin.ir.util.companionObject
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.util.properties
@@ -43,9 +40,6 @@ fun IrPluginContext.referenceFunctions(
 
 val KClass<*>.packageName: String
     get() = this.qualifiedName!!.removeSuffix(".${this.simpleName}")
-
-val KClass<*>.classifierSymbol: IrClassifierSymbol
-    get() = IrClassPublicSymbolImpl(IdSignature.CommonSignature(this.packageName, this.simpleName!!, null, 0, null))
 
 val KClass<*>.classId: ClassId
     get() = ClassId(FqName(this.packageName), Name.identifier(this.simpleName!!))
