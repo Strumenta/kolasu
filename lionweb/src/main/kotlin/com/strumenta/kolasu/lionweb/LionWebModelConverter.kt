@@ -4,6 +4,7 @@ import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.ids.SimpleSourceIdProvider
 import com.strumenta.kolasu.ids.SourceShouldBeSetException
+import com.strumenta.kolasu.language.Feature
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.CompositeDestination
 import com.strumenta.kolasu.model.Multiplicity
@@ -58,6 +59,7 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
+import io.lionweb.lioncore.java.language.Feature as LWFeature
 
 interface PrimitiveValueSerialization<E> {
     fun serialize(value: E): String
@@ -123,6 +125,9 @@ class LionWebModelConverter(
         }
     }
 
+    private val kFeaturesCache = mutableMapOf<Class<*>, Map<String, Feature>>()
+    private val lwFeaturesCache = mutableMapOf<Classifier<*>, List<LWFeature<*>>>()
+
     fun exportModelToLionWeb(
         kolasuTree: KNode,
         nodeIdProvider: NodeIdProvider = this.nodeIdProvider,
@@ -131,8 +136,10 @@ class LionWebModelConverter(
         kolasuTree.assignParents()
         val myIDManager = object {
 
+            private val cache = mutableMapOf<KNode, String>()
+
             fun nodeId(kNode: KNode): String {
-                return nodeIdProvider.id(kNode)
+                return cache.getOrPut(kNode) { nodeIdProvider.id(kNode) }
             }
         }
 
@@ -151,14 +158,17 @@ class LionWebModelConverter(
                             "It was produced while exporting this Kolasu Node: $kNode"
                     )
                 }
-                val kFeatures = kNode.javaClass.kotlin.allFeatures()
-                lwNode.classifier.allFeatures().forEach { feature ->
+                val kFeatures = kFeaturesCache.getOrPut(kNode.javaClass) {
+                    kNode.javaClass.kotlin.allFeatures().associateBy { it.name }
+                }
+                val lwFeatures = lwFeaturesCache.getOrPut(lwNode.classifier) { lwNode.classifier.allFeatures() }
+                lwFeatures.forEach { feature ->
                     when (feature) {
                         is Property -> {
                             if (feature == StarLasuLWLanguage.ASTNodePosition) {
                                 lwNode.setPropertyValue(StarLasuLWLanguage.ASTNodePosition, kNode.position)
                             } else {
-                                val kAttribute = kFeatures.find { it.name == feature.name }
+                                val kAttribute = kFeatures[feature.name]
                                     as? com.strumenta.kolasu.language.Attribute
                                     ?: throw IllegalArgumentException("Property ${feature.name} not found in $kNode")
                                 val kValue = kNode.getAttributeValue(kAttribute)
@@ -173,7 +183,7 @@ class LionWebModelConverter(
                         is Containment -> {
                             try {
                                 val kContainment = (
-                                    kFeatures.find { it.name == feature.name } ?: throw IllegalStateException(
+                                    kFeatures[feature.name] ?: throw IllegalStateException(
                                         "Cannot find containment for ${feature.name} when considering node $kNode"
                                     )
                                     )
@@ -230,7 +240,7 @@ class LionWebModelConverter(
                                 }
                                 lwNode.setReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes, referenceValues)
                             } else {
-                                val kReference = kFeatures.find { it.name == feature.name }
+                                val kReference = kFeatures[feature.name]
                                     as com.strumenta.kolasu.language.Reference
                                 val kValue = kNode.getReference(kReference)
                                 if (kValue == null) {
