@@ -55,7 +55,6 @@ import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
@@ -125,8 +124,16 @@ class LionWebModelConverter(
         }
     }
 
-    private val kFeaturesCache = mutableMapOf<Class<*>, Map<String, Feature>>()
-    private val lwFeaturesCache = mutableMapOf<Classifier<*>, List<LWFeature<*>>>()
+    companion object {
+        private val kFeaturesCache = mutableMapOf<Class<*>, Map<String, Feature>>()
+        private val lwFeaturesCache = mutableMapOf<Classifier<*>, Map<String, LWFeature<*>>>()
+
+        fun lwFeatureByName(classifier: Classifier<*>, featureName: String): LWFeature<*>? {
+            return lwFeaturesCache.getOrPut(classifier) {
+                classifier.allFeatures().associateBy { it.name!! }
+            }[featureName]
+        }
+    }
 
     fun exportModelToLionWeb(
         kolasuTree: KNode,
@@ -161,8 +168,10 @@ class LionWebModelConverter(
                 val kFeatures = kFeaturesCache.getOrPut(kNode.javaClass) {
                     kNode.javaClass.kotlin.allFeatures().associateBy { it.name }
                 }
-                val lwFeatures = lwFeaturesCache.getOrPut(lwNode.classifier) { lwNode.classifier.allFeatures() }
-                lwFeatures.forEach { feature ->
+                val lwFeatures = lwFeaturesCache.getOrPut(lwNode.classifier) {
+                    lwNode.classifier.allFeatures().associateBy { it.name!! }
+                }
+                lwFeatures.values.forEach { feature ->
                     when (feature) {
                         is Property -> {
                             if (feature == StarLasuLWLanguage.ASTNodePosition) {
@@ -661,20 +670,21 @@ class LionWebModelConverter(
         if (specialObject != null) {
             return specialObject as T
         }
-        val constructor: KFunction<Any> = when {
-            kClass.constructors.size == 1 -> {
-                kClass.constructors.first()
+        val constructor =
+            when {
+                kClass.constructors.size == 1 -> {
+                    kClass.constructors.first()
+                }
+                kClass.primaryConstructor != null -> {
+                    kClass.primaryConstructor!!
+                }
+                else -> {
+                    TODO()
+                }
             }
-            kClass.primaryConstructor != null -> {
-                kClass.primaryConstructor!!
-            }
-            else -> {
-                TODO()
-            }
-        }
         val params = mutableMapOf<KParameter, Any?>()
         constructor.parameters.forEach { param ->
-            val feature = data.classifier.getFeatureByName(param.name!!)
+            val feature = lwFeatureByName(data.classifier, param.name!!)
             if (feature == null) {
                 throw java.lang.IllegalStateException(
                     "We could not find a feature named as the parameter ${param.name} " +
@@ -712,7 +722,7 @@ class LionWebModelConverter(
             }
         }
         propertiesNotSetAtConstructionTime.forEach { property ->
-            val feature = data.classifier.getFeatureByName(property.name)
+            val feature = lwFeatureByName(data.classifier, property.name)
             if (property !is KMutableProperty<*>) {
                 if (property.isContainment() && property.asContainment().multiplicity == Multiplicity.MANY) {
                     val currentValue = property.get(kNode) as MutableList<KNode>
