@@ -143,7 +143,7 @@ class LionWebModelConverter(
         kolasuTree.assignParents()
         val myIDManager = object {
 
-            private val cache = mutableMapOf<KNode, String>()
+            private val cache = IdentityHashMap<KNode, String>()
 
             fun nodeId(kNode: KNode): String {
                 return cache.getOrPut(kNode) { nodeIdProvider.id(kNode) }
