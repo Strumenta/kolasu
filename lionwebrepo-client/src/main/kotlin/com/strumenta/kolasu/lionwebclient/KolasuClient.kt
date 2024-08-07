@@ -329,7 +329,11 @@ class KolasuClient(
         child: LWNode,
         parent: LWNode,
         property: KProperty1<*, *>,
+        skipRetrievalOfParent: Boolean = false
     ): String {
+        if (skipRetrievalOfParent) {
+            return attachLionWebChild(child, property.name!!, parent)
+        }
         return attachLionWebChild(child, parent.id!!, property.name!!)
     }
 
@@ -346,8 +350,7 @@ class KolasuClient(
         parentID: String,
         propertyName: String,
     ): String {
-        val updatedParent =
-            lionWebClient.retrieve(
+        val updatedParent = lionWebClient.retrieve(
                 parentID,
                 withProxyParent = true,
                 retrievalMode = RetrievalMode.SINGLE_NODE,
@@ -357,11 +360,20 @@ class KolasuClient(
 
     fun attachLionWebChild(
         child: LWNode,
+        propertyName: String,
+        providedUpdatedParent: LWNode
+    ): String {
+        return attachLionWebChild(child, providedUpdatedParent, propertyName)
+    }
+
+    fun attachLionWebChild(
+        child: LWNode,
         parent: LWNode,
         propertyName: String,
     ): String {
         parent.addChild(parent.classifier.requireContainmentByName(propertyName), child)
         lionWebClient.storeTree(parent)
+        (child as HasSettableParent).setParentID(parent.id)
         return child.id!!
     }
 
