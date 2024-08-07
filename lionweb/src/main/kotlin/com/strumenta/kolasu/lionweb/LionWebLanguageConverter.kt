@@ -314,9 +314,10 @@ class LionWebLanguageConverter {
         val primitiveType = classesAndPrimitiveTypes.byA(kClass)
         if (primitiveType == null) {
             val newPrimitiveName = kClass.simpleName
-            val newPrimitiveTypeID = (lionwebLanguage.id ?: "unknown_language") + "_" + newPrimitiveName
+            val newPrimitiveTypeID = (lionwebLanguage.id ?: "unknown_language") + "-" + newPrimitiveName + "-id"
             val newPrimitiveType = PrimitiveType(lionwebLanguage, newPrimitiveName, newPrimitiveTypeID)
-            newPrimitiveType.setKey(newPrimitiveName)
+            val newPrimitiveTypeKey = (lionwebLanguage.id ?: "unknown_language") + "-" + newPrimitiveName + "-key"
+            newPrimitiveType.setKey(newPrimitiveTypeKey)
             lionwebLanguage.addElement(newPrimitiveType)
             classesAndPrimitiveTypes.associate(kClass, newPrimitiveType)
             return newPrimitiveType
