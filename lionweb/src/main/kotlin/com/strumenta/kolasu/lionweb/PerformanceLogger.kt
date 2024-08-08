@@ -6,7 +6,7 @@ object PerformanceLogger {
     var file = File("performance-log.csv")
     val sumByStep = mutableMapOf<String, Long>()
 
-    fun sumByStep(description: String) : Long {
+    fun sumByStep(description: String): Long {
         return sumByStep.getOrDefault(description, 0)
     }
 
@@ -23,14 +23,14 @@ object PerformanceLogger {
         }
     }
 
-    fun log(description: String, baseTime: Long? = null) : Long {
+    fun log(description: String, baseTime: Long? = null): Long {
         ensureFileIsReady()
         val t = System.currentTimeMillis()
         if (baseTime == null) {
-            file.appendText("\"${description}\",${t},\n")
+            file.appendText("\"${description}\",$t,\n")
         } else {
             val delta = t - baseTime
-            file.appendText("\"${description}\",${t},${delta}\n")
+            file.appendText("\"${description}\",$t,${delta}\n")
             val baseDescription = description.removeSuffix(" - end")
             sumByStep[baseDescription] = sumByStep.getOrDefault(baseDescription, 0) + delta
         }
