@@ -3,15 +3,16 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.model.Node
 import java.util.IdentityHashMap
-import java.util.UUID
 
-class UUIDNodeIdProvider : NodeIdProvider {
+class SequentialNodeIdProvider(startId: Long = 1L) : NodeIdProvider {
 
     private val cache = IdentityHashMap<KNode, String>()
+    private var next = startId
+
 
     override fun id(kNode: Node): String {
         return cache.getOrPut(kNode) {
-            UUID.randomUUID().toString()
+            (next++).toString()
         }
     }
 
