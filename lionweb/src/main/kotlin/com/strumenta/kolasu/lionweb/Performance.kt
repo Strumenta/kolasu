@@ -1,4 +1,4 @@
-package com.strumenta.kolasu.lionwebclient
+package com.strumenta.kolasu.lionweb
 
 import java.io.File
 
@@ -8,6 +8,13 @@ object PerformanceLogger {
 
     fun sumByStep(description: String) : Long {
         return sumByStep.getOrDefault(description, 0)
+    }
+
+    fun printAllSums() {
+        println("== Performance logger sums ===")
+        sumByStep.forEach {
+            println("${it.key}: ${it.value}")
+        }
     }
 
     private fun ensureFileIsReady() {
