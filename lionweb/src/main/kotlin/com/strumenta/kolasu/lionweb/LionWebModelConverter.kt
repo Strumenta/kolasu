@@ -348,6 +348,7 @@ class LionWebModelConverter(
                 val instantiated = instantiate(kClass, lwNode, referencesPostponer)
                 if (instantiated is KNode) {
                     instantiated.assignParents()
+                    nodeIdProvider.registerMapping(instantiated, lwNode.id!!)
                 }
                 associateNodes(instantiated, lwNode)
             } catch (e: RuntimeException) {
