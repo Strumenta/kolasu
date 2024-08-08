@@ -9,6 +9,7 @@ import com.strumenta.kolasu.lionweb.LWLanguage
 import com.strumenta.kolasu.lionweb.LWNode
 import com.strumenta.kolasu.lionweb.LionWebModelConverter
 import com.strumenta.kolasu.lionweb.LionWebSource
+import com.strumenta.kolasu.lionweb.PerformanceLogger
 import com.strumenta.kolasu.lionweb.PrimitiveValueSerialization
 import com.strumenta.kolasu.lionweb.ProxyBasedNodeResolver
 import com.strumenta.kolasu.model.ASTRoot
@@ -57,21 +58,15 @@ class KolasuClient(
     val connectTimeOutInSeconds: Long = 60,
     val callTimeoutInSeconds: Long = 60,
     val authorizationToken: String? = null,
+    val idProvider: NodeIdProvider = CommonNodeIdProvider().caching()
 ) {
     /**
      * Exposed for testing purposes
      */
     val nodeConverter =
-        LionWebModelConverter().apply {
+        LionWebModelConverter(idProvider).apply {
             externalNodeResolver = ProxyBasedNodeResolver
         }
-
-    /**
-     * This is the logic we use to assign Node IDs. This can be customized, if needed.
-     * For example, we may want to use some form of semantic Node ID for certain kinds of Nodes, like qualified names
-     * for Class Declarations.
-     */
-    val idProvider: NodeIdProvider = CommonNodeIdProvider().caching()
 
     val lionWebClient =
         LionWebClient(
@@ -460,7 +455,6 @@ class KolasuClient(
         containmentIndex: Int,
     ): LWNode {
         require(kNode.javaClass.annotations.any { it is ASTRoot })
-        kNode.assignParents()
         nodeConverter.clearNodesMapping()
         return nodeConverter.exportModelToLionWeb(
             kNode,
