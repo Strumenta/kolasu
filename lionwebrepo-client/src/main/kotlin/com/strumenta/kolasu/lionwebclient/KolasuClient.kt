@@ -24,6 +24,7 @@ import io.lionweb.lioncore.java.serialization.UnavailableNodePolicy
 import io.lionweb.lioncore.kotlin.repoclient.ClassifierResult
 import io.lionweb.lioncore.kotlin.repoclient.LionWebClient
 import io.lionweb.lioncore.kotlin.repoclient.RetrievalMode
+import io.lionweb.lioncore.kotlin.repoclient.SerializationDecorator
 import io.lionweb.lioncore.kotlin.repoclient.debugFileHelper
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -468,5 +469,9 @@ class KolasuClient(
         text: () -> String,
     ) {
         debugFileHelper(debug, relativePath, text)
+    }
+
+    fun registerSerializationDecorator(decorator: SerializationDecorator) {
+        lionWebClient.registerSerializationDecorator(decorator)
     }
 }
