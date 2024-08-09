@@ -474,4 +474,8 @@ class KolasuClient(
     fun registerSerializationDecorator(decorator: SerializationDecorator) {
         lionWebClient.registerSerializationDecorator(decorator)
     }
+
+    fun updateJsonSerialization() {
+        lionWebClient.updateJsonSerialization()
+    }
 }
