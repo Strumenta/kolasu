@@ -717,6 +717,7 @@ class LionWebModelConverterTest {
 
     @Test
     fun canDeserializePosition() {
+        StarLasuLWLanguage
         val kl = KolasuLanguage("my.language").apply {
             addClass(NodeWithEnum::class)
         }

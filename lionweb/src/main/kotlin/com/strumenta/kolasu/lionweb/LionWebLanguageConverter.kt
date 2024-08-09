@@ -332,7 +332,7 @@ class LionWebLanguageConverter {
             Long::class.createType() -> LionCoreBuiltins.getInteger()
             String::class.createType() -> LionCoreBuiltins.getString()
             Boolean::class.createType() -> LionCoreBuiltins.getBoolean()
-            Char::class.createType() -> StarLasuLWLanguage.char
+            Char::class.createType() -> StarLasuLWLanguage.Char
             else -> {
                 val kClass = kType.classifier as KClass<*>
                 val isEnum = kClass.supertypes.any { it.classifier == Enum::class }
