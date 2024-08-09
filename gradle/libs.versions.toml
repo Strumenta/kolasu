@@ -3,7 +3,7 @@ buildConfig = { id = "com.github.gmazzo.buildconfig", version = "5.3.5" }
 superPublish = { id = "com.vanniktech.maven.publish", version = "0.22.0" }
 
 [versions]
-lwjava = "0.2.18"
+lwjava = "0.2.19-SNAPSHOT"
 lwkotlin = "0.2.5-SNAPSHOT"
 
 [libraries]
