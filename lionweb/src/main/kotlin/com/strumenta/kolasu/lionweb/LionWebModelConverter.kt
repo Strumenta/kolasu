@@ -8,7 +8,6 @@ import com.strumenta.kolasu.language.Feature
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.CompositeDestination
 import com.strumenta.kolasu.model.Multiplicity
-import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
@@ -45,11 +44,10 @@ import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.AbstractSerialization
 import io.lionweb.lioncore.java.serialization.JsonSerialization
-import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
-import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.java.serialization.SerializationProvider
 import io.lionweb.lioncore.java.utils.CommonChecks
 import io.lionweb.lioncore.kotlin.BaseNode
+import io.lionweb.lioncore.kotlin.MetamodelRegistry
 import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
 import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
 import java.util.IdentityHashMap
@@ -393,54 +391,8 @@ class LionWebModelConverter(
         serialization: AbstractSerialization =
             SerializationProvider.getStandardJsonSerialization()
     ): AbstractSerialization {
-        serialization.primitiveValuesSerialization.registerSerializer(
-            StarLasuLWLanguage.char.id
-        ) { value -> "$value" }
-        serialization.primitiveValuesSerialization.registerDeserializer(
-            StarLasuLWLanguage.char.id
-        ) { serialized -> serialized[0] }
-        val pointSerializer: PrimitiveSerializer<Point> =
-            PrimitiveSerializer<Point> { value ->
-                if (value == null) {
-                    return@PrimitiveSerializer null
-                }
-                "L${value.line}:${value.column}"
-            }
-        val pointDeserializer: PrimitiveDeserializer<Point> =
-            PrimitiveDeserializer<Point> { serialized ->
-                if (serialized == null) {
-                    return@PrimitiveDeserializer null
-                }
-                require(serialized.startsWith("L"))
-                require(serialized.removePrefix("L").isNotEmpty())
-                val parts = serialized.removePrefix("L").split(":")
-                require(parts.size == 2)
-                Point(parts[0].toInt(), parts[1].toInt())
-            }
-        serialization.primitiveValuesSerialization.registerSerializer(
-            StarLasuLWLanguage.Point.id,
-            pointSerializer
-        )
-        serialization.primitiveValuesSerialization.registerDeserializer(
-            StarLasuLWLanguage.Point.id,
-            pointDeserializer
-        )
-        serialization.primitiveValuesSerialization.registerSerializer(
-            StarLasuLWLanguage.Position.id
-        ) { value ->
-            "${pointSerializer.serialize((value as Position).start)} to ${pointSerializer.serialize(value.end)}"
-        }
-        serialization.primitiveValuesSerialization.registerDeserializer(
-            StarLasuLWLanguage.Position.id
-        ) { serialized ->
-            if (serialized == null) {
-                null
-            } else {
-                val parts = serialized.split(" to ")
-                require(parts.size == 2)
-                Position(pointDeserializer.deserialize(parts[0]), pointDeserializer.deserialize(parts[1]))
-            }
-        }
+        StarLasuLWLanguage
+        MetamodelRegistry.prepareJsonSerialization(serialization)
         synchronized(languageConverter) {
             languageConverter.knownLWLanguages().forEach {
                 serialization.primitiveValuesSerialization.registerLanguage(it)
