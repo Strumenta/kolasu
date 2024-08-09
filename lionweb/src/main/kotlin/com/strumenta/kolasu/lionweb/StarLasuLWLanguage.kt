@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.model.Multiplicity
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import io.lionweb.lioncore.java.language.Annotation
@@ -12,6 +14,9 @@ import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.self.LionCore
+import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
+import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
+import io.lionweb.lioncore.kotlin.MetamodelRegistry
 
 private const val PLACEHOLDER_NODE = "PlaceholderNode"
 
@@ -59,6 +64,7 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
             addContainment("root", ASTNode, Multiplicity.OPTIONAL)
             addProperty("code", LionCoreBuiltins.getString(), Multiplicity.OPTIONAL)
         }
+        registerSerializersAndDeserializersInMetamodelRegistry()
     }
 
     private fun addPlaceholderNodeAnnotation(astNode: Concept) {
@@ -100,7 +106,7 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
     val ASTNode: Concept
         get() = StarLasuLWLanguage.getConceptByName("ASTNode")!!
 
-    val char: PrimitiveType
+    val Char: PrimitiveType
         get() = StarLasuLWLanguage.getPrimitiveTypeByName("Char")!!
 
     val PlaceholderNode: Annotation
@@ -127,4 +133,51 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
         get() = StarLasuLWLanguage.getInterfaceByName("Statement")!!
     val TypeAnnotation: Interface
         get() = StarLasuLWLanguage.getInterfaceByName("TypeAnnotation")!!
+}
+
+private fun registerSerializersAndDeserializersInMetamodelRegistry() {
+    val charSerializer = PrimitiveSerializer<Char> { value -> "$value" }
+    val charDeserializer = PrimitiveDeserializer<Char> { serialized ->
+        require(serialized.length == 1)
+        serialized[0]
+    }
+    MetamodelRegistry.addSerializerAndDeserializer(StarLasuLWLanguage.Char, charSerializer, charDeserializer)
+
+    val pointSerializer: PrimitiveSerializer<Point> =
+        PrimitiveSerializer<Point> { value ->
+            if (value == null) {
+                return@PrimitiveSerializer null
+            }
+            "L${value.line}:${value.column}"
+        }
+    val pointDeserializer: PrimitiveDeserializer<Point> =
+        PrimitiveDeserializer<Point> { serialized ->
+            if (serialized == null) {
+                return@PrimitiveDeserializer null
+            }
+            require(serialized.startsWith("L"))
+            require(serialized.removePrefix("L").isNotEmpty())
+            val parts = serialized.removePrefix("L").split(":")
+            require(parts.size == 2)
+            Point(parts[0].toInt(), parts[1].toInt())
+        }
+    MetamodelRegistry.addSerializerAndDeserializer(StarLasuLWLanguage.Point, pointSerializer, pointDeserializer)
+
+    val positionSerializer = PrimitiveSerializer<Position> { value ->
+        "${pointSerializer.serialize((value as Position).start)} to ${pointSerializer.serialize(value.end)}"
+    }
+    val positionDeserializer = PrimitiveDeserializer<Position> { serialized ->
+        if (serialized == null) {
+            null
+        } else {
+            val parts = serialized.split(" to ")
+            require(parts.size == 2)
+            Position(pointDeserializer.deserialize(parts[0]), pointDeserializer.deserialize(parts[1]))
+        }
+    }
+    MetamodelRegistry.addSerializerAndDeserializer(
+        StarLasuLWLanguage.Position,
+        positionSerializer,
+        positionDeserializer
+    )
 }

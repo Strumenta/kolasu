@@ -122,7 +122,14 @@ open class Node() : Origin, Destination, Serializable {
         get() = explicitlySetSource ?: (position?.source ?: origin?.source)
         set(value) {
             explicitlySetSource = value
-            require(this.source === value) { "The source has not been set correctly. It should be $value while it is ${this.source}" }
+            if (value == null) {
+                require(this.source == null)
+            } else {
+                require(this.source === value) {
+                    "The source has not been set correctly. It should be $value " +
+                        "while it is ${this.source}"
+                }
+            }
         }
 
     fun setSourceForTree(source: Source): Node {

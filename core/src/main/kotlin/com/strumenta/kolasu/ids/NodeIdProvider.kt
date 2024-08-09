@@ -10,6 +10,10 @@ import com.strumenta.kolasu.model.Node as KNode
  */
 interface NodeIdProvider {
     fun id(kNode: KNode): String
+    fun registerMapping(kNode: KNode, nodeId: String) {
+        // do nothing
+    }
+
     var parentProvider: NodeIdProvider?
     val topLevelProvider: NodeIdProvider
         get() = if (parentProvider == null) this else parentProvider!!.topLevelProvider

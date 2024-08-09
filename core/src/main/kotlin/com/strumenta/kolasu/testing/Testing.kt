@@ -105,6 +105,16 @@ class IgnoreChildren<N : Node> : MutableList<N> {
     override fun subList(fromIndex: Int, toIndex: Int): MutableList<N> {
         TODO("Not yet implemented")
     }
+
+    // Sometimes the compiler complains about these methods not being overriden
+    fun toArray(): Array<out Any> {
+        TODO()
+    }
+
+    // Sometimes the compiler complains about these methods not being overriden
+    fun <T : Any>toArray(base: Array<out T>): Array<out T> {
+        TODO()
+    }
 }
 
 class ASTDifferenceException(val context: String, val expected: Any, val actual: Any) :
