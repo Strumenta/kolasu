@@ -9,7 +9,6 @@ class SequentialNodeIdProvider(startId: Long = 1L) : NodeIdProvider {
     private val cache = IdentityHashMap<KNode, String>()
     private var next = startId
 
-
     override fun id(kNode: Node): String {
         return cache.getOrPut(kNode) {
             (next++).toString()
