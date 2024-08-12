@@ -115,9 +115,13 @@ class KolasuLanguage(val qualifiedName: String) {
 
     fun <N : Node> tentativeAddClass(
         kClass: KClass<N>,
-        exceptions: MutableList<Exception> = mutableListOf<Exception>()
+        exceptions: MutableList<Exception> = mutableListOf()
     ): Attempt<Boolean, Exception> {
-        if (kClass == Node::class || kClass == Named::class || kClass == PossiblyNamed::class) {
+        if (kClass == Node::class || kClass == Named::class || kClass == PossiblyNamed::class ||
+            kClass.superclasses.contains(
+                    CommonElement::class
+                )
+        ) {
             return Attempt(false, exceptions)
         }
         if (!_astClasses.contains(kClass) && _astClasses.add(kClass)) {
