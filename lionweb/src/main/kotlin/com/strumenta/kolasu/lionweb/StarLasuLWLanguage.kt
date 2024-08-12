@@ -164,13 +164,13 @@ private fun registerSerializersAndDeserializersInMetamodelRegistry() {
     MetamodelRegistry.addSerializerAndDeserializer(StarLasuLWLanguage.Point, pointSerializer, pointDeserializer)
 
     val positionSerializer = PrimitiveSerializer<Position> { value ->
-        "${pointSerializer.serialize((value as Position).start)} to ${pointSerializer.serialize(value.end)}"
+        "${pointSerializer.serialize((value as Position).start)}-${pointSerializer.serialize(value.end)}"
     }
     val positionDeserializer = PrimitiveDeserializer<Position> { serialized ->
         if (serialized == null) {
             null
         } else {
-            val parts = serialized.split(" to ")
+            val parts = serialized.split("-")
             require(parts.size == 2)
             Position(pointDeserializer.deserialize(parts[0]), pointDeserializer.deserialize(parts[1]))
         }
