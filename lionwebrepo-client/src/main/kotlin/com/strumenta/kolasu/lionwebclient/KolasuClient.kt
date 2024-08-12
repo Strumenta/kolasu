@@ -491,7 +491,6 @@ class KolasuClient(
 
     fun registerSerializationDecorator(decorator: SerializationDecorator) {
         // We do not need to specify them also for the lionWebClient, as it uses ours version of JsonSerialization
-        // lionWebClient.registerSerializationDecorator(decorator)
         serializationDecorators.add(decorator)
     }
 
