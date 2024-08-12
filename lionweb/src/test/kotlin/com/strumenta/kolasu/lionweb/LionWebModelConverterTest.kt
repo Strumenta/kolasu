@@ -709,7 +709,7 @@ class LionWebModelConverterTest {
         mc.prepareSerialization(jsonSerialization)
         val serializationBlock = jsonSerialization.serializeNodesToSerializationBlock(lwNode)
         assertEquals(
-            "L3:5 to L27:200",
+            "L3:5-L27:200",
             serializationBlock.classifierInstancesByID["MySource"]!!
                 .getPropertyValue("com_strumenta_starlasu-ASTNode-position-key")
         )
