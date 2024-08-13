@@ -23,14 +23,10 @@ object PerformanceLogger {
         }
     }
 
-<<<<<<<< HEAD:lionwebrepo-client/src/main/kotlin/com/strumenta/kolasu/lionwebclient/PerformanceLogger.kt
     fun log(
         description: String,
         baseTime: Long? = null,
     ): Long {
-========
-    fun log(description: String, baseTime: Long? = null): Long {
->>>>>>>> maintenance/kolasu15:lionweb/src/main/kotlin/com/strumenta/kolasu/lionweb/PerformanceLogger.kt
         ensureFileIsReady()
         val t = System.currentTimeMillis()
         if (baseTime == null) {

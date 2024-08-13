@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.ids
 
+import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.NodeLike as KNode
 
 /**
@@ -8,10 +9,10 @@ import com.strumenta.kolasu.model.NodeLike as KNode
  * It is important that the logic is implemented so that given the same Node, the same ID is returned.
  */
 interface NodeIdProvider {
-    fun id(kNode: KNode): String
+    fun id(kNode: NodeLike): String
 
     fun registerMapping(
-        kNode: KNode,
+        kNode: NodeLike,
         nodeId: String,
     ) {
         // do nothing

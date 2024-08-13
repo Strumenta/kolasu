@@ -12,7 +12,6 @@ import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.NodeDestination
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.NodeOrigin
-import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.Source
@@ -61,8 +60,8 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
-import io.lionweb.lioncore.java.language.Feature as LWFeature
 import com.strumenta.kolasu.model.ReferenceValue as KReferenceValue
+import io.lionweb.lioncore.java.language.Feature as LWFeature
 import io.lionweb.lioncore.java.model.ReferenceValue as LWReferenceValue
 
 interface PrimitiveValueSerialization<E> {
@@ -143,7 +142,10 @@ class LionWebModelConverter(
         private val kFeaturesCache = mutableMapOf<Class<*>, Map<String, Feature>>()
         private val lwFeaturesCache = mutableMapOf<Classifier<*>, Map<String, LWFeature<*>>>()
 
-        fun lwFeatureByName(classifier: Classifier<*>, featureName: String): LWFeature<*>? {
+        fun lwFeatureByName(
+            classifier: Classifier<*>,
+            featureName: String,
+        ): LWFeature<*>? {
             return lwFeaturesCache.getOrPut(classifier) {
                 classifier.allFeatures().associateBy { it.name!! }
             }[featureName]
@@ -158,7 +160,9 @@ class LionWebModelConverter(
         kolasuTree.assignParents()
         val myIDManager =
             object {
-                private val cache = IdentityHashMap<KNode, String>()fun nodeId(kNode: KNode): String {
+                private val cache = IdentityHashMap<KNode, String>()
+
+                fun nodeId(kNode: KNode): String {
                     return cache.getOrPut(kNode) { nodeIdProvider.id(kNode) }
                 }
             }
@@ -178,12 +182,18 @@ class LionWebModelConverter(
                             "It was produced while exporting this Kolasu Node: $kNode",
                     )
                 }
-                val kFeatures = kFeaturesCache.getOrPut(kNode.javaClass) {
-                    kNode.javaClass.kotlin.allFeatures().associateBy { it.name }
-                }
-                val lwFeatures = lwFeaturesCache.getOrPut(lwNode.classifier) {
-                    lwNode.classifier.allFeatures().associateBy { it.name!! }
-                }
+                val kFeatures =
+                    kFeaturesCache.getOrPut(kNode.javaClass) {
+                        kNode
+                            .javaClass
+                            .kotlin
+                            .allFeatures()
+                            .associateBy { it.name }
+                    }
+                val lwFeatures =
+                    lwFeaturesCache.getOrPut(lwNode.classifier) {
+                        lwNode.classifier.allFeatures().associateBy { it.name!! }
+                    }
                 lwFeatures.values.forEach { feature ->
                     when (feature) {
                         is Property -> {

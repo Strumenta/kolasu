@@ -1,19 +1,17 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.ids.NodeIdProvider
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeLike
 import java.util.IdentityHashMap
 import java.util.UUID
 
 class UUIDNodeIdProvider : NodeIdProvider {
-
     private val cache = IdentityHashMap<KNode, String>()
 
-    override fun id(kNode: Node): String {
-        return cache.getOrPut(kNode) {
+    override fun id(kNode: NodeLike): String =
+        cache.getOrPut(kNode) {
             UUID.randomUUID().toString()
         }
-    }
 
     override var parentProvider: NodeIdProvider?
         get() = null
@@ -21,7 +19,10 @@ class UUIDNodeIdProvider : NodeIdProvider {
             throw UnsupportedOperationException()
         }
 
-    override fun registerMapping(kNode: Node, nodeId: String) {
+    override fun registerMapping(
+        kNode: NodeLike,
+        nodeId: String,
+    ) {
         if (cache.containsKey(kNode)) {
             require(cache[kNode] == nodeId)
         } else {

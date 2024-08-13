@@ -60,7 +60,7 @@ class KolasuClient(
     val connectTimeOutInSeconds: Long = 60,
     val callTimeoutInSeconds: Long = 60,
     val authorizationToken: String? = null,
-    val idProvider: NodeIdProvider = CommonNodeIdProvider().caching()
+    val idProvider: NodeIdProvider = CommonNodeIdProvider().caching(),
 ) {
     /**
      * Exposed for testing purposes
@@ -91,7 +91,7 @@ class KolasuClient(
                 unavailableReferenceTargetPolicy = UnavailableNodePolicy.PROXY_NODES
             }
             nodeConverter.prepareSerialization(
-                it
+                it,
             ) as JsonSerialization
         }
     }
@@ -107,7 +107,7 @@ class KolasuClient(
         lionWebClient.updateJsonSerialization()
     }
 
-    private fun calculateSerialization() : JsonSerialization {
+    private fun calculateSerialization(): JsonSerialization {
         val jsonSerialization = SerializationProvider.getStandardJsonSerialization()
         serializationDecorators.forEach { serializationDecorator -> serializationDecorator.invoke(jsonSerialization) }
         return jsonSerialization
@@ -349,7 +349,7 @@ class KolasuClient(
         child: LWNode,
         parent: LWNode,
         property: KProperty1<*, *>,
-        skipRetrievalOfParent: Boolean = false
+        skipRetrievalOfParent: Boolean = false,
     ): String {
         if (skipRetrievalOfParent) {
             return attachLionWebChild(child, property.name!!, parent)
@@ -370,7 +370,8 @@ class KolasuClient(
         parentID: String,
         propertyName: String,
     ): String {
-        val updatedParent = lionWebClient.retrieve(
+        val updatedParent =
+            lionWebClient.retrieve(
                 parentID,
                 withProxyParent = true,
                 retrievalMode = RetrievalMode.SINGLE_NODE,
@@ -381,7 +382,7 @@ class KolasuClient(
     fun attachLionWebChild(
         child: LWNode,
         propertyName: String,
-        providedUpdatedParent: LWNode
+        providedUpdatedParent: LWNode,
     ): String {
         return attachLionWebChild(child, providedUpdatedParent, propertyName)
     }
@@ -503,5 +504,4 @@ class KolasuClient(
         // We do not need to specify them also for the lionWebClient, as it uses ours version of JsonSerialization
         serializationDecorators.add(decorator)
     }
-
 }
