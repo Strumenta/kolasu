@@ -39,3 +39,4 @@ generated-test-src
 **/bin/
 .netlify
 .kotlin
+.java-version
