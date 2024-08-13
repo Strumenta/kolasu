@@ -717,6 +717,8 @@ class LionWebModelConverterTest {
 
     @Test
     fun canDeserializePosition() {
+        // This has the side effect on ensuring that the serializers and deserializers for primitive types in the
+        // StarLasu Language are registered in the MetamodelRegistry
         StarLasuLWLanguage
         val kl = KolasuLanguage("my.language").apply {
             addClass(NodeWithEnum::class)

@@ -20,6 +20,10 @@ import io.lionweb.lioncore.kotlin.MetamodelRegistry
 
 private const val PLACEHOLDER_NODE = "PlaceholderNode"
 
+/**
+ * When this object is referenced the initialization is performed. When that happens the serializers and deserializers
+ * for Position and other primitive types are registered in the MetamodelRegistry.
+ */
 object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
 
     val CommonElement: Interface
