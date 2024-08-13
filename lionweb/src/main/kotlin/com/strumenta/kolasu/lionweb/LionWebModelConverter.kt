@@ -4,6 +4,7 @@ import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.ids.SimpleSourceIdProvider
 import com.strumenta.kolasu.ids.SourceShouldBeSetException
+import com.strumenta.kolasu.language.Feature
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.model.FileSource
@@ -48,20 +49,19 @@ import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.AbstractSerialization
 import io.lionweb.lioncore.java.serialization.JsonSerialization
-import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
-import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.java.serialization.SerializationProvider
 import io.lionweb.lioncore.java.utils.CommonChecks
 import io.lionweb.lioncore.kotlin.BaseNode
+import io.lionweb.lioncore.kotlin.MetamodelRegistry
 import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
 import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
+import io.lionweb.lioncore.java.language.Feature as LWFeature
 import com.strumenta.kolasu.model.ReferenceValue as KReferenceValue
 import io.lionweb.lioncore.java.model.ReferenceValue as LWReferenceValue
 
@@ -139,6 +139,17 @@ class LionWebModelConverter(
         }
     }
 
+    companion object {
+        private val kFeaturesCache = mutableMapOf<Class<*>, Map<String, Feature>>()
+        private val lwFeaturesCache = mutableMapOf<Classifier<*>, Map<String, LWFeature<*>>>()
+
+        fun lwFeatureByName(classifier: Classifier<*>, featureName: String): LWFeature<*>? {
+            return lwFeaturesCache.getOrPut(classifier) {
+                classifier.allFeatures().associateBy { it.name!! }
+            }[featureName]
+        }
+    }
+
     fun exportModelToLionWeb(
         kolasuTree: KNode,
         nodeIdProvider: NodeIdProvider = this.nodeIdProvider,
@@ -147,8 +158,8 @@ class LionWebModelConverter(
         kolasuTree.assignParents()
         val myIDManager =
             object {
-                fun nodeId(kNode: KNode): String {
-                    return nodeIdProvider.id(kNode)
+                private val cache = IdentityHashMap<KNode, String>()fun nodeId(kNode: KNode): String {
+                    return cache.getOrPut(kNode) { nodeIdProvider.id(kNode) }
                 }
             }
 
@@ -167,15 +178,20 @@ class LionWebModelConverter(
                             "It was produced while exporting this Kolasu Node: $kNode",
                     )
                 }
-                val kFeatures = kNode.javaClass.kotlin.allFeatures()
-                lwNode.classifier.allFeatures().forEach { feature ->
+                val kFeatures = kFeaturesCache.getOrPut(kNode.javaClass) {
+                    kNode.javaClass.kotlin.allFeatures().associateBy { it.name }
+                }
+                val lwFeatures = lwFeaturesCache.getOrPut(lwNode.classifier) {
+                    lwNode.classifier.allFeatures().associateBy { it.name!! }
+                }
+                lwFeatures.values.forEach { feature ->
                     when (feature) {
                         is Property -> {
                             if (feature == StarLasuLWLanguage.ASTNodeRange) {
                                 lwNode.setPropertyValue(StarLasuLWLanguage.ASTNodeRange, kNode.range)
                             } else {
                                 val kAttribute =
-                                    kFeatures.find { it.name == feature.name }
+                                    kFeatures[feature.name]
                                         as? com.strumenta.kolasu.language.Property
                                         ?: throw IllegalArgumentException(
                                             "Property ${feature.name} not found in $kNode",
@@ -193,7 +209,7 @@ class LionWebModelConverter(
                             try {
                                 val kContainment =
                                     (
-                                        kFeatures.find { it.name == feature.name } ?: throw IllegalStateException(
+                                        kFeatures[feature.name] ?: throw IllegalStateException(
                                             "Cannot find containment for ${feature.name} when considering " +
                                                 "node $kNode",
                                         )
@@ -248,7 +264,7 @@ class LionWebModelConverter(
                                 lwNode.setReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes, referenceValues)
                             } else {
                                 val kReference =
-                                    kFeatures.find { it.name == feature.name }
+                                    kFeatures[feature.name]
                                         as com.strumenta.kolasu.language.Reference
                                 val kValue = kNode.getReference(kReference)
                                 if (kValue == null) {
@@ -357,6 +373,7 @@ class LionWebModelConverter(
                 val instantiated = instantiate(kClass, lwNode, referencesPostponer)
                 if (instantiated is KNode) {
                     instantiated.assignParents()
+                    nodeIdProvider.registerMapping(instantiated, lwNode.id!!)
                 }
                 associateNodes(instantiated, lwNode)
             } catch (e: RuntimeException) {
@@ -411,54 +428,8 @@ class LionWebModelConverter(
         serialization: AbstractSerialization =
             SerializationProvider.getStandardJsonSerialization(),
     ): AbstractSerialization {
-        serialization.primitiveValuesSerialization.registerSerializer(
-            StarLasuLWLanguage.char.id,
-        ) { value -> "$value" }
-        serialization.primitiveValuesSerialization.registerDeserializer(
-            StarLasuLWLanguage.char.id,
-        ) { serialized -> serialized[0] }
-        val pointSerializer: PrimitiveSerializer<Point> =
-            PrimitiveSerializer<Point> { value ->
-                if (value == null) {
-                    return@PrimitiveSerializer null
-                }
-                "L${value.line}:${value.column}"
-            }
-        val pointDeserializer: PrimitiveDeserializer<Point> =
-            PrimitiveDeserializer<Point> { serialized ->
-                if (serialized == null) {
-                    return@PrimitiveDeserializer null
-                }
-                require(serialized.startsWith("L"))
-                require(serialized.removePrefix("L").isNotEmpty())
-                val parts = serialized.removePrefix("L").split(":")
-                require(parts.size == 2)
-                Point(parts[0].toInt(), parts[1].toInt())
-            }
-        serialization.primitiveValuesSerialization.registerSerializer(
-            StarLasuLWLanguage.Point.id,
-            pointSerializer,
-        )
-        serialization.primitiveValuesSerialization.registerDeserializer(
-            StarLasuLWLanguage.Point.id,
-            pointDeserializer,
-        )
-        serialization.primitiveValuesSerialization.registerSerializer(
-            StarLasuLWLanguage.Range.id,
-        ) { value ->
-            "${pointSerializer.serialize((value as Range).start)} to ${pointSerializer.serialize(value.end)}"
-        }
-        serialization.primitiveValuesSerialization.registerDeserializer(
-            StarLasuLWLanguage.Range.id,
-        ) { serialized ->
-            if (serialized == null) {
-                null
-            } else {
-                val parts = serialized.split(" to ")
-                require(parts.size == 2)
-                Range(pointDeserializer.deserialize(parts[0]), pointDeserializer.deserialize(parts[1]))
-            }
-        }
+        StarLasuLWLanguage
+        MetamodelRegistry.prepareJsonSerialization(serialization)
         synchronized(languageConverter) {
             languageConverter.knownLWLanguages().forEach {
                 serialization.primitiveValuesSerialization.registerLanguage(it)
@@ -716,7 +687,7 @@ class LionWebModelConverter(
         if (specialObject != null) {
             return specialObject as T
         }
-        val constructor: KFunction<Any> =
+        val constructor =
             when {
                 kClass.constructors.size == 1 -> {
                     kClass.constructors.first()
@@ -730,7 +701,7 @@ class LionWebModelConverter(
             }
         val params = mutableMapOf<KParameter, Any?>()
         constructor.parameters.forEach { param ->
-            val feature = data.classifier.getFeatureByName(param.name!!)
+            val feature = lwFeatureByName(data.classifier, param.name!!)
             if (feature == null) {
                 throw java.lang.IllegalStateException(
                     "We could not find a feature named as the parameter ${param.name} " +
@@ -773,7 +744,7 @@ class LionWebModelConverter(
                 }
             }
         propertiesNotSetAtConstructionTime.forEach { property ->
-            val feature = data.classifier.getFeatureByName(property.name)
+            val feature = lwFeatureByName(data.classifier, property.name)
             if (property !is KMutableProperty<*>) {
                 if (property.isContainment() && property.asContainment().multiplicity == Multiplicity.MANY) {
                     val currentValue = property.get(kNode) as MutableList<KNode>

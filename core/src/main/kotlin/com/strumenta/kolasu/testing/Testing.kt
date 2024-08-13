@@ -111,6 +111,16 @@ class IgnoreChildren<N : NodeLike> : MutableList<N> {
     ): MutableList<N> {
         TODO("Not yet implemented")
     }
+
+    // Sometimes the compiler complains about these methods not being overriden
+    fun toArray(): Array<out Any> {
+        TODO()
+    }
+
+    // Sometimes the compiler complains about these methods not being overriden
+    fun <T : Any> toArray(base: Array<out T>): Array<out T> {
+        TODO()
+    }
 }
 
 class ASTDifferenceException(

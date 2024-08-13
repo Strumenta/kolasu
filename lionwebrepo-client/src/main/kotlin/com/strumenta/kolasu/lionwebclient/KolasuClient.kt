@@ -10,6 +10,7 @@ import com.strumenta.kolasu.lionweb.LWLanguage
 import com.strumenta.kolasu.lionweb.LWNode
 import com.strumenta.kolasu.lionweb.LionWebModelConverter
 import com.strumenta.kolasu.lionweb.LionWebSource
+import com.strumenta.kolasu.lionweb.PerformanceLogger
 import com.strumenta.kolasu.lionweb.PrimitiveValueSerialization
 import com.strumenta.kolasu.lionweb.ProxyBasedNodeResolver
 import com.strumenta.kolasu.model.ASTRoot
@@ -24,6 +25,7 @@ import io.lionweb.lioncore.java.serialization.UnavailableNodePolicy
 import io.lionweb.lioncore.kotlin.repoclient.ClassifierResult
 import io.lionweb.lioncore.kotlin.repoclient.LionWebClient
 import io.lionweb.lioncore.kotlin.repoclient.RetrievalMode
+import io.lionweb.lioncore.kotlin.repoclient.SerializationDecorator
 import io.lionweb.lioncore.kotlin.repoclient.debugFileHelper
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -58,21 +60,15 @@ class KolasuClient(
     val connectTimeOutInSeconds: Long = 60,
     val callTimeoutInSeconds: Long = 60,
     val authorizationToken: String? = null,
+    val idProvider: NodeIdProvider = CommonNodeIdProvider().caching()
 ) {
     /**
      * Exposed for testing purposes
      */
     val nodeConverter =
-        LionWebModelConverter().apply {
+        LionWebModelConverter(idProvider).apply {
             externalNodeResolver = ProxyBasedNodeResolver
         }
-
-    /**
-     * This is the logic we use to assign Node IDs. This can be customized, if needed.
-     * For example, we may want to use some form of semantic Node ID for certain kinds of Nodes, like qualified names
-     * for Class Declarations.
-     */
-    val idProvider: NodeIdProvider = CommonNodeIdProvider().caching()
 
     val lionWebClient =
         LionWebClient(
@@ -85,19 +81,37 @@ class KolasuClient(
             authorizationToken = authorizationToken,
         )
 
+    private val serializationDecorators = mutableListOf<SerializationDecorator>()
+
+    init {
+        registerSerializationDecorator {
+            it.apply {
+                enableDynamicNodes()
+                unavailableParentPolicy = UnavailableNodePolicy.NULL_REFERENCES
+                unavailableReferenceTargetPolicy = UnavailableNodePolicy.PROXY_NODES
+            }
+            nodeConverter.prepareSerialization(
+                it
+            ) as JsonSerialization
+        }
+    }
+
     /**
      * Exposed for testing purposes
      */
-    val jsonSerialization: JsonSerialization
-        get() {
-            return nodeConverter.prepareSerialization(
-                SerializationProvider.getStandardJsonSerialization().apply {
-                    enableDynamicNodes()
-                    unavailableParentPolicy = UnavailableNodePolicy.NULL_REFERENCES
-                    unavailableReferenceTargetPolicy = UnavailableNodePolicy.PROXY_NODES
-                },
-            ) as JsonSerialization
-        }
+    var jsonSerialization: JsonSerialization = calculateSerialization()
+        private set
+
+    fun updateSerialization() {
+        this.jsonSerialization = calculateSerialization()
+        lionWebClient.updateJsonSerialization()
+    }
+
+    private fun calculateSerialization() : JsonSerialization {
+        val jsonSerialization = SerializationProvider.getStandardJsonSerialization()
+        serializationDecorators.forEach { serializationDecorator -> serializationDecorator.invoke(jsonSerialization) }
+        return jsonSerialization
+    }
 
     //
     // Configuration
@@ -335,7 +349,11 @@ class KolasuClient(
         child: LWNode,
         parent: LWNode,
         property: KProperty1<*, *>,
+        skipRetrievalOfParent: Boolean = false
     ): String {
+        if (skipRetrievalOfParent) {
+            return attachLionWebChild(child, property.name!!, parent)
+        }
         return attachLionWebChild(child, parent.id!!, property.name!!)
     }
 
@@ -352,8 +370,7 @@ class KolasuClient(
         parentID: String,
         propertyName: String,
     ): String {
-        val updatedParent =
-            lionWebClient.retrieve(
+        val updatedParent = lionWebClient.retrieve(
                 parentID,
                 withProxyParent = true,
                 retrievalMode = RetrievalMode.SINGLE_NODE,
@@ -363,11 +380,20 @@ class KolasuClient(
 
     fun attachLionWebChild(
         child: LWNode,
+        propertyName: String,
+        providedUpdatedParent: LWNode
+    ): String {
+        return attachLionWebChild(child, providedUpdatedParent, propertyName)
+    }
+
+    fun attachLionWebChild(
+        child: LWNode,
         parent: LWNode,
         propertyName: String,
     ): String {
         parent.addChild(parent.classifier.requireContainmentByName(propertyName), child)
         lionWebClient.storeTree(parent)
+        (child as HasSettableParent).setParentID(parent.id)
         return child.id!!
     }
 
@@ -458,7 +484,6 @@ class KolasuClient(
         containmentIndex: Int,
     ): LWNode {
         require(kNode.javaClass.annotations.any { it is ASTRoot })
-        kNode.assignParents()
         nodeConverter.clearNodesMapping()
         return nodeConverter.exportModelToLionWeb(
             kNode,
@@ -473,4 +498,10 @@ class KolasuClient(
     ) {
         debugFileHelper(debug, relativePath, text)
     }
+
+    fun registerSerializationDecorator(decorator: SerializationDecorator) {
+        // We do not need to specify them also for the lionWebClient, as it uses ours version of JsonSerialization
+        serializationDecorators.add(decorator)
+    }
+
 }

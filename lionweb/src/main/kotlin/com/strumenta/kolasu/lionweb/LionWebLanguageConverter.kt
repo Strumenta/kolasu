@@ -572,9 +572,10 @@ class LionWebLanguageConverter {
         val primitiveType = classesAndPrimitiveTypes.byA(kClass)
         if (primitiveType == null) {
             val newPrimitiveName = kClass.simpleName
-            val newPrimitiveTypeID = (lionwebLanguage.id ?: "unknown_language") + "_" + newPrimitiveName
+            val newPrimitiveTypeID = (lionwebLanguage.id ?: "unknown_language") + "-" + newPrimitiveName + "-id"
             val newPrimitiveType = LWPrimitiveType(lionwebLanguage, newPrimitiveName, newPrimitiveTypeID)
-            newPrimitiveType.setKey(newPrimitiveName)
+            val newPrimitiveTypeKey = (lionwebLanguage.id ?: "unknown_language") + "-" + newPrimitiveName + "-key"
+            newPrimitiveType.setKey(newPrimitiveTypeKey)
             lionwebLanguage.addElement(newPrimitiveType)
             classesAndPrimitiveTypes.associate(kClass, newPrimitiveType)
             return newPrimitiveType
@@ -635,7 +636,7 @@ class LionWebLanguageConverter {
             Long::class.createType() -> LionCoreBuiltins.getInteger()
             String::class.createType() -> LionCoreBuiltins.getString()
             Boolean::class.createType() -> LionCoreBuiltins.getBoolean()
-            Char::class.createType() -> StarLasuLWLanguage.char
+            Char::class.createType() -> StarLasuLWLanguage.Char
             else -> {
                 val kClass = kType.classifier as KClass<*>
                 val isEnum = kClass.supertypes.any { it.classifier == Enum::class }

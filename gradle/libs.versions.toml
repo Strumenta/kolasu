@@ -1,7 +1,7 @@
 [versions]
 antlr4 = "4.9.3"
-lwjava = "0.2.18"
-lwkotlin = "0.2.3"
+lwjava = "0.2.19"
+lwkotlin = "0.2.5"
 
 [plugins]
 buildConfig = { id = "com.github.gmazzo.buildconfig", version = "5.3.5" }

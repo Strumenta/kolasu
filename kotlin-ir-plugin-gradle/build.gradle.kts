@@ -32,7 +32,6 @@ gradlePlugin {
             tags = listOf("StarLasu", "Kolasu", "Kotlin Compiler Plugin")
         }
     }
-
 }
 
 publishing {

@@ -143,7 +143,7 @@ class FastWalker(
         return if (childrenMap.containsKey(child)) {
             childrenMap[child]!!
         } else {
-            childrenMap.put(child, child.walkChildren().toList())
+            childrenMap[child] = child.walkChildren().toList()
             childrenMap[child]!!
         }
     }

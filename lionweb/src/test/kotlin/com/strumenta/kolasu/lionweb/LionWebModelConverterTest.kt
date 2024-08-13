@@ -732,7 +732,7 @@ class LionWebModelConverterTest {
         mc.prepareSerialization(jsonSerialization)
         val serializationBlock = jsonSerialization.serializeNodesToSerializationBlock(lwNode)
         assertEquals(
-            "L3:5 to L27:200",
+            "L3:5-L27:200",
             serializationBlock
                 .classifierInstancesByID["MySource"]!!
                 .getPropertyValue("com_strumenta_starlasu-ASTNode-range-key"),
@@ -741,6 +741,9 @@ class LionWebModelConverterTest {
 
     @Test
     fun canDeserializeRange() {
+        // This has the side effect on ensuring that the serializers and deserializers for primitive types in the
+        // StarLasu Language are registered in the MetamodelRegistry
+        StarLasuLWLanguage
         val kl =
             KolasuLanguage("my.language").apply {
                 addClass(NodeWithEnum::class)

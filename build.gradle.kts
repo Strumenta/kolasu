@@ -157,8 +157,7 @@ tasks.wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 tasks {
-        getByPath(":lionwebrepo-client:signMavenPublication")
-            .dependsOn(":lionwebrepo-client:kdocJar")
-            .dependsOn(":lionwebrepo-client:sourcesJar")
+    getByPath(":lionwebrepo-client:signMavenPublication")
+        .dependsOn(":lionwebrepo-client:kdocJar")
+        .dependsOn(":lionwebrepo-client:sourcesJar")
 }
-
