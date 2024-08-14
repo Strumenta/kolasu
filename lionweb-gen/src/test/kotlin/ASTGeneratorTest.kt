@@ -5,7 +5,7 @@ import io.lionweb.lioncore.java.language.Interface
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
-import io.lionweb.lioncore.java.serialization.JsonSerialization
+import io.lionweb.lioncore.java.serialization.SerializationProvider
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -14,7 +14,7 @@ class ASTGeneratorTest {
     @Test
     fun allASTClassesAreGeneratedAsExpected() {
         val inputStream = this.javaClass.getResourceAsStream("/properties-language.json")
-        val jsonser = JsonSerialization.getStandardSerialization()
+        val jsonser = SerializationProvider.getStandardJsonSerialization()
         jsonser.instanceResolver.addTree(StarLasuLWLanguage)
         val propertiesLanguage = jsonser.deserializeToNodes(inputStream).first() as Language
         val generated = ASTGenerator("com.strumenta.properties", propertiesLanguage).generateClasses()

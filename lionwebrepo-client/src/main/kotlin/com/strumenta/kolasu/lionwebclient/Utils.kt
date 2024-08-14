@@ -3,13 +3,12 @@ package com.strumenta.kolasu.lionwebclient
 import com.strumenta.kolasu.lionweb.KNode
 import com.strumenta.kolasu.lionweb.LWNode
 import com.strumenta.kolasu.lionweb.StarLasuLWLanguage
-import com.strumenta.kolasu.lionweb.children
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Source
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.model.HasSettableParent
-import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.java.model.impl.ProxyNode
+import io.lionweb.lioncore.kotlin.children
 
 fun Node.withSource(source: Source): Node {
     this.setSourceForTree(source)
