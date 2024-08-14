@@ -77,7 +77,7 @@ data class TokenCategory(val type: String) {
 open class KolasuToken(
     open val category: TokenCategory,
     open val position: Position,
-    open val text: String
+    open val text: String? = null
 ) : Serializable
 
 /**
@@ -155,7 +155,7 @@ class FirstStageParsingResult<C : ParserRuleContext>(
  * @param firstStage the result of the first parsing stage (from source code to parse tree).
  * @param time the time spent in the entire parsing process.
  */
-class ParsingResult<RootNode : Node>(
+open class ParsingResult<RootNode : Node>(
     issues: List<Issue>,
     val root: RootNode?,
     code: String? = null,
