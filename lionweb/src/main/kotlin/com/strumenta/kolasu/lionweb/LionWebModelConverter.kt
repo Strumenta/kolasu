@@ -47,6 +47,7 @@ import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.Primi
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.java.utils.CommonChecks
 import io.lionweb.lioncore.kotlin.BaseNode
+import io.lionweb.lioncore.kotlin.MetamodelRegistry
 import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
@@ -80,6 +81,13 @@ class LionWebModelConverter(
     var nodeIdProvider: NodeIdProvider = StructuralLionWebNodeIdProvider(),
     initialLanguageConverter: LionWebLanguageConverter = LionWebLanguageConverter()
 ) {
+    companion object {
+        init {
+            MetamodelRegistry.registerMapping(IssueNode::class, StarLasuLWLanguage.Issue)
+            MetamodelRegistry.registerMapping(ParsingResultNode::class, StarLasuLWLanguage.ParsingResult)
+        }
+    }
+
     private val languageConverter = initialLanguageConverter
 
     /**
