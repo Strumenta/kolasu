@@ -21,11 +21,15 @@ import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irNotEquals
 import org.jetbrains.kotlin.ir.builders.irNull
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
+import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
+import org.jetbrains.kotlin.ir.symbols.IrPropertySymbol
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.symbols.impl.IrAnonymousInitializerSymbolImpl
+import org.jetbrains.kotlin.ir.symbols.impl.IrFakeOverrideSymbolBase
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.util.allParameters
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
@@ -48,6 +52,7 @@ class SettingParentExtension(
     val pluginContext: IrPluginContext,
     val messageCollector: MessageCollector,
 ) : IrElementTransformerVoidWithContext() {
+    @OptIn(UnsafeDuringIrConstructionAPI::class)
     override fun visitPropertyNew(declaration: IrProperty): IrStatement {
         val prevBody = declaration.setter?.body
         if (prevBody != null && declaration.setter!!.origin == IrDeclarationOrigin.DEFAULT_PROPERTY_ACCESSOR) {
@@ -72,7 +77,12 @@ class SettingParentExtension(
                                                 .identifier("parent"),
                                         ),
                                     ).single()
-                            val parentSetter = parentPropertySymbol.owner.setter!!
+                            val parentSetter = if (parentPropertySymbol is IrFakeOverrideSymbolBase<*, *, *>)
+                                (parentPropertySymbol.originalSymbol as IrPropertySymbol).owner.setter
+                                //throw IllegalStateException("We cannot get the owner of $parentPropertySymbol in ${propertyTypeClassSymbol.descriptor.fqNameOrNull()}")
+                            else {
+                                parentPropertySymbol.owner.setter!!
+                            } as IrFunction
                             // TODO remove from previous parent: field?.removeChild(this)
                             // value?.parent = this -> if (value != null) {value.parent = this}
                             +irIfThen(
