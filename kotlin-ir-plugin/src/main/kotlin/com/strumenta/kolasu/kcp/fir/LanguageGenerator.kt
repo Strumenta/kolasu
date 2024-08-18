@@ -5,9 +5,11 @@ import com.strumenta.kolasu.kcp.fir.MPNodesCollector.knownMPNodeSubclasses
 import com.strumenta.kolasu.language.Concept
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.fir.FirSession
+import org.jetbrains.kotlin.fir.declarations.FirClassLikeDeclaration
 import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
 import org.jetbrains.kotlin.fir.declarations.origin
 import org.jetbrains.kotlin.fir.declarations.utils.classId
+import org.jetbrains.kotlin.fir.declarations.utils.nameOrSpecialName
 import org.jetbrains.kotlin.fir.extensions.ExperimentalTopLevelDeclarationsGenerationApi
 import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
 import org.jetbrains.kotlin.fir.extensions.NestedClassGenerationContext
@@ -15,6 +17,7 @@ import org.jetbrains.kotlin.fir.plugin.createCompanionObject
 import org.jetbrains.kotlin.fir.plugin.createDefaultPrivateConstructor
 import org.jetbrains.kotlin.fir.plugin.createMemberProperty
 import org.jetbrains.kotlin.fir.resolve.providers.toSymbol
+import org.jetbrains.kotlin.fir.symbols.SymbolInternals
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
@@ -89,14 +92,19 @@ class LanguageGenerator(
         return super.getTopLevelCallableIds()
     }
 
+    @OptIn(SymbolInternals::class)
     override fun generateNestedClassLikeDeclaration(
         owner: FirClassSymbol<*>,
         name: Name,
         context: NestedClassGenerationContext,
     ): FirClassLikeSymbol<*>? =
         runIf(name == DEFAULT_NAME_FOR_COMPANION_OBJECT) {
-            val firClass = createCompanionObject(owner, Key)
-            firClass.symbol
+            if (owner.fir.declarations.filterIsInstance<FirClassLikeDeclaration>().none { it.nameOrSpecialName == SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT }) {
+                val firClass = createCompanionObject(owner, Key)
+                firClass.symbol
+            } else {
+                null
+            }
         }
 
     override fun generateConstructors(context: MemberGenerationContext): List<FirConstructorSymbol> {
