@@ -3,7 +3,7 @@ package com.strumenta.kolasu.cli
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.core.subcommands
-import com.github.ajalt.clikt.output.CliktConsole
+import com.github.ajalt.mordant.terminal.Terminal
 import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.parsing.ASTParser
 
@@ -37,11 +37,16 @@ import com.strumenta.kolasu.parsing.ASTParser
  */
 class CLITool<R : NodeLike, P : ASTParser<R>>(
     parserInstantiator: ParserInstantiator<P>,
-    replacedConsole: CliktConsole? = null,
+    replacedConsole: Terminal? = null,
 ) : CliktCommand(invokeWithoutSubcommand = false) {
     init {
         subcommands(ASTSaverCommand(parserInstantiator), StatsCommand(parserInstantiator))
-        context { replacedConsole?.apply { console = replacedConsole } }
+        context {
+
+            replacedConsole?.apply {
+                terminal = replacedConsole
+            }
+        }
     }
 
     override fun run() = Unit

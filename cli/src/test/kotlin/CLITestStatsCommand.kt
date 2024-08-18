@@ -36,8 +36,8 @@ class CLITestStatsCommand {
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("stats", myFile.toString()))
         assertEquals(
             """== Stats ==
@@ -51,9 +51,9 @@ class CLITestStatsCommand {
   processing completed with errors    : 0
   processing completed without errors : 1
   total number of errors              : 0""",
-            console.stdOutput.trim(),
+            console.second.stdout().trim(),
         )
-        assertEquals("", console.errOutput)
+        assertEquals("", console.second.stderr())
     }
 
     @Test
@@ -84,14 +84,14 @@ class CLITestStatsCommand {
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("stats", myFile.toString(), "--csv"))
         assertEquals(
             """Saving Global Stats to global-stats.csv""",
-            console.stdOutput.trim(),
+            console.second.stdout().trim(),
         )
-        assertEquals("", console.errOutput)
+        assertEquals("", console.second.stderr())
 
         val globalStatsFile = File("global-stats.csv")
         assert(globalStatsFile.exists())
@@ -137,11 +137,11 @@ totalErrors,0
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("stats", "--no-stats", myFile.toString()))
-        assertEquals("""""", console.stdOutput.trim())
-        assertEquals("", console.errOutput)
+        assertEquals("""""", console.second.stdout().trim())
+        assertEquals("", console.second.stderr())
     }
 
     @Test
@@ -172,8 +172,8 @@ totalErrors,0
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("stats", "--no-stats", "--node-stats", myFile.toString()))
         assertEquals(
             """== Node Stats ==
@@ -183,9 +183,9 @@ totalErrors,0
   com.strumenta.kolasu.cli.MyFieldDecl              : 3
 
   total number of nodes                             : 6""",
-            console.stdOutput.trim(),
+            console.second.stdout().trim(),
         )
-        assertEquals("", console.errOutput)
+        assertEquals("", console.second.stderr())
     }
 
     @Test
@@ -216,14 +216,14 @@ totalErrors,0
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("stats", myFile.toString(), "--no-stats", "--node-stats", "--csv"))
         assertEquals(
             """Saving Node Stats to node-stats.csv""",
-            console.stdOutput.trim(),
+            console.second.stdout().trim(),
         )
-        assertEquals("", console.errOutput)
+        assertEquals("", console.second.stderr())
 
         val nodeStatsFile = File("node-stats.csv")
         assert(nodeStatsFile.exists())
@@ -267,14 +267,14 @@ total,6
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("stats", myFile.toString(), "--no-stats", "--node-stats", "--simple-names", "--csv"))
         assertEquals(
             """Saving Node Stats to node-stats.csv""",
-            console.stdOutput.trim(),
+            console.second.stdout().trim(),
         )
-        assertEquals("", console.errOutput)
+        assertEquals("", console.second.stderr())
 
         val nodeStatsFile = File("node-stats.csv")
         assert(nodeStatsFile.exists())
@@ -318,8 +318,8 @@ total,6
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("stats", "--no-stats", "--node-stats", "-sn", myFile.toString()))
         assertEquals(
             """== Node Stats ==
@@ -329,8 +329,8 @@ total,6
   MyFieldDecl              : 3
 
   total number of nodes    : 6""",
-            console.stdOutput.trim(),
+            console.second.stdout().trim(),
         )
-        assertEquals("", console.errOutput)
+        assertEquals("", console.second.stderr())
     }
 }

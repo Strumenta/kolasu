@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.cli
 
 import com.github.ajalt.clikt.core.PrintHelpMessage
-import com.github.ajalt.clikt.output.CliktConsole
 import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.language.explore
 import com.strumenta.kolasu.model.LanguageAssociation
@@ -65,40 +64,14 @@ class MyDummyParser : ASTParser<MyCompilationUnit> {
         expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
 }
 
-class CapturingCliktConsole : CliktConsole {
-    override val lineSeparator: String
-        get() = "\n"
-
-    var stdOutput = ""
-    var errOutput = ""
-
-    override fun print(
-        text: String,
-        error: Boolean,
-    ) {
-        if (error) {
-            errOutput += text
-        } else {
-            stdOutput += text
-        }
-    }
-
-    override fun promptForLine(
-        prompt: String,
-        hideInput: Boolean,
-    ): String? {
-        TODO("Not yet implemented")
-    }
-}
-
 class CLITest {
     @Test
     fun runSimpleASTSaverWithoutSpecifyingCommands() {
         val parserInstantiator = { file: File ->
             MyDummyParser()
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         assertFailsWith(PrintHelpMessage::class) {
             cliTool.parse(emptyArray())
         }
@@ -109,8 +82,8 @@ class CLITest {
         val parserInstantiator = { file: File ->
             MyDummyParser()
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         assertFailsWith(PrintHelpMessage::class) {
             cliTool.parse(arrayOf("-h"))
         }
@@ -144,8 +117,8 @@ class CLITest {
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("ast", myFile.toString(), "--print"))
         assertEquals(
             "{\n" +
@@ -179,9 +152,9 @@ class CLITest {
                 "    ]\n" +
                 "  }\n" +
                 "}\n",
-            console.stdOutput,
+            console.second.stdout(),
         )
-        assertEquals("", console.errOutput)
+        assertEquals("", console.second.stderr())
     }
 
     @Test
@@ -212,8 +185,8 @@ class CLITest {
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("ast", myFile.toString(), "--print", "--format", "json"))
         assertEquals(
             "{\n" +
@@ -247,9 +220,9 @@ class CLITest {
                 "    ]\n" +
                 "  }\n" +
                 "}\n",
-            console.stdOutput,
+            console.second.stdout(),
         )
-        assertEquals("", console.errOutput)
+        assertEquals("", console.second.stderr())
     }
 
     @Test
@@ -280,8 +253,8 @@ class CLITest {
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("ast", myFile.toString(), "--print", "--format", "xml"))
         assertEquals(
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -296,9 +269,9 @@ class CLITest {
                 "        </decls>\n" +
                 "    </root>\n" +
                 "</result>",
-            console.stdOutput.trim(),
+            console.second.stdout().trim(),
         )
-        assertEquals("", console.errOutput)
+        assertEquals("", console.second.stderr())
     }
 
     @Test
@@ -341,8 +314,8 @@ class CLITest {
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("ast", myFile.toString(), "--print", "--format", "debug-format"))
         assertEquals(
             "Result {\n" +
@@ -373,9 +346,9 @@ class CLITest {
                 "    } // MyCompilationUnit\n" +
                 "  ]\n" +
                 "}",
-            console.stdOutput.trim(),
+            console.second.stdout().trim(),
         )
-        assertEquals("", console.errOutput)
+        assertEquals("", console.second.stderr())
     }
 
     @Test
@@ -417,12 +390,9 @@ class CLITest {
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("ast", myDir.toString(), "-o", outDir.pathString, "--format", "json", "-v"))
-        println(console.stdOutput)
-//        assertEquals("", console.stdOutput)
-//        assertEquals("", console.errOutput)
         val outMyFile1 = File(outDir.toFile(), "myfile1.mylang.json")
         val outMyFile2 = File(File(outDir.toFile(), "mySubDir"), "myfile2.mylang.json")
         assert(outMyFile1.exists())
@@ -500,12 +470,9 @@ class CLITest {
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("ast", myDir.toString(), "-o", outDir.pathString, "--format", "xml", "-v"))
-        println(console.stdOutput)
-//        assertEquals("", console.stdOutput)
-//        assertEquals("", console.errOutput)
         val outMyFile1 = File(outDir.toFile(), "myfile1.mylang.xml")
         val outMyFile2 = File(File(outDir.toFile(), "mySubDir"), "myfile2.mylang.xml")
         assert(outMyFile1.exists())
@@ -573,12 +540,9 @@ class CLITest {
                     )
             }
         }
-        val console = CapturingCliktConsole()
-        val cliTool = CLITool(parserInstantiator, console)
+        val console = capturingCliktConsole()
+        val cliTool = CLITool(parserInstantiator, console.first)
         cliTool.parse(arrayOf("ast", myDir.toString(), "-o", outDir.pathString, "--format", "debug-format", "-v"))
-        println(console.stdOutput)
-//        assertEquals("", console.stdOutput)
-//        assertEquals("", console.errOutput)
         val outMyFile1 = File(outDir.toFile(), "myfile1.mylang.txt")
         val outMyFile2 = File(File(outDir.toFile(), "mySubDir"), "myfile2.mylang.txt")
         assert(outMyFile1.exists())

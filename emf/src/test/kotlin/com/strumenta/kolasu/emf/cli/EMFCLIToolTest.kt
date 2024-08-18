@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.emf.cli
 
 import com.github.ajalt.clikt.core.PrintHelpMessage
-import com.github.ajalt.clikt.output.CliktConsole
 import com.strumenta.kolasu.antlr4j.parsing.ANTLRTokenFactory
 import com.strumenta.kolasu.antlr4j.parsing.KolasuANTLRToken
 import com.strumenta.kolasu.antlr4j.parsing.ParsingResultWithFirstStage
@@ -98,32 +97,6 @@ class MyDummyParser :
         expectedResults[file] ?: throw java.lang.IllegalArgumentException("Unexpected file $file")
 }
 
-class CapturingCliktConsole : CliktConsole {
-    override val lineSeparator: String
-        get() = "\n"
-
-    var stdOutput = ""
-    var errOutput = ""
-
-    override fun print(
-        text: String,
-        error: Boolean,
-    ) {
-        if (error) {
-            errOutput += text
-        } else {
-            stdOutput += text
-        }
-    }
-
-    override fun promptForLine(
-        prompt: String,
-        hideInput: Boolean,
-    ): String? {
-        TODO("Not yet implemented")
-    }
-}
-
 class EMFCLIToolTest {
     init {
         StarLasuLanguageInstance.ensureIsRegistered()
@@ -135,8 +108,8 @@ class EMFCLIToolTest {
             MyDummyParser()
         }
         val mmSupport = MyDummyParser()
-        val console = CapturingCliktConsole()
-        val cliTool = EMFCLITool(parserInstantiator, mmSupport, console)
+        val console = capturingCliktConsole()
+        val cliTool = EMFCLITool(parserInstantiator, mmSupport, console.first)
         assertFailsWith(PrintHelpMessage::class) {
             cliTool.parse(emptyArray())
         }
@@ -148,8 +121,8 @@ class EMFCLIToolTest {
             MyDummyParser()
         }
         val mmSupport = MyDummyParser()
-        val console = CapturingCliktConsole()
-        val cliTool = EMFCLITool(parserInstantiator, mmSupport, console)
+        val console = capturingCliktConsole()
+        val cliTool = EMFCLITool(parserInstantiator, mmSupport, console.first)
         assertFailsWith(PrintHelpMessage::class) {
             cliTool.parse(arrayOf("-h"))
         }
@@ -161,14 +134,13 @@ class EMFCLIToolTest {
             MyDummyParser()
         }
         val mmSupport = MyDummyParser()
-        val console = CapturingCliktConsole()
-        val cliTool = EMFCLITool(parserInstantiator, mmSupport, console)
+        val console = capturingCliktConsole()
+        val cliTool = EMFCLITool(parserInstantiator, mmSupport, console.first)
         val myDir = createTempDirectory()
         val myFile = File(myDir.toFile(), "mymetamodel.json")
         myDir.toFile().deleteOnExit()
         cliTool.parse(arrayOf("metamodel", "-o", myFile.path, "-v"))
-        println(console.stdOutput)
-        assertEquals("", console.errOutput)
+        assertEquals("", console.second.stderr())
         assert(myFile.exists())
         assertEquals(
             """{
@@ -235,14 +207,13 @@ class EMFCLIToolTest {
             MyDummyParser()
         }
         val mmSupport = MyDummyParser()
-        val console = CapturingCliktConsole()
-        val cliTool = EMFCLITool(parserInstantiator, mmSupport, console)
+        val console = capturingCliktConsole()
+        val cliTool = EMFCLITool(parserInstantiator, mmSupport, console.first)
         val myDir = createTempDirectory()
         val myFile = File(myDir.toFile(), "mymetamodel.json")
         myDir.toFile().deleteOnExit()
         cliTool.parse(arrayOf("metamodel", "-o", myFile.path, "-v", "-ik"))
-        println(console.stdOutput)
-        assertEquals("", console.errOutput)
+        assertEquals("", console.second.stderr())
         assert(myFile.exists())
         assertEquals(
             """[ {
@@ -822,10 +793,9 @@ class EMFCLIToolTest {
             }
         }
         val mmSupport = MyDummyParser()
-        val console = CapturingCliktConsole()
-        val cliTool = EMFCLITool(parserInstantiator, mmSupport, console)
+        val console = capturingCliktConsole()
+        val cliTool = EMFCLITool(parserInstantiator, mmSupport, console.first)
         cliTool.parse(arrayOf("model", myDir.toString(), "-o", outDir.pathString, "-v"))
-        println(console.stdOutput)
         val outMyFile1 = File(outDir.toFile(), "myfile1.json")
         val outMyFile2 = File(File(outDir.toFile(), "mySubDir"), "myfile2.json")
         assert(outMyFile1.exists())
