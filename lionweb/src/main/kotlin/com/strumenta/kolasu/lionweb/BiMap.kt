@@ -3,7 +3,11 @@ package com.strumenta.kolasu.lionweb
 import java.util.IdentityHashMap
 
 /**
- * This class is thread-safe.
+ * A thread-safe bidirectional map implementation
+ *
+ * @param A The type of the first set of elements
+ * @param B Teh type of the second set of elements
+ * @param usingIdentity Whether to use identity-based comparison for keys
  */
 class BiMap<A, B>(
     val usingIdentity: Boolean = false,
@@ -20,28 +24,30 @@ class BiMap<A, B>(
     private val privateAsToBs = if (usingIdentity) IdentityHashMap() else mutableMapOf<A, B>()
     private val privateBsToAs = if (usingIdentity) IdentityHashMap() else mutableMapOf<B, A>()
 
+    @Synchronized
     fun associate(
         a: A,
         b: B,
     ) {
-        synchronized(this) {
-            privateAsToBs[a] = b
-            privateBsToAs[b] = a
-        }
+        privateAsToBs[a] = b
+        privateBsToAs[b] = a
     }
 
-    fun byA(a: A): B? = synchronized(this) { privateAsToBs[a] }
+    @Synchronized
+    fun byA(a: A): B? = privateAsToBs[a]
 
-    fun byB(b: B): A? = synchronized(this) { privateBsToAs[b] }
+    @Synchronized
+    fun byB(b: B): A? = privateBsToAs[b]
 
-    fun containsA(a: A): Boolean = synchronized(this) { privateAsToBs.containsKey(a) }
+    @Synchronized
+    fun containsA(a: A): Boolean = a in privateAsToBs
 
-    fun containsB(b: B): Boolean = synchronized(this) { privateBsToAs.containsKey(b) }
+    @Synchronized
+    fun containsB(b: B): Boolean = b in privateBsToAs
 
+    @Synchronized
     fun clear() {
-        synchronized(this) {
-            privateAsToBs.clear()
-            privateBsToAs.clear()
-        }
+        privateAsToBs.clear()
+        privateBsToAs.clear()
     }
 }
