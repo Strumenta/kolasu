@@ -244,6 +244,18 @@ val Node.startLine: Int?
 val Node.endLine: Int?
     get() = this.position?.end?.line
 
+/**
+ * Given the specified text and point it produces a position that will cover the text, minus the whitespace.
+ *
+ * If a null text is specified then a null position is returned.
+ *
+ * If a text with no leading or trailing whitespace is returned than this will return a position:
+ * - starting at the given start point
+ * - ending to the end point calculated "adding" the text to the start point
+ *
+ * If the text has leading whitespace, the start point will be advanced to skip such whitespace.
+ * Similarly, if the text has trailing whitespace the end point will be receded to skip such whitespace.
+ */
 fun strippedPosition(
     text: String?,
     start: Point
@@ -253,6 +265,9 @@ fun strippedPosition(
     }
 }
 
+/**
+ * See strippedPosition.
+ */
 fun Position.stripPosition(text: String): Position {
     if (text.isNotEmpty()) {
         when (text.first()) {
@@ -297,6 +312,9 @@ private object LinesSplitter {
     }
 }
 
+/**
+ * Given a piece of code, it extracts from it the substring at the given position.
+ */
 fun String.codeAtPosition(position: Position): String {
     try {
         val lines = LinesSplitter.getLines(this)
