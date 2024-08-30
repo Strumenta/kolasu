@@ -479,6 +479,7 @@ class LionWebModelConverter(
                         entry.key.identifier = (entry.value as ProxyNode).id
                     } else {
                         entry.key.referred = nodesMapping.byB(entry.value as LWNode)!! as PossiblyNamed
+                        entry.key.identifier = entry.value!!.id!!
                     }
                 }
             }
