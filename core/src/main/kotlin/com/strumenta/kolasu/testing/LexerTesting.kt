@@ -12,8 +12,10 @@ fun<T : KolasuToken> checkFileTokenization(file: File, lexer: KolasuLexer<T>) {
     require(file.isFile())
     require(file.canRead())
     val code = file.readText()
-    val lexingResult = lexer.lex(file)
-    require(lexingResult.issues.isEmpty())
+    val lexingResult = lexer.lex(file, onlyFromDefaultChannel = false)
+    require(lexingResult.issues.isEmpty()) {
+        "Lexing issues occurred: ${lexingResult.issues}"
+    }
     checkTokensAreCoveringText(code, lexingResult.tokens)
 }
 
@@ -30,7 +32,12 @@ fun<T : KolasuToken> checkTokensAreCoveringText(code: String, tokens: List<T>) {
     tokens.forEach { token ->
         if (prevToken == null) {
             // This is the first token, so we should start at the very beginning
-            assertEquals(token.position.start, START_POINT)
+            assertEquals(
+                token.position.start,
+                START_POINT,
+                "The first token is expected to be at the start position $START_POINT while it is ast " +
+                    "${token.position.start}"
+            )
         } else {
             assertEquals(
                 token.position.start,

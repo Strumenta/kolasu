@@ -224,7 +224,8 @@ interface KolasuLexer<T : KolasuToken> : Serializable {
     /**
      * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.
      */
-    fun lex(file: File): LexingResult<T> = BufferedInputStream(FileInputStream(file)).use { lex(it) }
+    fun lex(file: File, charset: Charset = Charsets.UTF_8, onlyFromDefaultChannel: Boolean = true): LexingResult<T> =
+        BufferedInputStream(FileInputStream(file)).use { lex(it, charset, onlyFromDefaultChannel) }
 }
 
 fun Lexer.injectErrorCollectorInLexer(issues: MutableList<Issue>) {
