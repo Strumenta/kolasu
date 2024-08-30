@@ -5,14 +5,33 @@ import com.strumenta.kolasu.model.codeAtPosition
 import com.strumenta.kolasu.parsing.KolasuLexer
 import com.strumenta.kolasu.parsing.KolasuToken
 import java.io.File
+import java.io.InputStream
+import java.nio.charset.Charset
 import kotlin.test.assertEquals
 
-fun<T : KolasuToken> checkFileTokenization(file: File, lexer: KolasuLexer<T>): List<T> {
+fun<T : KolasuToken> checkFileTokenization(
+    file: File,
+    lexer: KolasuLexer<T>,
+    charset: Charset = Charsets.UTF_8
+): List<T> {
     require(file.exists())
     require(file.isFile())
     require(file.canRead())
-    val code = file.readText()
-    val lexingResult = lexer.lex(file, onlyFromDefaultChannel = false)
+    val code = file.readText(charset = charset)
+    return checkTokenization(code, lexer)
+}
+
+fun<T : KolasuToken> checkTokenization(
+    inputStream: InputStream,
+    lexer: KolasuLexer<T>,
+    charset: Charset = Charsets.UTF_8
+): List<T> {
+    val code = inputStream.bufferedReader(charset = charset).use { it.readText() }
+    return checkTokenization(code, lexer)
+}
+
+fun<T : KolasuToken> checkTokenization(code: String, lexer: KolasuLexer<T>): List<T> {
+    val lexingResult = lexer.lex(code, onlyFromDefaultChannel = false)
     require(lexingResult.issues.isEmpty()) {
         "Lexing issues occurred: ${lexingResult.issues}"
     }
