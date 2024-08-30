@@ -7,7 +7,7 @@ import com.strumenta.kolasu.parsing.KolasuToken
 import java.io.File
 import kotlin.test.assertEquals
 
-fun<T : KolasuToken> checkFileTokenization(file: File, lexer: KolasuLexer<T>) {
+fun<T : KolasuToken> checkFileTokenization(file: File, lexer: KolasuLexer<T>): List<T> {
     require(file.exists())
     require(file.isFile())
     require(file.canRead())
@@ -17,6 +17,7 @@ fun<T : KolasuToken> checkFileTokenization(file: File, lexer: KolasuLexer<T>) {
         "Lexing issues occurred: ${lexingResult.issues}"
     }
     checkTokensAreCoveringText(code, lexingResult.tokens)
+    return lexingResult.tokens
 }
 
 fun<T : KolasuToken> checkTokensAreCoveringText(code: String, tokens: List<T>) {
