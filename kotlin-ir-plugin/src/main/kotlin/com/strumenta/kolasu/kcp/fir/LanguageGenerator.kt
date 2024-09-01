@@ -99,7 +99,10 @@ class LanguageGenerator(
         context: NestedClassGenerationContext,
     ): FirClassLikeSymbol<*>? =
         runIf(name == DEFAULT_NAME_FOR_COMPANION_OBJECT) {
-            if (owner.fir.declarations.filterIsInstance<FirClassLikeDeclaration>().none { it.nameOrSpecialName == SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT }) {
+            if (owner.fir.declarations.filterIsInstance<FirClassLikeDeclaration>().none {
+                    it.nameOrSpecialName == SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT
+                }
+            ) {
                 val firClass = createCompanionObject(owner, Key)
                 firClass.symbol
             } else {

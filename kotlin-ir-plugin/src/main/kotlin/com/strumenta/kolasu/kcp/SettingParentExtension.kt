@@ -77,12 +77,12 @@ class SettingParentExtension(
                                                 .identifier("parent"),
                                         ),
                                     ).single()
-                            val parentSetter = if (parentPropertySymbol is IrFakeOverrideSymbolBase<*, *, *>)
-                                (parentPropertySymbol.originalSymbol as IrPropertySymbol).owner.setter
-                                //throw IllegalStateException("We cannot get the owner of $parentPropertySymbol in ${propertyTypeClassSymbol.descriptor.fqNameOrNull()}")
-                            else {
-                                parentPropertySymbol.owner.setter!!
-                            } as IrFunction
+                            val parentSetter =
+                                if (parentPropertySymbol is IrFakeOverrideSymbolBase<*, *, *>) {
+                                    (parentPropertySymbol.originalSymbol as IrPropertySymbol).owner.setter
+                                } else {
+                                    parentPropertySymbol.owner.setter!!
+                                } as IrFunction
                             // TODO remove from previous parent: field?.removeChild(this)
                             // value?.parent = this -> if (value != null) {value.parent = this}
                             +irIfThen(

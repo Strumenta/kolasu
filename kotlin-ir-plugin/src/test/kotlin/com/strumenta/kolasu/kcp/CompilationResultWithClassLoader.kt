@@ -52,7 +52,9 @@ fun compile(
 
 fun CompilationResultWithClassLoader.assertHasMessage(regex: Regex) {
     val messageLines = this.messages.lines()
-    assert(messageLines.any { regex.matches(it) })
+    assert(messageLines.any { regex.matches(it) }) {
+        "No message line found matching $regex. Message lines found:\n - ${messageLines.joinToString("\n - ")}"
+    }
 }
 
 fun CompilationResultWithClassLoader.assertHasMessage(msg: String) {

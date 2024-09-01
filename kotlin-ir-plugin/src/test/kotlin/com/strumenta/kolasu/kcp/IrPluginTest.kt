@@ -86,13 +86,13 @@ fun main() {
                     ),
             )
         result.assertHasMessage(
-            Regex("i: file:///[a-zA-Z0-9/\\-.]*:[0-9]+:[0-9]+ MPNode class MyNode identified"),
+            Regex("i: file:///[a-zA-Z0-9/\\-._]*:[0-9]+:[0-9]+ MPNode class MyNode identified"),
         )
         result.assertHasMessage(
-            Regex("w: file:///[a-zA-Z0-9/\\-.]*:[0-9]+:[0-9]+ Value param MyNode.p1 is not assignable"),
+            Regex("w: file:///[a-zA-Z0-9/\\-._]*:[0-9]+:[0-9]+ Value param MyNode.p1 is not assignable"),
         )
         result.assertHasNotMessage(
-            Regex("w: file:///[a-zA-Z0-9/\\-.]*:[0-9]+:[0-9]+ Value param MyNode.p2 is not assignable"),
+            Regex("w: file:///[a-zA-Z0-9/\\-._]*:[0-9]+:[0-9]+ Value param MyNode.p2 is not assignable"),
         )
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
@@ -152,7 +152,7 @@ fun main() {
 """,
                     ),
             )
-        result.assertHasMessage(Regex("i: file:///[a-zA-Z0-9/\\-.]*:10:10 MPNode class mytest.MyNode identified"))
+        result.assertHasMessage(Regex("i: file:///[a-zA-Z0-9/\\-._]*:10:10 MPNode class mytest.MyNode identified"))
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
 
