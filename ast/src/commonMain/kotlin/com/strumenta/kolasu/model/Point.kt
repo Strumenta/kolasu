@@ -225,3 +225,101 @@ fun compareSources(
             sourceA!!.compareTo(sourceB!!)
         }
     }
+
+/**
+ * Given the specified text and point it produces a range that will cover the text, minus the whitespace.
+ *
+ * If a null text is specified then a null range is returned.
+ *
+ * If a text with no leading or trailing whitespace is returned than this will return a range:
+ * - starting at the given start point
+ * - ending to the end point calculated "adding" the text to the start point
+ *
+ * If the text has leading whitespace, the start point will be advanced to skip such whitespace.
+ * Similarly, if the text has trailing whitespace the end point will be receded to skip such whitespace.
+ */
+fun strippedRange(
+    text: String?,
+    start: Point,
+): Range? {
+    return text?.let { text ->
+        start.rangeWithLength(text.length).stripRange(text)
+    }
+}
+
+/**
+ * See strippedRange.
+ */
+fun Range.stripRange(text: String): Range {
+    if (text.isNotEmpty()) {
+        when (text.first()) {
+            ' ' -> return this.advanceStart().stripRange(text.substring(1))
+        }
+    }
+    if (text.isNotEmpty()) {
+        when (text.last()) {
+            ' ' -> return this.recedeEnd().stripRange(text.substring(0, text.length - 1))
+        }
+    }
+    val maxEnd = this.start + text
+    if (maxEnd.isBefore(this.end)) {
+        return Range(start, maxEnd)
+    }
+    return this
+}
+
+fun Range.advanceStart(): Range {
+    return Range(Point(start.line, start.column + 1), end)
+}
+
+fun Range.recedeEnd(): Range {
+    return Range(start, Point(end.line, end.column - 1))
+}
+
+expect class LRUCache<K, V>(
+    maxEntries: Int = 100,
+) : Map<K, V> {
+    fun put(
+        key: K,
+        value: V,
+    )
+}
+
+private fun <K, V> createLeastRecentlyUsedMap(maxEntries: Int = 100): Map<K, V> {
+    return LRUCache(maxEntries)
+}
+
+private object LinesSplitter {
+    val cache = createLeastRecentlyUsedMap<String, List<String>>() as MutableMap<String, List<String>>
+
+    fun getLines(code: String): List<String> {
+        return cache.getOrPut(code) {
+            code.split("(?<=\n)".toRegex())
+        }
+    }
+}
+
+/**
+ * Given a piece of code, it extracts from it the substring at the given range.
+ */
+fun String.codeAtRange(range: Range): String {
+    try {
+        val lines = LinesSplitter.getLines(this)
+        var res: String
+
+        var currLine = range.start.line
+        if (range.start.line == range.end.line) {
+            return lines[currLine - 1].substring(range.start.column, range.end.column)
+        }
+        res = lines[currLine - 1].substring(range.start.column)
+        currLine++
+        while (currLine <= lines.size && currLine < range.end.line) {
+            res += lines[currLine - 1]
+            currLine++
+        }
+        res += lines[currLine - 1].substring(0, range.end.column)
+        return res
+    } catch (t: Throwable) {
+        throw RuntimeException("Unable to get range $range in text:\n```$this```")
+    }
+}
