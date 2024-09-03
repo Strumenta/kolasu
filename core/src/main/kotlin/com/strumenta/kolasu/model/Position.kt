@@ -243,3 +243,96 @@ val Node.startLine: Int?
 
 val Node.endLine: Int?
     get() = this.position?.end?.line
+
+/**
+ * Given the specified text and point it produces a position that will cover the text, minus the whitespace.
+ *
+ * If a null text is specified then a null position is returned.
+ *
+ * If a text with no leading or trailing whitespace is returned than this will return a position:
+ * - starting at the given start point
+ * - ending to the end point calculated "adding" the text to the start point
+ *
+ * If the text has leading whitespace, the start point will be advanced to skip such whitespace.
+ * Similarly, if the text has trailing whitespace the end point will be receded to skip such whitespace.
+ */
+fun strippedPosition(
+    text: String?,
+    start: Point
+): Position? {
+    return text?.let { text ->
+        start.positionWithLength(text.length).stripPosition(text)
+    }
+}
+
+/**
+ * See strippedPosition.
+ */
+fun Position.stripPosition(text: String): Position {
+    if (text.isNotEmpty()) {
+        when (text.first()) {
+            ' ' -> return this.advanceStart().stripPosition(text.substring(1))
+        }
+    }
+    if (text.isNotEmpty()) {
+        when (text.last()) {
+            ' ' -> return this.recedeEnd().stripPosition(text.substring(0, text.length - 1))
+        }
+    }
+    val maxEnd = this.start + text
+    if (maxEnd.isBefore(this.end)) {
+        return Position(start, maxEnd)
+    }
+    return this
+}
+
+fun Position.advanceStart(): Position {
+    return Position(Point(start.line, start.column + 1), end)
+}
+
+fun Position.recedeEnd(): Position {
+    return Position(start, Point(end.line, end.column - 1))
+}
+
+private fun <K, V> createLeastRecentlyUsedMap(maxEntries: Int = 100): Map<K, V> {
+    return object : LinkedHashMap<K, V>(maxEntries * 10 / 7, 0.7f, true) {
+        override fun removeEldestEntry(eldest: Map.Entry<K, V>): Boolean {
+            return size > maxEntries
+        }
+    }
+}
+
+private object LinesSplitter {
+    val cache = createLeastRecentlyUsedMap<String, List<String>>() as MutableMap<String, List<String>>
+
+    fun getLines(code: String): List<String> {
+        return cache.getOrPut(code) {
+            code.split("(?<=\n)".toRegex())
+        }
+    }
+}
+
+/**
+ * Given a piece of code, it extracts from it the substring at the given position.
+ */
+fun String.codeAtPosition(position: Position): String {
+    try {
+        val lines = LinesSplitter.getLines(this)
+        var res: String
+
+        var currLine = position.start.line
+        if (position.start.line == position.end.line) {
+            return lines[currLine - 1].substring(position.start.column, position.end.column)
+        }
+        res = lines[currLine - 1].substring(position.start.column)
+        currLine++
+        while (currLine <= lines.size && currLine < position.end.line) {
+            res += lines[currLine - 1]
+            currLine++
+        }
+        res += lines[currLine - 1].substring(0, position.end.column)
+        return res
+    } catch (t: Throwable) {
+        throw RuntimeException("Unable to get position $position in text:\n```$this```")
+    }
+}

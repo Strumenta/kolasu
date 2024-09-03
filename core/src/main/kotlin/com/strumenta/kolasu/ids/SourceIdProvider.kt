@@ -21,6 +21,7 @@ abstract class AbstractSourceIdProvider : SourceIdProvider {
         .replace('.', '-')
         .replace('/', '-')
         .replace(' ', '_')
+        .replace("@", "_at_")
 }
 
 class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSourceIdProvider() {

@@ -67,7 +67,12 @@ data class TokenCategory(val type: String) {
         val KEYWORD = TokenCategory("Keyword")
         val NUMERIC_LITERAL = TokenCategory("Numeric literal")
         val STRING_LITERAL = TokenCategory("String literal")
+        val OTHER_LITERAL = TokenCategory("Other literal")
         val PLAIN_TEXT = TokenCategory("Plain text")
+        val WHITESPACE = TokenCategory("Whitespace")
+        val IDENTIFIER = TokenCategory("Identifier")
+        val PUNCTUATION = TokenCategory("Punctuation")
+        val OPERATOR = TokenCategory("Operator")
     }
 }
 
@@ -224,7 +229,8 @@ interface KolasuLexer<T : KolasuToken> : Serializable {
     /**
      * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.
      */
-    fun lex(file: File): LexingResult<T> = BufferedInputStream(FileInputStream(file)).use { lex(it) }
+    fun lex(file: File, charset: Charset = Charsets.UTF_8, onlyFromDefaultChannel: Boolean = true): LexingResult<T> =
+        BufferedInputStream(FileInputStream(file)).use { lex(it, charset, onlyFromDefaultChannel) }
 }
 
 fun Lexer.injectErrorCollectorInLexer(issues: MutableList<Issue>) {

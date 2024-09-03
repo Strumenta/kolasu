@@ -101,7 +101,9 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<
                     break
                 } else {
                     if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
-                        tokens.add(tokenFactory.convertToken(t))
+                        if (t.type != Token.EOF) {
+                            tokens.add(tokenFactory.convertToken(t))
+                        }
                         last = t
                     }
                 }
