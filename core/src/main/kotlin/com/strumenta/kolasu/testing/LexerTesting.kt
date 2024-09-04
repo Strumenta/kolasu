@@ -68,7 +68,7 @@ fun<T : KolasuToken> checkTokensAreCoveringText(code: String, tokens: List<T>) {
 
         // The text specified in tokens should be as long as the position indicated
         assertEquals(
-            token.position.start + token.text,
+            token.position.start + (token.text ?: ""),
             token.position.end,
             "We have a token with position ${token.position} and text '${token.text}'"
         )

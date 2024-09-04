@@ -34,10 +34,12 @@ interface TokenFactory<T : KolasuToken> {
     fun categoryOf(t: Token): TokenCategory = TokenCategory.PLAIN_TEXT
 
     fun convertToken(t: Token): T
+}
 
-    private fun convertToken(terminalNode: TerminalNode): T = convertToken(terminalNode.symbol)
+open class ANTLRTokenFactory : TokenFactory<KolasuANTLRToken> {
+    override fun convertToken(t: Token): KolasuANTLRToken = KolasuANTLRToken(categoryOf(t), t)
 
-    fun extractTokens(result: ParsingResult<*>): LexingResult<T>? {
+    fun extractTokens(result: ParsingResult<*>): LexingResult<KolasuANTLRToken>? {
         val antlrTerminals = mutableListOf<TerminalNode>()
         fun extractTokensFromParseTree(pt: ParseTree?) {
             if (pt is TerminalNode) {
@@ -49,20 +51,22 @@ interface TokenFactory<T : KolasuToken> {
             }
         }
 
-        val ptRoot = result.firstStage?.root
+        val ptRoot = result.firstStage?.root ?: if (result.root?.origin is ParseTreeOrigin) {
+            (result.root.origin as ParseTreeOrigin).parseTree
+        } else {
+            null
+        }
         return if (ptRoot != null) {
             extractTokensFromParseTree(ptRoot)
             antlrTerminals.sortBy { it.symbol.tokenIndex }
             val tokens = antlrTerminals.map { convertToken(it) }.toMutableList()
-            LexingResult(result.issues, tokens, result.code, result.firstStage.lexingTime, result.source)
+            LexingResult(result.issues, tokens, result.code, result.firstStage?.lexingTime, result.source)
         } else {
             null
         }
     }
-}
 
-open class ANTLRTokenFactory : TokenFactory<KolasuANTLRToken> {
-    override fun convertToken(t: Token): KolasuANTLRToken = KolasuANTLRToken(categoryOf(t), t)
+    private fun convertToken(terminalNode: TerminalNode): KolasuANTLRToken = convertToken(terminalNode.symbol)
 }
 
 abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<T>) : KolasuLexer<T> {

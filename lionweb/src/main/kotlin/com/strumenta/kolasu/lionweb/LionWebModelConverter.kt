@@ -19,6 +19,8 @@ import com.strumenta.kolasu.model.isAttribute
 import com.strumenta.kolasu.model.isContainment
 import com.strumenta.kolasu.model.isReference
 import com.strumenta.kolasu.model.nodeOriginalProperties
+import com.strumenta.kolasu.parsing.FirstStageParsingResult
+import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.transformation.MissingASTTransformation
 import com.strumenta.kolasu.traversing.walk
@@ -82,6 +84,22 @@ class LionWebModelConverter(
     var nodeIdProvider: NodeIdProvider = StructuralLionWebNodeIdProvider(),
     initialLanguageConverter: LionWebLanguageConverter = LionWebLanguageConverter()
 ) {
+    companion object {
+        private val kFeaturesCache = mutableMapOf<Class<*>, Map<String, Feature>>()
+        private val lwFeaturesCache = mutableMapOf<Classifier<*>, Map<String, LWFeature<*>>>()
+
+        fun lwFeatureByName(classifier: Classifier<*>, featureName: String): LWFeature<*>? {
+            return lwFeaturesCache.getOrPut(classifier) {
+                classifier.allFeatures().associateBy { it.name!! }
+            }[featureName]
+        }
+
+        init {
+            MetamodelRegistry.registerMapping(IssueNode::class, StarLasuLWLanguage.Issue)
+            MetamodelRegistry.registerMapping(ParsingResultNode::class, StarLasuLWLanguage.ParsingResult)
+        }
+    }
+
     private val languageConverter = initialLanguageConverter
 
     /**
@@ -119,17 +137,6 @@ class LionWebModelConverter(
     fun associateLanguages(lwLanguage: Language, kolasuLanguage: KolasuLanguage) {
         synchronized(languageConverter) {
             this.languageConverter.associateLanguages(lwLanguage, kolasuLanguage)
-        }
-    }
-
-    companion object {
-        private val kFeaturesCache = mutableMapOf<Class<*>, Map<String, Feature>>()
-        private val lwFeaturesCache = mutableMapOf<Classifier<*>, Map<String, LWFeature<*>>>()
-
-        fun lwFeatureByName(classifier: Classifier<*>, featureName: String): LWFeature<*>? {
-            return lwFeaturesCache.getOrPut(classifier) {
-                classifier.allFeatures().associateBy { it.name!! }
-            }[featureName]
         }
     }
 
@@ -740,11 +747,15 @@ class LionWebModelConverter(
             }
             ParsingResult::class -> {
                 val root = data.getOnlyChildByContainmentName(ParsingResult<*>::root.name)
-                ParsingResult(
+                val tokens = data.getPropertyValue(
+                    data.classifier.getPropertyByName(ParsingResultWithTokens<*>::tokens.name)!!
+                ) as TokensList?
+                ParsingResultWithTokens(
                     data.getChildrenByContainmentName(ParsingResult<*>::issues.name).map {
                         importModelFromLionWeb(it) as Issue
                     },
-                    if (root != null) importModelFromLionWeb(root) as KNode else null
+                    if (root != null) importModelFromLionWeb(root) as KNode else null,
+                    tokens?.tokens ?: listOf()
                 )
             }
             else -> {
@@ -763,25 +774,43 @@ class LionWebModelConverter(
 
     fun exportIssueToLionweb(issue: Issue): IssueNode {
         val issueNode = IssueNode()
-        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName("message")!!, issue.message)
-        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName("position")!!, issue.position)
-        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName("severity")!!, issue.severity)
-        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName("type")!!, issue.type)
+        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::message.name)!!, issue.message)
+        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::position.name)!!, issue.position)
+        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName(Issue::severity.name)!!, issue.severity)
+        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName(Issue::type.name)!!, issue.type)
         return issueNode
     }
 
-    fun exportParsingResultToLionweb(pr: ParsingResult<*>): ParsingResultNode {
+    fun exportParsingResultToLionweb(pr: ParsingResult<*>, tokens: List<KolasuToken> = listOf()): ParsingResultNode {
         val resultNode = ParsingResultNode(pr.source)
-        resultNode.setPropertyValue(StarLasuLWLanguage.ParsingResult.getPropertyByName("code")!!, pr.code)
+        resultNode.setPropertyValue(
+            StarLasuLWLanguage.ParsingResult.getPropertyByName(ParsingResult<*>::code.name)!!,
+            pr.code
+        )
         val root = if (pr.root != null) exportModelToLionWeb(pr.root!!, considerParent = false) else null
-        resultNode.addChild(StarLasuLWLanguage.ParsingResult.getContainmentByName("root")!!, root)
-        val issuesContainment = StarLasuLWLanguage.ParsingResult.getContainmentByName("issues")!!
+        resultNode.addChild(StarLasuLWLanguage.ParsingResult.getContainmentByName(ParsingResult<*>::root.name)!!, root)
+        val issuesContainment = StarLasuLWLanguage.ParsingResult.getContainmentByName(ParsingResult<*>::issues.name)!!
         pr.issues.forEach {
             resultNode.addChild(issuesContainment, exportIssueToLionweb(it))
         }
+        resultNode.setPropertyValue(
+            StarLasuLWLanguage.ParsingResult.getPropertyByName(ParsingResultWithTokens<*>::tokens.name)!!,
+            TokensList(tokens)
+        )
         return resultNode
     }
 }
+
+class ParsingResultWithTokens<RootNode : KNode>(
+    issues: List<Issue>,
+    root: RootNode?,
+    val tokens: List<KolasuToken>,
+    code: String? = null,
+    incompleteNode: com.strumenta.kolasu.model.Node? = null,
+    firstStage: FirstStageParsingResult<*>? = null,
+    time: Long? = null,
+    source: Source? = null
+) : ParsingResult<RootNode>(issues, root, code, incompleteNode, firstStage, time, source)
 
 class IssueNode : BaseNode() {
     var type: EnumerationValue? by property("type")

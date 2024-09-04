@@ -1,4 +1,4 @@
-name: FunctionalTests
+name: Functional Tests
 
 on: [push]
 

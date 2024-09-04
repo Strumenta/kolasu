@@ -51,7 +51,7 @@ class KolasuParserTest {
             """.trimMargin()
         )
         assertNotNull(result)
-        val lexingResult = parser.tokenFactory.extractTokens(result)
+        val lexingResult = (parser.tokenFactory as ANTLRTokenFactory).extractTokens(result)
         assertNotNull(lexingResult)
         assertEquals(11, lexingResult.tokens.size)
         val text = lexingResult.tokens.map { it.text }
