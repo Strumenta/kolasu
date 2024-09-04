@@ -747,7 +747,9 @@ class LionWebModelConverter(
             }
             ParsingResult::class -> {
                 val root = data.getOnlyChildByContainmentName(ParsingResult<*>::root.name)
-                val tokens = data.getPropertyValue(data.classifier.getPropertyByName("tokens")!!) as TokensList?
+                val tokens = data.getPropertyValue(
+                    data.classifier.getPropertyByName(ParsingResultWithTokens<*>::tokens.name)!!
+                ) as TokensList?
                 ParsingResultWithTokens(
                     data.getChildrenByContainmentName(ParsingResult<*>::issues.name).map {
                         importModelFromLionWeb(it) as Issue
@@ -791,7 +793,10 @@ class LionWebModelConverter(
         pr.issues.forEach {
             resultNode.addChild(issuesContainment, exportIssueToLionweb(it))
         }
-        resultNode.setPropertyValue(StarLasuLWLanguage.ParsingResult.getPropertyByName("tokens")!!, TokensList(tokens))
+        resultNode.setPropertyValue(
+            StarLasuLWLanguage.ParsingResult.getPropertyByName(ParsingResultWithTokens<*>::tokens.name)!!,
+            TokensList(tokens)
+        )
         return resultNode
     }
 }
