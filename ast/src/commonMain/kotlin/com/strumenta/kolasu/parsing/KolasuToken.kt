@@ -8,5 +8,5 @@ import com.strumenta.kolasu.model.Range
 open class KolasuToken(
     open val category: TokenCategory,
     open val range: Range,
-    open val text: String,
+    open val text: String?,
 )

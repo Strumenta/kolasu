@@ -3,6 +3,8 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Range
+import com.strumenta.kolasu.parsing.KolasuToken
+import com.strumenta.kolasu.parsing.TokenCategory
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import io.lionweb.lioncore.java.language.Annotation
@@ -17,6 +19,19 @@ import io.lionweb.lioncore.java.self.LionCore
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.kotlin.MetamodelRegistry
+import io.lionweb.lioncore.kotlin.addPrimitiveType
+import com.strumenta.kolasu.model.BehaviorDeclaration as KBehaviorDeclaration
+import com.strumenta.kolasu.model.CommonElement as KCommonElement
+import com.strumenta.kolasu.model.Documentation as KDocumentation
+import com.strumenta.kolasu.model.EntityDeclaration as KEntityDeclaration
+import com.strumenta.kolasu.model.EntityGroupDeclaration as KEntityGroupDeclaration
+import com.strumenta.kolasu.model.Expression as KExpression
+import com.strumenta.kolasu.model.Parameter as KParameter
+import com.strumenta.kolasu.model.PlaceholderElement as KPlaceholderElement
+import com.strumenta.kolasu.model.Statement as KStatement
+import com.strumenta.kolasu.model.TypeAnnotation as KTypeAnnotation
+import com.strumenta.kolasu.parsing.ParsingResult as KParsingResult
+import com.strumenta.kolasu.validation.Issue as KIssue
 
 private const val PLACEHOLDER_NODE = "PlaceholderNode"
 
@@ -46,30 +61,48 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
 
         addPlaceholderNodeAnnotation(astNode)
 
-        CommonElement = addInterface("CommonElement")
-        addInterface("BehaviorDeclaration").apply { addExtendedInterface(CommonElement) }
-        addInterface("Documentation").apply { addExtendedInterface(CommonElement) }
-        addInterface("EntityDeclaration").apply { addExtendedInterface(CommonElement) }
-        addInterface("EntityGroupDeclaration").apply { addExtendedInterface(CommonElement) }
-        addInterface("Expression").apply { addExtendedInterface(CommonElement) }
-        addInterface("Parameter").apply { addExtendedInterface(CommonElement) }
-        addInterface("PlaceholderElement").apply { addExtendedInterface(CommonElement) }
-        addInterface("Statement").apply { addExtendedInterface(CommonElement) }
-        addInterface("TypeAnnotation").apply { addExtendedInterface(CommonElement) }
+        CommonElement = addInterface(KCommonElement::class.simpleName!!)
+        addInterface(KBehaviorDeclaration::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        addInterface(KDocumentation::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        addInterface(KEntityDeclaration::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        addInterface(KEntityGroupDeclaration::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        addInterface(KExpression::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        addInterface(KParameter::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        addInterface(KPlaceholderElement::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        addInterface(KStatement::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        addInterface(KTypeAnnotation::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
 
         Issue =
-            addConcept("Issue").apply {
-                addProperty("type", addEnumerationFromClass(this@StarLasuLWLanguage, IssueType::class))
-                addProperty("message", LionCoreBuiltins.getString())
-                addProperty("severity", addEnumerationFromClass(this@StarLasuLWLanguage, IssueSeverity::class))
-                addProperty("range", range, Multiplicity.OPTIONAL)
+            addConcept(KIssue::class.simpleName!!).apply {
+                addProperty(
+                    KIssue::type.name,
+                    addEnumerationFromClass(
+                        this@StarLasuLWLanguage,
+                        IssueType::class,
+                    ),
+                )
+                addProperty(KIssue::message.name, LionCoreBuiltins.getString())
+                addProperty(
+                    KIssue::severity.name,
+                    addEnumerationFromClass(
+                        this@StarLasuLWLanguage,
+                        IssueSeverity::class,
+                    ),
+                )
+                addProperty(KIssue::range.name, range, Multiplicity.OPTIONAL)
             }
 
+        addPrimitiveType(TokensList::class)
         ParsingResult =
-            addConcept("ParsingResult").apply {
-                addContainment("issues", Issue, Multiplicity.MANY)
-                addContainment("root", ASTNode, Multiplicity.OPTIONAL)
-                addProperty("code", LionCoreBuiltins.getString(), Multiplicity.OPTIONAL)
+            addConcept(KParsingResult::class.simpleName!!).apply {
+                addContainment(KParsingResult<*>::issues.name, Issue, Multiplicity.MANY)
+                addContainment(KParsingResult<*>::root.name, ASTNode, Multiplicity.OPTIONAL)
+                addProperty(KParsingResult<*>::code.name, LionCoreBuiltins.getString(), Multiplicity.OPTIONAL)
+                addProperty(
+                    ParsingResultWithTokens<*>::tokens.name,
+                    MetamodelRegistry.getPrimitiveType(TokensList::class)!!,
+                    Multiplicity.OPTIONAL,
+                )
             }
         registerSerializersAndDeserializersInMetamodelRegistry()
     }
@@ -172,11 +205,11 @@ private fun registerSerializersAndDeserializersInMetamodelRegistry() {
         }
     MetamodelRegistry.addSerializerAndDeserializer(StarLasuLWLanguage.Point, pointSerializer, pointDeserializer)
 
-    val positionSerializer =
+    val rangeSerializer =
         PrimitiveSerializer<Range> { value ->
             "${pointSerializer.serialize((value as Range).start)}-${pointSerializer.serialize(value.end)}"
         }
-    val positionDeserializer =
+    val rangeDeserializer =
         PrimitiveDeserializer<Range> { serialized ->
             if (serialized == null) {
                 null
@@ -188,7 +221,44 @@ private fun registerSerializersAndDeserializersInMetamodelRegistry() {
         }
     MetamodelRegistry.addSerializerAndDeserializer(
         StarLasuLWLanguage.Range,
-        positionSerializer,
-        positionDeserializer,
+        rangeSerializer,
+        rangeDeserializer,
     )
+
+    val tokensListPrimitiveSerializer =
+        PrimitiveSerializer<TokensList?> { value: TokensList? ->
+            value?.tokens?.joinToString(";") { kt ->
+                kt.category.type + "$" + rangeSerializer.serialize(kt.range)
+            }
+        }
+    val tokensListPrimitiveDeserializer =
+        PrimitiveDeserializer<TokensList?> { serialized ->
+            if (serialized == null) {
+                null
+            } else {
+                val tokens =
+                    if (serialized.isEmpty()) {
+                        mutableListOf()
+                    } else {
+                        serialized
+                            .split(";")
+                            .map {
+                                val parts = it.split("$")
+                                require(parts.size == 2)
+                                val category = parts[0]
+                                val range = rangeDeserializer.deserialize(parts[1])
+                                KolasuToken(TokenCategory(category), range, null)
+                            }.toMutableList()
+                    }
+                TokensList(tokens)
+            }
+        }
+    val tlpt =
+        MetamodelRegistry.getPrimitiveType(TokensList::class)
+            ?: throw IllegalStateException("Unknown primitive type class ${TokensList::class}")
+    MetamodelRegistry.addSerializerAndDeserializer(tlpt, tokensListPrimitiveSerializer, tokensListPrimitiveDeserializer)
 }
+
+class TokensList(
+    val tokens: List<KolasuToken>,
+)

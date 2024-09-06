@@ -17,7 +17,9 @@ import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.model.range
 import com.strumenta.kolasu.model.withRange
+import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult
+import com.strumenta.kolasu.parsing.TokenCategory
 import com.strumenta.kolasu.testing.assertASTsAreEqual
 import com.strumenta.kolasu.transformation.MissingASTTransformation
 import com.strumenta.kolasu.validation.Issue
@@ -989,11 +991,32 @@ class LionWebModelConverterTest {
             }
         val converter = LionWebModelConverter()
         converter.exportLanguageToLionWeb(kLanguage)
-        val exported = converter.exportParsingResultToLionweb(parsingResult)
-        val reimported = converter.importModelFromLionWeb(exported) as ParsingResult<*>
+        val exported =
+            converter.exportParsingResultToLionweb(
+                parsingResult,
+                listOf(
+                    KolasuToken(TokenCategory.STRING_LITERAL, range(1, 2, 3, 4), null),
+                    KolasuToken(TokenCategory.PLAIN_TEXT, range(3, 5, 6, 7), null),
+                ),
+            )
+        val reimported = converter.importModelFromLionWeb(exported) as ParsingResultWithTokens<*>
         assertASTsAreEqual(parsingResult.root!!, reimported.root!!)
         assertEquals(3, parsingResult.issues.size)
         assertEquals("bla bla", parsingResult.code)
+        assertEquals(
+            listOf(
+                TokenCategory.STRING_LITERAL.type,
+                TokenCategory.PLAIN_TEXT.type,
+            ),
+            reimported.tokens.map { it.category.type },
+        )
+        assertEquals(
+            listOf(
+                range(1, 2, 3, 4),
+                range(3, 5, 6, 7),
+            ),
+            reimported.tokens.map { it.range },
+        )
     }
 }
 

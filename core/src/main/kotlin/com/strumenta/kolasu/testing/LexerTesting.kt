@@ -74,7 +74,7 @@ fun <T : KolasuToken> checkTokensAreCoveringText(
 
         // The text specified in tokens should be as long as the range indicated
         assertEquals(
-            token.range.start + token.text,
+            token.range.start + (token.text ?: ""),
             token.range.end,
             "We have a token with range ${token.range} and text '${token.text}'",
         )

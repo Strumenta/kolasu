@@ -71,8 +71,8 @@ class SymbolResolutionWithSRITest {
 
         assertEquals(false, todo2.prerequisite!!.isResolved)
         symbolResolver.resolve(todoProject, entireTree = true)
-        assertEquals(true, todo2.prerequisite!!.isResolved)
-        assertEquals(todo1, todo2.prerequisite!!.referred)
+        assertEquals(true, todo2.prerequisite.isResolved)
+        assertEquals(todo1, todo2.prerequisite.referred)
     }
 
     @Test
@@ -168,7 +168,7 @@ class SymbolResolutionWithSRITest {
 
         assertEquals(false, todo4.prerequisite!!.isResolved)
         symbolResolver.resolve(todoProjectErrands, entireTree = true)
-        assertEquals(true, todo4.prerequisite!!.isResolved)
+        assertEquals(true, todo4.prerequisite.isResolved)
         assertEquals("synthetic_Personal-Source_todos_1", todo4.prerequisite.identifier)
     }
 }

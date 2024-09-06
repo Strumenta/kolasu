@@ -12,6 +12,7 @@ import com.strumenta.kolasu.validation.Result
  * @param issues a list of issues encountered while processing the code.
  * @param data the result of the process.
  * @param code the processed source code.
+ * @param source where the source code comes from.
  */
 open class CodeProcessingResult<D>(
     val issues: List<Issue>,
