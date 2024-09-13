@@ -152,8 +152,16 @@ class LionWebModelConverter(
             private val cache = IdentityHashMap<KNode, String>()
 
             fun nodeId(kNode: KNode): String {
-                return cache.getOrPut(kNode) { nodeIdProvider.id(kNode) }
+                return cache.getOrPut(kNode) {
+                    val id = nodeIdProvider.id(kNode)
+                    if (!CommonChecks.isValidID(id)) {
+                        throw RuntimeException("We got an invalid Node ID from $nodeIdProvider for $id")
+                    }
+                    id
+                }
             }
+
+            override fun toString(): String = "Caching ID Manager in front of $nodeIdProvider"
         }
 
         if (!nodesMapping.containsA(kolasuTree)) {
@@ -226,7 +234,7 @@ class LionWebModelConverter(
                                 } else if (origin is PlaceholderASTTransformation) {
                                     if (lwNode is AbstractClassifierInstance<*>) {
                                         val instance = DynamicAnnotationInstance(
-                                            StarLasuLWLanguage.PlaceholderNode.id,
+                                            "${lwNode.id}_placeholder_annotation",
                                             StarLasuLWLanguage.PlaceholderNode
                                         )
                                         if (origin.origin is KNode) {
