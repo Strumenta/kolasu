@@ -8,13 +8,14 @@ class KotlinPrinter : ASTCodeGenerator<KCompilationUnit>() {
 
     override val placeholderNodePrinter: NodePrinter
         get() = NodePrinter { output: PrinterOutput, ast: Node ->
-            val origin = (ast.origin as PlaceholderASTTransformation).origin
+            val placeholder = ast.origin as PlaceholderASTTransformation
+            val origin = placeholder.origin
             val nodeType = if (origin is Node) {
                 origin.nodeType
             } else {
                 origin?.toString()
             }
-            output.print("/* Translation of a node is not yet implemented: $nodeType */")
+            output.print("/* ${placeholder.message} */")
         }
 
     override fun registerRecordPrinters() {

@@ -391,7 +391,9 @@ class LionWebModelConverter(
             }
         }
         referencesPostponer.populateReferences(nodesMapping, externalNodeResolver)
-        placeholderNodes.forEach { it.origin = MissingASTTransformation(it.origin) }
+        placeholderNodes.forEach { it.origin = MissingASTTransformation(origin = it.origin,
+            transformationSource = it.origin as com.strumenta.kolasu.model.Node,
+            expectedType = null) }
         return nodesMapping.byB(lwTree)!!
     }
 

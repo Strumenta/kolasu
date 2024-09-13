@@ -241,15 +241,21 @@ data class ChildNodeFactory<Source, Target, Child : Any>(
  */
 private val NO_CHILD_NODE = ChildNodeFactory<Any, Any, Any>("", { x -> x }, { _, _ -> }, Node::class)
 
-sealed class PlaceholderASTTransformation(val origin: Origin?) : Origin {
+sealed class PlaceholderASTTransformation(val origin: Origin?, val message: String) : Origin {
     override val position: Position?
         get() = origin?.position
     override val sourceText: String?
         get() = origin?.sourceText
 }
 
-class MissingASTTransformation(origin: Origin?) : PlaceholderASTTransformation(origin)
-class FailingASTTransformation(origin: Origin?) : PlaceholderASTTransformation(origin)
+
+class MissingASTTransformation(origin: Origin?, val transformationSource: Any?, val expectedType: KClass<out Node>? = null,
+                               message: String = "Translation of a node is not yet implemented: ${if (transformationSource is Node) transformationSource.simpleNodeType else transformationSource}${if (expectedType != null) " into $expectedType" else ""}")
+    : PlaceholderASTTransformation(origin, message) {
+        constructor(transformationSource: Node, expectedType: KClass<out Node>? = null) : this(transformationSource, transformationSource, expectedType)
+    }
+
+class FailingASTTransformation(origin: Origin?, message: String) : PlaceholderASTTransformation(origin, message)
 
 /**
  * Implementation of a tree-to-tree transformation. For each source node type, we can register a factory that knows how
@@ -335,7 +341,7 @@ open class ASTTransformer(
             } else if (expectedType.isDirectlyOrIndirectlyInstantiable() && !throwOnUnmappedNode) {
                 try {
                     val node = expectedType.dummyInstance()
-                    node.origin = MissingASTTransformation(asOrigin(source))
+                    node.origin = MissingASTTransformation(asOrigin(source), source, expectedType)
                     nodes = listOf(node)
                 } catch (e: Exception) {
                     throw IllegalStateException(
@@ -469,7 +475,8 @@ open class ASTTransformer(
         } catch (t: NotImplementedError) {
             if (faultTollerant) {
                 val node = T::class.dummyInstance()
-                node.origin = FailingASTTransformation(asOrigin(input))
+                node.origin = FailingASTTransformation(asOrigin(input),
+                    "Failed to transform $input into $kclass because the implementation is not complete (${t.message}")
                 node
             } else {
                 throw RuntimeException("Failed to transform $input into $kclass", t)
@@ -477,7 +484,8 @@ open class ASTTransformer(
         }catch (e: Exception) {
             if (faultTollerant) {
                 val node = T::class.dummyInstance()
-                node.origin = FailingASTTransformation(asOrigin(input))
+                node.origin = FailingASTTransformation(asOrigin(input),
+                    "Failed to transform $input into $kclass because of an error (${e.message})")
                 node
             } else {
                 throw RuntimeException("Failed to transform $input into $kclass", e)
