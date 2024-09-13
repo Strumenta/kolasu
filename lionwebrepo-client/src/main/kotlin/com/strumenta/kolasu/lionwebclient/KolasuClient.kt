@@ -18,6 +18,7 @@ import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.traversing.walkDescendants
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.model.HasSettableParent
+import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.serialization.SerializationProvider
 import io.lionweb.lioncore.java.serialization.UnavailableNodePolicy
@@ -399,7 +400,11 @@ class KolasuClient(
         nodeID: String,
         withProxyParent: Boolean = false,
     ): LWNode {
-        return lionWebClient.retrieve(nodeID, withProxyParent, retrievalMode = RetrievalMode.SINGLE_NODE)
+        val result = lionWebClient.retrieve(nodeID, withProxyParent, retrievalMode = RetrievalMode.SINGLE_NODE)
+        require(result !is ProxyNode) {
+            "The LionWebClient should not retrieve a node as a ProxyNode"
+        }
+        return result
     }
 
     fun getShallowLionWebNodes(

@@ -4,7 +4,7 @@ superPublish = { id = "com.vanniktech.maven.publish", version = "0.22.0" }
 
 [versions]
 lwjava = "0.2.19"
-lwkotlin = "0.2.5"
+lwkotlin = "0.2.6-SNAPSHOT"
 
 [libraries]
 lionwebjava = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2023.1-core", version.ref = "lwjava" }
