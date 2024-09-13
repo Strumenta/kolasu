@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import java.lang.reflect.ParameterizedType
+import kotlin.random.Random
 import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
@@ -240,19 +241,15 @@ data class ChildNodeFactory<Source, Target, Child : Any>(
  */
 private val NO_CHILD_NODE = ChildNodeFactory<Any, Any, Any>("", { x -> x }, { _, _ -> }, Node::class)
 
-class MissingASTTransformation(val origin: Origin?) : Origin {
+sealed class PlaceholderASTTransformation(val origin: Origin?) : Origin {
     override val position: Position?
         get() = origin?.position
     override val sourceText: String?
         get() = origin?.sourceText
 }
 
-class FailingASTTransformation(val origin: Origin?) : Origin {
-    override val position: Position?
-        get() = origin?.position
-    override val sourceText: String?
-        get() = origin?.sourceText
-}
+class MissingASTTransformation(origin: Origin?) : PlaceholderASTTransformation(origin)
+class FailingASTTransformation(origin: Origin?) : PlaceholderASTTransformation(origin)
 
 /**
  * Implementation of a tree-to-tree transformation. For each source node type, we can register a factory that knows how
@@ -469,13 +466,21 @@ open class ASTTransformer(
     inline fun <S : Any, reified T : Node> registerNodeFactory(kclass: KClass<S>, crossinline factory: (S) -> T?): NodeFactory<S, T> =
         registerNodeFactory(kclass) { input, _, _ -> try {
             factory(input)
-        } catch (t: Throwable) {
+        } catch (t: NotImplementedError) {
             if (faultTollerant) {
                 val node = T::class.dummyInstance()
                 node.origin = FailingASTTransformation(asOrigin(input))
                 node
             } else {
                 throw RuntimeException("Failed to transform $input into $kclass", t)
+            }
+        }catch (e: Exception) {
+            if (faultTollerant) {
+                val node = T::class.dummyInstance()
+                node.origin = FailingASTTransformation(asOrigin(input))
+                node
+            } else {
+                throw RuntimeException("Failed to transform $input into $kclass", e)
             }
         }
         }
@@ -634,8 +639,24 @@ private fun <T:Any> KClass<T>.isDirectlyOrIndirectlyInstantiable(): Boolean {
 private fun <T:Any> KClass<T>.toInstantiableType() : KClass<out T> {
     return when {
         this.isSealed -> {
-            val subclass = this.sealedSubclasses.find { it.isDirectlyOrIndirectlyInstantiable() }
-            subclass?.toInstantiableType() ?: throw IllegalStateException("$this has no instantiable sealed subclasses")
+            val subclasses = this.sealedSubclasses.filter { it.isDirectlyOrIndirectlyInstantiable() }
+            if (subclasses.isEmpty()) {
+                throw IllegalStateException("$this has no instantiable sealed subclasses")
+            }
+            val subClassWithEmptyParam = subclasses.find { it.constructors.any { it.parameters.isEmpty() } }
+            if (subClassWithEmptyParam == null) {
+                if (subclasses.size == 1) {
+                    subclasses.first().toInstantiableType()
+                } else {
+                    // Some constructs are recursive (think of the ArrayType)
+                    // We either find complex logic to find the ones that aren't or just pick one randomly. Eventually we will build
+                    // a tree
+                    val r = Random.Default
+                    subclasses[r.nextInt(subclasses.size)].toInstantiableType()
+                }
+            } else {
+                subClassWithEmptyParam.toInstantiableType()
+            }
         }
         this.isAbstract -> {
             throw IllegalStateException("We cannot instantiate an abstract class (but we can handle sealed classes)")
@@ -662,6 +683,9 @@ fun <T:Node> KClass<T>.dummyInstance() : T {
         val value = when {
             param.type.isMarkedNullable -> null
             mt is ParameterizedType && mt.rawType == List::class.java -> mutableListOf<Any>()
+            (param.type.classifier as KClass<*>).isSubclassOf(Node::class) -> (param.type.classifier as KClass<out Node>).dummyInstance()
+            param.type == String::class.createType() -> "DUMMY"
+            param.type.classifier == ReferenceByName::class -> ReferenceByName<PossiblyNamed>("UNKNOWN")
             else -> TODO()
         }
         params[param] = value

@@ -2,12 +2,13 @@ package com.strumenta.kolasu.codegen
 
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.transformation.MissingASTTransformation
+import com.strumenta.kolasu.transformation.PlaceholderASTTransformation
 
 class KotlinPrinter : ASTCodeGenerator<KCompilationUnit>() {
 
     override val placeholderNodePrinter: NodePrinter
         get() = NodePrinter { output: PrinterOutput, ast: Node ->
-            val origin = (ast.origin as MissingASTTransformation).origin
+            val origin = (ast.origin as PlaceholderASTTransformation).origin
             val nodeType = if (origin is Node) {
                 origin.nodeType
             } else {

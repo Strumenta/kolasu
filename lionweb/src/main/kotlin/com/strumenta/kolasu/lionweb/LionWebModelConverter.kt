@@ -59,6 +59,7 @@ import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 import io.lionweb.lioncore.java.language.Feature as LWFeature
+import com.strumenta.kolasu.transformation.PlaceholderASTTransformation
 
 interface PrimitiveValueSerialization<E> {
     fun serialize(value: E): String
@@ -218,7 +219,7 @@ class LionWebModelConverter(
                                 if (origin is KNode) {
                                     val targetID = myIDManager.nodeId(origin)
                                     setOriginalNode(lwNode, targetID)
-                                } else if (origin is MissingASTTransformation) {
+                                } else if (origin is PlaceholderASTTransformation) {
                                     if (lwNode is AbstractClassifierInstance<*>) {
                                         val instance = DynamicAnnotationInstance(
                                             StarLasuLWLanguage.PlaceholderNode.id,
