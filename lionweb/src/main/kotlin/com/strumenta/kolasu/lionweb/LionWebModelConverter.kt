@@ -159,7 +159,11 @@ class LionWebModelConverter(
         if (!nodesMapping.containsA(kolasuTree)) {
             kolasuTree.walk().forEach { kNode ->
                 if (!nodesMapping.containsA(kNode)) {
-                    val lwNode = DynamicNode(myIDManager.nodeId(kNode), findConcept(kNode))
+                    val nodeID = myIDManager.nodeId(kNode)
+                    if (!CommonChecks.isValidID(nodeID)) {
+                        throw RuntimeException("We generated an invalid Node ID, using $myIDManager in $kNode. Node ID: $nodeID")
+                    }
+                    val lwNode = DynamicNode(nodeID, findConcept(kNode))
                     associateNodes(kNode, lwNode)
                 }
             }
