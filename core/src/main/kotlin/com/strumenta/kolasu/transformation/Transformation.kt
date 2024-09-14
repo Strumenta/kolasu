@@ -4,14 +4,11 @@ import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import org.antlr.v4.runtime.tree.ParseTree
-import java.lang.reflect.ParameterizedType
-import kotlin.random.Random
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.*
-import kotlin.reflect.jvm.javaType
 
 /**
  * Factory that, given a tree node, will instantiate the corresponding transformed node.
@@ -254,7 +251,7 @@ class MissingASTTransformation(
     val expectedType: KClass<out Node>? = null,
     message: String = "Translation of a node is not yet implemented: " +
         "${if (transformationSource is Node) transformationSource.simpleNodeType else transformationSource}" +
-        "${if (expectedType != null) " into $expectedType" else ""}"
+        if (expectedType != null) " into $expectedType" else ""
 ) :
     PlaceholderASTTransformation(origin, message) {
     constructor(transformationSource: Node, expectedType: KClass<out Node>? = null) : this(
@@ -654,72 +651,6 @@ open class ASTTransformer(
         issues.add(issue)
         return issue
     }
-}
-
-private fun <T : Any> KClass<T>.isDirectlyOrIndirectlyInstantiable(): Boolean {
-    return if (this.isSealed) {
-        this.sealedSubclasses.any { it.isDirectlyOrIndirectlyInstantiable() }
-    } else {
-        !this.isAbstract && !this.java.isInterface
-    }
-}
-
-private fun <T : Any> KClass<T>.toInstantiableType(): KClass<out T> {
-    return when {
-        this.isSealed -> {
-            val subclasses = this.sealedSubclasses.filter { it.isDirectlyOrIndirectlyInstantiable() }
-            if (subclasses.isEmpty()) {
-                throw IllegalStateException("$this has no instantiable sealed subclasses")
-            }
-            val subClassWithEmptyParam = subclasses.find { it.constructors.any { it.parameters.isEmpty() } }
-            if (subClassWithEmptyParam == null) {
-                if (subclasses.size == 1) {
-                    subclasses.first().toInstantiableType()
-                } else {
-                    // Some constructs are recursive (think of the ArrayType)
-                    // We either find complex logic to find the ones that aren't or just pick one randomly.
-                    // Eventually we will build a tree
-                    val r = Random.Default
-                    subclasses[r.nextInt(subclasses.size)].toInstantiableType()
-                }
-            } else {
-                subClassWithEmptyParam.toInstantiableType()
-            }
-        }
-        this.isAbstract -> {
-            throw IllegalStateException("We cannot instantiate an abstract class (but we can handle sealed classes)")
-        }
-        this.java.isInterface -> {
-            throw IllegalStateException("We cannot instantiate an interface")
-        }
-        else -> {
-            this
-        }
-    }
-}
-
-fun <T : Node> KClass<T>.dummyInstance(): T {
-    val kClassToInstantiate = this.toInstantiableType()
-    val emptyConstructor = kClassToInstantiate.constructors.find { it.parameters.isEmpty() }
-    if (emptyConstructor != null) {
-        return emptyConstructor.call()
-    }
-    val constructor = kClassToInstantiate.primaryConstructor!!
-    val params = mutableMapOf<KParameter, Any?>()
-    constructor.parameters.forEach { param ->
-        val mt = param.type.javaType
-        val value = when {
-            param.type.isMarkedNullable -> null
-            mt is ParameterizedType && mt.rawType == List::class.java -> mutableListOf<Any>()
-            (param.type.classifier as KClass<*>).isSubclassOf(Node::class) ->
-                (param.type.classifier as KClass<out Node>).dummyInstance()
-            param.type == String::class.createType() -> "DUMMY"
-            param.type.classifier == ReferenceByName::class -> ReferenceByName<PossiblyNamed>("UNKNOWN")
-            else -> TODO()
-        }
-        params[param] = value
-    }
-    return constructor.callBy(params)
 }
 
 private fun <Source : Any, Target : Any, Child : Any> NodeFactory<*, *>.getChildNodeFactory(
