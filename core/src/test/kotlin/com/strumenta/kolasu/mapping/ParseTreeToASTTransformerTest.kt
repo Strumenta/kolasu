@@ -87,9 +87,17 @@ class ParseTreeToASTTransformerTest {
 
         val cu = CU(
             statements = listOf(
-                GenericErrorNode(message = "Exception java.lang.IllegalStateException: Parse error")
+                GenericErrorNode(
+                    message = "RuntimeException: Failed to transform [8] into " +
+                        "class com.strumenta.simplelang.SimpleLangParser${'$'}SetStmtContext " +
+                        "-> IllegalStateException: Parse error"
+                )
                     .withParseTreeNode(pt.statement(0)),
-                GenericErrorNode(message = "Exception java.lang.IllegalStateException: Parse error")
+                GenericErrorNode(
+                    message = "RuntimeException: Failed to transform [8] into " +
+                        "class com.strumenta.simplelang.SimpleLangParser${'$'}DisplayStmtContext " +
+                        "-> IllegalStateException: Parse error"
+                )
                     .withParseTreeNode(pt.statement(1))
             )
         ).withParseTreeNode(pt)
