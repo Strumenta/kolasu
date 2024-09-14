@@ -5,7 +5,7 @@ plugins {
     `maven-publish`
     idea
     signing
-    id("org.jlleitschuh.gradle.ktlint")
+    alias(libs.plugins.ktlint)
     id("org.jetbrains.dokka")
 }
 
