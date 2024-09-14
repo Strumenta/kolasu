@@ -9,11 +9,6 @@ class KotlinPrinter : ASTCodeGenerator<KCompilationUnit>() {
         get() = NodePrinter { output: PrinterOutput, ast: Node ->
             val placeholder = ast.origin as PlaceholderASTTransformation
             val origin = placeholder.origin
-            val nodeType = if (origin is Node) {
-                origin.nodeType
-            } else {
-                origin?.toString()
-            }
             output.print("/* ${placeholder.message} */")
         }
 
