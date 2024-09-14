@@ -12,6 +12,12 @@ import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaType
 
+/**
+ * This logic instantiate a node of the given class with dummy values.
+ * This is useful because it permits to add an element that "fit" and make the typesystem happy.
+ * Typically, the only goal of the element would be to hold some annotation that indicates that the element
+ * is representing an error or a missing transformation or something of that sort.
+ */
 fun <T : Node> KClass<T>.dummyInstance(): T {
     val kClassToInstantiate = this.toInstantiableType()
     val emptyConstructor = kClassToInstantiate.constructors.find { it.parameters.isEmpty() }
@@ -77,6 +83,10 @@ private fun <T : Any> KClass<T>.toInstantiableType(): KClass<out T> {
     }
 }
 
+/**
+ * We can only instantiate concrete classes or sealed classes, if one its subclasses is directly or
+ * indirectly instantiable. For interfaces this return false.
+ */
 fun <T : Any> KClass<T>.isDirectlyOrIndirectlyInstantiable(): Boolean {
     return if (this.isSealed) {
         this.sealedSubclasses.any { it.isDirectlyOrIndirectlyInstantiable() }

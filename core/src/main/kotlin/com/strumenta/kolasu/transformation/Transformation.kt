@@ -238,31 +238,6 @@ data class ChildNodeFactory<Source, Target, Child : Any>(
  */
 private val NO_CHILD_NODE = ChildNodeFactory<Any, Any, Any>("", { x -> x }, { _, _ -> }, Node::class)
 
-sealed class PlaceholderASTTransformation(val origin: Origin?, val message: String) : Origin {
-    override val position: Position?
-        get() = origin?.position
-    override val sourceText: String?
-        get() = origin?.sourceText
-}
-
-class MissingASTTransformation(
-    origin: Origin?,
-    val transformationSource: Any?,
-    val expectedType: KClass<out Node>? = null,
-    message: String = "Translation of a node is not yet implemented: " +
-        "${if (transformationSource is Node) transformationSource.simpleNodeType else transformationSource}" +
-        if (expectedType != null) " into $expectedType" else ""
-) :
-    PlaceholderASTTransformation(origin, message) {
-    constructor(transformationSource: Node, expectedType: KClass<out Node>? = null) : this(
-        transformationSource,
-        transformationSource,
-        expectedType
-    )
-}
-
-class FailingASTTransformation(origin: Origin?, message: String) : PlaceholderASTTransformation(origin, message)
-
 /**
  * Implementation of a tree-to-tree transformation. For each source node type, we can register a factory that knows how
  * to create a transformed node. Then, this transformer can read metadata in the transformed node to recursively
@@ -278,6 +253,11 @@ open class ASTTransformer(
     @Deprecated("To be removed in Kolasu 1.6")
     val allowGenericNode: Boolean = true,
     val throwOnUnmappedNode: Boolean = false,
+    /**
+     * When the fault tollerant flag is set, in case a transformation fails we will add a node
+     * with the origin FailingASTTransformation. If the flag is not set, then the transformation will just
+     * fail.
+     */
     val faultTollerant: Boolean = !throwOnUnmappedNode
 ) {
     /**

@@ -22,6 +22,7 @@ import com.strumenta.kolasu.model.nodeOriginalProperties
 import com.strumenta.kolasu.parsing.FirstStageParsingResult
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult
+import com.strumenta.kolasu.transformation.FailingASTTransformation
 import com.strumenta.kolasu.transformation.MissingASTTransformation
 import com.strumenta.kolasu.transformation.PlaceholderASTTransformation
 import com.strumenta.kolasu.traversing.walk
@@ -32,11 +33,13 @@ import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Enumeration
+import io.lionweb.lioncore.java.language.EnumerationLiteral
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
+import io.lionweb.lioncore.java.model.AnnotationInstance
 import io.lionweb.lioncore.java.model.Node
 import io.lionweb.lioncore.java.model.ReferenceValue
 import io.lionweb.lioncore.java.model.impl.AbstractClassifierInstance
@@ -243,6 +246,7 @@ class LionWebModelConverter(
                                             val targetID = myIDManager.nodeId(origin.origin as KNode)
                                             setOriginalNode(lwNode, targetID)
                                         }
+                                        setPlaceholderNodeType(instance, origin.javaClass.kotlin)
                                         lwNode.addAnnotation(instance)
                                     } else {
                                         throw Exception(
@@ -354,6 +358,26 @@ class LionWebModelConverter(
             listOf(
                 ReferenceValue(ProxyNode(targetID), null)
             )
+        )
+    }
+
+    private fun setPlaceholderNodeType(
+        placeholderAnnotation: AnnotationInstance,
+        kClass: KClass<out PlaceholderASTTransformation>
+    ) {
+        val enumerationLiteral: EnumerationLiteral = when (kClass) {
+            MissingASTTransformation::class -> StarLasuLWLanguage.PlaceholderNodeType.literals.find {
+                it.name == "MissingASTTransformation"
+            }!!
+            FailingASTTransformation::class -> StarLasuLWLanguage.PlaceholderNodeType.literals.find {
+                it.name == "FailingASTTransformation"
+            }!!
+            else -> TODO()
+        }
+
+        placeholderAnnotation.setPropertyValue(
+            StarLasuLWLanguage.PlaceholderNodeTypeProperty,
+            EnumerationValueImpl(enumerationLiteral)
         )
     }
 

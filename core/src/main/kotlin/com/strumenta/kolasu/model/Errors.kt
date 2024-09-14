@@ -19,8 +19,8 @@ class GenericErrorNode(error: Exception? = null, message: String? = null) : Node
 
     private fun Throwable.message(): String {
         val cause = this.cause?.message()?.let { " -> $it" } ?: ""
-        val msg = if (this.message != null) ": " + this.message else ""
-        return "${this.javaClass.simpleName}$msg$cause"
+        val explanation = if (this.message != null) ": " + this.message else ""
+        return "${this.javaClass.simpleName}$explanation$cause"
     }
 }
 

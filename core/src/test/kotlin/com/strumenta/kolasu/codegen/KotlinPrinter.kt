@@ -8,7 +8,6 @@ class KotlinPrinter : ASTCodeGenerator<KCompilationUnit>() {
     override val placeholderNodePrinter: NodePrinter
         get() = NodePrinter { output: PrinterOutput, ast: Node ->
             val placeholder = ast.origin as PlaceholderASTTransformation
-            val origin = placeholder.origin
             output.print("/* ${placeholder.message} */")
         }
 

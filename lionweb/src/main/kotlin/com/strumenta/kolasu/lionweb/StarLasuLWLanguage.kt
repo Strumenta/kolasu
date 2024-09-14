@@ -10,6 +10,8 @@ import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import io.lionweb.lioncore.java.language.Annotation
 import io.lionweb.lioncore.java.language.Concept
+import io.lionweb.lioncore.java.language.Enumeration
+import io.lionweb.lioncore.java.language.EnumerationLiteral
 import io.lionweb.lioncore.java.language.Interface
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
@@ -101,6 +103,29 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
             keyForContainedElement(PLACEHOLDER_NODE)
         )
         placeholderNodeAnnotation.annotates = LionCore.getConcept()
+
+        val placeholderNodeAnnotationType = Enumeration(
+            this,
+            "PlaceholderNodeType"
+        ).apply {
+            this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
+            this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
+            val enumeration = this
+            addLiteral(
+                EnumerationLiteral(this, "MissingASTTransformation").apply {
+                    this.id = "${enumeration.id!!.removeSuffix("-id")}-$name-id"
+                    this.key = "${enumeration.id!!.removeSuffix("-key")}-$name-key"
+                }
+            )
+            addLiteral(
+                EnumerationLiteral(this, "FailingASTTransformation").apply {
+                    this.id = "${enumeration.id!!.removeSuffix("-id")}-$name-id"
+                    this.key = "${enumeration.id!!.removeSuffix("-key")}-$name-key"
+                }
+            )
+        }
+        addElement(placeholderNodeAnnotationType)
+
         val reference =
             Reference().apply {
                 this.name = "originalNode"
@@ -111,6 +136,14 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
                 this.setMultiple(false)
             }
         placeholderNodeAnnotation.addFeature(reference)
+        val type = Property().apply {
+            this.name = "type"
+            this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
+            this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
+            this.type = placeholderNodeAnnotationType
+            this.setOptional(false)
+        }
+        placeholderNodeAnnotation.addFeature(type)
         addElement(placeholderNodeAnnotation)
     }
 
@@ -140,6 +173,12 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
 
     val PlaceholderNodeOriginalNode: Reference
         get() = PlaceholderNode.getReferenceByName("originalNode")!!
+
+    val PlaceholderNodeTypeProperty: Property
+        get() = PlaceholderNode.getPropertyByName("type")!!
+
+    val PlaceholderNodeType: Enumeration
+        get() = StarLasuLWLanguage.getEnumerationByName("PlaceholderNodeType")!!
 
     val BehaviorDeclaration: Interface
         get() = StarLasuLWLanguage.getInterfaceByName("BehaviorDeclaration")!!
