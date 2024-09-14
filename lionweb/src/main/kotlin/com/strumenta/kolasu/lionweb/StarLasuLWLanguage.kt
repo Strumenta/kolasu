@@ -144,6 +144,14 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
             this.setOptional(false)
         }
         placeholderNodeAnnotation.addFeature(type)
+        val message = Property().apply {
+            this.name = "message"
+            this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
+            this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
+            this.type = LionCoreBuiltins.getString()
+            this.setOptional(false)
+        }
+        placeholderNodeAnnotation.addFeature(message)
         addElement(placeholderNodeAnnotation)
     }
 
@@ -176,6 +184,9 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
 
     val PlaceholderNodeTypeProperty: Property
         get() = PlaceholderNode.getPropertyByName("type")!!
+
+    val PlaceholderNodeMessageProperty: Property
+        get() = PlaceholderNode.getPropertyByName("message")!!
 
     val PlaceholderNodeType: Enumeration
         get() = StarLasuLWLanguage.getEnumerationByName("PlaceholderNodeType")!!

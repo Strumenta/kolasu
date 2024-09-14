@@ -247,6 +247,10 @@ class LionWebModelConverter(
                                             setOriginalNode(lwNode, targetID)
                                         }
                                         setPlaceholderNodeType(instance, origin.javaClass.kotlin)
+                                        instance.setPropertyValue(
+                                            StarLasuLWLanguage.PlaceholderNodeMessageProperty,
+                                            origin.message
+                                        )
                                         lwNode.addAnnotation(instance)
                                     } else {
                                         throw Exception(
@@ -399,7 +403,7 @@ class LionWebModelConverter(
                 throw RuntimeException("Issue instantiating $kClass from LionWeb node $lwNode", e)
             }
         }
-        val placeholderNodes = mutableListOf<KNode>()
+        val placeholderNodes = mutableMapOf<KNode, (KNode) -> Unit>()
         lwTree.thisAndAllDescendants().forEach { lwNode ->
             val kNode = nodesMapping.byB(lwNode)!!
             if (kNode is KNode) {
@@ -419,7 +423,34 @@ class LionWebModelConverter(
                     it.classifier == StarLasuLWLanguage.PlaceholderNode
                 }
                 if (placeholderNodeAnnotation != null) {
-                    placeholderNodes.add(kNode)
+                    val placeholderType = (
+                        placeholderNodeAnnotation.getPropertyValue(
+                            StarLasuLWLanguage.PlaceholderNodeTypeProperty
+                        ) as EnumerationValue
+                        ).enumerationLiteral
+                    val placeholderMessage = placeholderNodeAnnotation.getPropertyValue(
+                        StarLasuLWLanguage.PlaceholderNodeMessageProperty
+                    ) as String
+                    when (placeholderType.name) {
+                        "MissingASTTransformation" -> {
+                            placeholderNodes[kNode] = { kNode ->
+                                kNode.origin = MissingASTTransformation(
+                                    origin = kNode.origin,
+                                    transformationSource = kNode.origin as? KNode,
+                                    expectedType = null
+                                )
+                            }
+                        }
+                        "FailingASTTransformation" -> {
+                            placeholderNodes[kNode] = { kNode ->
+                                kNode.origin = FailingASTTransformation(
+                                    origin = kNode.origin,
+                                    message = placeholderMessage
+                                )
+                            }
+                        }
+                        else -> TODO()
+                    }
                 }
                 val transpiledNodes = lwNode.getReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes)
                 if (transpiledNodes.isNotEmpty()) {
@@ -429,12 +460,10 @@ class LionWebModelConverter(
             }
         }
         referencesPostponer.populateReferences(nodesMapping, externalNodeResolver)
-        placeholderNodes.forEach {
-            it.origin = MissingASTTransformation(
-                origin = it.origin,
-                transformationSource = it.origin as com.strumenta.kolasu.model.Node,
-                expectedType = null
-            )
+        // We want to handle the origin for placeholder nodes AFTER references, to override the origins
+        // set during the population of references
+        placeholderNodes.entries.forEach { entry ->
+            entry.value.invoke(entry.key)
         }
         return nodesMapping.byB(lwTree)!!
     }
