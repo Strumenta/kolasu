@@ -3,9 +3,9 @@ package com.strumenta.kolasu.transformation
 import com.strumenta.kolasu.model.*
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
+import org.antlr.v4.runtime.tree.ParseTree
 import java.lang.reflect.ParameterizedType
 import kotlin.random.Random
-import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
@@ -248,12 +248,21 @@ sealed class PlaceholderASTTransformation(val origin: Origin?, val message: Stri
         get() = origin?.sourceText
 }
 
-
-class MissingASTTransformation(origin: Origin?, val transformationSource: Any?, val expectedType: KClass<out Node>? = null,
-                               message: String = "Translation of a node is not yet implemented: ${if (transformationSource is Node) transformationSource.simpleNodeType else transformationSource}${if (expectedType != null) " into $expectedType" else ""}")
-    : PlaceholderASTTransformation(origin, message) {
-        constructor(transformationSource: Node, expectedType: KClass<out Node>? = null) : this(transformationSource, transformationSource, expectedType)
-    }
+class MissingASTTransformation(
+    origin: Origin?,
+    val transformationSource: Any?,
+    val expectedType: KClass<out Node>? = null,
+    message: String = "Translation of a node is not yet implemented: " +
+        "${if (transformationSource is Node) transformationSource.simpleNodeType else transformationSource}" +
+        "${if (expectedType != null) " into $expectedType" else ""}"
+) :
+    PlaceholderASTTransformation(origin, message) {
+    constructor(transformationSource: Node, expectedType: KClass<out Node>? = null) : this(
+        transformationSource,
+        transformationSource,
+        expectedType
+    )
+}
 
 class FailingASTTransformation(origin: Origin?, message: String) : PlaceholderASTTransformation(origin, message)
 
@@ -469,28 +478,37 @@ open class ASTTransformer(
         crossinline factory: S.(ASTTransformer) -> T?
     ): NodeFactory<S, T> = registerNodeFactory(S::class) { source, transformer, _ -> source.factory(transformer) }
 
-    inline fun <S : Any, reified T : Node> registerNodeFactory(kclass: KClass<S>, crossinline factory: (S) -> T?): NodeFactory<S, T> =
-        registerNodeFactory(kclass) { input, _, _ -> try {
-            factory(input)
-        } catch (t: NotImplementedError) {
-            if (faultTollerant) {
-                val node = T::class.dummyInstance()
-                node.origin = FailingASTTransformation(asOrigin(input),
-                    "Failed to transform $input into $kclass because the implementation is not complete (${t.message}")
-                node
-            } else {
-                throw RuntimeException("Failed to transform $input into $kclass", t)
+    inline fun <S : Any, reified T : Node> registerNodeFactory(
+        kclass: KClass<S>,
+        crossinline factory: (S) -> T?
+    ): NodeFactory<S, T> =
+        registerNodeFactory(kclass) { input, _, _ ->
+            try {
+                factory(input)
+            } catch (t: NotImplementedError) {
+                if (faultTollerant) {
+                    val node = T::class.dummyInstance()
+                    node.origin = FailingASTTransformation(
+                        asOrigin(input),
+                        "Failed to transform $input into $kclass because the implementation is not complete " +
+                            "(${t.message}"
+                    )
+                    node
+                } else {
+                    throw RuntimeException("Failed to transform $input into $kclass", t)
+                }
+            } catch (e: Exception) {
+                if (faultTollerant) {
+                    val node = T::class.dummyInstance()
+                    node.origin = FailingASTTransformation(
+                        asOrigin(input),
+                        "Failed to transform $input into $kclass because of an error (${e.message})"
+                    )
+                    node
+                } else {
+                    throw RuntimeException("Failed to transform $input into $kclass", e)
+                }
             }
-        }catch (e: Exception) {
-            if (faultTollerant) {
-                val node = T::class.dummyInstance()
-                node.origin = FailingASTTransformation(asOrigin(input),
-                    "Failed to transform $input into $kclass because of an error (${e.message})")
-                node
-            } else {
-                throw RuntimeException("Failed to transform $input into $kclass", e)
-            }
-        }
         }
 
     fun <S : Any, T : Node> registerMultipleNodeFactory(kclass: KClass<S>, factory: (S) -> List<T>): NodeFactory<S, T> =
@@ -638,13 +656,15 @@ open class ASTTransformer(
     }
 }
 
-private fun <T:Any> KClass<T>.isDirectlyOrIndirectlyInstantiable(): Boolean {
+private fun <T : Any> KClass<T>.isDirectlyOrIndirectlyInstantiable(): Boolean {
     return if (this.isSealed) {
         this.sealedSubclasses.any { it.isDirectlyOrIndirectlyInstantiable() }
-    } else !this.isAbstract && !this.java.isInterface
+    } else {
+        !this.isAbstract && !this.java.isInterface
+    }
 }
 
-private fun <T:Any> KClass<T>.toInstantiableType() : KClass<out T> {
+private fun <T : Any> KClass<T>.toInstantiableType(): KClass<out T> {
     return when {
         this.isSealed -> {
             val subclasses = this.sealedSubclasses.filter { it.isDirectlyOrIndirectlyInstantiable() }
@@ -657,8 +677,8 @@ private fun <T:Any> KClass<T>.toInstantiableType() : KClass<out T> {
                     subclasses.first().toInstantiableType()
                 } else {
                     // Some constructs are recursive (think of the ArrayType)
-                    // We either find complex logic to find the ones that aren't or just pick one randomly. Eventually we will build
-                    // a tree
+                    // We either find complex logic to find the ones that aren't or just pick one randomly.
+                    // Eventually we will build a tree
                     val r = Random.Default
                     subclasses[r.nextInt(subclasses.size)].toInstantiableType()
                 }
@@ -678,7 +698,7 @@ private fun <T:Any> KClass<T>.toInstantiableType() : KClass<out T> {
     }
 }
 
-fun <T:Node> KClass<T>.dummyInstance() : T {
+fun <T : Node> KClass<T>.dummyInstance(): T {
     val kClassToInstantiate = this.toInstantiableType()
     val emptyConstructor = kClassToInstantiate.constructors.find { it.parameters.isEmpty() }
     if (emptyConstructor != null) {
@@ -691,7 +711,8 @@ fun <T:Node> KClass<T>.dummyInstance() : T {
         val value = when {
             param.type.isMarkedNullable -> null
             mt is ParameterizedType && mt.rawType == List::class.java -> mutableListOf<Any>()
-            (param.type.classifier as KClass<*>).isSubclassOf(Node::class) -> (param.type.classifier as KClass<out Node>).dummyInstance()
+            (param.type.classifier as KClass<*>).isSubclassOf(Node::class) ->
+                (param.type.classifier as KClass<out Node>).dummyInstance()
             param.type == String::class.createType() -> "DUMMY"
             param.type.classifier == ReferenceByName::class -> ReferenceByName<PossiblyNamed>("UNKNOWN")
             else -> TODO()

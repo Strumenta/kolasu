@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.codegen
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.transformation.MissingASTTransformation
 import com.strumenta.kolasu.transformation.PlaceholderASTTransformation
 
 class KotlinPrinter : ASTCodeGenerator<KCompilationUnit>() {

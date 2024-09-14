@@ -23,6 +23,7 @@ import com.strumenta.kolasu.parsing.FirstStageParsingResult
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.transformation.MissingASTTransformation
+import com.strumenta.kolasu.transformation.PlaceholderASTTransformation
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
@@ -59,7 +60,6 @@ import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 import io.lionweb.lioncore.java.language.Feature as LWFeature
-import com.strumenta.kolasu.transformation.PlaceholderASTTransformation
 
 interface PrimitiveValueSerialization<E> {
     fun serialize(value: E): String
@@ -169,7 +169,9 @@ class LionWebModelConverter(
                 if (!nodesMapping.containsA(kNode)) {
                     val nodeID = myIDManager.nodeId(kNode)
                     if (!CommonChecks.isValidID(nodeID)) {
-                        throw RuntimeException("We generated an invalid Node ID, using $myIDManager in $kNode. Node ID: $nodeID")
+                        throw RuntimeException(
+                            "We generated an invalid Node ID, using $myIDManager in $kNode. Node ID: $nodeID"
+                        )
                     }
                     val lwNode = DynamicNode(nodeID, findConcept(kNode))
                     associateNodes(kNode, lwNode)
@@ -403,9 +405,13 @@ class LionWebModelConverter(
             }
         }
         referencesPostponer.populateReferences(nodesMapping, externalNodeResolver)
-        placeholderNodes.forEach { it.origin = MissingASTTransformation(origin = it.origin,
-            transformationSource = it.origin as com.strumenta.kolasu.model.Node,
-            expectedType = null) }
+        placeholderNodes.forEach {
+            it.origin = MissingASTTransformation(
+                origin = it.origin,
+                transformationSource = it.origin as com.strumenta.kolasu.model.Node,
+                expectedType = null
+            )
+        }
         return nodesMapping.byB(lwTree)!!
     }
 

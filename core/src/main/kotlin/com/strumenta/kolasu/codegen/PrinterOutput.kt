@@ -4,8 +4,6 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.START_POINT
 import com.strumenta.kolasu.model.TextFileDestination
-import com.strumenta.kolasu.transformation.FailingASTTransformation
-import com.strumenta.kolasu.transformation.MissingASTTransformation
 import com.strumenta.kolasu.transformation.PlaceholderASTTransformation
 import kotlin.reflect.KClass
 import kotlin.reflect.full.superclasses
