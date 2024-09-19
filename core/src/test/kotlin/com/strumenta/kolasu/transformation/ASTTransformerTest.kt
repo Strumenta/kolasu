@@ -28,6 +28,7 @@ object MyExampleLanguageForTransformation : StarLasuLanguage("com.foo.MyExampleL
             BLangMult::class,
             BazRoot::class,
             Sum::class,
+            BarStmt::class,
         )
     }
 }

@@ -30,6 +30,8 @@ class CachingNodeIDProvider(
     fun clear() {
         cache.clear()
     }
+
+    override fun toString(): String = "CachingNodeIDProvider with wrapped=$wrapped"
 }
 
 fun NodeIdProvider.caching(): CachingNodeIDProvider = CachingNodeIDProvider(this)

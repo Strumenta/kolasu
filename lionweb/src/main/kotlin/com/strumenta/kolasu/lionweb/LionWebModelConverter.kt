@@ -26,7 +26,9 @@ import com.strumenta.kolasu.model.isReference
 import com.strumenta.kolasu.model.nodeOriginalProperties
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult
+import com.strumenta.kolasu.transformation.FailingASTTransformation
 import com.strumenta.kolasu.transformation.MissingASTTransformation
+import com.strumenta.kolasu.transformation.PlaceholderASTTransformation
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
@@ -35,11 +37,13 @@ import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Enumeration
+import io.lionweb.lioncore.java.language.EnumerationLiteral
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
+import io.lionweb.lioncore.java.model.AnnotationInstance
 import io.lionweb.lioncore.java.model.Node
 import io.lionweb.lioncore.java.model.impl.AbstractClassifierInstance
 import io.lionweb.lioncore.java.model.impl.DynamicAnnotationInstance
@@ -169,14 +173,28 @@ class LionWebModelConverter(
                 private val cache = IdentityHashMap<KNode, String>()
 
                 fun nodeId(kNode: KNode): String {
-                    return cache.getOrPut(kNode) { nodeIdProvider.id(kNode) }
+                    return cache.getOrPut(kNode) {
+                        val id = nodeIdProvider.id(kNode)
+                        if (!CommonChecks.isValidID(id)) {
+                            throw RuntimeException("We got an invalid Node ID from $nodeIdProvider for $id")
+                        }
+                        id
+                    }
                 }
+
+                override fun toString(): String = "Caching ID Manager in front of $nodeIdProvider"
             }
 
         if (!nodesMapping.containsA(kolasuTree)) {
             kolasuTree.walk().forEach { kNode ->
                 if (!nodesMapping.containsA(kNode)) {
-                    val lwNode = DynamicNode(myIDManager.nodeId(kNode), findConcept(kNode))
+                    val nodeID = myIDManager.nodeId(kNode)
+                    if (!CommonChecks.isValidID(nodeID)) {
+                        throw RuntimeException(
+                            "We generated an invalid Node ID, using $myIDManager in $kNode. Node ID: $nodeID",
+                        )
+                    }
+                    val lwNode = DynamicNode(nodeID, findConcept(kNode))
                     associateNodes(kNode, lwNode)
                 }
             }
@@ -246,17 +264,22 @@ class LionWebModelConverter(
                                 if (origin is NodeOrigin) {
                                     val targetID = myIDManager.nodeId(origin.node)
                                     setOriginalNode(lwNode, targetID)
-                                } else if (origin is MissingASTTransformation) {
+                                } else if (origin is PlaceholderASTTransformation) {
                                     if (lwNode is AbstractClassifierInstance<*>) {
                                         val instance =
                                             DynamicAnnotationInstance(
-                                                StarLasuLWLanguage.PlaceholderNode.id,
+                                                "${lwNode.id}_placeholder_annotation",
                                                 StarLasuLWLanguage.PlaceholderNode,
                                             )
-                                        if (origin.node != null) {
-                                            val targetID = myIDManager.nodeId(origin.node!!)
+                                        if (origin.origin is NodeOrigin) {
+                                            val targetID = myIDManager.nodeId((origin.origin as NodeOrigin).node)
                                             setOriginalNode(lwNode, targetID)
                                         }
+                                        setPlaceholderNodeType(instance, origin.javaClass.kotlin)
+                                        instance.setPropertyValue(
+                                            StarLasuLWLanguage.PlaceholderNodeMessageProperty,
+                                            origin.message,
+                                        )
                                         lwNode.addAnnotation(instance)
                                     } else {
                                         throw Exception(
@@ -374,6 +397,29 @@ class LionWebModelConverter(
         )
     }
 
+    private fun setPlaceholderNodeType(
+        placeholderAnnotation: AnnotationInstance,
+        kClass: KClass<out PlaceholderASTTransformation>,
+    ) {
+        val enumerationLiteral: EnumerationLiteral =
+            when (kClass) {
+                MissingASTTransformation::class ->
+                    StarLasuLWLanguage.PlaceholderNodeType.literals.find {
+                        it.name == "MissingASTTransformation"
+                    }!!
+                FailingASTTransformation::class ->
+                    StarLasuLWLanguage.PlaceholderNodeType.literals.find {
+                        it.name == "FailingASTTransformation"
+                    }!!
+                else -> TODO()
+            }
+
+        placeholderAnnotation.setPropertyValue(
+            StarLasuLWLanguage.PlaceholderNodeTypeProperty,
+            EnumerationValueImpl(enumerationLiteral),
+        )
+    }
+
     fun importModelFromLionWeb(lwTree: LWNode): Any {
         val referencesPostponer = ReferencesPostponer()
         lwTree.thisAndAllDescendants().reversed().forEach { lwNode ->
@@ -396,7 +442,7 @@ class LionWebModelConverter(
                 throw RuntimeException("Issue instantiating $kClass from LionWeb node $lwNode", e)
             }
         }
-        val placeholderNodes = mutableListOf<KNode>()
+        val placeholderNodes = mutableMapOf<KNode, (KNode) -> Unit>()
         lwTree.thisAndAllDescendants().forEach { lwNode ->
             val kNode = nodesMapping.byB(lwNode)!!
             if (kNode is KNode) {
@@ -417,7 +463,38 @@ class LionWebModelConverter(
                         it.classifier == StarLasuLWLanguage.PlaceholderNode
                     }
                 if (placeholderNodeAnnotation != null) {
-                    placeholderNodes.add(kNode)
+                    val placeholderType =
+                        (
+                            placeholderNodeAnnotation.getPropertyValue(
+                                StarLasuLWLanguage.PlaceholderNodeTypeProperty,
+                            ) as EnumerationValue
+                        ).enumerationLiteral
+                    val placeholderMessage =
+                        placeholderNodeAnnotation.getPropertyValue(
+                            StarLasuLWLanguage.PlaceholderNodeMessageProperty,
+                        ) as String
+                    when (placeholderType.name) {
+                        "MissingASTTransformation" -> {
+                            placeholderNodes[kNode] = { kNode ->
+                                kNode.origin =
+                                    MissingASTTransformation(
+                                        origin = kNode.origin,
+                                        transformationSource = kNode.origin as? KNode,
+                                        expectedType = null,
+                                    )
+                            }
+                        }
+                        "FailingASTTransformation" -> {
+                            placeholderNodes[kNode] = { kNode ->
+                                kNode.origin =
+                                    FailingASTTransformation(
+                                        origin = kNode.origin,
+                                        message = placeholderMessage,
+                                    )
+                            }
+                        }
+                        else -> TODO()
+                    }
                 }
                 val transpiledNodes = lwNode.getReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes)
                 if (transpiledNodes.isNotEmpty()) {
@@ -427,15 +504,10 @@ class LionWebModelConverter(
             }
         }
         referencesPostponer.populateReferences(nodesMapping, externalNodeResolver)
-        placeholderNodes.forEach {
-            it.origin =
-                MissingASTTransformation(
-                    if (it.origin is NodeOrigin) {
-                        (it.origin as NodeOrigin).node
-                    } else {
-                        null
-                    },
-                )
+        // We want to handle the origin for placeholder nodes AFTER references, to override the origins
+        // set during the population of references
+        placeholderNodes.entries.forEach { entry ->
+            entry.value.invoke(entry.key)
         }
         return nodesMapping.byB(lwTree)!!
     }

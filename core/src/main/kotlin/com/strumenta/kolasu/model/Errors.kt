@@ -14,12 +14,13 @@ class GenericErrorNode(
     ErrorNode {
     override val message: String =
         message
-            ?: if (error != null) {
-                val msg = if (error.message != null) ": " + error.message else ""
-                "Exception ${error::class.qualifiedName}$msg"
-            } else {
-                "Unspecified error node"
-            }
+            ?: error?.message() ?: "Unspecified error node"
+
+    private fun Throwable.message(): String {
+        val cause = this.cause?.message()?.let { " -> $it" } ?: ""
+        val explanation = if (this.message != null) ": " + this.message else ""
+        return "${this.javaClass.simpleName}$explanation$cause"
+    }
 
     override val concept: Concept
         get() = BaseStarLasuLanguage.astNode

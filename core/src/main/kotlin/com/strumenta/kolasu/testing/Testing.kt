@@ -294,7 +294,11 @@ fun NodeLike.assertReferencesResolved(withReturnType: KClass<out PossiblyNamed> 
     this
         .kReferenceByNameProperties(targetClass = withReturnType)
         .mapNotNull { it.get(this) }
-        .forEach { assertTrue { (it as ReferenceValue<*>).isResolved } }
+        .forEach {
+            assertTrue("Reference $it in node $this at ${this.range} was expected to be solved") {
+                (it as ReferenceValue<*>).isResolved
+            }
+        }
     this.walkChildren().forEach { it.assertReferencesResolved(withReturnType = withReturnType) }
 }
 

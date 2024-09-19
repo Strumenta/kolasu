@@ -1,15 +1,14 @@
 package com.strumenta.kolasu.codegen
 
 import com.strumenta.kolasu.model.NodeLike
-import com.strumenta.kolasu.transformation.MissingASTTransformation
+import com.strumenta.kolasu.transformation.PlaceholderASTTransformation
 
 class KotlinPrinter : ASTCodeGenerator<KCompilationUnit>() {
     override val placeholderNodePrinter: NodePrinter
         get() =
             NodePrinter { output: PrinterOutput, ast: NodeLike ->
-                val node = (ast.origin as MissingASTTransformation).node
-                val nodeType = node?.concept?.qualifiedName
-                output.print("/* Translation of a node is not yet implemented: $nodeType */")
+                val placeholder = ast.origin as PlaceholderASTTransformation
+                output.print("/* ${placeholder.message} */")
             }
 
     override fun registerRecordPrinters() {

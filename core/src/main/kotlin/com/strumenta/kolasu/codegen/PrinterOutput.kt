@@ -4,7 +4,7 @@ import com.strumenta.kolasu.model.NodeLike
 import com.strumenta.kolasu.model.Range
 import com.strumenta.kolasu.model.START_POINT
 import com.strumenta.kolasu.model.TextFileDestination
-import com.strumenta.kolasu.transformation.MissingASTTransformation
+import com.strumenta.kolasu.transformation.PlaceholderASTTransformation
 import kotlin.reflect.KClass
 import kotlin.reflect.full.superclasses
 
@@ -116,7 +116,7 @@ class PrinterOutput(
             return overrider
         }
         val properPrinter =
-            if (ast.origin is MissingASTTransformation && placeholderNodePrinter != null) {
+            if (ast.origin is PlaceholderASTTransformation && placeholderNodePrinter != null) {
                 placeholderNodePrinter
             } else {
                 nodePrinters[kclass]
