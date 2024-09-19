@@ -43,7 +43,7 @@ class ParserTraceTest {
     "eClass": "https://strumenta.com/starlasu/v2#//Result",
     "root": {
       "eClass": "https://strumenta.com/starlasu/v2#//GenericErrorNode",
-      "message": "Exception java.lang.Exception: foo"
+      "message": "Exception: foo"
     }
   }
 }""",

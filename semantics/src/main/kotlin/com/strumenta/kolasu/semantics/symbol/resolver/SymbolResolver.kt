@@ -7,6 +7,7 @@ import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.model.kReferenceByNameType
 import com.strumenta.kolasu.model.nodeProperties
 import com.strumenta.kolasu.semantics.scope.provider.ScopeProvider
+import com.strumenta.kolasu.transformation.isDirectlyPlaceholderASTTransformation
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSubtypeOf
 
@@ -52,8 +53,15 @@ open class SymbolResolver(
         node: Node,
         entireTree: Boolean = false
     ) {
+        if (node.isDirectlyPlaceholderASTTransformation) {
+            return
+        }
         node.references().forEach { reference -> this.resolve(node, reference) }
-        if (entireTree) node.children.forEach { this.resolve(it, entireTree) }
+        if (entireTree) {
+            node.children.filter { !it.isDirectlyPlaceholderASTTransformation }.forEach {
+                this.resolve(it, entireTree)
+            }
+        }
     }
 
     /**

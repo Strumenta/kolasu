@@ -17,7 +17,9 @@ import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.parsing.TokenCategory
 import com.strumenta.kolasu.testing.assertASTsAreEqual
+import com.strumenta.kolasu.transformation.FailingASTTransformation
 import com.strumenta.kolasu.transformation.MissingASTTransformation
+import com.strumenta.kolasu.transformation.dummyInstance
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
@@ -973,6 +975,51 @@ class LionWebModelConverterTest {
             ),
             reimported.tokens.map { it.position }
         )
+    }
+
+    @Test
+    fun serializeAndDeserializeNodeWithMissingTransformation() {
+        val myOriginalSource = LionWebSource("Some_dummy_original_source")
+        val myMigratedSource = LionWebSource("Some_dummy_migrated_source")
+        val myOriginalNode = NodeWithEnum::class.dummyInstance()
+        val myTransformedNode = NodeWithEnum::class.dummyInstance()
+        myOriginalNode.source = myOriginalSource
+        myTransformedNode.source = myMigratedSource
+        myTransformedNode.origin = MissingASTTransformation(myOriginalNode)
+
+        val converter = LionWebModelConverter()
+        converter.exportLanguageToLionWeb(
+            KolasuLanguage("myLanguage").apply {
+                addClass(NodeWithEnum::class)
+            }
+        )
+        converter.exportModelToLionWeb(myOriginalNode)
+        val lwNode = converter.exportModelToLionWeb(myTransformedNode)
+        val reimportedNode = converter.importModelFromLionWeb(lwNode) as Node
+        assert(reimportedNode.origin is MissingASTTransformation)
+    }
+
+    @Test
+    fun serializeAndDeserializeNodeWithFailingTransformation() {
+        val myOriginalSource = LionWebSource("Some_dummy_original_source")
+        val myMigratedSource = LionWebSource("Some_dummy_migrated_source")
+        val myOriginalNode = NodeWithEnum::class.dummyInstance()
+        val myTransformedNode = NodeWithEnum::class.dummyInstance()
+        myOriginalNode.source = myOriginalSource
+        myTransformedNode.source = myMigratedSource
+        myTransformedNode.origin = FailingASTTransformation(myOriginalNode, "failing because...")
+
+        val converter = LionWebModelConverter()
+        converter.exportLanguageToLionWeb(
+            KolasuLanguage("myLanguage").apply {
+                addClass(NodeWithEnum::class)
+            }
+        )
+        converter.exportModelToLionWeb(myOriginalNode)
+        val lwNode = converter.exportModelToLionWeb(myTransformedNode)
+        val reimportedNode = converter.importModelFromLionWeb(lwNode) as Node
+        assert(reimportedNode.origin is FailingASTTransformation)
+        assertEquals("failing because...", (reimportedNode.origin as FailingASTTransformation).message)
     }
 }
 

@@ -238,13 +238,6 @@ data class ChildNodeFactory<Source, Target, Child : Any>(
  */
 private val NO_CHILD_NODE = ChildNodeFactory<Any, Any, Any>("", { x -> x }, { _, _ -> }, Node::class)
 
-class MissingASTTransformation(val origin: Origin?) : Origin {
-    override val position: Position?
-        get() = origin?.position
-    override val sourceText: String?
-        get() = origin?.sourceText
-}
-
 /**
  * Implementation of a tree-to-tree transformation. For each source node type, we can register a factory that knows how
  * to create a transformed node. Then, this transformer can read metadata in the transformed node to recursively
@@ -259,7 +252,13 @@ open class ASTTransformer(
     val issues: MutableList<Issue> = mutableListOf(),
     @Deprecated("To be removed in Kolasu 1.6")
     val allowGenericNode: Boolean = true,
-    val throwOnUnmappedNode: Boolean = false
+    val throwOnUnmappedNode: Boolean = false,
+    /**
+     * When the fault tollerant flag is set, in case a transformation fails we will add a node
+     * with the origin FailingASTTransformation. If the flag is not set, then the transformation will just
+     * fail.
+     */
+    val faultTollerant: Boolean = !throwOnUnmappedNode
 ) {
     /**
      * Factories that map from source tree node to target tree node.
@@ -325,10 +324,10 @@ open class ASTTransformer(
                         origin?.position
                     )
                 )
-            } else if (!expectedType.isAbstract && expectedType != Node::class && !throwOnUnmappedNode) {
+            } else if (expectedType.isDirectlyOrIndirectlyInstantiable() && !throwOnUnmappedNode) {
                 try {
-                    val node = expectedType.createInstance()
-                    node.origin = MissingASTTransformation(asOrigin(source))
+                    val node = expectedType.dummyInstance()
+                    node.origin = MissingASTTransformation(asOrigin(source), source, expectedType)
                     nodes = listOf(node)
                 } catch (e: Exception) {
                     throw IllegalStateException(
@@ -361,7 +360,7 @@ open class ASTTransformer(
         }
     }
 
-    protected open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
+    public open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
 
     protected open fun setChild(
         childNodeFactory: ChildNodeFactory<*, *, *>,
@@ -456,8 +455,41 @@ open class ASTTransformer(
         crossinline factory: S.(ASTTransformer) -> T?
     ): NodeFactory<S, T> = registerNodeFactory(S::class) { source, transformer, _ -> source.factory(transformer) }
 
-    fun <S : Any, T : Node> registerNodeFactory(kclass: KClass<S>, factory: (S) -> T?): NodeFactory<S, T> =
-        registerNodeFactory(kclass) { input, _, _ -> factory(input) }
+    /**
+     * We need T to be reified because we may need to install dummy classes of T.
+     */
+    inline fun <S : Any, reified T : Node> registerNodeFactory(
+        kclass: KClass<S>,
+        crossinline factory: (S) -> T?
+    ): NodeFactory<S, T> =
+        registerNodeFactory(kclass) { input, _, _ ->
+            try {
+                factory(input)
+            } catch (t: NotImplementedError) {
+                if (faultTollerant) {
+                    val node = T::class.dummyInstance()
+                    node.origin = FailingASTTransformation(
+                        asOrigin(input),
+                        "Failed to transform $input into $kclass because the implementation is not complete " +
+                            "(${t.message}"
+                    )
+                    node
+                } else {
+                    throw RuntimeException("Failed to transform $input into $kclass", t)
+                }
+            } catch (e: Exception) {
+                if (faultTollerant) {
+                    val node = T::class.dummyInstance()
+                    node.origin = FailingASTTransformation(
+                        asOrigin(input),
+                        "Failed to transform $input into $kclass because of an error (${e.message})"
+                    )
+                    node
+                } else {
+                    throw RuntimeException("Failed to transform $input into $kclass", e)
+                }
+            }
+        }
 
     fun <S : Any, T : Node> registerMultipleNodeFactory(kclass: KClass<S>, factory: (S) -> List<T>): NodeFactory<S, T> =
         registerMultipleNodeFactory(kclass) { input, _, _ -> factory(input) }
@@ -578,7 +610,11 @@ open class ASTTransformer(
         return nodeFactory
     }
 
-    fun <T : Node> registerIdentityTransformation(nodeClass: KClass<T>) =
+    /**
+     * Here the method needs to be inlined and the type parameter reified as in the invoked
+     * registerNodeFactory we need to access the nodeClass
+     */
+    inline fun <reified T : Node> registerIdentityTransformation(nodeClass: KClass<T>) =
         registerNodeFactory(nodeClass) { node -> node }.skipChildren()
 
     private fun registerKnownClass(target: KClass<*>) {

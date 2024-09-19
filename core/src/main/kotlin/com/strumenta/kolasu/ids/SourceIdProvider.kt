@@ -9,6 +9,14 @@ import java.io.File
 
 const val UNKNOWN_SOURCE_ID = "UNKNOWN_SOURCE"
 
+fun String.removeCharactersInvalidInLionWebIDs(): String {
+    return this.filter {
+        it in setOf('-', '_') || it in CharRange('0', '9') ||
+            it in CharRange('a', 'z') ||
+            it in CharRange('A', 'Z')
+    }.toString()
+}
+
 /**
  * Given a Source (even null), it generates a corresponding identifier.
  */
@@ -20,8 +28,9 @@ abstract class AbstractSourceIdProvider : SourceIdProvider {
     protected fun cleanId(id: String) = id
         .replace('.', '-')
         .replace('/', '-')
+        .replace('#', '-')
         .replace(' ', '_')
-        .replace("@", "_at_")
+        .replace("@", "_at_").removeCharactersInvalidInLionWebIDs()
 }
 
 class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSourceIdProvider() {

@@ -271,7 +271,11 @@ fun Node.assertReferencesResolved(forProperty: KReferenceByName<out Node>) {
 fun Node.assertReferencesResolved(withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class) {
     this.kReferenceByNameProperties(targetClass = withReturnType)
         .mapNotNull { it.get(this) }
-        .forEach { assertTrue { (it as ReferenceByName<*>).resolved } }
+        .forEach {
+            assertTrue("Reference $it in node $this at ${this.position} was expected to be solved") {
+                (it as ReferenceByName<*>).resolved
+            }
+        }
     this.walkChildren().forEach { it.assertReferencesResolved(withReturnType = withReturnType) }
 }
 

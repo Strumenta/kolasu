@@ -4,7 +4,7 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.START_POINT
 import com.strumenta.kolasu.model.TextFileDestination
-import com.strumenta.kolasu.transformation.MissingASTTransformation
+import com.strumenta.kolasu.transformation.PlaceholderASTTransformation
 import kotlin.reflect.KClass
 import kotlin.reflect.full.superclasses
 
@@ -99,7 +99,7 @@ class PrinterOutput(
         if (overrider != null) {
             return overrider
         }
-        val properPrinter = if (ast.origin is MissingASTTransformation && placeholderNodePrinter != null) {
+        val properPrinter = if (ast.origin is PlaceholderASTTransformation && placeholderNodePrinter != null) {
             placeholderNodePrinter
         } else {
             nodePrinters[kclass]
