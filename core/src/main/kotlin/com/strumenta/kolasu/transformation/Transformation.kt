@@ -455,6 +455,9 @@ open class ASTTransformer(
         crossinline factory: S.(ASTTransformer) -> T?
     ): NodeFactory<S, T> = registerNodeFactory(S::class) { source, transformer, _ -> source.factory(transformer) }
 
+    /**
+     * We need T to be reified because we may need to install dummy classes of T.
+     */
     inline fun <S : Any, reified T : Node> registerNodeFactory(
         kclass: KClass<S>,
         crossinline factory: (S) -> T?
@@ -607,6 +610,10 @@ open class ASTTransformer(
         return nodeFactory
     }
 
+    /**
+     * Here the method needs to be inlined and the type parameter reified as in the invoked
+     * registerNodeFactory we need to access the nodeClass
+     */
     inline fun <reified T : Node> registerIdentityTransformation(nodeClass: KClass<T>) =
         registerNodeFactory(nodeClass) { node -> node }.skipChildren()
 

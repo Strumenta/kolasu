@@ -3,7 +3,27 @@ package com.strumenta.kolasu.transformation
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.traversing.walkAncestors
 import kotlin.reflect.KClass
+
+/**
+ * This indicates if the Node itself is marked as a placeholder. Note that the Node could not be directly marked
+ * as such and still be the descendants of such type of Node. In other words it could be in a placeholder tree.
+ * This operation is not expensive to perform.
+ */
+val Node.isDirectlyPlaceholderASTTransformation: Boolean
+    get() = this.origin is PlaceholderASTTransformation
+
+/**
+ * This indicates if the Node itself is marked as a placeholder or if any of its ancestors are. Note that the Node
+ * could not be directly marked as such and still be the descendants of such type of Node. In other words it could be
+ * in a placeholder tree.
+ * This operation is expensive to perform.
+ */
+val Node.isDirectlyOrIndirectlyAPlaceholderASTTransformation: Boolean
+    get() = this.isDirectlyPlaceholderASTTransformation || this.walkAncestors().any {
+        it.isDirectlyPlaceholderASTTransformation
+    }
 
 /**
  * This is used to indicate that a Node represents some form of placeholders to be used in transformation.

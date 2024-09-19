@@ -3,8 +3,9 @@ package com.strumenta.kolasu.transformation
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.isContainment
+import com.strumenta.kolasu.model.nodeProperties
 import java.lang.reflect.ParameterizedType
-import kotlin.random.Random
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.createType
@@ -18,8 +19,8 @@ import kotlin.reflect.jvm.javaType
  * Typically, the only goal of the element would be to hold some annotation that indicates that the element
  * is representing an error or a missing transformation or something of that sort.
  */
-fun <T : Node> KClass<T>.dummyInstance(): T {
-    val kClassToInstantiate = this.toInstantiableType()
+fun <T : Node> KClass<T>.dummyInstance(levelOfDummyTree: Int = 0): T {
+    val kClassToInstantiate = this.toInstantiableType(levelOfDummyTree)
     val emptyConstructor = kClassToInstantiate.constructors.find { it.parameters.isEmpty() }
     if (emptyConstructor != null) {
         return emptyConstructor.call()
@@ -32,7 +33,7 @@ fun <T : Node> KClass<T>.dummyInstance(): T {
             param.type.isMarkedNullable -> null
             mt is ParameterizedType && mt.rawType == List::class.java -> mutableListOf<Any>()
             (param.type.classifier as KClass<*>).isSubclassOf(Node::class) ->
-                (param.type.classifier as KClass<out Node>).dummyInstance()
+                (param.type.classifier as KClass<out Node>).dummyInstance(levelOfDummyTree + 1)
             param.type == String::class.createType() -> "DUMMY"
             param.type.classifier == ReferenceByName::class -> ReferenceByName<PossiblyNamed>("UNKNOWN")
             param.type == Int::class.createType() -> 0
@@ -49,7 +50,7 @@ fun <T : Node> KClass<T>.dummyInstance(): T {
     return constructor.callBy(params)
 }
 
-private fun <T : Any> KClass<T>.toInstantiableType(): KClass<out T> {
+private fun <T : Any> KClass<T>.toInstantiableType(levelOfDummyTree: Int = 0): KClass<out T> {
     return when {
         this.isSealed -> {
             val subclasses = this.sealedSubclasses.filter { it.isDirectlyOrIndirectlyInstantiable() }
@@ -59,16 +60,21 @@ private fun <T : Any> KClass<T>.toInstantiableType(): KClass<out T> {
             val subClassWithEmptyParam = subclasses.find { it.constructors.any { it.parameters.isEmpty() } }
             if (subClassWithEmptyParam == null) {
                 if (subclasses.size == 1) {
-                    subclasses.first().toInstantiableType()
+                    subclasses.first().toInstantiableType(levelOfDummyTree + 1)
                 } else {
                     // Some constructs are recursive (think of the ArrayType)
-                    // We either find complex logic to find the ones that aren't or just pick one randomly.
-                    // Eventually we will build a tree
-                    val r = Random.Default
-                    subclasses[r.nextInt(subclasses.size)].toInstantiableType()
+                    // So we want to avoid just using the same subclass, repeatedly as it would lead to an
+                    // infinite loop. Therefore we sort subclasses by the order of containments, preferring the ones
+                    // with no or few containments and we take them consider the level of depth in the dummy tree
+                    val subclassesByNumberOfContainments = subclasses.map {
+                        it to it.nodeProperties.count {
+                            it.isContainment()
+                        }
+                    }.toList().sortedBy { it.second }.map { it.first }
+                    subclasses[levelOfDummyTree].toInstantiableType(levelOfDummyTree + 1)
                 }
             } else {
-                subClassWithEmptyParam.toInstantiableType()
+                subClassWithEmptyParam.toInstantiableType(levelOfDummyTree + 1)
             }
         }
         this.isAbstract -> {
