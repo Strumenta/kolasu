@@ -50,7 +50,7 @@ open class DeclarativeScopeProvider(
 ) : ScopeProvider {
     private val rules: MutableList<DeclarativeScopeProviderRule<out Node>> = rules.sorted().toMutableList()
 
-    fun addRule(rule:  DeclarativeScopeProviderRule<out Node>) {
+    fun addRule(rule: DeclarativeScopeProviderRule<out Node>) {
         rules.add(rule)
         rules.sort()
     }
