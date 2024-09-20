@@ -48,7 +48,12 @@ inline fun <
 open class DeclarativeScopeProvider(
     vararg rules: DeclarativeScopeProviderRule<out NodeLike>,
 ) : ScopeProvider {
-    private val rules: List<DeclarativeScopeProviderRule<out NodeLike>> = rules.sorted()
+    private val rules: MutableList<DeclarativeScopeProviderRule<out NodeLike>> = rules.sorted().toMutableList()
+
+    fun addRule(rule: DeclarativeScopeProviderRule<out NodeLike>) {
+        rules.add(rule)
+        rules.sort()
+    }
 
     override fun <NodeType : NodeLike> scopeFor(
         node: NodeType,
