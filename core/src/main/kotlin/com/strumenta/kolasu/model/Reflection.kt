@@ -4,6 +4,7 @@ import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Feature
 import com.strumenta.kolasu.language.Reference
+import com.strumenta.kolasu.testing.IgnoreChildren
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KProperty1
@@ -71,7 +72,10 @@ data class PropertyDescription(
         }
         return if (provideNodes) {
             if (multiplicity == Multiplicity.MANY) {
-                "[${(value as Collection<Node>).joinToString(",") { it.nodeType }}]"
+                when (value) {
+                    is IgnoreChildren<*> -> "<Ignore Children Placeholder>"
+                    else -> "[${(value as Collection<Node>).joinToString(",") { it.nodeType }}]"
+                }
             } else {
                 "${(value as Node).nodeType}(...)"
             }
