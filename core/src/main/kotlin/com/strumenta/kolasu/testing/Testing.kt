@@ -264,7 +264,9 @@ fun Node.assertReferencesResolved(forProperty: KReferenceByName<out Node>) {
     this.kReferenceByNameProperties()
         .filter { it == forProperty }
         .mapNotNull { it.get(this) }
-        .forEach { assertTrue { (it as ReferenceByName<*>).resolved } }
+        .forEach {
+            val ref = it as ReferenceByName<*>
+            assertTrue("Reference $ref in node $this (link ${forProperty.name}) was expected to be solved") { ref.resolved } }
     this.walkChildren().forEach { it.assertReferencesResolved(forProperty = forProperty) }
 }
 
