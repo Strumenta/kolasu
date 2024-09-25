@@ -28,6 +28,7 @@ abstract class AbstractSourceIdProvider : SourceIdProvider {
     protected fun cleanId(id: String) = id
         .replace('.', '-')
         .replace('/', '-')
+        .replace('\\', '-')
         .replace('#', '-')
         .replace(' ', '_')
         .replace("@", "_at_").removeCharactersInvalidInLionWebIDs()
