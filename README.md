@@ -17,6 +17,11 @@ It stands for _**Ko**tlin_ _**La**nguage_ _**Su**pport_.
 Kolasu is part of the [StarLasu](https://github.com/Strumenta/StarLasu) set of libraries. The other libraries provide
 similar support in other languages such as Typescript and Python.
 
+## Prerequisites
+
+- JDK 8, 11, and 17 available on your system
+- Docker environment
+
 ## JDK supported
 
 We support JDK 8, 11, and 17. All JDKs in between should work too, but these are explicitly tested.
@@ -66,6 +71,20 @@ Releases are published on Maven Central:
 dependencies {
     compile "com.strumenta.kolasu:kolasu-core:1.5.0-RC5"
 }
+```
+
+## Building and Testing 
+
+To build the project, run: 
+
+```
+./gradlew build
+```
+
+To run all tests, use:
+
+```
+./gradlew allTest
 ```
 
 ## How to format code
