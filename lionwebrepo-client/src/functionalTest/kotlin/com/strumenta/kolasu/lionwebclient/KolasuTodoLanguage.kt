@@ -57,13 +57,11 @@ class TodoSymbolProvider(nodeIdProvider: NodeIdProvider) : DeclarativeSymbolProv
 class TodoScopeProvider(val sri: SymbolRepository) : DeclarativeScopeProvider(
     scopeFor(Todo::prerequisite) {
         // We first consider local todos, as they may shadow todos from other projects
-        (it.node.parent as TodoProject).todos.forEach {
-            define(it)
-        }
+        (it.node.parent as TodoProject).todos.forEach(this::define)
         // We then consider all symbols from the sri. Note that nodes of the current project
         // appear both as nodes and as symbols
-        sri.find(Todo::class).forEach {
-            define(it.name!!, it)
+        sri.find(Todo::class).forEach { todo ->
+            define(todo.name, todo)
         }
     },
 )

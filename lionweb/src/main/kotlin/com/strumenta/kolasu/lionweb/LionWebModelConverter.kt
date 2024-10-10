@@ -97,11 +97,6 @@ class LionWebModelConverter(
                 classifier.allFeatures().associateBy { it.name!! }
             }[featureName]
         }
-
-        init {
-            MetamodelRegistry.registerMapping(IssueNode::class, StarLasuLWLanguage.Issue)
-            MetamodelRegistry.registerMapping(ParsingResultNode::class, StarLasuLWLanguage.ParsingResult)
-        }
     }
 
     private val languageConverter = initialLanguageConverter
