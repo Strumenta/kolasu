@@ -204,10 +204,10 @@ inline fun <reified T : RuleContext> RuleContext.ancestor(): T = this.ancestor(T
  * Find the ancestor of the given element with the given class.
  */
 fun <T : RuleContext> RuleContext.ancestor(kclass: KClass<T>): T =
-    if (this.parent == null) {
+    if (this.getParent() == null) {
         throw IllegalStateException("Cannot find ancestor of type $kclass")
-    } else if (kclass.isInstance(this.parent)) {
-        this.parent as T
+    } else if (kclass.isInstance(this.getParent())) {
+        this.getParent() as T
     } else {
-        this.parent!!.ancestor(kclass)
+        this.getParent()!!.ancestor(kclass)
     }
