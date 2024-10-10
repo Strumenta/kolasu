@@ -283,6 +283,22 @@ expect class LRUCache<K, V>(
         key: K,
         value: V,
     )
+
+    override fun containsKey(key: K): Boolean
+
+    override fun containsValue(value: V): Boolean
+
+    override fun get(key: K): V?
+
+    override fun isEmpty(): Boolean
+
+    override val entries: Set<Map.Entry<K, V>>
+
+    override val keys: Set<K>
+
+    override val size: Int
+
+    override val values: Collection<V>
 }
 
 private fun <K, V> createLeastRecentlyUsedMap(maxEntries: Int = 100): Map<K, V> {

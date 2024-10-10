@@ -8,25 +8,25 @@ actual class LRUCache<K, V> actual constructor(
             override fun removeEldestEntry(eldest: Map.Entry<K, V>): Boolean = size > maxEntries
         }
 
-    override val entries: Set<Map.Entry<K, V>>
+    actual override val entries: Set<Map.Entry<K, V>>
         get() = map.entries
 
-    override val keys: Set<K>
+    actual override val keys: Set<K>
         get() = map.keys
 
-    override val size: Int
+    actual override val size: Int
         get() = map.size
 
-    override val values: Collection<V>
+    actual override val values: Collection<V>
         get() = map.values
 
-    override fun containsKey(key: K): Boolean = map.containsKey(key)
+    actual override fun containsKey(key: K): Boolean = map.containsKey(key)
 
-    override fun containsValue(value: V): Boolean = map.containsValue(value)
+    actual override fun containsValue(value: V): Boolean = map.containsValue(value)
 
-    override fun get(key: K): V? = map[key]
+    actual override fun get(key: K): V? = map[key]
 
-    override fun isEmpty(): Boolean = map.isEmpty()
+    actual override fun isEmpty(): Boolean = map.isEmpty()
 
     actual fun put(
         key: K,
