@@ -35,52 +35,52 @@ fun PublishingExtension.addPublication(
     pubName: String,
     pubDescription: String,
     project: Project,
+    kotlinMultiplatform: Boolean = false,
     addPrefix: Boolean = true
 ) {
     publications {
-        create<MavenPublication>(pubName) {
-            from(project.components["java"])
-            artifactId = if (addPrefix) "kolasu-" + project.name else project.name
-            artifact(project.tasks.named("sourcesJar"))
-            artifact(project.tasks.named("kdocJar"))
-            suppressPomMetadataWarningsFor("cliApiElements")
-            suppressPomMetadataWarningsFor("cliRuntimeElements")
-            pom {
-                name.set(if (addPrefix) "kolasu-" + project.name else project.name)
-                description.set(pubDescription)
-                version = project.version as String
-                packaging = "jar"
-                url.set("https://github.com/Strumenta/kolasu")
+        if (kotlinMultiplatform) {
+            TODO()
+        } else {
+            create<MavenPublication>(pubName) {
+                from(project.components["java"])
+                artifactId = if (addPrefix) "kolasu-" + project.name else project.name
+                artifact(project.tasks.named("sourcesJar"))
+                artifact(project.tasks.named("kdocJar"))
+                suppressPomMetadataWarningsFor("cliApiElements")
+                suppressPomMetadataWarningsFor("cliRuntimeElements")
+                pom {
+                    name.set(if (addPrefix) "kolasu-" + project.name else project.name)
+                    description.set(pubDescription)
+                    version = project.version as String
+                    packaging = "jar"
+                    url.set("https://github.com/Strumenta/kolasu")
 
-                scm {
-                    connection.set("scm:git:https://github.com/Strumenta/kolasu.git")
-                    developerConnection.set("scm:git:git@github.com:Strumenta/kolasu.git")
-                    url.set("https://github.com/Strumenta/kolasu.git")
-                }
+                    scm {
+                        connection.set("scm:git:https://github.com/Strumenta/kolasu.git")
+                        developerConnection.set("scm:git:git@github.com:Strumenta/kolasu.git")
+                        url.set("https://github.com/Strumenta/kolasu.git")
+                    }
 
-                licenses {
-                    license {
-                        name.set("Apache License V2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
-                        distribution.set("repo")
+                    licenses {
+                        license {
+                            name.set("Apache License V2.0")
+                            url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                            distribution.set("repo")
+                        }
                     }
-                }
 
-                developers {
-                    developer {
-                        id.set("ftomassetti")
-                        name.set("Federico Tomassetti")
-                        email.set("federico@strumenta.com")
-                    }
-                    developer {
-                        id.set("alessiostalla")
-                        name.set("Alessio Stalla")
-                        email.set("alessio.stalla@strumenta.com")
-                    }
-                    developer {
-                        id.set("lorenzoaddazi")
-                        name.set("Lorenzo Addazi")
-                        email.set("lorenzo.addazi@strumenta.com")
+                    developers {
+                        developer {
+                            id.set("ftomassetti")
+                            name.set("Federico Tomassetti")
+                            email.set("federico@strumenta.com")
+                        }
+                        developer {
+                            id.set("alessiostalla")
+                            name.set("Alessio Stalla")
+                            email.set("alessio.stalla@strumenta.com")
+                        }
                     }
                 }
             }
