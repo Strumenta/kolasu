@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.kcp
 
 import com.strumenta.kolasu.language.Concept
+import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeLike
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
@@ -58,11 +59,12 @@ fun IrBuilderWithScope.companionGetter(irClass: IrClass): IrExpression {
 }
 
 fun IrBuilderWithScope.conceptGetter(nodeSubclass: IrClass): IrExpression {
+    val extendNode = nodeSubclass.superTypes.any { it.classFqName!!.asString() == Node::class.qualifiedName!! }
     val companionClass =
         nodeSubclass
             .companionObject()
             ?: throw IllegalStateException(
-                "Cannot find companion object for ${nodeSubclass.kotlinFqName}",
+                "Cannot find companion object for ${nodeSubclass.kotlinFqName}. ${if (extendNode) "It extends Node and not MPNode" else ""}",
             )
     val conceptField = companionClass.properties.find { it.name.identifier == "concept" }!!
     val conceptInstance: IrExpression =

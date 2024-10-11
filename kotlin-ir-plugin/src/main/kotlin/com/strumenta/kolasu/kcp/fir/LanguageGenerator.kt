@@ -129,7 +129,7 @@ class LanguageGenerator(
         classSymbol: FirClassSymbol<*>,
         context: NestedClassGenerationContext,
     ): Set<Name> {
-        if (classSymbol.extendMPNode(session)) {
+        if (classSymbol.isKolasuGenEnabled(session)) {
             knownMPNodeSubclasses.add(classSymbol.name)
             println("FOR CLASS ${classSymbol.name} GOT COMPANION")
             return setOf(DEFAULT_NAME_FOR_COMPANION_OBJECT)
