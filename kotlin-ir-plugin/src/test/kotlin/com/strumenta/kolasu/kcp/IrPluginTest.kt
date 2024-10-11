@@ -646,4 +646,32 @@ fun main() {
 
         result.invokeMainMethod("mytest.MainKt")
     }
+
+    @Test
+    fun `KolasuGen Annotation`() {
+        val result =
+            compile(
+                sourceFile =
+                SourceFile.kotlin(
+                    "main.kt",
+                    """
+          import com.strumenta.kolasu.model.MPNode
+          import com.strumenta.kolasu.model.KolasuGen
+          import com.strumenta.kolasu.language.StarLasuLanguage
+
+    object LanguageMyTest : StarLasuLanguage("mytest")
+
+    @KolasuGen
+    data class MyNode(var p1: Int) : Node()
+
+fun main() {
+  val n = MyNode(1)
+  n.p1 = 2
+}
+
+""",
+                ),
+            )
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
 }

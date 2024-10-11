@@ -72,7 +72,7 @@ fun IrProperty.declareSingleOrOptionalContainment(): Boolean {
 
 @ObsoleteDescriptorBasedAPI
 fun IrProperty.declareSingleOrOptionalAttribute(): Boolean {
-    val propertyType = this.backingField?.type
+    val propertyType = this.backingField?.type ?: this.getter?.returnType
     return propertyType?.isSingleOrOptionalAttribute() ?: false
 }
 
@@ -126,7 +126,7 @@ fun IrType.isReference(): Boolean {
 
 @ObsoleteDescriptorBasedAPI
 fun IrProperty.declareMultipleContainment(): Boolean {
-    val propertyType = this.backingField?.type
+    val propertyType = this.backingField?.type ?: this.getter?.returnType
     return propertyType?.isAssignableTo(List::class) ?: false
 }
 

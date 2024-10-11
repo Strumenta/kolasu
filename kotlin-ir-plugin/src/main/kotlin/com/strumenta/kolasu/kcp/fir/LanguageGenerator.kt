@@ -1,8 +1,10 @@
 package com.strumenta.kolasu.kcp.fir
 
 import com.strumenta.kolasu.kcp.classId
+import com.strumenta.kolasu.kcp.companionConceptPropertyName
 import com.strumenta.kolasu.kcp.fir.MPNodesCollector.knownMPNodeSubclasses
 import com.strumenta.kolasu.language.Concept
+import com.strumenta.kolasu.model.KolasuGen
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.FirClassLikeDeclaration
@@ -10,9 +12,13 @@ import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
 import org.jetbrains.kotlin.fir.declarations.origin
 import org.jetbrains.kotlin.fir.declarations.utils.classId
 import org.jetbrains.kotlin.fir.declarations.utils.nameOrSpecialName
+import org.jetbrains.kotlin.fir.extensions.AnnotationFqn
 import org.jetbrains.kotlin.fir.extensions.ExperimentalTopLevelDeclarationsGenerationApi
+import org.jetbrains.kotlin.fir.extensions.FirDeclarationPredicateRegistrar
 import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
 import org.jetbrains.kotlin.fir.extensions.NestedClassGenerationContext
+import org.jetbrains.kotlin.fir.extensions.predicate.LookupPredicate
+import org.jetbrains.kotlin.fir.extensions.predicateBasedProvider
 import org.jetbrains.kotlin.fir.plugin.createCompanionObject
 import org.jetbrains.kotlin.fir.plugin.createDefaultPrivateConstructor
 import org.jetbrains.kotlin.fir.plugin.createMemberProperty
@@ -37,6 +43,19 @@ import org.jetbrains.kotlin.utils.addToStdlib.runIf
 class LanguageGenerator(
     session: FirSession,
 ) : BaseFirExtension(session) {
+
+    lateinit var kolasuGenSymbolsPredicate : LookupPredicate.AnnotatedWith
+
+
+    override fun FirDeclarationPredicateRegistrar.registerPredicates() {
+
+        kolasuGenSymbolsPredicate = LookupPredicate.AnnotatedWith(setOf(
+            FqName(KolasuGen::class.qualifiedName!!)
+        ))
+        this.register(kolasuGenSymbolsPredicate)
+
+    }
+
     @ExperimentalTopLevelDeclarationsGenerationApi
     override fun generateTopLevelClassLikeDeclaration(classId: ClassId): FirClassLikeSymbol<*>? {
         TODO()
@@ -71,13 +90,13 @@ class LanguageGenerator(
         callableId: CallableId,
         context: MemberGenerationContext?,
     ): List<FirPropertySymbol> {
-        return if (callableId.callableName.identifier == "concept") {
+        return if (callableId.callableName.identifier == companionConceptPropertyName) {
             val ps = FirPropertySymbol(callableId)
 
             val conceptClassId: ClassId = Concept::class.classId
             val conceptType: ConeKotlinType = conceptClassId.toConeType()
             val thisClass: FirClassSymbol<*> = callableId.classId!!.toSymbol(session) as FirClassSymbol<*>
-            val property = createMemberProperty(thisClass, Key, Name.identifier("concept"), conceptType)
+            val property = createMemberProperty(thisClass, Key, Name.identifier(companionConceptPropertyName), conceptType)
 
             ps.bind(property)
 
@@ -122,14 +141,15 @@ class LanguageGenerator(
         if (!classSymbol.isCompanion) return emptySet()
 
         val origin = classSymbol.origin as? FirDeclarationOrigin.Plugin
-        return runIf(origin?.key == Key) { setOf(SpecialNames.INIT, Name.identifier("concept")) }.orEmpty()
+        return runIf(origin?.key == Key) { setOf(SpecialNames.INIT, Name.identifier(companionConceptPropertyName)) }.orEmpty()
     }
 
     override fun getNestedClassifiersNames(
         classSymbol: FirClassSymbol<*>,
         context: NestedClassGenerationContext,
     ): Set<Name> {
-        if (classSymbol.isKolasuGenEnabled(session)) {
+        val kolasuGenSymbols = session.predicateBasedProvider.getSymbolsByPredicate(kolasuGenSymbolsPredicate)
+        if (kolasuGenSymbols.contains(classSymbol) || classSymbol.isKolasuGenEnabled(session)) {
             knownMPNodeSubclasses.add(classSymbol.name)
             println("FOR CLASS ${classSymbol.name} GOT COMPANION")
             return setOf(DEFAULT_NAME_FOR_COMPANION_OBJECT)
