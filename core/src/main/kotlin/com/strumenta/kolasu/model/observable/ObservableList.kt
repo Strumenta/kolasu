@@ -18,6 +18,10 @@ class ObservableList<E>(
 ) : MutableList<E> by base {
     val changes = PublishSubject<ListNotification<E>>()
 
+    constructor(vararg elements: E) : this() {
+        elements.forEach { add(it) }
+    }
+
     override fun addAll(elements: Collection<E>): Boolean {
         var modified = false
         elements.forEach { element ->

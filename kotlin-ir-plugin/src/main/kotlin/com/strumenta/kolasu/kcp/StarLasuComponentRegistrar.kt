@@ -5,11 +5,14 @@ package com.strumenta.kolasu.kcp
 import com.google.auto.service.AutoService
 import com.strumenta.kolasu.kcp.fir.StarLasuFirExtensionsRegistrar
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
+import org.jetbrains.kotlin.backend.jvm.extensions.ClassGeneratorExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.codegen.ClassBuilder
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.fir.extensions.FirExtension
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 
 @AutoService(CompilerPluginRegistrar::class)

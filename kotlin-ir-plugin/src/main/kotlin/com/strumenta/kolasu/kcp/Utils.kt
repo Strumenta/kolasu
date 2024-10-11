@@ -25,6 +25,9 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import kotlin.reflect.KClass
 
+val companionConceptPropertyName = "concept"
+
+
 fun IrPluginContext.referenceConstructors(klass: KClass<*>): Collection<IrConstructorSymbol> {
     val classId = ClassId.topLevel(FqName(klass.qualifiedName!!))
     return this.referenceConstructors(classId)
@@ -66,7 +69,7 @@ fun IrBuilderWithScope.conceptGetter(nodeSubclass: IrClass): IrExpression {
             ?: throw IllegalStateException(
                 "Cannot find companion object for ${nodeSubclass.kotlinFqName}. ${if (extendNode) "It extends Node and not MPNode" else ""}",
             )
-    val conceptField = companionClass.properties.find { it.name.identifier == "concept" }!!
+    val conceptField = companionClass.conceptProperty
     val conceptInstance: IrExpression =
         irCall(conceptField.getter!!).apply {
             dispatchReceiver = companionGetter(nodeSubclass)
@@ -80,7 +83,7 @@ fun IrBuilderWithScope.conceptGetter(
 ): IrExpression {
     val nodeLike = pluginContext.referenceClass(NodeLike::class.classId)!!
 
-    val conceptField = nodeLike.owner.properties.find { it.name.identifier == "concept" }!!
+    val conceptField = nodeLike.owner.properties.find { it.name.identifier == companionConceptPropertyName }!!
     val conceptInstance: IrExpression =
         irCall(conceptField.getter!!).apply {
             dispatchReceiver = nodeInstance
@@ -144,3 +147,10 @@ fun IrBuilderWithScope.referenceByName(
 
 val FqName.packageName: String
     get() = this.parent().asString()
+
+val IrClass.conceptProperty
+    get() =
+    this.properties.find {
+        it.name ==
+                Name.identifier(companionConceptPropertyName)
+    } ?: throw IllegalStateException("Cannot find property concept in companion class ${this.kotlinFqName.asString()}")

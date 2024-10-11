@@ -38,6 +38,10 @@ fun <T> ASTTransformer.translateList(original: Collection<out Any>?): MutableLis
     return original?.map { transformIntoNodes(it) as List<T> }?.flatten()?.toMutableList() ?: mutableListOf()
 }
 
+fun <T> ASTTransformer.translateObservableList(original: Collection<out Any>?): ObservableList<T> {
+    return original?.map { transformIntoNodes(it) as List<T> }?.flatten()?.toObservableList() ?: ObservableList()
+}
+
 fun <E> List<E>.toObservableList(): ObservableList<E> {
     val ol = ObservableList<E>()
     ol.addAll(this)

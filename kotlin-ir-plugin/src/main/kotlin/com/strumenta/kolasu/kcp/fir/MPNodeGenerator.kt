@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.kcp.fir
 
+import com.strumenta.kolasu.kcp.classId
 import com.strumenta.kolasu.kcp.fir.MPNodesCollector.knownMPNodeSubclasses
 import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.model.KolasuGen
@@ -7,6 +8,9 @@ import com.strumenta.kolasu.model.MPNode
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.analysis.checkers.toClassLikeSymbol
+import org.jetbrains.kotlin.fir.analysis.checkers.toRegularClassSymbol
+import org.jetbrains.kotlin.fir.declarations.getAnnotationByClassId
+import org.jetbrains.kotlin.fir.declarations.hasAnnotation
 import org.jetbrains.kotlin.fir.declarations.utils.classId
 import org.jetbrains.kotlin.fir.declarations.utils.isAbstract
 import org.jetbrains.kotlin.fir.declarations.utils.isSealed
@@ -141,19 +145,25 @@ fun FirClassSymbol<*>.isMPNode(firSession: FirSession): Boolean =
 
 @OptIn(SymbolInternals::class)
 fun FirClassSymbol<*>.isKolasuGenEnabled(firSession: FirSession): Boolean {
-    return this.extendMPNode(firSession) || this.annotations.any {
-        val classId = it.annotationTypeRef.firClassLike(firSession)?.classId
-        if (classId == null) {
-            val coneType = it.annotationTypeRef.coneTypeOrNull
-            if (coneType == null) {
-                throw IllegalStateException("Unable to process annotation ${it}")
-            } else {
-                coneType.classId?.asSingleFqName()?.asString() == KolasuGen::class.qualifiedName
-            }
-        } else {
-            classId.asSingleFqName().asString() == KolasuGen::class.qualifiedName
-        }
-    }
+    return this.extendMPNode(firSession) || this.getAnnotationByClassId(KolasuGen::class.classId, firSession)!=null
+//    return this.extendMPNode(firSession) || this.annotations.any {
+//        val classId = it.annotationTypeRef.firClassLike(firSession)?.classId
+//        if (classId == null) {
+//            val coneType = it.annotationTypeRef.coneTypeOrNull
+//            if (coneType == null) {
+//                val classSymbol = it.annotationTypeRef.toClassLikeSymbol(firSession)
+//                if (classSymbol == null) {
+//                    it.annotationTypeRef
+//                } else {
+//                    classSymbol.classId.asSingleFqName().asString() == KolasuGen::class.qualifiedName
+//                }
+//            } else {
+//                coneType.classId?.asSingleFqName()?.asString() == KolasuGen::class.qualifiedName
+//            }
+//        } else {
+//            classId.asSingleFqName().asString() == KolasuGen::class.qualifiedName
+//        }
+//    }
 }
 
 @OptIn(SymbolInternals::class)

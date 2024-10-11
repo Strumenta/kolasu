@@ -53,6 +53,7 @@ import org.jetbrains.kotlin.ir.types.isMarkedNullable
 import org.jetbrains.kotlin.ir.types.toKotlinType
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
+import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.util.packageFqName
@@ -164,7 +165,10 @@ class LanguageIrGenerationExtension(
                                     languageInitializer, addMethod, conceptLikeInstance,
                                 )
                             } else {
-                                TODO()
+                                val propertyType = property.backingField?.type ?: property.getter?.returnType
+                                val assignableToList = propertyType?.isAssignableTo(List::class)
+                                val assignableToNodeLike = propertyType?.isAssignableTo(NodeLike::class)
+                                TODO("Unable to process property ${property.fqNameWhenAvailable?.asString() ?: property.name} propertyType=${propertyType?.classFqName} assignableToList=$assignableToList assignableToNodeLike=$assignableToNodeLike")
                             }
                         }
                     }
@@ -486,7 +490,10 @@ class LanguageIrGenerationExtension(
         languageClass: IrClass,
         astClass: IrClass,
     ) {
-        astClass.declarations.filterIsInstance<IrClass>().filter { it.isCompanion }.forEach { companionIrClass ->
+        val companions = astClass.declarations.filterIsInstance<IrClass>().filter { it.isCompanion }
+        val companionIrClass = companions.find { it.properties.any { it.name.identifier == companionConceptPropertyName } }
+            ?: throw IllegalStateException("Cannot find right companion in ${astClass.kotlinFqName.asString()}. " +
+                    "Companions found: ${companions.size}")
             val anonymousInitializerSymbolImpl =
                 IrFactoryImpl.createAnonymousInitializer(
                     astClass.startOffset,
@@ -502,11 +509,7 @@ class LanguageIrGenerationExtension(
                         astClass.endOffset,
                     ),
                 ) {
-                    val conceptProperty =
-                        companionIrClass.properties.find {
-                            it.name ==
-                                Name.identifier("concept")
-                        }!!
+                    val conceptProperty = companionIrClass.conceptProperty
                     val starLasulanguage = pluginContext.referenceClass(StarLasuLanguage::class.classId)!!
                     val getConcept = starLasulanguage.functionByName(StarLasuLanguage::getConcept.name)
                     val conceptValue: IrExpression =
@@ -521,7 +524,7 @@ class LanguageIrGenerationExtension(
                 }
             anonymousInitializerSymbolImpl.parent = astClass
             companionIrClass.declarations.add(anonymousInitializerSymbolImpl)
-        }
+
     }
 
     override fun generate(

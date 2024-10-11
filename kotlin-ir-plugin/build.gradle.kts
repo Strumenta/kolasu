@@ -37,5 +37,5 @@ tasks {
 
 publishing {
     addSonatypeRepo(project)
-    addPublication("kolasu_ir_plugin", "Kotlin Compiler Plugin for Kolasu", project, false)
+    addPublication("kolasu_ir_plugin", "Kotlin Compiler Plugin for Kolasu", project, addPrefix = false)
 }
