@@ -4,7 +4,9 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.google.gson.JsonPrimitive
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 fun assertJSONsAreEqual(
     expected: String,
@@ -19,25 +21,30 @@ fun assertJSONsAreEqual(
     actual: JsonElement,
     context: String = "<ROOT>",
 ) {
-    if (expected is JsonObject && actual is JsonObject) {
-        val ejo = expected.asJsonObject
-        val ajo = actual.asJsonObject
-        assertEquals(ejo.keySet(), ajo.keySet())
-        ejo.keySet().forEach { key ->
-            assertJSONsAreEqual(ejo[key], ajo[key], "$context.$key")
+    when{
+        expected is JsonObject && actual is JsonObject -> {
+            assertEquals(expected.keySet(), actual.keySet(),
+                "Json Object keys do not match at $context")
+            expected.keySet().forEach { key ->
+                assertJSONsAreEqual(expected[key], actual[key], "$context.$key")
+            }
         }
-    } else if (expected is JsonArray && actual is JsonArray) {
-        val eja = expected.asJsonArray
-        val aja = actual.asJsonArray
-        assertEquals(
-            eja.size(),
-            aja.size(),
-            message = "size of $context (expected: ${eja.size()}, actual: ${aja.size()}",
-        )
-        (0 until eja.size()).forEach { i ->
-            assertJSONsAreEqual(eja[i], aja[i], "$context[$i]")
+        expected is JsonArray && actual is JsonArray -> {
+            assertEquals(
+                expected.size(),
+                actual.size(),
+                "Json Array size mismatch at $context. Expected: ${expected.size()}, Actual: ${actual.size()}"
+            )
+            (0 until expected.size()).forEach { i ->
+                assertJSONsAreEqual(expected[i], actual[i], "$context[$i]")
+            }
         }
-    } else {
-        return assertEquals(expected, actual, "Difference in $context")
+        expected is JsonPrimitive && actual is JsonPrimitive -> {
+            assertEquals(expected, actual,
+                "Json Primitive value mismatch at $context")
+        }
+        else -> {
+            fail("Json Type mismatch at $context. Expected: ${expected::class.simpleName}, actual: ${actual::class.simpleName}")
+        }
     }
 }

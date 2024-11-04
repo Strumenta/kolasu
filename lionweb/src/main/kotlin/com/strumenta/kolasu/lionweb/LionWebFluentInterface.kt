@@ -24,39 +24,21 @@ fun lwLanguage(name: String): Language {
 }
 
 fun Language.addConcept(name: String): Concept {
-    val concept =
-        Concept(
-            this,
-            name,
-            this.idForContainedElement(name),
-            this.keyForContainedElement(name),
-        )
-    this.addElement(concept)
-    return concept
+    return Concept(this,  name, idForContainedElement(name), keyForContainedElement(name))
+        .also(::addElement)
 }
 
 fun Language.addInterface(name: String): Interface {
-    val intf =
-        Interface(
-            this,
-            name,
-            this.idForContainedElement(name),
-            this.keyForContainedElement(name),
-        )
-    this.addElement(intf)
-    return intf
+    return Interface(this, name, idForContainedElement(name), keyForContainedElement(name))
+        .also(::addElement)
 }
 
 fun Language.addPrimitiveType(name: String): PrimitiveType {
-    val primitiveType =
-        PrimitiveType(
-            this,
-            name,
-            this.idForContainedElement(name),
-        )
-    primitiveType.key = this.keyForContainedElement(name)
-    this.addElement(primitiveType)
-    return primitiveType
+    return PrimitiveType(this, name, idForContainedElement(name))
+        .apply {
+            key = keyForContainedElement(name)
+        }
+        .also(::addElement)
 }
 
 fun Concept.addContainment(
@@ -64,29 +46,27 @@ fun Concept.addContainment(
     containedConcept: Concept,
     multiplicity: Multiplicity = Multiplicity.SINGULAR,
 ): Containment {
-    val containment =
-        Containment().apply {
-            this.name = name
-            this.id = "${this@addContainment.id!!.removeSuffix("-id")}-$name-id"
-            this.key = "${this@addContainment.key!!.removeSuffix("-key")}-$name-key"
-            this.type = containedConcept
-            this.setOptional(
-                when (multiplicity) {
-                    Multiplicity.SINGULAR -> false
-                    Multiplicity.MANY -> true
-                    Multiplicity.OPTIONAL -> true
-                },
-            )
-            this.setMultiple(
-                when (multiplicity) {
-                    Multiplicity.SINGULAR -> false
-                    Multiplicity.MANY -> true
-                    Multiplicity.OPTIONAL -> false
-                },
-            )
-        }
-    this.addFeature(containment)
-    return containment
+    return Containment().apply {
+        this.name = name
+        this.id = "${this@addContainment.id!!.removeSuffix("-id")}-$name-id"
+        this.key = "${this@addContainment.key!!.removeSuffix("-key")}-$name-key"
+        this.type = containedConcept
+        // consider simplification: this.isOptional = multiplicity != Multiplicity.SINGULAR
+        this.setOptional(
+            when (multiplicity) {
+                Multiplicity.SINGULAR -> false
+                Multiplicity.MANY -> true
+                Multiplicity.OPTIONAL -> true
+            },
+        )
+        this.setMultiple(
+            when (multiplicity) {
+                Multiplicity.SINGULAR -> false
+                Multiplicity.MANY -> true
+                Multiplicity.OPTIONAL -> false
+            },
+        )
+    }.also(::addFeature)
 }
 
 fun Concept.addProperty(
@@ -94,23 +74,20 @@ fun Concept.addProperty(
     type: DataType<*>,
     multiplicity: Multiplicity = Multiplicity.SINGULAR,
 ): Property {
-    require(multiplicity != Multiplicity.MANY)
-    val property =
-        Property().apply {
-            this.name = name
-            this.id = "${this@addProperty.id!!.removeSuffix("-id")}-$name-id"
-            this.key = "${this@addProperty.key!!.removeSuffix("-key")}-$name-key"
-            this.type = type
-            this.setOptional(
-                when (multiplicity) {
-                    Multiplicity.SINGULAR -> false
-                    Multiplicity.MANY -> true
-                    Multiplicity.OPTIONAL -> true
-                },
-            )
-        }
-    this.addFeature(property)
-    return property
+    require(multiplicity != Multiplicity.MANY) { "Properties cannot have MANY multiplicity" }
+    return Property().apply {
+        this.name = name
+        this.id = "${this@addProperty.id!!.removeSuffix("-id")}-$name-id"
+        this.key = "${this@addProperty.key!!.removeSuffix("-key")}-$name-key"
+        this.type = type
+        this.setOptional(
+            when (multiplicity) {
+                Multiplicity.SINGULAR -> false
+                Multiplicity.MANY -> true
+                Multiplicity.OPTIONAL -> true
+            },
+        )
+    }.also(::addFeature)
 }
 
 val Multiplicity.optional
@@ -124,17 +101,14 @@ fun Concept.addReference(
     type: Classifier<*>,
     multiplicity: Multiplicity = Multiplicity.SINGULAR,
 ): Reference {
-    val reference =
-        Reference().apply {
-            this.name = name
-            this.id = "${this@addReference.id!!.removeSuffix("-id")}-$name-id"
-            this.key = "${this@addReference.key!!.removeSuffix("-key")}-$name-key"
-            this.type = type
-            this.setOptional(multiplicity.optional)
-            this.setMultiple(multiplicity.multiple)
-        }
-    this.addFeature(reference)
-    return reference
+    return Reference().apply {
+        this.name = name
+        this.id = "${this@addReference.id!!.removeSuffix("-id")}-$name-id"
+        this.key = "${this@addReference.key!!.removeSuffix("-key")}-$name-key"
+        this.type = type
+        this.setOptional(multiplicity.optional)
+        this.setMultiple(multiplicity.multiple)
+    }.also(::addFeature)
 }
 
 /**
@@ -142,6 +116,9 @@ fun Concept.addReference(
  */
 fun Concept.dynamicNode(nodeId: String = "node-id-rand-${Random.nextInt()}"): DynamicNode = DynamicNode(nodeId, this)
 
+/**
+ * Cleans a string for use in LIonWeb IDs
+ */
 fun String.lwIDCleanedVersion(): String =
     this
         .replace(".", "_")
