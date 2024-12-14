@@ -12,7 +12,6 @@ import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
 import org.jetbrains.kotlin.fir.declarations.origin
 import org.jetbrains.kotlin.fir.declarations.utils.classId
 import org.jetbrains.kotlin.fir.declarations.utils.nameOrSpecialName
-import org.jetbrains.kotlin.fir.extensions.AnnotationFqn
 import org.jetbrains.kotlin.fir.extensions.ExperimentalTopLevelDeclarationsGenerationApi
 import org.jetbrains.kotlin.fir.extensions.FirDeclarationPredicateRegistrar
 import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
@@ -43,17 +42,16 @@ import org.jetbrains.kotlin.utils.addToStdlib.runIf
 class LanguageGenerator(
     session: FirSession,
 ) : BaseFirExtension(session) {
-
-    lateinit var kolasuGenSymbolsPredicate : LookupPredicate.AnnotatedWith
-
+    lateinit var kolasuGenSymbolsPredicate: LookupPredicate.AnnotatedWith
 
     override fun FirDeclarationPredicateRegistrar.registerPredicates() {
-
-        kolasuGenSymbolsPredicate = LookupPredicate.AnnotatedWith(setOf(
-            FqName(KolasuGen::class.qualifiedName!!)
-        ))
+        kolasuGenSymbolsPredicate =
+            LookupPredicate.AnnotatedWith(
+                setOf(
+                    FqName(KolasuGen::class.qualifiedName!!),
+                ),
+            )
         this.register(kolasuGenSymbolsPredicate)
-
     }
 
     @ExperimentalTopLevelDeclarationsGenerationApi
@@ -96,7 +94,8 @@ class LanguageGenerator(
             val conceptClassId: ClassId = Concept::class.classId
             val conceptType: ConeKotlinType = conceptClassId.toConeType()
             val thisClass: FirClassSymbol<*> = callableId.classId!!.toSymbol(session) as FirClassSymbol<*>
-            val property = createMemberProperty(thisClass, Key, Name.identifier(companionConceptPropertyName), conceptType)
+            val property =
+                createMemberProperty(thisClass, Key, Name.identifier(companionConceptPropertyName), conceptType)
 
             ps.bind(property)
 
@@ -141,7 +140,9 @@ class LanguageGenerator(
         if (!classSymbol.isCompanion) return emptySet()
 
         val origin = classSymbol.origin as? FirDeclarationOrigin.Plugin
-        return runIf(origin?.key == Key) { setOf(SpecialNames.INIT, Name.identifier(companionConceptPropertyName)) }.orEmpty()
+        return runIf(
+            origin?.key == Key,
+        ) { setOf(SpecialNames.INIT, Name.identifier(companionConceptPropertyName)) }.orEmpty()
     }
 
     override fun getNestedClassifiersNames(

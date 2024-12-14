@@ -1,11 +1,9 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import com.vanniktech.maven.publish.KotlinMultiplatform
-import com.vanniktech.maven.publish.JavadocJar
 
 plugins {
     kotlin("multiplatform")
     alias(libs.plugins.ktlint)
-    //id("maven-publish")
+    // id("maven-publish")
     id("signing")
     id("org.jetbrains.dokka")
     id("com.vanniktech.maven.publish") version "0.28.0"

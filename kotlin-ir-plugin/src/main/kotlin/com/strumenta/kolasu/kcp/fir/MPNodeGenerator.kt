@@ -7,10 +7,7 @@ import com.strumenta.kolasu.model.KolasuGen
 import com.strumenta.kolasu.model.MPNode
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.fir.FirSession
-import org.jetbrains.kotlin.fir.analysis.checkers.toClassLikeSymbol
-import org.jetbrains.kotlin.fir.analysis.checkers.toRegularClassSymbol
 import org.jetbrains.kotlin.fir.declarations.getAnnotationByClassId
-import org.jetbrains.kotlin.fir.declarations.hasAnnotation
 import org.jetbrains.kotlin.fir.declarations.utils.classId
 import org.jetbrains.kotlin.fir.declarations.utils.isAbstract
 import org.jetbrains.kotlin.fir.declarations.utils.isSealed
@@ -31,7 +28,6 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import org.jetbrains.kotlin.fir.types.FirErrorTypeRef
 import org.jetbrains.kotlin.fir.types.classId
-import org.jetbrains.kotlin.fir.types.coneTypeOrNull
 import org.jetbrains.kotlin.fir.types.impl.FirImplicitAnyTypeRef
 import org.jetbrains.kotlin.fir.types.impl.FirResolvedTypeRefImpl
 import org.jetbrains.kotlin.fir.types.impl.FirUserTypeRefImpl
@@ -145,7 +141,7 @@ fun FirClassSymbol<*>.isMPNode(firSession: FirSession): Boolean =
 
 @OptIn(SymbolInternals::class)
 fun FirClassSymbol<*>.isKolasuGenEnabled(firSession: FirSession): Boolean {
-    return this.extendMPNode(firSession) || this.getAnnotationByClassId(KolasuGen::class.classId, firSession)!=null
+    return this.extendMPNode(firSession) || this.getAnnotationByClassId(KolasuGen::class.classId, firSession) != null
 //    return this.extendMPNode(firSession) || this.annotations.any {
 //        val classId = it.annotationTypeRef.firClassLike(firSession)?.classId
 //        if (classId == null) {
@@ -167,8 +163,8 @@ fun FirClassSymbol<*>.isKolasuGenEnabled(firSession: FirSession): Boolean {
 }
 
 @OptIn(SymbolInternals::class)
-fun FirClassSymbol<*>.extendMPNode(firSession: FirSession): Boolean {
-    return this.fir.superTypeRefs.any {
+fun FirClassSymbol<*>.extendMPNode(firSession: FirSession): Boolean =
+    this.fir.superTypeRefs.any {
         when (it) {
             is FirResolvedTypeRefImpl -> {
                 (it.type.classId!!.toSymbol(firSession) as FirClassSymbol<*>).isOrExtendMPNode(firSession)
@@ -203,4 +199,3 @@ fun FirClassSymbol<*>.extendMPNode(firSession: FirSession): Boolean {
             }
         }
     }
-}

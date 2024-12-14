@@ -168,7 +168,13 @@ class LanguageIrGenerationExtension(
                                 val propertyType = property.backingField?.type ?: property.getter?.returnType
                                 val assignableToList = propertyType?.isAssignableTo(List::class)
                                 val assignableToNodeLike = propertyType?.isAssignableTo(NodeLike::class)
-                                TODO("Unable to process property ${property.fqNameWhenAvailable?.asString() ?: property.name} propertyType=${propertyType?.classFqName} assignableToList=$assignableToList assignableToNodeLike=$assignableToNodeLike")
+                                TODO(
+                                    "Unable to process property " +
+                                        "${property.fqNameWhenAvailable?.asString() ?: property.name} " +
+                                        "propertyType=${propertyType?.classFqName} " +
+                                        "assignableToList=$assignableToList " +
+                                        "assignableToNodeLike=$assignableToNodeLike",
+                                )
                             }
                         }
                     }
@@ -491,40 +497,42 @@ class LanguageIrGenerationExtension(
         astClass: IrClass,
     ) {
         val companions = astClass.declarations.filterIsInstance<IrClass>().filter { it.isCompanion }
-        val companionIrClass = companions.find { it.properties.any { it.name.identifier == companionConceptPropertyName } }
-            ?: throw IllegalStateException("Cannot find right companion in ${astClass.kotlinFqName.asString()}. " +
-                    "Companions found: ${companions.size}")
-            val anonymousInitializerSymbolImpl =
-                IrFactoryImpl.createAnonymousInitializer(
+        val companionIrClass =
+            companions.find { it.properties.any { it.name.identifier == companionConceptPropertyName } }
+                ?: throw IllegalStateException(
+                    "Cannot find right companion in ${astClass.kotlinFqName.asString()}. " +
+                        "Companions found: ${companions.size}",
+                )
+        val anonymousInitializerSymbolImpl =
+            IrFactoryImpl.createAnonymousInitializer(
+                astClass.startOffset,
+                astClass.endOffset,
+                IrDeclarationOrigin.GeneratedByPlugin(StarLasuGeneratedDeclarationKey),
+                IrAnonymousInitializerSymbolImpl(),
+                false,
+            )
+        anonymousInitializerSymbolImpl.body =
+            DeclarationIrBuilder(pluginContext, anonymousInitializerSymbolImpl.symbol).irBlockBody(
+                IrFactoryImpl.createBlockBody(
                     astClass.startOffset,
                     astClass.endOffset,
-                    IrDeclarationOrigin.GeneratedByPlugin(StarLasuGeneratedDeclarationKey),
-                    IrAnonymousInitializerSymbolImpl(),
-                    false,
-                )
-            anonymousInitializerSymbolImpl.body =
-                DeclarationIrBuilder(pluginContext, anonymousInitializerSymbolImpl.symbol).irBlockBody(
-                    IrFactoryImpl.createBlockBody(
-                        astClass.startOffset,
-                        astClass.endOffset,
-                    ),
-                ) {
-                    val conceptProperty = companionIrClass.conceptProperty
-                    val starLasulanguage = pluginContext.referenceClass(StarLasuLanguage::class.classId)!!
-                    val getConcept = starLasulanguage.functionByName(StarLasuLanguage::getConcept.name)
-                    val conceptValue: IrExpression =
-                        irCall(getConcept).apply {
-                            dispatchReceiver = irGetObject(languageClass.symbol)
-                            putValueArgument(0, irString(astClass.name.asString()))
-                        }
+                ),
+            ) {
+                val conceptProperty = companionIrClass.conceptProperty
+                val starLasulanguage = pluginContext.referenceClass(StarLasuLanguage::class.classId)!!
+                val getConcept = starLasulanguage.functionByName(StarLasuLanguage::getConcept.name)
+                val conceptValue: IrExpression =
+                    irCall(getConcept).apply {
+                        dispatchReceiver = irGetObject(languageClass.symbol)
+                        putValueArgument(0, irString(astClass.name.asString()))
+                    }
 
-                    val thisCompanion = irGet(companionIrClass.thisReceiver!!)
-                    val stmt: IrStatement = irSetField(thisCompanion, conceptProperty.backingField!!, conceptValue)
-                    +stmt
-                }
-            anonymousInitializerSymbolImpl.parent = astClass
-            companionIrClass.declarations.add(anonymousInitializerSymbolImpl)
-
+                val thisCompanion = irGet(companionIrClass.thisReceiver!!)
+                val stmt: IrStatement = irSetField(thisCompanion, conceptProperty.backingField!!, conceptValue)
+                +stmt
+            }
+        anonymousInitializerSymbolImpl.parent = astClass
+        companionIrClass.declarations.add(anonymousInitializerSymbolImpl)
     }
 
     override fun generate(

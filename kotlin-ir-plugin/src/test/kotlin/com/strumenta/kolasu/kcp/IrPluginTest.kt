@@ -652,9 +652,9 @@ fun main() {
         val result =
             compile(
                 sourceFile =
-                SourceFile.kotlin(
-                    "main.kt",
-                    """
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
           import com.strumenta.kolasu.model.MPNode
           import com.strumenta.kolasu.model.KolasuGen
           import com.strumenta.kolasu.language.StarLasuLanguage
@@ -662,7 +662,7 @@ fun main() {
     object LanguageMyTest : StarLasuLanguage("mytest")
 
     @KolasuGen
-    data class MyNode(var p1: Int) : Node()
+    data class MyNode(var p1: Int) : MPNode()
 
 fun main() {
   val n = MyNode(1)
@@ -670,7 +670,7 @@ fun main() {
 }
 
 """,
-                ),
+                    ),
             )
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
     }

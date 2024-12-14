@@ -27,7 +27,6 @@ import kotlin.reflect.KClass
 
 val companionConceptPropertyName = "concept"
 
-
 fun IrPluginContext.referenceConstructors(klass: KClass<*>): Collection<IrConstructorSymbol> {
     val classId = ClassId.topLevel(FqName(klass.qualifiedName!!))
     return this.referenceConstructors(classId)
@@ -67,7 +66,11 @@ fun IrBuilderWithScope.conceptGetter(nodeSubclass: IrClass): IrExpression {
         nodeSubclass
             .companionObject()
             ?: throw IllegalStateException(
-                "Cannot find companion object for ${nodeSubclass.kotlinFqName}. ${if (extendNode) "It extends Node and not MPNode" else ""}",
+                "Cannot find companion object for ${nodeSubclass.kotlinFqName}. ${if (extendNode) {
+                    "It extends Node and not MPNode"
+                } else {
+                    ""
+                }}",
             )
     val conceptField = companionClass.conceptProperty
     val conceptInstance: IrExpression =
@@ -150,7 +153,10 @@ val FqName.packageName: String
 
 val IrClass.conceptProperty
     get() =
-    this.properties.find {
-        it.name ==
+        this.properties.find {
+            it.name ==
                 Name.identifier(companionConceptPropertyName)
-    } ?: throw IllegalStateException("Cannot find property concept in companion class ${this.kotlinFqName.asString()}")
+        } ?: throw IllegalStateException(
+            "Cannot find property concept in companion class " +
+                this.kotlinFqName.asString(),
+        )
