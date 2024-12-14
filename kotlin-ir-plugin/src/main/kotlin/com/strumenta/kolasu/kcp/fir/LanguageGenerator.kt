@@ -117,14 +117,15 @@ class LanguageGenerator(
         context: NestedClassGenerationContext,
     ): FirClassLikeSymbol<*>? =
         runIf(name == DEFAULT_NAME_FOR_COMPANION_OBJECT) {
-            if (owner.fir.declarations.filterIsInstance<FirClassLikeDeclaration>().none {
-                    it.nameOrSpecialName == SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT
-                }
-            ) {
+            // We cannot add more than one companion object
+            val existingCompanion = owner.fir.declarations.filterIsInstance<FirClassLikeDeclaration>().find {
+                it.nameOrSpecialName == DEFAULT_NAME_FOR_COMPANION_OBJECT
+            }
+            if (existingCompanion == null) {
                 val firClass = createCompanionObject(owner, Key)
                 firClass.symbol
             } else {
-                null
+                existingCompanion.symbol
             }
         }
 
@@ -139,10 +140,13 @@ class LanguageGenerator(
     ): Set<Name> {
         if (!classSymbol.isCompanion) return emptySet()
 
-        val origin = classSymbol.origin as? FirDeclarationOrigin.Plugin
-        return runIf(
-            origin?.key == Key,
-        ) { setOf(SpecialNames.INIT, Name.identifier(companionConceptPropertyName)) }.orEmpty()
+//        val origin = classSymbol.origin as? FirDeclarationOrigin.Plugin
+//        return runIf(
+//            origin?.key == Key,
+//        ) { setOf(SpecialNames.INIT, Name.identifier(companionConceptPropertyName)) }.orEmpty()
+
+        // I want to change also existing companions
+        return setOf(SpecialNames.INIT, Name.identifier(companionConceptPropertyName))
     }
 
     override fun getNestedClassifiersNames(

@@ -500,8 +500,12 @@ class LanguageIrGenerationExtension(
         val companionIrClass =
             companions.find { it.properties.any { it.name.identifier == companionConceptPropertyName } }
                 ?: throw IllegalStateException(
-                    "Cannot find right companion in ${astClass.kotlinFqName.asString()}. " +
-                        "Companions found: ${companions.size}",
+                    "Cannot find companion with expected property ${companionConceptPropertyName} in ${astClass.kotlinFqName.asString()}. " +
+                        "Companions found: ${companions.size}. Companions have these properties: ${
+                            companions.joinToString(
+                                "; "
+                            ) { it.properties.map { it.name }.joinToString(", ") }
+                        }",
                 )
         val anonymousInitializerSymbolImpl =
             IrFactoryImpl.createAnonymousInitializer(
