@@ -106,6 +106,8 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
                     Multiplicity.OPTIONAL,
                 )
             }
+        MetamodelRegistry.registerMapping(IssueNode::class, Issue)
+        MetamodelRegistry.registerMapping(ParsingResultNode::class, ParsingResult)
         registerSerializersAndDeserializersInMetamodelRegistry()
     }
 

@@ -62,9 +62,7 @@ class SymbolResolutionWithSRITest {
         val scopeProvider =
             DeclarativeScopeProvider(
                 scopeFor(Todo::prerequisite) {
-                    (it.node.parent as TodoProject).todos.forEach {
-                        define(it)
-                    }
+                    (it.node.parent as TodoProject).todos.forEach(this::define)
                 },
             )
         val symbolResolver = SR(scopeProvider)

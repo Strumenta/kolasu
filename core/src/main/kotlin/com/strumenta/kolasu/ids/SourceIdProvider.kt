@@ -30,6 +30,7 @@ abstract class AbstractSourceIdProvider : SourceIdProvider {
         id
             .replace('.', '-')
             .replace('/', '-')
+            .replace('\\', '-')
             .replace('#', '-')
             .replace(' ', '_')
             .replace("@", "_at_")
