@@ -77,6 +77,12 @@ fun IrProperty.declareSingleOrOptionalAttribute(): Boolean {
 }
 
 @ObsoleteDescriptorBasedAPI
+fun IrProperty.declareSingleOrOptionalReference(): Boolean {
+    val propertyType = this.backingField?.type ?: this.getter?.returnType
+    return propertyType?.isSingleOrOptionalReference() ?: false
+}
+
+@ObsoleteDescriptorBasedAPI
 fun IrProperty.declareReference(): Boolean {
     val propertyType = this.backingField?.type
     return propertyType?.isReference() ?: false
@@ -116,7 +122,13 @@ fun IrType.isMultipleContainment(): Boolean {
 
 @ObsoleteDescriptorBasedAPI
 fun IrType.isSingleOrOptionalAttribute(): Boolean {
-    return !this.isAssignableTo(List::class) && !this.isAssignableTo(NodeLike::class)
+    return !this.isAssignableTo(List::class) && !this.isAssignableTo(NodeLike::class) &&  !this.isAssignableTo(
+        ReferenceValue::class)
+}
+
+@ObsoleteDescriptorBasedAPI
+fun IrType.isSingleOrOptionalReference(): Boolean {
+    return this.isAssignableTo(ReferenceValue::class)
 }
 
 @ObsoleteDescriptorBasedAPI
@@ -147,14 +159,24 @@ fun IrType.featureType(): FeatureType {
         isSingleOrOptionalAttribute() -> FeatureType.ATTRIBUTE
         isSingleOrOptionalContainment() -> FeatureType.CONTAINMENT
         isMultipleContainment() -> FeatureType.CONTAINMENT
-        else -> TODO()
+        isSingleOrOptionalReference() -> FeatureType.REFERENCE
+        else -> TODO("Unable to determine the feature type from the type: $this")
     }
 }
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 fun IrType.multiplicity(): Multiplicity {
     return when {
-        isSingleOrOptionalAttribute() -> Multiplicity.SINGULAR
+        isSingleOrOptionalAttribute() -> if (this.isNullable()) {
+            Multiplicity.OPTIONAL
+        } else {
+            Multiplicity.SINGULAR
+        }
+        isSingleOrOptionalReference() -> if (this.isNullable()) {
+            Multiplicity.OPTIONAL
+        } else {
+            Multiplicity.SINGULAR
+        }
         isSingleOrOptionalContainment() -> {
             if (this.isNullable()) {
                 Multiplicity.OPTIONAL

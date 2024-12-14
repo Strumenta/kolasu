@@ -4,6 +4,7 @@ import com.strumenta.kolasu.language.Classifier
 import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Property
+import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.language.StarLasuLanguage
 import com.strumenta.kolasu.model.Internal
 import com.strumenta.kolasu.model.Multiplicity
@@ -46,11 +47,13 @@ import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.impl.IrFunctionExpressionImpl
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrAnonymousInitializerSymbolImpl
+import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.isMarkedNullable
 import org.jetbrains.kotlin.ir.types.toKotlinType
+import org.jetbrains.kotlin.ir.types.typeOrNull
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
@@ -159,6 +162,11 @@ class LanguageIrGenerationExtension(
                                     pluginContext, property, languageClass,
                                     languageInitializer, addMethod, conceptLikeInstance,
                                 )
+                            } else if (property.declareSingleOrOptionalReference()) {
+                                +handleSingleOrOptionalReference(
+                                    pluginContext, property, languageClass,
+                                    languageInitializer, addMethod, conceptLikeInstance,
+                                )
                             } else if (property.declareMultipleContainment()) {
                                 +handleMultipleContainment(
                                     pluginContext, property, languageClass,
@@ -224,6 +232,98 @@ class LanguageIrGenerationExtension(
                                         .getter!!
                                         .returnType
                                         .classFqName!!
+                                        .asString(),
+                                ),
+                            )
+                        },
+                    )
+                    // value provider
+                    // To create lambda you should do something like this:
+                    // 1. Create a simple function with LOCAL_FUNCTION_FOR_LAMBDA origin (ofc, fill it with types you need):
+                    //     https://github.com/ForteScarlet/kotlin-suspend-transform-compiler-plugin/blob/
+                    //           2c3bf967fdc81e20fc73ac90e8e54ce51833d35b/compiler/suspend-transform-plugin/src/main/kotlin/
+                    //           love/forte/plugin/suspendtrans/utils/IrFunctionUtils.kt#L147
+                    // 2. Create IrFunctionExpression IR-node, that accepts the previously created simple function and its type.
+                    //    As far as I know, there is no IrBuilderWithScope method for this type of IR-node, but this is how we represent
+                    //    lambdas inside the compiler, so you can create it with the IrFunctionExpressionImpl constructor.
+
+                    val lambda =
+                        pluginContext.createLambdaFunctionWithNeededScope(
+                            languageClass,
+                            languageInitializer,
+                            property,
+                        )
+
+                    putValueArgument(
+                        3,
+                        IrFunctionExpressionImpl(
+                            startOffset = SYNTHETIC_OFFSET,
+                            endOffset = SYNTHETIC_OFFSET,
+                            type =
+                                pluginContext
+                                    .irBuiltIns
+                                    .functionN(1)
+                                    .typeWith(
+                                        pluginContext
+                                            .referenceClass(NodeLike::class.classId)!!
+                                            .createType(false, emptyList()),
+                                        pluginContext
+                                            .irBuiltIns
+                                            .anyNType,
+                                    ),
+                            origin = IrStatementOrigin.LAMBDA,
+                            function = lambda,
+                        ),
+                    )
+                    // derived
+                    putValueArgument(4, irBoolean(false))
+                },
+            )
+        }
+    }
+
+    private fun IrBuilderWithScope.handleSingleOrOptionalReference(
+        pluginContext: IrPluginContext,
+        property: IrProperty,
+        languageClass: IrClass,
+        languageInitializer: IrAnonymousInitializer,
+        addMethod: IrSimpleFunctionSymbol,
+        conceptInstance: IrVariable,
+    ): IrStatement {
+        // c.features.add(Reference("referenceName", optional, classifier, valueProvider, derived))
+        return irCall(addMethod).apply {
+            // c.features
+            val featuresField = pluginContext.conceptLikeFeaturesField()
+            dispatchReceiver =
+                irCall(featuresField.getter!!).apply {
+                    dispatchReceiver = irGet(conceptInstance)
+                }
+            val referenceConstructor =
+                pluginContext.referenceConstructors(Reference::class).first()
+            val getConceptLike =
+                pluginContext
+                    .referenceClass(StarLasuLanguage::class.classId)!!
+                    .functionByName(StarLasuLanguage::getConceptLike.name)
+            putValueArgument(
+                0,
+                irCallConstructor(referenceConstructor, emptyList()).apply {
+                    // name
+                    putValueArgument(0, irString(property.name.identifier))
+                    // optional
+                    putValueArgument(1, irBoolean(false))
+                    // data type: language.getConceptLike("classifierName")
+                    putValueArgument(
+                        2,
+                        irCall(getConceptLike).apply {
+                            dispatchReceiver = irGetObject(languageClass.symbol)
+                            putValueArgument(
+                                0,
+                                irString(
+                                    // Here we take the type parameter ReferenceValue<MyAstClass>
+                                    (property
+                                        .getter!!
+                                        .returnType as IrSimpleType).arguments[0].typeOrNull!!
+                                        .classFqName!!.shortName()
                                         .asString(),
                                 ),
                             )

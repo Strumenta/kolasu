@@ -39,7 +39,7 @@ open class StarLasuLanguage(
         } else if (stringType.name == name) {
             stringType
         } else {
-            TODO()
+            TODO("Cannot retrieve data type $name")
         }
 
     fun getPrimitiveType(name: String): PrimitiveType =
