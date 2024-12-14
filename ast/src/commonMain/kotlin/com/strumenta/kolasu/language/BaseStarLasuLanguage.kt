@@ -1,6 +1,15 @@
 package com.strumenta.kolasu.language
 
+import com.strumenta.kolasu.model.BehaviorDeclaration
+import com.strumenta.kolasu.model.CommonElement
+import com.strumenta.kolasu.model.Documentation
+import com.strumenta.kolasu.model.EntityDeclaration
+import com.strumenta.kolasu.model.EntityGroupDeclaration
+import com.strumenta.kolasu.model.Expression
 import com.strumenta.kolasu.model.NodeLike
+import com.strumenta.kolasu.model.Parameter
+import com.strumenta.kolasu.model.Statement
+import com.strumenta.kolasu.model.TypeAnnotation
 
 val intType = PrimitiveType.get("kotlin.Int")
 val stringType = PrimitiveType.get("kotlin.String")
@@ -27,6 +36,19 @@ object BaseStarLasuLanguage : StarLasuLanguage("com.strumenta.basestarlasulangua
         types.add(primitiveType)
         val point = PrimitiveType("Point")
         types.add(point)
+
+        val commonElement = ConceptInterface(this, CommonElement::class.simpleName!!)
+        types.add(commonElement)
+
+        setOf(
+            Expression::class, Statement::class, EntityDeclaration::class, BehaviorDeclaration::class,
+            Parameter::class, Documentation::class, EntityGroupDeclaration::class, TypeAnnotation::class
+        ).forEach { kClass ->
+            val aCommonElement = ConceptInterface(this, CommonElement::class.simpleName!!)
+            aCommonElement.superInterfaces.add(commonElement)
+            types.add(aCommonElement)
+        }
+
     }
 
     val astNode: Concept
@@ -43,4 +65,7 @@ object BaseStarLasuLanguage : StarLasuLanguage("com.strumenta.basestarlasulangua
 
     val point: PrimitiveType
         get() = getPrimitiveType("Point")
+
+    val expression: ConceptInterface
+        get() = getConceptInterface(Expression::class.simpleName!!)
 }
