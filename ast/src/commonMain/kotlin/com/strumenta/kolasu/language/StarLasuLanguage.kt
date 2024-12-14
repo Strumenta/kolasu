@@ -39,7 +39,10 @@ open class StarLasuLanguage(
         } else if (stringType.name == name) {
             stringType
         } else {
-            TODO("Cannot retrieve data type $name")
+            this.types.filterIsInstance<DataType>().find { it.name == name }
+                ?: throw IllegalArgumentException("Cannot find data type $name. Known types are ${
+                    this.types.filterIsInstance<DataType>().joinToString(", ") { it.name }
+                }")
         }
 
     fun getPrimitiveType(name: String): PrimitiveType =
