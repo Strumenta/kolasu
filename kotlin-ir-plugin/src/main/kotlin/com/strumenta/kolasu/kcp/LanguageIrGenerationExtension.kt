@@ -16,6 +16,7 @@ import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irBlockBody
 import org.jetbrains.kotlin.backend.jvm.codegen.AnnotationCodegen.Companion.annotationClass
 import org.jetbrains.kotlin.backend.jvm.functionByName
+import org.jetbrains.kotlin.backend.jvm.ir.findEnumValuesFunction
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
@@ -38,6 +39,7 @@ import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrAnonymousInitializer
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
+import org.jetbrains.kotlin.ir.declarations.IrEnumEntry
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
@@ -57,6 +59,7 @@ import org.jetbrains.kotlin.ir.types.toKotlinType
 import org.jetbrains.kotlin.ir.types.typeOrNull
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
+import org.jetbrains.kotlin.ir.util.allParameters
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.kotlinFqName
@@ -111,13 +114,30 @@ class LanguageIrGenerationExtension(
 
                 // We add the enums
                 enumClasses.forEach { enumClass ->
+                    val arrayListConstructor = pluginContext.referenceConstructors(ArrayList::class.classId).find {
+                        it.owner.valueParameters.isEmpty()
+                    }!!
+                    val literals =
+                        createTmpVariable(
+                            irCallConstructor(arrayListConstructor, emptyList()).apply {
+                            },
+                        )
+                    enumClass.declarations.filterIsInstance<IrEnumEntry>().forEach { entry ->
+                        +irCall(addMethod).apply {
+                            dispatchReceiver = irGet(literals)
+                            putValueArgument(0, irString(entry.name.identifier))
+                        }
+                    }
+
                     val enumTypeConstructor = pluginContext.referenceConstructors(EnumType::class.classId).first()
                     val enumTypeInstance =
                         createTmpVariable(
                             irCallConstructor(enumTypeConstructor, emptyList()).apply {
                                 putValueArgument(0, irString(enumClass.name.identifier))
+                                putValueArgument(1, irGet(literals))
                             },
                         )
+
                     +irCall(addMethod).apply {
                         dispatchReceiver =
                             irCall(types.getter!!).apply {
