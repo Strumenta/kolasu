@@ -2,14 +2,12 @@
 
 package com.strumenta.kolasu.kcp
 
-import com.strumenta.kolasu.language.Concept
-import com.strumenta.kolasu.language.EnumType
-import com.strumenta.kolasu.language.Property
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class IrPluginTest : AbstractIrPluginTest() {
     @Test
@@ -686,11 +684,15 @@ fun main() {
                     SourceFile.kotlin(
                         "main.kt",
                         """
+package mytest
+
           import com.strumenta.kolasu.model.MPNode
           import com.strumenta.kolasu.model.KolasuGen
           import com.strumenta.kolasu.language.Property
           import com.strumenta.kolasu.language.EnumType
           import com.strumenta.kolasu.language.StarLasuLanguage
+          import kotlin.test.assertNotNull
+import kotlin.test.assertEquals
 
     object LanguageMyTest : StarLasuLanguage("mytest")
 
@@ -706,12 +708,17 @@ fun main() {
   val c = n.concept
   val p = c.declaredFeatures.find { it.name == "p1" } as Property
   assert(p.type is EnumType)
+  val l = c.language
+  val e = l.getEnum("MyEnum")
+  assertNotNull(e)
+  assertEquals(2, e.literals.size)
 }
 
 """,
                     ),
             )
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+        result.invokeMainMethod("mytest.MainKt")
     }
 
 }

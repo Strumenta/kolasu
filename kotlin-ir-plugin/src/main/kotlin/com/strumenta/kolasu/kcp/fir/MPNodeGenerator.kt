@@ -8,7 +8,6 @@ import com.strumenta.kolasu.model.MPNode
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.getAnnotationByClassId
-import org.jetbrains.kotlin.fir.declarations.utils.classId
 import org.jetbrains.kotlin.fir.declarations.utils.isAbstract
 import org.jetbrains.kotlin.fir.declarations.utils.isSealed
 import org.jetbrains.kotlin.fir.expressions.builder.FirBlockBuilder
@@ -141,7 +140,8 @@ fun FirClassSymbol<*>.isMPNode(firSession: FirSession): Boolean =
 
 @OptIn(SymbolInternals::class)
 fun FirClassSymbol<*>.isKolasuGenEnabled(firSession: FirSession): Boolean {
-    return this.extendMPNode(firSession) || this.getAnnotationByClassId(KolasuGen::class.classId, firSession) != null
+    return this.extendMPNode(firSession)
+            || this.getAnnotationByClassId(KolasuGen::class.classId, firSession) != null
 //    return this.extendMPNode(firSession) || this.annotations.any {
 //        val classId = it.annotationTypeRef.firClassLike(firSession)?.classId
 //        if (classId == null) {

@@ -3,6 +3,7 @@ package com.strumenta.kolasu.kcp
 import com.strumenta.kolasu.language.Classifier
 import com.strumenta.kolasu.language.Concept
 import com.strumenta.kolasu.language.Containment
+import com.strumenta.kolasu.language.EnumType
 import com.strumenta.kolasu.language.Property
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.language.StarLasuLanguage
@@ -75,6 +76,7 @@ class LanguageIrGenerationExtension(
         pluginContext: IrPluginContext,
         languageClass: IrClass,
         astClasses: List<IrClass>,
+        enumClasses: List<IrClass>
     ) {
         val languageInitializer =
             IrFactoryImpl.createAnonymousInitializer(
@@ -106,6 +108,31 @@ class LanguageIrGenerationExtension(
                         ).find {
                             it.owner.valueParameters.size == 1
                         }!!
+
+                // We add the enums
+                enumClasses.forEach { enumClass ->
+
+                    CLASS CAST SUCCEDE QUI
+
+                    val enumTypeConstructor = pluginContext.referenceConstructors(EnumType::class.classId).first()
+                    val enumTypeInstance =
+                        createTmpVariable(
+                            irCallConstructor(enumTypeConstructor, emptyList()).apply {
+                                putValueArgument(0, irGetObject(languageClass.symbol))
+                                putValueArgument(1, irString(enumClass.name.identifier))
+                            },
+                        )
+                    +irCall(addMethod).apply {
+                        dispatchReceiver =
+                            irCall(types.getter!!).apply {
+                                dispatchReceiver = irGetObject(languageClass.symbol)
+                            }
+                        putValueArgument(
+                            0,
+                            irGet(enumTypeInstance),
+                        )
+                    }
+                }
 
                 // We first instantiate the concepts, without populating them (as their features could refer
                 // to themselves or other types declared in the language)
@@ -645,7 +672,9 @@ class LanguageIrGenerationExtension(
     ) {
         val astClasses = mutableListOf<IrClass>()
         val languages = mutableListOf<IrClass>()
-        processMPNodeSubclasses(moduleFragment, { astClasses.add(it) }, { languages.add(it) })
+        val enumClasses = mutableListOf<IrClass>()
+        processMPNodeSubclasses(moduleFragment, { astClasses.add(it) }, { languages.add(it) }, {
+            enumClasses.add(it)})
         if (astClasses.isNotEmpty()) {
             require(languages.size == 1) {
                 if (languages.size == 0) {
@@ -660,17 +689,17 @@ class LanguageIrGenerationExtension(
         if (languages.size == 1) {
             val languageClass = languages.first()
             require(languageClass.kind == ClassKind.OBJECT)
-            generateLanguageInitializer(pluginContext, languageClass, astClasses)
+            generateLanguageInitializer(pluginContext, languageClass, astClasses, enumClasses)
             processMPNodeSubclasses(moduleFragment, { irClass ->
                 generateConceptMethodForAstClass(pluginContext, languageClass, irClass)
-            })
+            }, {}, {})
         }
     }
 }
 
 fun findLanguageClass(moduleFragment: IrModuleFragment): IrClass {
     val languages = mutableListOf<IrClass>()
-    processMPNodeSubclasses(moduleFragment, { }, { languages.add(it) })
+    processMPNodeSubclasses(moduleFragment, { }, { languages.add(it) }, {})
     if (languages.size == 1) {
         return languages.first()
     } else {

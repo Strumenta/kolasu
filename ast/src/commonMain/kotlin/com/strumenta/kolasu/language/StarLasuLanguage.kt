@@ -45,6 +45,10 @@ open class StarLasuLanguage(
                 }")
         }
 
+    fun getEnum(name: String) : EnumType {
+        return getDataType(name) as? EnumType ?: throw IllegalArgumentException("Does not correspond to enum: $name")
+    }
+
     fun getPrimitiveType(name: String): PrimitiveType =
         this.types.filterIsInstance<PrimitiveType>().find {
             it.name == name
