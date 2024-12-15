@@ -674,7 +674,7 @@ fun findLanguageClass(moduleFragment: IrModuleFragment): IrClass {
     if (languages.size == 1) {
         return languages.first()
     } else {
-        TODO("Languages ${languages.size}")
+        throw IllegalStateException("We found ${languages.size} when processing MPNode Subclasses")
     }
 }
 

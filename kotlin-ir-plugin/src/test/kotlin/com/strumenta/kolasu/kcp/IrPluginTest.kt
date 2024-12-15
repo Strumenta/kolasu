@@ -2,6 +2,9 @@
 
 package com.strumenta.kolasu.kcp
 
+import com.strumenta.kolasu.language.Concept
+import com.strumenta.kolasu.language.EnumType
+import com.strumenta.kolasu.language.Property
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
@@ -674,4 +677,41 @@ fun main() {
             )
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
     }
+
+    @Test
+    fun `Enum in Language`() {
+        val result =
+            compile(
+                sourceFile =
+                    SourceFile.kotlin(
+                        "main.kt",
+                        """
+          import com.strumenta.kolasu.model.MPNode
+          import com.strumenta.kolasu.model.KolasuGen
+          import com.strumenta.kolasu.language.Property
+          import com.strumenta.kolasu.language.EnumType
+          import com.strumenta.kolasu.language.StarLasuLanguage
+
+    object LanguageMyTest : StarLasuLanguage("mytest")
+
+    @KolasuGen
+    enum class MyEnum { A, B}
+
+    @KolasuGen
+    data class MyNode(var p1: MyEnum) : MPNode()
+
+fun main() {
+  val n = MyNode(MyEnum.A)
+  n.p1 = MyEnum.B
+  val c = n.concept
+  val p = c.declaredFeatures.find { it.name == "p1" } as Property
+  assert(p.type is EnumType)
+}
+
+""",
+                    ),
+            )
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
 }
