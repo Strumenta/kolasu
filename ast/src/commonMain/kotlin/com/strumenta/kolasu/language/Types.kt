@@ -23,6 +23,7 @@ data class PrimitiveType(
     }
 }
 
+
 data class EnumType(
     override val name: String,
     val literals: MutableList<EnumerationLiteral> = mutableListOf(),

@@ -111,15 +111,11 @@ class LanguageIrGenerationExtension(
 
                 // We add the enums
                 enumClasses.forEach { enumClass ->
-
-                    CLASS CAST SUCCEDE QUI
-
                     val enumTypeConstructor = pluginContext.referenceConstructors(EnumType::class.classId).first()
                     val enumTypeInstance =
                         createTmpVariable(
                             irCallConstructor(enumTypeConstructor, emptyList()).apply {
-                                putValueArgument(0, irGetObject(languageClass.symbol))
-                                putValueArgument(1, irString(enumClass.name.identifier))
+                                putValueArgument(0, irString(enumClass.name.identifier))
                             },
                         )
                     +irCall(addMethod).apply {
@@ -259,7 +255,7 @@ class LanguageIrGenerationExtension(
                                         .getter!!
                                         .returnType
                                         .classFqName!!
-                                        .asString(),
+                                        .shortName().asString(),
                                 ),
                             )
                         },
