@@ -89,12 +89,31 @@ mavenPublishing {
     }
 }
 
+//signing {
+////    sign(publishing.publications["kolasu_ast"])
+//}
+
 signing {
-//    sign(publishing.publications["kolasu_ast"])
+    sign(publishing.publications)
 }
 
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
+
+tasks {
+    named("publishJsPublicationToMavenLocal") {
+        dependsOn("signJvmPublication")
+        dependsOn("signKotlinMultiplatformPublication")
+    }
+    named("publishJvmPublicationToMavenLocal") {
+        dependsOn("signJsPublication")
+        dependsOn("signKotlinMultiplatformPublication")
+    }
+    named("publishKotlinMultiplatformPublicationToMavenLocal") {
+        dependsOn("signJsPublication")
+        dependsOn("signJvmPublication")
     }
 }
