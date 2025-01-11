@@ -54,7 +54,7 @@ data class NodeWithEnum(
 class LionWebModelConverterTest {
 
     val serialized = """{
-  "serializationFormatVersion": "2023.1",
+  "serializationFormatVersion": "2024.1",
   "languages": [
     {
       "key": "com-strumenta-SimpleLang",
@@ -66,7 +66,7 @@ class LionWebModelConverterTest {
     },
     {
       "key": "LionCore-builtins",
-      "version": "2023.1"
+      "version": "2024.1"
     }
   ],
   "nodes": [
@@ -141,7 +141,7 @@ class LionWebModelConverterTest {
         {
           "property": {
             "language": "LionCore-builtins",
-            "version": "2023.1",
+            "version": "2024.1",
             "key": "LionCore-builtins-INamed-name"
           },
           "value": "A1"
@@ -257,7 +257,7 @@ class LionWebModelConverterTest {
         {
           "property": {
             "language": "LionCore-builtins",
-            "version": "2023.1",
+            "version": "2024.1",
             "key": "LionCore-builtins-INamed-name"
           },
           "value": "A3"
