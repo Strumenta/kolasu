@@ -22,7 +22,7 @@ import io.lionweb.lioncore.java.self.LionCore
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.kotlin.MetamodelRegistry
-import io.lionweb.lioncore.kotlin.addPrimitiveType
+import io.lionweb.lioncore.kotlin.createPrimitiveType
 import com.strumenta.kolasu.model.BehaviorDeclaration as KBehaviorDeclaration
 import com.strumenta.kolasu.model.CommonElement as KCommonElement
 import com.strumenta.kolasu.model.Documentation as KDocumentation
@@ -81,7 +81,7 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
             addProperty(KIssue::position.name, position, Multiplicity.OPTIONAL)
         }
 
-        addPrimitiveType(TokensList::class)
+        createPrimitiveType(TokensList::class)
         ParsingResult = addConcept(KParsingResult::class.simpleName!!).apply {
             addContainment(KParsingResult<*>::issues.name, Issue, Multiplicity.MANY)
             addContainment(KParsingResult<*>::root.name, ASTNode, Multiplicity.OPTIONAL)
