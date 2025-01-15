@@ -323,7 +323,7 @@
           "targets": [
             {
               "resolveInfo": "String",
-              "reference": "LionCore-builtins-String"
+              "reference": "LionCore-builtins-String-2024-1"
             }
           ]
         }
@@ -575,7 +575,7 @@
           "targets": [
             {
               "resolveInfo": "Boolean",
-              "reference": "LionCore-builtins-Boolean"
+              "reference": "LionCore-builtins-Boolean-2024-1"
             }
           ]
         }
@@ -698,7 +698,7 @@
           "targets": [
             {
               "resolveInfo": "String",
-              "reference": "LionCore-builtins-String"
+              "reference": "LionCore-builtins-String-2024-1"
             }
           ]
         }
@@ -821,7 +821,7 @@
           "targets": [
             {
               "resolveInfo": "String",
-              "reference": "LionCore-builtins-String"
+              "reference": "LionCore-builtins-String-2024-1"
             }
           ]
         }
@@ -944,7 +944,7 @@
           "targets": [
             {
               "resolveInfo": "String",
-              "reference": "LionCore-builtins-String"
+              "reference": "LionCore-builtins-String-2024-1"
             }
           ]
         }
