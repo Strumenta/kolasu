@@ -1,6 +1,6 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import com.vanniktech.maven.publish.KotlinMultiplatform
 import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinMultiplatform
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     kotlin("multiplatform")
@@ -52,20 +52,21 @@ publishing {
 //        kotlinMultiplatform = true)
 }
 
-
 mavenPublishing {
-    configure(KotlinMultiplatform(
-        // configures the -javadoc artifact, possible values:
-        // - `JavadocJar.None()` don't publish this artifact
-        // - `JavadocJar.Empty()` publish an emprt jar
-        // - `JavadocJar.Dokka("dokkaHtml")` when using Kotlin with Dokka, where `dokkaHtml` is the name of the Dokka task that should be used as input
-        javadocJar = JavadocJar.Dokka("dokkaHtml"),
-        // whether to publish a sources jar
-        sourcesJar = true,
-        // configure which Android library variants to publish if this project has an Android target
-        // defaults to "release" when using the main plugin and nothing for the base plugin
-        //androidVariantsToPublish = listOf("debug", "release"),
-    ))
+    configure(
+        KotlinMultiplatform(
+            // configures the -javadoc artifact, possible values:
+            // - `JavadocJar.None()` don't publish this artifact
+            // - `JavadocJar.Empty()` publish an emprt jar
+            // - `JavadocJar.Dokka("dokkaHtml")` when using Kotlin with Dokka, where `dokkaHtml` is the name of the Dokka task that should be used as input
+            javadocJar = JavadocJar.Dokka("dokkaHtml"),
+            // whether to publish a sources jar
+            sourcesJar = true,
+            // configure which Android library variants to publish if this project has an Android target
+            // defaults to "release" when using the main plugin and nothing for the base plugin
+            // androidVariantsToPublish = listOf("debug", "release"),
+        ),
+    )
     coordinates(project.group as String, "kolasu-ast", project.version as String)
 
     pom {
@@ -104,9 +105,9 @@ mavenPublishing {
     }
 }
 
-//signing {
-////    sign(publishing.publications["kolasu_ast"])
-//}
+// signing {
+// //    sign(publishing.publications["kolasu_ast"])
+// }
 
 signing {
     sign(publishing.publications)

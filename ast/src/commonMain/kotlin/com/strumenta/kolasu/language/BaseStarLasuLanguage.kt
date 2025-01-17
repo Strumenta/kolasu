@@ -41,14 +41,19 @@ object BaseStarLasuLanguage : StarLasuLanguage("com.strumenta.basestarlasulangua
         types.add(commonElement)
 
         setOf(
-            Expression::class, Statement::class, EntityDeclaration::class, BehaviorDeclaration::class,
-            Parameter::class, Documentation::class, EntityGroupDeclaration::class, TypeAnnotation::class
+            Expression::class,
+            Statement::class,
+            EntityDeclaration::class,
+            BehaviorDeclaration::class,
+            Parameter::class,
+            Documentation::class,
+            EntityGroupDeclaration::class,
+            TypeAnnotation::class,
         ).forEach { kClass ->
             val aCommonElement = ConceptInterface(this, CommonElement::class.simpleName!!)
             aCommonElement.superInterfaces.add(commonElement)
             types.add(aCommonElement)
         }
-
     }
 
     val astNode: Concept

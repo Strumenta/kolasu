@@ -40,14 +40,15 @@ open class StarLasuLanguage(
             stringType
         } else {
             this.types.filterIsInstance<DataType>().find { it.name == name }
-                ?: throw IllegalArgumentException("Cannot find data type $name. Known types are ${
-                    this.types.filterIsInstance<DataType>().joinToString(", ") { it.name }
-                }")
+                ?: throw IllegalArgumentException(
+                    "Cannot find data type $name. Known types are ${
+                        this.types.filterIsInstance<DataType>().joinToString(", ") { it.name }
+                    }",
+                )
         }
 
-    fun getEnum(name: String) : EnumType {
-        return getDataType(name) as? EnumType ?: throw IllegalArgumentException("Does not correspond to enum: $name")
-    }
+    fun getEnum(name: String): EnumType =
+        getDataType(name) as? EnumType ?: throw IllegalArgumentException("Does not correspond to enum: $name")
 
     fun getPrimitiveType(name: String): PrimitiveType =
         this.types.filterIsInstance<PrimitiveType>().find {

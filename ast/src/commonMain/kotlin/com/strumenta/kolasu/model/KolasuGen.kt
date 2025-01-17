@@ -9,6 +9,8 @@ import kotlin.reflect.KClass
  */
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS)
-annotation class KolasuGen(val language: KClass<out StarLasuLanguage> = PlaceholderLanguage::class)
+annotation class KolasuGen(
+    val language: KClass<out StarLasuLanguage> = PlaceholderLanguage::class,
+)
 
 object PlaceholderLanguage : StarLasuLanguage("dummy")
