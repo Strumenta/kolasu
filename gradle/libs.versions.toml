@@ -1,7 +1,7 @@
 [versions]
 antlr4 = "4.9.3"
-lwjava = "0.2.19"
-lwkotlin = "0.2.6"
+lwjava = "0.3.0"
+lwkotlin = "0.3.0"
 kotestVersion= "1.3.3"
 
 [plugins]
@@ -9,17 +9,17 @@ buildConfig = { id = "com.github.gmazzo.buildconfig", version = "5.4.0" }
 # More recent versions og this plugin to do not work with JVM 8
 # We should configure JVM 11 for the build and JVM 8 only as a target
 superPublish = { id = "com.vanniktech.maven.publish", version = "0.21.0" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.1" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.2" }
 gradlePublish = { id = "com.gradle.plugin-publish", version = "1.2.1" }
 kover = { id = "org.jetbrains.kotlinx.kover", version = "0.8.3" }
 
 [libraries]
+lionwebjava = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-core", version.ref = "lwjava" }
+lionwebjavaemf = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-emf", version.ref = "lwjava" }
 gson = { module = "com.google.code.gson:gson", version = "2.11.0" }
 antlr4Tool = { module = "org.antlr:antlr4", version.ref = "antlr4" }
 antlr4jRuntime = { module = "org.antlr:antlr4-runtime", version.ref= "antlr4" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version="4.4.0"}
-lionwebjava = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2023.1-core", version.ref = "lwjava" }
-lionwebjavaemf = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2023.1-emf", version.ref = "lwjava" }
 lionwebkotlinrepoclient = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-repo-client", version.ref = "lwkotlin" }
 lionwebkotlinrepoclienttesting = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-repo-client-testing", version.ref = "lwkotlin" }
 lionwebkotlincore = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-core", version.ref = "lwkotlin" }
