@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.lionweb
 
-import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
@@ -22,7 +21,12 @@ import io.lionweb.lioncore.java.self.LionCore
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.kotlin.MetamodelRegistry
-import io.lionweb.lioncore.kotlin.addPrimitiveType
+import io.lionweb.lioncore.kotlin.Multiplicity
+import io.lionweb.lioncore.kotlin.createConcept
+import io.lionweb.lioncore.kotlin.createContainment
+import io.lionweb.lioncore.kotlin.createPrimitiveType
+import io.lionweb.lioncore.kotlin.createProperty
+import io.lionweb.lioncore.kotlin.createReference
 import com.strumenta.kolasu.model.BehaviorDeclaration as KBehaviorDeclaration
 import com.strumenta.kolasu.model.CommonElement as KCommonElement
 import com.strumenta.kolasu.model.Documentation as KDocumentation
@@ -52,14 +56,14 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
         id = "com-strumenta-StarLasu"
         key = "com_strumenta_starlasu"
         version = "1"
-        addPrimitiveType("Char")
-        addPrimitiveType("Point")
-        val position = addPrimitiveType("Position")
-        val astNode = addConcept("ASTNode").apply {
-            addProperty(Node::position.name, position, Multiplicity.OPTIONAL)
+        createPrimitiveType("Char")
+        createPrimitiveType("Point")
+        val position = createPrimitiveType("Position")
+        val astNode = createConcept("ASTNode").apply {
+            createProperty(Node::position.name, position, Multiplicity.OPTIONAL)
         }
-        astNode.addReference("originalNode", astNode, Multiplicity.OPTIONAL)
-        astNode.addReference("transpiledNodes", astNode, Multiplicity.MANY)
+        astNode.createReference("originalNode", astNode, Multiplicity.OPTIONAL)
+        astNode.createReference("transpiledNodes", astNode, Multiplicity.ZERO_TO_MANY)
 
         addPlaceholderNodeAnnotation(astNode)
 
@@ -74,19 +78,19 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
         addInterface(KStatement::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
         addInterface(KTypeAnnotation::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
 
-        Issue = addConcept(KIssue::class.simpleName!!).apply {
+        Issue = createConcept(KIssue::class.simpleName!!).apply {
             addProperty(KIssue::type.name, addEnumerationFromClass(this@StarLasuLWLanguage, IssueType::class))
-            addProperty(KIssue::message.name, LionCoreBuiltins.getString())
+            createProperty(KIssue::message.name, LionCoreBuiltins.getString())
             addProperty(KIssue::severity.name, addEnumerationFromClass(this@StarLasuLWLanguage, IssueSeverity::class))
-            addProperty(KIssue::position.name, position, Multiplicity.OPTIONAL)
+            createProperty(KIssue::position.name, position, Multiplicity.OPTIONAL)
         }
 
-        addPrimitiveType(TokensList::class)
-        ParsingResult = addConcept(KParsingResult::class.simpleName!!).apply {
-            addContainment(KParsingResult<*>::issues.name, Issue, Multiplicity.MANY)
-            addContainment(KParsingResult<*>::root.name, ASTNode, Multiplicity.OPTIONAL)
-            addProperty(KParsingResult<*>::code.name, LionCoreBuiltins.getString(), Multiplicity.OPTIONAL)
-            addProperty(
+        createPrimitiveType(TokensList::class)
+        ParsingResult = createConcept(KParsingResult::class.simpleName!!).apply {
+            createContainment(KParsingResult<*>::issues.name, Issue, Multiplicity.ZERO_TO_MANY)
+            createContainment(KParsingResult<*>::root.name, ASTNode, Multiplicity.OPTIONAL)
+            createProperty(KParsingResult<*>::code.name, LionCoreBuiltins.getString(), Multiplicity.OPTIONAL)
+            createProperty(
                 ParsingResultWithTokens<*>::tokens.name,
                 MetamodelRegistry.getPrimitiveType(TokensList::class)!!,
                 Multiplicity.OPTIONAL

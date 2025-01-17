@@ -2,11 +2,7 @@ package com.strumenta.kolasu.lionwebclient
 
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.language.KolasuLanguage
-import com.strumenta.kolasu.lionweb.addConcept
-import com.strumenta.kolasu.lionweb.addContainment
-import com.strumenta.kolasu.lionweb.lwLanguage
 import com.strumenta.kolasu.model.ASTRoot
-import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
@@ -17,11 +13,15 @@ import com.strumenta.kolasu.semantics.symbol.provider.declarative.symbolFor
 import com.strumenta.kolasu.semantics.symbol.repository.SymbolRepository
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.model.impl.DynamicNode
+import io.lionweb.lioncore.kotlin.Multiplicity
+import io.lionweb.lioncore.kotlin.createConcept
+import io.lionweb.lioncore.kotlin.createContainment
+import io.lionweb.lioncore.kotlin.lwLanguage
 
 val todoAccountLanguage =
     lwLanguage("todoAccountLanguage").apply {
-        addConcept("TodoAccount").apply {
-            addContainment("projects", LionCoreBuiltins.getNode(), Multiplicity.MANY)
+        createConcept("TodoAccount").apply {
+            createContainment("projects", LionCoreBuiltins.getNode(), Multiplicity.ZERO_TO_MANY)
         }
     }
 

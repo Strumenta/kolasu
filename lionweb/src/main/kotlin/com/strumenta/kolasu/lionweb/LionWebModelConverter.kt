@@ -857,7 +857,12 @@ class LionWebModelConverter(
             pr.code
         )
         val root = if (pr.root != null) exportModelToLionWeb(pr.root!!, considerParent = false) else null
-        resultNode.addChild(StarLasuLWLanguage.ParsingResult.getContainmentByName(ParsingResult<*>::root.name)!!, root)
+        root?.let {
+            resultNode.addChild(
+                StarLasuLWLanguage.ParsingResult.getContainmentByName(ParsingResult<*>::root.name)!!,
+                root
+            )
+        }
         val issuesContainment = StarLasuLWLanguage.ParsingResult.getContainmentByName(ParsingResult<*>::issues.name)!!
         pr.issues.forEach {
             resultNode.addChild(issuesContainment, exportIssueToLionweb(it))

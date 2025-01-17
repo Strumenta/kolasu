@@ -1,39 +1,17 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.model.Multiplicity
-import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.DataType
+import io.lionweb.lioncore.java.language.IKeyed
 import io.lionweb.lioncore.java.language.Interface
 import io.lionweb.lioncore.java.language.Language
-import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
-import io.lionweb.lioncore.java.language.Reference
+import io.lionweb.lioncore.java.model.Node
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import kotlin.random.Random
 
-// TODO: move this to LionWeb Kotlin, once that project is created
-
-/**
- * Create a LionWeb Language with the given name.
- */
-fun lwLanguage(name: String): Language {
-    val cleanedName = name.lowercase().lwIDCleanedVersion()
-    return Language(name, "language-$cleanedName-id", "language-$cleanedName-key", "1")
-}
-
-fun Language.addConcept(name: String): Concept {
-    val concept =
-        Concept(
-            this,
-            name,
-            this.idForContainedElement(name),
-            this.keyForContainedElement(name)
-        )
-    this.addElement(concept)
-    return concept
-}
+// TODO: use equivalent methods from LionWeb Kotlin
 
 fun Language.addInterface(name: String): Interface {
     val intf =
@@ -45,48 +23,6 @@ fun Language.addInterface(name: String): Interface {
         )
     this.addElement(intf)
     return intf
-}
-
-fun Language.addPrimitiveType(name: String): PrimitiveType {
-    val primitiveType =
-        PrimitiveType(
-            this,
-            name,
-            this.idForContainedElement(name)
-        )
-    primitiveType.key = this.keyForContainedElement(name)
-    this.addElement(primitiveType)
-    return primitiveType
-}
-
-fun Concept.addContainment(
-    name: String,
-    containedConcept: Concept,
-    multiplicity: Multiplicity = Multiplicity.SINGULAR
-): Containment {
-    val containment =
-        Containment().apply {
-            this.name = name
-            this.id = "${this@addContainment.id!!.removeSuffix("-id")}-$name-id"
-            this.key = "${this@addContainment.key!!.removeSuffix("-key")}-$name-key"
-            this.type = containedConcept
-            this.setOptional(
-                when (multiplicity) {
-                    Multiplicity.SINGULAR -> false
-                    Multiplicity.MANY -> true
-                    Multiplicity.OPTIONAL -> true
-                }
-            )
-            this.setMultiple(
-                when (multiplicity) {
-                    Multiplicity.SINGULAR -> false
-                    Multiplicity.MANY -> true
-                    Multiplicity.OPTIONAL -> false
-                }
-            )
-        }
-    this.addFeature(containment)
-    return containment
 }
 
 fun Concept.addProperty(
@@ -119,24 +55,6 @@ val Multiplicity.optional
 val Multiplicity.multiple
     get() = this == Multiplicity.MANY
 
-fun Concept.addReference(
-    name: String,
-    type: Classifier<*>,
-    multiplicity: Multiplicity = Multiplicity.SINGULAR
-): Reference {
-    val reference =
-        Reference().apply {
-            this.name = name
-            this.id = "${this@addReference.id!!.removeSuffix("-id")}-$name-id"
-            this.key = "${this@addReference.key!!.removeSuffix("-key")}-$name-key"
-            this.type = type
-            this.setOptional(multiplicity.optional)
-            this.setMultiple(multiplicity.multiple)
-        }
-    this.addFeature(reference)
-    return reference
-}
-
 /**
  * Create a Dynamic Node with the given Concept and a random node ID.
  */
@@ -150,18 +68,18 @@ fun String.lwIDCleanedVersion(): String {
         .replace("/", "_")
 }
 
-private fun Language.idPrefixForContainedElements(): String {
+private fun Node.idPrefixForContainedElements(): String {
     return this.id!!.removePrefix("language-").removeSuffix("-id")
 }
 
-private fun Language.keyPrefixForContainedElements(): String {
+private fun IKeyed<*>.keyPrefixForContainedElements(): String {
     return this.key!!.removePrefix("language-").removeSuffix("-key")
 }
 
-fun Language.idForContainedElement(containedElementName: String): String {
+fun Node.idForContainedElement(containedElementName: String): String {
     return "${this.idPrefixForContainedElements()}-${containedElementName.lwIDCleanedVersion()}-id"
 }
 
-fun Language.keyForContainedElement(containedElementName: String): String {
+fun IKeyed<*>.keyForContainedElement(containedElementName: String): String {
     return "${this.keyPrefixForContainedElements()}-${containedElementName.lwIDCleanedVersion()}-key"
 }
