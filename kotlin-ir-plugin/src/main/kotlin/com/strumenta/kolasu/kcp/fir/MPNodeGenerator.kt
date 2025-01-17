@@ -140,8 +140,8 @@ fun FirClassSymbol<*>.isMPNode(firSession: FirSession): Boolean =
 
 @OptIn(SymbolInternals::class)
 fun FirClassSymbol<*>.isKolasuGenEnabled(firSession: FirSession): Boolean {
-    return this.extendMPNode(firSession)
-            || this.getAnnotationByClassId(KolasuGen::class.classId, firSession) != null
+    return this.extendMPNode(firSession) ||
+        this.getAnnotationByClassId(KolasuGen::class.classId, firSession) != null
 //    return this.extendMPNode(firSession) || this.annotations.any {
 //        val classId = it.annotationTypeRef.firClassLike(firSession)?.classId
 //        if (classId == null) {

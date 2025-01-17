@@ -30,10 +30,11 @@ fun processMPNodeSubclasses(
                     it.kotlinFqName.toString() == StarLasuLanguage::class.qualifiedName
                 }
             val isEnum =
-                irClass.isEnumClass && irClass.annotations.any { it.type.classFqName!! == KolasuGen::class.classId.asSingleFqName() }
-                irClass.getAllSuperclasses().any {
-                    it.kotlinFqName.toString() == MPNode::class.qualifiedName
-                }
+                irClass.isEnumClass &&
+                    irClass.annotations.any { it.type.classFqName!! == KolasuGen::class.classId.asSingleFqName() }
+            irClass.getAllSuperclasses().any {
+                it.kotlinFqName.toString() == MPNode::class.qualifiedName
+            }
             if (isMPNode) {
                 mpNodeProcessor.invoke(irClass)
             } else if (isLanguage) {

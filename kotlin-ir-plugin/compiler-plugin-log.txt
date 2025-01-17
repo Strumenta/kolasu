@@ -597,3 +597,215 @@
 2024-12-14 09:43: getCallableNamesForClass FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@c83af5a
 2024-12-14 09:43: generateFunctions mytest/SimpleNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@227cf44b
 2024-12-14 09:43: generateProperties mytest/SimpleNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@227cf44b
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: hasPackage kotlin.test
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/SimpleNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@677c97da
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@68e3b8bb
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/SimpleNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@677c97d9
+2025-01-17 14:46:   mytest.SimpleNode extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@68e3b8ba
+2025-01-17 14:46: generateFunctions mytest/SimpleNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@677c97d9
+2025-01-17 14:46: generateProperties mytest/SimpleNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@677c97d9
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: hasPackage kotlin.test
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/SimpleNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@5ac33aeb
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@649cc79f
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/SimpleNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@5ac33aea
+2025-01-17 14:46:   mytest.SimpleNode extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@649cc79e
+2025-01-17 14:46: generateFunctions mytest/SimpleNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@5ac33aea
+2025-01-17 14:46: generateProperties mytest/SimpleNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@5ac33aea
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model.observable
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@65bbde16
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@721bf0fd
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@721bf0fc
+2025-01-17 14:46:   mytest.MyNode extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@65bbde15
+2025-01-17 14:46: generateFunctions mytest/MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@721bf0fc
+2025-01-17 14:46: generateProperties mytest/MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@721bf0fc
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model.observable
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@511fc0e3
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@2481200c
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/Foo org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@7762bf9f
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/MyObserver org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@7e36818
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@2481200b
+2025-01-17 14:46:   mytest.MyNode extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/Foo org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@7762bf9e
+2025-01-17 14:46:   mytest.Foo extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/MyObserver org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@7e36817
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@511fc0e2
+2025-01-17 14:46: generateFunctions mytest/MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@2481200b
+2025-01-17 14:46: generateProperties mytest/MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@2481200b
+2025-01-17 14:46: generateFunctions mytest/Foo.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@7762bf9e
+2025-01-17 14:46: generateProperties mytest/Foo.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@7762bf9e
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@294b96b4
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@190b8cf4
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@190b8cf3
+2025-01-17 14:46:   MyNode extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@294b96b3
+2025-01-17 14:46: generateFunctions /MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@190b8cf3
+2025-01-17 14:46: generateProperties /MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@190b8cf3
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model.observable
+2025-01-17 14:46: hasPackage kotlin.test
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@3099b28
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/A org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@1b0f7e27
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/A org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@1b0f7e26
+2025-01-17 14:46:   mytest.A extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@3099b27
+2025-01-17 14:46: generateFunctions mytest/A.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@1b0f7e26
+2025-01-17 14:46: generateProperties mytest/A.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@1b0f7e26
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@2258c079
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@56afa2a1
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@56afa2a0
+2025-01-17 14:46:   MyNode extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@2258c078
+2025-01-17 14:46: generateFunctions /MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@56afa2a0
+2025-01-17 14:46: generateProperties /MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@56afa2a0
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model.observable
+2025-01-17 14:46: hasPackage kotlin.test
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@4036de8c
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/SimpleNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@21231855
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/SimpleNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@21231854
+2025-01-17 14:46:   mytest.SimpleNode extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@4036de8b
+2025-01-17 14:46: generateFunctions mytest/SimpleNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@21231854
+2025-01-17 14:46: generateProperties mytest/SimpleNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@21231854
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model.observable
+2025-01-17 14:46: hasPackage kotlin.test
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@7c4122fb
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/Expression org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@70b94520
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/Statement org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@2cb226cb
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/InputDeclaration org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@4a9fc106
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/SumExpr org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@3fbc6446
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/IntLiteral org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@597571a
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/VarDeclaration org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@38aebd0f
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/MiniCalcFile org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@c0ddcff
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/SumExpr org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@3fbc6445
+2025-01-17 14:46:   mytest.SumExpr extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/Expression org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@70b9451f
+2025-01-17 14:46:   mytest.Expression extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/IntLiteral org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@5975719
+2025-01-17 14:46:   mytest.IntLiteral extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/VarDeclaration org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@38aebd0e
+2025-01-17 14:46:   mytest.VarDeclaration extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/Statement org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@2cb226ca
+2025-01-17 14:46:   mytest.Statement extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/MiniCalcFile org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@c0ddcfe
+2025-01-17 14:46:   mytest.MiniCalcFile extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@7c4122fa
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/InputDeclaration org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@4a9fc105
+2025-01-17 14:46:   mytest.InputDeclaration extends MPNode
+2025-01-17 14:46: generateFunctions mytest/InputDeclaration.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@4a9fc105
+2025-01-17 14:46: generateProperties mytest/InputDeclaration.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@4a9fc105
+2025-01-17 14:46: generateFunctions mytest/SumExpr.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@3fbc6445
+2025-01-17 14:46: generateProperties mytest/SumExpr.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@3fbc6445
+2025-01-17 14:46: generateFunctions mytest/IntLiteral.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@5975719
+2025-01-17 14:46: generateProperties mytest/IntLiteral.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@5975719
+2025-01-17 14:46: generateFunctions mytest/VarDeclaration.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@38aebd0e
+2025-01-17 14:46: generateProperties mytest/VarDeclaration.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@38aebd0e
+2025-01-17 14:46: generateFunctions mytest/MiniCalcFile.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@c0ddcfe
+2025-01-17 14:46: generateProperties mytest/MiniCalcFile.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@c0ddcfe
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@57994fea
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@20607011
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@20607010
+2025-01-17 14:46:   mytest.MyNode extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@57994fe9
+2025-01-17 14:46: generateFunctions mytest/MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@20607010
+2025-01-17 14:46: generateProperties mytest/MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@20607010
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: hasPackage kotlin.test
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@4e39e311
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/MyEnum org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@43130657
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@6096315c
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/MyEnum org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@43130656
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@6096315b
+2025-01-17 14:46:   mytest.MyNode extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@4e39e310
+2025-01-17 14:46: generateFunctions mytest/MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@6096315b
+2025-01-17 14:46: generateProperties mytest/MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@6096315b
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@1c695ddf
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@1c695dde
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model.observable
+2025-01-17 14:46: hasPackage kotlin.test
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/StarLasuLanguageInstance org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@359b3edd
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/NamedNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@29a06b2a
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/NodeWithReference org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@7f9d6807
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/MyObserver org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@3cb390ec
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/NamedNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@29a06b29
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/NodeWithReference org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@7f9d6806
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/MyObserver org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@3cb390eb
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/StarLasuLanguageInstance org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@359b3edc
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@409e536a
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@55da98f5
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol MyNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@55da98f4
+2025-01-17 14:46:   MyNode extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@409e5369
+2025-01-17 14:46: generateFunctions /MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@55da98f4
+2025-01-17 14:46: generateProperties /MyNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@55da98f4
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.model.observable
+2025-01-17 14:46: hasPackage kotlin.test
+2025-01-17 14:46: hasPackage com.strumenta.kolasu.language
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@407bcc6d
+2025-01-17 14:46: getNestedClassifiersNames FirRegularClassSymbol mytest/SimpleNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Nested@5c42f826
+2025-01-17 14:46: getTopLevelClassIds
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/SimpleNode org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@5c42f825
+2025-01-17 14:46:   mytest.SimpleNode extends MPNode
+2025-01-17 14:46: getCallableNamesForClass FirRegularClassSymbol mytest/LanguageMyTest org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@407bcc6c
+2025-01-17 14:46: generateFunctions mytest/SimpleNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@5c42f825
+2025-01-17 14:46: generateProperties mytest/SimpleNode.calculateConcept org.jetbrains.kotlin.fir.extensions.DeclarationGenerationContext$Member@5c42f825

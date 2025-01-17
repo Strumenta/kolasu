@@ -16,7 +16,6 @@ import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irBlockBody
 import org.jetbrains.kotlin.backend.jvm.codegen.AnnotationCodegen.Companion.annotationClass
 import org.jetbrains.kotlin.backend.jvm.functionByName
-import org.jetbrains.kotlin.backend.jvm.ir.findEnumValuesFunction
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
@@ -59,7 +58,6 @@ import org.jetbrains.kotlin.ir.types.toKotlinType
 import org.jetbrains.kotlin.ir.types.typeOrNull
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
-import org.jetbrains.kotlin.ir.util.allParameters
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.kotlinFqName
@@ -79,7 +77,7 @@ class LanguageIrGenerationExtension(
         pluginContext: IrPluginContext,
         languageClass: IrClass,
         astClasses: List<IrClass>,
-        enumClasses: List<IrClass>
+        enumClasses: List<IrClass>,
     ) {
         val languageInitializer =
             IrFactoryImpl.createAnonymousInitializer(
@@ -114,9 +112,10 @@ class LanguageIrGenerationExtension(
 
                 // We add the enums
                 enumClasses.forEach { enumClass ->
-                    val arrayListConstructor = pluginContext.referenceConstructors(ArrayList::class.classId).find {
-                        it.owner.valueParameters.isEmpty()
-                    }!!
+                    val arrayListConstructor =
+                        pluginContext.referenceConstructors(ArrayList::class.classId).find {
+                            it.owner.valueParameters.isEmpty()
+                        }!!
                     val literals =
                         createTmpVariable(
                             irCallConstructor(arrayListConstructor, emptyList()).apply {
@@ -275,7 +274,8 @@ class LanguageIrGenerationExtension(
                                         .getter!!
                                         .returnType
                                         .classFqName!!
-                                        .shortName().asString(),
+                                        .shortName()
+                                        .asString(),
                                 ),
                             )
                         },
@@ -363,10 +363,14 @@ class LanguageIrGenerationExtension(
                                 0,
                                 irString(
                                     // Here we take the type parameter ReferenceValue<MyAstClass>
-                                    (property
-                                        .getter!!
-                                        .returnType as IrSimpleType).arguments[0].typeOrNull!!
-                                        .classFqName!!.shortName()
+                                    (
+                                        property
+                                            .getter!!
+                                            .returnType as IrSimpleType
+                                    ).arguments[0]
+                                        .typeOrNull!!
+                                        .classFqName!!
+                                        .shortName()
                                         .asString(),
                                 ),
                             )
@@ -643,10 +647,11 @@ class LanguageIrGenerationExtension(
         val companionIrClass =
             companions.find { it.properties.any { it.name.identifier == companionConceptPropertyName } }
                 ?: throw IllegalStateException(
-                    "Cannot find companion with expected property ${companionConceptPropertyName} in ${astClass.kotlinFqName.asString()}. " +
+                    "Cannot find companion with expected property $companionConceptPropertyName in " +
+                        "${astClass.kotlinFqName.asString()}. " +
                         "Companions found: ${companions.size}. Companions have these properties: ${
                             companions.joinToString(
-                                "; "
+                                "; ",
                             ) { it.properties.map { it.name }.joinToString(", ") }
                         }",
                 )
@@ -690,7 +695,8 @@ class LanguageIrGenerationExtension(
         val languages = mutableListOf<IrClass>()
         val enumClasses = mutableListOf<IrClass>()
         processMPNodeSubclasses(moduleFragment, { astClasses.add(it) }, { languages.add(it) }, {
-            enumClasses.add(it)})
+            enumClasses.add(it)
+        })
         if (astClasses.isNotEmpty()) {
             require(languages.size == 1) {
                 if (languages.size == 0) {

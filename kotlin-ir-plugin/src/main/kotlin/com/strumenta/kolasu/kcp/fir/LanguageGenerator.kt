@@ -114,9 +114,10 @@ class LanguageGenerator(
     ): FirClassLikeSymbol<*>? =
         runIf(name == DEFAULT_NAME_FOR_COMPANION_OBJECT) {
             // We cannot add more than one companion object
-            val existingCompanion = owner.fir.declarations.filterIsInstance<FirClassLikeDeclaration>().find {
-                it.nameOrSpecialName == DEFAULT_NAME_FOR_COMPANION_OBJECT
-            }
+            val existingCompanion =
+                owner.fir.declarations.filterIsInstance<FirClassLikeDeclaration>().find {
+                    it.nameOrSpecialName == DEFAULT_NAME_FOR_COMPANION_OBJECT
+                }
             if (existingCompanion == null) {
                 val firClass = createCompanionObject(owner, Key)
                 firClass.symbol

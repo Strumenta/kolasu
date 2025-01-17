@@ -7,7 +7,6 @@ import com.tschuchort.compiletesting.SourceFile
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class IrPluginTest : AbstractIrPluginTest() {
     @Test
@@ -720,5 +719,4 @@ fun main() {
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
         result.invokeMainMethod("mytest.MainKt")
     }
-
 }

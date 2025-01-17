@@ -39,9 +39,8 @@ signing {
 //    sign(publishing.publications["kolasu_ast"])
 }
 
-
 mavenPublishing {
-    coordinates(project.group as String, "kolasu-"+project.name, project.version as String)
+    coordinates(project.group as String, "kolasu-" + project.name, project.version as String)
 
     pom {
         name.set("kolasu-" + project.name)
