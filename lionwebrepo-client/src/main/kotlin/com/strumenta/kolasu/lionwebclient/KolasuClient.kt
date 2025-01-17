@@ -421,6 +421,13 @@ class KolasuClient(
         return lionWebClient.retrieve(nodeIDs, withProxyParent, retrievalMode = RetrievalMode.SINGLE_NODE)
     }
 
+    fun getFullLionWebNodes(
+        nodeIDs: List<String>,
+        withProxyParent: Boolean = false,
+    ): List<LWNode> {
+        return lionWebClient.retrieve(nodeIDs, withProxyParent, retrievalMode = RetrievalMode.ENTIRE_SUBTREE)
+    }
+
     //
     // Other operations
     //
