@@ -1,3 +1,4 @@
+import com.strumenta.starlasuv2.StarLasuGen
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Language

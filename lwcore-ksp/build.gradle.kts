@@ -1,35 +1,25 @@
-//import com.vanniktech.maven.publish.SonatypeHost
-import java.net.URI
-
 plugins {
-    `jvm-test-suite`
-    id("org.jetbrains.kotlin.jvm")
-    //alias(libs.plugins.kotlinJvm)
-    //alias(libs.plugins.dokka)
-    alias(libs.plugins.ktlint)
-    id("java-library")
-    alias(libs.plugins.superPublish)
+    kotlin("jvm") version "1.9.0"
+    id("com.google.devtools.ksp") version "1.9.0-1.0.13" // Use the latest KSP plugin version
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 
-tasks.withType<Test>().all {
-    testLogging {
-        showStandardStreams = true
-        showExceptions = true
-        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-    }
+dependencies {
+    implementation(project(":lwcore"))
+    implementation(kotlin("stdlib"))
+    implementation("com.google.devtools.ksp:symbol-processing-api:1.9.0-1.0.13") // KSP API
 }
 
-dependencies {
-    api(libs.lionwebjava)
-    api(libs.lionwebkotlincore)
-//    api(libs.lionwebkotlincore) {
-//        exclude group: "org.jetbrains.kotlin", module: "kotlin-test-junit5"
-//    }
+// Ensure generated code is recognized
+sourceSets.main {
+    java.srcDir("build/generated/ksp/main/kotlin")
+}
+
+ksp {
+    arg("ksp.verbose", "true")
 }
 
 val jvmVersion = extra["jvm_version"] as String
