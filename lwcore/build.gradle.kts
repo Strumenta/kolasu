@@ -68,3 +68,68 @@ tasks.withType<Test> {
         events("standardOut", "passed", "skipped", "failed")
     }
 }
+
+val isReleaseVersion = (version as String).endsWith("SNAPSHOT")
+
+publishing {
+
+    repositories {
+        maven {
+            val releaseRepo = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            val snapshotRepo = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url = URI(if (isReleaseVersion)  releaseRepo else snapshotRepo)
+            credentials {
+                username = if (project.hasProperty("ossrhTokenUsername")) project.properties["ossrhTokenUsername"] as String else "Unknown user"
+                password = if (project.hasProperty("ossrhTokenPassword")) project.properties["ossrhTokenPassword"] as String  else "Unknown password"
+            }
+        }
+    }
+
+    publishing {
+        publications {
+            create<MavenPublication>("kolasu_lwcore") {
+                from(components["java"])
+                artifactId = "kolasu-${project.name}"
+                //artifact(sourcesJar)
+                //artifact(javadocJar)
+                suppressPomMetadataWarningsFor("cliApiElements")
+                suppressPomMetadataWarningsFor("cliRuntimeElements")
+
+                pom {
+                    name.set("kolasu-${project.name}")
+                    description.set("Framework to work with AST and building languages. Integrated with ANTLR.")
+                    version = project.version.toString()
+                    packaging = "jar"
+                    url.set("https://github.com/Strumenta/kolasu")
+
+                    scm {
+                        connection.set("scm:git:https://github.com/Strumenta/kolasu.git")
+                        developerConnection.set("scm:git:git@github.com:Strumenta/kolasu.git")
+                        url.set("https://github.com/Strumenta/kolasu.git")
+                    }
+
+                    licenses {
+                        license {
+                            name.set("Apache License V2.0")
+                            url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                            distribution.set("repo")
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id.set("ftomassetti")
+                            name.set("Federico Tomassetti")
+                            email.set("federico@strumenta.com")
+                        }
+                        developer {
+                            id.set("alessiostalla")
+                            name.set("Alessio Stalla")
+                            email.set("alessio.stalla@strumenta.com")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
