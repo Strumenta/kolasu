@@ -1,6 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.9.0"
-    id("com.google.devtools.ksp") version "1.9.0-1.0.13" // Use the latest KSP plugin version
+    kotlin("jvm")
 }
 
 repositories {
@@ -11,7 +10,6 @@ dependencies {
     api(libs.lionwebjava)
     api(libs.lionwebkotlincore)
     implementation(project(":lwcore"))
-    ksp(project(":lwcore-ksp"))
     //implementation(kotlin("stdlib"))
     //implementation("com.google.devtools.ksp:symbol-processing-api:1.9.0-1.0.13") // KSP API
 }
@@ -21,9 +19,6 @@ sourceSets.main {
     java.srcDir("build/generated/ksp/main/kotlin")
 }
 
-ksp {
-    arg("ksp.verbose", "true")
-}
 
 val jvmVersion = extra["jvm_version"] as String
 val normalizedJvmVersion = if (jvmVersion.startsWith("1.")) jvmVersion.removePrefix("1.") else jvmVersion
