@@ -25,6 +25,7 @@ tasks.withType<Test>().all {
 }
 
 dependencies {
+    implementation(project(":core"))
     api(libs.lionwebjava)
     api(libs.lionwebkotlincore)
 //    api(libs.lionwebkotlincore) {

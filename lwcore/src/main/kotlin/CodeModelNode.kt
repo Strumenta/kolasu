@@ -1,9 +1,14 @@
+import com.strumenta.kolasu.model.Origin
+import com.strumenta.kolasu.model.Position
 import io.lionweb.lioncore.java.language.INamed
 import io.lionweb.lioncore.java.model.Node
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.kotlin.BaseNode
 
-abstract class CodeModelNode : BaseNode()
+abstract class CodeModelNode : BaseNode() {
+    var origin: Origin? = null
+    var position: Position? = null
+}
 
 interface NamedNode : Node, INamed
 
