@@ -14,4 +14,4 @@ include 'lionweb-gen-gradle'
 include 'lionwebrepo-client'
 include 'lwcore'
 include 'lwcore-example'
-
+include 'lwcore-gradle'
