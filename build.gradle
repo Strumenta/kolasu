@@ -96,7 +96,7 @@ subprojects {
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 release {
-    buildTasks = ['publish', ":lionweb-gen-gradle:publishPlugins"]
+    buildTasks = ['publish', ":lionweb-gen-gradle:publishPlugins", ":lwcore-gradle:publishPlugins"]
     git {
         requireBranch.set('')
         pushToRemote.set('origin')
