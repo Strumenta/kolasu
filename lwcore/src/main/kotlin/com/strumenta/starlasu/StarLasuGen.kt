@@ -1,4 +1,4 @@
-package com.strumenta.starlasuv2
+package com.strumenta.starlasu
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY, AnnotationTarget.FIELD,
     AnnotationTarget.CONSTRUCTOR, AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.CONSTRUCTOR)

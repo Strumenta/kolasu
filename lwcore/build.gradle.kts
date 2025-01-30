@@ -25,9 +25,9 @@ tasks.withType<Test>().all {
 }
 
 dependencies {
-    implementation(project(":core"))
-    api(libs.lionwebjava)
-    api(libs.lionwebkotlincore)
+    // implementation(project(":core"))
+    implementation(libs.lionwebjava)
+    implementation(libs.lionwebkotlincore)
 //    api(libs.lionwebkotlincore) {
 //        exclude group: "org.jetbrains.kotlin", module: "kotlin-test-junit5"
 //    }

@@ -1,5 +1,7 @@
 package com.strumenta.starlasu2
 
+import com.strumenta.kolasu.lionweb.StarLasuLWLanguage
+import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.serialization.SerializationProvider
 import org.gradle.api.Plugin
@@ -47,8 +49,18 @@ class LWCorePlugin : Plugin<Project> {
 
     private fun generateASTClassesForLanguage(project: Project, configuration: LWCoreGradleExtension, languageFile: File) {
         val jsonSerialization = SerializationProvider.getStandardJsonSerialization()
+        jsonSerialization.instanceResolver.addTree(StarLasuLWLanguage)
         val language = jsonSerialization.deserializeToNodes(languageFile).filterIsInstance<Language>().first()
         println("Language: ${language.name}")
+        val generationDir = File(File(project.projectDir,"build"), "generatedStarLasuCode")
+        generationDir.mkdirs()
+        val astFile = File(generationDir, "CodeModel.kt")
+        val code = "${language.elements.filterIsInstance<Concept>().map { generateASTClass(it) }.joinToString("\n\n")}"
+        astFile.writeText(code)
+    }
+
+    private fun generateASTClass(concept: Concept) : String{
+        return "class ${concept.name}"
     }
 
 }
