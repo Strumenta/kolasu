@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.mapping
 
+import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.getOriginalText
 import com.strumenta.kolasu.transformation.ASTTransformer
 import org.antlr.v4.runtime.ParserRuleContext
@@ -29,8 +30,8 @@ fun <T> ASTTransformer.translateCasted(original: Any): T {
  * JExtendsType(translateCasted(pt.typeType()), translateList(pt.annotation()))
  * ```
  */
-fun <T> ASTTransformer.translateList(original: Collection<out Any>?): MutableList<T> {
-    return original?.map { transformIntoNodes(it) as List<T> }?.flatten()?.toMutableList() ?: mutableListOf()
+inline fun <reified T : Node> ASTTransformer.translateList(original: Collection<out Any>?): MutableList<T> {
+    return original?.map { transformIntoNodes(it, expectedType = T::class) as List<T> }?.flatten()?.toMutableList() ?: mutableListOf()
 }
 
 /**
