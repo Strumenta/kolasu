@@ -272,8 +272,8 @@ open class ASTTransformer(
      * This ensures that the generated value is a single Node or null.
      */
     @JvmOverloads
-    fun transform(source: Any?, parent: Node? = null): Node? {
-        val result = transformIntoNodes(source, parent)
+    fun transform(source: Any?, parent: Node? = null, expectedType: KClass<out Node> = Node::class): Node? {
+        val result = transformIntoNodes(source, parent, expectedType)
         return when (result.size) {
             0 -> null
             1 -> {

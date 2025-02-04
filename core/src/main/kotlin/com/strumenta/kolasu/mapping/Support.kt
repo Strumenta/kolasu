@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.mapping
 
+import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.getOriginalText
 import com.strumenta.kolasu.transformation.ASTTransformer
 import org.antlr.v4.runtime.ParserRuleContext
@@ -12,8 +13,8 @@ import org.antlr.v4.runtime.ParserRuleContext
  * JPostIncrementExpr(translateCasted<JExpression>(expression().first()))
  * ```
  */
-fun <T> ASTTransformer.translateCasted(original: Any): T {
-    val result = transform(original)
+inline fun <reified T : Node> ASTTransformer.translateCasted(original: Any): T {
+    val result = transform(original, expectedType = T::class)
     if (result is Nothing) {
         throw IllegalStateException("Transformation produced Nothing")
     }
@@ -29,8 +30,9 @@ fun <T> ASTTransformer.translateCasted(original: Any): T {
  * JExtendsType(translateCasted(pt.typeType()), translateList(pt.annotation()))
  * ```
  */
-fun <T> ASTTransformer.translateList(original: Collection<out Any>?): MutableList<T> {
-    return original?.map { transformIntoNodes(it) as List<T> }?.flatten()?.toMutableList() ?: mutableListOf()
+inline fun <reified T : Node> ASTTransformer.translateList(original: Collection<out Any>?): MutableList<T> {
+    return original?.map { transformIntoNodes(it, expectedType = T::class) as List<T> }?.flatten()?.toMutableList()
+        ?: mutableListOf()
 }
 
 /**
@@ -46,8 +48,8 @@ fun <T> ASTTransformer.translateList(original: Collection<out Any>?): MutableLis
  *  )
  *  ```
  */
-fun <T> ASTTransformer.translateOptional(original: Any?): T? {
-    return original?.let { transform(it) as T }
+inline fun <reified T : Node> ASTTransformer.translateOptional(original: Any?): T? {
+    return original?.let { transform(it, expectedType = T::class) as T }
 }
 
 /**
