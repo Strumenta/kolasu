@@ -740,7 +740,7 @@ class LionWebModelConverter(
             constructor.callBy(params) as T
         } catch (e: Exception) {
             throw RuntimeException(
-                "Issue instantiating using constructor $constructor with params " +
+                "Issue instantiating using constructor ${kClass.qualifiedName}.$constructor with params " +
                     "${params.map { "${it.key.name}=${it.value}" }}",
                 e
             )
