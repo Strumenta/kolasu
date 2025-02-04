@@ -886,7 +886,7 @@ class ParsingResultWithTokens<RootNode : KNode>(
     source: Source? = null
 ) : ParsingResult<RootNode>(issues, root, code, incompleteNode, firstStage, time, source)
 
-class IssueNode : BaseNode() {
+class IssueNode : BaseNode(LIONWEB_VERSION_USED_BY_KOLASU) {
     var type: EnumerationValue? by property("type")
     var message: String? by property("message")
     var severity: EnumerationValue? by property("severity")
@@ -897,7 +897,7 @@ class IssueNode : BaseNode() {
     }
 }
 
-class ParsingResultNode(val source: Source?) : BaseNode() {
+class ParsingResultNode(val source: Source?) : BaseNode(LIONWEB_VERSION_USED_BY_KOLASU) {
     override fun calculateID(): String? {
         return try {
             SimpleSourceIdProvider().sourceId(source) + "_ParsingResult"
