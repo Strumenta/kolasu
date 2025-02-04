@@ -238,6 +238,22 @@ data class ChildNodeFactory<Source, Target, Child : Any>(
  */
 private val NO_CHILD_NODE = ChildNodeFactory<Any, Any, Any>("", { x -> x }, { _, _ -> }, Node::class)
 
+val IDENTTITY_TRANSFORMATION: (source: Any?, parent: Node?, expectedType: KClass<out Node>) -> List<Node> = {
+        source: Any?, parent: Node?, expectedType: KClass<out Node> ->
+    when (source) {
+        null -> {
+            emptyList()
+        }
+        is Node -> {
+            source.parent = parent
+            listOf(source)
+        }
+        else -> {
+            throw IllegalArgumentException("An Identity Transformation expect to receive a Node")
+        }
+    }
+}
+
 /**
  * Implementation of a tree-to-tree transformation. For each source node type, we can register a factory that knows how
  * to create a transformed node. Then, this transformer can read metadata in the transformed node to recursively
@@ -258,7 +274,8 @@ open class ASTTransformer(
      * with the origin FailingASTTransformation. If the flag is not set, then the transformation will just
      * fail.
      */
-    val faultTollerant: Boolean = !throwOnUnmappedNode
+    val faultTollerant: Boolean = !throwOnUnmappedNode,
+    val defaultTransformation: ((source: Any?, parent: Node?, expectedType: KClass<out Node>) -> List<Node>)? = null
 ) {
     /**
      * Factories that map from source tree node to target tree node.
@@ -272,8 +289,8 @@ open class ASTTransformer(
      * This ensures that the generated value is a single Node or null.
      */
     @JvmOverloads
-    fun transform(source: Any?, parent: Node? = null): Node? {
-        val result = transformIntoNodes(source, parent)
+    fun transform(source: Any?, parent: Node? = null, expectedType: KClass<out Node> = Node::class): Node? {
+        val result = transformIntoNodes(source, parent, expectedType)
         return when (result.size) {
             0 -> null
             1 -> {
@@ -314,7 +331,9 @@ open class ASTTransformer(
                 node.parent = parent
             }
         } else {
-            if (allowGenericNode) {
+            if (defaultTransformation != null) {
+                nodes = defaultTransformation.invoke(source, parent, expectedType)
+            } else if (allowGenericNode) {
                 val origin = asOrigin(source)
                 nodes = listOf(GenericNode(parent).withOrigin(origin))
                 issues.add(
