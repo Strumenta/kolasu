@@ -224,10 +224,10 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
             classifier.id == StarLasuLWLanguage.ASTNode.id -> {
                 Node::class.java.asTypeName()
             }
-            classifier.id == LionCoreBuiltins.getNode().id -> {
+            classifier.id == LionCoreBuiltins.getNode(LIONWEB_VERSION_USED_BY_KOLASU).id -> {
                 Node::class.java.asTypeName()
             }
-            classifier.id == LionCoreBuiltins.getINamed().id -> {
+            classifier.id == LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU).id -> {
                 Named::class.java.asTypeName()
             }
             classifier.id == StarLasuLWLanguage.Position.id -> {
@@ -244,13 +244,13 @@ class ASTGenerator(val packageName: String, val language: LWLanguage) {
 
     private fun typeName(dataType: DataType<*>): TypeName {
         return when {
-            dataType == LionCoreBuiltins.getString() -> {
+            dataType == LionCoreBuiltins.getString(LIONWEB_VERSION_USED_BY_KOLASU) -> {
                 ClassName.bestGuess("kotlin.String")
             }
-            dataType == LionCoreBuiltins.getBoolean() -> {
+            dataType == LionCoreBuiltins.getBoolean(LIONWEB_VERSION_USED_BY_KOLASU) -> {
                 Boolean::class.java.asTypeName()
             }
-            dataType == LionCoreBuiltins.getInteger() -> {
+            dataType == LionCoreBuiltins.getInteger(LIONWEB_VERSION_USED_BY_KOLASU) -> {
                 ClassName.bestGuess("kotlin.Int")
             }
             dataType.language == this.language -> {

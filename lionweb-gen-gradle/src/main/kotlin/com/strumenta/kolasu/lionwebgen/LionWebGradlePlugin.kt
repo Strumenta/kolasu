@@ -3,6 +3,7 @@ package com.strumenta.kolasu.lionwebgen
 import com.google.devtools.ksp.gradle.KspExtension
 import com.strumenta.kolasu.lionweb.ASTGenerator
 import com.strumenta.kolasu.lionweb.KotlinCodeProcessor
+import com.strumenta.kolasu.lionweb.LIONWEB_VERSION_USED_BY_KOLASU
 import com.strumenta.kolasu.lionweb.StarLasuLWLanguage
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.serialization.JsonSerialization
@@ -46,7 +47,8 @@ class LionWebGradlePlugin : Plugin<Project> {
                     println("processing languageFile $languageFile")
                     when (languageFile.extension) {
                         "json" -> {
-                            val jsonser = SerializationProvider.getStandardJsonSerialization()
+                            val jsonser = SerializationProvider.getStandardJsonSerialization(
+                                LIONWEB_VERSION_USED_BY_KOLASU)
                             jsonser.instanceResolver.addTree(StarLasuLWLanguage)
                             val language = jsonser.deserializeToNodes(FileInputStream(languageFile)).first() as Language
                             val existingKotlinClasses = KotlinCodeProcessor().classesDeclaredInDir(project.file("src/main/kotlin"))

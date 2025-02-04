@@ -465,7 +465,7 @@ class LionWebModelConverter(
 
     fun prepareSerialization(
         serialization: AbstractSerialization =
-            SerializationProvider.getStandardJsonSerialization()
+            SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
     ): AbstractSerialization {
         StarLasuLWLanguage
         MetamodelRegistry.prepareJsonSerialization(serialization)

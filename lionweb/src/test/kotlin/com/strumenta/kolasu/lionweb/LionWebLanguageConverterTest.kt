@@ -67,7 +67,7 @@ class LionWebLanguageConverterTest {
         val simpleRootID = simpleRoot.getPropertyByName("id")!!
         assertEquals("id", simpleRootID.name)
         assertEquals(false, simpleRootID.isOptional)
-        assertEquals(LionCoreBuiltins.getInteger(), simpleRootID.type)
+        assertEquals(LionCoreBuiltins.getInteger(LIONWEB_VERSION_USED_BY_KOLASU), simpleRootID.type)
 
         val simpleRootChildren = simpleRoot.getContainmentByName("childrez")!!
         assertEquals("childrez", simpleRootChildren.name)
@@ -85,14 +85,18 @@ class LionWebLanguageConverterTest {
         assertSame(lwLanguage, simpleNodeA.language)
         assertEquals(simpleDecl, simpleNodeA.extendedConcept)
         assertEquals(listOf(StarLasuLWLanguage.EntityDeclaration), simpleNodeA.extendedConcept!!.implemented)
-        assertEquals(listOf(LionCoreBuiltins.getINamed(), myRelevantInterface), simpleNodeA.implemented)
+        assertEquals(
+            listOf(LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU), myRelevantInterface),
+            simpleNodeA.implemented
+        )
         assertEquals(false, simpleNodeA.isAbstract)
         assertEquals(2, simpleNodeA.features.size)
         assertEquals(6, simpleNodeA.allFeatures().size)
 
         assertEquals(
             true,
-            LionCoreBuiltins.getINamed().getPropertyByName("name") in simpleNodeA.allFeatures()
+            LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU)
+                .getPropertyByName("name") in simpleNodeA.allFeatures()
         )
 
         val simpleNodeARef = simpleNodeA.getReferenceByName("ref")!!
@@ -117,7 +121,7 @@ class LionWebLanguageConverterTest {
         val simpleNodeBValue = simpleNodeB.getPropertyByName("value")!!
         assertEquals("value", simpleNodeBValue.name)
         assertEquals(false, simpleNodeBValue.isOptional)
-        assertEquals(LionCoreBuiltins.getString(), simpleNodeBValue.type)
+        assertEquals(LionCoreBuiltins.getString(LIONWEB_VERSION_USED_BY_KOLASU), simpleNodeBValue.type)
 
         val validationResult = LanguageValidator().validate(lwLanguage)
         assertEquals(true, validationResult.isSuccessful, validationResult.issues.toString())
@@ -163,7 +167,7 @@ class LionWebLanguageConverterTest {
         val simpleRootID = simpleRoot.getPropertyByName("id")!!
         assertEquals("id", simpleRootID.name)
         assertEquals(false, simpleRootID.isOptional)
-        assertEquals(LionCoreBuiltins.getInteger(), simpleRootID.type)
+        assertEquals(LionCoreBuiltins.getInteger(LIONWEB_VERSION_USED_BY_KOLASU), simpleRootID.type)
 
         val simpleRootChildren = simpleRoot.getContainmentByName("childrez")!!
         assertEquals("childrez", simpleRootChildren.name)
@@ -182,14 +186,18 @@ class LionWebLanguageConverterTest {
         assertEquals(false, simpleNodeA.isPartition)
         assertSame(lwLanguage, simpleNodeA.language)
         assertEquals(simpleDecl, simpleNodeA.extendedConcept)
-        assertEquals(listOf(LionCoreBuiltins.getINamed(), myRelevantInterface), simpleNodeA.implemented)
+        assertEquals(
+            listOf(LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU), myRelevantInterface),
+            simpleNodeA.implemented
+        )
         assertEquals(false, simpleNodeA.isAbstract)
         assertEquals(2, simpleNodeA.features.size)
         assertEquals(6, simpleNodeA.allFeatures().size)
 
         assertEquals(
             true,
-            LionCoreBuiltins.getINamed().getPropertyByName("name") in simpleNodeA.allFeatures()
+            LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU)
+                .getPropertyByName("name") in simpleNodeA.allFeatures()
         )
 
         val simpleNodeARef = simpleNodeA.getReferenceByName("ref")!!
@@ -215,7 +223,7 @@ class LionWebLanguageConverterTest {
         val simpleNodeBValue = simpleNodeB.getPropertyByName("value")!!
         assertEquals("value", simpleNodeBValue.name)
         assertEquals(false, simpleNodeBValue.isOptional)
-        assertEquals(LionCoreBuiltins.getString(), simpleNodeBValue.type)
+        assertEquals(LionCoreBuiltins.getString(LIONWEB_VERSION_USED_BY_KOLASU), simpleNodeBValue.type)
 
         val validationResult = LanguageValidator().validate(lwLanguage)
         assertEquals(true, validationResult.isSuccessful, validationResult.issues.toString())
