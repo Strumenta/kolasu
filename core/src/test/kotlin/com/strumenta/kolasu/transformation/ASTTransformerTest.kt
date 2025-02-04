@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.transformation
 
+import com.strumenta.kolasu.mapping.translateList
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.testing.assertASTsAreEqual
@@ -349,6 +351,51 @@ class ASTTransformerTest {
         )
         assertIs<MissingASTTransformation>(bazRoot1.stmts[0].origin)
     }
+
+    @Test
+    fun testIdentityTransformation() {
+        val transformer = ASTTransformer(defaultTransformation = IDENTTITY_TRANSFORMATION)
+
+        val original = BarRoot(
+            stmts = mutableListOf(
+                BarStmt("a"),
+                BarStmt("b")
+            )
+        )
+        val transformed = transformer.transform(original) as Node
+        assertASTsAreEqual(
+            original,
+            transformed
+        )
+    }
+
+    @Test
+    fun testPartialIdentityTransformation() {
+        val transformer1 = ASTTransformer(defaultTransformation = IDENTTITY_TRANSFORMATION)
+        transformer1.registerNodeFactory(BarRoot::class) { original: BarRoot, astTransformer: ASTTransformer, _ ->
+            FooRoot(
+                desc = "#children = ${original.children.size}",
+                stmts = astTransformer.translateList(original.stmts)
+            )
+        }
+        val original = BarRoot(
+            stmts = mutableListOf(
+                BarStmt("a"),
+                BarStmt("b")
+            )
+        )
+        val transformed = transformer1.transform(original) as FooRoot
+        assertASTsAreEqual(
+            FooRoot(
+                "#children = 2",
+                mutableListOf(
+                    BarStmt("a"),
+                    BarStmt("b")
+                )
+            ),
+            transformed
+        )
+    }
 }
 
 data class BazRoot(var stmts: MutableList<BazStmt> = mutableListOf()) : Node()
@@ -357,3 +404,5 @@ data class BazStmt(val desc: String? = null) : Node()
 
 data class BarRoot(var stmts: MutableList<BarStmt> = mutableListOf()) : Node()
 data class BarStmt(val desc: String) : Node()
+
+data class FooRoot(var desc: String, var stmts: MutableList<BarStmt> = mutableListOf()) : Node()
