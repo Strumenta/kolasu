@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.lionwebclient
 
+import com.strumenta.kolasu.lionweb.LIONWEB_VERSION_USED_BY_KOLASU
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
@@ -10,7 +11,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @Testcontainers
-class TodoFunctionalTest : AbstractRepoClientFunctionalTest() {
+class TodoFunctionalTest : AbstractRepoClientFunctionalTest(lionWebVersion = LIONWEB_VERSION_USED_BY_KOLASU) {
     @Test
     fun noPartitionsOnNewModelRepository() {
         val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort)
