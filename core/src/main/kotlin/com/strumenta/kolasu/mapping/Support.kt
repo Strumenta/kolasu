@@ -49,7 +49,14 @@ inline fun <reified T : Node> ASTTransformer.translateList(original: Collection<
  *  ```
  */
 inline fun <reified T : Node> ASTTransformer.translateOptional(original: Any?): T? {
-    return original?.let { transform(it, expectedType = T::class) as T }
+    return original?.let {
+        val transformed = transform(it, expectedType = T::class)
+        if (transformed == null) {
+            return null
+        } else {
+            transformed as T
+        }
+    }
 }
 
 /**

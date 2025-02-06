@@ -7,10 +7,10 @@ import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.TokenCategory
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
+import io.lionweb.lioncore.java.LionWebVersion
 import io.lionweb.lioncore.java.language.Annotation
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Enumeration
-import io.lionweb.lioncore.java.language.EnumerationLiteral
 import io.lionweb.lioncore.java.language.Interface
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
@@ -22,8 +22,10 @@ import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.Primi
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.kotlin.MetamodelRegistry
 import io.lionweb.lioncore.kotlin.Multiplicity
+import io.lionweb.lioncore.kotlin.addLiteral
 import io.lionweb.lioncore.kotlin.createConcept
 import io.lionweb.lioncore.kotlin.createContainment
+import io.lionweb.lioncore.kotlin.createInterface
 import io.lionweb.lioncore.kotlin.createPrimitiveType
 import io.lionweb.lioncore.kotlin.createProperty
 import io.lionweb.lioncore.kotlin.createReference
@@ -42,11 +44,13 @@ import com.strumenta.kolasu.validation.Issue as KIssue
 
 private const val PLACEHOLDER_NODE = "PlaceholderNode"
 
+val LIONWEB_VERSION_USED_BY_KOLASU = LionWebVersion.v2023_1
+
 /**
  * When this object is referenced the initialization is performed. When that happens the serializers and deserializers
  * for Position and other primitive types are registered in the MetamodelRegistry.
  */
-object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
+object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strumenta.StarLasu") {
 
     val CommonElement: Interface
     val Issue: Concept
@@ -67,21 +71,24 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
 
         addPlaceholderNodeAnnotation(astNode)
 
-        CommonElement = addInterface(KCommonElement::class.simpleName!!)
-        addInterface(KBehaviorDeclaration::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
-        addInterface(KDocumentation::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
-        addInterface(KEntityDeclaration::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
-        addInterface(KEntityGroupDeclaration::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
-        addInterface(KExpression::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
-        addInterface(KParameter::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
-        addInterface(KPlaceholderElement::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
-        addInterface(KStatement::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
-        addInterface(KTypeAnnotation::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        CommonElement = createInterface(KCommonElement::class.simpleName!!)
+        createInterface(KBehaviorDeclaration::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        createInterface(KDocumentation::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        createInterface(KEntityDeclaration::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        createInterface(KEntityGroupDeclaration::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        createInterface(KExpression::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        createInterface(KParameter::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        createInterface(KPlaceholderElement::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        createInterface(KStatement::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
+        createInterface(KTypeAnnotation::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
 
         Issue = createConcept(KIssue::class.simpleName!!).apply {
-            addProperty(KIssue::type.name, addEnumerationFromClass(this@StarLasuLWLanguage, IssueType::class))
-            createProperty(KIssue::message.name, LionCoreBuiltins.getString())
-            addProperty(KIssue::severity.name, addEnumerationFromClass(this@StarLasuLWLanguage, IssueSeverity::class))
+            createProperty(KIssue::type.name, addEnumerationFromClass(this@StarLasuLWLanguage, IssueType::class))
+            createProperty(KIssue::message.name, LionCoreBuiltins.getString(lionWebVersion))
+            createProperty(
+                KIssue::severity.name,
+                addEnumerationFromClass(this@StarLasuLWLanguage, IssueSeverity::class)
+            )
             createProperty(KIssue::position.name, position, Multiplicity.OPTIONAL)
         }
 
@@ -89,10 +96,14 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
         ParsingResult = createConcept(KParsingResult::class.simpleName!!).apply {
             createContainment(KParsingResult<*>::issues.name, Issue, Multiplicity.ZERO_TO_MANY)
             createContainment(KParsingResult<*>::root.name, ASTNode, Multiplicity.OPTIONAL)
-            createProperty(KParsingResult<*>::code.name, LionCoreBuiltins.getString(), Multiplicity.OPTIONAL)
+            createProperty(
+                KParsingResult<*>::code.name,
+                LionCoreBuiltins.getString(lionWebVersion),
+                Multiplicity.OPTIONAL
+            )
             createProperty(
                 ParsingResultWithTokens<*>::tokens.name,
-                MetamodelRegistry.getPrimitiveType(TokensList::class)!!,
+                MetamodelRegistry.getPrimitiveType(TokensList::class, LIONWEB_VERSION_USED_BY_KOLASU)!!,
                 Multiplicity.OPTIONAL
             )
         }
@@ -108,7 +119,7 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
             idForContainedElement(PLACEHOLDER_NODE),
             keyForContainedElement(PLACEHOLDER_NODE)
         )
-        placeholderNodeAnnotation.annotates = LionCore.getConcept()
+        placeholderNodeAnnotation.annotates = LionCore.getConcept(lionWebVersion)
 
         val placeholderNodeAnnotationType = Enumeration(
             this,
@@ -116,24 +127,13 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
         ).apply {
             this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
             this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
-            val enumeration = this
-            addLiteral(
-                EnumerationLiteral(this, "MissingASTTransformation").apply {
-                    this.id = "${enumeration.id!!.removeSuffix("-id")}-$name-id"
-                    this.key = "${enumeration.id!!.removeSuffix("-key")}-$name-key"
-                }
-            )
-            addLiteral(
-                EnumerationLiteral(this, "FailingASTTransformation").apply {
-                    this.id = "${enumeration.id!!.removeSuffix("-id")}-$name-id"
-                    this.key = "${enumeration.id!!.removeSuffix("-key")}-$name-key"
-                }
-            )
+            addLiteral("MissingASTTransformation")
+            addLiteral("FailingASTTransformation")
         }
         addElement(placeholderNodeAnnotationType)
 
         val reference =
-            Reference().apply {
+            Reference(lionWebVersion).apply {
                 this.name = "originalNode"
                 this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
                 this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
@@ -142,7 +142,7 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
                 this.setMultiple(false)
             }
         placeholderNodeAnnotation.addFeature(reference)
-        val type = Property().apply {
+        val type = Property(lionWebVersion).apply {
             this.name = "type"
             this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
             this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
@@ -150,11 +150,11 @@ object StarLasuLWLanguage : Language("com.strumenta.StarLasu") {
             this.setOptional(false)
         }
         placeholderNodeAnnotation.addFeature(type)
-        val message = Property().apply {
+        val message = Property(lionWebVersion).apply {
             this.name = "message"
             this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
             this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
-            this.type = LionCoreBuiltins.getString()
+            this.type = LionCoreBuiltins.getString(LIONWEB_VERSION_USED_BY_KOLASU)
             this.setOptional(false)
         }
         placeholderNodeAnnotation.addFeature(message)
@@ -288,7 +288,7 @@ private fun registerSerializersAndDeserializersInMetamodelRegistry() {
             TokensList(tokens)
         }
     }
-    val tlpt = MetamodelRegistry.getPrimitiveType(TokensList::class)
+    val tlpt = MetamodelRegistry.getPrimitiveType(TokensList::class, LIONWEB_VERSION_USED_BY_KOLASU)
         ?: throw IllegalStateException("Unknown primitive type class ${TokensList::class}")
     MetamodelRegistry.addSerializerAndDeserializer(tlpt, tokensListPrimitiveSerializer, tokensListPrimitiveDeserializer)
 }

@@ -2,6 +2,7 @@ package com.strumenta.kolasu.lionwebclient
 
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.language.KolasuLanguage
+import com.strumenta.kolasu.lionweb.LIONWEB_VERSION_USED_BY_KOLASU
 import com.strumenta.kolasu.model.ASTRoot
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
@@ -19,7 +20,7 @@ import io.lionweb.lioncore.kotlin.createContainment
 import io.lionweb.lioncore.kotlin.lwLanguage
 
 val todoAccountLanguage =
-    lwLanguage("todoAccountLanguage").apply {
+    lwLanguage("todoAccountLanguage", lionWebVersion = LIONWEB_VERSION_USED_BY_KOLASU).apply {
         createConcept("TodoAccount").apply {
             createContainment("projects", LionCoreBuiltins.getNode(), Multiplicity.ZERO_TO_MANY)
         }

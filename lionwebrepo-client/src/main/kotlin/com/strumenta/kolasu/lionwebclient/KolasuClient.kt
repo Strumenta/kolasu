@@ -5,6 +5,7 @@ import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.ids.caching
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.lionweb.KNode
+import com.strumenta.kolasu.lionweb.LIONWEB_VERSION_USED_BY_KOLASU
 import com.strumenta.kolasu.lionweb.LWLanguage
 import com.strumenta.kolasu.lionweb.LWNode
 import com.strumenta.kolasu.lionweb.LionWebModelConverter
@@ -79,6 +80,7 @@ class KolasuClient(
             connectTimeOutInSeconds = connectTimeOutInSeconds,
             callTimeoutInSeconds = callTimeoutInSeconds,
             authorizationToken = authorizationToken,
+            lionWebVersion = LIONWEB_VERSION_USED_BY_KOLASU
         )
 
     private val serializationDecorators = mutableListOf<SerializationDecorator>()
@@ -108,7 +110,7 @@ class KolasuClient(
     }
 
     private fun calculateSerialization() : JsonSerialization {
-        val jsonSerialization = SerializationProvider.getStandardJsonSerialization()
+        val jsonSerialization = SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
         serializationDecorators.forEach { serializationDecorator -> serializationDecorator.invoke(jsonSerialization) }
         return jsonSerialization
     }

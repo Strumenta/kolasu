@@ -465,7 +465,7 @@ class LionWebModelConverter(
 
     fun prepareSerialization(
         serialization: AbstractSerialization =
-            SerializationProvider.getStandardJsonSerialization()
+            SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
     ): AbstractSerialization {
         StarLasuLWLanguage
         MetamodelRegistry.prepareJsonSerialization(serialization)
@@ -740,7 +740,7 @@ class LionWebModelConverter(
             constructor.callBy(params) as T
         } catch (e: Exception) {
             throw RuntimeException(
-                "Issue instantiating using constructor $constructor with params " +
+                "Issue instantiating using constructor ${kClass.qualifiedName}.$constructor with params " +
                     "${params.map { "${it.key.name}=${it.value}" }}",
                 e
             )
@@ -886,7 +886,7 @@ class ParsingResultWithTokens<RootNode : KNode>(
     source: Source? = null
 ) : ParsingResult<RootNode>(issues, root, code, incompleteNode, firstStage, time, source)
 
-class IssueNode : BaseNode() {
+class IssueNode : BaseNode(LIONWEB_VERSION_USED_BY_KOLASU) {
     var type: EnumerationValue? by property("type")
     var message: String? by property("message")
     var severity: EnumerationValue? by property("severity")
@@ -897,7 +897,7 @@ class IssueNode : BaseNode() {
     }
 }
 
-class ParsingResultNode(val source: Source?) : BaseNode() {
+class ParsingResultNode(val source: Source?) : BaseNode(LIONWEB_VERSION_USED_BY_KOLASU) {
     override fun calculateID(): String? {
         return try {
             SimpleSourceIdProvider().sourceId(source) + "_ParsingResult"

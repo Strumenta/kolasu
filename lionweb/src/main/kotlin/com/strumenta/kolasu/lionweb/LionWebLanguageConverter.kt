@@ -52,8 +52,8 @@ class LionWebLanguageConverter {
         val starLasuKLanguage = KolasuLanguage(StarLasuLWLanguage.name)
         languages.associate(starLasuKLanguage, StarLasuLWLanguage)
         registerMapping(Node::class, StarLasuLWLanguage.ASTNode)
-        registerMapping(Named::class, LionCoreBuiltins.getINamed())
-        registerMapping(PossiblyNamed::class, LionCoreBuiltins.getINamed())
+        registerMapping(Named::class, LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU))
+        registerMapping(PossiblyNamed::class, LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU))
         registerMapping(CommonElement::class, StarLasuLWLanguage.CommonElement)
         registerMapping(BehaviorDeclaration::class, StarLasuLWLanguage.BehaviorDeclaration)
         registerMapping(Documentation::class, StarLasuLWLanguage.Documentation)
@@ -78,7 +78,7 @@ class LionWebLanguageConverter {
     }
 
     fun exportToLionWeb(kolasuLanguage: KolasuLanguage): LWLanguage {
-        val lionwebLanguage = LWLanguage()
+        val lionwebLanguage = LWLanguage(LIONWEB_VERSION_USED_BY_KOLASU)
         lionwebLanguage.version = "1"
         lionwebLanguage.name = kolasuLanguage.qualifiedName
         lionwebLanguage.key = kolasuLanguage.qualifiedName.replace('.', '-')
@@ -185,7 +185,7 @@ class LionWebLanguageConverter {
         this.languages.associate(kolasuLanguage, lwLanguage)
         kolasuLanguage.astClasses.forEach { astClass ->
             var classifier: Classifier<*>? = null
-            val annotation = astClass.annotations.filterIsInstance(LionWebAssociation::class.java).firstOrNull()
+            val annotation = astClass.annotations.filterIsInstance<LionWebAssociation>().firstOrNull()
             if (annotation != null) {
                 classifier = lwLanguage.elements.filterIsInstance(Classifier::class.java).find {
                     it.key == annotation.key
@@ -328,10 +328,10 @@ class LionWebLanguageConverter {
 
     private fun toLWDataType(kType: KType, lionwebLanguage: LWLanguage): DataType<*> {
         return when (kType) {
-            Int::class.createType() -> LionCoreBuiltins.getInteger()
-            Long::class.createType() -> LionCoreBuiltins.getInteger()
-            String::class.createType() -> LionCoreBuiltins.getString()
-            Boolean::class.createType() -> LionCoreBuiltins.getBoolean()
+            Int::class.createType() -> LionCoreBuiltins.getInteger(LIONWEB_VERSION_USED_BY_KOLASU)
+            Long::class.createType() -> LionCoreBuiltins.getInteger(LIONWEB_VERSION_USED_BY_KOLASU)
+            String::class.createType() -> LionCoreBuiltins.getString(LIONWEB_VERSION_USED_BY_KOLASU)
+            Boolean::class.createType() -> LionCoreBuiltins.getBoolean(LIONWEB_VERSION_USED_BY_KOLASU)
             Char::class.createType() -> StarLasuLWLanguage.Char
             else -> {
                 val kClass = kType.classifier as KClass<*>
