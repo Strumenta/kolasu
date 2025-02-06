@@ -441,7 +441,7 @@ class ASTTransformerTest {
         )
         // All identity besides AA
         transformer1.registerNodeFactory(AA::class) { original, t, _ ->
-            BA("your_" + original.a.removePrefix("my_") ,t.translateCasted(original.child))
+            BA("your_" + original.a.removePrefix("my_"), t.translateCasted(original.child))
         }
         assertASTsAreEqual(
             BA(
@@ -462,7 +462,7 @@ class ASTTransformerTest {
         )
         // All identity besides AA and AB
         transformer1.registerNodeFactory(AB::class) { original, t, _ ->
-            BB("your_" + original.b.removePrefix("my_") ,t.translateCasted(original.child))
+            BB("your_" + original.b.removePrefix("my_"), t.translateCasted(original.child))
         }
         assertASTsAreEqual(
             BA(
@@ -514,11 +514,11 @@ data class BarStmt(val desc: String) : Node()
 
 data class FooRoot(var desc: String, var stmts: MutableList<BarStmt> = mutableListOf()) : Node()
 
-open class AA(var a: String, val child: AB): Node()
-open class AB(var b: String, val child: AC): Node()
-open class AC(var c: String, val children: MutableList<AD>): Node()
-open class AD(var d: String): Node()
+open class AA(var a: String, val child: AB) : Node()
+open class AB(var b: String, val child: AC) : Node()
+open class AC(var c: String, val children: MutableList<AD>) : Node()
+open class AD(var d: String) : Node()
 
-class BA(a: String, child: AB): AA(a, child)
-class BB(b: String, child: AC): AB(b, child)
-class BD(d: String): AD(d)
+class BA(a: String, child: AB) : AA(a, child)
+class BB(b: String, child: AC) : AB(b, child)
+class BD(d: String) : AD(d)

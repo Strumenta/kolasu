@@ -259,7 +259,12 @@ open class ASTTransformer(
      * fail.
      */
     val faultTollerant: Boolean = !throwOnUnmappedNode,
-    val defaultTransformation: ((source: Any?, parent: Node?, expectedType: KClass<out Node>, astTransformer: ASTTransformer) -> List<Node>)? = null
+    val defaultTransformation: (
+        (
+            source: Any?, parent: Node?, expectedType: KClass<out Node>,
+            astTransformer: ASTTransformer
+        ) -> List<Node>
+    )? = null
 ) {
     /**
      * Factories that map from source tree node to target tree node.
