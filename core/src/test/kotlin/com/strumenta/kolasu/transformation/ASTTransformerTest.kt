@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.transformation
 
+import com.strumenta.kolasu.mapping.translateCasted
 import com.strumenta.kolasu.mapping.translateList
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.children
@@ -396,6 +397,112 @@ class ASTTransformerTest {
             transformed
         )
     }
+
+    @Test
+    fun testIdentityTransformationOfIntermediateNodes() {
+        val transformer1 = ASTTransformer(defaultTransformation = IDENTTITY_TRANSFORMATION)
+        transformer1.registerNodeFactory(BarRoot::class) { original: BarRoot, astTransformer: ASTTransformer, _ ->
+            FooRoot(
+                desc = "#children = ${original.children.size}",
+                stmts = astTransformer.translateList(original.stmts)
+            )
+        }
+        val original = AA(
+            a = "my_a",
+            child = AB(
+                b = "my_b",
+                child = AC(
+                    c = "my_c",
+                    children = mutableListOf(
+                        AD("my_d1"),
+                        AD("my_d2"),
+                        AD("my_d3")
+                    )
+                )
+            )
+        )
+        // All identity
+        assertASTsAreEqual(
+            AA(
+                a = "my_a",
+                child = AB(
+                    b = "my_b",
+                    child = AC(
+                        c = "my_c",
+                        children = mutableListOf(
+                            AD("my_d1"),
+                            AD("my_d2"),
+                            AD("my_d3")
+                        )
+                    )
+                )
+            ),
+            transformer1.transform(original) as AA
+        )
+        // All identity besides AA
+        transformer1.registerNodeFactory(AA::class) { original, t, _ ->
+            BA("your_" + original.a.removePrefix("my_"), t.translateCasted(original.child))
+        }
+        assertASTsAreEqual(
+            BA(
+                a = "your_a",
+                child = AB(
+                    b = "my_b",
+                    child = AC(
+                        c = "my_c",
+                        children = mutableListOf(
+                            AD("my_d1"),
+                            AD("my_d2"),
+                            AD("my_d3")
+                        )
+                    )
+                )
+            ),
+            transformer1.transform(original) as AA
+        )
+        // All identity besides AA and AB
+        transformer1.registerNodeFactory(AB::class) { original, t, _ ->
+            BB("your_" + original.b.removePrefix("my_"), t.translateCasted(original.child))
+        }
+        assertASTsAreEqual(
+            BA(
+                a = "your_a",
+                child = BB(
+                    b = "your_b",
+                    child = AC(
+                        c = "my_c",
+                        children = mutableListOf(
+                            AD("my_d1"),
+                            AD("my_d2"),
+                            AD("my_d3")
+                        )
+                    )
+                )
+            ),
+            transformer1.transform(original) as AA
+        )
+        // All identity besides AA and AB and AD
+        transformer1.registerNodeFactory(AD::class) { original, t, _ ->
+            BD("your_" + original.d.removePrefix("my_"))
+        }
+        assertASTsAreEqual(
+            BA(
+                a = "your_a",
+                child = BB(
+                    b = "your_b",
+                    child = AC(
+                        c = "my_c",
+                        children = mutableListOf(
+                            BD("your_d1"),
+                            BD("your_d2"),
+                            BD("your_d3")
+                        )
+                    )
+                )
+            ),
+            transformer1.transform(original) as AA
+        )
+    }
 }
 
 data class BazRoot(var stmts: MutableList<BazStmt> = mutableListOf()) : Node()
@@ -406,3 +513,12 @@ data class BarRoot(var stmts: MutableList<BarStmt> = mutableListOf()) : Node()
 data class BarStmt(val desc: String) : Node()
 
 data class FooRoot(var desc: String, var stmts: MutableList<BarStmt> = mutableListOf()) : Node()
+
+open class AA(var a: String, val child: AB) : Node()
+open class AB(var b: String, val child: AC) : Node()
+open class AC(var c: String, val children: MutableList<AD>) : Node()
+open class AD(var d: String) : Node()
+
+class BA(a: String, child: AB) : AA(a, child)
+class BB(b: String, child: AC) : AB(b, child)
+class BD(d: String) : AD(d)
