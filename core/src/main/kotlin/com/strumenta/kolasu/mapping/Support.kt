@@ -53,7 +53,9 @@ inline fun <reified T : Node> ASTTransformer.translateOptional(original: Any?): 
         val transformed = transform(it, expectedType = T::class)
         if (transformed == null) {
             return null
-        } else transformed as T
+        } else {
+            transformed as T
+        }
     }
 }
 
