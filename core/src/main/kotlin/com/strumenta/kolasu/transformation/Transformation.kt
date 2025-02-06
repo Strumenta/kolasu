@@ -238,22 +238,6 @@ data class ChildNodeFactory<Source, Target, Child : Any>(
  */
 private val NO_CHILD_NODE = ChildNodeFactory<Any, Any, Any>("", { x -> x }, { _, _ -> }, Node::class)
 
-val IDENTTITY_TRANSFORMATION: (source: Any?, parent: Node?, expectedType: KClass<out Node>) -> List<Node> = {
-        source: Any?, parent: Node?, expectedType: KClass<out Node> ->
-    when (source) {
-        null -> {
-            emptyList()
-        }
-        is Node -> {
-            source.parent = parent
-            listOf(source)
-        }
-        else -> {
-            throw IllegalArgumentException("An Identity Transformation expect to receive a Node")
-        }
-    }
-}
-
 /**
  * Implementation of a tree-to-tree transformation. For each source node type, we can register a factory that knows how
  * to create a transformed node. Then, this transformer can read metadata in the transformed node to recursively
@@ -275,7 +259,12 @@ open class ASTTransformer(
      * fail.
      */
     val faultTollerant: Boolean = !throwOnUnmappedNode,
-    val defaultTransformation: ((source: Any?, parent: Node?, expectedType: KClass<out Node>) -> List<Node>)? = null
+    val defaultTransformation: (
+        (
+            source: Any?, parent: Node?, expectedType: KClass<out Node>,
+            astTransformer: ASTTransformer
+        ) -> List<Node>
+    )? = null
 ) {
     /**
      * Factories that map from source tree node to target tree node.
@@ -332,7 +321,7 @@ open class ASTTransformer(
             }
         } else {
             if (defaultTransformation != null) {
-                nodes = defaultTransformation.invoke(source, parent, expectedType)
+                nodes = defaultTransformation.invoke(source, parent, expectedType, this)
             } else if (allowGenericNode) {
                 val origin = asOrigin(source)
                 nodes = listOf(GenericNode(parent).withOrigin(origin))
