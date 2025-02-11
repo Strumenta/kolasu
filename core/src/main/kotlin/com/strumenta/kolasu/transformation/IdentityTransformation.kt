@@ -52,6 +52,7 @@ val IDENTTITY_TRANSFORMATION: (
 
             val newInstance = primaryConstructor.callBy(params) as Node
             newInstance.parent = parent
+            newInstance.origin = source
             listOf(newInstance)
         }
         else -> {

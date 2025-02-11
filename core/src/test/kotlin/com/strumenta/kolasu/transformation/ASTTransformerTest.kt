@@ -503,8 +503,30 @@ class ASTTransformerTest {
             transformer1.transform(original) as AA
         )
     }
-}
 
+    @Test
+    fun testIdentityTransformationOfIntermediateNodesWithOrigin() {
+        val transformer1 = ASTTransformer(defaultTransformation = IDENTTITY_TRANSFORMATION)
+        transformer1.registerNodeFactory(AA::class) { original, t, _ ->
+            BA("your_" + original.a.removePrefix("my_"), t.translateCasted(original.child))
+        }
+        val original = AA(
+            a = "my_a",
+            child = AB(
+                b = "my_b",
+                child = AC(
+                    c = "my_c",
+                    children = mutableListOf(
+                        AD("my_d1")
+                    )
+                )
+            )
+        )
+        val transformedAST = transformer1.transform(original) as AA
+        // verify that the origin is set correctly
+        assert(transformedAST.origin == original)
+    }
+}
 data class BazRoot(var stmts: MutableList<BazStmt> = mutableListOf()) : Node()
 
 data class BazStmt(val desc: String? = null) : Node()
