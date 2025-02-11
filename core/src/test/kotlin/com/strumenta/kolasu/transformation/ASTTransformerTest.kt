@@ -7,6 +7,7 @@ import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.testing.assertASTsAreEqual
+import com.strumenta.kolasu.traversing.walkDescendants
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import org.junit.Test
@@ -503,8 +504,40 @@ class ASTTransformerTest {
             transformer1.transform(original) as AA
         )
     }
-}
 
+    @Test
+    fun testIdentityTransformationOfIntermediateNodesWithOrigin() {
+        val transformer1 = ASTTransformer(defaultTransformation = IDENTTITY_TRANSFORMATION)
+        transformer1.registerNodeFactory(AA::class) { original, t, _ ->
+            BA("your_" + original.a.removePrefix("my_"), t.translateCasted(original.child))
+        }
+        val original = AA(
+            a = "my_a",
+            child = AB(
+                b = "my_b",
+                child = AC(
+                    c = "my_c",
+                    children = mutableListOf(
+                        AD("my_d1")
+                    )
+                )
+            )
+        )
+        val transformedAST = transformer1.transform(original) as BA
+
+        // verify that the origin is set correctly
+        assertEquals(transformedAST.origin, original)
+        // verify that the descendants have the correct origin as well
+        assertEquals(
+            transformedAST.walkDescendants(AB::class).first().origin,
+            original.walkDescendants(AB::class).first()
+        )
+        assertEquals(
+            transformedAST.walkDescendants(AC::class).first().origin,
+            original.walkDescendants(AC::class).first()
+        )
+    }
+}
 data class BazRoot(var stmts: MutableList<BazStmt> = mutableListOf()) : Node()
 
 data class BazStmt(val desc: String? = null) : Node()
