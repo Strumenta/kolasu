@@ -7,6 +7,7 @@ import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.model.hasValidParents
 import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.testing.assertASTsAreEqual
+import com.strumenta.kolasu.traversing.walkDescendants
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import org.junit.Test
@@ -522,9 +523,19 @@ class ASTTransformerTest {
                 )
             )
         )
-        val transformedAST = transformer1.transform(original) as AA
+        val transformedAST = transformer1.transform(original) as BA
+
         // verify that the origin is set correctly
-        assert(transformedAST.origin == original)
+        assertEquals(transformedAST.origin, original)
+        // verify that the descendants have the correct origin as well
+        assertEquals(
+            transformedAST.walkDescendants(AB::class).first().origin,
+            original.walkDescendants(AB::class).first()
+        )
+        assertEquals(
+            transformedAST.walkDescendants(AC::class).first().origin,
+            original.walkDescendants(AC::class).first()
+        )
     }
 }
 data class BazRoot(var stmts: MutableList<BazStmt> = mutableListOf()) : Node()
