@@ -536,6 +536,10 @@ class ASTTransformerTest {
             transformedAST.walkDescendants(AC::class).first().origin,
             original.walkDescendants(AC::class).first()
         )
+        assertEquals(
+            transformedAST.walkDescendants(AD::class).first().origin,
+            original.walkDescendants(AD::class).first()
+        )
     }
 }
 data class BazRoot(var stmts: MutableList<BazStmt> = mutableListOf()) : Node()
