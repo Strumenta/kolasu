@@ -2,8 +2,6 @@ package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
-import com.strumenta.kolasu.ids.SimpleSourceIdProvider
-import com.strumenta.kolasu.ids.SourceShouldBeSetException
 import com.strumenta.kolasu.language.Feature
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.CompositeDestination
@@ -11,7 +9,6 @@ import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.allFeatures
 import com.strumenta.kolasu.model.asContainment
 import com.strumenta.kolasu.model.assignParents
@@ -19,7 +16,6 @@ import com.strumenta.kolasu.model.isAttribute
 import com.strumenta.kolasu.model.isContainment
 import com.strumenta.kolasu.model.isReference
 import com.strumenta.kolasu.model.nodeOriginalProperties
-import com.strumenta.kolasu.parsing.FirstStageParsingResult
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.transformation.FailingASTTransformation
@@ -34,6 +30,7 @@ import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Enumeration
 import io.lionweb.lioncore.java.language.EnumerationLiteral
+import io.lionweb.lioncore.java.language.Feature as LWFeature
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.PrimitiveType
@@ -52,7 +49,6 @@ import io.lionweb.lioncore.java.serialization.AbstractSerialization
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.serialization.SerializationProvider
 import io.lionweb.lioncore.java.utils.CommonChecks
-import io.lionweb.lioncore.kotlin.BaseNode
 import io.lionweb.lioncore.kotlin.MetamodelRegistry
 import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
 import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
@@ -62,7 +58,6 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
-import io.lionweb.lioncore.java.language.Feature as LWFeature
 
 interface PrimitiveValueSerialization<E> {
     fun serialize(value: E): String
@@ -841,8 +836,9 @@ class LionWebModelConverter(
         nodesMapping.associate(kNode, lwNode)
     }
 
-    fun exportIssueToLionweb(issue: Issue): IssueNode {
+    fun exportIssueToLionweb(issue: Issue, id: String? = null): IssueNode {
         val issueNode = IssueNode()
+        id?.let { issueNode.id = it }
         issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::message.name)!!, issue.message)
         issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::position.name)!!, issue.position)
         setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName(Issue::severity.name)!!, issue.severity)
@@ -867,49 +863,18 @@ class LionWebModelConverter(
             )
         }
         val issuesContainment = StarLasuLWLanguage.ParsingResult.getContainmentByName(ParsingResult<*>::issues.name)!!
-        pr.issues.forEach {
-            resultNode.addChild(issuesContainment, exportIssueToLionweb(it))
+        pr.issues.forEachIndexed { index, issue ->
+            val id = "${resultNode.id}-issue-${index}"
+            resultNode.addChild(issuesContainment, exportIssueToLionweb(issue, id))
         }
         resultNode.setPropertyValue(
             StarLasuLWLanguage.ParsingResult.getPropertyByName(ParsingResultWithTokens<*>::tokens.name)!!,
             TokensList(tokens)
         )
+        resultNode.thisAndAllDescendants().forEach { lwNode ->
+            require(lwNode.id != null) { "Node $lwNode should get a valid ID" }
+        }
         return resultNode
     }
 }
 
-class ParsingResultWithTokens<RootNode : KNode>(
-    issues: List<Issue>,
-    root: RootNode?,
-    val tokens: List<KolasuToken>,
-    code: String? = null,
-    incompleteNode: com.strumenta.kolasu.model.Node? = null,
-    firstStage: FirstStageParsingResult<*>? = null,
-    time: Long? = null,
-    source: Source? = null
-) : ParsingResult<RootNode>(issues, root, code, incompleteNode, firstStage, time, source)
-
-class IssueNode : BaseNode(LIONWEB_VERSION_USED_BY_KOLASU) {
-    var type: EnumerationValue? by property("type")
-    var message: String? by property("message")
-    var severity: EnumerationValue? by property("severity")
-    var position: Position? by property("position")
-
-    override fun getClassifier(): Concept {
-        return StarLasuLWLanguage.Issue
-    }
-}
-
-class ParsingResultNode(val source: Source?) : BaseNode(LIONWEB_VERSION_USED_BY_KOLASU) {
-    override fun calculateID(): String? {
-        return try {
-            SimpleSourceIdProvider().sourceId(source) + "_ParsingResult"
-        } catch (_: SourceShouldBeSetException) {
-            super.calculateID()
-        }
-    }
-
-    override fun getClassifier(): Concept {
-        return StarLasuLWLanguage.ParsingResult
-    }
-}
