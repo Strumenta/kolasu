@@ -852,6 +852,9 @@ class LionWebModelConverter(
 
     fun exportParsingResultToLionweb(pr: ParsingResult<*>, tokens: List<KolasuToken> = listOf()): ParsingResultNode {
         val resultNode = ParsingResultNode(pr.source)
+        if (resultNode.id == null) {
+            throw IllegalStateException("Parsing result has null ID")
+        }
         resultNode.setPropertyValue(
             StarLasuLWLanguage.ParsingResult.getPropertyByName(ParsingResult<*>::code.name)!!,
             pr.code
