@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.interop
 
+import io.lionweb.lioncore.java.model.Node as LWNode
+
 interface StarlasuSemanticEnricher {
 
     /**
@@ -13,6 +15,6 @@ interface StarlasuSemanticEnricher {
      * @return the AST with possibly resolved references and type annotations, in LionWebFormat.
      *         Return null when no changes have been made.
      */
-    fun processAST(codebaseFile: String, codebaseAccess: CodebaseAccess) : String?
+    fun processAST(codebaseFile: LWNode, codebaseAccess: CodebaseAccess) : LWNode?
 
 }

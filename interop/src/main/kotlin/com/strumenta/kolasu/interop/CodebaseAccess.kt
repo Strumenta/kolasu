@@ -1,5 +1,7 @@
 package com.strumenta.kolasu.interop
 
+import io.lionweb.lioncore.java.model.Node as LWNode
+
 interface CodebaseAccess {
     val name: String
 
@@ -11,5 +13,5 @@ interface CodebaseAccess {
     /**
      * Retrieve the file, in LionWeb format.
      */
-    fun retrieveFile(fileIdentifier: String) : String
+    fun retrieveFile(fileIdentifier: String) : LWNode
 }

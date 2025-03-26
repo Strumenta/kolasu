@@ -2,6 +2,7 @@ package com.strumenta.kolasu.interop
 
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization
+import io.lionweb.lioncore.java.model.Node as LWNode
 
 /**
  * In the future this interface should use more concrete types.
@@ -23,5 +24,5 @@ interface StarlasuParser {
     /**
      * Produce a Parsing Result serialized according to the LionWeb Specifications.
      */
-    fun parse(codebaseName: String, relativePath: String, code: String) : String
+    fun parse(codebaseName: String, relativePath: String, code: String) : LWNode
 }
