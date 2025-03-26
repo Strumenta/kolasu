@@ -9,12 +9,14 @@ interface StarlasuSemanticEnricher {
      */
     fun supportedLanguages() : Set<String>
 
+    fun setCodebaseAccess(codebaseAccess: CodebaseAccess)
+
     /**
      * @param codebaseFile the codebase file, serialized in LionWeb format.
      *
      * @return the AST with possibly resolved references and type annotations, in LionWebFormat.
      *         Return null when no changes have been made.
      */
-    fun processCodebaseFile(codebaseFile: LWNode, codebaseAccess: CodebaseAccess) : LWNode?
+    fun processCodebaseFile(codebaseFile: LWNode) : LWNode?
 
 }

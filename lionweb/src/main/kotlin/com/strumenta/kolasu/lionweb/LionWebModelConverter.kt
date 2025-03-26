@@ -57,7 +57,9 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
+import kotlin.reflect.KType
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.javaType
 
 interface PrimitiveValueSerialization<E> {
     fun serialize(value: E): String
@@ -549,8 +551,15 @@ class LionWebModelConverter(
                     if (entry.value is ProxyNode) {
                         entry.key.identifier = (entry.value as ProxyNode).id
                     } else {
-                        entry.key.referred = nodesMapping.byB(entry.value as LWNode)!! as PossiblyNamed
-                        entry.key.identifier = entry.value!!.id!!
+                        val target = entry.value as LWNode
+                        val nodeMapping = nodesMapping.byB(target)
+                        if (nodeMapping == null){
+                            //?: throw IllegalStateException("No node mapping for $target (id: ${target.id}, classifier: ${target.classifier})")
+                            entry.key.identifier = entry.value!!.id!!
+                        } else {
+                            entry.key.referred = nodeMapping as PossiblyNamed
+                            entry.key.identifier = entry.value!!.id!!
+                        }
                     }
                 }
             }
@@ -596,31 +605,28 @@ class LionWebModelConverter(
         }
     }
 
+    private fun importEnumValue(propValue: EnumerationValue): Any {
+        val enumerationLiteral = propValue.enumerationLiteral
+        val enumKClass = synchronized(languageConverter) {
+            languageConverter
+                .getEnumerationsToKolasuClassesMapping().entries.find { it.key.id == enumerationLiteral.enumeration?.id }?.value
+                ?: throw java.lang.IllegalStateException(
+                    "Cannot find enum class for enumeration " +
+                            "${enumerationLiteral.enumeration?.name}"
+                )
+        }
+        val entries = enumKClass.java.enumConstants
+        return entries.find { it.name == enumerationLiteral.name }
+            ?: throw IllegalStateException(
+                "Cannot find enum constant named ${enumerationLiteral.name} in enum " +
+                        "class ${enumKClass.qualifiedName}"
+            )
+    }
+
     private fun attributeValue(data: LWNode, property: Property): Any? {
         val propValue = data.getPropertyValue(property)
         val value = if (property.type is Enumeration && propValue != null) {
-            val enumerationLiteral = if (propValue is EnumerationValue) {
-                propValue.enumerationLiteral
-            } else {
-                throw java.lang.IllegalStateException(
-                    "Property value of property of enumeration type is " +
-                        "not an EnumerationValue. It is instead " + propValue
-                )
-            }
-            val enumKClass = synchronized(languageConverter) {
-                languageConverter
-                    .getEnumerationsToKolasuClassesMapping()[enumerationLiteral.enumeration]
-                    ?: throw java.lang.IllegalStateException(
-                        "Cannot find enum class for enumeration " +
-                            "${enumerationLiteral.enumeration?.name}"
-                    )
-            }
-            val entries = enumKClass.java.enumConstants
-            entries.find { it.name == enumerationLiteral.name }
-                ?: throw IllegalStateException(
-                    "Cannot find enum constant named ${enumerationLiteral.name} in enum " +
-                        "class ${enumKClass.qualifiedName}"
-                )
+            importEnumValue(propValue as EnumerationValue)
         } else {
             propValue
         }
@@ -718,13 +724,25 @@ class LionWebModelConverter(
             } else {
                 when (feature) {
                     is Property -> {
-                        params[param] = attributeValue(data, feature)
+                        val value = attributeValue(data, feature)
+                        if (!param.type.isAssignableBy(value)) {
+                            throw RuntimeException("Cannot assign value $value to param ${param.name} of type ${param.type}")
+                        }
+                        params[param] = value
                     }
                     is Reference -> {
-                        params[param] = referenceValue(data, feature, referencesPostponer)
+                        val value = referenceValue(data, feature, referencesPostponer)
+                        if (!param.type.isAssignableBy(value)) {
+                            throw RuntimeException()
+                        }
+                        params[param] = value
                     }
                     is Containment -> {
-                        params[param] = containmentValue(data, feature)
+                        val value = containmentValue(data, feature)
+                        if (!param.type.isAssignableBy(value)) {
+                            throw RuntimeException()
+                        }
+                        params[param] = value
                     }
                     else -> throw IllegalStateException()
                 }
@@ -846,6 +864,15 @@ class LionWebModelConverter(
         return issueNode
     }
 
+    fun importIssueFromLionweb(issueNode: IssueNode): Pair<String, Issue> {
+        val issueType = importEnumValue(issueNode.getPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::type.name)!!) as EnumerationValue) as IssueType
+        val message = issueNode.getPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::message.name)!!) as String
+        val severity = importEnumValue(issueNode.getPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::severity.name)!!) as EnumerationValue) as IssueSeverity
+        val position = issueNode.getPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::position.name)!!) as Position
+        val issue = Issue(issueType, message, severity, position)
+        return issueNode.id!! to issue
+    }
+
     fun exportParsingResultToLionweb(pr: ParsingResult<*>, tokens: List<KolasuToken> = listOf()): ParsingResultNode {
         val resultNode = ParsingResultNode(pr.source)
         if (resultNode.id == null) {
@@ -878,3 +905,12 @@ class LionWebModelConverter(
     }
 }
 
+fun KType.isAssignableBy(value: Any?): Boolean {
+    val classifier = this.classifier as? KClass<*> ?: return false
+
+    if (value == null) {
+        return this.isMarkedNullable
+    }
+
+    return classifier.isInstance(value)
+}
