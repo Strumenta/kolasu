@@ -15,6 +15,6 @@ interface StarlasuSemanticEnricher {
      * @return the AST with possibly resolved references and type annotations, in LionWebFormat.
      *         Return null when no changes have been made.
      */
-    fun processAST(codebaseFile: LWNode, codebaseAccess: CodebaseAccess) : LWNode?
+    fun processCodebaseFile(codebaseFile: LWNode, codebaseAccess: CodebaseAccess) : LWNode?
 
 }
