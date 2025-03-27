@@ -19,4 +19,7 @@ object CodebaseLanguage {
     val codebaseFile : Concept by lazy {
         language.getConceptByName("CodebaseFile") ?: throw IllegalStateException()
     }
+    val builtinsCollection : Concept by lazy {
+        language.getConceptByName("BuiltinsCollection") ?: throw IllegalStateException()
+    }
 }

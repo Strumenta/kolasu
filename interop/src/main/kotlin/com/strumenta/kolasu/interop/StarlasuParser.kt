@@ -22,6 +22,11 @@ interface StarlasuParser {
     fun preparePrimitiveSerialization(primitiveSerialization: PrimitiveValuesSerialization)
 
     /**
+     * Return the list of top-level nodes to be stored as builtins.
+     */
+    fun builtins() : List<LWNode>
+
+    /**
      * Produce a Parsing Result serialized according to the LionWeb Specifications.
      */
     fun parse(codebaseName: String, relativePath: String, code: String) : LWNode
