@@ -39,11 +39,6 @@ data class TextFileDestination(val position: Position?) : Destination, Serializa
 
 val RESERVED_FEATURE_NAMES = setOf("parent", "position")
 
-interface HasID {
-    @Internal
-    var id: String?
-}
-
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
  *

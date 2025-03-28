@@ -79,6 +79,8 @@ class DummyNodeResolver : NodeResolver {
  * This class is thread-safe.
  *
  * @param nodeIdProvider logic to be used to associate IDs to Kolasu nodes when exporting them to LionWeb
+ *                       it will be used to assign an ID to those elements which already do not have one
+ *                       (through the HasID.id field).
  */
 class LionWebModelConverter(
     var nodeIdProvider: NodeIdProvider = StructuralLionWebNodeIdProvider(),
@@ -98,8 +100,11 @@ class LionWebModelConverter(
     private val languageConverter = initialLanguageConverter
 
     /**
-     * We mostly map Kolasu Nodes to LionWeb Nodes, but we also map things that are not Kolasu Nodes but are nodes
-     * for LionWeb (this used to be the case for Positions and Points).
+     * We mostly map Kolasu Nodes to LionWeb Nodes, but we may also map things that are not Kolasu Nodes but are nodes
+     * for LionWeb. For example, we could do that for Issues and Parsing Results.
+     *
+     * In the future we could rely on the HasID.id field to consider removing this field, which can grow significantly
+     * and cause issues when nodes are cached and changes happening between two conversions are ignored.
      */
     private val nodesMapping = BiMap<Any, LWNode>(usingIdentity = true)
     private val primitiveValueSerializations = ConcurrentHashMap<KClass<*>, PrimitiveValueSerialization<*>>()
@@ -147,6 +152,12 @@ class LionWebModelConverter(
 
             fun nodeId(kNode: KNode): String {
                 return cache.getOrPut(kNode) {
+                    // If a kNode has already an id, it should prevail and we should not attempt to generate
+                    // an ID for it
+                    require(kNode.id == null) {
+                        "We should not generate an ID for a kNode which already has one"
+                    }
+
                     val id = nodeIdProvider.id(kNode)
                     if (!CommonChecks.isValidID(id)) {
                         throw RuntimeException("We got an invalid Node ID from $nodeIdProvider for $id")
@@ -225,7 +236,7 @@ class LionWebModelConverter(
                             if (feature == StarLasuLWLanguage.ASTNodeOriginalNode) {
                                 val origin = kNode.origin
                                 if (origin is KNode) {
-                                    val targetID = myIDManager.nodeId(origin)
+                                    val targetID = origin.id ?: myIDManager.nodeId(origin)
                                     setOriginalNode(lwNode, targetID)
                                 } else if (origin is PlaceholderASTTransformation) {
                                     if (lwNode is AbstractClassifierInstance<*>) {
@@ -233,8 +244,9 @@ class LionWebModelConverter(
                                             "${lwNode.id}_placeholder_annotation",
                                             StarLasuLWLanguage.PlaceholderNode
                                         )
-                                        if (origin.origin is KNode) {
-                                            val targetID = myIDManager.nodeId(origin.origin as KNode)
+                                        val effectiveOrigin = origin.origin
+                                        if (effectiveOrigin is KNode) {
+                                            val targetID = effectiveOrigin.id ?: myIDManager.nodeId(effectiveOrigin)
                                             setOriginalNode(lwNode, targetID)
                                         }
                                         setPlaceholderNodeType(instance, origin.javaClass.kotlin)
@@ -263,7 +275,7 @@ class LionWebModelConverter(
                                     }
                                 }
                                 val referenceValues = destinationNodes.map { destinationNode ->
-                                    val targetID = myIDManager.nodeId(destinationNode)
+                                    val targetID = destinationNode.id ?: myIDManager.nodeId(destinationNode)
                                     ReferenceValue(ProxyNode(targetID), null)
                                 }
                                 lwNode.setReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes, referenceValues)
@@ -388,6 +400,8 @@ class LionWebModelConverter(
                 val instantiated = instantiate(kClass, lwNode, referencesPostponer)
                 if (instantiated is KNode) {
                     instantiated.assignParents()
+                    // This mapping will eventually become superfluous because we will store the ID directly in the
+                    // instantiated kNode
                     nodeIdProvider.registerMapping(instantiated, lwNode.id!!)
                     instantiated.id = lwNode.id
                 }
@@ -425,7 +439,7 @@ class LionWebModelConverter(
                         StarLasuLWLanguage.PlaceholderNodeMessageProperty
                     ) as String
                     when (placeholderType.name) {
-                        "MissingASTTransformation" -> {
+                        MissingASTTransformation::class.simpleName -> {
                             placeholderNodes[kNode] = { kNode ->
                                 kNode.origin = MissingASTTransformation(
                                     origin = kNode.origin,
@@ -434,7 +448,7 @@ class LionWebModelConverter(
                                 )
                             }
                         }
-                        "FailingASTTransformation" -> {
+                        FailingASTTransformation::class.simpleName -> {
                             placeholderNodes[kNode] = { kNode ->
                                 kNode.origin = FailingASTTransformation(
                                     origin = kNode.origin,
@@ -657,7 +671,7 @@ class LionWebModelConverter(
                     throw IllegalStateException()
                 }
             }
-            val kChild = if (lwChild == null) {
+            if (lwChild == null) {
                 return null
             } else {
                 (
@@ -678,9 +692,6 @@ class LionWebModelConverter(
     ): Any? {
         val referenceValues = data.getReferenceValues(reference)
         return when {
-            referenceValues.size > 1 -> {
-                throw IllegalStateException()
-            }
             referenceValues.size == 0 -> {
                 null
             }
@@ -690,7 +701,9 @@ class LionWebModelConverter(
                 referencesPostponer.registerPostponedReference(referenceByName, rf.referred)
                 referenceByName
             }
-            else -> throw java.lang.IllegalStateException()
+            else -> {
+                throw IllegalStateException()
+            }
         }
     }
 
