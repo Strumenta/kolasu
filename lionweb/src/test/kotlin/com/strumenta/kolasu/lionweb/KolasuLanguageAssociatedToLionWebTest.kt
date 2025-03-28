@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @LionWebAssociation("key-123")
-data class LWRoot(val id: Int, val childrez: MutableList<LWNodeA>) : Node()
+data class LWRoot(val _id: Int, val childrez: MutableList<LWNodeA>) : Node()
 
 @LionWebAssociation("key-456")
 data class LWNodeA(override val name: String, val ref: ReferenceByName<LWNodeA>, val child: LWNodeB?) : Named, Node()

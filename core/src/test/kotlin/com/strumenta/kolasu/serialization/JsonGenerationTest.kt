@@ -91,19 +91,19 @@ class JsonGenerationTest {
     "contents": [
       {
         "#type": "com.strumenta.kolasu.serialization.Content",
-        "id": 1
+        "_id": 1
       },
       {
         "#type": "com.strumenta.kolasu.serialization.Content",
+        "_id": 2,
         "annidatedContent": {
           "#type": "com.strumenta.kolasu.serialization.Content",
+          "_id": 3,
           "annidatedContent": {
             "#type": "com.strumenta.kolasu.serialization.Content",
-            "id": 4
-          },
-          "id": 3
-        },
-        "id": 2
+            "_id": 4
+          }
+        }
       }
     ],
     "name": "Section1"
@@ -132,9 +132,10 @@ class JsonGenerationTest {
         assertEquals(
             """{"#type":"com.strumenta.kolasu.serialization.MyRoot",
                 |"mainSection":{"#type":"com.strumenta.kolasu.serialization.Section","contents":
-                |[{"#type":"com.strumenta.kolasu.serialization.Content","id":1},
-                |{"#type":"com.strumenta.kolasu.serialization.Content","annidatedContent":{"#type":"com.strumenta.kolasu.serialization.Content",
-                |"annidatedContent":{"#type":"com.strumenta.kolasu.serialization.Content","id":4},"id":3},"id":2}],
+                |[{"#type":"com.strumenta.kolasu.serialization.Content","_id":1},
+                |{"#type":"com.strumenta.kolasu.serialization.Content","_id":2,
+                |"annidatedContent":{"#type":"com.strumenta.kolasu.serialization.Content","_id":3,
+                |"annidatedContent":{"#type":"com.strumenta.kolasu.serialization.Content","_id":4}}}],
                 |"name":"Section1"},"otherSections":[]}
             """.trimMargin().replace("\n", ""),
             json
@@ -156,12 +157,22 @@ class JsonGenerationTest {
         val writer = StringWriter()
         JsonGenerator().generateJSONWithStreaming(root = myRoot, writer = JsonWriter(writer), shortClassNames = true)
         val json = writer.toString()
+        // {"#type":"MyRoot",
+        // "mainSection":{"#type":"Section","contents":
+        // [{"#type":"Content","_id":1},
+        // {"#type":"Content","_id":2,
+        // "annidatedContent":{"#type":"Content",
+        // "_id":3,
+        // "annidatedContent":{"#type":"Content","_id":4}}}]
+        // ,"name":"Section1"},"otherSections":[]}
         assertEquals(
             """{"#type":"MyRoot",
                 |"mainSection":{"#type":"Section","contents":
-                |[{"#type":"Content","id":1},
-                |{"#type":"Content","annidatedContent":{"#type":"Content",
-                |"annidatedContent":{"#type":"Content","id":4},"id":3},"id":2}],
+                |[{"#type":"Content","_id":1},
+                |{"#type":"Content","_id":2,
+                |"annidatedContent":{"#type":"Content",
+                |"_id":3,
+                |"annidatedContent":{"#type":"Content","_id":4}}}],
                 |"name":"Section1"},"otherSections":[]}
             """.trimMargin().replace("\n", ""),
             json

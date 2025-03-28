@@ -15,7 +15,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 
 @ASTRoot
-data class SimpleRoot(val id: Int, val childrez: MutableList<SimpleDecl>) : Node()
+data class SimpleRoot(val _id: Int, val childrez: MutableList<SimpleDecl>) : Node()
 
 sealed class SimpleDecl : Node(), EntityDeclaration
 
@@ -64,8 +64,8 @@ class LionWebLanguageConverterTest {
         assertEquals(2, simpleRoot.features.size)
         assertEquals(5, simpleRoot.allFeatures().size)
 
-        val simpleRootID = simpleRoot.getPropertyByName("id")!!
-        assertEquals("id", simpleRootID.name)
+        val simpleRootID = simpleRoot.getPropertyByName("_id")!!
+        assertEquals("_id", simpleRootID.name)
         assertEquals(false, simpleRootID.isOptional)
         assertEquals(LionCoreBuiltins.getInteger(LIONWEB_VERSION_USED_BY_KOLASU), simpleRootID.type)
 
@@ -164,8 +164,8 @@ class LionWebLanguageConverterTest {
         assertEquals(2, simpleRoot.features.size)
         assertEquals(5, simpleRoot.allFeatures().size)
 
-        val simpleRootID = simpleRoot.getPropertyByName("id")!!
-        assertEquals("id", simpleRootID.name)
+        val simpleRootID = simpleRoot.getPropertyByName("_id")!!
+        assertEquals("_id", simpleRootID.name)
         assertEquals(false, simpleRootID.isOptional)
         assertEquals(LionCoreBuiltins.getInteger(LIONWEB_VERSION_USED_BY_KOLASU), simpleRootID.type)
 
