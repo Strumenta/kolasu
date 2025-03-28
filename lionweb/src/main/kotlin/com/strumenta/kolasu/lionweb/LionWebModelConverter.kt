@@ -162,7 +162,7 @@ class LionWebModelConverter(
         if (!nodesMapping.containsA(kolasuTree)) {
             kolasuTree.walk().forEach { kNode ->
                 if (!nodesMapping.containsA(kNode)) {
-                    val nodeID = myIDManager.nodeId(kNode)
+                    val nodeID = kNode.id ?: myIDManager.nodeId(kNode)
                     if (!CommonChecks.isValidID(nodeID)) {
                         throw RuntimeException(
                             "We generated an invalid Node ID, using $myIDManager in $kNode. Node ID: $nodeID"
@@ -294,6 +294,7 @@ class LionWebModelConverter(
                                                             "reference holder: $kNode"
                                                     )
                                             )
+                                            require(lwReferred.id != null)
                                             lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
                                         }
 
@@ -389,6 +390,7 @@ class LionWebModelConverter(
                 if (instantiated is KNode) {
                     instantiated.assignParents()
                     nodeIdProvider.registerMapping(instantiated, lwNode.id!!)
+                    instantiated.id = lwNode.id
                 }
                 associateNodes(instantiated, lwNode)
             } catch (e: RuntimeException) {
@@ -851,6 +853,10 @@ class LionWebModelConverter(
     }
 
     private fun associateNodes(kNode: Any, lwNode: LWNode) {
+        if (kNode is KNode) {
+            require(kNode.id == null || kNode.id == lwNode.id)
+            kNode.id = lwNode.id
+        }
         nodesMapping.associate(kNode, lwNode)
     }
 
