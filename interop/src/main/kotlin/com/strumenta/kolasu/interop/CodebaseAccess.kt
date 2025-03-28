@@ -8,10 +8,10 @@ interface CodebaseAccess {
     /**
      * Return a list of LionWeb identifiers of the single files.
      */
-    fun files() : Sequence<String>
+    fun files(): Sequence<String>
 
     /**
      * Retrieve the file, in LionWeb format.
      */
-    fun retrieveFile(fileIdentifier: String) : LWNode
+    fun retrieveFile(fileIdentifier: String): LWNode
 }

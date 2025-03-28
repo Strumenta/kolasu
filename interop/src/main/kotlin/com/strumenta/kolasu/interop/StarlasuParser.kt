@@ -10,24 +10,24 @@ import io.lionweb.lioncore.java.model.Node as LWNode
  */
 interface StarlasuParser {
 
-    fun languageName() : String
+    fun languageName(): String
 
-    fun extensions() : Set<String>
+    fun extensions(): Set<String>
 
     /**
      * Return the language used, in LionWeb Format
      */
-    fun languages() : List<Language>
+    fun languages(): List<Language>
 
     fun preparePrimitiveSerialization(primitiveSerialization: PrimitiveValuesSerialization)
 
     /**
      * Return the list of top-level nodes to be stored as builtins.
      */
-    fun builtins() : List<LWNode>
+    fun builtins(): List<LWNode>
 
     /**
      * Produce a Parsing Result serialized according to the LionWeb Specifications.
      */
-    fun parse(codebaseName: String, relativePath: String, code: String) : LWNode
+    fun parse(codebaseName: String, relativePath: String, code: String): LWNode
 }

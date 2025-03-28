@@ -48,11 +48,11 @@ class ScopeDescription(
     fun resolve(reference: ReferenceByName<out PossiblyNamed>) {
         val name = reference.name.asKey()
         val node by lazy { this.namesToLocalSymbolNodes[name] }
-        val identifier : String? by lazy {
+        val identifier: String? by lazy {
             val id = this.namesToExternalSymbolIdentifiers[name] ?: (node as? HasID)?.id
             require(node == null || id != null) { "No ID available for node $node" }
             id
-       }
+        }
         when {
             node != null -> {
                 @Suppress("UNCHECKED_CAST")

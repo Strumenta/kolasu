@@ -13,5 +13,4 @@ object ASTLanguage {
         require(languages.size == 1)
         languages.first()
     }
-
 }

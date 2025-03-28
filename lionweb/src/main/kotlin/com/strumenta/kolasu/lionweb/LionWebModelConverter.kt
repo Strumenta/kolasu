@@ -30,7 +30,6 @@ import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
 import io.lionweb.lioncore.java.language.Enumeration
 import io.lionweb.lioncore.java.language.EnumerationLiteral
-import io.lionweb.lioncore.java.language.Feature as LWFeature
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.PrimitiveType
@@ -59,7 +58,7 @@ import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.javaType
+import io.lionweb.lioncore.java.language.Feature as LWFeature
 
 interface PrimitiveValueSerialization<E> {
     fun serialize(value: E): String
@@ -555,8 +554,8 @@ class LionWebModelConverter(
                     } else {
                         val target = entry.value as LWNode
                         val nodeMapping = nodesMapping.byB(target)
-                        if (nodeMapping == null){
-                            //?: throw IllegalStateException("No node mapping for $target (id: ${target.id}, classifier: ${target.classifier})")
+                        if (nodeMapping == null) {
+                            // ?: throw IllegalStateException("No node mapping for $target (id: ${target.id}, classifier: ${target.classifier})")
                             entry.key.identifier = entry.value!!.id!!
                         } else {
                             entry.key.referred = nodeMapping as PossiblyNamed
@@ -611,17 +610,19 @@ class LionWebModelConverter(
         val enumerationLiteral = propValue.enumerationLiteral
         val enumKClass = synchronized(languageConverter) {
             languageConverter
-                .getEnumerationsToKolasuClassesMapping().entries.find { it.key.id == enumerationLiteral.enumeration?.id }?.value
+                .getEnumerationsToKolasuClassesMapping().entries.find {
+                    it.key.id == enumerationLiteral.enumeration?.id
+                }?.value
                 ?: throw java.lang.IllegalStateException(
                     "Cannot find enum class for enumeration " +
-                            "${enumerationLiteral.enumeration?.name}"
+                        "${enumerationLiteral.enumeration?.name}"
                 )
         }
         val entries = enumKClass.java.enumConstants
         return entries.find { it.name == enumerationLiteral.name }
             ?: throw IllegalStateException(
                 "Cannot find enum constant named ${enumerationLiteral.name} in enum " +
-                        "class ${enumKClass.qualifiedName}"
+                    "class ${enumKClass.qualifiedName}"
             )
     }
 
@@ -728,7 +729,9 @@ class LionWebModelConverter(
                     is Property -> {
                         val value = attributeValue(data, feature)
                         if (!param.type.isAssignableBy(value)) {
-                            throw RuntimeException("Cannot assign value $value to param ${param.name} of type ${param.type}")
+                            throw RuntimeException(
+                                "Cannot assign value $value to param ${param.name} of type ${param.type}"
+                            )
                         }
                         params[param] = value
                     }
@@ -871,10 +874,22 @@ class LionWebModelConverter(
     }
 
     fun importIssueFromLionweb(issueNode: IssueNode): Pair<String, Issue> {
-        val issueType = importEnumValue(issueNode.getPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::type.name)!!) as EnumerationValue) as IssueType
-        val message = issueNode.getPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::message.name)!!) as String
-        val severity = importEnumValue(issueNode.getPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::severity.name)!!) as EnumerationValue) as IssueSeverity
-        val position = issueNode.getPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::position.name)!!) as Position
+        val issueType = importEnumValue(
+            issueNode.getPropertyValue(
+                StarLasuLWLanguage.Issue.getPropertyByName(Issue::type.name)!!
+            ) as EnumerationValue
+        ) as IssueType
+        val message = issueNode.getPropertyValue(
+            StarLasuLWLanguage.Issue.getPropertyByName(Issue::message.name)!!
+        ) as String
+        val severity = importEnumValue(
+            issueNode.getPropertyValue(
+                StarLasuLWLanguage.Issue.getPropertyByName(Issue::severity.name)!!
+            ) as EnumerationValue
+        ) as IssueSeverity
+        val position = issueNode.getPropertyValue(
+            StarLasuLWLanguage.Issue.getPropertyByName(Issue::position.name)!!
+        ) as Position
         val issue = Issue(issueType, message, severity, position)
         return issueNode.id!! to issue
     }
@@ -897,7 +912,7 @@ class LionWebModelConverter(
         }
         val issuesContainment = StarLasuLWLanguage.ParsingResult.getContainmentByName(ParsingResult<*>::issues.name)!!
         pr.issues.forEachIndexed { index, issue ->
-            val id = "${resultNode.id}-issue-${index}"
+            val id = "${resultNode.id}-issue-$index"
             resultNode.addChild(issuesContainment, exportIssueToLionweb(issue, id))
         }
         resultNode.setPropertyValue(

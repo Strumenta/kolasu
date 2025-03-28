@@ -16,10 +16,10 @@ object CodebaseLanguage {
         require(languages.size == 1)
         languages.first()
     }
-    val codebaseFile : Concept by lazy {
+    val codebaseFile: Concept by lazy {
         language.getConceptByName("CodebaseFile") ?: throw IllegalStateException()
     }
-    val builtinsCollection : Concept by lazy {
+    val builtinsCollection: Concept by lazy {
         language.getConceptByName("BuiltinsCollection") ?: throw IllegalStateException()
     }
 }
