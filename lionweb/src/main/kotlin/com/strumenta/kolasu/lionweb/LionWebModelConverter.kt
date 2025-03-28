@@ -391,7 +391,7 @@ class LionWebModelConverter(
 
     fun importModelFromLionWeb(lwTree: LWNode): Any {
         val referencesPostponer = ReferencesPostponer()
-        lwTree.thisAndAllDescendants().reversed().forEach { lwNode ->
+        lwTree.thisAndAllDescendants().toList().myReversed().forEach { lwNode ->
             val kClass = synchronized(languageConverter) {
                 languageConverter.correspondingKolasuClass(lwNode.classifier)
             }
@@ -947,4 +947,17 @@ fun KType.isAssignableBy(value: Any?): Boolean {
     }
 
     return classifier.isInstance(value)
+}
+
+/**
+ * This avoids an issue when using JDK 21+. In JDK 21 java.util.List.asReversed was introduced
+ * and cause a conflict with the Kotlin one.
+ */
+fun <T> Iterable<T>.myReversed(): List<T> {
+    val result = mutableListOf<T>()
+    for (item in this) {
+        result.add(item)
+    }
+    result.reverse()
+    return result
 }
