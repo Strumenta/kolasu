@@ -189,7 +189,7 @@ open class Node() : Origin, Destination, Serializable {
      * of circular graphs.
      */
     final override fun toString(): String {
-        return "${this.nodeType}(${properties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
+        return "${this.nodeType}(${originalProperties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
     }
 
     fun getChildren(containment: Containment, includeDerived: Boolean = false): List<Node> {
