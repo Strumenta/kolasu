@@ -25,7 +25,6 @@ dependencies {
     implementation(libs.lionwebjavaemf)
     implementation(libs.starlasu.specs)
     api(project(":core"))
-    api(project(":emf"))
     api(project(":lionweb"))
 
 

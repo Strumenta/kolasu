@@ -4,8 +4,6 @@ plugins {
 rootProject.name = 'kolasu'
 include 'core'
 include 'semantics'
-include 'emf'
-include 'playground'
 include 'javalib'
 include 'lionweb'
 include 'lionweb-gen'
