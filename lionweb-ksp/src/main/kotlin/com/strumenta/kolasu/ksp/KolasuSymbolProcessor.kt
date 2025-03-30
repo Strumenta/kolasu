@@ -11,7 +11,6 @@ import com.strumenta.kolasu.model.Node
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintWriter
-import java.lang.IllegalStateException
 
 class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : SymbolProcessor {
 

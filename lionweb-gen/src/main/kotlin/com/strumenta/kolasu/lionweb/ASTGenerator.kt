@@ -27,7 +27,6 @@ import io.lionweb.lioncore.java.language.LionCoreBuiltins
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
 import org.jetbrains.kotlin.konan.file.File
-import java.lang.UnsupportedOperationException
 
 data class KotlinFile(val path: String, val code: String)
 

@@ -7,9 +7,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CompilationUnit extends Node {
+public class CompilationUnit extends BaseASTNode {
 
-    public static class A extends Node {
+    public static class A extends BaseASTNode {
         private List<B> bs = new LinkedList<>();
 
         public List<B> getBs() {
@@ -24,7 +24,7 @@ public class CompilationUnit extends Node {
         }
     }
 
-    public static class B extends Node {
+    public static class B extends BaseASTNode {
 
     }
 

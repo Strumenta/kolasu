@@ -2,6 +2,7 @@ package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.ASTRoot
+import com.strumenta.kolasu.model.BaseASTNode
 import com.strumenta.kolasu.model.CompositeDestination
 import com.strumenta.kolasu.model.FileSource
 import com.strumenta.kolasu.model.Named
@@ -49,7 +50,7 @@ enum class AnEnum {
 data class NodeWithEnum(
     override val name: String,
     val e: AnEnum?
-) : Named, Node()
+) : Named, BaseASTNode()
 
 class LionWebModelConverterTest {
 
@@ -705,7 +706,7 @@ class LionWebModelConverterTest {
         }
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
-        val n1 = NodeWithEnum("foo", AnEnum.FOO)
+        val n1: BaseASTNode = NodeWithEnum("foo", AnEnum.FOO)
             .withPosition(Position(Point(3, 5), Point(27, 200)))
             .setSourceForTree(LionWebSource("MySource"))
         val lwNode = mc.exportModelToLionWeb(n1)

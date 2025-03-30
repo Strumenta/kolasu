@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.lionweb
 
+import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.parsing.FirstStageParsingResult
 import com.strumenta.kolasu.parsing.KolasuToken
@@ -11,7 +12,7 @@ class ParsingResultWithTokens<RootNode : KNode>(
     root: RootNode?,
     val tokens: List<KolasuToken>,
     code: String? = null,
-    incompleteNode: com.strumenta.kolasu.model.Node? = null,
+    incompleteNode: Node? = null,
     firstStage: FirstStageParsingResult<*>? = null,
     time: Long? = null,
     source: Source? = null

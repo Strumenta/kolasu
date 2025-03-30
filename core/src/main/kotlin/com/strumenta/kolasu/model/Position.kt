@@ -210,7 +210,7 @@ data class Position(val start: Point, val end: Point, var source: Source? = null
      * Tests whether the given node is contained in the interval represented by this object.
      * @param node the node
      */
-    fun contains(node: Node): Boolean {
+    fun contains(node: BaseASTNode): Boolean {
         return this.contains(node.position)
     }
 
@@ -236,12 +236,12 @@ fun pos(startLine: Int, startCol: Int, endLine: Int, endCol: Int) = Position(
     Point(endLine, endCol)
 )
 
-fun Node.isBefore(other: Node): Boolean = position!!.start.isBefore(other.position!!.start)
+fun BaseASTNode.isBefore(other: BaseASTNode): Boolean = position!!.start.isBefore(other.position!!.start)
 
-val Node.startLine: Int?
+val BaseASTNode.startLine: Int?
     get() = this.position?.start?.line
 
-val Node.endLine: Int?
+val BaseASTNode.endLine: Int?
     get() = this.position?.end?.line
 
 /**

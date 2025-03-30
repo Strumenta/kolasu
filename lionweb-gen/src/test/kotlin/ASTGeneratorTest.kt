@@ -24,7 +24,7 @@ class ASTGeneratorTest {
             """package com.strumenta.properties
 
 import com.strumenta.kolasu.lionweb.LionWebAssociation
-import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.BaseASTNode
 import kotlin.Boolean
 import kotlin.String
 import kotlin.collections.MutableList
@@ -32,16 +32,16 @@ import kotlin.collections.MutableList
 @LionWebAssociation(key = "io-lionweb-Properties_PropertiesFile")
 public data class PropertiesFile(
   public var props: MutableList<Property>,
-) : Node()
+) : BaseASTNode()
 
 @LionWebAssociation(key = "io-lionweb-Properties_Property")
 public data class Property(
   public var name: String,
   public var `value`: Value,
-) : Node()
+) : BaseASTNode()
 
 @LionWebAssociation(key = "io-lionweb-Properties_Value")
-public sealed class Value : Node()
+public sealed class Value : BaseASTNode()
 
 @LionWebAssociation(key = "io-lionweb-Properties_BooleanValue")
 public data class BooleanValue(

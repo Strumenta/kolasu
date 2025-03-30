@@ -32,6 +32,7 @@ dependencies {
     implementation("com.google.code.gson:gson:$gson_version")
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    api(libs.lionwebjava)
 }
 
 generateTestGrammarSource {
