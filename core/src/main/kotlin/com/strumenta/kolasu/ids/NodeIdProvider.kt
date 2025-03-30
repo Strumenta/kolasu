@@ -15,6 +15,7 @@ interface NodeIdProvider {
      * This should be replaced in the future by setting kNode.id directly, instead of relying
      * on this external mapping
      */
+    @Deprecated("No nodes have an ID")
     fun registerMapping(kNode: KNode, nodeId: String) {
         // do nothing
     }

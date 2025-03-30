@@ -5,6 +5,7 @@ import com.strumenta.kolasu.model.checkFeatureName
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
+@Deprecated("Use LionWeb's Language")
 sealed class Feature {
     abstract val name: String
 
@@ -14,6 +15,7 @@ sealed class Feature {
     abstract val multiplicity: Multiplicity
 }
 
+@Deprecated("Use LionWeb's Language")
 data class Attribute(override val name: String, val optional: Boolean, val type: KType) : Feature() {
 
     init {
@@ -28,10 +30,12 @@ data class Attribute(override val name: String, val optional: Boolean, val type:
         get() = if (optional) Multiplicity.OPTIONAL else Multiplicity.SINGULAR
 }
 
+@Deprecated("Use LionWeb's Language")
 sealed class Link : Feature() {
     abstract val type: KClass<*>
 }
 
+@Deprecated("Use LionWeb's Language")
 data class Reference(override val name: String, val optional: Boolean, override val type: KClass<*>) : Link() {
     override val multiplicity: Multiplicity
         get() = if (optional) Multiplicity.OPTIONAL else Multiplicity.SINGULAR
@@ -40,6 +44,7 @@ data class Reference(override val name: String, val optional: Boolean, override 
     }
 }
 
+@Deprecated("Use LionWeb's Language")
 data class Containment(
     override val name: String,
     override val multiplicity: Multiplicity,

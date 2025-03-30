@@ -21,6 +21,7 @@ import kotlin.reflect.full.superclasses
  * There is no explicit Language defined in Kolasu, it is just a bunch of AST classes.
  * We create this Class to represent that collection of AST classes.
  */
+@Deprecated("Use LionWeb's Language")
 class KolasuLanguage(val qualifiedName: String) {
     val astClasses: List<KClass<*>>
         get() = _astClasses
