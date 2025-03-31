@@ -46,8 +46,6 @@ publishing {
         create<MavenPublication>("kolasu_codebase") {
             from(components["java"])
             artifactId = "kolasu-${project.name}"
-            artifact(tasks.named("sourcesJar"))
-            artifact(tasks.named("javadocJar"))
             suppressPomMetadataWarningsFor("cliApiElements")
             suppressPomMetadataWarningsFor("cliRuntimeElements")
             pom {
@@ -87,4 +85,8 @@ publishing {
 
 signing {
     sign(publishing.publications["kolasu_codebase"])
+}
+
+tasks.named("dokkaJavadoc").configure {
+    dependsOn(":core:compileKotlin")
 }
