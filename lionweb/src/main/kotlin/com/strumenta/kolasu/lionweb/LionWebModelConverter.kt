@@ -395,7 +395,7 @@ class LionWebModelConverter(
             val kClass = synchronized(languageConverter) {
                 languageConverter.correspondingKolasuClass(lwNode.classifier)
             }
-                ?: throw RuntimeException("We do not have StarLasu AST class for LIonWeb Concept ${lwNode.classifier}")
+                ?: throw RuntimeException("We do not have StarLasu AST class for LionWeb Concept ${lwNode.classifier}")
             try {
                 val instantiated = instantiate(kClass, lwNode, referencesPostponer)
                 if (instantiated is KNode) {
