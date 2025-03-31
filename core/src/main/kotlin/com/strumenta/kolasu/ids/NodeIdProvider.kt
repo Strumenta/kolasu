@@ -10,6 +10,11 @@ import com.strumenta.kolasu.model.Node as KNode
  */
 interface NodeIdProvider {
     fun id(kNode: KNode): String
+
+    /**
+     * This should be replaced in the future by setting kNode.id directly, instead of relying
+     * on this external mapping
+     */
     fun registerMapping(kNode: KNode, nodeId: String) {
         // do nothing
     }

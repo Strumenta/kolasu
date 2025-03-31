@@ -2,8 +2,6 @@ package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.ids.IDGenerationException
 import com.strumenta.kolasu.ids.NodeIdProvider
-import com.strumenta.kolasu.ids.SimpleSourceIdProvider
-import com.strumenta.kolasu.ids.SourceShouldBeSetException
 import com.strumenta.kolasu.language.Feature
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.CompositeDestination
@@ -11,7 +9,6 @@ import com.strumenta.kolasu.model.Multiplicity
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.allFeatures
 import com.strumenta.kolasu.model.asContainment
 import com.strumenta.kolasu.model.assignParents
@@ -19,7 +16,6 @@ import com.strumenta.kolasu.model.isAttribute
 import com.strumenta.kolasu.model.isContainment
 import com.strumenta.kolasu.model.isReference
 import com.strumenta.kolasu.model.nodeOriginalProperties
-import com.strumenta.kolasu.parsing.FirstStageParsingResult
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.transformation.FailingASTTransformation
@@ -52,7 +48,6 @@ import io.lionweb.lioncore.java.serialization.AbstractSerialization
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.serialization.SerializationProvider
 import io.lionweb.lioncore.java.utils.CommonChecks
-import io.lionweb.lioncore.kotlin.BaseNode
 import io.lionweb.lioncore.kotlin.MetamodelRegistry
 import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
 import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
@@ -61,6 +56,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
+import kotlin.reflect.KType
 import kotlin.reflect.full.primaryConstructor
 import io.lionweb.lioncore.java.language.Feature as LWFeature
 
@@ -83,6 +79,8 @@ class DummyNodeResolver : NodeResolver {
  * This class is thread-safe.
  *
  * @param nodeIdProvider logic to be used to associate IDs to Kolasu nodes when exporting them to LionWeb
+ *                       it will be used to assign an ID to those elements which already do not have one
+ *                       (through the HasID.id field).
  */
 class LionWebModelConverter(
     var nodeIdProvider: NodeIdProvider = StructuralLionWebNodeIdProvider(),
@@ -102,8 +100,11 @@ class LionWebModelConverter(
     private val languageConverter = initialLanguageConverter
 
     /**
-     * We mostly map Kolasu Nodes to LionWeb Nodes, but we also map things that are not Kolasu Nodes but are nodes
-     * for LionWeb (this used to be the case for Positions and Points).
+     * We mostly map Kolasu Nodes to LionWeb Nodes, but we may also map things that are not Kolasu Nodes but are nodes
+     * for LionWeb. For example, we could do that for Issues and Parsing Results.
+     *
+     * In the future we could rely on the HasID.id field to consider removing this field, which can grow significantly
+     * and cause issues when nodes are cached and changes happening between two conversions are ignored.
      */
     private val nodesMapping = BiMap<Any, LWNode>(usingIdentity = true)
     private val primitiveValueSerializations = ConcurrentHashMap<KClass<*>, PrimitiveValueSerialization<*>>()
@@ -151,6 +152,12 @@ class LionWebModelConverter(
 
             fun nodeId(kNode: KNode): String {
                 return cache.getOrPut(kNode) {
+                    // If a kNode has already an id, it should prevail and we should not attempt to generate
+                    // an ID for it
+                    require(kNode.id == null) {
+                        "We should not generate an ID for a kNode which already has one"
+                    }
+
                     val id = nodeIdProvider.id(kNode)
                     if (!CommonChecks.isValidID(id)) {
                         throw RuntimeException("We got an invalid Node ID from $nodeIdProvider for $id")
@@ -165,7 +172,7 @@ class LionWebModelConverter(
         if (!nodesMapping.containsA(kolasuTree)) {
             kolasuTree.walk().forEach { kNode ->
                 if (!nodesMapping.containsA(kNode)) {
-                    val nodeID = myIDManager.nodeId(kNode)
+                    val nodeID = kNode.id ?: myIDManager.nodeId(kNode)
                     if (!CommonChecks.isValidID(nodeID)) {
                         throw RuntimeException(
                             "We generated an invalid Node ID, using $myIDManager in $kNode. Node ID: $nodeID"
@@ -229,7 +236,7 @@ class LionWebModelConverter(
                             if (feature == StarLasuLWLanguage.ASTNodeOriginalNode) {
                                 val origin = kNode.origin
                                 if (origin is KNode) {
-                                    val targetID = myIDManager.nodeId(origin)
+                                    val targetID = origin.id ?: myIDManager.nodeId(origin)
                                     setOriginalNode(lwNode, targetID)
                                 } else if (origin is PlaceholderASTTransformation) {
                                     if (lwNode is AbstractClassifierInstance<*>) {
@@ -237,8 +244,9 @@ class LionWebModelConverter(
                                             "${lwNode.id}_placeholder_annotation",
                                             StarLasuLWLanguage.PlaceholderNode
                                         )
-                                        if (origin.origin is KNode) {
-                                            val targetID = myIDManager.nodeId(origin.origin as KNode)
+                                        val effectiveOrigin = origin.origin
+                                        if (effectiveOrigin is KNode) {
+                                            val targetID = effectiveOrigin.id ?: myIDManager.nodeId(effectiveOrigin)
                                             setOriginalNode(lwNode, targetID)
                                         }
                                         setPlaceholderNodeType(instance, origin.javaClass.kotlin)
@@ -267,7 +275,7 @@ class LionWebModelConverter(
                                     }
                                 }
                                 val referenceValues = destinationNodes.map { destinationNode ->
-                                    val targetID = myIDManager.nodeId(destinationNode)
+                                    val targetID = destinationNode.id ?: myIDManager.nodeId(destinationNode)
                                     ReferenceValue(ProxyNode(targetID), null)
                                 }
                                 lwNode.setReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes, referenceValues)
@@ -297,6 +305,7 @@ class LionWebModelConverter(
                                                             "reference holder: $kNode"
                                                     )
                                             )
+                                            require(lwReferred.id != null)
                                             lwNode.addReferenceValue(feature, ReferenceValue(lwReferred, kValue.name))
                                         }
 
@@ -382,7 +391,7 @@ class LionWebModelConverter(
 
     fun importModelFromLionWeb(lwTree: LWNode): Any {
         val referencesPostponer = ReferencesPostponer()
-        lwTree.thisAndAllDescendants().reversed().forEach { lwNode ->
+        lwTree.thisAndAllDescendants().toList().myReversed().forEach { lwNode ->
             val kClass = synchronized(languageConverter) {
                 languageConverter.correspondingKolasuClass(lwNode.classifier)
             }
@@ -391,7 +400,10 @@ class LionWebModelConverter(
                 val instantiated = instantiate(kClass, lwNode, referencesPostponer)
                 if (instantiated is KNode) {
                     instantiated.assignParents()
+                    // This mapping will eventually become superfluous because we will store the ID directly in the
+                    // instantiated kNode
                     nodeIdProvider.registerMapping(instantiated, lwNode.id!!)
+                    instantiated.id = lwNode.id
                 }
                 associateNodes(instantiated, lwNode)
             } catch (e: RuntimeException) {
@@ -427,7 +439,7 @@ class LionWebModelConverter(
                         StarLasuLWLanguage.PlaceholderNodeMessageProperty
                     ) as String
                     when (placeholderType.name) {
-                        "MissingASTTransformation" -> {
+                        MissingASTTransformation::class.simpleName -> {
                             placeholderNodes[kNode] = { kNode ->
                                 kNode.origin = MissingASTTransformation(
                                     origin = kNode.origin,
@@ -436,7 +448,7 @@ class LionWebModelConverter(
                                 )
                             }
                         }
-                        "FailingASTTransformation" -> {
+                        FailingASTTransformation::class.simpleName -> {
                             placeholderNodes[kNode] = { kNode ->
                                 kNode.origin = FailingASTTransformation(
                                     origin = kNode.origin,
@@ -554,8 +566,15 @@ class LionWebModelConverter(
                     if (entry.value is ProxyNode) {
                         entry.key.identifier = (entry.value as ProxyNode).id
                     } else {
-                        entry.key.referred = nodesMapping.byB(entry.value as LWNode)!! as PossiblyNamed
-                        entry.key.identifier = entry.value!!.id!!
+                        val target = entry.value as LWNode
+                        val nodeMapping = nodesMapping.byB(target)
+                        if (nodeMapping == null) {
+                            // ?: throw IllegalStateException("No node mapping for $target (id: ${target.id}, classifier: ${target.classifier})")
+                            entry.key.identifier = entry.value!!.id!!
+                        } else {
+                            entry.key.referred = nodeMapping as PossiblyNamed
+                            entry.key.identifier = entry.value!!.id!!
+                        }
                     }
                 }
             }
@@ -601,31 +620,30 @@ class LionWebModelConverter(
         }
     }
 
+    private fun importEnumValue(propValue: EnumerationValue): Any {
+        val enumerationLiteral = propValue.enumerationLiteral
+        val enumKClass = synchronized(languageConverter) {
+            languageConverter
+                .getEnumerationsToKolasuClassesMapping().entries.find {
+                    it.key.id == enumerationLiteral.enumeration?.id
+                }?.value
+                ?: throw java.lang.IllegalStateException(
+                    "Cannot find enum class for enumeration " +
+                        "${enumerationLiteral.enumeration?.name}"
+                )
+        }
+        val entries = enumKClass.java.enumConstants
+        return entries.find { it.name == enumerationLiteral.name }
+            ?: throw IllegalStateException(
+                "Cannot find enum constant named ${enumerationLiteral.name} in enum " +
+                    "class ${enumKClass.qualifiedName}"
+            )
+    }
+
     private fun attributeValue(data: LWNode, property: Property): Any? {
         val propValue = data.getPropertyValue(property)
         val value = if (property.type is Enumeration && propValue != null) {
-            val enumerationLiteral = if (propValue is EnumerationValue) {
-                propValue.enumerationLiteral
-            } else {
-                throw java.lang.IllegalStateException(
-                    "Property value of property of enumeration type is " +
-                        "not an EnumerationValue. It is instead " + propValue
-                )
-            }
-            val enumKClass = synchronized(languageConverter) {
-                languageConverter
-                    .getEnumerationsToKolasuClassesMapping()[enumerationLiteral.enumeration]
-                    ?: throw java.lang.IllegalStateException(
-                        "Cannot find enum class for enumeration " +
-                            "${enumerationLiteral.enumeration?.name}"
-                    )
-            }
-            val entries = enumKClass.java.enumConstants
-            entries.find { it.name == enumerationLiteral.name }
-                ?: throw IllegalStateException(
-                    "Cannot find enum constant named ${enumerationLiteral.name} in enum " +
-                        "class ${enumKClass.qualifiedName}"
-                )
+            importEnumValue(propValue as EnumerationValue)
         } else {
             propValue
         }
@@ -653,7 +671,7 @@ class LionWebModelConverter(
                     throw IllegalStateException()
                 }
             }
-            val kChild = if (lwChild == null) {
+            if (lwChild == null) {
                 return null
             } else {
                 (
@@ -674,9 +692,6 @@ class LionWebModelConverter(
     ): Any? {
         val referenceValues = data.getReferenceValues(reference)
         return when {
-            referenceValues.size > 1 -> {
-                throw IllegalStateException()
-            }
             referenceValues.size == 0 -> {
                 null
             }
@@ -686,7 +701,9 @@ class LionWebModelConverter(
                 referencesPostponer.registerPostponedReference(referenceByName, rf.referred)
                 referenceByName
             }
-            else -> throw java.lang.IllegalStateException()
+            else -> {
+                throw IllegalStateException()
+            }
         }
     }
 
@@ -723,13 +740,27 @@ class LionWebModelConverter(
             } else {
                 when (feature) {
                     is Property -> {
-                        params[param] = attributeValue(data, feature)
+                        val value = attributeValue(data, feature)
+                        if (!param.type.isAssignableBy(value)) {
+                            throw RuntimeException(
+                                "Cannot assign value $value to param ${param.name} of type ${param.type}"
+                            )
+                        }
+                        params[param] = value
                     }
                     is Reference -> {
-                        params[param] = referenceValue(data, feature, referencesPostponer)
+                        val value = referenceValue(data, feature, referencesPostponer)
+                        if (!param.type.isAssignableBy(value)) {
+                            throw RuntimeException()
+                        }
+                        params[param] = value
                     }
                     is Containment -> {
-                        params[param] = containmentValue(data, feature)
+                        val value = containmentValue(data, feature)
+                        if (!param.type.isAssignableBy(value)) {
+                            throw RuntimeException()
+                        }
+                        params[param] = value
                     }
                     else -> throw IllegalStateException()
                 }
@@ -838,11 +869,16 @@ class LionWebModelConverter(
     }
 
     private fun associateNodes(kNode: Any, lwNode: LWNode) {
+        if (kNode is KNode) {
+            require(kNode.id == null || kNode.id == lwNode.id)
+            kNode.id = lwNode.id
+        }
         nodesMapping.associate(kNode, lwNode)
     }
 
-    fun exportIssueToLionweb(issue: Issue): IssueNode {
+    fun exportIssueToLionweb(issue: Issue, id: String? = null): IssueNode {
         val issueNode = IssueNode()
+        id?.let { issueNode.id = it }
         issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::message.name)!!, issue.message)
         issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::position.name)!!, issue.position)
         setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName(Issue::severity.name)!!, issue.severity)
@@ -850,8 +886,32 @@ class LionWebModelConverter(
         return issueNode
     }
 
+    fun importIssueFromLionweb(issueNode: IssueNode): Pair<String, Issue> {
+        val issueType = importEnumValue(
+            issueNode.getPropertyValue(
+                StarLasuLWLanguage.Issue.getPropertyByName(Issue::type.name)!!
+            ) as EnumerationValue
+        ) as IssueType
+        val message = issueNode.getPropertyValue(
+            StarLasuLWLanguage.Issue.getPropertyByName(Issue::message.name)!!
+        ) as String
+        val severity = importEnumValue(
+            issueNode.getPropertyValue(
+                StarLasuLWLanguage.Issue.getPropertyByName(Issue::severity.name)!!
+            ) as EnumerationValue
+        ) as IssueSeverity
+        val position = issueNode.getPropertyValue(
+            StarLasuLWLanguage.Issue.getPropertyByName(Issue::position.name)!!
+        ) as Position
+        val issue = Issue(issueType, message, severity, position)
+        return issueNode.id!! to issue
+    }
+
     fun exportParsingResultToLionweb(pr: ParsingResult<*>, tokens: List<KolasuToken> = listOf()): ParsingResultNode {
         val resultNode = ParsingResultNode(pr.source)
+        if (resultNode.id == null) {
+            throw IllegalStateException("Parsing result has null ID")
+        }
         resultNode.setPropertyValue(
             StarLasuLWLanguage.ParsingResult.getPropertyByName(ParsingResult<*>::code.name)!!,
             pr.code
@@ -864,49 +924,40 @@ class LionWebModelConverter(
             )
         }
         val issuesContainment = StarLasuLWLanguage.ParsingResult.getContainmentByName(ParsingResult<*>::issues.name)!!
-        pr.issues.forEach {
-            resultNode.addChild(issuesContainment, exportIssueToLionweb(it))
+        pr.issues.forEachIndexed { index, issue ->
+            val id = "${resultNode.id}-issue-$index"
+            resultNode.addChild(issuesContainment, exportIssueToLionweb(issue, id))
         }
         resultNode.setPropertyValue(
             StarLasuLWLanguage.ParsingResult.getPropertyByName(ParsingResultWithTokens<*>::tokens.name)!!,
             TokensList(tokens)
         )
+        resultNode.thisAndAllDescendants().forEach { lwNode ->
+            require(lwNode.id != null) { "Node $lwNode should get a valid ID" }
+        }
         return resultNode
     }
 }
 
-class ParsingResultWithTokens<RootNode : KNode>(
-    issues: List<Issue>,
-    root: RootNode?,
-    val tokens: List<KolasuToken>,
-    code: String? = null,
-    incompleteNode: com.strumenta.kolasu.model.Node? = null,
-    firstStage: FirstStageParsingResult<*>? = null,
-    time: Long? = null,
-    source: Source? = null
-) : ParsingResult<RootNode>(issues, root, code, incompleteNode, firstStage, time, source)
+fun KType.isAssignableBy(value: Any?): Boolean {
+    val classifier = this.classifier as? KClass<*> ?: return false
 
-class IssueNode : BaseNode(LIONWEB_VERSION_USED_BY_KOLASU) {
-    var type: EnumerationValue? by property("type")
-    var message: String? by property("message")
-    var severity: EnumerationValue? by property("severity")
-    var position: Position? by property("position")
-
-    override fun getClassifier(): Concept {
-        return StarLasuLWLanguage.Issue
+    if (value == null) {
+        return this.isMarkedNullable
     }
+
+    return classifier.isInstance(value)
 }
 
-class ParsingResultNode(val source: Source?) : BaseNode(LIONWEB_VERSION_USED_BY_KOLASU) {
-    override fun calculateID(): String? {
-        return try {
-            SimpleSourceIdProvider().sourceId(source) + "_ParsingResult"
-        } catch (_: SourceShouldBeSetException) {
-            super.calculateID()
-        }
+/**
+ * This avoids an issue when using JDK 21+. In JDK 21 java.util.List.asReversed was introduced
+ * and cause a conflict with the Kotlin one.
+ */
+fun <T> Iterable<T>.myReversed(): List<T> {
+    val result = mutableListOf<T>()
+    for (item in this) {
+        result.add(item)
     }
-
-    override fun getClassifier(): Concept {
-        return StarLasuLWLanguage.ParsingResult
-    }
+    result.reverse()
+    return result
 }

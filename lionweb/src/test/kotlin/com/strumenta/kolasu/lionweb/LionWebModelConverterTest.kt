@@ -82,7 +82,7 @@ class LionWebModelConverterTest {
           "property": {
             "language": "com-strumenta-SimpleLang",
             "version": "1",
-            "key": "com-strumenta-SimpleLang_SimpleRoot_id"
+            "key": "com-strumenta-SimpleLang_SimpleRoot__id"
           },
           "value": "12345"
         },
@@ -399,7 +399,7 @@ class LionWebModelConverterTest {
         val simpleNodeB = lwLanguage.getConceptByName("SimpleNodeB")!!
 
         assertSame(simpleRoot, lwAST.classifier)
-        assertEquals(12345, lwAST.getPropertyValueByName("id"))
+        assertEquals(12345, lwAST.getPropertyValueByName("_id"))
         assertEquals(3, lwAST.getChildrenByContainmentName("childrez").size)
 
         val child1 = lwAST.getChildrenByContainmentName("childrez")[0]
@@ -781,9 +781,9 @@ class LionWebModelConverterTest {
 
         // We verify the re-imported data is correct
         val deserializedNode1 = mc.importModelFromLionWeb(lwNode1) as SimpleRoot
-        assertEquals(1, deserializedNode1.id)
+        assertEquals(1, deserializedNode1._id)
         assert(deserializedNode1.origin is SimpleRoot)
-        assertEquals(2, (deserializedNode1.origin as SimpleRoot).id)
+        assertEquals(2, (deserializedNode1.origin as SimpleRoot)._id)
         assertEquals(Position(Point(10, 20), Point(30, 40)), deserializedNode1.position)
     }
 
@@ -814,9 +814,9 @@ class LionWebModelConverterTest {
 
         val lwNode3 = mc.exportModelToLionWeb(node3)
         val deserializedNode3 = mc.importModelFromLionWeb(lwNode3) as SimpleRoot
-        assertEquals(3, deserializedNode3.id)
+        assertEquals(3, deserializedNode3._id)
         assert(deserializedNode3.destination is SimpleRoot)
-        assertEquals(1, (deserializedNode3.destination as SimpleRoot).id)
+        assertEquals(1, (deserializedNode3.destination as SimpleRoot)._id)
         assertEquals(Position(Point(1, 2), Point(3, 4)), deserializedNode3.position)
     }
 
@@ -854,10 +854,10 @@ class LionWebModelConverterTest {
 
         val lwNode3 = mc.exportModelToLionWeb(node3)
         val deserializedNode3 = mc.importModelFromLionWeb(lwNode3) as SimpleRoot
-        assertEquals(3, deserializedNode3.id)
+        assertEquals(3, deserializedNode3._id)
         assert(deserializedNode3.destination is CompositeDestination)
-        assertEquals(1, ((deserializedNode3.destination as CompositeDestination).elements[0] as SimpleRoot).id)
-        assertEquals(2, ((deserializedNode3.destination as CompositeDestination).elements[1] as SimpleRoot).id)
+        assertEquals(1, ((deserializedNode3.destination as CompositeDestination).elements[0] as SimpleRoot)._id)
+        assertEquals(2, ((deserializedNode3.destination as CompositeDestination).elements[1] as SimpleRoot)._id)
         assertEquals(Position(Point(1, 2), Point(3, 4)), deserializedNode3.position)
     }
 
@@ -896,7 +896,7 @@ class LionWebModelConverterTest {
         val deserializedNode1 = mc.importModelFromLionWeb(lwNode1) as SimpleRoot
         assertIs<MissingASTTransformation>(deserializedNode1.origin)
         assertIs<SimpleRoot>((deserializedNode1.origin as MissingASTTransformation).origin)
-        assertEquals(2, ((deserializedNode1.origin as MissingASTTransformation).origin as SimpleRoot).id)
+        assertEquals(2, ((deserializedNode1.origin as MissingASTTransformation).origin as SimpleRoot)._id)
     }
 
     @Test

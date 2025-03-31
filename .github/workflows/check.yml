@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         # For building we need JDK 11
-        java: [ '11', '17' ]
+        java: [ '11', '17', '21' ]
     name: Java ${{ matrix.Java }} BuildAndTest
 
     steps:
@@ -19,5 +19,7 @@ jobs:
       with:
         distribution: 'adopt'
         java-version: ${{ matrix.java }}
+    - name: Check Java version
+      run: java -version
     - name: Test
       run: ./gradlew check

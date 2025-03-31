@@ -45,7 +45,10 @@ val RESERVED_FEATURE_NAMES = setOf("parent", "position")
  * It implements Origin as it could be the source of a AST-to-AST transformation, so the node itself can be
  * the Origin of another node.
  */
-open class Node() : Origin, Destination, Serializable {
+open class Node() : Origin, Destination, Serializable, HasID {
+
+    @Internal
+    override var id: String? = null
 
     @Internal
     protected var positionOverride: Position? = null

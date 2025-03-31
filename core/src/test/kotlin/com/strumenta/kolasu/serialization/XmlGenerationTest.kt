@@ -48,12 +48,12 @@ class XmlGenerationTest {
             """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <root type="MyRoot">
     <mainSection name="Section1" type="Section">
-        <contents id="1" type="Content">
+        <contents _id="1" type="Content">
             <annidatedContent/>
         </contents>
-        <contents id="2" type="Content">
-            <annidatedContent id="3" type="Content">
-                <annidatedContent id="4" type="Content">
+        <contents _id="2" type="Content">
+            <annidatedContent _id="3" type="Content">
+                <annidatedContent _id="4" type="Content">
                     <annidatedContent/>
                 </annidatedContent>
             </annidatedContent>
@@ -83,7 +83,7 @@ class XmlGenerationTest {
             """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <root type="MyRoot">
     <mainSection name="Section1" type="Section">
-        <contents id="1" type="Content">
+        <contents _id="1" type="Content">
             <annidatedContent/>
         </contents>
         <contents type="OtherContent">
@@ -93,9 +93,9 @@ class XmlGenerationTest {
             <values value="100"/>
             <values value="-122"/>
         </contents>
-        <contents id="2" type="Content">
-            <annidatedContent id="3" type="Content">
-                <annidatedContent id="4" type="Content">
+        <contents _id="2" type="Content">
+            <annidatedContent _id="3" type="Content">
+                <annidatedContent _id="4" type="Content">
                     <annidatedContent/>
                 </annidatedContent>
             </annidatedContent>
