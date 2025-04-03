@@ -57,6 +57,7 @@ import kotlin.reflect.KProperty1
 class KolasuClient(
     val hostname: String = "localhost",
     val port: Int = 3005,
+    val repository: String = "default",
     val debug: Boolean = false,
     val connectTimeOutInSeconds: Long = 60,
     val callTimeoutInSeconds: Long = 60,
@@ -75,6 +76,7 @@ class KolasuClient(
         LionWebClient(
             hostname,
             port,
+            repository = repository,
             debug = debug,
             jsonSerializationProvider = { this.jsonSerialization },
             connectTimeOutInSeconds = connectTimeOutInSeconds,
