@@ -8,26 +8,26 @@ plugins {
     id("org.jetbrains.dokka")
 }
 
-val jvm_version = project.property("jvm_version") as String
-val kotlin_version = project.property("kotlin_version") as String
-val gson_version = project.property("gson_version") as String
+val jvmVersion = project.property("jvm_version") as String
+val kotlinVersion = project.property("kotlin_version") as String
+val gsonVersion = project.property("gson_version") as String
 
 val isReleaseVersion = !(project.version as String).endsWith("-SNAPSHOT")
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(jvm_version)
-    targetCompatibility = JavaVersion.toVersion(jvm_version)
+    sourceCompatibility = JavaVersion.toVersion(jvmVersion)
+    targetCompatibility = JavaVersion.toVersion(jvmVersion)
     withSourcesJar()
     withJavadocJar()
 }
 
 dependencies {
     implementation(project(":core"))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
-    implementation("org.jetbrains.kotlin:kotlin-test:$kotlin_version")
-    implementation("com.google.code.gson:gson:$gson_version")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+    implementation("com.google.code.gson:gson:$gsonVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
 }
 
 publishing {
