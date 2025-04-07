@@ -23,6 +23,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
     implementation(libs.lionwebjava)
     implementation(libs.lionwebjavaemf)
+    implementation(libs.starlasu.specs)
     api(project(":core"))
     api(project(":emf"))
     api(project(":lionweb"))

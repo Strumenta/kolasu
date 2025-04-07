@@ -4,9 +4,8 @@ import com.google.devtools.ksp.gradle.KspExtension
 import com.strumenta.kolasu.lionweb.ASTGenerator
 import com.strumenta.kolasu.lionweb.KotlinCodeProcessor
 import com.strumenta.kolasu.lionweb.LIONWEB_VERSION_USED_BY_KOLASU
-import com.strumenta.kolasu.lionweb.StarLasuLWLanguage
+import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.lioncore.java.language.Language
-import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.java.serialization.SerializationProvider
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -49,7 +48,7 @@ class LionWebGradlePlugin : Plugin<Project> {
                         "json" -> {
                             val jsonser = SerializationProvider.getStandardJsonSerialization(
                                 LIONWEB_VERSION_USED_BY_KOLASU)
-                            jsonser.instanceResolver.addTree(StarLasuLWLanguage)
+                            jsonser.instanceResolver.addTree(ASTLanguage.getLanguage())
                             val language = jsonser.deserializeToNodes(FileInputStream(languageFile)).first() as Language
                             val existingKotlinClasses = KotlinCodeProcessor().classesDeclaredInDir(project.file("src/main/kotlin"))
 

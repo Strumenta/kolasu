@@ -41,6 +41,7 @@ import com.strumenta.kolasu.model.Statement as KStatement
 import com.strumenta.kolasu.model.TypeAnnotation as KTypeAnnotation
 import com.strumenta.kolasu.parsing.ParsingResult as KParsingResult
 import com.strumenta.kolasu.validation.Issue as KIssue
+import com.strumenta.starlasu.base.ASTLanguage
 
 private const val PLACEHOLDER_NODE = "PlaceholderNode"
 
@@ -50,6 +51,7 @@ val LIONWEB_VERSION_USED_BY_KOLASU = LionWebVersion.v2023_1
  * When this object is referenced the initialization is performed. When that happens the serializers and deserializers
  * for Position and other primitive types are registered in the MetamodelRegistry.
  */
+@Deprecated("Use the AST language from Starlasu-specs")
 object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strumenta.StarLasu") {
 
     val CommonElement: Interface
@@ -94,7 +96,7 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
 
         createPrimitiveType(TokensList::class)
         ParsingResult = createConcept(KParsingResult::class.simpleName!!).apply {
-            createContainment(KParsingResult<*>::issues.name, Issue, Multiplicity.ZERO_TO_MANY)
+            createContainment(KParsingResult<*>::issues.name, ASTLanguage.getIssue(), Multiplicity.ZERO_TO_MANY)
             createContainment(KParsingResult<*>::root.name, ASTNode, Multiplicity.OPTIONAL)
             createProperty(
                 KParsingResult<*>::code.name,
@@ -107,7 +109,7 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
                 Multiplicity.OPTIONAL
             )
         }
-        MetamodelRegistry.registerMapping(IssueNode::class, Issue)
+        MetamodelRegistry.registerMapping(IssueNode::class, ASTLanguage.getIssue())
         MetamodelRegistry.registerMapping(ParsingResultNode::class, ParsingResult)
         registerSerializersAndDeserializersInMetamodelRegistry()
     }

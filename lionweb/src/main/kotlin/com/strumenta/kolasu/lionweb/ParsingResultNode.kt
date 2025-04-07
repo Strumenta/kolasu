@@ -3,6 +3,7 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.ids.SimpleSourceIdProvider
 import com.strumenta.kolasu.ids.SourceShouldBeSetException
 import com.strumenta.kolasu.model.Source
+import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.kotlin.BaseNode
 
@@ -16,6 +17,6 @@ class ParsingResultNode(val source: Source?) : BaseNode(LIONWEB_VERSION_USED_BY_
     }
 
     override fun getClassifier(): Concept {
-        return StarLasuLWLanguage.ParsingResult
+        return ASTLanguage.getParsingResult()
     }
 }
