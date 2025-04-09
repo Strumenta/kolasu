@@ -25,6 +25,8 @@ import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
+import com.strumenta.starlasu.base.ASTLanguage
+import io.lionweb.lioncore.java.language.Annotation
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
@@ -72,6 +74,14 @@ interface NodeResolver {
 class DummyNodeResolver : NodeResolver {
     override fun resolve(nodeID: String): KNode? = null
 }
+
+private val ASTNodePosition = ASTLanguage.getASTNode().getPropertyByName("position")!!
+private val ASTNodeOriginalNode = ASTLanguage.getASTNode().getReferenceByName("originalNode")!!
+private val ASTNodeTranspiledNodes = ASTLanguage.getASTNode().getReferenceByName("transpiledNodes")!!
+private val PlaceholderNode = ASTLanguage.getLanguage().getElementByName("PlaceholderNode") as Annotation
+private val PlaceholderNodeMessageProperty = PlaceholderNode.getPropertyByName("message")!!
+private val PlaceholderNodeTypeProperty = PlaceholderNode.getPropertyByName("type")!!
+private val PlaceholderNodeType = ASTLanguage.getLanguage().getEnumerationByName("PlaceholderNodeType")!!
 
 /**
  * This class is able to convert between Kolasu and LionWeb models, tracking the mapping.
@@ -199,8 +209,8 @@ class LionWebModelConverter(
                 lwFeatures.values.forEach { feature ->
                     when (feature) {
                         is Property -> {
-                            if (feature == StarLasuLWLanguage.ASTNodePosition) {
-                                lwNode.setPropertyValue(StarLasuLWLanguage.ASTNodePosition, kNode.position)
+                            if (feature == ASTNodePosition) {
+                                lwNode.setPropertyValue(ASTNodePosition, kNode.position)
                             } else {
                                 val kAttribute = kFeatures[feature.name]
                                     as? com.strumenta.kolasu.language.Attribute
@@ -233,7 +243,7 @@ class LionWebModelConverter(
                         }
 
                         is Reference -> {
-                            if (feature == StarLasuLWLanguage.ASTNodeOriginalNode) {
+                            if (feature == ASTNodeOriginalNode) {
                                 val origin = kNode.origin
                                 if (origin is KNode) {
                                     val targetID = origin.id ?: myIDManager.nodeId(origin)
@@ -242,7 +252,7 @@ class LionWebModelConverter(
                                     if (lwNode is AbstractClassifierInstance<*>) {
                                         val instance = DynamicAnnotationInstance(
                                             "${lwNode.id}_placeholder_annotation",
-                                            StarLasuLWLanguage.PlaceholderNode
+                                            PlaceholderNode
                                         )
                                         val effectiveOrigin = origin.origin
                                         if (effectiveOrigin is KNode) {
@@ -251,7 +261,7 @@ class LionWebModelConverter(
                                         }
                                         setPlaceholderNodeType(instance, origin.javaClass.kotlin)
                                         instance.setPropertyValue(
-                                            StarLasuLWLanguage.PlaceholderNodeMessageProperty,
+                                            PlaceholderNodeMessageProperty,
                                             origin.message
                                         )
                                         lwNode.addAnnotation(instance)
@@ -262,7 +272,7 @@ class LionWebModelConverter(
                                         )
                                     }
                                 }
-                            } else if (feature == StarLasuLWLanguage.ASTNodeTranspiledNodes) {
+                            } else if (feature == ASTNodeTranspiledNodes) {
                                 val destinationNodes = mutableListOf<KNode>()
                                 if (kNode.destination != null) {
                                     if (kNode.destination is KNode) {
@@ -278,9 +288,14 @@ class LionWebModelConverter(
                                     val targetID = destinationNode.id ?: myIDManager.nodeId(destinationNode)
                                     ReferenceValue(ProxyNode(targetID), null)
                                 }
-                                lwNode.setReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes, referenceValues)
+                                lwNode.setReferenceValues(ASTNodeTranspiledNodes, referenceValues)
                             } else {
-                                val kReference = kFeatures[feature.name]
+                                val kReference = (
+                                    kFeatures[feature.name]
+                                        ?: throw java.lang.IllegalStateException(
+                                            "Cannot find feature ${feature.name} in Starlasu Node ${kNode.nodeType}"
+                                        )
+                                    )
                                     as com.strumenta.kolasu.language.Reference
                                 val kValue = kNode.getReference(kReference)
                                 if (kValue == null) {
@@ -362,7 +377,7 @@ class LionWebModelConverter(
 
     private fun setOriginalNode(lwNode: LWNode, targetID: String) {
         lwNode.setReferenceValues(
-            StarLasuLWLanguage.ASTNodeOriginalNode,
+            ASTNodeOriginalNode,
             listOf(
                 ReferenceValue(ProxyNode(targetID), null)
             )
@@ -374,17 +389,17 @@ class LionWebModelConverter(
         kClass: KClass<out PlaceholderASTTransformation>
     ) {
         val enumerationLiteral: EnumerationLiteral = when (kClass) {
-            MissingASTTransformation::class -> StarLasuLWLanguage.PlaceholderNodeType.literals.find {
+            MissingASTTransformation::class -> PlaceholderNodeType.literals.find {
                 it.name == "MissingASTTransformation"
             }!!
-            FailingASTTransformation::class -> StarLasuLWLanguage.PlaceholderNodeType.literals.find {
+            FailingASTTransformation::class -> PlaceholderNodeType.literals.find {
                 it.name == "FailingASTTransformation"
             }!!
             else -> TODO()
         }
 
         placeholderAnnotation.setPropertyValue(
-            StarLasuLWLanguage.PlaceholderNodeTypeProperty,
+            PlaceholderNodeTypeProperty,
             EnumerationValueImpl(enumerationLiteral)
         )
     }
@@ -414,11 +429,11 @@ class LionWebModelConverter(
         lwTree.thisAndAllDescendants().forEach { lwNode ->
             val kNode = nodesMapping.byB(lwNode)!!
             if (kNode is KNode) {
-                val lwPosition = lwNode.getPropertyValue(StarLasuLWLanguage.ASTNodePosition)
+                val lwPosition = lwNode.getPropertyValue(ASTNodePosition)
                 if (lwPosition != null) {
                     kNode.position = lwPosition as Position
                 }
-                val originalNodes = lwNode.getReferenceValues(StarLasuLWLanguage.ASTNodeOriginalNode)
+                val originalNodes = lwNode.getReferenceValues(ASTNodeOriginalNode)
                 if (originalNodes.isNotEmpty()) {
                     require(originalNodes.size == 1)
                     val originalNode = originalNodes.first()
@@ -427,16 +442,16 @@ class LionWebModelConverter(
                     referencesPostponer.registerPostponedOriginReference(kNode, originalNodeID)
                 }
                 val placeholderNodeAnnotation = lwNode.annotations.find {
-                    it.classifier == StarLasuLWLanguage.PlaceholderNode
+                    it.classifier == PlaceholderNode
                 }
                 if (placeholderNodeAnnotation != null) {
                     val placeholderType = (
                         placeholderNodeAnnotation.getPropertyValue(
-                            StarLasuLWLanguage.PlaceholderNodeTypeProperty
+                            PlaceholderNodeTypeProperty
                         ) as EnumerationValue
                         ).enumerationLiteral
                     val placeholderMessage = placeholderNodeAnnotation.getPropertyValue(
-                        StarLasuLWLanguage.PlaceholderNodeMessageProperty
+                        PlaceholderNodeMessageProperty
                     ) as String
                     when (placeholderType.name) {
                         MissingASTTransformation::class.simpleName -> {
@@ -459,7 +474,7 @@ class LionWebModelConverter(
                         else -> TODO()
                     }
                 }
-                val transpiledNodes = lwNode.getReferenceValues(StarLasuLWLanguage.ASTNodeTranspiledNodes)
+                val transpiledNodes = lwNode.getReferenceValues(ASTNodeTranspiledNodes)
                 if (transpiledNodes.isNotEmpty()) {
                     val transpiledNodeIDs = transpiledNodes.map { it.referredID!! }
                     referencesPostponer.registerPostponedTranspiledReference(kNode, transpiledNodeIDs)
@@ -479,7 +494,7 @@ class LionWebModelConverter(
         serialization: AbstractSerialization =
             SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
     ): AbstractSerialization {
-        StarLasuLWLanguage
+        registerSerializersAndDeserializersInMetamodelRegistry()
         MetamodelRegistry.prepareJsonSerialization(serialization)
         synchronized(languageConverter) {
             languageConverter.knownLWLanguages().forEach {
@@ -879,29 +894,29 @@ class LionWebModelConverter(
     fun exportIssueToLionweb(issue: Issue, id: String? = null): IssueNode {
         val issueNode = IssueNode()
         id?.let { issueNode.id = it }
-        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::message.name)!!, issue.message)
-        issueNode.setPropertyValue(StarLasuLWLanguage.Issue.getPropertyByName(Issue::position.name)!!, issue.position)
-        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName(Issue::severity.name)!!, issue.severity)
-        setEnumProperty(issueNode, StarLasuLWLanguage.Issue.getPropertyByName(Issue::type.name)!!, issue.type)
+        issueNode.setPropertyValue(ASTLanguage.getIssue().getPropertyByName(Issue::message.name)!!, issue.message)
+        issueNode.setPropertyValue(ASTLanguage.getIssue().getPropertyByName(Issue::position.name)!!, issue.position)
+        setEnumProperty(issueNode, ASTLanguage.getIssue().getPropertyByName(Issue::severity.name)!!, issue.severity)
+        setEnumProperty(issueNode, ASTLanguage.getIssue().getPropertyByName(Issue::type.name)!!, issue.type)
         return issueNode
     }
 
     fun importIssueFromLionweb(issueNode: IssueNode): Pair<String, Issue> {
         val issueType = importEnumValue(
             issueNode.getPropertyValue(
-                StarLasuLWLanguage.Issue.getPropertyByName(Issue::type.name)!!
+                ASTLanguage.getIssue().getPropertyByName(Issue::type.name)!!
             ) as EnumerationValue
         ) as IssueType
         val message = issueNode.getPropertyValue(
-            StarLasuLWLanguage.Issue.getPropertyByName(Issue::message.name)!!
+            ASTLanguage.getIssue().getPropertyByName(Issue::message.name)!!
         ) as String
         val severity = importEnumValue(
             issueNode.getPropertyValue(
-                StarLasuLWLanguage.Issue.getPropertyByName(Issue::severity.name)!!
+                ASTLanguage.getIssue().getPropertyByName(Issue::severity.name)!!
             ) as EnumerationValue
         ) as IssueSeverity
         val position = issueNode.getPropertyValue(
-            StarLasuLWLanguage.Issue.getPropertyByName(Issue::position.name)!!
+            ASTLanguage.getIssue().getPropertyByName(Issue::position.name)!!
         ) as Position
         val issue = Issue(issueType, message, severity, position)
         return issueNode.id!! to issue
@@ -913,23 +928,23 @@ class LionWebModelConverter(
             throw IllegalStateException("Parsing result has null ID")
         }
         resultNode.setPropertyValue(
-            StarLasuLWLanguage.ParsingResult.getPropertyByName(ParsingResult<*>::code.name)!!,
+            ASTLanguage.getParsingResult().getPropertyByName(ParsingResult<*>::code.name)!!,
             pr.code
         )
         val root = if (pr.root != null) exportModelToLionWeb(pr.root!!, considerParent = false) else null
         root?.let {
             resultNode.addChild(
-                StarLasuLWLanguage.ParsingResult.getContainmentByName(ParsingResult<*>::root.name)!!,
+                ASTLanguage.getParsingResult().getContainmentByName(ParsingResult<*>::root.name)!!,
                 root
             )
         }
-        val issuesContainment = StarLasuLWLanguage.ParsingResult.getContainmentByName(ParsingResult<*>::issues.name)!!
+        val issuesContainment = ASTLanguage.getParsingResult().getContainmentByName(ParsingResult<*>::issues.name)!!
         pr.issues.forEachIndexed { index, issue ->
             val id = "${resultNode.id}-issue-$index"
             resultNode.addChild(issuesContainment, exportIssueToLionweb(issue, id))
         }
         resultNode.setPropertyValue(
-            StarLasuLWLanguage.ParsingResult.getPropertyByName(ParsingResultWithTokens<*>::tokens.name)!!,
+            ASTLanguage.getParsingResult().getPropertyByName(ParsingResultWithTokens<*>::tokens.name)!!,
             TokensList(tokens)
         )
         resultNode.thisAndAllDescendants().forEach { lwNode ->

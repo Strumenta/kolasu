@@ -23,6 +23,7 @@ import com.strumenta.kolasu.transformation.dummyInstance
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
+import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.serialization.SerializationProvider
@@ -463,7 +464,7 @@ class LionWebModelConverterTest {
         val lwLanguage = mConverter.exportLanguageToLionWeb(kLanguage)
         assertEquals(4, lwLanguage.elements.filterIsInstance<Concept>().size)
         lwLanguage.elements.filterIsInstance<Concept>().forEach { concept ->
-            assertEquals(true, concept.allAncestors().contains(StarLasuLWLanguage.ASTNode))
+            assertEquals(true, concept.allAncestors().contains(ASTLanguage.getASTNode()))
         }
     }
 
@@ -723,7 +724,7 @@ class LionWebModelConverterTest {
     fun canDeserializePosition() {
         // This has the side effect on ensuring that the serializers and deserializers for primitive types in the
         // StarLasu Language are registered in the MetamodelRegistry
-        StarLasuLWLanguage
+        registerSerializersAndDeserializersInMetamodelRegistry()
         val kl = KolasuLanguage("my.language").apply {
             addClass(NodeWithEnum::class)
         }

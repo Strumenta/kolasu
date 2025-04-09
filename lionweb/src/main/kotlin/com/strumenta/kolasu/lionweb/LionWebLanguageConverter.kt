@@ -26,6 +26,7 @@ import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
+import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.DataType
@@ -49,32 +50,32 @@ class LionWebLanguageConverter {
     private val languages = BiMap<KolasuLanguage, LWLanguage>()
 
     init {
-        val starLasuKLanguage = KolasuLanguage(StarLasuLWLanguage.name)
-        languages.associate(starLasuKLanguage, StarLasuLWLanguage)
-        registerMapping(Node::class, StarLasuLWLanguage.ASTNode)
+        val starLasuKLanguage = KolasuLanguage(ASTLanguage.getLanguage().name)
+        languages.associate(starLasuKLanguage, ASTLanguage.getLanguage())
+        registerMapping(Node::class, ASTLanguage.getASTNode())
         registerMapping(Named::class, LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU))
         registerMapping(PossiblyNamed::class, LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU))
-        registerMapping(CommonElement::class, StarLasuLWLanguage.CommonElement)
-        registerMapping(BehaviorDeclaration::class, StarLasuLWLanguage.BehaviorDeclaration)
-        registerMapping(Documentation::class, StarLasuLWLanguage.Documentation)
-        registerMapping(EntityDeclaration::class, StarLasuLWLanguage.EntityDeclaration)
-        registerMapping(EntityGroupDeclaration::class, StarLasuLWLanguage.EntityGroupDeclaration)
-        registerMapping(Expression::class, StarLasuLWLanguage.Expression)
-        registerMapping(Parameter::class, StarLasuLWLanguage.Parameter)
-        registerMapping(PlaceholderElement::class, StarLasuLWLanguage.PlaceholderElement)
-        registerMapping(Statement::class, StarLasuLWLanguage.Statement)
-        registerMapping(TypeAnnotation::class, StarLasuLWLanguage.TypeAnnotation)
+        registerMapping(CommonElement::class, ASTLanguage.getCommonElement())
+        registerMapping(BehaviorDeclaration::class, ASTLanguage.getBehaviorDeclaration())
+        registerMapping(Documentation::class, ASTLanguage.getDocumentation())
+        registerMapping(EntityDeclaration::class, ASTLanguage.getEntityDeclaration())
+        registerMapping(EntityGroupDeclaration::class, ASTLanguage.getEntityGroupDeclaration())
+        registerMapping(Expression::class, ASTLanguage.getExpression())
+        registerMapping(Parameter::class, ASTLanguage.getParameter())
+        registerMapping(PlaceholderElement::class, ASTLanguage.getPlaceholderElement())
+        registerMapping(Statement::class, ASTLanguage.getStatement())
+        registerMapping(TypeAnnotation::class, ASTLanguage.getTypeAnnotation())
 
-        registerMapping(Issue::class, StarLasuLWLanguage.Issue)
+        registerMapping(Issue::class, ASTLanguage.getIssue())
         classesAndEnumerations.associate(
             IssueSeverity::class,
-            (StarLasuLWLanguage.Issue.getFeatureByName(Issue::severity.name) as Property).type as Enumeration
+            (ASTLanguage.getIssue().getFeatureByName(Issue::severity.name) as Property).type as Enumeration
         )
         classesAndEnumerations.associate(
             IssueType::class,
-            (StarLasuLWLanguage.Issue.getFeatureByName(Issue::type.name) as Property).type as Enumeration
+            (ASTLanguage.getIssue().getFeatureByName(Issue::type.name) as Property).type as Enumeration
         )
-        registerMapping(ParsingResult::class, StarLasuLWLanguage.ParsingResult)
+        registerMapping(ParsingResult::class, ASTLanguage.getParsingResult())
     }
 
     fun exportToLionWeb(kolasuLanguage: KolasuLanguage): LWLanguage {
@@ -83,7 +84,7 @@ class LionWebLanguageConverter {
         lionwebLanguage.name = kolasuLanguage.qualifiedName
         lionwebLanguage.key = kolasuLanguage.qualifiedName.replace('.', '-')
         lionwebLanguage.id = "starlasu_language_${kolasuLanguage.qualifiedName.replace('.', '-')}"
-        lionwebLanguage.addDependency(StarLasuLWLanguage)
+        lionwebLanguage.addDependency(ASTLanguage.getLanguage())
 
         kolasuLanguage.enumClasses.forEach { enumClass ->
             toLWEnumeration(enumClass, lionwebLanguage)
@@ -332,7 +333,7 @@ class LionWebLanguageConverter {
             Long::class.createType() -> LionCoreBuiltins.getInteger(LIONWEB_VERSION_USED_BY_KOLASU)
             String::class.createType() -> LionCoreBuiltins.getString(LIONWEB_VERSION_USED_BY_KOLASU)
             Boolean::class.createType() -> LionCoreBuiltins.getBoolean(LIONWEB_VERSION_USED_BY_KOLASU)
-            Char::class.createType() -> StarLasuLWLanguage.Char
+            Char::class.createType() -> ASTLanguage.getChar()
             else -> {
                 val kClass = kType.classifier as KClass<*>
                 val isEnum = kClass.supertypes.any { it.classifier == Enum::class }

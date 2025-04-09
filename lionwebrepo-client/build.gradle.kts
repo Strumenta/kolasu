@@ -58,6 +58,7 @@ dependencies {
     implementation(project(":semantics"))
     implementation(libs.lionwebkotlincore)
     implementation(libs.lionwebkotlinrepoclient)
+    implementation(libs.starlasu.specs)
 
     testImplementation(kotlin("test-junit5"))
     testImplementation("commons-io:commons-io:2.7")

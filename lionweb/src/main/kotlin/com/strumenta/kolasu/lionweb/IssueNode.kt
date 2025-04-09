@@ -1,6 +1,7 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.model.Position
+import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.kotlin.BaseNode
@@ -12,6 +13,6 @@ class IssueNode : BaseNode(LIONWEB_VERSION_USED_BY_KOLASU) {
     var position: Position? by property("position")
 
     override fun getClassifier(): Concept {
-        return StarLasuLWLanguage.Issue
+        return ASTLanguage.getIssue()
     }
 }
