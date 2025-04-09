@@ -84,7 +84,7 @@ class LionWebLanguageConverter {
         lionwebLanguage.name = kolasuLanguage.qualifiedName
         lionwebLanguage.key = kolasuLanguage.qualifiedName.replace('.', '-')
         lionwebLanguage.id = "starlasu_language_${kolasuLanguage.qualifiedName.replace('.', '-')}"
-        lionwebLanguage.addDependency(StarLasuLWLanguage)
+        lionwebLanguage.addDependency(ASTLanguage.getLanguage())
 
         kolasuLanguage.enumClasses.forEach { enumClass ->
             toLWEnumeration(enumClass, lionwebLanguage)

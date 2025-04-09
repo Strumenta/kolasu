@@ -26,6 +26,7 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.starlasu.base.ASTLanguage
+import io.lionweb.lioncore.java.language.Annotation
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
@@ -77,6 +78,10 @@ class DummyNodeResolver : NodeResolver {
 private val ASTNodePosition = ASTLanguage.getASTNode().getPropertyByName("position")!!
 private val ASTNodeOriginalNode = ASTLanguage.getASTNode().getReferenceByName("originalNode")!!
 private val ASTNodeTranspiledNodes = ASTLanguage.getASTNode().getReferenceByName("transpiledNodes")!!
+private val PlaceholderNode = ASTLanguage.getLanguage().getElementByName("PlaceholderNode") as Annotation
+private val PlaceholderNodeMessageProperty = PlaceholderNode.getPropertyByName("message")!!
+private val PlaceholderNodeTypeProperty = PlaceholderNode.getPropertyByName("type")!!
+private val PlaceholderNodeType = ASTLanguage.getLanguage().getEnumerationByName("PlaceholderNodeType")!!
 
 /**
  * This class is able to convert between Kolasu and LionWeb models, tracking the mapping.
@@ -247,7 +252,7 @@ class LionWebModelConverter(
                                     if (lwNode is AbstractClassifierInstance<*>) {
                                         val instance = DynamicAnnotationInstance(
                                             "${lwNode.id}_placeholder_annotation",
-                                            StarLasuLWLanguage.PlaceholderNode
+                                            PlaceholderNode
                                         )
                                         val effectiveOrigin = origin.origin
                                         if (effectiveOrigin is KNode) {
@@ -256,7 +261,7 @@ class LionWebModelConverter(
                                         }
                                         setPlaceholderNodeType(instance, origin.javaClass.kotlin)
                                         instance.setPropertyValue(
-                                            StarLasuLWLanguage.PlaceholderNodeMessageProperty,
+                                            PlaceholderNodeMessageProperty,
                                             origin.message
                                         )
                                         lwNode.addAnnotation(instance)
@@ -384,17 +389,17 @@ class LionWebModelConverter(
         kClass: KClass<out PlaceholderASTTransformation>
     ) {
         val enumerationLiteral: EnumerationLiteral = when (kClass) {
-            MissingASTTransformation::class -> StarLasuLWLanguage.PlaceholderNodeType.literals.find {
+            MissingASTTransformation::class -> PlaceholderNodeType.literals.find {
                 it.name == "MissingASTTransformation"
             }!!
-            FailingASTTransformation::class -> StarLasuLWLanguage.PlaceholderNodeType.literals.find {
+            FailingASTTransformation::class -> PlaceholderNodeType.literals.find {
                 it.name == "FailingASTTransformation"
             }!!
             else -> TODO()
         }
 
         placeholderAnnotation.setPropertyValue(
-            StarLasuLWLanguage.PlaceholderNodeTypeProperty,
+            PlaceholderNodeTypeProperty,
             EnumerationValueImpl(enumerationLiteral)
         )
     }
@@ -437,16 +442,16 @@ class LionWebModelConverter(
                     referencesPostponer.registerPostponedOriginReference(kNode, originalNodeID)
                 }
                 val placeholderNodeAnnotation = lwNode.annotations.find {
-                    it.classifier == StarLasuLWLanguage.PlaceholderNode
+                    it.classifier == PlaceholderNode
                 }
                 if (placeholderNodeAnnotation != null) {
                     val placeholderType = (
                         placeholderNodeAnnotation.getPropertyValue(
-                            StarLasuLWLanguage.PlaceholderNodeTypeProperty
+                            PlaceholderNodeTypeProperty
                         ) as EnumerationValue
                         ).enumerationLiteral
                     val placeholderMessage = placeholderNodeAnnotation.getPropertyValue(
-                        StarLasuLWLanguage.PlaceholderNodeMessageProperty
+                        PlaceholderNodeMessageProperty
                     ) as String
                     when (placeholderType.name) {
                         MissingASTTransformation::class.simpleName -> {
@@ -489,7 +494,7 @@ class LionWebModelConverter(
         serialization: AbstractSerialization =
             SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
     ): AbstractSerialization {
-        StarLasuLWLanguage
+        registerSerializersAndDeserializersInMetamodelRegistry()
         MetamodelRegistry.prepareJsonSerialization(serialization)
         synchronized(languageConverter) {
             languageConverter.knownLWLanguages().forEach {

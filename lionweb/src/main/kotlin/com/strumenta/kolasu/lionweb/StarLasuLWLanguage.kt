@@ -219,7 +219,7 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
         get() = StarLasuLWLanguage.getInterfaceByName("TypeAnnotation")!!
 }
 
-private fun registerSerializersAndDeserializersInMetamodelRegistry() {
+fun registerSerializersAndDeserializersInMetamodelRegistry() {
     val charSerializer = PrimitiveSerializer<Char> { value -> "$value" }
     val charDeserializer = PrimitiveDeserializer<Char> { serialized ->
         require(serialized.length == 1)
