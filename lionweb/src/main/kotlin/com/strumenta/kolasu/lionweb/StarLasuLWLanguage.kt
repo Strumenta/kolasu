@@ -1,22 +1,6 @@
 package com.strumenta.kolasu.lionweb
 
-import com.strumenta.kolasu.model.BehaviorDeclaration as KBehaviorDeclaration
-import com.strumenta.kolasu.model.CommonElement as KCommonElement
-import com.strumenta.kolasu.model.Documentation as KDocumentation
-import com.strumenta.kolasu.model.EntityDeclaration as KEntityDeclaration
-import com.strumenta.kolasu.model.EntityGroupDeclaration as KEntityGroupDeclaration
-import com.strumenta.kolasu.model.Expression as KExpression
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Parameter as KParameter
-import com.strumenta.kolasu.model.PlaceholderElement as KPlaceholderElement
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.model.Statement as KStatement
-import com.strumenta.kolasu.model.TypeAnnotation as KTypeAnnotation
-import com.strumenta.kolasu.parsing.KolasuToken
-import com.strumenta.kolasu.parsing.ParsingResult as KParsingResult
-import com.strumenta.kolasu.parsing.TokenCategory
-import com.strumenta.kolasu.validation.Issue as KIssue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import io.lionweb.lioncore.java.LionWebVersion
@@ -30,8 +14,6 @@ import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.self.LionCore
-import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
-import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.kotlin.MetamodelRegistry
 import io.lionweb.lioncore.kotlin.Multiplicity
 import io.lionweb.lioncore.kotlin.addLiteral
@@ -41,6 +23,18 @@ import io.lionweb.lioncore.kotlin.createInterface
 import io.lionweb.lioncore.kotlin.createPrimitiveType
 import io.lionweb.lioncore.kotlin.createProperty
 import io.lionweb.lioncore.kotlin.createReference
+import com.strumenta.kolasu.model.BehaviorDeclaration as KBehaviorDeclaration
+import com.strumenta.kolasu.model.CommonElement as KCommonElement
+import com.strumenta.kolasu.model.Documentation as KDocumentation
+import com.strumenta.kolasu.model.EntityDeclaration as KEntityDeclaration
+import com.strumenta.kolasu.model.EntityGroupDeclaration as KEntityGroupDeclaration
+import com.strumenta.kolasu.model.Expression as KExpression
+import com.strumenta.kolasu.model.Parameter as KParameter
+import com.strumenta.kolasu.model.PlaceholderElement as KPlaceholderElement
+import com.strumenta.kolasu.model.Statement as KStatement
+import com.strumenta.kolasu.model.TypeAnnotation as KTypeAnnotation
+import com.strumenta.kolasu.parsing.ParsingResult as KParsingResult
+import com.strumenta.kolasu.validation.Issue as KIssue
 
 private const val PLACEHOLDER_NODE = "PlaceholderNode"
 
