@@ -159,7 +159,7 @@ class LionWebLanguageConverterTest {
         assertEquals("SimpleRoot", simpleRoot.name)
         assertEquals(false, simpleRoot.isPartition)
         assertSame(lwLanguage, simpleRoot.language)
-        assertEquals(ASTLanguage.getASTNode()(), simpleRoot.extendedConcept)
+        assertEquals(ASTLanguage.getASTNode(), simpleRoot.extendedConcept)
         assertEquals(emptyList(), simpleRoot.implemented)
         assertEquals(false, simpleRoot.isAbstract)
         assertEquals(2, simpleRoot.features.size)
@@ -179,7 +179,7 @@ class LionWebLanguageConverterTest {
         assertEquals("SimpleDecl", simpleDecl.name)
         assertEquals(false, simpleDecl.isPartition)
         assertSame(lwLanguage, simpleDecl.language)
-        assertEquals(ASTLanguage.getASTNode()(), simpleDecl.extendedConcept)
+        assertEquals(ASTLanguage.getASTNode(), simpleDecl.extendedConcept)
         assertEquals(emptyList(), simpleRoot.implemented)
         assertEquals(true, simpleDecl.isAbstract)
 
