@@ -1,13 +1,24 @@
 package com.strumenta.kolasu.lionweb
 
+import com.strumenta.kolasu.model.BehaviorDeclaration as KBehaviorDeclaration
+import com.strumenta.kolasu.model.CommonElement as KCommonElement
+import com.strumenta.kolasu.model.Documentation as KDocumentation
+import com.strumenta.kolasu.model.EntityDeclaration as KEntityDeclaration
+import com.strumenta.kolasu.model.EntityGroupDeclaration as KEntityGroupDeclaration
+import com.strumenta.kolasu.model.Expression as KExpression
 import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Parameter as KParameter
+import com.strumenta.kolasu.model.PlaceholderElement as KPlaceholderElement
 import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Statement as KStatement
+import com.strumenta.kolasu.model.TypeAnnotation as KTypeAnnotation
 import com.strumenta.kolasu.parsing.KolasuToken
+import com.strumenta.kolasu.parsing.ParsingResult as KParsingResult
 import com.strumenta.kolasu.parsing.TokenCategory
+import com.strumenta.kolasu.validation.Issue as KIssue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
-import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.lioncore.java.LionWebVersion
 import io.lionweb.lioncore.java.language.Annotation
 import io.lionweb.lioncore.java.language.Concept
@@ -30,18 +41,6 @@ import io.lionweb.lioncore.kotlin.createInterface
 import io.lionweb.lioncore.kotlin.createPrimitiveType
 import io.lionweb.lioncore.kotlin.createProperty
 import io.lionweb.lioncore.kotlin.createReference
-import com.strumenta.kolasu.model.BehaviorDeclaration as KBehaviorDeclaration
-import com.strumenta.kolasu.model.CommonElement as KCommonElement
-import com.strumenta.kolasu.model.Documentation as KDocumentation
-import com.strumenta.kolasu.model.EntityDeclaration as KEntityDeclaration
-import com.strumenta.kolasu.model.EntityGroupDeclaration as KEntityGroupDeclaration
-import com.strumenta.kolasu.model.Expression as KExpression
-import com.strumenta.kolasu.model.Parameter as KParameter
-import com.strumenta.kolasu.model.PlaceholderElement as KPlaceholderElement
-import com.strumenta.kolasu.model.Statement as KStatement
-import com.strumenta.kolasu.model.TypeAnnotation as KTypeAnnotation
-import com.strumenta.kolasu.parsing.ParsingResult as KParsingResult
-import com.strumenta.kolasu.validation.Issue as KIssue
 
 private const val PLACEHOLDER_NODE = "PlaceholderNode"
 
@@ -96,7 +95,7 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
 
         createPrimitiveType(TokensList::class)
         ParsingResult = createConcept(KParsingResult::class.simpleName!!).apply {
-            createContainment(KParsingResult<*>::issues.name, ASTLanguage.getIssue(), Multiplicity.ZERO_TO_MANY)
+            createContainment(KParsingResult<*>::issues.name, Issue, Multiplicity.ZERO_TO_MANY)
             createContainment(KParsingResult<*>::root.name, ASTNode, Multiplicity.OPTIONAL)
             createProperty(
                 KParsingResult<*>::code.name,
@@ -109,7 +108,7 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
                 Multiplicity.OPTIONAL
             )
         }
-        MetamodelRegistry.registerMapping(IssueNode::class, ASTLanguage.getIssue())
+        MetamodelRegistry.registerMapping(IssueNode::class, Issue)
         MetamodelRegistry.registerMapping(ParsingResultNode::class, ParsingResult)
         registerSerializersAndDeserializersInMetamodelRegistry()
     }
@@ -217,88 +216,4 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
         get() = StarLasuLWLanguage.getInterfaceByName("Statement")!!
     val TypeAnnotation: Interface
         get() = StarLasuLWLanguage.getInterfaceByName("TypeAnnotation")!!
-}
-
-fun registerSerializersAndDeserializersInMetamodelRegistry() {
-    val charSerializer = PrimitiveSerializer<Char> { value -> "$value" }
-    val charDeserializer = PrimitiveDeserializer<Char> { serialized ->
-        require(serialized.length == 1)
-        serialized[0]
-    }
-    MetamodelRegistry.addSerializerAndDeserializer(StarLasuLWLanguage.Char, charSerializer, charDeserializer)
-
-    val pointSerializer: PrimitiveSerializer<Point> =
-        PrimitiveSerializer<Point> { value ->
-            if (value == null) {
-                return@PrimitiveSerializer null
-            }
-            "L${value.line}:${value.column}"
-        }
-
-    MetamodelRegistry.addSerializerAndDeserializer(StarLasuLWLanguage.Point, pointSerializer, pointDeserializer)
-
-    val positionSerializer = PrimitiveSerializer<Position> { value ->
-        "${pointSerializer.serialize((value as Position).start)}-${pointSerializer.serialize(value.end)}"
-    }
-
-    MetamodelRegistry.addSerializerAndDeserializer(
-        StarLasuLWLanguage.Position,
-        positionSerializer,
-        positionDeserializer
-    )
-
-    val tokensListPrimitiveSerializer = PrimitiveSerializer<TokensList?> { value: TokensList? ->
-        value?.tokens?.joinToString(";") { kt ->
-            kt.category.type + "$" + positionSerializer.serialize(kt.position)
-        }
-    }
-
-    val tlpt = MetamodelRegistry.getPrimitiveType(TokensList::class, LIONWEB_VERSION_USED_BY_KOLASU)
-        ?: throw IllegalStateException("Unknown primitive type class ${TokensList::class}")
-    MetamodelRegistry.addSerializerAndDeserializer(tlpt, tokensListPrimitiveSerializer, tokensListPrimitiveDeserializer)
-}
-
-class TokensList(val tokens: List<KolasuToken>)
-
-val pointDeserializer: PrimitiveDeserializer<Point> =
-    PrimitiveDeserializer<Point> { serialized ->
-        if (serialized == null) {
-            return@PrimitiveDeserializer null
-        }
-        require(serialized.startsWith("L"))
-        require(serialized.removePrefix("L").isNotEmpty())
-        val parts = serialized.removePrefix("L").split(":")
-        require(parts.size == 2)
-        Point(parts[0].toInt(), parts[1].toInt())
-    }
-
-val positionDeserializer = PrimitiveDeserializer<Position> { serialized ->
-    if (serialized == null) {
-        null
-    } else {
-        val parts = serialized.split("-")
-        require(parts.size == 2) {
-            "Position has an expected format: $serialized"
-        }
-        Position(pointDeserializer.deserialize(parts[0]), pointDeserializer.deserialize(parts[1]))
-    }
-}
-
-val tokensListPrimitiveDeserializer = PrimitiveDeserializer<TokensList?> { serialized ->
-    if (serialized == null) {
-        null
-    } else {
-        val tokens = if (serialized.isEmpty()) {
-            mutableListOf()
-        } else {
-            serialized.split(";").map {
-                val parts = it.split("$")
-                require(parts.size == 2)
-                val category = parts[0]
-                val position = positionDeserializer.deserialize(parts[1])
-                KolasuToken(TokenCategory(category), position)
-            }.toMutableList()
-        }
-        TokensList(tokens)
-    }
 }
