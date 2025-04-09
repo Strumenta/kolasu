@@ -23,6 +23,8 @@ java {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":lionweb"))
+    implementation(libs.starlasu.specs)
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
@@ -89,4 +91,5 @@ signing {
 
 tasks.named("dokkaJavadoc").configure {
     dependsOn(":core:compileKotlin")
+    dependsOn(":lionweb:jar")
 }
