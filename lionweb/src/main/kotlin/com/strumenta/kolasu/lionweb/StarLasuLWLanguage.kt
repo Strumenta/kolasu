@@ -7,6 +7,7 @@ import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.TokenCategory
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
+import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.lioncore.java.LionWebVersion
 import io.lionweb.lioncore.java.language.Annotation
 import io.lionweb.lioncore.java.language.Concept
@@ -41,7 +42,6 @@ import com.strumenta.kolasu.model.Statement as KStatement
 import com.strumenta.kolasu.model.TypeAnnotation as KTypeAnnotation
 import com.strumenta.kolasu.parsing.ParsingResult as KParsingResult
 import com.strumenta.kolasu.validation.Issue as KIssue
-import com.strumenta.starlasu.base.ASTLanguage
 
 private const val PLACEHOLDER_NODE = "PlaceholderNode"
 
