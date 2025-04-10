@@ -1032,8 +1032,8 @@ class LionWebModelConverterTest {
 
     @Test
     fun preserveLionWebAnnotationsWhenConvertingBackAndForthFromLionWeb() {
-        var annotation1 : Annotation
-        var annotation1Value : Property
+        var annotation1: Annotation
+        var annotation1Value: Property
         val language1 = Language().apply {
             id = "lang1-id"
             key = "lang1-key"
@@ -1077,7 +1077,14 @@ class LionWebModelConverterTest {
         val myKNode3 = converter2.importModelFromLionWeb(lwNode1) as KNode
         assertEquals(1, myKNode2.annotations.size)
 
-        val lwNode3 = converter2.exportModelToLionWeb(myKNode3)
+        val converter3 = LionWebModelConverter()
+        converter3.exportLanguageToLionWeb(
+            KolasuLanguage("myLanguage").apply {
+                addClass(NodeWithEnum::class)
+            }
+        )
+
+        val lwNode3 = converter3.exportModelToLionWeb(myKNode3)
         assertEquals(1, lwNode3.annotations.size)
         assertEquals(annInstance1, lwNode3.annotations.first())
     }

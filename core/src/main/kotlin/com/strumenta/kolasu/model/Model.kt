@@ -6,11 +6,7 @@ import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.traversing.walk
 import java.io.Serializable
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
-import kotlin.reflect.KVisibility
 import kotlin.reflect.cast
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.memberProperties
 
 val RESERVED_FEATURE_NAMES = setOf("parent", "position")
 
