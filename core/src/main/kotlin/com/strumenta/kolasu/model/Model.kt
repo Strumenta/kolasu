@@ -4,11 +4,13 @@ import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.traversing.walk
+import io.lionweb.lioncore.java.model.AnnotationInstance
 import java.io.Serializable
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
-val RESERVED_FEATURE_NAMES = setOf("parent", "position")
+val RESERVED_FEATURE_NAMES = setOf("parent", "position", "id", "annotations")
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
@@ -20,6 +22,9 @@ open class Node() : Origin, Destination, Serializable, HasID {
 
     @Internal
     override var id: String? = null
+
+    @Internal
+    val annotations: MutableList<AnnotationInstance> = CopyOnWriteArrayList()
 
     @Internal
     protected var positionOverride: Position? = null
