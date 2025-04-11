@@ -770,14 +770,18 @@ class LionWebModelConverter(
                     is Reference -> {
                         val value = referenceValue(data, feature, referencesPostponer)
                         if (!param.type.isAssignableBy(value)) {
-                            throw RuntimeException()
+                            throw RuntimeException(
+                                "Cannot assign value $value to param ${param.name} of type ${param.type}"
+                            )
                         }
                         params[param] = value
                     }
                     is Containment -> {
                         val value = containmentValue(data, feature)
                         if (!param.type.isAssignableBy(value)) {
-                            throw RuntimeException()
+                            throw RuntimeException(
+                                "Cannot assign value $value to param ${param.name} of type ${param.type}"
+                            )
                         }
                         params[param] = value
                     }
