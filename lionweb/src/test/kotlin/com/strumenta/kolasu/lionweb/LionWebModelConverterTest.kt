@@ -24,10 +24,17 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.starlasu.base.ASTLanguage
+import io.lionweb.lioncore.java.language.Annotation
 import io.lionweb.lioncore.java.language.Concept
+import io.lionweb.lioncore.java.language.Language
+import io.lionweb.lioncore.java.language.LionCoreBuiltins
+import io.lionweb.lioncore.java.language.Property
+import io.lionweb.lioncore.java.model.impl.DynamicAnnotationInstance
 import io.lionweb.lioncore.java.model.impl.EnumerationValue
 import io.lionweb.lioncore.java.serialization.SerializationProvider
 import io.lionweb.lioncore.kotlin.children
+import io.lionweb.lioncore.kotlin.createAnnotation
+import io.lionweb.lioncore.kotlin.createProperty
 import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
 import io.lionweb.lioncore.kotlin.getPropertyValueByName
 import io.lionweb.lioncore.kotlin.getReferenceValueByName
@@ -1021,6 +1028,65 @@ class LionWebModelConverterTest {
         val reimportedNode = converter.importModelFromLionWeb(lwNode) as Node
         assert(reimportedNode.origin is FailingASTTransformation)
         assertEquals("failing because...", (reimportedNode.origin as FailingASTTransformation).message)
+    }
+
+    @Test
+    fun preserveLionWebAnnotationsWhenConvertingBackAndForthFromLionWeb() {
+        var annotation1: Annotation
+        var annotation1Value: Property
+        val language1 = Language().apply {
+            id = "lang1-id"
+            key = "lang1-key"
+            name = "Lang1"
+            annotation1 = createAnnotation("MyAnnotation").apply {
+                annotation1Value = createProperty("value", LionCoreBuiltins.getInteger())
+            }
+        }
+
+        val converter1 = LionWebModelConverter()
+        converter1.exportLanguageToLionWeb(
+            KolasuLanguage("myLanguage").apply {
+                addClass(NodeWithEnum::class)
+            }
+        )
+
+        val myKNode1 = NodeWithEnum("MyNode", AnEnum.ZUM)
+        myKNode1.id = "MyNode1"
+
+        val lwNode1 = converter1.exportModelToLionWeb(myKNode1)
+
+        val annInstance1 = DynamicAnnotationInstance("my-annotation-1", annotation1)
+        annInstance1.setPropertyValue(annotation1Value, 123)
+        lwNode1.addAnnotation(annInstance1)
+
+        val myKNode2 = converter1.importModelFromLionWeb(lwNode1) as KNode
+        assertEquals(1, myKNode2.annotations.size)
+
+        val lwNode2 = converter1.exportModelToLionWeb(myKNode2)
+        assertEquals(1, lwNode2.annotations.size)
+        assertEquals(annInstance1, lwNode2.annotations.first())
+
+        // Let's also try with a new converter, where caches are not available
+        val converter2 = LionWebModelConverter()
+        converter2.exportLanguageToLionWeb(
+            KolasuLanguage("myLanguage").apply {
+                addClass(NodeWithEnum::class)
+            }
+        )
+
+        val myKNode3 = converter2.importModelFromLionWeb(lwNode1) as KNode
+        assertEquals(1, myKNode2.annotations.size)
+
+        val converter3 = LionWebModelConverter()
+        converter3.exportLanguageToLionWeb(
+            KolasuLanguage("myLanguage").apply {
+                addClass(NodeWithEnum::class)
+            }
+        )
+
+        val lwNode3 = converter3.exportModelToLionWeb(myKNode3)
+        assertEquals(1, lwNode3.annotations.size)
+        assertEquals(annInstance1, lwNode3.annotations.first())
     }
 }
 

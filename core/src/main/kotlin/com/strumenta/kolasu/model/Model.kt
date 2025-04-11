@@ -4,40 +4,13 @@ import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.traversing.walk
+import io.lionweb.lioncore.java.model.AnnotationInstance
 import java.io.Serializable
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
-import kotlin.reflect.KVisibility
 import kotlin.reflect.cast
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.memberProperties
 
-interface Origin {
-    val position: Position?
-    val sourceText: String?
-    val source: Source?
-        get() = position?.source
-}
-
-class SimpleOrigin(
-    override val position: Position?,
-    override val sourceText: String? = null
-) : Origin, Serializable
-
-data class CompositeOrigin(
-    val elements: List<Origin>,
-    override val position: Position?,
-    override val sourceText: String?
-) : Origin, Serializable
-
-interface Destination
-
-data class CompositeDestination(val elements: List<Destination>) : Destination, Serializable {
-    constructor(vararg elements: Destination) : this(elements.toList())
-}
-data class TextFileDestination(val position: Position?) : Destination, Serializable
-
-val RESERVED_FEATURE_NAMES = setOf("parent", "position")
+val RESERVED_FEATURE_NAMES = setOf("parent", "position", "id", "annotations")
 
 /**
  * The Abstract Syntax Tree will be constituted by instances of Node.
@@ -49,6 +22,9 @@ open class Node() : Origin, Destination, Serializable, HasID {
 
     @Internal
     override var id: String? = null
+
+    @Internal
+    val annotations: MutableList<AnnotationInstance> = CopyOnWriteArrayList()
 
     @Internal
     protected var positionOverride: Position? = null
@@ -265,39 +241,6 @@ fun <N : Node> N.withOrigin(origin: Origin?): N {
     this.origin = if (origin == this) { null } else { origin }
     return this
 }
-
-val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
-    get() = this.kotlin.nodeProperties
-val <T : Any> Class<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
-    get() = this.kotlin.nodeOriginalProperties
-val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
-    get() = memberProperties.asSequence()
-        .filter { it.visibility == KVisibility.PUBLIC }
-        .filter { it.findAnnotation<Internal>() == null }
-        .filter { it.findAnnotation<Link>() == null }
-        .map {
-            require(it.name !in RESERVED_FEATURE_NAMES) {
-                "Property ${it.name} in ${this.qualifiedName} should be marked as internal"
-            }
-            it
-        }
-        .toList()
-
-val <T : Any> KClass<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
-    get() = nodeProperties
-        .filter { it.findAnnotation<Derived>() == null }
-
-/**
- * @return all properties of this node that are considered AST properties.
- */
-val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
-    get() = this.javaClass.nodeProperties
-
-/**
- * @return all non-derived properties of this node that are considered AST properties.
- */
-val <T : Node> T.nodeOriginalProperties: Collection<KProperty1<T, *>>
-    get() = this.javaClass.nodeOriginalProperties
 
 /**
  * Use this to mark properties that are internal, i.e., they are used for bookkeeping and are not part of the model,

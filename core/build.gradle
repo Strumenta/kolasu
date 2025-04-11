@@ -26,6 +26,7 @@ dependencies {
     implementation 'org.redundent:kotlin-xml-builder:1.7.3'
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.2")
     implementation "com.google.code.gson:gson:$gson_version"
+    api(libs.lionwebjava)
 
     api "com.github.ajalt.clikt:clikt:$clikt_version"
 

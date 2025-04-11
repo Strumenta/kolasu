@@ -194,6 +194,9 @@ class LionWebModelConverter(
             }
             kolasuTree.walk().forEach { kNode ->
                 val lwNode = nodesMapping.byA(kNode)!!
+                kNode.annotations.forEach { annotationInstance ->
+                    lwNode.addAnnotation(annotationInstance)
+                }
                 if (!CommonChecks.isValidID(lwNode.id)) {
                     throw RuntimeException(
                         "Cannot export AST to LionWeb as we got an invalid Node ID: ${lwNode.id}. " +
@@ -419,6 +422,7 @@ class LionWebModelConverter(
                     // instantiated kNode
                     nodeIdProvider.registerMapping(instantiated, lwNode.id!!)
                     instantiated.id = lwNode.id
+                    instantiated.annotations.addAll(lwNode.annotations)
                 }
                 associateNodes(instantiated, lwNode)
             } catch (e: RuntimeException) {
