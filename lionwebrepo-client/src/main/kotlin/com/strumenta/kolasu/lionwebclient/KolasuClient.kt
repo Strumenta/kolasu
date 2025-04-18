@@ -53,7 +53,7 @@ import kotlin.reflect.KProperty1
  */
 class KolasuClient(
     hostname: String = "localhost",
-    val port: Int = 3005,
+    port: Int = 3005,
     repository: String = "default",
     val debug: Boolean = false,
     connectTimeOutInSeconds: Long = 60,
@@ -61,6 +61,15 @@ class KolasuClient(
     authorizationToken: String? = null,
     val idProvider: NodeIdProvider = CommonNodeIdProvider().caching()
 ) {
+    val hostname: String
+        get() = lionWebClient.hostname
+
+    val port: Int
+        get() = lionWebClient.port
+
+    val repository: String
+        get() = lionWebClient.repository
+
     /**
      * Exposed for testing purposes
      */
