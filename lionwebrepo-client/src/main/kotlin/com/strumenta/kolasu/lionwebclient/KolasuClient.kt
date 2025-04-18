@@ -21,8 +21,6 @@ import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.model.HasSettableParent
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
-import io.lionweb.lioncore.java.serialization.SerializationProvider
-import io.lionweb.lioncore.java.serialization.UnavailableNodePolicy
 import io.lionweb.lioncore.kotlin.repoclient.ClassifierResult
 import io.lionweb.lioncore.kotlin.repoclient.LionWebClient
 import io.lionweb.lioncore.kotlin.repoclient.RetrievalMode
@@ -54,13 +52,13 @@ import kotlin.reflect.KProperty1
  * or (iii) implement IDLogic.
  */
 class KolasuClient(
-    val hostname: String = "localhost",
+    hostname: String = "localhost",
     val port: Int = 3005,
-    val repository: String = "default",
+    repository: String = "default",
     val debug: Boolean = false,
     connectTimeOutInSeconds: Long = 60,
     callTimeoutInSeconds: Long = 60,
-    val authorizationToken: String? = null,
+    authorizationToken: String? = null,
     val idProvider: NodeIdProvider = CommonNodeIdProvider().caching()
 ) {
     /**
@@ -84,39 +82,8 @@ class KolasuClient(
             lionWebVersion = LIONWEB_VERSION_USED_BY_KOLASU
         )
 
-    private val serializationDecorators = mutableListOf<SerializationDecorator>()
-
-    init {
-        registerSerializationDecorator {
-            it.apply {
-                enableDynamicNodes()
-                unavailableParentPolicy = UnavailableNodePolicy.NULL_REFERENCES
-                unavailableReferenceTargetPolicy = UnavailableNodePolicy.PROXY_NODES
-            }
-            nodeConverter.prepareSerialization(
-                it
-            ) as JsonSerialization
-        }
-    }
-
-    /**
-     * Exposed for testing purposes
-     */
-    @Deprecated("This does not affect the serialization used by the underlying LionWebClient")
-    var jsonSerialization: JsonSerialization = calculateSerialization()
-        private set
-
-    @Deprecated("This does not affect the serialization used by the underlying LionWebClient")
-    fun updateSerialization() {
-        this.jsonSerialization = calculateSerialization()
-    }
-
-    @Deprecated("This does not affect the serialization used by the underlying LionWebClient")
-    private fun calculateSerialization() : JsonSerialization {
-        val jsonSerialization = SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
-        serializationDecorators.forEach { serializationDecorator -> serializationDecorator.invoke(jsonSerialization) }
-        return jsonSerialization
-    }
+    val jsonSerialization: JsonSerialization
+        get() = lionWebClient.jsonSerialization
 
     //
     // Configuration
@@ -480,11 +447,6 @@ class KolasuClient(
             idProvider,
             considerParent = true,
         )
-    }
-
-    fun registerSerializationDecorator(decorator: SerializationDecorator) {
-        // We do not need to specify them also for the lionWebClient, as it uses ours version of JsonSerialization
-        serializationDecorators.add(decorator)
     }
 
 }
