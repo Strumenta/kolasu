@@ -389,6 +389,10 @@ class KolasuClient(
     // Other operations
     //
 
+    fun createRepository() {
+        lionWebClient.createRepository(lionWebClient.repository, lionWebClient.lionWebVersion)
+    }
+
     /**
      * Return the Node ID associated to the Node. If the Client has already "seen"
      * the Node before associated to a particular Node ID (either during insertion or retrieval)
