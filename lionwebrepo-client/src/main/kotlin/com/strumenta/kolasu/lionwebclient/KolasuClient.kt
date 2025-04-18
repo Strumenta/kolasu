@@ -58,8 +58,8 @@ class KolasuClient(
     val port: Int = 3005,
     val repository: String = "default",
     val debug: Boolean = false,
-    val connectTimeOutInSeconds: Long = 60,
-    val callTimeoutInSeconds: Long = 60,
+    connectTimeOutInSeconds: Long = 60,
+    callTimeoutInSeconds: Long = 60,
     val authorizationToken: String? = null,
     val idProvider: NodeIdProvider = CommonNodeIdProvider().caching()
 ) {
@@ -102,14 +102,16 @@ class KolasuClient(
     /**
      * Exposed for testing purposes
      */
+    @Deprecated("This does not affect the serialization used by the underlying LionWebClient")
     var jsonSerialization: JsonSerialization = calculateSerialization()
         private set
 
+    @Deprecated("This does not affect the serialization used by the underlying LionWebClient")
     fun updateSerialization() {
         this.jsonSerialization = calculateSerialization()
-        lionWebClient.updateJsonSerialization()
     }
 
+    @Deprecated("This does not affect the serialization used by the underlying LionWebClient")
     private fun calculateSerialization() : JsonSerialization {
         val jsonSerialization = SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
         serializationDecorators.forEach { serializationDecorator -> serializationDecorator.invoke(jsonSerialization) }
