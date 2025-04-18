@@ -1,6 +1,6 @@
 [versions]
 antlr4 = "4.9.3"
-lwjava = "0.4.3"
+lwjava = "0.4.4-SNAPSHOT"
 lwkotlin = "0.4.1-SNAPSHOT"
 kotestVersion= "1.3.3"
 specsVersion = "0.1.7"
