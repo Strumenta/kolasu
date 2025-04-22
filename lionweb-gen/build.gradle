@@ -30,7 +30,11 @@ dependencies {
 
     implementation("com.squareup:kotlinpoet:1.14.2")
     cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
-    implementation(libs.gson)
+    implementation(libs.gson) {
+        version {
+            strictly(libs.versions.gson.get())
+        }
+    }
 
     // We use the embeddable version because it avoids issues with conflicting versions of dependencies
     // that we have when using the normal one
@@ -109,6 +113,14 @@ signing {
 
 test {
     useJUnitPlatform()
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'com.google.code.gson') {
+            details.useVersion(libs.versions.gson.get())
+        }
+    }
 }
 
 tasks.findByName("dokkaJavadoc").dependsOn(":core:compileKotlin")
