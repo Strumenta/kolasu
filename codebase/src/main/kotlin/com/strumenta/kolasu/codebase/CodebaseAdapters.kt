@@ -1,7 +1,6 @@
 package com.strumenta.kolasu.codebase
 
 import com.strumenta.kolasu.lionweb.IssueNode
-import com.strumenta.kolasu.lionweb.LIONWEB_VERSION_USED_BY_KOLASU
 import com.strumenta.kolasu.lionweb.LWNode
 import com.strumenta.kolasu.lionweb.LionWebModelConverter
 import com.strumenta.kolasu.model.Node
@@ -10,14 +9,11 @@ import com.strumenta.starlasu.base.CodebaseLanguage
 import io.lionweb.lioncore.java.model.ClassifierInstanceUtils
 import io.lionweb.lioncore.java.model.impl.DynamicNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
-import io.lionweb.lioncore.java.serialization.SerializationProvider
-import io.lionweb.lioncore.kotlin.MetamodelRegistry
 import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
 import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
 import io.lionweb.lioncore.kotlin.getPropertyValueByName
 import io.lionweb.lioncore.kotlin.setPropertyValueByName
 import java.util.stream.Collectors
-import javax.json.spi.JsonProvider
 
 fun <R : Node> deserialize(
     modelConverter: LionWebModelConverter,
@@ -61,14 +57,13 @@ fun <R : Node> convertCodebase(
     languagesWeConsider: Set<String>,
     jsonSerialization: JsonSerialization
 ): Codebase<R> {
-
     return object : Codebase<R> {
         override val name: String
             get() = codebaseAccess.name
 
         private val filesCache: List<CodebaseFile<R>> by lazy {
             codebaseAccess.files().map { fileIdentifier ->
-               val serializedFile = codebaseAccess.retrieveFile(fileIdentifier)
+                val serializedFile = codebaseAccess.retrieveFile(fileIdentifier)
                 jsonSerialization.deserializeToNodes(serializedFile)[0]
             }.filter { serializedCodebaseFile ->
                 val languageName = serializedCodebaseFile!!.getPropertyValueByName("language_name") as String

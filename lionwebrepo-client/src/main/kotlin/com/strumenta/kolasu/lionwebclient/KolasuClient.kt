@@ -24,7 +24,6 @@ import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.kotlin.repoclient.ClassifierResult
 import io.lionweb.lioncore.kotlin.repoclient.LionWebClient
 import io.lionweb.lioncore.kotlin.repoclient.RetrievalMode
-import io.lionweb.lioncore.kotlin.repoclient.SerializationDecorator
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 

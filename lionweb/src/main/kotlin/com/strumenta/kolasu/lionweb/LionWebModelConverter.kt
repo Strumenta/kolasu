@@ -6,7 +6,6 @@ import com.strumenta.kolasu.language.Feature
 import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.CompositeDestination
 import com.strumenta.kolasu.model.Multiplicity
-import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.PossiblyNamed
 import com.strumenta.kolasu.model.ReferenceByName
@@ -436,7 +435,7 @@ class LionWebModelConverter(
             if (kNode is KNode) {
                 val lwPosition = lwNode.getPropertyValue(ASTNodePosition)
                 if (lwPosition != null) {
-                    kNode.position = lwPosition.asPosition()
+                    kNode.position = lwPosition as Position
                 }
                 val originalNodes = lwNode.getReferenceValues(ASTNodeOriginalNode)
                 if (originalNodes.isNotEmpty()) {
@@ -640,7 +639,7 @@ class LionWebModelConverter(
         }
     }
 
-    fun importEnumValue(propValue: EnumerationValue): Any {
+    private fun importEnumValue(propValue: EnumerationValue): Any {
         val enumerationLiteral = propValue.enumerationLiteral
         val enumKClass = synchronized(languageConverter) {
             languageConverter
@@ -763,7 +762,8 @@ class LionWebModelConverter(
                         val value = attributeValue(data, feature)
                         if (!param.type.isAssignableBy(value)) {
                             throw RuntimeException(
-                                "Cannot assign value $value (${value?.javaClass?.canonicalName}) to param ${param.name} of type ${param.type}"
+                                "Cannot assign value $value (${value?.javaClass?.canonicalName}) to param " +
+                                    "${param.name} of type ${param.type}"
                             )
                         }
                         params[param] = value
@@ -926,7 +926,7 @@ class LionWebModelConverter(
         ) as IssueSeverity
         val position = issueNode.getPropertyValue(
             ASTLanguage.getIssue().getPropertyByName(Issue::position.name)!!
-        )?.asPosition()
+        ) as Position
         val issue = Issue(issueType, message, severity, position)
         return issueNode.id!! to issue
     }
@@ -984,37 +984,4 @@ fun <T> Iterable<T>.myReversed(): List<T> {
     }
     result.reverse()
     return result
-}
-
-
-fun Any.asPosition(): Position {
-    if (this is Position) {
-        return this
-    }
-    // We have a version of Position obtained from another classloader.
-    // In the future Position should be moved to Specs and avoiding this, but in the meantime we convert
-    // to the version of Position that works here
-    if (this.javaClass.canonicalName == Position::class.qualifiedName) {
-        val start = this.javaClass.getMethod("getStart").invoke(this)!!.asPoint()
-        val end = this.javaClass.getMethod("getEnd").invoke(this)!!.asPoint()
-        return Position(start, end)
-    } else {
-        throw IllegalArgumentException()
-    }
-}
-
-fun Any.asPoint(): Point {
-    if (this is Point) {
-        return this
-    }
-    // We have a version of Position obtained from another classloader.
-    // In the future Position should be moved to Specs and avoiding this, but in the meantime we convert
-    // to the version of Position that works here
-    if (this.javaClass.canonicalName == Point::class.qualifiedName) {
-        val line = this.javaClass.getMethod("getLine").invoke(this) as Int
-        val column = this.javaClass.getMethod("getColumn").invoke(this) as Int
-        return Point(line, column)
-    } else {
-        throw IllegalArgumentException()
-    }
 }
