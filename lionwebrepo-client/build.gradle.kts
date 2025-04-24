@@ -37,7 +37,7 @@ testing {
                 implementation("org.testcontainers:testcontainers:1.19.5")
                 implementation("org.testcontainers:junit-jupiter:1.19.5")
                 implementation("org.testcontainers:postgresql:1.19.5")
-                implementation(libs.lionwebkotlinrepoclienttesting)
+                implementation(libs.lionwebjavarepoclienttesting)
             }
 
             targets {

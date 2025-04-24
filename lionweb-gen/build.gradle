@@ -28,12 +28,11 @@ dependencies {
     api(project(":emf"))
     api(project(":lionweb"))
 
-
     implementation("com.squareup:kotlinpoet:1.14.2")
     cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
-    implementation("com.google.code.gson:gson:$gson_version") {
+    implementation(libs.gson) {
         version {
-            strictly gson_version
+            strictly(libs.versions.gson.get())
         }
     }
 
@@ -119,7 +118,7 @@ test {
 configurations.all {
     resolutionStrategy.eachDependency { details ->
         if (details.requested.group == 'com.google.code.gson') {
-            details.useVersion gson_version
+            details.useVersion(libs.versions.gson.get())
         }
     }
 }

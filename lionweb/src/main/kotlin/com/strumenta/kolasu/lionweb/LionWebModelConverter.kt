@@ -762,7 +762,8 @@ class LionWebModelConverter(
                         val value = attributeValue(data, feature)
                         if (!param.type.isAssignableBy(value)) {
                             throw RuntimeException(
-                                "Cannot assign value $value to param ${param.name} of type ${param.type}"
+                                "Cannot assign value $value (${value?.javaClass?.canonicalName}) to param " +
+                                    "${param.name} of type ${param.type}"
                             )
                         }
                         params[param] = value
