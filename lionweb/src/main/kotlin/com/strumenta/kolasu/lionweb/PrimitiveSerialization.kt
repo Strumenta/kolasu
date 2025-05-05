@@ -16,10 +16,11 @@ fun registerSerializersAndDeserializersInMetamodelRegistry() {
         positionSerializer,
         positionDeserializer
     )
-
-    val tlpt = MetamodelRegistry.getPrimitiveType(TokensList::class, LIONWEB_VERSION_USED_BY_KOLASU)
-        ?: throw IllegalStateException("Unknown primitive type class ${TokensList::class}")
-    MetamodelRegistry.addSerializerAndDeserializer(tlpt, tokensListPrimitiveSerializer, tokensListPrimitiveDeserializer)
+    MetamodelRegistry.addSerializerAndDeserializer(
+        ASTLanguage.getTokensList(),
+        tokensListPrimitiveSerializer,
+        tokensListPrimitiveDeserializer
+    )
 }
 
 class TokensList(val tokens: List<KolasuToken>)
