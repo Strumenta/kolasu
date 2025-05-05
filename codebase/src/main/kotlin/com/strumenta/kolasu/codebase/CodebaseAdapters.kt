@@ -63,7 +63,7 @@ fun <R : Node> convertCodebase(
 
         private val filesCache: List<CodebaseFile<R>> by lazy {
             codebaseAccess.files().map { fileIdentifier ->
-                val serializedFile = codebaseAccess.retrieveFile(fileIdentifier)
+                val serializedFile = codebaseAccess.retrieve(fileIdentifier)
                 jsonSerialization.deserializeToNodes(serializedFile)[0]
             }.filter { serializedCodebaseFile ->
                 val languageName = serializedCodebaseFile!!.getPropertyValueByName("language_name") as String
