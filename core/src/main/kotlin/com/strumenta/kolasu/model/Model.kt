@@ -65,7 +65,7 @@ open class Node() : Origin, Destination, Serializable, HasID {
     @property:Internal
     open val originalProperties: List<PropertyDescription>
         get() = try {
-            properties.filter { !it.derived }
+            nodeOriginalProperties.map { PropertyDescription.buildFor(it, this) }
         } catch (e: Throwable) {
             throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
         }

@@ -926,7 +926,7 @@ class LionWebModelConverter(
         ) as IssueSeverity
         val position = issueNode.getPropertyValue(
             ASTLanguage.getIssue().getPropertyByName(Issue::position.name)!!
-        ) as Position
+        ) as? Position
         val issue = Issue(issueType, message, severity, position)
         return issueNode.id!! to issue
     }
