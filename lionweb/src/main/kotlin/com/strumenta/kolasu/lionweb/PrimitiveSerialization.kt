@@ -11,7 +11,6 @@ import io.lionweb.lioncore.kotlin.MetamodelRegistry
 
 fun registerSerializersAndDeserializersInMetamodelRegistry() {
     MetamodelRegistry.addSerializerAndDeserializer(ASTLanguage.getChar(), charSerializer, charDeserializer)
-    MetamodelRegistry.addSerializerAndDeserializer(StarLasuLWLanguage.Point, pointSerializer, pointDeserializer)
     MetamodelRegistry.addSerializerAndDeserializer(
         ASTLanguage.getPosition(),
         positionSerializer,
