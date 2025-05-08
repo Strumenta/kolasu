@@ -3,6 +3,7 @@ package com.strumenta.kolasu.codebase
 import com.strumenta.kolasu.lionweb.IssueNode
 import com.strumenta.kolasu.lionweb.LWNode
 import com.strumenta.kolasu.lionweb.LionWebModelConverter
+import com.strumenta.kolasu.lionweb.TokensList
 import com.strumenta.kolasu.model.Node
 import com.strumenta.starlasu.base.CodebaseAccess
 import com.strumenta.starlasu.base.CodebaseLanguage
@@ -28,7 +29,8 @@ fun <R : Node> deserialize(
         codebaseFile.getChildrenByContainmentName("issues").map { lwIssue ->
             modelConverter.importIssueFromLionweb(lwIssue as IssueNode).second
         }
-    return CodebaseFile(codebase, relativePath, code, compilationUnit, issues)
+    val tokens = codebaseFile.getPropertyValueByName("tokens") as TokensList
+    return CodebaseFile(codebase, relativePath, code, compilationUnit, tokens, issues)
 }
 
 fun <R : Node> serialize(
@@ -41,6 +43,7 @@ fun <R : Node> serialize(
     lwCodebaseFile.setPropertyValueByName("language_name", languageName)
     lwCodebaseFile.setPropertyValueByName("relative_path", codebaseFile.relativePath)
     lwCodebaseFile.setPropertyValueByName("code", codebaseFile.code)
+    lwCodebaseFile.setPropertyValueByName("tokens", codebaseFile.tokens)
     modelConverter.clearNodesMapping()
     val ast = modelConverter.exportModelToLionWeb(codebaseFile.ast)
     ClassifierInstanceUtils.setOnlyChildByContainmentName(lwCodebaseFile, "ast", ast)
@@ -63,7 +66,7 @@ fun <R : Node> convertCodebase(
 
         private val filesCache: List<CodebaseFile<R>> by lazy {
             codebaseAccess.files().map { fileIdentifier ->
-                val serializedFile = codebaseAccess.retrieveFile(fileIdentifier)
+                val serializedFile = codebaseAccess.retrieve(fileIdentifier)
                 jsonSerialization.deserializeToNodes(serializedFile)[0]
             }.filter { serializedCodebaseFile ->
                 val languageName = serializedCodebaseFile!!.getPropertyValueByName("language_name") as String

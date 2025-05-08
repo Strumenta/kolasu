@@ -4,22 +4,23 @@ import com.strumenta.kolasu.model.Point
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.TokenCategory
+import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
 import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.kotlin.MetamodelRegistry
 
 fun registerSerializersAndDeserializersInMetamodelRegistry() {
-    MetamodelRegistry.addSerializerAndDeserializer(StarLasuLWLanguage.Char, charSerializer, charDeserializer)
-    MetamodelRegistry.addSerializerAndDeserializer(StarLasuLWLanguage.Point, pointSerializer, pointDeserializer)
+    MetamodelRegistry.addSerializerAndDeserializer(ASTLanguage.getChar(), charSerializer, charDeserializer)
     MetamodelRegistry.addSerializerAndDeserializer(
-        StarLasuLWLanguage.Position,
+        ASTLanguage.getPosition(),
         positionSerializer,
         positionDeserializer
     )
-
-    val tlpt = MetamodelRegistry.getPrimitiveType(TokensList::class, LIONWEB_VERSION_USED_BY_KOLASU)
-        ?: throw IllegalStateException("Unknown primitive type class ${TokensList::class}")
-    MetamodelRegistry.addSerializerAndDeserializer(tlpt, tokensListPrimitiveSerializer, tokensListPrimitiveDeserializer)
+    MetamodelRegistry.addSerializerAndDeserializer(
+        ASTLanguage.getTokensList(),
+        tokensListPrimitiveSerializer,
+        tokensListPrimitiveDeserializer
+    )
 }
 
 class TokensList(val tokens: List<KolasuToken>)
@@ -30,6 +31,9 @@ class TokensList(val tokens: List<KolasuToken>)
 
 val charSerializer = PrimitiveSerializer<Char> { value -> "$value" }
 val charDeserializer = PrimitiveDeserializer<Char> { serialized ->
+    if (serialized == null) {
+        return@PrimitiveDeserializer null
+    }
     require(serialized.length == 1)
     serialized[0]
 }
@@ -63,19 +67,21 @@ val pointDeserializer: PrimitiveDeserializer<Point> =
 //
 
 val positionSerializer = PrimitiveSerializer<Position> { value ->
+    if (value == null) {
+        return@PrimitiveSerializer null
+    }
     "${pointSerializer.serialize((value as Position).start)}-${pointSerializer.serialize(value.end)}"
 }
 
 val positionDeserializer = PrimitiveDeserializer<Position> { serialized ->
     if (serialized == null) {
-        null
-    } else {
-        val parts = serialized.split("-")
-        require(parts.size == 2) {
-            "Position has an expected format: $serialized"
-        }
-        Position(pointDeserializer.deserialize(parts[0]), pointDeserializer.deserialize(parts[1]))
+        return@PrimitiveDeserializer null
     }
+    val parts = serialized.split("-")
+    require(parts.size == 2) {
+        "Position has an unexpected format: $serialized"
+    }
+    Position(pointDeserializer.deserialize(parts[0]), pointDeserializer.deserialize(parts[1]))
 }
 
 //
@@ -90,19 +96,18 @@ val tokensListPrimitiveSerializer = PrimitiveSerializer<TokensList?> { value: To
 
 val tokensListPrimitiveDeserializer = PrimitiveDeserializer<TokensList?> { serialized ->
     if (serialized == null) {
-        null
-    } else {
-        val tokens = if (serialized.isEmpty()) {
-            mutableListOf()
-        } else {
-            serialized.split(";").map {
-                val parts = it.split("$")
-                require(parts.size == 2)
-                val category = parts[0]
-                val position = positionDeserializer.deserialize(parts[1])
-                KolasuToken(TokenCategory(category), position)
-            }.toMutableList()
-        }
-        TokensList(tokens)
+        return@PrimitiveDeserializer null
     }
+    val tokens = if (serialized.isEmpty()) {
+        mutableListOf()
+    } else {
+        serialized.split(";").map {
+            val parts = it.split("$")
+            require(parts.size == 2)
+            val category = parts[0]
+            val position = positionDeserializer.deserialize(parts[1])
+            KolasuToken(TokenCategory(category), position)
+        }.toMutableList()
+    }
+    TokensList(tokens)
 }
