@@ -4,6 +4,7 @@ import com.strumenta.kolasu.model.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,17 +17,16 @@ public class CompilationUnit extends Node {
             return bs;
         }
 
-        @NotNull
         @Override
-        @Internal
-        public List<PropertyDescription> getProperties() {
+        @NotNull
+        public List<PropertyDescription> getOriginalProperties() {
             return Arrays.asList(new PropertyDescription("bs", true, Multiplicity.MANY, getBs(), PropertyType.CONTAINMENT, false));
         }
 
         @Override
         @NotNull
-        public List<PropertyDescription> getOriginalProperties() {
-            return getProperties();
+        public List<PropertyDescription> getDerivedProperties() {
+            return Collections.emptyList();
         }
     }
 
