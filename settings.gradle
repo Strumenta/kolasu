@@ -6,8 +6,4 @@ include 'core'
 include 'semantics'
 include 'javalib'
 include 'lionweb'
-include 'lionweb-gen'
-include 'lionweb-ksp'
-include 'lionweb-gen-gradle'
 include 'lionwebrepo-client'
-include("codebase")
