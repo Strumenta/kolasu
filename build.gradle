@@ -8,7 +8,7 @@ plugins {
     id("signing")
     id("org.jetbrains.dokka") version "${dokka_version}"
     id 'java-library'
-    id 'net.researchgate.release' version '3.0.2'
+    id 'net.researchgate.release' version '3.1.0'
 }
 
 allprojects {
@@ -100,7 +100,7 @@ subprojects {
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 release {
-    buildTasks = ['publish', ":lionweb-gen-gradle:publishPlugins"]
+    buildTasks = ['publish']
     git {
         requireBranch.set('')
         pushToRemote.set('origin')
