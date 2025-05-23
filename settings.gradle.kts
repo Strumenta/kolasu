@@ -22,4 +22,4 @@ include("lionwebrepo-client")
 
 include("lionweb-ksp")
 include("lionweb-gen")
-// include("lionweb-gen-gradle")
+include("lionweb-gen-gradle")

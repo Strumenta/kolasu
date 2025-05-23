@@ -8,11 +8,9 @@ plugins {
     `kotlin-dsl`
 }
 
-val kspVersion = extra["kspVersion"] as String
 val kotlin_version = extra["kotlin_version"] as String
 val gson_version = extra["gson_version"] as String
 val lionwebGenGradlePluginID = extra["lionwebGenGradlePluginID"] as String
-val completeKspVersion = if (kspVersion.contains("-")) kspVersion else "${kotlin_version}-${kspVersion}"
 val lionwebJavaVersion = libs.lionwebjava.get().version
 
 dependencies {
@@ -24,9 +22,9 @@ dependencies {
     testImplementation(project(":lionweb-ksp"))
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    implementation("com.google.code.gson:gson:$gson_version")
     implementation(libs.starlasu.specs)
-    implementation("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$completeKspVersion")
+    implementation(libs.gson)
+    implementation(libs.kspGradlePlugin)
 }
 
 buildConfig {
