@@ -37,7 +37,7 @@ open class CodeProcessingResult<D>(
     val issues: List<Issue>,
     val data: D?,
     val code: String? = null,
-    val source: Source? = null
+    val source: Source? = null,
 ) : Serializable {
     val correct: Boolean
         get() = issues.none { it.severity != IssueSeverity.INFO }
@@ -82,7 +82,7 @@ data class TokenCategory(val type: String) {
 open class KolasuToken(
     open val category: TokenCategory,
     open val position: Position,
-    open val text: String? = null
+    open val text: String? = null,
 ) : Serializable
 
 /**
@@ -100,9 +100,8 @@ class LexingResult<T : KolasuToken>(
     val tokens: List<T>,
     code: String? = null,
     val time: Long? = null,
-    source: Source? = null
+    source: Source? = null,
 ) : CodeProcessingResult<List<T>>(issues, tokens, code, source) {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is LexingResult<*>) return false
@@ -130,7 +129,7 @@ class FirstStageParsingResult<C : ParserRuleContext>(
     val incompleteNode: Node? = null,
     val time: Long? = null,
     val lexingTime: Long? = null,
-    source: Source? = null
+    source: Source? = null,
 ) : CodeProcessingResult<C>(issues, root, code, source) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -167,9 +166,8 @@ open class ParsingResult<RootNode : Node>(
     val incompleteNode: Node? = null,
     val firstStage: FirstStageParsingResult<*>? = null,
     val time: Long? = null,
-    source: Source? = null
+    source: Source? = null,
 ) : CodeProcessingResult<RootNode>(issues, root, code, source) {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ParsingResult<*>) return false
@@ -194,12 +192,13 @@ open class ParsingResult<RootNode : Node>(
 fun String.toStream(charset: Charset = Charsets.UTF_8) = ByteArrayInputStream(toByteArray(charset))
 
 interface KolasuLexer<T : KolasuToken> : Serializable {
-
     /**
      * Performs "lexing" on the given code string, i.e., it breaks it into tokens.
      */
-    fun lex(code: String, onlyFromDefaultChannel: Boolean = true) =
-        lex(code.byteInputStream(Charsets.UTF_8), Charsets.UTF_8, onlyFromDefaultChannel)
+    fun lex(
+        code: String,
+        onlyFromDefaultChannel: Boolean = true,
+    ) = lex(code.byteInputStream(Charsets.UTF_8), Charsets.UTF_8, onlyFromDefaultChannel)
 
     /**
      * Performs "lexing" on the given code string, i.e., it breaks it into tokens.
@@ -213,13 +212,16 @@ interface KolasuLexer<T : KolasuToken> : Serializable {
         inputStream: InputStream,
         charset: Charset = Charsets.UTF_8,
         onlyFromDefaultChannel: Boolean = true,
-        source: Source? = null
+        source: Source? = null,
     ): LexingResult<T>
 
     /**
      * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.
      */
-    fun lex(inputStream: InputStream, charset: Charset = Charsets.UTF_8) = lex(inputStream, charset, true)
+    fun lex(
+        inputStream: InputStream,
+        charset: Charset = Charsets.UTF_8,
+    ) = lex(inputStream, charset, true)
 
     /**
      * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.
@@ -229,55 +231,62 @@ interface KolasuLexer<T : KolasuToken> : Serializable {
     /**
      * Performs "lexing" on the given code stream, i.e., it breaks it into tokens.
      */
-    fun lex(file: File, charset: Charset = Charsets.UTF_8, onlyFromDefaultChannel: Boolean = true): LexingResult<T> =
-        BufferedInputStream(FileInputStream(file)).use { lex(it, charset, onlyFromDefaultChannel) }
+    fun lex(
+        file: File,
+        charset: Charset = Charsets.UTF_8,
+        onlyFromDefaultChannel: Boolean = true,
+    ): LexingResult<T> = BufferedInputStream(FileInputStream(file)).use { lex(it, charset, onlyFromDefaultChannel) }
 }
 
 fun Lexer.injectErrorCollectorInLexer(issues: MutableList<Issue>) {
     this.removeErrorListeners()
-    this.addErrorListener(object : BaseErrorListener() {
-        override fun syntaxError(
-            recognizer: Recognizer<*, *>?,
-            offendingSymbol: Any?,
-            line: Int,
-            charPositionInLine: Int,
-            errorMessage: String?,
-            recognitionException: RecognitionException?
-        ) {
-            issues.add(
-                Issue(
-                    IssueType.LEXICAL,
-                    errorMessage ?: "unspecified",
-                    position = Point(line, charPositionInLine).asPosition
+    this.addErrorListener(
+        object : BaseErrorListener() {
+            override fun syntaxError(
+                recognizer: Recognizer<*, *>?,
+                offendingSymbol: Any?,
+                line: Int,
+                charPositionInLine: Int,
+                errorMessage: String?,
+                recognitionException: RecognitionException?,
+            ) {
+                issues.add(
+                    Issue(
+                        IssueType.LEXICAL,
+                        errorMessage ?: "unspecified",
+                        position = Point(line, charPositionInLine).asPosition,
+                    ),
                 )
-            )
-        }
-    })
+            }
+        },
+    )
 }
 
 fun Parser.injectErrorCollectorInParser(issues: MutableList<Issue>) {
     this.removeErrorListeners()
-    this.addErrorListener(object : BaseErrorListener() {
-        override fun syntaxError(
-            recognizer: Recognizer<*, *>?,
-            offendingSymbol: Any?,
-            line: Int,
-            charPositionInLine: Int,
-            errorMessage: String?,
-            recognitionException: RecognitionException?
-        ) {
-            val startPoint = Point(line, charPositionInLine)
-            var endPoint = startPoint
-            if (offendingSymbol is CommonToken) {
-                endPoint = offendingSymbol.endPoint
-            }
-            issues.add(
-                Issue(
-                    IssueType.SYNTACTIC,
-                    errorMessage?.capitalize() ?: "unspecified",
-                    position = Position(startPoint, endPoint)
+    this.addErrorListener(
+        object : BaseErrorListener() {
+            override fun syntaxError(
+                recognizer: Recognizer<*, *>?,
+                offendingSymbol: Any?,
+                line: Int,
+                charPositionInLine: Int,
+                errorMessage: String?,
+                recognitionException: RecognitionException?,
+            ) {
+                val startPoint = Point(line, charPositionInLine)
+                var endPoint = startPoint
+                if (offendingSymbol is CommonToken) {
+                    endPoint = offendingSymbol.endPoint
+                }
+                issues.add(
+                    Issue(
+                        IssueType.SYNTACTIC,
+                        errorMessage?.capitalize() ?: "unspecified",
+                        position = Position(startPoint, endPoint),
+                    ),
                 )
-            )
-        }
-    })
+            }
+        },
+    )
 }

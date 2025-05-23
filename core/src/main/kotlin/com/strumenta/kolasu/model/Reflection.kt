@@ -18,14 +18,14 @@ import kotlin.reflect.full.withNullability
 fun <T : BaseASTNode> T.relevantMemberProperties(
     withPosition: Boolean = false,
     withNodeType: Boolean = false,
-    includeDerived: Boolean = false
-):
-    List<KProperty1<T, *>> {
-    val list = if (includeDerived) {
-        this::class.nodeProperties.map { it as KProperty1<T, *> }.toMutableList()
-    } else {
-        this::class.nodeOriginalProperties.map { it as KProperty1<T, *> }.toMutableList()
-    }
+    includeDerived: Boolean = false,
+): List<KProperty1<T, *>> {
+    val list =
+        if (includeDerived) {
+            this::class.nodeProperties.map { it as KProperty1<T, *> }.toMutableList()
+        } else {
+            this::class.nodeOriginalProperties.map { it as KProperty1<T, *> }.toMutableList()
+        }
     if (withPosition) {
         list.add(BaseASTNode::position as KProperty1<T, *>)
     }
@@ -42,7 +42,7 @@ fun <T : BaseASTNode> T.relevantMemberProperties(
  */
 fun <T : Any> KClass<T>.processProperties(
     propertiesToIgnore: Set<String> = emptySet(),
-    propertyTypeOperation: (PropertyTypeDescription) -> Unit
+    propertyTypeOperation: (PropertyTypeDescription) -> Unit,
 ) {
     nodeProperties.forEach { p ->
         if (!propertiesToIgnore.contains(p.name)) {
@@ -54,7 +54,7 @@ fun <T : Any> KClass<T>.processProperties(
 enum class PropertyType {
     ATTRIBUTE,
     CONTAINMENT,
-    REFERENCE
+    REFERENCE,
 }
 
 data class PropertyDescription(
@@ -63,9 +63,8 @@ data class PropertyDescription(
     val multiplicity: Multiplicity,
     val value: Any?,
     val propertyType: PropertyType,
-    val derived: Boolean
+    val derived: Boolean,
 ) {
-
     fun valueToString(): String {
         if (value == null) {
             return "null"
@@ -92,7 +91,6 @@ data class PropertyDescription(
         get() = multiplicity == Multiplicity.MANY
 
     companion object {
-
         fun <N : BaseASTNode> multiple(property: KProperty1<N, *>): Boolean {
             val propertyType = property.returnType
             val classifier = propertyType.classifier as? KClass<*>
@@ -122,7 +120,10 @@ data class PropertyDescription(
             }
         }
 
-        fun <N : BaseASTNode> buildFor(property: KProperty1<N, *>, node: BaseASTNode): PropertyDescription {
+        fun <N : BaseASTNode> buildFor(
+            property: KProperty1<N, *>,
+            node: BaseASTNode,
+        ): PropertyDescription {
             val multiplicity = multiplicity(property)
             val provideNodes = providesNodes(property)
             return PropertyDescription(
@@ -135,7 +136,7 @@ data class PropertyDescription(
                     provideNodes -> PropertyType.CONTAINMENT
                     else -> PropertyType.ATTRIBUTE
                 },
-                derived = property.findAnnotation<Derived>() != null
+                derived = property.findAnnotation<Derived>() != null,
             )
         }
     }
@@ -149,7 +150,7 @@ private fun providesNodes(classifier: KClassifier?): Boolean {
         return providesNodes(classifier as? KClass<*>)
     } else {
         throw UnsupportedOperationException(
-            "We are not able to determine if the classifier $classifier provides AST Nodes or not"
+            "We are not able to determine if the classifier $classifier provides AST Nodes or not",
         )
     }
 }
@@ -183,7 +184,7 @@ data class PropertyTypeDescription(
     val name: String,
     val provideNodes: Boolean,
     val multiple: Boolean,
-    val valueType: KType
+    val valueType: KType,
 ) {
     companion object {
         fun buildFor(property: KProperty1<*, *>): PropertyTypeDescription {
@@ -191,18 +192,19 @@ data class PropertyTypeDescription(
             val classifier = propertyType.classifier as? KClass<*>
             val multiple = (classifier?.isSubclassOf(Collection::class) == true)
             val valueType: KType
-            val provideNodes = if (multiple) {
-                valueType = propertyType.arguments[0].type!!
-                providesNodes(propertyType.arguments[0])
-            } else {
-                valueType = propertyType
-                providesNodes(classifier)
-            }
+            val provideNodes =
+                if (multiple) {
+                    valueType = propertyType.arguments[0].type!!
+                    providesNodes(propertyType.arguments[0])
+                } else {
+                    valueType = propertyType
+                    providesNodes(classifier)
+                }
             return PropertyTypeDescription(
                 name = property.name,
                 provideNodes = provideNodes,
                 multiple = multiple,
-                valueType = valueType
+                valueType = valueType,
             )
         }
     }
@@ -211,7 +213,7 @@ data class PropertyTypeDescription(
 enum class Multiplicity {
     OPTIONAL,
     SINGULAR,
-    MANY
+    MANY,
 }
 
 private fun providesNodes(kTypeProjection: KTypeProjection): Boolean {
@@ -220,7 +222,7 @@ private fun providesNodes(kTypeProjection: KTypeProjection): Boolean {
         is KClass<*> -> providesNodes(ktype as? KClass<*>)
         is KType -> providesNodes((ktype as? KType)?.classifier)
         else -> throw UnsupportedOperationException(
-            "We are not able to determine if the type $ktype provides AST Nodes or not"
+            "We are not able to determine if the type $ktype provides AST Nodes or not",
         )
     }
 }
@@ -256,46 +258,53 @@ fun <N : BaseASTNode> KProperty1<N, *>.referredType(): KClass<out BaseASTNode> {
 }
 
 fun <N : Any> KProperty1<N, *>.asContainment(): Containment {
-    val multiplicity = when {
-        (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
-            if (this.returnType.isMarkedNullable) {
-                throw IllegalStateException(
-                    "Containments should not be defined as nullable collections " +
-                        "(property ${this.name})"
-                )
+    val multiplicity =
+        when {
+            (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
+                if (this.returnType.isMarkedNullable) {
+                    throw IllegalStateException(
+                        "Containments should not be defined as nullable collections " +
+                            "(property ${this.name})",
+                    )
+                }
+                Multiplicity.MANY
             }
-            Multiplicity.MANY
+
+            this.returnType.isMarkedNullable -> Multiplicity.OPTIONAL
+            else -> Multiplicity.SINGULAR
         }
-        this.returnType.isMarkedNullable -> Multiplicity.OPTIONAL
-        else -> Multiplicity.SINGULAR
-    }
-    val type = if (multiplicity == Multiplicity.MANY) {
-        this.returnType.arguments[0].type!!.classifier as KClass<*>
-    } else {
-        this.returnType.classifier as KClass<*>
-    }
+    val type =
+        if (multiplicity == Multiplicity.MANY) {
+            this.returnType.arguments[0].type!!.classifier as KClass<*>
+        } else {
+            this.returnType.classifier as KClass<*>
+        }
     return Containment(this.name, multiplicity, type)
 }
 
 fun <N : Any> KProperty1<N, *>.asReference(): Reference {
-    val optional = when {
-        (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
-            throw IllegalStateException()
+    val optional =
+        when {
+            (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
+                throw IllegalStateException()
+            }
+
+            this.returnType.isMarkedNullable -> true
+            else -> false
         }
-        this.returnType.isMarkedNullable -> true
-        else -> false
-    }
     return Reference(this.name, optional, this.returnType.arguments[0].type?.classifier as KClass<*>)
 }
 
 fun <N : Any> KProperty1<N, *>.asAttribute(): Attribute {
-    val optional = when {
-        (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
-            throw IllegalStateException("Attributes with a Collection type are not allowed (property $this)")
+    val optional =
+        when {
+            (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
+                throw IllegalStateException("Attributes with a Collection type are not allowed (property $this)")
+            }
+
+            this.returnType.isMarkedNullable -> true
+            else -> false
         }
-        this.returnType.isMarkedNullable -> true
-        else -> false
-    }
     return Attribute(this.name, optional, this.returnType.withNullability(false))
 }
 
@@ -320,33 +329,35 @@ fun <N : Any> KClass<N>.isInherited(feature: Feature): Boolean {
 fun <N : Any> KClass<N>.declaredFeatures(includeDerived: Boolean = false): List<Feature> {
     if (!featuresCache.containsKey(this)) {
         // Named can be used also for things which are not Node, so we treat it as a special case
-        featuresCache[this] = if (!isANode() && this != Named::class) {
-            emptyList()
-        } else {
-            val inheritedNamed =
-                supertypes.map { (it.classifier as? KClass<*>)?.allFeatures()?.map { it.name } ?: emptyList() }
-                    .flatten()
-                    .toSet()
-            val notInheritedProps = (if (includeDerived) nodeProperties else nodeOriginalProperties)
-                .filter { it.name !in inheritedNamed }
-            notInheritedProps.map {
-                when {
-                    it.isAttribute() -> {
-                        it.asAttribute()
-                    }
+        featuresCache[this] =
+            if (!isANode() && this != Named::class) {
+                emptyList()
+            } else {
+                val inheritedNamed =
+                    supertypes.map { (it.classifier as? KClass<*>)?.allFeatures()?.map { it.name } ?: emptyList() }
+                        .flatten()
+                        .toSet()
+                val notInheritedProps =
+                    (if (includeDerived) nodeProperties else nodeOriginalProperties)
+                        .filter { it.name !in inheritedNamed }
+                notInheritedProps.map {
+                    when {
+                        it.isAttribute() -> {
+                            it.asAttribute()
+                        }
 
-                    it.isReference() -> {
-                        it.asReference()
-                    }
+                        it.isReference() -> {
+                            it.asReference()
+                        }
 
-                    it.isContainment() -> {
-                        it.asContainment()
-                    }
+                        it.isContainment() -> {
+                            it.asContainment()
+                        }
 
-                    else -> throw IllegalStateException()
+                        else -> throw IllegalStateException()
+                    }
                 }
             }
-        }
     }
     return featuresCache[this]!!
 }

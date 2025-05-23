@@ -20,7 +20,6 @@ data class MyOtherNode(override val name: String) : Node(), Named
 data class MyOtherRoot(val s: String) : Node()
 
 class StructuralNodeIdProviderTest {
-
     @Test(expected = SourceShouldBeSetException::class)
     fun rootNodeMustHaveSourceSet() {
         val idProvider = StructuralNodeIdProvider()
@@ -86,13 +85,15 @@ class StructuralNodeIdProviderTest {
 
     @Test
     fun semanticIDProviderForRootNode() {
-        val idProvider = CommonNodeIdProvider(
-            semanticIDProvider = DeclarativeNodeIdProvider(
-                idFor<MyOtherRoot> {
-                    "MyOtherRoot-${it.s}"
-                }
+        val idProvider =
+            CommonNodeIdProvider(
+                semanticIDProvider =
+                    DeclarativeNodeIdProvider(
+                        idFor<MyOtherRoot> {
+                            "MyOtherRoot-${it.s}"
+                        },
+                    ),
             )
-        )
         val ast = MyOtherRoot("foo")
         // Note that the source is not set
         assertEquals("MyOtherRoot-foo", idProvider.id(ast))
@@ -100,14 +101,16 @@ class StructuralNodeIdProviderTest {
 
     @Test
     fun semanticIDProviderForNonRootNode() {
-        val idProvider = CommonNodeIdProvider(
-            semanticIDProvider = DeclarativeNodeIdProvider(
-                idFor<MyOtherNode> {
-                    val n = (it.parent as MyRoot).foos.sumOf { it.v }
-                    "MyName-${it.name}-$n"
-                }
+        val idProvider =
+            CommonNodeIdProvider(
+                semanticIDProvider =
+                    DeclarativeNodeIdProvider(
+                        idFor<MyOtherNode> {
+                            val n = (it.parent as MyRoot).foos.sumOf { it.v }
+                            "MyName-${it.name}-$n"
+                        },
+                    ),
             )
-        )
         val n1 = MyNonRoot(2)
         val n2 = MyNonRoot(4)
         val n3 = MyNonRoot(6)

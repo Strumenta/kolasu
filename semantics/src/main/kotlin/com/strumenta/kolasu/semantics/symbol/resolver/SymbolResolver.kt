@@ -27,14 +27,14 @@ import kotlin.reflect.full.isSubtypeOf
  * if an entry is found in the corresponding scope.
  **/
 open class SymbolResolver(
-    private val scopeProvider: ScopeProvider
+    private val scopeProvider: ScopeProvider,
 ) {
     /**
      * Attempts to resolve the given reference property of the given node.
      **/
     fun resolve(
         node: Node,
-        reference: KProperty1<Node, ReferenceByName<PossiblyNamed>?>
+        reference: KProperty1<Node, ReferenceByName<PossiblyNamed>?>,
     ) {
         node.properties
             .find { it.name == reference.name }
@@ -51,7 +51,7 @@ open class SymbolResolver(
      **/
     fun resolve(
         node: Node,
-        entireTree: Boolean = false
+        entireTree: Boolean = false,
     ) {
         if (node.isDirectlyPlaceholderASTTransformation) {
             return

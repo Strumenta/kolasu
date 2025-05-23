@@ -18,7 +18,7 @@ import com.strumenta.kolasu.semantics.symbol.repository.SymbolRepository
  **/
 open class SymbolImporter(
     private val symbolProvider: SymbolProvider,
-    private val symbolRepository: SymbolRepository
+    private val symbolRepository: SymbolRepository,
 ) {
     /**
      * Extracts a symbol description from the given node
@@ -27,7 +27,7 @@ open class SymbolImporter(
      **/
     fun import(
         node: Node,
-        entireTree: Boolean = false
+        entireTree: Boolean = false,
     ) {
         this.symbolProvider.symbolFor(node)?.let { this.symbolRepository.store(it) }
         node.children.forEach { this.import(it, entireTree) }

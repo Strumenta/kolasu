@@ -7,33 +7,39 @@ import java.util.IdentityHashMap
  */
 class BiMap<A, B>(val usingIdentity: Boolean = false) {
     val `as`: Set<A>
-        get() = synchronized(this) { _asToBs.keys }
+        get() = synchronized(this) { internalAsToBs.keys }
     val bs: Set<B>
-        get() = synchronized(this) { _bsToAs.keys }
+        get() = synchronized(this) { internalBsToAs.keys }
     val asToBsMap: Map<A, B>
-        get() = _asToBs
+        get() = internalAsToBs
     val bsToAsMap: Map<B, A>
-        get() = _bsToAs
+        get() = internalBsToAs
 
-    private val _asToBs = if (usingIdentity) IdentityHashMap() else mutableMapOf<A, B>()
-    private val _bsToAs = if (usingIdentity) IdentityHashMap() else mutableMapOf<B, A>()
+    private val internalAsToBs = if (usingIdentity) IdentityHashMap() else mutableMapOf<A, B>()
+    private val internalBsToAs = if (usingIdentity) IdentityHashMap() else mutableMapOf<B, A>()
 
-    fun associate(a: A, b: B) {
+    fun associate(
+        a: A,
+        b: B,
+    ) {
         synchronized(this) {
-            _asToBs[a] = b
-            _bsToAs[b] = a
+            internalAsToBs[a] = b
+            internalBsToAs[b] = a
         }
     }
 
-    fun byA(a: A): B? = synchronized(this) { _asToBs[a] }
-    fun byB(b: B): A? = synchronized(this) { _bsToAs[b] }
+    fun byA(a: A): B? = synchronized(this) { internalAsToBs[a] }
 
-    fun containsA(a: A): Boolean = synchronized(this) { _asToBs.containsKey(a) }
-    fun containsB(b: B): Boolean = synchronized(this) { _bsToAs.containsKey(b) }
+    fun byB(b: B): A? = synchronized(this) { internalBsToAs[b] }
+
+    fun containsA(a: A): Boolean = synchronized(this) { internalAsToBs.containsKey(a) }
+
+    fun containsB(b: B): Boolean = synchronized(this) { internalBsToAs.containsKey(b) }
+
     fun clear() {
         synchronized(this) {
-            _asToBs.clear()
-            _bsToAs.clear()
+            internalAsToBs.clear()
+            internalBsToAs.clear()
         }
     }
 }

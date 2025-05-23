@@ -36,5 +36,5 @@ object RootCoordinates : Coordinates()
 data class InternalCoordinates(
     val containerID: String,
     val containmentName: String,
-    val indexInContainment: Int
+    val indexInContainment: Int,
 ) : Coordinates()

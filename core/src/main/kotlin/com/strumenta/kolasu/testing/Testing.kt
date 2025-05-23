@@ -1,19 +1,27 @@
 package com.strumenta.kolasu.testing
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.KReferenceByName
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.PropertyType
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.kReferenceByNameProperties
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.parsing.toParseTreeModel
 import com.strumenta.kolasu.traversing.walkChildren
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Vocabulary
 import kotlin.reflect.KClass
-import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import kotlin.test.fail
 
 fun assertParseTreeStr(
     expectedMultiLineStr: String,
     root: ParserRuleContext,
     vocabulary: Vocabulary,
-    printParseTree: Boolean = true
+    printParseTree: Boolean = true,
 ) {
     val actualParseTree = toParseTreeModel(root, vocabulary).multiLineString()
     if (printParseTree) {
@@ -34,11 +42,17 @@ class IgnoreChildren<N : Node> : MutableList<N> {
         TODO("Not yet implemented")
     }
 
-    override fun addAll(index: Int, elements: Collection<N>): Boolean {
+    override fun addAll(
+        index: Int,
+        elements: Collection<N>,
+    ): Boolean {
         TODO("Not yet implemented")
     }
 
-    override fun add(index: Int, element: N) {
+    override fun add(
+        index: Int,
+        element: N,
+    ) {
         TODO("Not yet implemented")
     }
 
@@ -86,7 +100,10 @@ class IgnoreChildren<N : Node> : MutableList<N> {
         TODO("Not yet implemented")
     }
 
-    override fun set(index: Int, element: N): N {
+    override fun set(
+        index: Int,
+        element: N,
+    ): N {
         TODO("Not yet implemented")
     }
 
@@ -102,7 +119,10 @@ class IgnoreChildren<N : Node> : MutableList<N> {
         TODO("Not yet implemented")
     }
 
-    override fun subList(fromIndex: Int, toIndex: Int): MutableList<N> {
+    override fun subList(
+        fromIndex: Int,
+        toIndex: Int,
+    ): MutableList<N> {
         TODO("Not yet implemented")
     }
 
@@ -112,7 +132,7 @@ class IgnoreChildren<N : Node> : MutableList<N> {
     }
 
     // Sometimes the compiler complains about these methods not being overriden
-    fun <T : Any>toArray(base: Array<out T>): Array<out T> {
+    fun <T : Any> toArray(base: Array<out T>): Array<out T> {
         TODO()
     }
 }
@@ -120,7 +140,10 @@ class IgnoreChildren<N : Node> : MutableList<N> {
 class ASTDifferenceException(val context: String, val expected: Any, val actual: Any) :
     Exception("$context: expecting $expected, actual $actual")
 
-fun <T : Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: ParsingResult<T>) {
+fun <T : Node> assertParsingResultsAreEqual(
+    expected: ParsingResult<T>,
+    actual: ParsingResult<T>,
+) {
     assertEquals(expected.issues, actual.issues)
     assertEquals(expected.root != null, actual.root != null)
     if (expected.root != null) {
@@ -132,14 +155,14 @@ fun <N : Node> assertASTsAreEqual(
     expected: Node,
     actual: ParsingResult<N>,
     context: String = "<root>",
-    considerPosition: Boolean = false
+    considerPosition: Boolean = false,
 ) {
     assertEquals(0, actual.issues.size, actual.issues.toString())
     assertASTsAreEqual(
         expected = expected,
         actual = actual.root!!,
         context = context,
-        considerPosition = considerPosition
+        considerPosition = considerPosition,
     )
 }
 
@@ -148,7 +171,7 @@ fun assertASTsAreEqual(
     actual: Node,
     context: String = "<root>",
     considerPosition: Boolean = false,
-    useLightweightAttributeEquality: Boolean = false
+    useLightweightAttributeEquality: Boolean = false,
 ) {
     if (expected.nodeType == actual.nodeType) {
         if (considerPosition) {
@@ -156,8 +179,9 @@ fun assertASTsAreEqual(
         }
         expected.originalProperties.forEach { expectedProperty ->
             try {
-                val actualProperty = actual.originalProperties.find { it.name == expectedProperty.name }
-                    ?: fail("No property ${expectedProperty.name} found at $context")
+                val actualProperty =
+                    actual.originalProperties.find { it.name == expectedProperty.name }
+                        ?: fail("No property ${expectedProperty.name} found at $context")
                 val actualPropValue = actualProperty.value
                 val expectedPropValue = expectedProperty.value
                 if (expectedProperty.provideNodes) {
@@ -172,13 +196,13 @@ fun assertASTsAreEqual(
                                 expectedPropValueCollection == null,
                                 "$context.${expectedProperty.name} nullness: expected value " +
                                     "to be $expectedPropValueCollection but was $actualPropValueCollection " +
-                                    "(node type ${actual.nodeType})"
+                                    "(node type ${actual.nodeType})",
                             )
                             if (actualPropValueCollection != null && expectedPropValueCollection != null) {
                                 assertEquals(
                                     expectedPropValueCollection?.size,
                                     actualPropValueCollection?.size,
-                                    "$context.${expectedProperty.name} length"
+                                    "$context.${expectedProperty.name} length",
                                 )
                                 val expectedIt = expectedPropValueCollection.iterator()
                                 val actualIt = actualPropValueCollection.iterator()
@@ -188,7 +212,7 @@ fun assertASTsAreEqual(
                                         actualIt.next(),
                                         "$context.${expectedProperty.name}[$i]",
                                         considerPosition = considerPosition,
-                                        useLightweightAttributeEquality = useLightweightAttributeEquality
+                                        useLightweightAttributeEquality = useLightweightAttributeEquality,
                                     )
                                 }
                             }
@@ -198,13 +222,13 @@ fun assertASTsAreEqual(
                             assertEquals<Any?>(
                                 expectedPropValue,
                                 actualPropValue,
-                                "$context.${expectedProperty.name}"
+                                "$context.${expectedProperty.name}",
                             )
                         } else if (expectedPropValue != null && actualPropValue == null) {
                             assertEquals<Any?>(
                                 expectedPropValue,
                                 actualPropValue,
-                                "$context.${expectedProperty.name}"
+                                "$context.${expectedProperty.name}",
                             )
                         } else if (expectedPropValue == null && actualPropValue == null) {
                             // that is ok
@@ -214,7 +238,7 @@ fun assertASTsAreEqual(
                                 actualPropValue as Node,
                                 context = "$context.${expectedProperty.name}",
                                 considerPosition = considerPosition,
-                                useLightweightAttributeEquality = useLightweightAttributeEquality
+                                useLightweightAttributeEquality = useLightweightAttributeEquality,
                             )
                         }
                     }
@@ -223,12 +247,12 @@ fun assertASTsAreEqual(
                         assertEquals(
                             expectedPropValue.name,
                             actualPropValue.name,
-                            "$context, comparing reference name of ${expectedProperty.name} of ${expected.nodeType}"
+                            "$context, comparing reference name of ${expectedProperty.name} of ${expected.nodeType}",
                         )
                         assertEquals(
                             expectedPropValue.referred?.toString(),
                             actualPropValue.referred?.toString(),
-                            "$context, comparing reference pointer ${expectedProperty.name} of ${expected.nodeType}"
+                            "$context, comparing reference pointer ${expectedProperty.name} of ${expected.nodeType}",
                         )
                     } else {
                         TODO()
@@ -238,13 +262,13 @@ fun assertASTsAreEqual(
                         assertEquals(
                             expectedPropValue?.toString(),
                             actualPropValue?.toString(),
-                            "$context, comparing property ${expectedProperty.name} of ${expected.nodeType}"
+                            "$context, comparing property ${expectedProperty.name} of ${expected.nodeType}",
                         )
                     } else {
                         assertEquals(
                             expectedPropValue,
                             actualPropValue,
-                            "$context, comparing property ${expectedProperty.name} of ${expected.nodeType}"
+                            "$context, comparing property ${expectedProperty.name} of ${expected.nodeType}",
                         )
                     }
                 }
@@ -255,7 +279,7 @@ fun assertASTsAreEqual(
     } else {
         fail(
             "$context: expected node of type ${expected.nodeType}, " +
-                "but found ${actual.nodeType}"
+                "but found ${actual.nodeType}",
         )
     }
 }
@@ -268,7 +292,7 @@ fun Node.assertReferencesResolved(forProperty: KReferenceByName<out Node>) {
             val ref = it as ReferenceByName<*>
             assertTrue(
                 "Reference $ref in node $this (link ${forProperty.name}) " +
-                    "was expected to be solved"
+                    "was expected to be solved",
             ) { ref.resolved }
         }
     this.walkChildren().forEach { it.assertReferencesResolved(forProperty = forProperty) }

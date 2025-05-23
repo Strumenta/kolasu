@@ -10,16 +10,17 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class XmlGenerationTest {
-
     @Test
     fun generateXMLBasic() {
-        val myRoot = MyRoot(
-            mainSection = Section(
-                "Section1",
-                emptyList()
-            ),
-            otherSections = listOf()
-        )
+        val myRoot =
+            MyRoot(
+                mainSection =
+                    Section(
+                        "Section1",
+                        emptyList(),
+                    ),
+                otherSections = listOf(),
+            )
         val xml = XMLGenerator().generateString(myRoot)
         assertEquals(
             """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -27,22 +28,24 @@ class XmlGenerationTest {
     <mainSection name="Section1" type="Section"/>
 </root>
 """.replace("\n", System.lineSeparator()),
-            xml
+            xml,
         )
     }
 
     @Test
     fun generateXML() {
-        val myRoot = MyRoot(
-            mainSection = Section(
-                "Section1",
-                listOf(
-                    Content(1, null),
-                    Content(2, Content(3, Content(4, null)))
-                )
-            ),
-            otherSections = listOf()
-        )
+        val myRoot =
+            MyRoot(
+                mainSection =
+                    Section(
+                        "Section1",
+                        listOf(
+                            Content(1, null),
+                            Content(2, Content(3, Content(4, null))),
+                        ),
+                    ),
+                otherSections = listOf(),
+            )
         val xml = XMLGenerator().generateString(myRoot)
         assertEquals(
             """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -61,23 +64,25 @@ class XmlGenerationTest {
     </mainSection>
 </root>
 """.replace("\n", System.lineSeparator()),
-            xml
+            xml,
         )
     }
 
     @Test
     fun generateXMLWithListOfValues() {
-        val myRoot = MyRoot(
-            mainSection = Section(
-                "Section1",
-                listOf(
-                    Content(1, null),
-                    OtherContent(listOf(1, 2, 3, 100, -122)),
-                    Content(2, Content(3, Content(4, null)))
-                )
-            ),
-            otherSections = listOf()
-        )
+        val myRoot =
+            MyRoot(
+                mainSection =
+                    Section(
+                        "Section1",
+                        listOf(
+                            Content(1, null),
+                            OtherContent(listOf(1, 2, 3, 100, -122)),
+                            Content(2, Content(3, Content(4, null))),
+                        ),
+                    ),
+                otherSections = listOf(),
+            )
         val xml = XMLGenerator().generateString(myRoot)
         assertEquals(
             """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -103,30 +108,31 @@ class XmlGenerationTest {
     </mainSection>
 </root>
 """.replace("\n", System.lineSeparator()),
-            xml
+            xml,
         )
     }
 
     @Test
     fun generateXMLWithIssues() {
-        val issues: List<Issue> = listOf(
-            Issue.lexical("lexical problem"),
-            Issue.semantic(
-                "semantic problem",
-                severity = IssueSeverity.ERROR,
-                position = Position(Point(10, 1), Point(12, 3))
-            ),
-            Issue.semantic(
-                "semantic warning",
-                severity = IssueSeverity.WARNING,
-                position = Position(Point(10, 1), Point(12, 3))
-            ),
-            Issue.semantic(
-                "semantic info",
-                severity = IssueSeverity.INFO,
-                position = Position(Point(10, 1), Point(12, 3))
+        val issues: List<Issue> =
+            listOf(
+                Issue.lexical("lexical problem"),
+                Issue.semantic(
+                    "semantic problem",
+                    severity = IssueSeverity.ERROR,
+                    position = Position(Point(10, 1), Point(12, 3)),
+                ),
+                Issue.semantic(
+                    "semantic warning",
+                    severity = IssueSeverity.WARNING,
+                    position = Position(Point(10, 1), Point(12, 3)),
+                ),
+                Issue.semantic(
+                    "semantic info",
+                    severity = IssueSeverity.INFO,
+                    position = Position(Point(10, 1), Point(12, 3)),
+                ),
             )
-        )
         val result = Result<Node>(issues, null)
         val serialized = XMLGenerator().generateString(result)
         assertEquals(
@@ -155,7 +161,7 @@ class XmlGenerationTest {
     </issues>
     <root/>
 </result>""".replace("\n", System.lineSeparator()),
-            serialized.trim()
+            serialized.trim(),
         )
     }
 }

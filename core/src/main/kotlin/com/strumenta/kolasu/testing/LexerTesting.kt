@@ -9,10 +9,10 @@ import java.io.InputStream
 import java.nio.charset.Charset
 import kotlin.test.assertEquals
 
-fun<T : KolasuToken> checkFileTokenization(
+fun <T : KolasuToken> checkFileTokenization(
     file: File,
     lexer: KolasuLexer<T>,
-    charset: Charset = Charsets.UTF_8
+    charset: Charset = Charsets.UTF_8,
 ): List<T> {
     require(file.exists())
     require(file.isFile())
@@ -21,16 +21,19 @@ fun<T : KolasuToken> checkFileTokenization(
     return checkTokenization(code, lexer)
 }
 
-fun<T : KolasuToken> checkTokenization(
+fun <T : KolasuToken> checkTokenization(
     inputStream: InputStream,
     lexer: KolasuLexer<T>,
-    charset: Charset = Charsets.UTF_8
+    charset: Charset = Charsets.UTF_8,
 ): List<T> {
     val code = inputStream.bufferedReader(charset = charset).use { it.readText() }
     return checkTokenization(code, lexer)
 }
 
-fun<T : KolasuToken> checkTokenization(code: String, lexer: KolasuLexer<T>): List<T> {
+fun <T : KolasuToken> checkTokenization(
+    code: String,
+    lexer: KolasuLexer<T>,
+): List<T> {
     val lexingResult = lexer.lex(code, onlyFromDefaultChannel = false)
     require(lexingResult.issues.isEmpty()) {
         "Lexing issues occurred: ${lexingResult.issues}"
@@ -39,7 +42,10 @@ fun<T : KolasuToken> checkTokenization(code: String, lexer: KolasuLexer<T>): Lis
     return lexingResult.tokens
 }
 
-fun<T : KolasuToken> checkTokensAreCoveringText(code: String, tokens: List<T>) {
+fun <T : KolasuToken> checkTokensAreCoveringText(
+    code: String,
+    tokens: List<T>,
+) {
     require(code.isEmpty() == tokens.isEmpty())
     if (code.isEmpty()) {
         return
@@ -56,13 +62,13 @@ fun<T : KolasuToken> checkTokensAreCoveringText(code: String, tokens: List<T>) {
                 token.position.start,
                 START_POINT,
                 "The first token is expected to be at the start position $START_POINT while it is ast " +
-                    "${token.position.start}"
+                    "${token.position.start}",
             )
         } else {
             assertEquals(
                 token.position.start,
                 prevToken!!.position.end,
-                "Token $token does not immediately follow $prevToken"
+                "Token $token does not immediately follow $prevToken",
             )
         }
 
@@ -70,7 +76,7 @@ fun<T : KolasuToken> checkTokensAreCoveringText(code: String, tokens: List<T>) {
         assertEquals(
             token.position.start + (token.text ?: ""),
             token.position.end,
-            "We have a token with position ${token.position} and text '${token.text}'"
+            "We have a token with position ${token.position} and text '${token.text}'",
         )
 
         // The text specified in the tokens should correspond to the corresponding code
@@ -78,7 +84,7 @@ fun<T : KolasuToken> checkTokensAreCoveringText(code: String, tokens: List<T>) {
         assertEquals(
             expectedText,
             token.text,
-            "At position ${token.position} we found '${token.text}' while we expected '$expectedText'"
+            "At position ${token.position} we found '${token.text}' while we expected '$expectedText'",
         )
 
         prevToken = token

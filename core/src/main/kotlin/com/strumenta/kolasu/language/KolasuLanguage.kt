@@ -59,15 +59,17 @@ class KolasuLanguage(val qualifiedName: String) {
             return attempt.result
         } else {
             throw RuntimeException(
-                "Issues prevented from adding $kClass:\n${attempt.issues.map { it.message }
-                    .joinToString("\n")}"
+                "Issues prevented from adding $kClass:\n${
+                    attempt.issues.map { it.message }
+                        .joinToString("\n")
+                }",
             )
         }
     }
 
     fun tentativeAddInterfaceClass(
         kClass: KClass<*>,
-        exceptions: MutableList<Exception> = mutableListOf()
+        exceptions: MutableList<Exception> = mutableListOf(),
     ): Attempt<Boolean, Exception> {
         if (!_astClasses.contains(kClass) && _astClasses.add(kClass)) {
             kClass.supertypes.forEach { superType -> processSuperType(superType, exceptions) }
@@ -77,7 +79,10 @@ class KolasuLanguage(val qualifiedName: String) {
         }
     }
 
-    private fun processSuperType(superType: KType, exceptions: MutableList<Exception> = mutableListOf()) {
+    private fun processSuperType(
+        superType: KType,
+        exceptions: MutableList<Exception> = mutableListOf(),
+    ) {
         // In case the super type is already mapped to another language we may want to not add it into this language,
         // once we introduce the concept of extending languages
         val kClass = superType.classifier as? KClass<*>
@@ -108,20 +113,22 @@ class KolasuLanguage(val qualifiedName: String) {
             return attempt.result
         } else {
             throw RuntimeException(
-                "Issues prevented from adding $kClass:\n${attempt.issues.map { it.message }
-                    .joinToString("\n")}"
+                "Issues prevented from adding $kClass:\n${
+                    attempt.issues.map { it.message }
+                        .joinToString("\n")
+                }",
             )
         }
     }
 
     fun <N : Node> tentativeAddClass(
         kClass: KClass<N>,
-        exceptions: MutableList<Exception> = mutableListOf()
+        exceptions: MutableList<Exception> = mutableListOf(),
     ): Attempt<Boolean, Exception> {
         if (kClass == Node::class || kClass == Named::class || kClass == PossiblyNamed::class ||
             kClass.superclasses.contains(
-                    CommonElement::class
-                )
+                CommonElement::class,
+            )
         ) {
             return Attempt(false, exceptions)
         }
@@ -153,8 +160,8 @@ class KolasuLanguage(val qualifiedName: String) {
                         exceptions.add(
                             RuntimeException(
                                 "Issue while examining kotlin class $kClass and its property $nodeProperty",
-                                e
-                            )
+                                e,
+                            ),
                         )
                     }
                 }
@@ -166,7 +173,9 @@ class KolasuLanguage(val qualifiedName: String) {
     }
 
     fun findASTClass(name: String): KClass<*>? = astClasses.find { it.simpleName == name }
+
     fun findEnumClass(name: String): KClass<out Enum<*>>? = enumClasses.find { it.simpleName == name }
+
     fun findPrimitiveClass(name: String): KClass<*>? = primitiveClasses.find { it.simpleName == name }
 }
 

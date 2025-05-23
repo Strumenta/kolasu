@@ -20,15 +20,18 @@ open class ParseTreeToASTTransformer(
     issues: MutableList<Issue> = mutableListOf(),
     allowGenericNode: Boolean = true,
     val source: Source? = null,
-    throwOnUnmappedNode: Boolean = true
+    throwOnUnmappedNode: Boolean = true,
 ) : ASTTransformer(issues, allowGenericNode, throwOnUnmappedNode) {
-
     /**
      * Performs the transformation of a node and, recursively, its descendants. In addition to the overridden method,
      * it also assigns the parseTreeNode to the AST node so that it can keep track of its position.
      * However, a node factory can override the parseTreeNode of the nodes it creates (but not the parent).
      */
-    override fun transformIntoNodes(source: Any?, parent: Node?, expectedType: KClass<out Node>): List<Node> {
+    override fun transformIntoNodes(
+        source: Any?,
+        parent: Node?,
+        expectedType: KClass<out Node>,
+    ): List<Node> {
         val transformed = super.transformIntoNodes(source, parent, expectedType)
         return transformed.map { node ->
             if (source is ParserRuleContext) {
@@ -42,7 +45,10 @@ open class ParseTreeToASTTransformer(
         }.flatten()
     }
 
-    override fun getSource(node: Node, source: Any): Any {
+    override fun getSource(
+        node: Node,
+        source: Any,
+    ): Any {
         val origin = node.origin
         return if (origin is ParseTreeOrigin) origin.parseTree else source
     }
@@ -56,20 +62,19 @@ open class ParseTreeToASTTransformer(
      * wrapper. When there is only a ParserRuleContext child we can transform
      * that child and return that result.
      */
-    fun <P : ParserRuleContext> registerNodeFactoryUnwrappingChild(
-        kclass: KClass<P>
-    ): NodeFactory<P, Node> = registerNodeFactory(kclass) { source, transformer, _ ->
-        val nodeChildren = source.children.filterIsInstance<ParserRuleContext>()
-        require(nodeChildren.size == 1) {
-            "Node $source (${source.javaClass}) has ${nodeChildren.size} " +
-                "node children: $nodeChildren"
+    fun <P : ParserRuleContext> registerNodeFactoryUnwrappingChild(kclass: KClass<P>): NodeFactory<P, Node> =
+        registerNodeFactory(kclass) { source, transformer, _ ->
+            val nodeChildren = source.children.filterIsInstance<ParserRuleContext>()
+            require(nodeChildren.size == 1) {
+                "Node $source (${source.javaClass}) has ${nodeChildren.size} " +
+                    "node children: $nodeChildren"
+            }
+            transformer.transform(nodeChildren[0]) as Node
         }
-        transformer.transform(nodeChildren[0]) as Node
-    }
 
     /**
      * Alternative to registerNodeFactoryUnwrappingChild(KClass) which is slightly more concise.
      */
-    inline fun <reified P : ParserRuleContext> registerNodeFactoryUnwrappingChild():
-        NodeFactory<P, Node> = registerNodeFactoryUnwrappingChild(P::class)
+    inline fun <reified P : ParserRuleContext> registerNodeFactoryUnwrappingChild(): NodeFactory<P, Node> =
+        registerNodeFactoryUnwrappingChild(P::class)
 }

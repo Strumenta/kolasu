@@ -20,7 +20,7 @@ import kotlin.reflect.full.isSuperclassOf
  * ```
  **/
 open class DeclarativeNodeIdProvider(
-    vararg rules: DeclarativeNodeIdProviderRule<out Node>
+    vararg rules: DeclarativeNodeIdProviderRule<out Node>,
 ) : SemanticNodeIDProvider {
     private val rules: List<DeclarativeNodeIdProviderRule<out Node>> = rules.sorted()
 
@@ -43,7 +43,7 @@ open class DeclarativeNodeIdProvider(
  * Can be used whenever listing the rules in the DeclarativeNodeIdProvider constructor.
  **/
 inline fun <reified NodeTy : Node> idFor(
-    noinline specification: SemanticNodeIDProvider.(NodeTy) -> String
+    noinline specification: SemanticNodeIDProvider.(NodeTy) -> String,
 ): DeclarativeNodeIdProviderRule<NodeTy> = DeclarativeNodeIdProviderRule(NodeTy::class, specification)
 
 /**
@@ -51,11 +51,11 @@ inline fun <reified NodeTy : Node> idFor(
  **/
 class DeclarativeNodeIdProviderRule<NodeTy : Node>(
     private val nodeType: KClass<NodeTy>,
-    private val specification: SemanticNodeIDProvider.(NodeTy) -> String
+    private val specification: SemanticNodeIDProvider.(NodeTy) -> String,
 ) : Comparable<DeclarativeNodeIdProviderRule<*>>, (SemanticNodeIDProvider, Node) -> String {
     override fun invoke(
         nodeIdProvider: SemanticNodeIDProvider,
-        node: Node
+        node: Node,
     ): String {
         @Suppress("UNCHECKED_CAST")
         return nodeIdProvider.specification(node as NodeTy)

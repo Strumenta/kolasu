@@ -19,27 +19,27 @@ data class B(var name: String, var cs: MutableList<C> = mutableListOf()) : Node(
 data class C(var value: Int) : Node()
 
 class StructuralLionWebNodeIdProviderTest {
-
     @Test
     fun equalsNodesInTreeGetDifferentIDs() {
-        val root = A(
-            mutableListOf(
-                B(
-                    "foo",
-                    mutableListOf(
-                        C(1),
-                        C(2)
-                    )
+        val root =
+            A(
+                mutableListOf(
+                    B(
+                        "foo",
+                        mutableListOf(
+                            C(1),
+                            C(2),
+                        ),
+                    ),
+                    B(
+                        "foo",
+                        mutableListOf(
+                            C(1),
+                            C(2),
+                        ),
+                    ),
                 ),
-                B(
-                    "foo",
-                    mutableListOf(
-                        C(1),
-                        C(2)
-                    )
-                )
             )
-        )
         root.assignParents()
         root.source = SyntheticSource("ss1")
         val ip = StructuralLionWebNodeIdProvider()
@@ -55,24 +55,25 @@ class StructuralLionWebNodeIdProviderTest {
 
     @Test
     fun equalsNodesNotInTreeGetSameIDs() {
-        val root = A(
-            mutableListOf(
-                B(
-                    "foo",
-                    mutableListOf(
-                        C(1),
-                        C(2)
-                    )
+        val root =
+            A(
+                mutableListOf(
+                    B(
+                        "foo",
+                        mutableListOf(
+                            C(1),
+                            C(2),
+                        ),
+                    ),
+                    B(
+                        "foo",
+                        mutableListOf(
+                            C(1),
+                            C(2),
+                        ),
+                    ),
                 ),
-                B(
-                    "foo",
-                    mutableListOf(
-                        C(1),
-                        C(2)
-                    )
-                )
             )
-        )
         root.setSourceForTree(SyntheticSource("foo-bar"))
 
         // we do NOT call assignParents

@@ -14,8 +14,9 @@ interface ErrorNode {
  * Generic implementation of [ErrorNode].
  */
 class GenericErrorNode(error: Exception? = null, message: String? = null) : Node(), ErrorNode {
-    override val message: String = message
-        ?: error?.message() ?: "Unspecified error node"
+    override val message: String =
+        message
+            ?: error?.message() ?: "Unspecified error node"
 
     private fun Throwable.message(): String {
         val cause = this.cause?.message()?.let { " -> $it" } ?: ""

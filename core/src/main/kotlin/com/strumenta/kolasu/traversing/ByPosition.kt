@@ -14,7 +14,10 @@ import com.strumenta.kolasu.model.Position
  * @see searchByPosition
  */
 @JvmOverloads
-fun Node.findByPosition(position: Position, selfContained: Boolean = false): Node? {
+fun Node.findByPosition(
+    position: Position,
+    selfContained: Boolean = false,
+): Node? {
     return this.searchByPosition(position, selfContained).lastOrNull()
 }
 
@@ -27,7 +30,10 @@ fun Node.findByPosition(position: Position, selfContained: Boolean = false): Nod
  * @return all nodes containing the given [position] using depth-first search. Empty list if none are found.
  */
 @JvmOverloads
-fun Node.searchByPosition(position: Position, selfContained: Boolean = false): Sequence<Node> {
+fun Node.searchByPosition(
+    position: Position,
+    selfContained: Boolean = false,
+): Sequence<Node> {
     val contains = this.contains(position)
     if (!selfContained || contains) {
         if (children.isEmpty()) {

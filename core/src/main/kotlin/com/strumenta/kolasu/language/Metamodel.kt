@@ -17,7 +17,6 @@ sealed class Feature {
 
 @Deprecated("Use LionWeb's Language")
 data class Attribute(override val name: String, val optional: Boolean, val type: KType) : Feature() {
-
     init {
         require(!type.isMarkedNullable) {
             "The type should be specified as not nullable. " +
@@ -39,6 +38,7 @@ sealed class Link : Feature() {
 data class Reference(override val name: String, val optional: Boolean, override val type: KClass<*>) : Link() {
     override val multiplicity: Multiplicity
         get() = if (optional) Multiplicity.OPTIONAL else Multiplicity.SINGULAR
+
     init {
         checkFeatureName(name)
     }
@@ -48,7 +48,7 @@ data class Reference(override val name: String, val optional: Boolean, override 
 data class Containment(
     override val name: String,
     override val multiplicity: Multiplicity,
-    override val type: KClass<*>
+    override val type: KClass<*>,
 ) : Link() {
     init {
         checkFeatureName(name)

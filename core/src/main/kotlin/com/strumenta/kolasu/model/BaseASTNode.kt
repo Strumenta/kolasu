@@ -23,7 +23,6 @@ typealias Node = BaseASTNode
  * the Origin of another node.
  */
 open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
-
     @Internal
     override var id: String? = null
 
@@ -53,11 +52,12 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
      */
     @property:Internal
     open val properties: List<PropertyDescription>
-        get() = try {
-            nodeProperties.map { PropertyDescription.buildFor(it, this) }
-        } catch (e: Throwable) {
-            throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
-        }
+        get() =
+            try {
+                nodeProperties.map { PropertyDescription.buildFor(it, this) }
+            } catch (e: Throwable) {
+                throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
+            }
 
     /**
      * The properties of this AST nodes, including attributes, children, and references, but excluding derived
@@ -65,11 +65,12 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
      */
     @property:Internal
     open val originalProperties: List<PropertyDescription>
-        get() = try {
-            properties.filter { !it.derived }
-        } catch (e: Throwable) {
-            throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
-        }
+        get() =
+            try {
+                properties.filter { !it.derived }
+            } catch (e: Throwable) {
+                throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
+            }
 
     /**
      * The node from which this AST Node has been generated, if any.
@@ -120,14 +121,18 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
         return this
     }
 
-    fun detach(keepPosition: Boolean = true, keepSourceText: Boolean = false) {
+    fun detach(
+        keepPosition: Boolean = true,
+        keepSourceText: Boolean = false,
+    ) {
         val existingOrigin = origin
         if (existingOrigin != null) {
             if (keepPosition || keepSourceText) {
-                this.origin = SimpleOrigin(
-                    if (keepPosition) existingOrigin.position else null,
-                    if (keepSourceText) existingOrigin.sourceText else null
-                )
+                this.origin =
+                    SimpleOrigin(
+                        if (keepPosition) existingOrigin.position else null,
+                        if (keepSourceText) existingOrigin.sourceText else null,
+                    )
             } else {
                 this.origin = null
             }
@@ -172,14 +177,21 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
         return "${this.nodeType}(${originalProperties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
     }
 
-    fun getChildren(containment: Containment, includeDerived: Boolean = false): List<Node> {
+    fun getChildren(
+        containment: Containment,
+        includeDerived: Boolean = false,
+    ): List<Node> {
         return getChildren(containment.name, includeDerived)
     }
 
-    fun getChildren(propertyName: String, includeDerived: Boolean = false): List<Node> {
+    fun getChildren(
+        propertyName: String,
+        includeDerived: Boolean = false,
+    ): List<Node> {
         checkFeatureName(propertyName)
-        val property = (if (includeDerived) properties else originalProperties)
-            .find { it.name == propertyName }
+        val property =
+            (if (includeDerived) properties else originalProperties)
+                .find { it.name == propertyName }
         require(property != null) {
             "Property $propertyName not found in node of type ${this.nodeType} " +
                 "(considering derived properties? $includeDerived)"
@@ -236,7 +248,10 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
         TODO("Not yet implemented")
     }
 
-    override fun setPropertyValue(property: Property, value: Any?) {
+    override fun setPropertyValue(
+        property: Property,
+        value: Any?,
+    ) {
         TODO("Not yet implemented")
     }
 
@@ -246,7 +261,7 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
 
     override fun addChild(
         containment: io.lionweb.lioncore.java.language.Containment,
-        child: Node
+        child: Node,
     ) {
         TODO("Not yet implemented")
     }
@@ -255,7 +270,10 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
         TODO("Not yet implemented")
     }
 
-    override fun removeChild(containment: io.lionweb.lioncore.java.language.Containment, index: Int) {
+    override fun removeChild(
+        containment: io.lionweb.lioncore.java.language.Containment,
+        index: Int,
+    ) {
         TODO("Not yet implemented")
     }
 
@@ -265,25 +283,28 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
 
     override fun addReferenceValue(
         reference: io.lionweb.lioncore.java.language.Reference,
-        referredNode: ReferenceValue?
+        referredNode: ReferenceValue?,
     ) {
         TODO("Not yet implemented")
     }
 
     override fun removeReferenceValue(
         reference: io.lionweb.lioncore.java.language.Reference,
-        referenceValue: ReferenceValue?
+        referenceValue: ReferenceValue?,
     ) {
         TODO("Not yet implemented")
     }
 
-    override fun removeReferenceValue(reference: io.lionweb.lioncore.java.language.Reference, index: Int) {
+    override fun removeReferenceValue(
+        reference: io.lionweb.lioncore.java.language.Reference,
+        index: Int,
+    ) {
         TODO("Not yet implemented")
     }
 
     override fun setReferenceValues(
         reference: io.lionweb.lioncore.java.language.Reference,
-        values: List<ReferenceValue?>
+        values: List<ReferenceValue?>,
     ) {
         TODO("Not yet implemented")
     }

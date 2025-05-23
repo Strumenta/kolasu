@@ -3,7 +3,8 @@
 package com.strumenta.kolasu.traversing
 
 import com.strumenta.kolasu.model.BaseASTNode
-import java.util.*
+import java.util.ArrayDeque
+import java.util.WeakHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
 
@@ -102,7 +103,7 @@ fun BaseASTNode.walkChildren(includeDerived: Boolean = false): Sequence<BaseASTN
             } else {
                 this@walkChildren.originalProperties
             }
-            ).forEach { property ->
+        ).forEach { property ->
             when (val value = property.value) {
                 is BaseASTNode -> yield(value)
                 is Collection<*> -> value.forEach { if (it is BaseASTNode) yield(it) }
@@ -119,16 +120,15 @@ fun BaseASTNode.walkChildren(includeDerived: Boolean = false): Sequence<BaseASTN
 @JvmOverloads
 fun BaseASTNode.walkDescendants(
     walker: (BaseASTNode) ->
-    Sequence<BaseASTNode> = BaseASTNode::walk
-):
-    Sequence<BaseASTNode> {
+    Sequence<BaseASTNode> = BaseASTNode::walk,
+): Sequence<BaseASTNode> {
     return walker.invoke(this).filter { node -> node != this }
 }
 
 @JvmOverloads
 fun <N : Any> BaseASTNode.walkDescendants(
     type: KClass<N>,
-    walker: (BaseASTNode) -> Sequence<BaseASTNode> = BaseASTNode::walk
+    walker: (BaseASTNode) -> Sequence<BaseASTNode> = BaseASTNode::walk,
 ): Sequence<N> {
     return walkDescendants(walker).filterIsInstance(type.java)
 }
@@ -155,7 +155,7 @@ val BaseASTNode.children: List<BaseASTNode>
 @JvmOverloads
 fun <T> BaseASTNode.searchByType(
     klass: Class<T>,
-    walker: KFunction1<BaseASTNode, Sequence<BaseASTNode>> = BaseASTNode::walk
+    walker: KFunction1<BaseASTNode, Sequence<BaseASTNode>> = BaseASTNode::walk,
 ) = walker.invoke(this).filterIsInstance(klass)
 
 /**
@@ -166,7 +166,7 @@ fun <T> BaseASTNode.searchByType(
  */
 fun <T> BaseASTNode.collectByType(
     klass: Class<T>,
-    walker: KFunction1<BaseASTNode, Sequence<BaseASTNode>> = BaseASTNode::walk
+    walker: KFunction1<BaseASTNode, Sequence<BaseASTNode>> = BaseASTNode::walk,
 ): List<T> {
     return walker.invoke(this).filterIsInstance(klass).toList()
 }

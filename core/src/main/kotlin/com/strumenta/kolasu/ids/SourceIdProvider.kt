@@ -25,13 +25,14 @@ interface SourceIdProvider {
 }
 
 abstract class AbstractSourceIdProvider : SourceIdProvider {
-    protected fun cleanId(id: String) = id
-        .replace('.', '-')
-        .replace('/', '-')
-        .replace('\\', '-')
-        .replace('#', '-')
-        .replace(' ', '_')
-        .replace("@", "_at_").removeCharactersInvalidInLionWebIDs()
+    protected fun cleanId(id: String) =
+        id
+            .replace('.', '-')
+            .replace('/', '-')
+            .replace('\\', '-')
+            .replace('#', '-')
+            .replace(' ', '_')
+            .replace("@", "_at_").removeCharactersInvalidInLionWebIDs()
 }
 
 class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSourceIdProvider() {
@@ -44,15 +45,19 @@ class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSo
                     throw SourceShouldBeSetException("Source should not be null")
                 }
             }
+
             is FileSource -> {
                 cleanId("file_${source.file.path}")
             }
+
             is SyntheticSource -> {
                 cleanId("synthetic_${source.description}")
             }
+
             is CodeBaseSource -> {
                 cleanId("codebase_${source.codebaseName}_relpath_${source.relativePath}")
             }
+
             is SourceWithID -> source.sourceID()
             else -> {
                 TODO("Unable to generate ID for Source $this (${source.javaClass.canonicalName})")
@@ -64,7 +69,7 @@ class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSo
 class RelativeSourceIdProvider(
     val baseDir: File,
     var rootName: String? = null,
-    var acceptNullSource: Boolean = false
+    var acceptNullSource: Boolean = false,
 ) : AbstractSourceIdProvider() {
     override fun sourceId(source: Source?): String {
         return when (source) {
@@ -75,6 +80,7 @@ class RelativeSourceIdProvider(
                     throw IDGenerationException("Source should not be null")
                 }
             }
+
             is FileSource -> {
                 val thisAbsPath = source.file.absolutePath
                 val baseAbsPath = baseDir.absolutePath
@@ -84,6 +90,7 @@ class RelativeSourceIdProvider(
                 val id = if (rootName == null) relativePath else "${rootName}___$relativePath"
                 return cleanId(id)
             }
+
             else -> {
                 TODO("Unable to generate ID for Source $this (${this.javaClass.canonicalName})")
             }
@@ -92,15 +99,18 @@ class RelativeSourceIdProvider(
 }
 
 open class IDGenerationException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+
 class SourceShouldBeSetException(message: String, cause: Throwable? = null) : IDGenerationException(
     message,
-    cause
+    cause,
 )
+
 class NodeShouldNotBeRootException(message: String, cause: Throwable? = null) : IDGenerationException(
     message,
-    cause
+    cause,
 )
+
 class NodeShouldBeRootException(message: String, cause: Throwable? = null) : IDGenerationException(
     message,
-    cause
+    cause,
 )

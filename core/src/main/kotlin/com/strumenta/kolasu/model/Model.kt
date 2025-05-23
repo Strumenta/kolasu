@@ -16,13 +16,13 @@ interface Origin {
 
 class SimpleOrigin(
     override val position: Position?,
-    override val sourceText: String? = null
+    override val sourceText: String? = null,
 ) : Origin, Serializable
 
 data class CompositeOrigin(
     val elements: List<Origin>,
     override val position: Position?,
-    override val sourceText: String?
+    override val sourceText: String?,
 ) : Origin, Serializable
 
 interface Destination
@@ -30,6 +30,7 @@ interface Destination
 data class CompositeDestination(val elements: List<Destination>) : Destination, Serializable {
     constructor(vararg elements: Destination) : this(elements.toList())
 }
+
 data class TextFileDestination(val position: Position?) : Destination, Serializable
 
 val RESERVED_FEATURE_NAMES = setOf("parent", "position")
@@ -40,7 +41,12 @@ fun <N : BaseASTNode> N.withPosition(position: Position?): N {
 }
 
 fun <N : BaseASTNode> N.withOrigin(origin: Origin?): N {
-    this.origin = if (origin == this) { null } else { origin }
+    this.origin =
+        if (origin == this) {
+            null
+        } else {
+            origin
+        }
     return this
 }
 
@@ -49,21 +55,23 @@ val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
 val <T : Any> Class<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
     get() = this.kotlin.nodeOriginalProperties
 val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
-    get() = memberProperties.asSequence()
-        .filter { it.visibility == KVisibility.PUBLIC }
-        .filter { it.findAnnotation<Internal>() == null }
-        .filter { it.findAnnotation<Link>() == null }
-        .map {
-            require(it.name !in RESERVED_FEATURE_NAMES) {
-                "Property ${it.name} in ${this.qualifiedName} should be marked as internal"
+    get() =
+        memberProperties.asSequence()
+            .filter { it.visibility == KVisibility.PUBLIC }
+            .filter { it.findAnnotation<Internal>() == null }
+            .filter { it.findAnnotation<Link>() == null }
+            .map {
+                require(it.name !in RESERVED_FEATURE_NAMES) {
+                    "Property ${it.name} in ${this.qualifiedName} should be marked as internal"
+                }
+                it
             }
-            it
-        }
-        .toList()
+            .toList()
 
 val <T : Any> KClass<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
-    get() = nodeProperties
-        .filter { it.findAnnotation<Derived>() == null }
+    get() =
+        nodeProperties
+            .filter { it.findAnnotation<Derived>() == null }
 
 /**
  * @return all properties of this node that are considered AST properties.

@@ -9,11 +9,13 @@ import kotlin.reflect.full.isSuperclassOf
 // instance
 @Deprecated("The corresponding component in the semantics module should be used instead.")
 class TypeComputer(
-    private val typingRules: MutableMap<KClass<out Node>, (Node) -> Node?> = mutableMapOf()
+    private val typingRules: MutableMap<KClass<out Node>, (Node) -> Node?> = mutableMapOf(),
 ) {
-    fun loadFrom(configuration: TypeComputerConfiguration, semantics: Semantics) {
-        configuration.typingRules.mapValuesTo(this.typingRules) {
-                (_, typingRule) ->
+    fun loadFrom(
+        configuration: TypeComputerConfiguration,
+        semantics: Semantics,
+    ) {
+        configuration.typingRules.mapValuesTo(this.typingRules) { (_, typingRule) ->
             { node: Node -> semantics.typingRule(node) }
         }
     }
@@ -31,16 +33,20 @@ class TypeComputer(
 // configuration
 @Deprecated("The corresponding component in the semantics module should be used instead.")
 class TypeComputerConfiguration(
-    val typingRules: MutableMap<KClass<out Node>, Semantics.(Node) -> Node?> = mutableMapOf(
-        Node::class to { it }
-    )
+    val typingRules: MutableMap<KClass<out Node>, Semantics.(Node) -> Node?> =
+        mutableMapOf(
+            Node::class to { it },
+        ),
 ) {
-    inline fun <reified N : Node> typeFor(nodeType: KClass<N>, crossinline typingRule: Semantics.(N) -> Node?) {
+    inline fun <reified N : Node> typeFor(
+        nodeType: KClass<N>,
+        crossinline typingRule: Semantics.(N) -> Node?,
+    ) {
         this.typingRules.putIfAbsent(
             nodeType,
             { semantics: Semantics, node: Node ->
                 if (node is N) semantics.typingRule(node) else null
-            }.memoize()
+            }.memoize(),
         )
     }
 }

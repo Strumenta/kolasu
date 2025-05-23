@@ -6,7 +6,6 @@ import java.util.IdentityHashMap
 import java.util.UUID
 
 class UUIDNodeIdProvider : NodeIdProvider {
-
     private val cache = IdentityHashMap<KNode, String>()
 
     override fun id(kNode: Node): String {
@@ -21,7 +20,10 @@ class UUIDNodeIdProvider : NodeIdProvider {
             throw UnsupportedOperationException()
         }
 
-    override fun registerMapping(kNode: Node, nodeId: String) {
+    override fun registerMapping(
+        kNode: Node,
+        nodeId: String,
+    ) {
         if (cache.containsKey(kNode)) {
             require(cache[kNode] == nodeId)
         } else {

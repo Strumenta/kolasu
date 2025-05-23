@@ -7,18 +7,20 @@ import com.strumenta.kolasu.validation.Issue
 @Deprecated("The corresponding component in the semantics module should be used instead.")
 class Semantics(
     issues: MutableList<Issue> = mutableListOf(),
-    configuration: SemanticsConfiguration
+    configuration: SemanticsConfiguration,
 ) {
-    val typeComputer = TypeComputer().apply {
-        configuration.typeComputer?.let {
-            this.loadFrom(it, this@Semantics)
+    val typeComputer =
+        TypeComputer().apply {
+            configuration.typeComputer?.let {
+                this.loadFrom(it, this@Semantics)
+            }
         }
-    }
-    val symbolResolver = SymbolResolver().apply {
-        configuration.symbolResolver?.let {
-            this.loadFrom(it, this@Semantics)
+    val symbolResolver =
+        SymbolResolver().apply {
+            configuration.symbolResolver?.let {
+                this.loadFrom(it, this@Semantics)
+            }
         }
-    }
 }
 
 // configuration
@@ -26,11 +28,12 @@ class Semantics(
 @Deprecated("The corresponding component in the semantics module should be used instead.")
 class SemanticsConfiguration(
     var typeComputer: TypeComputerConfiguration? = null,
-    var symbolResolver: SymbolResolverConfiguration? = null
+    var symbolResolver: SymbolResolverConfiguration? = null,
 ) {
     fun typeComputer(init: TypeComputerConfiguration.() -> Unit) {
         this.typeComputer = TypeComputerConfiguration().apply(init)
     }
+
     fun symbolResolver(init: SymbolResolverConfiguration.() -> Unit) {
         this.symbolResolver = SymbolResolverConfiguration().apply(init)
     }
@@ -40,5 +43,5 @@ class SemanticsConfiguration(
 
 fun semantics(
     issues: MutableList<Issue> = mutableListOf(),
-    init: SemanticsConfiguration.() -> Unit
+    init: SemanticsConfiguration.() -> Unit,
 ) = Semantics(issues, SemanticsConfiguration().apply(init))

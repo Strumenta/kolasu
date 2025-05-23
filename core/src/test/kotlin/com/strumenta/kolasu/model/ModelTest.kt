@@ -10,18 +10,20 @@ import org.junit.Test as test
 class MyNode(override val name: String) : Node(), Named
 
 data class ASymbol(override val name: String, val index: Int = 0) : Named
+
 data class BSymbol(override val name: String, val index: Int = 0) : Named
+
 data class USymbol(override val name: String? = null) : PossiblyNamed
 
 data class NodeOverridingName(
-    override var name: String
+    override var name: String,
 ) : Node(), Named
 
 open class BaseNode(open var attr1: Int) : Node()
+
 data class ExtNode(override var attr1: Int) : BaseNode(attr1)
 
 class ModelTest {
-
     @test
     fun referenceByNameUnsolvedToString() {
         val refUnsolved = ReferenceByName<MyNode>("foo")
@@ -91,9 +93,10 @@ class ModelTest {
 
     @test
     fun lookupSymbolByNameInLocal() {
-        val scope = Scope(
-            parent = Scope().apply { define(ASymbol(name = "b")) }
-        ).apply { this.define(ASymbol(name = "a")) }
+        val scope =
+            Scope(
+                parent = Scope().apply { define(ASymbol(name = "b")) },
+            ).apply { this.define(ASymbol(name = "a")) }
         val expected = ASymbol(name = "a")
         val actual = scope.resolve(name = "a")
         assertEquals(expected, actual)
@@ -101,9 +104,10 @@ class ModelTest {
 
     @test
     fun lookupSymbolByNameInParent() {
-        val scope = Scope(
-            parent = Scope().apply { define(ASymbol(name = "b")) }
-        ).apply { define(ASymbol(name = "a")) }
+        val scope =
+            Scope(
+                parent = Scope().apply { define(ASymbol(name = "b")) },
+            ).apply { define(ASymbol(name = "a")) }
         val expected = ASymbol(name = "b")
         val actual = scope.resolve(name = "b")
         assertEquals(expected, actual)
@@ -117,9 +121,10 @@ class ModelTest {
 
     @test
     fun lookupSymbolByNameAndTypeInLocal() {
-        val scope = Scope(
-            parent = Scope().apply { define(BSymbol(name = "a")) }
-        ).apply { define(ASymbol(name = "a")) }
+        val scope =
+            Scope(
+                parent = Scope().apply { define(BSymbol(name = "a")) },
+            ).apply { define(ASymbol(name = "a")) }
         val expected = ASymbol(name = "a")
         val actual = scope.resolve(name = "a", type = ASymbol::class)
         assertEquals(expected, actual)
@@ -127,9 +132,10 @@ class ModelTest {
 
     @test
     fun lookupSymbolByNameAndTypeInParent() {
-        val scope = Scope(
-            parent = Scope().apply { define(BSymbol(name = "a")) }
-        ).apply { define(ASymbol(name = "a")) }
+        val scope =
+            Scope(
+                parent = Scope().apply { define(BSymbol(name = "a")) },
+            ).apply { define(ASymbol(name = "a")) }
         val expected = BSymbol(name = "a")
         val actual = scope.resolve(name = "a", type = BSymbol::class)
         assertEquals(expected, actual)
@@ -159,7 +165,8 @@ class ModelTest {
         assertEquals(1, properties.size)
     }
 
-    @test fun nameIsProperty() {
+    @test
+    fun nameIsProperty() {
         assertTrue { MyNode("").properties.map { it.name }.contains("name") }
     }
 }

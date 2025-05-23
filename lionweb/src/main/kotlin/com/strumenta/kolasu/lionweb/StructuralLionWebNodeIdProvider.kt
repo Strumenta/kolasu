@@ -9,7 +9,6 @@ import io.lionweb.lioncore.java.utils.CommonChecks
 
 class StructuralLionWebNodeIdProvider(sourceIdProvider: SourceIdProvider = SimpleSourceIdProvider()) :
     StructuralNodeIdProvider(sourceIdProvider) {
-
     constructor(customSourceId: String) : this(ConstantSourceIdProvider(customSourceId))
 
     override fun id(kNode: Node): String {

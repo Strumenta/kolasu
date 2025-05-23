@@ -15,5 +15,5 @@ class ParsingResultWithTokens<RootNode : KNode>(
     incompleteNode: Node? = null,
     firstStage: FirstStageParsingResult<*>? = null,
     time: Long? = null,
-    source: Source? = null
+    source: Source? = null,
 ) : ParsingResult<RootNode>(issues, root, code, incompleteNode, firstStage, time, source)

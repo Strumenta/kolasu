@@ -23,7 +23,10 @@ object PerformanceLogger {
         }
     }
 
-    fun log(description: String, baseTime: Long? = null): Long {
+    fun log(
+        description: String,
+        baseTime: Long? = null,
+    ): Long {
         ensureFileIsReady()
         val t = System.currentTimeMillis()
         if (baseTime == null) {
@@ -37,7 +40,10 @@ object PerformanceLogger {
         return t
     }
 
-    fun log(description: String, operation: () -> Unit) {
+    fun log(
+        description: String,
+        operation: () -> Unit,
+    ) {
         val t0 = log("$description - start")
         try {
             operation()

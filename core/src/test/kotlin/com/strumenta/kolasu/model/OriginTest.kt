@@ -10,12 +10,13 @@ import kotlin.test.assertNull
 import org.junit.Test as test
 
 class OriginTest {
-
-    @test fun parseTreeOriginPosition() {
-        val code = """set a = 1 + 2
+    @test
+    fun parseTreeOriginPosition() {
+        val code =
+            """set a = 1 + 2
             |input c is string
             |display 2 * 3
-        """.trimMargin()
+            """.trimMargin()
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
         val parseTreeRoot = parser.compilationUnit()
@@ -46,11 +47,13 @@ class OriginTest {
         assertEquals(pos(1, 2, 3, 4), node.position)
     }
 
-    @test fun parseTreeOriginsSourceText() {
-        val code = """set a = 1 + 2
+    @test
+    fun parseTreeOriginsSourceText() {
+        val code =
+            """set a = 1 + 2
             |input c is string
             |display 2 * 3
-        """.trimMargin()
+            """.trimMargin()
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
         val parseTreeRoot = parser.compilationUnit()

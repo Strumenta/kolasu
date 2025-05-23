@@ -22,7 +22,6 @@ import javax.xml.transform.stream.StreamResult
  * It may be removed in future version of Kolasu.
  */
 class XMLGenerator {
-
     fun generateXML(root: Node): Document {
         val documentFactory = DocumentBuilderFactory.newInstance()
         val documentBuilder = documentFactory.newDocumentBuilder()
@@ -66,16 +65,26 @@ class XMLGenerator {
         return document.toXmlString()
     }
 
-    fun generateFile(root: Node, file: File) {
+    fun generateFile(
+        root: Node,
+        file: File,
+    ) {
         File(file.toURI()).writeText(generateString(root))
     }
 
-    fun generateFile(result: Result<out Node>, file: File) {
+    fun generateFile(
+        result: Result<out Node>,
+        file: File,
+    ) {
         File(file.toURI()).writeText(generateString(result))
     }
 }
 
-private fun Element.addChildPossiblyEmpty(role: String, node: Node?, document: Document) {
+private fun Element.addChildPossiblyEmpty(
+    role: String,
+    node: Node?,
+    document: Document,
+) {
     if (node == null) {
         this.addNullChild(role, document)
     } else {
@@ -83,13 +92,21 @@ private fun Element.addChildPossiblyEmpty(role: String, node: Node?, document: D
     }
 }
 
-private fun Element.addListOfNodes(listName: String, elements: Iterable<Node>, document: Document) {
+private fun Element.addListOfNodes(
+    listName: String,
+    elements: Iterable<Node>,
+    document: Document,
+) {
     elements.forEach {
         addChild(it.toXML(listName, document))
     }
 }
 
-private fun Element.addListOfElements(listName: String, elements: Iterable<Element>, document: Document) {
+private fun Element.addListOfElements(
+    listName: String,
+    elements: Iterable<Element>,
+    document: Document,
+) {
     val listElement = document.createElement(listName)
     elements.forEach {
         listElement.addChild(it)
@@ -101,12 +118,18 @@ private fun Element.addChild(child: Element) {
     this.appendChild(child)
 }
 
-private fun Element.addNullChild(role: String, document: Document) {
+private fun Element.addNullChild(
+    role: String,
+    document: Document,
+) {
     val element = document.createElement(role)
     this.appendChild(element)
 }
 
-private fun Node.toXML(role: String, document: Document): Element {
+private fun Node.toXML(
+    role: String,
+    document: Document,
+): Element {
     val element = document.createElement(role)
     element.setAttribute("type", this.javaClass.simpleName)
     this.position?.let {
@@ -132,11 +155,18 @@ private fun Node.toXML(role: String, document: Document): Element {
     return element
 }
 
-private fun Element.addAttribute(role: String, value: Any) {
+private fun Element.addAttribute(
+    role: String,
+    value: Any,
+) {
     this.setAttribute(role, value.toString())
 }
 
-private fun Element.addAttributesList(listName: String, values: Collection<*>, document: Document) {
+private fun Element.addAttributesList(
+    listName: String,
+    values: Collection<*>,
+    document: Document,
+) {
     values.forEach {
         val childElement = document.createElement(listName)
         childElement.setAttribute("value", it.toString())
@@ -155,7 +185,10 @@ private fun Issue.toXML(document: Document): Element {
     return element
 }
 
-private fun Position.toXML(role: String = "position", document: Document): Element {
+private fun Position.toXML(
+    role: String = "position",
+    document: Document,
+): Element {
     val xmlNode = document.createElement(role)
     xmlNode.setAttribute("description", this.toString())
     xmlNode.addChild(this.start.toXML("start", document))
@@ -163,7 +196,10 @@ private fun Position.toXML(role: String = "position", document: Document): Eleme
     return xmlNode
 }
 
-private fun Point.toXML(role: String, document: Document): Element {
+private fun Point.toXML(
+    role: String,
+    document: Document,
+): Element {
     val xmlNode = document.createElement(role)
     xmlNode.setAttribute("line", this.line.toString())
     xmlNode.setAttribute("column", this.column.toString())

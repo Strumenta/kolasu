@@ -1,11 +1,16 @@
 package com.strumenta.kolasu.parsing
 
-import com.strumenta.kolasu.model.*
-import org.antlr.v4.runtime.*
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Origin
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.Source
+import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.RuleContext
+import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
-import kotlin.IllegalStateException
 import kotlin.reflect.KClass
 
 /**
@@ -15,7 +20,7 @@ import kotlin.reflect.KClass
 fun ParserRuleContext.processDescendantsAndErrors(
     operationOnParserRuleContext: (ParserRuleContext) -> Unit,
     operationOnError: (ErrorNode) -> Unit,
-    includingMe: Boolean = true
+    includingMe: Boolean = true,
 ) {
     if (includingMe) {
         operationOnParserRuleContext(this)
@@ -82,9 +87,11 @@ class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = n
                 is ParserRuleContext -> {
                     parseTree.getOriginalText()
                 }
+
                 is TerminalNode -> {
                     parseTree.text
                 }
+
                 else -> null
             }
 }
@@ -93,7 +100,10 @@ class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = n
  * Set the origin of the AST node as a ParseTreeOrigin, providing the parseTree is not null.
  * If the parseTree is null, no operation is performed.
  */
-fun <T : Node> T.withParseTreeNode(parseTree: ParserRuleContext?, source: Source? = null): T {
+fun <T : Node> T.withParseTreeNode(
+    parseTree: ParserRuleContext?,
+    source: Source? = null,
+): T {
     if (parseTree != null) {
         this.origin = ParseTreeOrigin(parseTree, source)
     }
@@ -131,7 +141,10 @@ val ParserRuleContext.position: Position
  * Returns the position of the receiver parser rule context.
  * @param considerPosition if it's false, this method returns null.
  */
-fun ParserRuleContext.toPosition(considerPosition: Boolean = true, source: Source? = null): Position? {
+fun ParserRuleContext.toPosition(
+    considerPosition: Boolean = true,
+    source: Source? = null,
+): Position? {
     return if (considerPosition && start != null && stop != null) {
         val position = position
         if (source == null) position else Position(position.start, position.end, source)
@@ -140,13 +153,20 @@ fun ParserRuleContext.toPosition(considerPosition: Boolean = true, source: Sourc
     }
 }
 
-fun TerminalNode.toPosition(considerPosition: Boolean = true, source: Source? = null): Position? =
-    this.symbol.toPosition(considerPosition, source)
+fun TerminalNode.toPosition(
+    considerPosition: Boolean = true,
+    source: Source? = null,
+): Position? = this.symbol.toPosition(considerPosition, source)
 
-fun Token.toPosition(considerPosition: Boolean = true, source: Source? = null): Position? =
-    if (considerPosition) Position(this.startPoint, this.endPoint, source) else null
+fun Token.toPosition(
+    considerPosition: Boolean = true,
+    source: Source? = null,
+): Position? = if (considerPosition) Position(this.startPoint, this.endPoint, source) else null
 
-fun ParseTree.toPosition(considerPosition: Boolean = true, source: Source? = null): Position? {
+fun ParseTree.toPosition(
+    considerPosition: Boolean = true,
+    source: Source? = null,
+): Position? {
     return when (this) {
         is TerminalNode -> this.toPosition(considerPosition, source)
         is ParserRuleContext -> this.toPosition(considerPosition, source)

@@ -12,8 +12,9 @@ internal class TraversingByPositionTest {
     class Box(
         val name: String,
         val contents: List<Node>,
-        specifiedPosition: Position? = null
+        specifiedPosition: Position? = null,
     ) : Node(specifiedPosition)
+
     class Item(val name: String, specifiedPosition: Position? = null) : Node(specifiedPosition)
 
     private fun printSequence(sequence: Sequence<Node>): String {
@@ -26,36 +27,37 @@ internal class TraversingByPositionTest {
         }.joinToString()
     }
 
-    private val testCase = Box(
-        "root",
-        listOf(
-            Box(
-                "first",
-                listOf(
-                    Item("1", specifiedPosition = pos(3, 6, 3, 12))
+    private val testCase =
+        Box(
+            "root",
+            listOf(
+                Box(
+                    "first",
+                    listOf(
+                        Item("1", specifiedPosition = pos(3, 6, 3, 12)),
+                    ),
+                    specifiedPosition = pos(2, 3, 4, 3),
                 ),
-                specifiedPosition = pos(2, 3, 4, 3)
-            ),
-            Item("2", specifiedPosition = pos(5, 3, 5, 9)),
-            Box(
-                "big",
-                listOf(
-                    Box(
-                        "small",
-                        listOf(
-                            Item("3", specifiedPosition = pos(8, 7, 8, 13)),
-                            Item("4", specifiedPosition = pos(9, 7, 9, 13)),
-                            Item("5", specifiedPosition = pos(10, 7, 10, 13))
+                Item("2", specifiedPosition = pos(5, 3, 5, 9)),
+                Box(
+                    "big",
+                    listOf(
+                        Box(
+                            "small",
+                            listOf(
+                                Item("3", specifiedPosition = pos(8, 7, 8, 13)),
+                                Item("4", specifiedPosition = pos(9, 7, 9, 13)),
+                                Item("5", specifiedPosition = pos(10, 7, 10, 13)),
+                            ),
+                            specifiedPosition = pos(7, 5, 11, 5),
                         ),
-                        specifiedPosition = pos(7, 5, 11, 5)
-                    )
+                    ),
+                    specifiedPosition = pos(6, 3, 12, 3),
                 ),
-                specifiedPosition = pos(6, 3, 12, 3)
+                Item("6", specifiedPosition = pos(13, 3, 13, 9)),
             ),
-            Item("6", specifiedPosition = pos(13, 3, 13, 9))
-        ),
-        specifiedPosition = pos(1, 1, 14, 1)
-    )
+            specifiedPosition = pos(1, 1, 14, 1),
+        )
 
     @Test
     fun walkWithinWithOutsidePosition() {

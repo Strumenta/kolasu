@@ -16,7 +16,10 @@ interface NodeIdProvider {
      * on this external mapping
      */
     @Deprecated("No nodes have an ID")
-    fun registerMapping(kNode: KNode, nodeId: String) {
+    fun registerMapping(
+        kNode: KNode,
+        nodeId: String,
+    ) {
         // do nothing
     }
 
@@ -28,11 +31,12 @@ interface NodeIdProvider {
 abstract class BaseNodeIdProvider : NodeIdProvider {
     override var parentProvider: NodeIdProvider? = null
         set(value) {
-            field = if (value == this) {
-                null
-            } else {
-                value
-            }
+            field =
+                if (value == this) {
+                    null
+                } else {
+                    value
+                }
         }
 }
 
@@ -42,7 +46,6 @@ abstract class BaseNodeIdProvider : NodeIdProvider {
  */
 class CommonNodeIdProvider(val semanticIDProvider: SemanticNodeIDProvider = DeclarativeNodeIdProvider()) :
     BaseNodeIdProvider() {
-
     override fun id(kNode: Node): String {
         return if (semanticIDProvider.hasSemanticIdentity(kNode)) {
             semanticIDProvider.semanticID(kNode)
@@ -58,5 +61,6 @@ class CommonNodeIdProvider(val semanticIDProvider: SemanticNodeIDProvider = Decl
 
 interface SemanticNodeIDProvider {
     fun hasSemanticIdentity(kNode: Node): Boolean
+
     fun semanticID(kNode: Node): String
 }

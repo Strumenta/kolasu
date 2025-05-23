@@ -1,7 +1,11 @@
 package com.strumenta.kolasu.model
 
 import java.io.Serializable
-import kotlin.reflect.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
+import kotlin.reflect.KType
+import kotlin.reflect.KTypeProjection
+import kotlin.reflect.KVariance
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubtypeOf
 
@@ -43,7 +47,7 @@ interface Named : PossiblyNamed {
 class ReferenceByName<N : PossiblyNamed>(
     var name: String,
     initialReferred: N? = null,
-    var identifier: String? = null
+    var identifier: String? = null,
 ) : Serializable {
     var referred: N? = null
         set(value) {
@@ -92,7 +96,7 @@ class ReferenceByName<N : PossiblyNamed>(
  */
 fun <N> ReferenceByName<N>.tryToResolve(
     candidates: Iterable<N>,
-    caseInsensitive: Boolean = false
+    caseInsensitive: Boolean = false,
 ): Boolean where N : PossiblyNamed {
     val res: N? = candidates.find { if (it.name == null) false else it.name.equals(this.name, caseInsensitive) }
     this.referred = res
@@ -125,7 +129,7 @@ typealias KReferenceByName<S> = KProperty1<S, ReferenceByName<out PossiblyNamed>
 fun kReferenceByNameType(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class): KType {
     return ReferenceByName::class.createType(
         arguments = listOf(KTypeProjection(variance = KVariance.OUT, type = targetClass.createType())),
-        nullable = true
+        nullable = true,
     )
 }
 

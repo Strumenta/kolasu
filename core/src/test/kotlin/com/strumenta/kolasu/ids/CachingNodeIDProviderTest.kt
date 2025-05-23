@@ -7,7 +7,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class CachingNodeIDProviderTest {
-
     class CountingNodeIdProvider() :
         StructuralNodeIdProvider() {
         var count: Int = 0

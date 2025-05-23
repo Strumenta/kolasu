@@ -15,11 +15,11 @@ import kotlin.reflect.full.isSuperclassOf
  **/
 inline fun <
     reified NodeTy : Node,
-    PropertyTy : KProperty1<in NodeTy, ReferenceByName<out PossiblyNamed>?>
+    PropertyTy : KProperty1<in NodeTy, ReferenceByName<out PossiblyNamed>?>,
     > scopeFor(
     property: PropertyTy,
     ignoreCase: Boolean = false,
-    noinline specification: ScopeDescriptionApi.(DeclarativeScopeProviderRuleContext<NodeTy>) -> Unit
+    noinline specification: ScopeDescriptionApi.(DeclarativeScopeProviderRuleContext<NodeTy>) -> Unit,
 ) = DeclarativeScopeProviderRule(NodeTy::class, property.name, ignoreCase, specification)
 
 /**
@@ -46,7 +46,7 @@ inline fun <
  * ```
  **/
 open class DeclarativeScopeProvider(
-    vararg rules: DeclarativeScopeProviderRule<out Node>
+    vararg rules: DeclarativeScopeProviderRule<out Node>,
 ) : ScopeProvider {
     private val rules: MutableList<DeclarativeScopeProviderRule<out Node>> = rules.sorted().toMutableList()
 
@@ -57,12 +57,12 @@ open class DeclarativeScopeProvider(
 
     override fun <NodeType : Node> scopeFor(
         node: NodeType,
-        reference: KProperty1<in NodeType, ReferenceByName<out PossiblyNamed>?>
+        reference: KProperty1<in NodeType, ReferenceByName<out PossiblyNamed>?>,
     ): ScopeDescription {
         return this.rules.firstOrNull { it.canBeInvokedWith(node::class, reference) }
             ?.invoke(this, node)
             ?: throw RuntimeException(
-                "Cannot find scoping rule for reference ${node::class.qualifiedName}::${reference.name}"
+                "Cannot find scoping rule for reference ${node::class.qualifiedName}::${reference.name}",
             )
     }
 }
@@ -74,11 +74,11 @@ class DeclarativeScopeProviderRule<NodeTy : Node>(
     private val nodeType: KClass<NodeTy>,
     private val propertyName: String,
     private val ignoreCase: Boolean,
-    private val specification: ScopeDescription.(DeclarativeScopeProviderRuleContext<NodeTy>) -> Unit
+    private val specification: ScopeDescription.(DeclarativeScopeProviderRuleContext<NodeTy>) -> Unit,
 ) : (ScopeProvider, Node) -> ScopeDescription, Comparable<DeclarativeScopeProviderRule<out Node>> {
     override fun invoke(
         scopeProvider: ScopeProvider,
-        node: Node
+        node: Node,
     ): ScopeDescription {
         return ScopeDescription(this.ignoreCase).apply {
             @Suppress("UNCHECKED_CAST")
@@ -89,7 +89,7 @@ class DeclarativeScopeProviderRule<NodeTy : Node>(
 
     fun canBeInvokedWith(
         nodeType: KClass<*>,
-        property: KProperty1<*, ReferenceByName<out PossiblyNamed>?>
+        property: KProperty1<*, ReferenceByName<out PossiblyNamed>?>,
     ): Boolean {
         return this.nodeType.isSuperclassOf(nodeType) && this.propertyName == property.name
     }
@@ -113,5 +113,5 @@ class DeclarativeScopeProviderRule<NodeTy : Node>(
  **/
 data class DeclarativeScopeProviderRuleContext<NodeTy : Node>(
     val node: NodeTy,
-    val scopeProvider: ScopeProvider
+    val scopeProvider: ScopeProvider,
 )

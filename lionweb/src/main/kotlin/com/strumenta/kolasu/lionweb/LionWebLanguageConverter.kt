@@ -69,11 +69,11 @@ class LionWebLanguageConverter {
         registerMapping(Issue::class, ASTLanguage.getIssue())
         classesAndEnumerations.associate(
             IssueSeverity::class,
-            (ASTLanguage.getIssue().getFeatureByName(Issue::severity.name) as Property).type as Enumeration
+            (ASTLanguage.getIssue().getFeatureByName(Issue::severity.name) as Property).type as Enumeration,
         )
         classesAndEnumerations.associate(
             IssueType::class,
-            (ASTLanguage.getIssue().getFeatureByName(Issue::type.name) as Property).type as Enumeration
+            (ASTLanguage.getIssue().getFeatureByName(Issue::type.name) as Property).type as Enumeration,
         )
         registerMapping(ParsingResult::class, ASTLanguage.getParsingResult())
     }
@@ -117,15 +117,17 @@ class LionWebLanguageConverter {
 
             if (astClass.java.isInterface) {
                 val conceptInterface = featuresContainer as Interface
-                val superInterfaces = astClass.supertypes.map { it.classifier as KClass<*> }
-                    .filter { it.java.isInterface }
+                val superInterfaces =
+                    astClass.supertypes.map { it.classifier as KClass<*> }
+                        .filter { it.java.isInterface }
                 superInterfaces.filter { it.isMarkedAsNodeType() }.forEach {
                     conceptInterface.addExtendedInterface(correspondingInterface(it))
                 }
             } else {
                 val concept = featuresContainer as Concept
-                val superClasses = astClass.supertypes.map { it.classifier as KClass<*> }
-                    .filter { !it.java.isInterface }
+                val superClasses =
+                    astClass.supertypes.map { it.classifier as KClass<*> }
+                        .filter { !it.java.isInterface }
                 if (superClasses.size == 1) {
                     concept.extendedConcept = astClassesAndClassifiers.byA(superClasses.first()) as Concept
                 } else {
@@ -136,11 +138,12 @@ class LionWebLanguageConverter {
                     concept.addImplementedInterface(correspondingInterface(it))
                 }
             }
-            val features = try {
-                astClass.declaredFeatures()
-            } catch (e: RuntimeException) {
-                throw RuntimeException("Issue processing features for AST class ${astClass.qualifiedName}", e)
-            }
+            val features =
+                try {
+                    astClass.declaredFeatures()
+                } catch (e: RuntimeException) {
+                    throw RuntimeException("Issue processing features for AST class ${astClass.qualifiedName}", e)
+                }
 
             features.forEach {
                 when (it) {
@@ -182,15 +185,19 @@ class LionWebLanguageConverter {
      * LionWeb language, so that we can import LionWeb models by instantiating the corresponding classes in the
      * Kolasu language.
      */
-    fun associateLanguages(lwLanguage: LWLanguage, kolasuLanguage: KolasuLanguage) {
+    fun associateLanguages(
+        lwLanguage: LWLanguage,
+        kolasuLanguage: KolasuLanguage,
+    ) {
         this.languages.associate(kolasuLanguage, lwLanguage)
         kolasuLanguage.astClasses.forEach { astClass ->
             var classifier: Classifier<*>? = null
             val annotation = astClass.annotations.filterIsInstance<LionWebAssociation>().firstOrNull()
             if (annotation != null) {
-                classifier = lwLanguage.elements.filterIsInstance(Classifier::class.java).find {
-                    it.key == annotation.key
-                }
+                classifier =
+                    lwLanguage.elements.filterIsInstance(Classifier::class.java).find {
+                        it.key == annotation.key
+                    }
             }
             if (classifier != null) {
                 registerMapping(astClass, classifier)
@@ -200,9 +207,10 @@ class LionWebLanguageConverter {
             var enumeration: Enumeration? = null
             val annotation = enumClass.annotations.filterIsInstance<LionWebAssociation>().firstOrNull()
             if (annotation != null) {
-                enumeration = lwLanguage.elements.filterIsInstance<Enumeration>().find {
-                    it.key == annotation.key
-                }
+                enumeration =
+                    lwLanguage.elements.filterIsInstance<Enumeration>().find {
+                        it.key == annotation.key
+                    }
             }
             if (enumeration != null) {
                 classesAndEnumerations.associate(enumClass, enumeration)
@@ -212,9 +220,10 @@ class LionWebLanguageConverter {
             var primitiveType: PrimitiveType? = null
             val annotation = primitiveClass.annotations.filterIsInstance<LionWebAssociation>().firstOrNull()
             if (annotation != null) {
-                primitiveType = lwLanguage.elements.filterIsInstance<PrimitiveType>().find {
-                    it.key == annotation.key
-                }
+                primitiveType =
+                    lwLanguage.elements.filterIsInstance<PrimitiveType>().find {
+                        it.key == annotation.key
+                    }
             }
             if (primitiveType != null) {
                 classesAndPrimitiveTypes.associate(primitiveClass, primitiveType)
@@ -284,7 +293,10 @@ class LionWebLanguageConverter {
         }?.value
     }
 
-    private fun registerMapping(kolasuClass: KClass<*>, featuresContainer: Classifier<*>) {
+    private fun registerMapping(
+        kolasuClass: KClass<*>,
+        featuresContainer: Classifier<*>,
+    ) {
         astClassesAndClassifiers.associate(kolasuClass, featuresContainer)
     }
 
@@ -293,14 +305,18 @@ class LionWebLanguageConverter {
     }
 
     private fun toLWClassifier(nodeType: String): Classifier<*> {
-        val kClass = astClassesAndClassifiers.`as`.find { it.qualifiedName == nodeType }
-            ?: throw IllegalArgumentException(
-                "Unknown nodeType $nodeType"
-            )
+        val kClass =
+            astClassesAndClassifiers.`as`.find { it.qualifiedName == nodeType }
+                ?: throw IllegalArgumentException(
+                    "Unknown nodeType $nodeType",
+                )
         return toLWClassifier(kClass)
     }
 
-    private fun toLWEnumeration(kClass: KClass<*>, lionwebLanguage: LWLanguage): Enumeration {
+    private fun toLWEnumeration(
+        kClass: KClass<*>,
+        lionwebLanguage: LWLanguage,
+    ): Enumeration {
         val enumeration = classesAndEnumerations.byA(kClass as EnumKClass)
         if (enumeration == null) {
             val newEnumeration = addEnumerationFromClass(lionwebLanguage, kClass)
@@ -311,7 +327,10 @@ class LionWebLanguageConverter {
         }
     }
 
-    private fun toLWPrimitiveType(kClass: KClass<*>, lionwebLanguage: LWLanguage): PrimitiveType {
+    private fun toLWPrimitiveType(
+        kClass: KClass<*>,
+        lionwebLanguage: LWLanguage,
+    ): PrimitiveType {
         val primitiveType = classesAndPrimitiveTypes.byA(kClass)
         if (primitiveType == null) {
             val newPrimitiveName = kClass.simpleName
@@ -327,7 +346,10 @@ class LionWebLanguageConverter {
         }
     }
 
-    private fun toLWDataType(kType: KType, lionwebLanguage: LWLanguage): DataType<*> {
+    private fun toLWDataType(
+        kType: KType,
+        lionwebLanguage: LWLanguage,
+    ): DataType<*> {
         return when (kType) {
             Int::class.createType() -> LionCoreBuiltins.getInteger(LIONWEB_VERSION_USED_BY_KOLASU)
             Long::class.createType() -> LionCoreBuiltins.getInteger(LIONWEB_VERSION_USED_BY_KOLASU)
@@ -349,7 +371,7 @@ class LionWebLanguageConverter {
 
 fun addEnumerationFromClass(
     lionwebLanguage: LWLanguage,
-    kClass: EnumKClass
+    kClass: EnumKClass,
 ): Enumeration {
     val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
     newEnumeration.id = (lionwebLanguage.id ?: "unknown_language") + "_" + newEnumeration.name
@@ -361,7 +383,7 @@ fun addEnumerationFromClass(
             EnumerationLiteral(newEnumeration, entry.name).apply {
                 id = newEnumeration.id + "-" + entry.name
                 key = newEnumeration.key + "-" + entry.name
-            }
+            },
         )
     }
 

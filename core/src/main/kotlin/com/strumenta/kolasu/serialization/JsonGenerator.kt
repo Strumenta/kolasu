@@ -30,6 +30,7 @@ const val JSON_ID_KEY = "#id"
 const val JSON_DESTINATION_KEY = "#destination"
 
 fun Iterable<*>.toJsonArray() = jsonArray(this.iterator())
+
 fun jsonArray(values: Iterator<Any?>): JsonArray {
     val array = JsonArray()
     for (value in values)
@@ -65,13 +66,15 @@ fun jsonObject(vararg values: Pair<String, *>): JsonObject {
  * Note that ASTs may also be exported to the EMF-JSON format, which is different.
  */
 class JsonGenerator {
-
     var shortClassNames = false
 
     private val customSerializers: MutableMap<KType, com.google.gson.JsonSerializer<*>> = HashMap()
     private val gsonBuilder = GsonBuilder()
 
-    fun registerCustomSerializer(type: KType, serializer: com.google.gson.JsonSerializer<*>) {
+    fun registerCustomSerializer(
+        type: KType,
+        serializer: com.google.gson.JsonSerializer<*>,
+    ) {
         customSerializers[type] = serializer
         gsonBuilder.registerTypeAdapter(type.javaType, serializer)
     }
@@ -84,14 +87,14 @@ class JsonGenerator {
         withIds: IdentityHashMap<Node, String>? = null,
         withOriginIds: IdentityHashMap<Node, String>? = null,
         withDestinationIds: IdentityHashMap<Node, String>? = null,
-        shortClassNames: Boolean = false
+        shortClassNames: Boolean = false,
     ): JsonElement {
         return nodeToJson(
             root,
             shortClassNames,
             withIds = withIds,
             withOriginIds = withOriginIds,
-            withDestinationIds = withDestinationIds
+            withDestinationIds = withDestinationIds,
         )
     }
 
@@ -100,11 +103,11 @@ class JsonGenerator {
      */
     fun generateJSON(
         result: Result<out Node>,
-        withIds: IdentityHashMap<Node, String>? = null
+        withIds: IdentityHashMap<Node, String>? = null,
     ): JsonElement {
         return jsonObject(
             "issues" to result.issues.map { it.toJson() }.toJsonArray(),
-            "root" to result.root?.let { nodeToJson(it, shortClassNames, withIds) }
+            "root" to result.root?.let { nodeToJson(it, shortClassNames, withIds) },
         )
     }
 
@@ -113,18 +116,22 @@ class JsonGenerator {
      */
     fun generateJSON(
         result: ParsingResult<out Node>,
-        withIds: IdentityHashMap<Node, String>? = null
+        withIds: IdentityHashMap<Node, String>? = null,
     ): JsonElement {
         return jsonObject(
             "issues" to result.issues.map { it.toJson() }.toJsonArray(),
-            "root" to result.root?.let { nodeToJson(it, shortClassNames, withIds) }
+            "root" to result.root?.let { nodeToJson(it, shortClassNames, withIds) },
         )
     }
 
     /**
      * Converts "results" to JSON format.
      */
-    fun generateJSONWithStreaming(result: Result<out Node>, writer: JsonWriter, shortClassNames: Boolean = false) {
+    fun generateJSONWithStreaming(
+        result: Result<out Node>,
+        writer: JsonWriter,
+        shortClassNames: Boolean = false,
+    ) {
         writer.beginObject()
         writer.name("issues")
         writer.beginArray()
@@ -139,7 +146,11 @@ class JsonGenerator {
         writer.endObject()
     }
 
-    fun generateJSONWithStreaming(root: Node, writer: JsonWriter, shortClassNames: Boolean = false) {
+    fun generateJSONWithStreaming(
+        root: Node,
+        writer: JsonWriter,
+        shortClassNames: Boolean = false,
+    ) {
         val gson = gsonBuilder.create()
         gson.toJson(
             generateJSON(
@@ -147,42 +158,63 @@ class JsonGenerator {
                 withIds = null,
                 withOriginIds = null,
                 withDestinationIds = null,
-                shortClassNames = shortClassNames
+                shortClassNames = shortClassNames,
             ),
-            writer
+            writer,
         )
     }
 
-    fun generateString(root: Node, withIds: IdentityHashMap<Node, String>? = null): String {
+    fun generateString(
+        root: Node,
+        withIds: IdentityHashMap<Node, String>? = null,
+    ): String {
         val gson = gsonBuilder.setPrettyPrinting().create()
         return gson.toJson(generateJSON(root, withIds))
     }
 
-    fun generateString(result: Result<out Node>, withIds: IdentityHashMap<Node, String>? = null): String {
+    fun generateString(
+        result: Result<out Node>,
+        withIds: IdentityHashMap<Node, String>? = null,
+    ): String {
         val gson = gsonBuilder.setPrettyPrinting().create()
         return gson.toJson(generateJSON(result, withIds))
     }
 
-    fun generateString(result: ParsingResult<out Node>, withIds: IdentityHashMap<Node, String>? = null): String {
+    fun generateString(
+        result: ParsingResult<out Node>,
+        withIds: IdentityHashMap<Node, String>? = null,
+    ): String {
         val gson = gsonBuilder.setPrettyPrinting().create()
         return gson.toJson(generateJSON(result, withIds))
     }
 
-    fun generateFile(root: Node, file: File, withIds: IdentityHashMap<Node, String>? = null) {
+    fun generateFile(
+        root: Node,
+        file: File,
+        withIds: IdentityHashMap<Node, String>? = null,
+    ) {
         File(file.toURI()).writeText(generateString(root, withIds))
     }
 
-    fun generateFile(result: Result<out Node>, file: File, withIds: IdentityHashMap<Node, String>? = null) {
+    fun generateFile(
+        result: Result<out Node>,
+        file: File,
+        withIds: IdentityHashMap<Node, String>? = null,
+    ) {
         File(file.toURI()).writeText(generateString(result, withIds))
     }
 
-    fun generateFile(result: ParsingResult<out Node>, file: File, withIds: IdentityHashMap<Node, String>? = null) {
+    fun generateFile(
+        result: ParsingResult<out Node>,
+        file: File,
+        withIds: IdentityHashMap<Node, String>? = null,
+    ) {
         File(file.toURI()).writeText(generateString(result, withIds))
     }
 
     private fun valueToJson(
         value: Any?,
-        withIds: IdentityHashMap<Node, String>? = null
+        withIds: IdentityHashMap<Node, String>? = null,
     ): JsonElement {
         try {
             return when (value) {
@@ -196,7 +228,7 @@ class JsonGenerator {
                     if (withIds != null) {
                         jsonObject.addProperty(
                             "referred",
-                            if (value.resolved) withIds[value.referred as Node] ?: "<unknown>" else null
+                            if (value.resolved) withIds[value.referred as Node] ?: "<unknown>" else null,
                         )
                     }
                     jsonObject
@@ -227,14 +259,14 @@ class JsonGenerator {
         shortClassNames: Boolean = false,
         withIds: IdentityHashMap<Node, String>? = null,
         withOriginIds: IdentityHashMap<Node, String>? = null,
-        withDestinationIds: IdentityHashMap<Node, String>? = null
-    ):
-        JsonElement {
+        withDestinationIds: IdentityHashMap<Node, String>? = null,
+    ): JsonElement {
         val nodeType = node.nodeType
-        val jsonObject = jsonObject(
-            JSON_TYPE_KEY to if (shortClassNames) nodeType.substring(nodeType.lastIndexOf('.') + 1) else nodeType,
-            JSON_POSITION_KEY to node.position?.toJson()
-        )
+        val jsonObject =
+            jsonObject(
+                JSON_TYPE_KEY to if (shortClassNames) nodeType.substring(nodeType.lastIndexOf('.') + 1) else nodeType,
+                JSON_POSITION_KEY to node.position?.toJson(),
+            )
         if (withIds != null) {
             val id = withIds[node]
             if (id != null) {
@@ -266,10 +298,10 @@ class JsonGenerator {
                                     shortClassNames,
                                     withIds = withIds,
                                     withOriginIds = withOriginIds,
-                                    withDestinationIds = withDestinationIds
+                                    withDestinationIds = withDestinationIds,
                                 )
                             }
-                                .toJsonArray()
+                                .toJsonArray(),
                         )
                     } else {
                         jsonObject.add(it.name, valueToJson(it.value, withIds))
@@ -283,8 +315,8 @@ class JsonGenerator {
                                 shortClassNames,
                                 withIds = withIds,
                                 withOriginIds = withOriginIds,
-                                withDestinationIds = withDestinationIds
-                            )
+                                withDestinationIds = withDestinationIds,
+                            ),
                         )
                     } else {
                         jsonObject.add(it.name, valueToJson(it.value, withIds))
@@ -298,7 +330,10 @@ class JsonGenerator {
     }
 }
 
-private fun Node.toJsonStreaming(writer: JsonWriter, shortClassNames: Boolean = false) {
+private fun Node.toJsonStreaming(
+    writer: JsonWriter,
+    shortClassNames: Boolean = false,
+) {
     writer.beginObject()
     writer.name(JSON_TYPE_KEY)
     writer.value(if (shortClassNames) this.javaClass.simpleName else this.javaClass.canonicalName)
@@ -368,7 +403,7 @@ fun Issue.toJson(): JsonElement {
         "type" to this.type.name,
         "message" to this.message,
         "severity" to this.severity.name,
-        "position" to this.position?.toJson()
+        "position" to this.position?.toJson(),
     )
 }
 
@@ -393,7 +428,7 @@ fun Position.toJson(): JsonElement {
     return jsonObject(
         "description" to this.toString(),
         "start" to this.start.toJson(),
-        "end" to this.end.toJson()
+        "end" to this.end.toJson(),
     )
 }
 
@@ -411,7 +446,7 @@ private fun Position.toJsonStreaming(writer: JsonWriter) {
 private fun Point.toJson(): JsonElement {
     return jsonObject(
         "line" to this.line,
-        "column" to this.column
+        "column" to this.column,
     )
 }
 

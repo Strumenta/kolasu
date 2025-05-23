@@ -17,14 +17,18 @@ data class Result<C>(val issues: List<Issue>, val root: C?) {
         get() = issues.isEmpty()
 
     companion object {
-        fun <C> exception(errorType: IssueType, e: Throwable): Result<C> {
-            val errors = listOf(
-                Issue(
-                    type = errorType,
-                    message = e.message ?: e.javaClass.simpleName,
-                    position = null
+        fun <C> exception(
+            errorType: IssueType,
+            e: Throwable,
+        ): Result<C> {
+            val errors =
+                listOf(
+                    Issue(
+                        type = errorType,
+                        message = e.message ?: e.javaClass.simpleName,
+                        position = null,
+                    ),
                 )
-            )
             return Result(errors, null)
         }
     }

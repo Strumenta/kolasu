@@ -1,16 +1,18 @@
 package com.strumenta.kolasu.model
 
 import org.junit.Test
-import java.util.*
+import java.util.LinkedList
 import kotlin.test.assertEquals
 
 data class Foo1(val name: String) : Node()
+
 data class Foo2(val names: List<String>) : Node()
+
 data class Foo3(val foo: Foo1) : Node()
+
 data class Foo4(val foos: List<Foo1>?) : Node()
 
 class PropertyDescriptionTest {
-
     @Test
     fun buildForNotNodeSingleProperty() {
         val list = LinkedList<PropertyDescription>()
@@ -26,9 +28,9 @@ class PropertyDescriptionTest {
                 Multiplicity.SINGULAR,
                 "gino",
                 PropertyType.ATTRIBUTE,
-                derived = false
+                derived = false,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -47,9 +49,9 @@ class PropertyDescriptionTest {
                 Multiplicity.MANY,
                 listOf("gino", "pino"),
                 PropertyType.ATTRIBUTE,
-                derived = false
+                derived = false,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -68,9 +70,9 @@ class PropertyDescriptionTest {
                 Multiplicity.SINGULAR,
                 Foo1("gino"),
                 PropertyType.CONTAINMENT,
-                derived = false
+                derived = false,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -89,9 +91,9 @@ class PropertyDescriptionTest {
                 Multiplicity.MANY,
                 listOf(Foo1("gino")),
                 PropertyType.CONTAINMENT,
-                derived = false
+                derived = false,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -110,9 +112,9 @@ class PropertyDescriptionTest {
                 Multiplicity.MANY,
                 emptyList<Foo1>(),
                 PropertyType.CONTAINMENT,
-                derived = false
+                derived = false,
             ),
-            list[0]
+            list[0],
         )
     }
 
@@ -131,9 +133,9 @@ class PropertyDescriptionTest {
                 Multiplicity.MANY,
                 null,
                 PropertyType.CONTAINMENT,
-                derived = false
+                derived = false,
             ),
-            list[0]
+            list[0],
         )
     }
 }

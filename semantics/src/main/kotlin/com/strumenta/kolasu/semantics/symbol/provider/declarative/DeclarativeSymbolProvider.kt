@@ -21,15 +21,15 @@ import kotlin.reflect.full.safeCast
 
 inline fun <reified NodeTy : Node> symbolFor(
     noinline specification: DeclarativeSymbolProvideRuleApi<NodeTy>.(
-        DeclarativeSymbolProviderRuleContext<NodeTy>
-    ) -> Unit
+        DeclarativeSymbolProviderRuleContext<NodeTy>,
+    ) -> Unit,
 ): DeclarativeSymbolProviderRule<NodeTy> {
     return DeclarativeSymbolProviderRule(NodeTy::class, specification)
 }
 
 open class DeclarativeSymbolProvider(
     private val nodeIdProvider: NodeIdProvider,
-    vararg rules: DeclarativeSymbolProviderRule<out Node>
+    vararg rules: DeclarativeSymbolProviderRule<out Node>,
 ) : SymbolProvider {
     private val rules: List<DeclarativeSymbolProviderRule<out Node>> = rules.sorted()
 
@@ -43,8 +43,8 @@ open class DeclarativeSymbolProvider(
 class DeclarativeSymbolProviderRule<NodeTy : Node>(
     private val nodeType: KClass<NodeTy>,
     private val specification: DeclarativeSymbolProvideRuleApi<NodeTy>.(
-        DeclarativeSymbolProviderRuleContext<NodeTy>
-    ) -> Unit
+        DeclarativeSymbolProviderRuleContext<NodeTy>,
+    ) -> Unit,
 ) : DeclarativeSymbolProvideRuleApi<NodeTy>,
     (NodeIdProvider, SymbolProvider, Node) -> SymbolDescription,
     Comparable<DeclarativeSymbolProviderRule<out Node>> {
@@ -71,7 +71,7 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
     override fun invoke(
         nodeIdProvider: NodeIdProvider,
         symbolProvider: SymbolProvider,
-        node: Node
+        node: Node,
     ): SymbolDescription {
         @Suppress("UNCHECKED_CAST")
         return (node as NodeTy).let {
@@ -80,7 +80,7 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
                 getName(node),
                 nodeIdProvider.id(node),
                 getTypes(node),
-                getProperties(nodeIdProvider, node)
+                getProperties(nodeIdProvider, node),
             )
         }
     }
@@ -104,13 +104,13 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
 
     private fun getTypes(node: NodeTy): List<String> {
         return listOfNotNull(
-            node::class.qualifiedName
+            node::class.qualifiedName,
         ) + node::class.allSuperclasses.mapNotNull(KClass<*>::qualifiedName)
     }
 
     private fun getProperties(
         nodeIdProvider: NodeIdProvider,
-        node: NodeTy
+        node: NodeTy,
     ): Map<String, ValueDescription> {
         return this.properties.mapValues { (_, valueDescriptionProvider) ->
             valueDescriptionProvider(nodeIdProvider, node)
@@ -119,7 +119,7 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
 
     private fun toValueDescription(
         nodeIdProvider: NodeIdProvider,
-        source: Any?
+        source: Any?,
     ): ValueDescription {
         return when (source) {
             is Boolean -> BooleanValueDescription(source)
@@ -135,23 +135,23 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
 
     private fun toReferenceValueDescription(
         nodeIdProvider: NodeIdProvider,
-        source: ReferenceByName<*>
+        source: ReferenceByName<*>,
     ): ReferenceValueDescription {
         return ReferenceValueDescription(
-            source.referred?.let { it as? Node }?.let { nodeIdProvider.id(it) }
+            source.referred?.let { it as? Node }?.let { nodeIdProvider.id(it) },
         )
     }
 
     private fun toContainmentValueDescription(
         nodeIdProvider: NodeIdProvider,
-        source: Node
+        source: Node,
     ): ContainmentValueDescription {
         return ContainmentValueDescription(nodeIdProvider.id(source))
     }
 
     private fun toListValueDescription(
         nodeIdProvider: NodeIdProvider,
-        source: List<*>
+        source: List<*>,
     ): ListValueDescription {
         return ListValueDescription(source.map { this.toValueDescription(nodeIdProvider, it) }.toList())
     }

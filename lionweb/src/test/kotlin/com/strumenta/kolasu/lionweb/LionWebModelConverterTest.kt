@@ -43,17 +43,16 @@ import kotlin.test.assertTrue
 enum class AnEnum {
     FOO,
     BAR,
-    ZUM
+    ZUM,
 }
 
 @ASTRoot(canBeNotRoot = true)
 data class NodeWithEnum(
     override val name: String,
-    val e: AnEnum?
+    val e: AnEnum?,
 ) : Named, BaseASTNode()
 
 class LionWebModelConverterTest {
-
     val serialized = """{
   "serializationFormatVersion": "2023.1",
   "languages": [
@@ -370,22 +369,24 @@ class LionWebModelConverterTest {
 
     @Test
     fun exportSimpleModel() {
-        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
-            addClass(SimpleRoot::class)
-        }
+        val kLanguage =
+            KolasuLanguage("com.strumenta.SimpleLang").apply {
+                addClass(SimpleRoot::class)
+            }
         val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
         a1.ref.referred = a1
         val b2 = SimpleNodeB("some magic value")
-        val b3_1 = SimpleNodeB("some other value")
-        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b3_1)
-        val ast = SimpleRoot(
-            12345,
-            mutableListOf(
-                a1,
-                b2,
-                a3
+        val b3n1 = SimpleNodeB("some other value")
+        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b3n1)
+        val ast =
+            SimpleRoot(
+                12345,
+                mutableListOf(
+                    a1,
+                    b2,
+                    a3,
+                ),
             )
-        )
         ast.source = SyntheticSource("foo-bar-source")
         ast.assignParents()
 
@@ -430,9 +431,10 @@ class LionWebModelConverterTest {
     @Test
     fun importSimpleModel() {
         val mConverter = LionWebModelConverter()
-        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
-            addClass(SimpleRoot::class)
-        }
+        val kLanguage =
+            KolasuLanguage("com.strumenta.SimpleLang").apply {
+                addClass(SimpleRoot::class)
+            }
         mConverter.exportLanguageToLionWeb(kLanguage)
         val lwAST = mConverter.deserializeToNodes(serialized).first()
         val kAST = mConverter.importModelFromLionWeb(lwAST) as KNode
@@ -440,16 +442,17 @@ class LionWebModelConverterTest {
         val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
         a1.ref.referred = a1
         val b2 = SimpleNodeB("some magic value")
-        val b3_1 = SimpleNodeB("some other value")
-        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b3_1)
-        val expectedAST = SimpleRoot(
-            12345,
-            mutableListOf(
-                a1,
-                b2,
-                a3
+        val b3n1 = SimpleNodeB("some other value")
+        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b3n1)
+        val expectedAST =
+            SimpleRoot(
+                12345,
+                mutableListOf(
+                    a1,
+                    b2,
+                    a3,
+                ),
             )
-        )
         expectedAST.assignParents()
 
         assertASTsAreEqual(expectedAST, kAST)
@@ -458,9 +461,10 @@ class LionWebModelConverterTest {
     @Test
     fun kolasuNodesExtendsLionWebASTNode() {
         val mConverter = LionWebModelConverter()
-        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
-            addClass(SimpleRoot::class)
-        }
+        val kLanguage =
+            KolasuLanguage("com.strumenta.SimpleLang").apply {
+                addClass(SimpleRoot::class)
+            }
         val lwLanguage = mConverter.exportLanguageToLionWeb(kLanguage)
         assertEquals(4, lwLanguage.elements.filterIsInstance<Concept>().size)
         lwLanguage.elements.filterIsInstance<Concept>().forEach { concept ->
@@ -471,28 +475,34 @@ class LionWebModelConverterTest {
     @Test
     fun serializeAndDeserializePosition() {
         val mConverter = LionWebModelConverter()
-        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
-            addClass(SimpleRoot::class)
-        }
+        val kLanguage =
+            KolasuLanguage("com.strumenta.SimpleLang").apply {
+                addClass(SimpleRoot::class)
+            }
         mConverter.exportLanguageToLionWeb(kLanguage)
 
-        val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
-            .withPosition(Position(Point(1, 1), Point(1, 10)))
+        val a1 =
+            SimpleNodeA("A1", ReferenceByName("A1"), null)
+                .withPosition(Position(Point(1, 1), Point(1, 10)))
         a1.ref.referred = a1
-        val b2 = SimpleNodeB("some magic value")
-            .withPosition(Position(Point(2, 1), Point(2, 10)))
-        val b3_1 = SimpleNodeB("some other value")
-            .withPosition(Position(Point(2, 21), Point(2, 30)))
-        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b3_1)
-            .withPosition(Position(Point(3, 4), Point(3, 12)))
-        val initialAst = SimpleRoot(
-            12345,
-            mutableListOf(
-                a1,
-                b2,
-                a3
+        val b2 =
+            SimpleNodeB("some magic value")
+                .withPosition(Position(Point(2, 1), Point(2, 10)))
+        val b3n1 =
+            SimpleNodeB("some other value")
+                .withPosition(Position(Point(2, 21), Point(2, 30)))
+        val a3 =
+            SimpleNodeA("A3", ReferenceByName("A1", a1), b3n1)
+                .withPosition(Position(Point(3, 4), Point(3, 12)))
+        val initialAst =
+            SimpleRoot(
+                12345,
+                mutableListOf(
+                    a1,
+                    b2,
+                    a3,
+                ),
             )
-        )
         initialAst.assignParents()
         initialAst.source = SyntheticSource("ss1")
 
@@ -524,7 +534,7 @@ class LionWebModelConverterTest {
             KolasuLanguage("myLanguage").apply {
                 addClass(SimpleNodeA::class)
                 addClass(SimpleNodeB::class)
-            }
+            },
         )
         var exported = converter.exportModelToLionWeb(b2, considerParent = false)
         assertNull(exported.parent)
@@ -549,7 +559,7 @@ class LionWebModelConverterTest {
         converter.exportLanguageToLionWeb(
             KolasuLanguage("myLanguage").apply {
                 addClass(NodeWithEnum::class)
-            }
+            },
         )
         val exportedN1 = converter.exportModelToLionWeb(n1)
         val exportedN2 = converter.exportModelToLionWeb(n2)
@@ -584,7 +594,7 @@ class LionWebModelConverterTest {
         converter.exportLanguageToLionWeb(
             KolasuLanguage("myLanguage").apply {
                 addClass(NodeWithEnum::class)
-            }
+            },
         )
 
         val reimportedN1 = converter.importModelFromLionWeb(converter.exportModelToLionWeb(n1)) as NodeWithEnum
@@ -601,9 +611,10 @@ class LionWebModelConverterTest {
     // This verifies Issue #324
     @Test
     fun whenImportingConsiderAlsoPropertiesNotInConstructor() {
-        val kl = KolasuLanguage("my.language").apply {
-            addClass(NodeWithPropertiesNotInConstructor::class)
-        }
+        val kl =
+            KolasuLanguage("my.language").apply {
+                addClass(NodeWithPropertiesNotInConstructor::class)
+            }
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
         val n1 = NodeWithPropertiesNotInConstructor("N1", "foo")
@@ -644,9 +655,10 @@ class LionWebModelConverterTest {
 
     @Test
     fun whenImportingConsiderAlsoPropertiesNotInConstructorWhichAreMutable() {
-        val kl = KolasuLanguage("my.language").apply {
-            addClass(NodeWithPropertiesNotInConstructorMutableProps::class)
-        }
+        val kl =
+            KolasuLanguage("my.language").apply {
+                addClass(NodeWithPropertiesNotInConstructorMutableProps::class)
+            }
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
         val n1 = NodeWithPropertiesNotInConstructorMutableProps("N1", "foo")
@@ -687,28 +699,32 @@ class LionWebModelConverterTest {
 
     @Test
     fun nodesAreNotProducedForPositionsAndPoints() {
-        val kl = KolasuLanguage("my.language").apply {
-            addClass(NodeWithEnum::class)
-        }
+        val kl =
+            KolasuLanguage("my.language").apply {
+                addClass(NodeWithEnum::class)
+            }
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
-        val n1 = NodeWithEnum("foo", AnEnum.FOO)
-            .withPosition(Position(Point(3, 5), Point(27, 200)))
-            .setSourceForTree(LionWebSource("MySource"))
+        val n1 =
+            NodeWithEnum("foo", AnEnum.FOO)
+                .withPosition(Position(Point(3, 5), Point(27, 200)))
+                .setSourceForTree(LionWebSource("MySource"))
         val lwNodes = mc.exportModelToLionWeb(n1)
         assertEquals(emptyList(), lwNodes.children)
     }
 
     @Test
     fun canSerializePosition() {
-        val kl = KolasuLanguage("my.language").apply {
-            addClass(NodeWithEnum::class)
-        }
+        val kl =
+            KolasuLanguage("my.language").apply {
+                addClass(NodeWithEnum::class)
+            }
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
-        val n1: BaseASTNode = NodeWithEnum("foo", AnEnum.FOO)
-            .withPosition(Position(Point(3, 5), Point(27, 200)))
-            .setSourceForTree(LionWebSource("MySource"))
+        val n1: BaseASTNode =
+            NodeWithEnum("foo", AnEnum.FOO)
+                .withPosition(Position(Point(3, 5), Point(27, 200)))
+                .setSourceForTree(LionWebSource("MySource"))
         val lwNode = mc.exportModelToLionWeb(n1)
         val jsonSerialization = SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
         mc.prepareSerialization(jsonSerialization)
@@ -716,7 +732,7 @@ class LionWebModelConverterTest {
         assertEquals(
             "L3:5-L27:200",
             serializationBlock.classifierInstancesByID["MySource"]!!
-                .getPropertyValue("com_strumenta_starlasu-ASTNode-position-key")
+                .getPropertyValue("com_strumenta_starlasu-ASTNode-position-key"),
         )
     }
 
@@ -725,14 +741,16 @@ class LionWebModelConverterTest {
         // This has the side effect on ensuring that the serializers and deserializers for primitive types in the
         // StarLasu Language are registered in the MetamodelRegistry
         StarLasuLWLanguage
-        val kl = KolasuLanguage("my.language").apply {
-            addClass(NodeWithEnum::class)
-        }
+        val kl =
+            KolasuLanguage("my.language").apply {
+                addClass(NodeWithEnum::class)
+            }
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
-        val n1 = NodeWithEnum("foo", AnEnum.FOO)
-            .withPosition(Position(Point(3, 5), Point(27, 200)))
-            .setSourceForTree(LionWebSource("MySource"))
+        val n1 =
+            NodeWithEnum("foo", AnEnum.FOO)
+                .withPosition(Position(Point(3, 5), Point(27, 200)))
+                .setSourceForTree(LionWebSource("MySource"))
         val lwNode = mc.exportModelToLionWeb(n1)
         val jsonSerialization = SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
         jsonSerialization.enableDynamicNodes()
@@ -745,26 +763,29 @@ class LionWebModelConverterTest {
 
     @Test
     fun canSerializeAndDeserializeTheOriginalNodeLink() {
-        val kl = KolasuLanguage("my.language").apply {
-            addClass(SimpleRoot::class)
-        }
+        val kl =
+            KolasuLanguage("my.language").apply {
+                addClass(SimpleRoot::class)
+            }
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
 
-        val node1 = SimpleRoot(1, mutableListOf())
-            .apply { position = Position(Point(10, 20), Point(30, 40)) }
-            .setSourceForTree(LionWebSource("MySource1"))
+        val node1 =
+            SimpleRoot(1, mutableListOf())
+                .apply { position = Position(Point(10, 20), Point(30, 40)) }
+                .setSourceForTree(LionWebSource("MySource1"))
         val node2 = SimpleRoot(2, mutableListOf()).setSourceForTree(LionWebSource("MySource2"))
 
-        mc.externalNodeResolver = object : NodeResolver {
-            override fun resolve(nodeID: String): KNode? {
-                return if (nodeID == "MySource2") {
-                    node2
-                } else {
-                    null
+        mc.externalNodeResolver =
+            object : NodeResolver {
+                override fun resolve(nodeID: String): KNode? {
+                    return if (nodeID == "MySource2") {
+                        node2
+                    } else {
+                        null
+                    }
                 }
             }
-        }
 
         node1.origin = node2
         assertSame(node2, node1.origin)
@@ -790,28 +811,31 @@ class LionWebModelConverterTest {
 
     @Test
     fun canSerializeAndDeserializeTheTranspiledNodesLinkSingleCase() {
-        val kl = KolasuLanguage("my.language").apply {
-            addClass(SimpleRoot::class)
-        }
+        val kl =
+            KolasuLanguage("my.language").apply {
+                addClass(SimpleRoot::class)
+            }
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
 
         val node1 = SimpleRoot(1, mutableListOf()).setSourceForTree(LionWebSource("MySource1"))
-        val node3 = SimpleRoot(3, mutableListOf())
-            .setSourceForTree(LionWebSource("MySource3"))
-            .apply { position = Position(Point(1, 2), Point(3, 4)) }
+        val node3 =
+            SimpleRoot(3, mutableListOf())
+                .setSourceForTree(LionWebSource("MySource3"))
+                .apply { position = Position(Point(1, 2), Point(3, 4)) }
 
         node3.destination = node1
 
-        mc.externalNodeResolver = object : NodeResolver {
-            override fun resolve(nodeID: String): KNode? {
-                return if (nodeID == "MySource1") {
-                    node1
-                } else {
-                    null
+        mc.externalNodeResolver =
+            object : NodeResolver {
+                override fun resolve(nodeID: String): KNode? {
+                    return if (nodeID == "MySource1") {
+                        node1
+                    } else {
+                        null
+                    }
                 }
             }
-        }
 
         val lwNode3 = mc.exportModelToLionWeb(node3)
         val deserializedNode3 = mc.importModelFromLionWeb(lwNode3) as SimpleRoot
@@ -823,35 +847,38 @@ class LionWebModelConverterTest {
 
     @Test
     fun canSerializeAndDeserializeTheTranspiledNodesLinkMultipleCase() {
-        val kl = KolasuLanguage("my.language").apply {
-            addClass(SimpleRoot::class)
-        }
+        val kl =
+            KolasuLanguage("my.language").apply {
+                addClass(SimpleRoot::class)
+            }
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
 
         val node1 = SimpleRoot(1, mutableListOf()).setSourceForTree(LionWebSource("MySource1"))
         val node2 = SimpleRoot(2, mutableListOf()).setSourceForTree(LionWebSource("MySource2"))
-        val node3 = SimpleRoot(3, mutableListOf())
-            .apply { position = Position(Point(1, 2), Point(3, 4)) }
-            .setSourceForTree(LionWebSource("MySource3"))
+        val node3 =
+            SimpleRoot(3, mutableListOf())
+                .apply { position = Position(Point(1, 2), Point(3, 4)) }
+                .setSourceForTree(LionWebSource("MySource3"))
 
         node3.destination = CompositeDestination(node1, node2)
 
-        mc.externalNodeResolver = object : NodeResolver {
-            override fun resolve(nodeID: String): KNode? {
-                return when (nodeID) {
-                    "MySource1" -> {
-                        node1
-                    }
-                    "MySource2" -> {
-                        node2
-                    }
-                    else -> {
-                        null
+        mc.externalNodeResolver =
+            object : NodeResolver {
+                override fun resolve(nodeID: String): KNode? {
+                    return when (nodeID) {
+                        "MySource1" -> {
+                            node1
+                        }
+                        "MySource2" -> {
+                            node2
+                        }
+                        else -> {
+                            null
+                        }
                     }
                 }
             }
-        }
 
         val lwNode3 = mc.exportModelToLionWeb(node3)
         val deserializedNode3 = mc.importModelFromLionWeb(lwNode3) as SimpleRoot
@@ -864,9 +891,10 @@ class LionWebModelConverterTest {
 
     @Test
     fun canSerializeAndDeserializePlaceholderNodes() {
-        val kl = KolasuLanguage("my.language").apply {
-            addClass(SimpleRoot::class)
-        }
+        val kl =
+            KolasuLanguage("my.language").apply {
+                addClass(SimpleRoot::class)
+            }
         val mc = LionWebModelConverter()
         mc.exportLanguageToLionWeb(kl)
 
@@ -879,21 +907,22 @@ class LionWebModelConverterTest {
         assertEquals(1, lwNode1Origins.size)
         assertEquals(1, lwNode1.annotations.size)
         // We verify the re-imported data is correct
-        mc.externalNodeResolver = object : NodeResolver {
-            override fun resolve(nodeID: String): KNode? {
-                return when (nodeID) {
-                    "MySource1" -> {
-                        node1
-                    }
-                    "MySource2" -> {
-                        node2
-                    }
-                    else -> {
-                        null
+        mc.externalNodeResolver =
+            object : NodeResolver {
+                override fun resolve(nodeID: String): KNode? {
+                    return when (nodeID) {
+                        "MySource1" -> {
+                            node1
+                        }
+                        "MySource2" -> {
+                            node2
+                        }
+                        else -> {
+                            null
+                        }
                     }
                 }
             }
-        }
         val deserializedNode1 = mc.importModelFromLionWeb(lwNode1) as SimpleRoot
         assertIs<MissingASTTransformation>(deserializedNode1.origin)
         assertIs<SimpleRoot>((deserializedNode1.origin as MissingASTTransformation).origin)
@@ -933,31 +962,34 @@ class LionWebModelConverterTest {
         val a1 = SimpleNodeA("A1", ReferenceByName("A1"), null)
         a1.ref.referred = a1
         val b2 = SimpleNodeB("some magic value")
-        val b3_1 = SimpleNodeB("some other value")
-        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b3_1)
-        val root = SimpleRoot(
-            12345,
-            mutableListOf(
-                a1,
-                b2,
-                a3
-            )
-        ).withPosition(Position(Point(1, 2), Point(3, 4), source))
+        val b3n1 = SimpleNodeB("some other value")
+        val a3 = SimpleNodeA("A3", ReferenceByName("A1", a1), b3n1)
+        val root =
+            SimpleRoot(
+                12345,
+                mutableListOf(
+                    a1,
+                    b2,
+                    a3,
+                ),
+            ).withPosition(Position(Point(1, 2), Point(3, 4), source))
         root.assignParents()
         val parsingResult = ParsingResult(listOf(i1, i2, i3), root, "bla bla", source = source)
 
-        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
-            addClass(SimpleRoot::class)
-        }
+        val kLanguage =
+            KolasuLanguage("com.strumenta.SimpleLang").apply {
+                addClass(SimpleRoot::class)
+            }
         val converter = LionWebModelConverter()
         converter.exportLanguageToLionWeb(kLanguage)
-        val exported = converter.exportParsingResultToLionweb(
-            parsingResult,
-            listOf(
-                KolasuToken(TokenCategory.STRING_LITERAL, pos(1, 2, 3, 4)),
-                KolasuToken(TokenCategory.PLAIN_TEXT, pos(3, 5, 6, 7))
+        val exported =
+            converter.exportParsingResultToLionweb(
+                parsingResult,
+                listOf(
+                    KolasuToken(TokenCategory.STRING_LITERAL, pos(1, 2, 3, 4)),
+                    KolasuToken(TokenCategory.PLAIN_TEXT, pos(3, 5, 6, 7)),
+                ),
             )
-        )
         val reimported = converter.importModelFromLionWeb(exported) as ParsingResultWithTokens<*>
         assertASTsAreEqual(parsingResult.root!!, reimported.root!!)
         assertEquals(3, parsingResult.issues.size)
@@ -965,16 +997,16 @@ class LionWebModelConverterTest {
         assertEquals(
             listOf(
                 TokenCategory.STRING_LITERAL.type,
-                TokenCategory.PLAIN_TEXT.type
+                TokenCategory.PLAIN_TEXT.type,
             ),
-            reimported.tokens.map { it.category.type }
+            reimported.tokens.map { it.category.type },
         )
         assertEquals(
             listOf(
                 pos(1, 2, 3, 4),
-                pos(3, 5, 6, 7)
+                pos(3, 5, 6, 7),
             ),
-            reimported.tokens.map { it.position }
+            reimported.tokens.map { it.position },
         )
     }
 
@@ -992,7 +1024,7 @@ class LionWebModelConverterTest {
         converter.exportLanguageToLionWeb(
             KolasuLanguage("myLanguage").apply {
                 addClass(NodeWithEnum::class)
-            }
+            },
         )
         converter.exportModelToLionWeb(myOriginalNode)
         val lwNode = converter.exportModelToLionWeb(myTransformedNode)
@@ -1014,7 +1046,7 @@ class LionWebModelConverterTest {
         converter.exportLanguageToLionWeb(
             KolasuLanguage("myLanguage").apply {
                 addClass(NodeWithEnum::class)
-            }
+            },
         )
         converter.exportModelToLionWeb(myOriginalNode)
         val lwNode = converter.exportModelToLionWeb(myTransformedNode)

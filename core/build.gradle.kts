@@ -1,6 +1,3 @@
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.kotlin.dsl.*
-
 plugins {
     kotlin("jvm")
     alias(libs.plugins.ktlint)

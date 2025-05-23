@@ -21,7 +21,6 @@ interface FooMyIrrelevantInterface
 interface FooMyRelevantInterface
 
 class KolasuLanguageTest {
-
     @Test
     fun allASTClassesAreFound() {
         val kolasuLanguage = KolasuLanguage("com.strumenta.TestLanguage1")
@@ -29,7 +28,7 @@ class KolasuLanguageTest {
         kolasuLanguage.addClass(Root::class)
         assertEquals(
             setOf(Root::class, NodeA::class, NodeB::class, FooMyRelevantInterface::class),
-            kolasuLanguage.astClasses.toSet()
+            kolasuLanguage.astClasses.toSet(),
         )
     }
 

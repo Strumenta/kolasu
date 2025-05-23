@@ -21,9 +21,11 @@ val Node.isDirectlyPlaceholderASTTransformation: Boolean
  * This operation is expensive to perform.
  */
 val Node.isDirectlyOrIndirectlyAPlaceholderASTTransformation: Boolean
-    get() = this.isDirectlyPlaceholderASTTransformation || this.walkAncestors().any {
-        it.isDirectlyPlaceholderASTTransformation
-    }
+    get() =
+        this.isDirectlyPlaceholderASTTransformation ||
+            this.walkAncestors().any {
+                it.isDirectlyPlaceholderASTTransformation
+            }
 
 /**
  * This is used to indicate that a Node represents some form of placeholders to be used in transformation.
@@ -42,15 +44,16 @@ class MissingASTTransformation(
     origin: Origin?,
     val transformationSource: Any?,
     val expectedType: KClass<out Node>? = null,
-    message: String = "Translation of a node is not yet implemented: " +
-        "${if (transformationSource is Node) transformationSource.simpleNodeType else transformationSource}" +
-        if (expectedType != null) " into $expectedType" else ""
+    message: String =
+        "Translation of a node is not yet implemented: " +
+            "${if (transformationSource is Node) transformationSource.simpleNodeType else transformationSource}" +
+            if (expectedType != null) " into $expectedType" else "",
 ) :
     PlaceholderASTTransformation(origin, message) {
     constructor(transformationSource: Node, expectedType: KClass<out Node>? = null) : this(
         transformationSource,
         transformationSource,
-        expectedType
+        expectedType,
     )
 }
 

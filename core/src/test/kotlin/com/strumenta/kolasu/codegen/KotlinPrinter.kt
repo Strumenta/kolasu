@@ -4,12 +4,12 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.transformation.PlaceholderASTTransformation
 
 class KotlinPrinter : ASTCodeGenerator<KCompilationUnit>() {
-
     override val placeholderNodePrinter: NodePrinter
-        get() = NodePrinter { output: PrinterOutput, ast: Node ->
-            val placeholder = ast.origin as PlaceholderASTTransformation
-            output.print("/* ${placeholder.message} */")
-        }
+        get() =
+            NodePrinter { output: PrinterOutput, ast: Node ->
+                val placeholder = ast.origin as PlaceholderASTTransformation
+                output.print("/* ${placeholder.message} */")
+            }
 
     override fun registerRecordPrinters() {
         recordPrinter<KCompilationUnit> {

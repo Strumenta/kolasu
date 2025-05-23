@@ -9,5 +9,6 @@ import java.io.File
  **/
 interface ASTParserInstantiator {
     fun instantiate(fileToParse: File): ASTParser<*>
+
     fun instantiate(code: String): ASTParser<*>
 }

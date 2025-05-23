@@ -9,5 +9,6 @@ import java.io.File
  */
 interface KolasuParserInstantiator : ASTParserInstantiator {
     override fun instantiate(fileToParse: File): KolasuParser<*, *, *, *>
+
     override fun instantiate(code: String): KolasuParser<*, *, *, *>
 }

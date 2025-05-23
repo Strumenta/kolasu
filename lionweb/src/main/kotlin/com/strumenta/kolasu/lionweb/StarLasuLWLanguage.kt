@@ -53,7 +53,6 @@ val LIONWEB_VERSION_USED_BY_KOLASU = LionWebVersion.v2023_1
  */
 @Deprecated("Use the AST language from Starlasu-specs")
 object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strumenta.StarLasu") {
-
     val CommonElement: Interface
     val Issue: Concept
     val ParsingResult: Concept
@@ -65,9 +64,10 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
         createPrimitiveType("Char")
         createPrimitiveType("Point")
         val position = createPrimitiveType("Position")
-        val astNode = createConcept("ASTNode").apply {
-            createProperty(Node::position.name, position, Multiplicity.OPTIONAL)
-        }
+        val astNode =
+            createConcept("ASTNode").apply {
+                createProperty(Node::position.name, position, Multiplicity.OPTIONAL)
+            }
         astNode.createReference("originalNode", astNode, Multiplicity.OPTIONAL)
         astNode.createReference("transpiledNodes", astNode, Multiplicity.ZERO_TO_MANY)
 
@@ -84,54 +84,58 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
         createInterface(KStatement::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
         createInterface(KTypeAnnotation::class.simpleName!!).apply { addExtendedInterface(CommonElement) }
 
-        Issue = createConcept(KIssue::class.simpleName!!).apply {
-            createProperty(KIssue::type.name, addEnumerationFromClass(this@StarLasuLWLanguage, IssueType::class))
-            createProperty(KIssue::message.name, LionCoreBuiltins.getString(lionWebVersion))
-            createProperty(
-                KIssue::severity.name,
-                addEnumerationFromClass(this@StarLasuLWLanguage, IssueSeverity::class)
-            )
-            createProperty(KIssue::position.name, position, Multiplicity.OPTIONAL)
-        }
+        Issue =
+            createConcept(KIssue::class.simpleName!!).apply {
+                createProperty(KIssue::type.name, addEnumerationFromClass(this@StarLasuLWLanguage, IssueType::class))
+                createProperty(KIssue::message.name, LionCoreBuiltins.getString(lionWebVersion))
+                createProperty(
+                    KIssue::severity.name,
+                    addEnumerationFromClass(this@StarLasuLWLanguage, IssueSeverity::class),
+                )
+                createProperty(KIssue::position.name, position, Multiplicity.OPTIONAL)
+            }
 
         createPrimitiveType(TokensList::class)
-        ParsingResult = createConcept(KParsingResult::class.simpleName!!).apply {
-            createContainment(KParsingResult<*>::issues.name, ASTLanguage.getIssue(), Multiplicity.ZERO_TO_MANY)
-            createContainment(KParsingResult<*>::root.name, ASTNode, Multiplicity.OPTIONAL)
-            createProperty(
-                KParsingResult<*>::code.name,
-                LionCoreBuiltins.getString(lionWebVersion),
-                Multiplicity.OPTIONAL
-            )
-            createProperty(
-                ParsingResultWithTokens<*>::tokens.name,
-                MetamodelRegistry.getPrimitiveType(TokensList::class, LIONWEB_VERSION_USED_BY_KOLASU)!!,
-                Multiplicity.OPTIONAL
-            )
-        }
+        ParsingResult =
+            createConcept(KParsingResult::class.simpleName!!).apply {
+                createContainment(KParsingResult<*>::issues.name, ASTLanguage.getIssue(), Multiplicity.ZERO_TO_MANY)
+                createContainment(KParsingResult<*>::root.name, ASTNode, Multiplicity.OPTIONAL)
+                createProperty(
+                    KParsingResult<*>::code.name,
+                    LionCoreBuiltins.getString(lionWebVersion),
+                    Multiplicity.OPTIONAL,
+                )
+                createProperty(
+                    ParsingResultWithTokens<*>::tokens.name,
+                    MetamodelRegistry.getPrimitiveType(TokensList::class, LIONWEB_VERSION_USED_BY_KOLASU)!!,
+                    Multiplicity.OPTIONAL,
+                )
+            }
         MetamodelRegistry.registerMapping(IssueNode::class, ASTLanguage.getIssue())
         MetamodelRegistry.registerMapping(ParsingResultNode::class, ParsingResult)
         registerSerializersAndDeserializersInMetamodelRegistry()
     }
 
     private fun addPlaceholderNodeAnnotation(astNode: Concept) {
-        val placeholderNodeAnnotation = Annotation(
-            this,
-            PLACEHOLDER_NODE,
-            idForContainedElement(PLACEHOLDER_NODE),
-            keyForContainedElement(PLACEHOLDER_NODE)
-        )
+        val placeholderNodeAnnotation =
+            Annotation(
+                this,
+                PLACEHOLDER_NODE,
+                idForContainedElement(PLACEHOLDER_NODE),
+                keyForContainedElement(PLACEHOLDER_NODE),
+            )
         placeholderNodeAnnotation.annotates = LionCore.getConcept(lionWebVersion)
 
-        val placeholderNodeAnnotationType = Enumeration(
-            this,
-            "PlaceholderNodeType"
-        ).apply {
-            this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
-            this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
-            addLiteral("MissingASTTransformation")
-            addLiteral("FailingASTTransformation")
-        }
+        val placeholderNodeAnnotationType =
+            Enumeration(
+                this,
+                "PlaceholderNodeType",
+            ).apply {
+                this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
+                this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
+                addLiteral("MissingASTTransformation")
+                addLiteral("FailingASTTransformation")
+            }
         addElement(placeholderNodeAnnotationType)
 
         val reference =
@@ -144,21 +148,23 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
                 this.setMultiple(false)
             }
         placeholderNodeAnnotation.addFeature(reference)
-        val type = Property(lionWebVersion).apply {
-            this.name = "type"
-            this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
-            this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
-            this.type = placeholderNodeAnnotationType
-            this.setOptional(false)
-        }
+        val type =
+            Property(lionWebVersion).apply {
+                this.name = "type"
+                this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
+                this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
+                this.type = placeholderNodeAnnotationType
+                this.setOptional(false)
+            }
         placeholderNodeAnnotation.addFeature(type)
-        val message = Property(lionWebVersion).apply {
-            this.name = "message"
-            this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
-            this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
-            this.type = LionCoreBuiltins.getString(LIONWEB_VERSION_USED_BY_KOLASU)
-            this.setOptional(false)
-        }
+        val message =
+            Property(lionWebVersion).apply {
+                this.name = "message"
+                this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
+                this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
+                this.type = LionCoreBuiltins.getString(LIONWEB_VERSION_USED_BY_KOLASU)
+                this.setOptional(false)
+            }
         placeholderNodeAnnotation.addFeature(message)
         addElement(placeholderNodeAnnotation)
     }
@@ -221,10 +227,11 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
 
 private fun registerSerializersAndDeserializersInMetamodelRegistry() {
     val charSerializer = PrimitiveSerializer<Char> { value -> "$value" }
-    val charDeserializer = PrimitiveDeserializer<Char> { serialized ->
-        require(serialized.length == 1)
-        serialized[0]
-    }
+    val charDeserializer =
+        PrimitiveDeserializer<Char> { serialized ->
+            require(serialized.length == 1)
+            serialized[0]
+        }
     MetamodelRegistry.addSerializerAndDeserializer(StarLasuLWLanguage.Char, charSerializer, charDeserializer)
 
     val pointSerializer: PrimitiveSerializer<Point> =
@@ -247,51 +254,57 @@ private fun registerSerializersAndDeserializersInMetamodelRegistry() {
         }
     MetamodelRegistry.addSerializerAndDeserializer(StarLasuLWLanguage.Point, pointSerializer, pointDeserializer)
 
-    val positionSerializer = PrimitiveSerializer<Position> { value ->
-        "${pointSerializer.serialize((value as Position).start)}-${pointSerializer.serialize(value.end)}"
-    }
-    val positionDeserializer = PrimitiveDeserializer<Position> { serialized ->
-        if (serialized == null) {
-            null
-        } else {
-            val parts = serialized.split("-")
-            require(parts.size == 2) {
-                "Position has an expected format: $serialized"
-            }
-            Position(pointDeserializer.deserialize(parts[0]), pointDeserializer.deserialize(parts[1]))
+    val positionSerializer =
+        PrimitiveSerializer<Position> { value ->
+            "${pointSerializer.serialize((value as Position).start)}-${pointSerializer.serialize(value.end)}"
         }
-    }
+    val positionDeserializer =
+        PrimitiveDeserializer<Position> { serialized ->
+            if (serialized == null) {
+                null
+            } else {
+                val parts = serialized.split("-")
+                require(parts.size == 2) {
+                    "Position has an expected format: $serialized"
+                }
+                Position(pointDeserializer.deserialize(parts[0]), pointDeserializer.deserialize(parts[1]))
+            }
+        }
     MetamodelRegistry.addSerializerAndDeserializer(
         StarLasuLWLanguage.Position,
         positionSerializer,
-        positionDeserializer
+        positionDeserializer,
     )
 
-    val tokensListPrimitiveSerializer = PrimitiveSerializer<TokensList?> { value: TokensList? ->
-        value?.tokens?.joinToString(";") { kt ->
-            kt.category.type + "$" + positionSerializer.serialize(kt.position)
-        }
-    }
-    val tokensListPrimitiveDeserializer = PrimitiveDeserializer<TokensList?> { serialized ->
-        if (serialized == null) {
-            null
-        } else {
-            val tokens = if (serialized.isEmpty()) {
-                mutableListOf()
-            } else {
-                serialized.split(";").map {
-                    val parts = it.split("$")
-                    require(parts.size == 2)
-                    val category = parts[0]
-                    val position = positionDeserializer.deserialize(parts[1])
-                    KolasuToken(TokenCategory(category), position)
-                }.toMutableList()
+    val tokensListPrimitiveSerializer =
+        PrimitiveSerializer<TokensList?> { value: TokensList? ->
+            value?.tokens?.joinToString(";") { kt ->
+                kt.category.type + "$" + positionSerializer.serialize(kt.position)
             }
-            TokensList(tokens)
         }
-    }
-    val tlpt = MetamodelRegistry.getPrimitiveType(TokensList::class, LIONWEB_VERSION_USED_BY_KOLASU)
-        ?: throw IllegalStateException("Unknown primitive type class ${TokensList::class}")
+    val tokensListPrimitiveDeserializer =
+        PrimitiveDeserializer<TokensList?> { serialized ->
+            if (serialized == null) {
+                null
+            } else {
+                val tokens =
+                    if (serialized.isEmpty()) {
+                        mutableListOf()
+                    } else {
+                        serialized.split(";").map {
+                            val parts = it.split("$")
+                            require(parts.size == 2)
+                            val category = parts[0]
+                            val position = positionDeserializer.deserialize(parts[1])
+                            KolasuToken(TokenCategory(category), position)
+                        }.toMutableList()
+                    }
+                TokensList(tokens)
+            }
+        }
+    val tlpt =
+        MetamodelRegistry.getPrimitiveType(TokensList::class, LIONWEB_VERSION_USED_BY_KOLASU)
+            ?: throw IllegalStateException("Unknown primitive type class ${TokensList::class}")
     MetamodelRegistry.addSerializerAndDeserializer(tlpt, tokensListPrimitiveSerializer, tokensListPrimitiveDeserializer)
 }
 

@@ -34,6 +34,7 @@ data class Point(val line: Int, val column: Int) : Comparable<Point>, Serializab
         fun checkLine(line: Int) {
             require(line >= START_LINE) { "Line should be equal or greater than 1, was $line" }
         }
+
         fun checkColumn(column: Int) {
             require(column >= START_COLUMN) { "Column should be equal or greater than 0, was $column" }
         }
@@ -110,7 +111,11 @@ data class Point(val line: Int, val column: Int) : Comparable<Point>, Serializab
         get() = Position(this, this)
 }
 
-fun linePosition(lineNumber: Int, lineCode: String, source: Source? = null): Position {
+fun linePosition(
+    lineNumber: Int,
+    lineCode: String,
+    source: Source? = null,
+): Position {
     require(lineNumber >= 1) { "Line numbers are expected to be equal or greater than 1" }
     return Position(Point(lineNumber, START_COLUMN), Point(lineNumber, lineCode.length), source)
 }
@@ -122,10 +127,15 @@ interface SourceWithID {
 }
 
 class SourceSet(val name: String, val root: Path)
+
 class SourceSetElement(val sourceSet: SourceSet, val relativePath: Path) : Source()
+
 data class FileSource(val file: File) : Source()
+
 class StringSource(val code: String? = null) : Source()
+
 class URLSource(val url: URL) : Source()
+
 data class CodeBaseSource(val codebaseName: String, val relativePath: String) : Source()
 
 /**
@@ -148,7 +158,6 @@ data class SyntheticSource(val description: String) : Source()
  * The Position of such text will be Position(Point(1, 0), Point(1, 5)).
  */
 data class Position(val start: Point, val end: Point, var source: Source? = null) : Comparable<Position>, Serializable {
-
     val isFlat: Boolean
         get() = start == end
 
@@ -224,16 +233,21 @@ data class Position(val start: Point, val end: Point, var source: Source? = null
                 (this.end.isSameOrAfter(position.start) && this.end.isSameOrBefore(position.end)) ||
                 (position.start.isSameOrAfter(this.start) && position.start.isSameOrBefore(this.end)) ||
                 (position.end.isSameOrAfter(this.start) && position.end.isSameOrBefore(this.end))
-            )
+        )
     }
 }
 
 /**
  * Utility function to create a Position
  */
-fun pos(startLine: Int, startCol: Int, endLine: Int, endCol: Int) = Position(
+fun pos(
+    startLine: Int,
+    startCol: Int,
+    endLine: Int,
+    endCol: Int,
+) = Position(
     Point(startLine, startCol),
-    Point(endLine, endCol)
+    Point(endLine, endCol),
 )
 
 fun BaseASTNode.isBefore(other: BaseASTNode): Boolean = position!!.start.isBefore(other.position!!.start)
@@ -258,7 +272,7 @@ val BaseASTNode.endLine: Int?
  */
 fun strippedPosition(
     text: String?,
-    start: Point
+    start: Point,
 ): Position? {
     return text?.let { text ->
         start.positionWithLength(text.length).stripPosition(text)

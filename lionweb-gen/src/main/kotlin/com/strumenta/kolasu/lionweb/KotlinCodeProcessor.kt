@@ -25,7 +25,6 @@ private val KtDeclaration.fqName: String
  * This class finds Kotlin classes definitions.
  */
 class KotlinCodeProcessor {
-
     fun classesDeclaredInFile(code: String): Set<String> {
         val ktFile = parse(code)
         return ktFile.declarations.map {
@@ -56,11 +55,12 @@ class KotlinCodeProcessor {
     private fun parse(code: String): KtFile {
         val disposable = Disposer.newDisposable()
         try {
-            val env = KotlinCoreEnvironment.createForProduction(
-                disposable,
-                CompilerConfiguration(),
-                EnvironmentConfigFiles.JVM_CONFIG_FILES
-            )
+            val env =
+                KotlinCoreEnvironment.createForProduction(
+                    disposable,
+                    CompilerConfiguration(),
+                    EnvironmentConfigFiles.JVM_CONFIG_FILES,
+                )
             val file = LightVirtualFile("temp.kt", KotlinFileType.INSTANCE, code)
             return PsiManager.getInstance(env.project).findFile(file) as KtFile
         } finally {

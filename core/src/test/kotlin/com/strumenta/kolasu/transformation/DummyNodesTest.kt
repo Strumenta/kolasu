@@ -9,21 +9,24 @@ import kotlin.test.Test
 enum class SomeAlternatives {
     BAR,
     FOO,
-    ZUM
+    ZUM,
 }
 
 data class MyNodeWithProps(val p1: Int, val p2: Boolean, val p4: String) : Node()
+
 data class MyNodeWithLongProp(val p3: Long) : Node()
+
 data class MyNodeWithEnum(val p5: SomeAlternatives) : Node()
+
 data class MyNodeWithContainments(
     val c1: MyNodeWithProps,
     val c2: MyNodeWithProps?,
-    val c3: MutableList<MyNodeWithProps>
+    val c3: MutableList<MyNodeWithProps>,
 ) : Node()
+
 data class MyNodeWithRefs(val r1: ReferenceByName<PossiblyNamed>?, val r2: ReferenceByName<PossiblyNamed>) : Node()
 
 class DummyNodesTest {
-
     @Test
     fun canCreateDummyNodeWithProperties() {
         val dummyNode = MyNodeWithProps::class.dummyInstance()

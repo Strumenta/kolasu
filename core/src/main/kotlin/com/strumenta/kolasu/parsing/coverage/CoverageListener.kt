@@ -78,7 +78,6 @@ data class Path(val elements: List<PathElement> = listOf(), val states: MutableS
  * similar complexity, it would still be a better measure than what we have now.
  */
 open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths: Boolean = true) : ParseTreeListener {
-
     val paths = mutableMapOf<Path, Boolean>()
     val pathStack = mutableStackOf<Path>()
 
@@ -105,7 +104,10 @@ open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths
         }
     }
 
-    private fun isLeftRecursive(path: Path, ruleIndex: Int): Boolean {
+    private fun isLeftRecursive(
+        path: Path,
+        ruleIndex: Int,
+    ): Boolean {
         return if (path.elements.isNotEmpty()) {
             val last = path.elements.last()
             last.rule && last.symbol == ruleIndex
@@ -127,9 +129,11 @@ open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths
                         addUncoveredPath(PathElement(it.ruleIndex, true), it.target.stateNumber)
                     }
                 }
+
                 is AtomTransition -> {
                     addUncoveredPath(PathElement(it.label, false), it.target.stateNumber)
                 }
+
                 is SetTransition -> {
                     it.set.intervals.forEach { interval ->
                         for (i in interval.a..interval.b) {
@@ -137,6 +141,7 @@ open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths
                         }
                     }
                 }
+
                 else -> {
                     addUncoveredPaths(it.target.stateNumber)
                 }
@@ -144,16 +149,20 @@ open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths
         }
     }
 
-    private fun addUncoveredPath(element: PathElement, nextState: Int): Boolean {
+    private fun addUncoveredPath(
+        element: PathElement,
+        nextState: Int,
+    ): Boolean {
         val path = pathStack.peek().followWith(element)
         return if (!paths.containsKey(path)) {
             paths[path] = false
             if (expandUncoveredPaths) {
-                val newPath = if (element.rule) {
-                    Path(listOf(element), path.states)
-                } else {
-                    path
-                }
+                val newPath =
+                    if (element.rule) {
+                        Path(listOf(element), path.states)
+                    } else {
+                        path
+                    }
                 pathStack.push(newPath)
                 try {
                     addUncoveredPaths(nextState)

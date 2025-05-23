@@ -41,6 +41,7 @@ open class ANTLRTokenFactory : TokenFactory<KolasuANTLRToken> {
 
     fun extractTokens(result: ParsingResult<*>): LexingResult<KolasuANTLRToken>? {
         val antlrTerminals = mutableListOf<TerminalNode>()
+
         fun extractTokensFromParseTree(pt: ParseTree?) {
             if (pt is TerminalNode) {
                 antlrTerminals.add(pt)
@@ -51,11 +52,12 @@ open class ANTLRTokenFactory : TokenFactory<KolasuANTLRToken> {
             }
         }
 
-        val ptRoot = result.firstStage?.root ?: if (result.root?.origin is ParseTreeOrigin) {
-            (result.root.origin as ParseTreeOrigin).parseTree
-        } else {
-            null
-        }
+        val ptRoot =
+            result.firstStage?.root ?: if (result.root?.origin is ParseTreeOrigin) {
+                (result.root.origin as ParseTreeOrigin).parseTree
+            } else {
+                null
+            }
         return if (ptRoot != null) {
             extractTokensFromParseTree(ptRoot)
             antlrTerminals.sortBy { it.symbol.tokenIndex }
@@ -74,7 +76,10 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<
      * Creates the lexer.
      */
     @JvmOverloads
-    protected open fun createANTLRLexer(inputStream: InputStream, charset: Charset = Charsets.UTF_8): Lexer {
+    protected open fun createANTLRLexer(
+        inputStream: InputStream,
+        charset: Charset = Charsets.UTF_8,
+    ): Lexer {
         return createANTLRLexer(CharStreams.fromStream(inputStream, charset))
     }
 
@@ -87,38 +92,42 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<
         inputStream: InputStream,
         charset: Charset,
         onlyFromDefaultChannel: Boolean,
-        source: Source?
+        source: Source?,
     ): LexingResult<T> {
         val issues = mutableListOf<Issue>()
         val tokens = mutableListOf<T>()
         var last: Token? = null
-        val time = measureTimeMillis {
-            val lexer = createANTLRLexer(inputStream, charset)
-            attachListeners(lexer, issues)
-            do {
-                val t = lexer.nextToken()
-                if (t == null) {
-                    break
-                } else {
-                    if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
-                        if (t.type != Token.EOF) {
-                            tokens.add(tokenFactory.convertToken(t))
+        val time =
+            measureTimeMillis {
+                val lexer = createANTLRLexer(inputStream, charset)
+                attachListeners(lexer, issues)
+                do {
+                    val t = lexer.nextToken()
+                    if (t == null) {
+                        break
+                    } else {
+                        if (!onlyFromDefaultChannel || t.channel == Token.DEFAULT_CHANNEL) {
+                            if (t.type != Token.EOF) {
+                                tokens.add(tokenFactory.convertToken(t))
+                            }
+                            last = t
                         }
-                        last = t
                     }
-                }
-            } while (t.type != Token.EOF)
+                } while (t.type != Token.EOF)
 
-            if (last != null && last!!.type != Token.EOF) {
-                val message = "The parser didn't consume the entire input"
-                issues.add(Issue(IssueType.SYNTACTIC, message, position = last!!.endPoint.asPosition))
+                if (last != null && last!!.type != Token.EOF) {
+                    val message = "The parser didn't consume the entire input"
+                    issues.add(Issue(IssueType.SYNTACTIC, message, position = last!!.endPoint.asPosition))
+                }
             }
-        }
 
         return LexingResult(issues, tokens, null, time, source)
     }
 
-    protected open fun attachListeners(lexer: Lexer, issues: MutableList<Issue>) {
+    protected open fun attachListeners(
+        lexer: Lexer,
+        issues: MutableList<Issue>,
+    ) {
         lexer.injectErrorCollectorInLexer(issues)
     }
 }
@@ -132,9 +141,8 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<
  * instance every time you need to parse some source code, or performance may suffer.
  */
 abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken>(
-    tokenFactory: TokenFactory<T>
+    tokenFactory: TokenFactory<T>,
 ) : KolasuANTLRLexer<T>(tokenFactory), ASTParser<R> {
-
     protected var predictionContextCache = PredictionContextCache()
 
     /**
@@ -161,17 +169,23 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         parseTreeRoot: C,
         considerPosition: Boolean = true,
         issues: MutableList<Issue>,
-        source: Source? = null
+        source: Source? = null,
     ): R?
 
-    protected open fun attachListeners(parser: P, issues: MutableList<Issue>) {
+    protected open fun attachListeners(
+        parser: P,
+        issues: MutableList<Issue>,
+    ) {
         parser.injectErrorCollectorInParser(issues)
     }
 
     /**
      * Creates the first-stage parser.
      */
-    protected open fun createParser(inputStream: CharStream, issues: MutableList<Issue>): P {
+    protected open fun createParser(
+        inputStream: CharStream,
+        issues: MutableList<Issue>,
+    ): P {
         val lexer = createANTLRLexer(inputStream)
         attachListeners(lexer, issues)
         val tokenStream = createTokenStream(lexer)
@@ -189,15 +203,19 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
      * Checks the parse tree for correctness. If you're concerned about performance, you may want to override this to
      * do nothing.
      */
-    protected open fun verifyParseTree(parser: Parser, issues: MutableList<Issue>, root: ParserRuleContext) {
+    protected open fun verifyParseTree(
+        parser: Parser,
+        issues: MutableList<Issue>,
+        root: ParserRuleContext,
+    ) {
         val lastToken = parser.tokenStream.get(parser.tokenStream.index())
         if (lastToken.type != Token.EOF) {
             issues.add(
                 Issue(
                     IssueType.SYNTACTIC,
                     "The whole input was not consumed",
-                    position = lastToken!!.endPoint.asPosition
-                )
+                    position = lastToken!!.endPoint.asPosition,
+                ),
             )
         }
 
@@ -211,12 +229,15 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
             {
                 val message = "Error node found (token: ${it.symbol?.text})"
                 issues.add(Issue.syntactic(message, position = it.toPosition()))
-            }
+            },
         )
     }
 
     @JvmOverloads
-    fun parseFirstStage(code: String, measureLexingTime: Boolean = false): FirstStageParsingResult<C> {
+    fun parseFirstStage(
+        code: String,
+        measureLexingTime: Boolean = false,
+    ): FirstStageParsingResult<C> {
         return parseFirstStage(CharStreams.fromString(code), measureLexingTime)
     }
 
@@ -224,7 +245,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
     fun parseFirstStage(
         inputStream: InputStream,
         charset: Charset = Charsets.UTF_8,
-        measureLexingTime: Boolean = false
+        measureLexingTime: Boolean = false,
     ): FirstStageParsingResult<C> {
         return parseFirstStage(CharStreams.fromStream(inputStream, charset), measureLexingTime)
     }
@@ -237,37 +258,44 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
     fun parseFirstStage(
         inputStream: CharStream,
         measureLexingTime: Boolean = false,
-        source: Source? = null
+        source: Source? = null,
     ): FirstStageParsingResult<C> {
         val issues = LinkedList<Issue>()
         var root: C?
         var lexingTime: Long? = null
-        val time = measureTimeMillis {
-            val parser = createParser(inputStream, issues)
-            countExecution(parser)
-            if (measureLexingTime) {
-                val tokenStream = parser.inputStream
-                if (tokenStream is CommonTokenStream) {
-                    lexingTime = measureTimeMillis {
-                        tokenStream.fill()
-                        tokenStream.seek(0)
+        val time =
+            measureTimeMillis {
+                val parser = createParser(inputStream, issues)
+                countExecution(parser)
+                if (measureLexingTime) {
+                    val tokenStream = parser.inputStream
+                    if (tokenStream is CommonTokenStream) {
+                        lexingTime =
+                            measureTimeMillis {
+                                tokenStream.fill()
+                                tokenStream.seek(0)
+                            }
                     }
                 }
+                root = invokeRootRule(parser)
+                if (root != null) {
+                    verifyParseTree(parser, issues, root!!)
+                }
             }
-            root = invokeRootRule(parser)
-            if (root != null) {
-                verifyParseTree(parser, issues, root!!)
-            }
-        }
         return FirstStageParsingResult(issues, root, null, null, time, lexingTime, source)
     }
 
     @JvmOverloads
-    fun parseFirstStage(file: File, charset: Charset = Charsets.UTF_8, measureLexingTime: Boolean = false):
-        FirstStageParsingResult<C> =
-        parseFirstStage(FileInputStream(file), charset, measureLexingTime)
+    fun parseFirstStage(
+        file: File,
+        charset: Charset = Charsets.UTF_8,
+        measureLexingTime: Boolean = false,
+    ): FirstStageParsingResult<C> = parseFirstStage(FileInputStream(file), charset, measureLexingTime)
 
-    protected open fun postProcessAst(ast: R, issues: MutableList<Issue>): R {
+    protected open fun postProcessAst(
+        ast: R,
+        issues: MutableList<Issue>,
+    ): R {
         return ast
     }
 
@@ -275,7 +303,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         code: String,
         considerPosition: Boolean,
         measureLexingTime: Boolean,
-        source: Source?
+        source: Source?,
     ): ParsingResult<R> = parse(CharStreams.fromString(code), considerPosition, measureLexingTime, source)
 
     @JvmOverloads
@@ -283,7 +311,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         inputStream: CharStream,
         considerPosition: Boolean = true,
         measureLexingTime: Boolean = false,
-        source: Source? = null
+        source: Source? = null,
     ): ParsingResult<R> {
         val start = System.currentTimeMillis()
         val firstStage = parseFirstStage(inputStream, measureLexingTime)
@@ -303,7 +331,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
             null,
             firstStage,
             now - start,
-            source
+            source,
         )
     }
 
@@ -311,9 +339,8 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         file: File,
         charset: Charset,
         considerPosition: Boolean,
-        measureLexingTime: Boolean
-    ): ParsingResult<R> =
-        parse(FileInputStream(file), charset, considerPosition, measureLexingTime, FileSource(file))
+        measureLexingTime: Boolean,
+    ): ParsingResult<R> = parse(FileInputStream(file), charset, considerPosition, measureLexingTime, FileSource(file))
 
     // For convenient use from Java
     fun walk(node: Node) = node.walk()
@@ -322,7 +349,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
     fun processProperties(
         node: Node,
         propertyOperation: (PropertyDescription) -> Unit,
-        propertiesToIgnore: Set<String> = emptySet()
+        propertiesToIgnore: Set<String> = emptySet(),
     ) = node.processProperties(propertiesToIgnore, propertyOperation)
 
     /**

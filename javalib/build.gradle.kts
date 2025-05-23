@@ -1,5 +1,3 @@
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.kotlin.dsl.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {

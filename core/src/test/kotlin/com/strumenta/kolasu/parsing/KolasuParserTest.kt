@@ -14,8 +14,12 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-open class SimpleLangKolasuParser : KolasuParser<Node, SimpleLangParser, SimpleLangParser.CompilationUnitContext,
-    KolasuANTLRToken>(ANTLRTokenFactory()) {
+open class SimpleLangKolasuParser : KolasuParser<
+    Node,
+    SimpleLangParser,
+    SimpleLangParser.CompilationUnitContext,
+    KolasuANTLRToken,
+    >(ANTLRTokenFactory()) {
     override fun createANTLRLexer(charStream: CharStream): Lexer {
         return SimpleLangLexer(charStream)
     }
@@ -28,7 +32,7 @@ open class SimpleLangKolasuParser : KolasuParser<Node, SimpleLangParser, SimpleL
         parseTreeRoot: SimpleLangParser.CompilationUnitContext,
         considerPosition: Boolean,
         issues: MutableList<Issue>,
-        source: Source?
+        source: Source?,
     ): Node? = null
 
     override fun clearCaches() {
@@ -40,16 +44,16 @@ open class SimpleLangKolasuParser : KolasuParser<Node, SimpleLangParser, SimpleL
 }
 
 class KolasuParserTest {
-
     @Test
     fun testLexing() {
         val parser = SimpleLangKolasuParser()
-        val result = parser.parse(
-            """set a = 10
+        val result =
+            parser.parse(
+                """set a = 10
             |set b = ""
             |display c
-            """.trimMargin()
-        )
+                """.trimMargin(),
+            )
         assertNotNull(result)
         val lexingResult = (parser.tokenFactory as ANTLRTokenFactory).extractTokens(result)
         assertNotNull(lexingResult)
@@ -65,7 +69,7 @@ class KolasuParserTest {
             """set a = 10
             |set b = ""
             |display c
-            """.trimMargin()
+            """.trimMargin(),
         )
         parser.executionsToNextCacheClean = 0
         assertEquals(0, parser.cachesCounter)
@@ -73,7 +77,7 @@ class KolasuParserTest {
             """set a = 10
             |set b = ""
             |display c
-            """.trimMargin()
+            """.trimMargin(),
         )
         assertEquals(1, parser.cachesCounter)
     }
@@ -81,11 +85,12 @@ class KolasuParserTest {
     @Test
     fun issuesAreCapitalized() {
         val parser = SimpleLangKolasuParser()
-        val result = parser.parse(
-            """set set a = 10
+        val result =
+            parser.parse(
+                """set set a = 10
             |display c
-            """.trimMargin()
-        )
+                """.trimMargin(),
+            )
         assert(result.issues.isNotEmpty())
         assertNotNull(result.issues.find { it.message.startsWith("Extraneous input 'set'") })
         assertNotNull(result.issues.find { it.message.startsWith("Mismatched input 'c'") })
@@ -94,11 +99,12 @@ class KolasuParserTest {
     @Test
     fun issuesHaveNotFlatPosition() {
         val parser = SimpleLangKolasuParser()
-        val result = parser.parse(
-            """set set a = 10
+        val result =
+            parser.parse(
+                """set set a = 10
             |display c
-            """.trimMargin()
-        )
+                """.trimMargin(),
+            )
         assert(result.issues.isNotEmpty())
         assert(result.issues.none { it.position?.isFlat ?: false })
         val extraneousInput = result.issues.find { it.message.startsWith("Extraneous input 'set'") }!!

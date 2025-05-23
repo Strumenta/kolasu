@@ -1,17 +1,20 @@
 package com.strumenta.kolasu.model
 
-import java.lang.UnsupportedOperationException
 import java.util.LinkedList
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import org.junit.Test as test
 
 data class A(val s: String) : Node()
+
 data class B(val a: A, val manyAs: List<A>) : Node()
 
 data class AW(var s: String) : Node()
+
 data class BW(var a: AW, val manyAs: MutableList<AW>) : Node()
+
 data class CW(var a: AW, val manyAs: MutableSet<AW>) : Node()
+
 data class DW(var a: BW, val manyAs: MutableList<AW>) : Node()
 
 @NodeType
@@ -20,16 +23,22 @@ interface FooNodeType
 interface BarNotNodeType
 
 data class MiniCalcFile(val elements: List<MCStatement>) : Node()
+
 data class VarDeclaration(override val name: String, val value: MCExpression) : MCStatement(), Named
+
 sealed class MCExpression : Node()
+
 data class IntLit(val value: String) : MCExpression()
+
 sealed class MCStatement : Node()
+
 data class Assignment(val ref: ReferenceByName<VarDeclaration>, val value: MCExpression) : MCStatement()
+
 data class Print(val value: MCExpression) : MCStatement()
+
 data class ValueReference(val ref: ReferenceByName<VarDeclaration>) : MCExpression()
 
 class ProcessingTest {
-
     @test
     fun recognizeNodeType() {
         assertEquals(true, FooNodeType::class.isMarkedAsNodeType())
@@ -174,21 +183,23 @@ class ProcessingTest {
 
     @test
     fun transformVarName() {
-        val startTree = MiniCalcFile(
-            listOf(
-                VarDeclaration("A", IntLit("10")),
-                Assignment(ReferenceByName("A"), IntLit("11")),
-                Print(ValueReference(ReferenceByName("A")))
+        val startTree =
+            MiniCalcFile(
+                listOf(
+                    VarDeclaration("A", IntLit("10")),
+                    Assignment(ReferenceByName("A"), IntLit("11")),
+                    Print(ValueReference(ReferenceByName("A"))),
+                ),
             )
-        )
 
-        val expectedTransformedTree = MiniCalcFile(
-            listOf(
-                VarDeclaration("B", IntLit("10")),
-                Assignment(ReferenceByName("B"), IntLit("11")),
-                Print(ValueReference(ReferenceByName("B")))
+        val expectedTransformedTree =
+            MiniCalcFile(
+                listOf(
+                    VarDeclaration("B", IntLit("10")),
+                    Assignment(ReferenceByName("B"), IntLit("11")),
+                    Print(ValueReference(ReferenceByName("B"))),
+                ),
             )
-        )
 
         val nodesProcessed = HashSet<Node>()
 
@@ -205,7 +216,7 @@ class ProcessingTest {
                     is Assignment -> Assignment(ReferenceByName("B"), it.value)
                     else -> it
                 }
-            })
+            }),
         )
     }
 

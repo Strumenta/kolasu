@@ -23,7 +23,7 @@ sealed class SimpleDecl : Node(), EntityDeclaration
 data class SimpleNodeA(
     override val name: String,
     val ref: ReferenceByName<SimpleNodeA>,
-    val child: SimpleNodeB?
+    val child: SimpleNodeB?,
 ) : Named, SimpleDecl(), MyRelevantInterface, MyIrrelevantInterface
 
 data class MyNonPartition(val roots: MutableList<SimpleRoot>) : Node()
@@ -38,12 +38,12 @@ data class SimpleNodeB(val value: String) : SimpleDecl()
 data class MyNodeWithNullableContainmentLists(val children: MutableList<MyNodeWithNullableContainmentLists>?) : Node()
 
 class LionWebLanguageConverterTest {
-
     @Test
     fun exportSimpleLanguage() {
-        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
-            addClass(SimpleRoot::class)
-        }
+        val kLanguage =
+            KolasuLanguage("com.strumenta.SimpleLang").apply {
+                addClass(SimpleRoot::class)
+            }
         assertEquals(5, kLanguage.astClasses.size)
         val lwLanguage = LionWebLanguageConverter().exportToLionWeb(kLanguage)
         assertEquals("1", lwLanguage.version)
@@ -87,7 +87,7 @@ class LionWebLanguageConverterTest {
         assertEquals(listOf(StarLasuLWLanguage.EntityDeclaration), simpleNodeA.extendedConcept!!.implemented)
         assertEquals(
             listOf(LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU), myRelevantInterface),
-            simpleNodeA.implemented
+            simpleNodeA.implemented,
         )
         assertEquals(false, simpleNodeA.isAbstract)
         assertEquals(2, simpleNodeA.features.size)
@@ -96,7 +96,7 @@ class LionWebLanguageConverterTest {
         assertEquals(
             true,
             LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU)
-                .getPropertyByName("name") in simpleNodeA.allFeatures()
+                .getPropertyByName("name") in simpleNodeA.allFeatures(),
         )
 
         val simpleNodeARef = simpleNodeA.getReferenceByName("ref")!!
@@ -129,10 +129,11 @@ class LionWebLanguageConverterTest {
 
     @Test
     fun exportSimpleLanguageWithPartitions() {
-        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
-            addClass(SimpleRoot::class)
-            addClass(MyNonPartition::class)
-        }
+        val kLanguage =
+            KolasuLanguage("com.strumenta.SimpleLang").apply {
+                addClass(SimpleRoot::class)
+                addClass(MyNonPartition::class)
+            }
         assertEquals(6, kLanguage.astClasses.size)
         val lwLanguage = LionWebLanguageConverter().exportToLionWeb(kLanguage)
         assertEquals("1", lwLanguage.version)
@@ -188,7 +189,7 @@ class LionWebLanguageConverterTest {
         assertEquals(simpleDecl, simpleNodeA.extendedConcept)
         assertEquals(
             listOf(LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU), myRelevantInterface),
-            simpleNodeA.implemented
+            simpleNodeA.implemented,
         )
         assertEquals(false, simpleNodeA.isAbstract)
         assertEquals(2, simpleNodeA.features.size)
@@ -197,7 +198,7 @@ class LionWebLanguageConverterTest {
         assertEquals(
             true,
             LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU)
-                .getPropertyByName("name") in simpleNodeA.allFeatures()
+                .getPropertyByName("name") in simpleNodeA.allFeatures(),
         )
 
         val simpleNodeARef = simpleNodeA.getReferenceByName("ref")!!
@@ -231,20 +232,22 @@ class LionWebLanguageConverterTest {
 
     @Test(expected = RuntimeException::class)
     fun conversionOfNullableContainmentListIsForbidden() {
-        val kLanguage = KolasuLanguage("com.strumenta.SimpleLang").apply {
-            addClass(MyNodeWithNullableContainmentLists::class)
-        }
+        val kLanguage =
+            KolasuLanguage("com.strumenta.SimpleLang").apply {
+                addClass(MyNodeWithNullableContainmentLists::class)
+            }
         val lwLanguage = LionWebLanguageConverter().exportToLionWeb(kLanguage)
     }
 
     @Test
     fun exportEnumLiterals() {
         val converter = LionWebLanguageConverter()
-        val lwLanguage = converter.exportToLionWeb(
-            KolasuLanguage("myLanguage").apply {
-                addClass(NodeWithEnum::class)
-            }
-        )
+        val lwLanguage =
+            converter.exportToLionWeb(
+                KolasuLanguage("myLanguage").apply {
+                    addClass(NodeWithEnum::class)
+                },
+            )
         val enumeration = lwLanguage.getEnumerationByName("AnEnum") ?: throw IllegalStateException()
         assertEquals("AnEnum", enumeration.name)
         assertEquals(3, enumeration.literals.size)

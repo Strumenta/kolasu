@@ -1,6 +1,9 @@
 package com.strumenta.kolasu.traversing
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.model.pos
 import kotlin.system.measureTimeMillis
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -13,8 +16,9 @@ internal class TraversingStructurallyTest {
         val name: String,
         val contents: List<Node> = listOf(),
         val set: Set<Node> = setOf(),
-        specifiedPosition: Position? = null
+        specifiedPosition: Position? = null,
     ) : Node(specifiedPosition)
+
     class Item(val name: String, specifiedPosition: Position? = null) : Node(specifiedPosition)
 
     private fun printSequence(sequence: Sequence<Node>): String {
@@ -27,36 +31,37 @@ internal class TraversingStructurallyTest {
         }.joinToString()
     }
 
-    private val testCase = Box(
-        "root",
-        listOf(
-            Box(
-                "first",
-                listOf(
-                    Item("1", specifiedPosition = pos(3, 6, 3, 12))
+    private val testCase =
+        Box(
+            "root",
+            listOf(
+                Box(
+                    "first",
+                    listOf(
+                        Item("1", specifiedPosition = pos(3, 6, 3, 12)),
+                    ),
+                    specifiedPosition = pos(2, 3, 4, 3),
                 ),
-                specifiedPosition = pos(2, 3, 4, 3)
-            ),
-            Item("2", specifiedPosition = pos(5, 3, 5, 9)),
-            Box(
-                "big",
-                listOf(
-                    Box(
-                        "small",
-                        listOf(
-                            Item("3", specifiedPosition = pos(8, 7, 8, 13)),
-                            Item("4", specifiedPosition = pos(9, 7, 9, 13)),
-                            Item("5", specifiedPosition = pos(10, 7, 10, 13))
+                Item("2", specifiedPosition = pos(5, 3, 5, 9)),
+                Box(
+                    "big",
+                    listOf(
+                        Box(
+                            "small",
+                            listOf(
+                                Item("3", specifiedPosition = pos(8, 7, 8, 13)),
+                                Item("4", specifiedPosition = pos(9, 7, 9, 13)),
+                                Item("5", specifiedPosition = pos(10, 7, 10, 13)),
+                            ),
+                            specifiedPosition = pos(7, 5, 11, 5),
                         ),
-                        specifiedPosition = pos(7, 5, 11, 5)
-                    )
+                    ),
+                    specifiedPosition = pos(6, 3, 12, 3),
                 ),
-                specifiedPosition = pos(6, 3, 12, 3)
+                Item("6", specifiedPosition = pos(13, 3, 13, 9)),
             ),
-            Item("6", specifiedPosition = pos(13, 3, 13, 9))
-        ),
-        specifiedPosition = pos(1, 1, 14, 1)
-    )
+            specifiedPosition = pos(1, 1, 14, 1),
+        )
 
     @Test
     fun walkDepthFirst() {
@@ -91,7 +96,8 @@ internal class TraversingStructurallyTest {
             .joinToString("")
     }
 
-    @Test @Ignore
+    @Test
+    @Ignore
     fun performanceTest() {
         val boxes = mutableListOf<Box>()
         val numberOfChildren = 10000
@@ -116,32 +122,37 @@ internal class TraversingStructurallyTest {
         root.assignParents()
 
         val countedNodesList: MutableList<Int> = mutableListOf()
-        val walkTime = measureTimeMillis {
-            var countedNodes = 0
-            root.walk().forEach { countedNodes++ }
-            countedNodesList.add(countedNodes)
-        }
-        val walkTimeTwo = measureTimeMillis {
-            var countedNodes = 0
-            root.walk().forEach { countedNodes++ }
-            countedNodesList.add(countedNodes)
-        }
+        val walkTime =
+            measureTimeMillis {
+                var countedNodes = 0
+                root.walk().forEach { countedNodes++ }
+                countedNodesList.add(countedNodes)
+            }
+        val walkTimeTwo =
+            measureTimeMillis {
+                var countedNodes = 0
+                root.walk().forEach { countedNodes++ }
+                countedNodesList.add(countedNodes)
+            }
         val fw = FastWalker(root)
-        val walkTimeFast = measureTimeMillis {
-            var countedNodes = 0
-            fw.walk().forEach { countedNodes++ }
-            countedNodesList.add(countedNodes)
-        }
-        val walkTimeFastTwo = measureTimeMillis {
-            var countedNodes = 0
-            fw.walk().forEach { countedNodes++ }
-            countedNodesList.add(countedNodes)
-        }
-        val walkTimeFastThree = measureTimeMillis {
-            var countedNodes = 0
-            fw.walk().forEach { countedNodes++ }
-            countedNodesList.add(countedNodes)
-        }
+        val walkTimeFast =
+            measureTimeMillis {
+                var countedNodes = 0
+                fw.walk().forEach { countedNodes++ }
+                countedNodesList.add(countedNodes)
+            }
+        val walkTimeFastTwo =
+            measureTimeMillis {
+                var countedNodes = 0
+                fw.walk().forEach { countedNodes++ }
+                countedNodesList.add(countedNodes)
+            }
+        val walkTimeFastThree =
+            measureTimeMillis {
+                var countedNodes = 0
+                fw.walk().forEach { countedNodes++ }
+                countedNodesList.add(countedNodes)
+            }
         countedNodesList.forEach {
             assertEquals(nodes, it)
         }
@@ -154,36 +165,41 @@ internal class TraversingStructurallyTest {
     @Test
     fun walkSet() {
         // Note: we use hashSetOf() specifically because it doesn't guarantee traversal order
-        val testCase = Box(
-            "root",
-            set = hashSetOf(
-                Box(
-                    "first",
-                    set = hashSetOf(
-                        Item("1", specifiedPosition = pos(3, 6, 3, 12))
-                    ),
-                    specifiedPosition = pos(2, 3, 4, 3)
-                ),
-                Item("2", specifiedPosition = pos(5, 3, 5, 9)),
-                Box(
-                    "big",
-                    set = hashSetOf(
+        val testCase =
+            Box(
+                "root",
+                set =
+                    hashSetOf(
                         Box(
-                            "small",
-                            set = hashSetOf(
-                                Item("3", specifiedPosition = pos(8, 7, 8, 13)),
-                                Item("4", specifiedPosition = pos(9, 7, 9, 13)),
-                                Item("5", specifiedPosition = pos(10, 7, 10, 13))
-                            ),
-                            specifiedPosition = pos(7, 5, 11, 5)
-                        )
+                            "first",
+                            set =
+                                hashSetOf(
+                                    Item("1", specifiedPosition = pos(3, 6, 3, 12)),
+                                ),
+                            specifiedPosition = pos(2, 3, 4, 3),
+                        ),
+                        Item("2", specifiedPosition = pos(5, 3, 5, 9)),
+                        Box(
+                            "big",
+                            set =
+                                hashSetOf(
+                                    Box(
+                                        "small",
+                                        set =
+                                            hashSetOf(
+                                                Item("3", specifiedPosition = pos(8, 7, 8, 13)),
+                                                Item("4", specifiedPosition = pos(9, 7, 9, 13)),
+                                                Item("5", specifiedPosition = pos(10, 7, 10, 13)),
+                                            ),
+                                        specifiedPosition = pos(7, 5, 11, 5),
+                                    ),
+                                ),
+                            specifiedPosition = pos(6, 3, 12, 3),
+                        ),
+                        Item("6", specifiedPosition = pos(13, 3, 13, 9)),
                     ),
-                    specifiedPosition = pos(6, 3, 12, 3)
-                ),
-                Item("6", specifiedPosition = pos(13, 3, 13, 9))
-            ),
-            specifiedPosition = pos(1, 1, 14, 1)
-        )
+                specifiedPosition = pos(1, 1, 14, 1),
+            )
         val set = mutableSetOf<String>()
         testCase.walk().map {
             when (it) {

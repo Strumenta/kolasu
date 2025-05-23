@@ -11,7 +11,7 @@ import com.strumenta.kolasu.semantics.symbol.description.SymbolDescription
  **/
 fun scope(
     ignoreCase: Boolean = false,
-    init: ScopeDescriptionApi.() -> Unit
+    init: ScopeDescriptionApi.() -> Unit,
 ): ScopeDescription = ScopeDescription(ignoreCase).apply(init)
 
 /**
@@ -36,7 +36,7 @@ fun scope(
  *
  **/
 class ScopeDescription(
-    private val ignoreCase: Boolean = false
+    private val ignoreCase: Boolean = false,
 ) : ScopeDescriptionApi {
     private var parent: ScopeDescription? = null
     private val namesToExternalSymbolIdentifiers: MutableMap<String, String> = mutableMapOf()
@@ -69,7 +69,7 @@ class ScopeDescription(
 
     override fun define(
         name: String,
-        symbol: Node
+        symbol: Node,
     ) {
         when (symbol) {
             is SymbolDescription -> this.namesToExternalSymbolIdentifiers[name.asKey()] = symbol.identifier
@@ -91,7 +91,7 @@ class ScopeDescription(
 
     override fun parent(
         ignoreCase: Boolean,
-        init: ScopeDescriptionApi.() -> Unit
+        init: ScopeDescriptionApi.() -> Unit,
     ) {
         this.parent = scope(ignoreCase, init)
     }
@@ -117,7 +117,7 @@ interface ScopeDescriptionApi {
      **/
     fun define(
         name: String,
-        symbol: Node
+        symbol: Node,
     )
 
     /**
@@ -136,6 +136,6 @@ interface ScopeDescriptionApi {
      **/
     fun parent(
         ignoreCase: Boolean = false,
-        init: ScopeDescriptionApi.() -> Unit
+        init: ScopeDescriptionApi.() -> Unit,
     )
 }

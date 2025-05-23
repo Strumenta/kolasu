@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import kotlin.test.Ignore
 
 class ClassesGenerationFromEMFTest {
-
     private fun loadEPackage(name: String): EPackage {
         val inputStream = this.javaClass.getResourceAsStream("/$name.ecore")
         requireNotNull(inputStream)

@@ -16,8 +16,8 @@ import org.junit.Test as test
 data class MySetStatement(val specifiedPosition: Position? = null) : Node(specifiedPosition)
 
 class PositionTest {
-
-    @test fun offset() {
+    @test
+    fun offset() {
         val code =
             """this is some code
                      |second line
@@ -30,7 +30,8 @@ class PositionTest {
         assertFails { Point(4, 0).offset(code) }
     }
 
-    @test fun pointCompare() {
+    @test
+    fun pointCompare() {
         val p0 = START_POINT
         val p1 = Point(1, 1)
         val p2 = Point(1, 100)
@@ -67,7 +68,8 @@ class PositionTest {
         assertEquals(false, p1 > p3)
     }
 
-    @test fun isBefore() {
+    @test
+    fun isBefore() {
         val p0 = START_POINT
         val p1 = Point(1, 1)
         val p2 = Point(1, 100)
@@ -94,7 +96,8 @@ class PositionTest {
         assertEquals(false, p3.isBefore(p3))
     }
 
-    @test fun text() {
+    @test
+    fun text() {
         val code =
             """this is some code
                      |second line
@@ -171,7 +174,8 @@ class PositionTest {
         assertEquals(Position(Point(1, 0), Point(1, 13)), mySetStatement.position)
     }
 
-    @test fun illegalPositionAccepted() {
+    @test
+    fun illegalPositionAccepted() {
         Position(Point(10, 1), Point(5, 2), validate = false)
     }
 
@@ -180,7 +184,8 @@ class PositionTest {
         Position(Point(10, 1), Point(5, 2), validate = true)
     }
 
-    @test fun parserTreePosition() {
+    @test
+    fun parserTreePosition() {
         val code = "set foo = 123"
         val lexer = SimpleLangLexer(CharStreams.fromString(code))
         val parser = SimpleLangParser(CommonTokenStream(lexer))
