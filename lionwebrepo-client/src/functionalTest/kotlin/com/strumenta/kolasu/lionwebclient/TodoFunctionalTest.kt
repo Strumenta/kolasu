@@ -5,13 +5,13 @@ import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
 import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
-import io.lionweb.lioncore.kotlin.repoclient.testing.AbstractRepoClientFunctionalTest
+import io.lionweb.repoclient.testing.AbstractRepoClientFunctionalTest
 import org.testcontainers.junit.jupiter.Testcontainers
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @Testcontainers
-class TodoFunctionalTest : AbstractRepoClientFunctionalTest(lionWebVersion = LIONWEB_VERSION_USED_BY_KOLASU) {
+class TodoFunctionalTest : AbstractRepoClientFunctionalTest(LIONWEB_VERSION_USED_BY_KOLASU, true) {
     @Test
     fun noPartitionsOnNewModelRepository() {
         val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort)
@@ -79,7 +79,9 @@ class TodoFunctionalTest : AbstractRepoClientFunctionalTest(lionWebVersion = LIO
 
     @Test
     fun checkNodeIDs() {
-        val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort, debug = true)
+        val repoName = "checkNodeIDs"
+        val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort, debug = true, repositoryName = repoName)
+        kolasuClient.lionWebClient.createRepository(repoName, LIONWEB_VERSION_USED_BY_KOLASU, history = false)
         kolasuClient.registerLanguage(todoLanguage)
         kolasuClient.registerLanguage(todoAccountLanguage)
 
@@ -114,7 +116,9 @@ class TodoFunctionalTest : AbstractRepoClientFunctionalTest(lionWebVersion = LIO
 
     @Test
     fun sourceIsRetrievedCorrectly() {
-        val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort, debug = true)
+        val repoName = "sourceIsRetrievedCorrectly"
+        val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort, debug = true, repositoryName = repoName)
+        kolasuClient.lionWebClient.createRepository(repoName, LIONWEB_VERSION_USED_BY_KOLASU, false)
         kolasuClient.registerLanguage(todoLanguage)
         kolasuClient.registerLanguage(todoAccountLanguage)
 

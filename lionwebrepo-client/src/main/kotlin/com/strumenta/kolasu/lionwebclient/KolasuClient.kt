@@ -61,7 +61,8 @@ class KolasuClient(
     val connectTimeOutInSeconds: Long = 60,
     val callTimeoutInSeconds: Long = 60,
     val authorizationToken: String? = null,
-    val idProvider: NodeIdProvider = CommonNodeIdProvider().caching()
+    val idProvider: NodeIdProvider = CommonNodeIdProvider().caching(),
+    val repositoryName : String = "default"
 ) {
     /**
      * Exposed for testing purposes
@@ -81,32 +82,20 @@ class KolasuClient(
             connectTimeOutInSeconds = connectTimeOutInSeconds,
             callTimeoutInSeconds = callTimeoutInSeconds,
             authorizationToken = authorizationToken,
-            lionWebVersion = LIONWEB_VERSION_USED_BY_KOLASU
+            lionWebVersion = LIONWEB_VERSION_USED_BY_KOLASU,
+            repository = repositoryName
         )
-
-    private val serializationDecorators = mutableListOf<SerializationDecorator>()
-
-    init {
-        registerSerializationDecorator {
-            it.apply {
-                enableDynamicNodes()
-                unavailableParentPolicy = UnavailableNodePolicy.NULL_REFERENCES
-                unavailableReferenceTargetPolicy = UnavailableNodePolicy.PROXY_NODES
-            }
-            nodeConverter.prepareSerialization(
-                it
-            ) as JsonSerialization
-        }
-    }
-
     /**
      * Exposed for testing purposes
      */
     var jsonSerialization: JsonSerialization = lionWebClient.jsonSerialization
         private set
 
-    fun updateSerialization() {
-        serializationDecorators.forEach { serializationDecorator -> serializationDecorator.invoke(jsonSerialization) }
+    init {
+        jsonSerialization.enableDynamicNodes()
+        jsonSerialization.unavailableParentPolicy = UnavailableNodePolicy.NULL_REFERENCES
+        jsonSerialization.unavailableReferenceTargetPolicy = UnavailableNodePolicy.PROXY_NODES
+        nodeConverter.prepareSerialization(jsonSerialization)
     }
 
     //
@@ -480,11 +469,6 @@ class KolasuClient(
             idProvider,
             considerParent = true,
         )
-    }
-
-    fun registerSerializationDecorator(decorator: SerializationDecorator) {
-        // We do not need to specify them also for the lionWebClient, as it uses ours version of JsonSerialization
-        serializationDecorators.add(decorator)
     }
 
 }
