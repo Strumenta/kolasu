@@ -1,6 +1,6 @@
 [versions]
-lwjava = "0.3.1"
-lwkotlin = "0.3.3"
+lwjava = "0.4.5"
+lwkotlin = "0.4.2"
 kotestVersion= "1.3.3"
 kotlin = "2.1.21"
 dokka = "1.9.20"

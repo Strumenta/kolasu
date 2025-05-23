@@ -27,7 +27,6 @@ import io.lionweb.lioncore.kotlin.repoclient.ClassifierResult
 import io.lionweb.lioncore.kotlin.repoclient.LionWebClient
 import io.lionweb.lioncore.kotlin.repoclient.RetrievalMode
 import io.lionweb.lioncore.kotlin.repoclient.SerializationDecorator
-import io.lionweb.lioncore.kotlin.repoclient.debugFileHelper
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
@@ -103,18 +102,11 @@ class KolasuClient(
     /**
      * Exposed for testing purposes
      */
-    var jsonSerialization: JsonSerialization = calculateSerialization()
+    var jsonSerialization: JsonSerialization = lionWebClient.jsonSerialization
         private set
 
     fun updateSerialization() {
-        this.jsonSerialization = calculateSerialization()
-        lionWebClient.updateJsonSerialization()
-    }
-
-    private fun calculateSerialization() : JsonSerialization {
-        val jsonSerialization = SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
         serializationDecorators.forEach { serializationDecorator -> serializationDecorator.invoke(jsonSerialization) }
-        return jsonSerialization
     }
 
     //
@@ -214,9 +206,6 @@ class KolasuClient(
         }
         val lwTreeToAppend = toLionWeb(kNode, containerID, containmentName, containmentIndex)
         considerLogging("attachAST - prepared lwTreeToAppend")
-        debugFile("createNode-${lwTreeToAppend.id}.json") {
-            (nodeConverter.prepareSerialization() as JsonSerialization).serializeTreesToJsonString(lwTreeToAppend)
-        }
         considerLogging("attachAST - debug file prepared")
         lionWebClient.appendTree(lwTreeToAppend, containerID, containmentName, containmentIndex)
         considerLogging("attachAST - actual lionweb appending done")
@@ -339,9 +328,8 @@ class KolasuClient(
 
     fun getLionWebNode(
         nodeID: String,
-        withProxyParent: Boolean = false,
     ): LWNode {
-        return lionWebClient.retrieve(nodeID, withProxyParent)
+        return lionWebClient.retrieve(nodeID)
     }
 
     fun attachLionWebChild(
@@ -371,7 +359,6 @@ class KolasuClient(
     ): String {
         val updatedParent = lionWebClient.retrieve(
                 parentID,
-                withProxyParent = true,
                 retrievalMode = RetrievalMode.SINGLE_NODE,
             )
         return attachLionWebChild(child, updatedParent, propertyName)
@@ -402,9 +389,8 @@ class KolasuClient(
 
     fun getShallowLionWebNode(
         nodeID: String,
-        withProxyParent: Boolean = false,
     ): LWNode {
-        val result = lionWebClient.retrieve(nodeID, withProxyParent, retrievalMode = RetrievalMode.SINGLE_NODE)
+        val result = lionWebClient.retrieve(nodeID, retrievalMode = RetrievalMode.SINGLE_NODE)
         require(result !is ProxyNode) {
             "The LionWebClient should not retrieve a node as a ProxyNode"
         }
@@ -413,16 +399,14 @@ class KolasuClient(
 
     fun getShallowLionWebNodes(
         nodeIDs: List<String>,
-        withProxyParent: Boolean = false,
     ): List<LWNode> {
-        return lionWebClient.retrieve(nodeIDs, withProxyParent, retrievalMode = RetrievalMode.SINGLE_NODE)
+        return lionWebClient.retrieve(nodeIDs, retrievalMode = RetrievalMode.SINGLE_NODE)
     }
 
     fun getFullLionWebNodes(
         nodeIDs: List<String>,
-        withProxyParent: Boolean = false,
     ): List<LWNode> {
-        return lionWebClient.retrieve(nodeIDs, withProxyParent, retrievalMode = RetrievalMode.ENTIRE_SUBTREE)
+        return lionWebClient.retrieve(nodeIDs, retrievalMode = RetrievalMode.ENTIRE_SUBTREE)
     }
 
     //
@@ -496,13 +480,6 @@ class KolasuClient(
             idProvider,
             considerParent = true,
         )
-    }
-
-    private fun debugFile(
-        relativePath: String,
-        text: () -> String,
-    ) {
-        debugFileHelper(debug, relativePath, text)
     }
 
     fun registerSerializationDecorator(decorator: SerializationDecorator) {
