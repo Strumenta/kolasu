@@ -9,22 +9,24 @@ plugins {
 }
 
 val kotlin_version = extra["kotlin_version"] as String
-val gson_version = extra["gson_version"] as String
 val lionwebGenGradlePluginID = extra["lionwebGenGradlePluginID"] as String
 val lionwebJavaVersion = libs.lionwebjava.get().version
 
 dependencies {
-    api("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
+    api(libs.kotlin.gradle.plugin)
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlin.reflect)
     implementation(libs.lionwebjava)
+
     api(project(":lionweb-gen"))
     testImplementation(project(":lionweb-ksp"))
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+
+    testImplementation(libs.kotlin.test.junit5)
+    testImplementation(libs.junit.jupiter)
+
     implementation(libs.starlasu.specs)
     implementation(libs.gson)
-    implementation(libs.kspGradlePlugin)
+    implementation(libs.symbol.processing.api)
 }
 
 buildConfig {

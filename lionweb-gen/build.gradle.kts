@@ -18,26 +18,22 @@ java {
 }
 
 dependencies {
-    val kotlinVersion = libs.versions.kotlin.get()
-    val cliktVersion = libs.versions.clikt.get()
-    val gsonVersion = libs.versions.gson.get()
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlin.reflect)
+    implementation(libs.kotlin.test)
+    implementation(libs.kotlin.test.junit5)
+    implementation(libs.junit.jupiter)
+    implementation(libs.kotlinpoet)
+    implementation(libs.kotlin.compiler.embeddable)
 
-    implementation(kotlin("stdlib", kotlinVersion))
-    implementation(kotlin("reflect", kotlinVersion))
-    implementation(kotlin("test", kotlinVersion))
-    implementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlinVersion")
-    implementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    implementation("com.squareup:kotlinpoet:1.14.2")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlinVersion")
-
-    implementation("com.google.code.gson:gson:$gsonVersion") {
+    implementation(libs.gson) {
         version {
-            strictly(gsonVersion)
+            strictly(libs.versions.gson.get())
         }
     }
 
-    implementation("com.github.ajalt.clikt:clikt:$cliktVersion")
-    implementation("com.github.ajalt.clikt:clikt:$cliktVersion")
+    implementation(libs.clikt)
+    implementation(libs.clikt)
 
     implementation(libs.lionwebjava)
     implementation(libs.lionwebjavaemf)

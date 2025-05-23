@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.lionwebgen
 
-import com.google.devtools.ksp.gradle.KspExtension
 import com.strumenta.kolasu.lionweb.ASTGenerator
 import com.strumenta.kolasu.lionweb.KotlinCodeProcessor
 import com.strumenta.kolasu.lionweb.LIONWEB_VERSION_USED_BY_KOLASU
@@ -118,19 +117,25 @@ class LionWebGradlePlugin : Plugin<Project> {
      * paths to use.
      */
     private fun configureKsp(project: Project, configuration: LionWebGradleExtension) {
-        val ksp = project.extensions.findByName("ksp") as KspExtension
         val kspFile = File(project.buildDir, "lionwebgen${File.separator}kspconf.txt")
-        ksp.arg("lionwebgendir", File(project.buildDir, "lionwebgen").absolutePath)
-        ksp.arg("file", kspFile.absolutePath)
 
-        val prepareKsp = project.tasks.create("prepareKspForLionWebGen") {
-            this.doFirst {
-                val exportPackagesStr = configuration.exportPackages.get().let { it.joinToString(",") }
+        // Register a task to prepare the config file
+        val prepareKsp = project.tasks.register("prepareKspForLionWebGen") {
+            doFirst {
+                val exportPackagesStr = configuration.exportPackages.get().joinToString(",")
                 kspFile.parentFile.mkdirs()
                 kspFile.writeText("exportPackages=$exportPackagesStr\n")
             }
         }
-        project.tasks.getByName("compileKotlin").dependsOn(prepareKsp)
+
+        // Set KSP arguments as project properties
+        project.extensions.extraProperties["ksp.lionwebgendir"] = File(project.buildDir, "lionwebgen").absolutePath
+        project.extensions.extraProperties["ksp.file"] = kspFile.absolutePath
+
+        // Ensure the configuration file is written before compilation
+        project.tasks.named("compileKotlin").configure {
+            dependsOn(prepareKsp)
+        }
     }
 
     /**
