@@ -23,8 +23,6 @@ dependencies {
     implementation(kotlin("stdlib", libs.versions.kotlin.get()))
     implementation(kotlin("reflect", libs.versions.kotlin.get()))
     implementation(kotlin("test", libs.versions.kotlin.get()))
-    implementation(libs.kotlinXmlBuilder)
-    implementation(libs.kotlinCsv)
     implementation(libs.gson)
     api(libs.clikt)
     testImplementation(kotlin("test-junit", libs.versions.kotlin.get()))
