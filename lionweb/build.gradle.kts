@@ -30,6 +30,7 @@ dependencies {
     }
 
     api(project(":core"))
+    implementation(libs.starlasu.specs)
 }
 
 // Maven publishing

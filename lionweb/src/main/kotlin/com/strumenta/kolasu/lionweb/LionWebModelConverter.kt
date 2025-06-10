@@ -302,9 +302,14 @@ class LionWebModelConverter(
                                 lwNode.setReferenceValues(ASTNodeTranspiledNodes, referenceValues)
                             } else {
                                 val kReference =
-                                    (kFeatures[feature.name]
-                                        ?: throw java.lang.IllegalStateException("Cannot find feature ${feature.name} in Starlasu Node ${kNode.nodeType}"))
-                                    as com.strumenta.kolasu.language.Reference
+                                    (
+                                        kFeatures[feature.name]
+                                            ?: throw java.lang.IllegalStateException(
+                                                "Cannot find feature ${feature.name} " +
+                                                    "in Starlasu Node ${kNode.nodeType}",
+                                            )
+                                    )
+                                        as com.strumenta.kolasu.language.Reference
                                 val kValue = kNode.getReference(kReference)
                                 if (kValue == null) {
                                     lwNode.addReferenceValue(feature, null)

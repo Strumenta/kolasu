@@ -62,7 +62,6 @@ class KolasuClient(
     val callTimeoutInSeconds: Long = 60,
     val authorizationToken: String? = null,
     val idProvider: NodeIdProvider = CommonNodeIdProvider().caching(),
-    val repositoryName : String = "default"
 ) {
     /**
      * Exposed for testing purposes
@@ -83,7 +82,6 @@ class KolasuClient(
             callTimeoutInSeconds = callTimeoutInSeconds,
             authorizationToken = authorizationToken,
             lionWebVersion = LIONWEB_VERSION_USED_BY_KOLASU,
-            repository = repositoryName
         )
     /**
      * Exposed for testing purposes

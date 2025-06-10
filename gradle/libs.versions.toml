@@ -11,8 +11,7 @@ jvm = "11"
 antlr = "4.13.1"
 gson = "2.13.1"
 clikt = "3.5.0"
-specsVersion = "0.1.6-SNAPSHOT"
-ksp = "2.1.21-2.0.1"
+specsVersion = "0.2.1"
 kotlinpoet = "1.14.2"
 junit = "5.7.1"
 
@@ -36,18 +35,13 @@ antlrRuntime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
 starlasu-specs = { module="com.strumenta.starlasu.specs:starlasuspecs-jvm", version.ref="specsVersion" }
-
 ksp-gradle-plugin = { module="com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
-
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit5 = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit5", version.ref = "kotlin" }
 kotlin-compiler-embeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable", version.ref = "kotlin" }
 symbol-processing-api = { group = "com.google.devtools.ksp", name = "symbol-processing-api", version.ref = "ksp" }
-
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
-
 kotlinpoet = { group = "com.squareup", name = "kotlinpoet", version.ref = "kotlinpoet" }
-
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
