@@ -12,7 +12,7 @@ plugins {
     id("signing")
     id("org.jetbrains.dokka") version libs.versions.dokka.get()
     id("java-library")
-    id("net.researchgate.release") version "3.1.0"
+    alias(libs.plugins.release)
 }
 
 allprojects {

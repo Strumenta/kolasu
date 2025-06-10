@@ -21,6 +21,8 @@ buildConfig = { id = "com.github.gmazzo.buildconfig", version = "5.6.5" }
 superPublish = { id = "com.vanniktech.maven.publish", version = "0.32.0" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.3.0" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+release = { id ="net.researchgate.release", version = "3.1.0" }
+buildconfig = { id = "com.github.gmazzo.buildconfig", version = "3.1.0" }
 
 [libraries]
 lionwebjava = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-core", version.ref = "lwjava" }
