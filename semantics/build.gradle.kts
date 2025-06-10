@@ -9,7 +9,7 @@ plugins {
     id("org.jetbrains.dokka")
 }
 
-val jvmVersion: String = properties["jvm_version"] as String
+val jvmVersion: String = libs.versions.jvm.get()
 val isReleaseVersion: Boolean = !(project.version as String).endsWith("SNAPSHOT")
 
 java {

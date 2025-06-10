@@ -104,7 +104,7 @@ mavenPublishing {
     }
 }
 
-val jvmVersion = extra["jvm_version"] as String
+val jvmVersion = libs.versions.jvm.get()
 
 java {
     sourceCompatibility = JavaVersion.toVersion(jvmVersion)
