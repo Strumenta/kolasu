@@ -1,5 +1,7 @@
 [versions]
 lwjava = "0.4.5"
+# Note that we use the EXACT same version of Kotlin as the one included in Gradle, to avoid
+# conflicts
 lwkotlin = "0.4.2"
 kotestVersion= "1.3.3"
 kotlin = "2.1.21"

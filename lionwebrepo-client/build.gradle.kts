@@ -9,8 +9,6 @@ plugins {
     alias(libs.plugins.buildConfig)
 }
 
-val kotlinVersion = extra["kotlin_version"]
-
 repositories {
     mavenLocal()
     mavenCentral()
@@ -29,7 +27,7 @@ testing {
                 implementation(project(":lionweb"))
                 implementation(project(":semantics"))
                 implementation(libs.lionwebkotlinrepoclient)
-                implementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlinVersion")
+                implementation(libs.kotlin.test.junit5)
                 implementation("io.kotest:kotest-runner-junit5-jvm:5.8.0")
                 implementation(libs.kotesttestcontainers)
                 implementation("io.kotest:kotest-assertions-core:5.8.0")

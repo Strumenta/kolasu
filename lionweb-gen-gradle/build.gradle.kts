@@ -8,7 +8,6 @@ plugins {
     `kotlin-dsl`
 }
 
-val kotlin_version = extra["kotlin_version"] as String
 val lionwebGenGradlePluginID = extra["lionwebGenGradlePluginID"] as String
 val lionwebJavaVersion = libs.lionwebjava.get().version
 

@@ -10,7 +10,6 @@ plugins {
 }
 
 val jvmVersion: String = properties["jvm_version"] as String
-val kotlinVersion: String = properties["kotlin_version"] as String
 val isReleaseVersion: Boolean = !(project.version as String).endsWith("SNAPSHOT")
 
 java {
@@ -22,9 +21,9 @@ java {
 
 dependencies {
     api(project(":core"))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlin.reflect)
+    testImplementation(libs.kotlin.test)
 }
 
 publishing {
