@@ -37,7 +37,7 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
 starlasu-specs = { module="com.strumenta.starlasu.specs:starlasuspecs-jvm", version.ref="specsVersion" }
 
-kspGradlePlugin = { module="com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+ksp-gradle-plugin = { module="com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }

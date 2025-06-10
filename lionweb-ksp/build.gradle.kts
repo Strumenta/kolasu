@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    id("com.google.devtools.ksp") version libs.versions.ksp.get()
+    alias(libs.plugins.ksp)
     id("maven-publish")
     id("signing")
     id("org.jetbrains.dokka")
@@ -25,7 +25,7 @@ java {
 }
 
 dependencies {
-    implementation("com.google.devtools.ksp:symbol-processing-api:${libs.versions.ksp.get()}")
+    implementation(libs.symbol.processing.api)
     implementation(project(":core"))
 }
 
