@@ -2,7 +2,7 @@ import java.net.URI
 
 plugins {
     kotlin("jvm")
-    `maven-publish`
+    alias(libs.plugins.superPublish)
     idea
     signing
     alias(libs.plugins.ktlint)

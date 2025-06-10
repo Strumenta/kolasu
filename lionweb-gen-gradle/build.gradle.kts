@@ -2,7 +2,6 @@ plugins {
     id("java-gradle-plugin")
     id("org.jetbrains.kotlin.jvm")
     alias(libs.plugins.buildconfig)
-    id("maven-publish")
     alias(libs.plugins.superPublish)
     id("org.jetbrains.dokka")
     `kotlin-dsl`

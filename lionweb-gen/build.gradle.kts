@@ -3,7 +3,7 @@ import org.gradle.api.publish.maven.MavenPublication
 plugins {
     kotlin("jvm")
     id("org.jlleitschuh.gradle.ktlint")
-    id("maven-publish")
+    alias(libs.plugins.superPublish)
     id("signing")
     id("org.jetbrains.dokka")
 }

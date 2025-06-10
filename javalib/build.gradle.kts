@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm")
     id("org.jlleitschuh.gradle.ktlint")
-    id("maven-publish")
+    alias(libs.plugins.superPublish)
     id("antlr")
     id("idea")
     id("signing")

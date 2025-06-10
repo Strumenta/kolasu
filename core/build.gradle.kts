@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm")
     alias(libs.plugins.ktlint)
-    id("maven-publish")
+    alias(libs.plugins.superPublish)
     id("antlr")
     id("idea")
     id("signing")
