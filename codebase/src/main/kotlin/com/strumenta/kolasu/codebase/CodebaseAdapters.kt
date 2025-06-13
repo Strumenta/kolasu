@@ -16,7 +16,9 @@ import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
 import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
 import io.lionweb.lioncore.kotlin.getPropertyValueByName
 import io.lionweb.lioncore.kotlin.setPropertyValueByName
+import java.lang.IllegalStateException
 import java.util.stream.Collectors
+import kotlin.streams.asSequence
 
 fun <R : Node> deserialize(
     modelConverter: LionWebModelConverter,
@@ -81,6 +83,10 @@ fun <R : Node> convertCodebaseJSON(
         override fun files(): Sequence<CodebaseFile<R>> {
             return filesCache.asSequence()
         }
+
+        override fun fileByRelativePath(relativePath: String): CodebaseFile<R>? {
+            TODO("Not yet implemented")
+        }
     }
 }
 
@@ -94,8 +100,8 @@ fun <R : Node> convertCodebaseFlatBuffers(
         override val name: String
             get() = codebaseAccess.name
 
-        private val filesCache: List<CodebaseFile<R>> by lazy {
-            codebaseAccess.files().map { fileIdentifier ->
+        override fun files(): Sequence<CodebaseFile<R>> {
+            return codebaseAccess.files().map { fileIdentifier ->
                 val serializedFile = codebaseAccess.retrieve(fileIdentifier)
                 serialization.deserializeToNodes(serializedFile)[0]
             }.filter { serializedCodebaseFile ->
@@ -103,11 +109,14 @@ fun <R : Node> convertCodebaseFlatBuffers(
                 languagesWeConsider.contains(languageName)
             }.map { serializedCodebaseFile ->
                 deserialize(modelConverter, this, serializedCodebaseFile!!)
-            }.collect(Collectors.toList())
+            }.asSequence()
         }
 
-        override fun files(): Sequence<CodebaseFile<R>> {
-            return filesCache.asSequence()
+        override fun fileByRelativePath(relativePath: String): CodebaseFile<R>? {
+            val fileIdentifier = codebaseAccess.fileByRelativePath(relativePath) ?: return null
+            val serializedFile = codebaseAccess.retrieve(fileIdentifier) ?: throw IllegalStateException()
+            val serializedCodebaseFile = serialization.deserializeToNodes(serializedFile)[0]
+            return deserialize(modelConverter, this, serializedCodebaseFile)
         }
     }
 }
