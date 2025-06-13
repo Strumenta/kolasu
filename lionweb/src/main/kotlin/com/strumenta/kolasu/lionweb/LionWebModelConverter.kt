@@ -316,7 +316,7 @@ class LionWebModelConverter(
                                             // which we have therefore no LionWeb node. In that case, if we have the
                                             // identifier, we can produce a ProxyNode instead
                                             val lwReferred: Node = nodesMapping.byA(kReferred) ?: ProxyNode(
-                                                kValue.identifier
+                                                kValue.identifier ?: kReferred.id
                                                     ?: throw java.lang.IllegalStateException(
                                                         "Identifier of reference target " +
                                                             "value not set. Referred: $kReferred, " +
