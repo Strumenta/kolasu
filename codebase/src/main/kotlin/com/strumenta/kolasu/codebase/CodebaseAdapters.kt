@@ -5,10 +5,12 @@ import com.strumenta.kolasu.lionweb.LWNode
 import com.strumenta.kolasu.lionweb.LionWebModelConverter
 import com.strumenta.kolasu.lionweb.TokensList
 import com.strumenta.kolasu.model.Node
-import com.strumenta.starlasu.base.CodebaseAccess
+import com.strumenta.starlasu.base.CodebaseAccessFlatBuffers
+import com.strumenta.starlasu.base.CodebaseAccessJSON
 import com.strumenta.starlasu.base.CodebaseLanguage
 import io.lionweb.lioncore.java.model.ClassifierInstanceUtils
 import io.lionweb.lioncore.java.model.impl.DynamicNode
+import io.lionweb.lioncore.java.serialization.FlatBuffersSerialization
 import io.lionweb.lioncore.java.serialization.JsonSerialization
 import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
 import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
@@ -54,9 +56,9 @@ fun <R : Node> serialize(
     return lwCodebaseFile
 }
 
-fun <R : Node> convertCodebase(
+fun <R : Node> convertCodebaseJSON(
     modelConverter: LionWebModelConverter,
-    codebaseAccess: CodebaseAccess,
+    codebaseAccess: CodebaseAccessJSON,
     languagesWeConsider: Set<String>,
     jsonSerialization: JsonSerialization
 ): Codebase<R> {
@@ -68,6 +70,34 @@ fun <R : Node> convertCodebase(
             codebaseAccess.files().map { fileIdentifier ->
                 val serializedFile = codebaseAccess.retrieve(fileIdentifier)
                 jsonSerialization.deserializeToNodes(serializedFile)[0]
+            }.filter { serializedCodebaseFile ->
+                val languageName = serializedCodebaseFile!!.getPropertyValueByName("language_name") as String
+                languagesWeConsider.contains(languageName)
+            }.map { serializedCodebaseFile ->
+                deserialize(modelConverter, this, serializedCodebaseFile!!)
+            }.collect(Collectors.toList())
+        }
+
+        override fun files(): Sequence<CodebaseFile<R>> {
+            return filesCache.asSequence()
+        }
+    }
+}
+
+fun <R : Node> convertCodebaseFlatBuffers(
+    modelConverter: LionWebModelConverter,
+    codebaseAccess: CodebaseAccessFlatBuffers,
+    languagesWeConsider: Set<String>,
+    serialization: FlatBuffersSerialization
+): Codebase<R> {
+    return object : Codebase<R> {
+        override val name: String
+            get() = codebaseAccess.name
+
+        private val filesCache: List<CodebaseFile<R>> by lazy {
+            codebaseAccess.files().map { fileIdentifier ->
+                val serializedFile = codebaseAccess.retrieve(fileIdentifier)
+                serialization.deserializeToNodes(serializedFile)[0]
             }.filter { serializedCodebaseFile ->
                 val languageName = serializedCodebaseFile!!.getPropertyValueByName("language_name") as String
                 languagesWeConsider.contains(languageName)
