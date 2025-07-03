@@ -40,7 +40,7 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
                     import com.strumenta.kolasu.language.KolasuLanguage
                     import com.strumenta.kolasu.lionweb.LionWebLanguageConverter
                     import com.strumenta.kolasu.lionweb.LionWebModelConverter
-                    import io.lionweb.lioncore.java.language.Language
+                    import io.lionweb.language.Language
 
                     private val kolasuLanguage = KolasuLanguage("$packageName").apply { 
                         ${classes.joinToString("\n        ") { "addClass(${it.simpleName.asString()}::class)" }}

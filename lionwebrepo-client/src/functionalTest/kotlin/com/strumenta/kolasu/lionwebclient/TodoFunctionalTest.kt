@@ -5,8 +5,8 @@ import com.strumenta.kolasu.lionweb.registerSerializersAndDeserializersInMetamod
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
-import io.lionweb.lioncore.kotlin.MetamodelRegistry
-import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
+import io.lionweb.kotlin.MetamodelRegistry
+import io.lionweb.kotlin.getChildrenByContainmentName
 import io.lionweb.repoclient.testing.AbstractRepoClientFunctionalTest
 import org.testcontainers.junit.jupiter.Testcontainers
 import kotlin.test.Test

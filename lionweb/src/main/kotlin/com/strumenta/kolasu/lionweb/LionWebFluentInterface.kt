@@ -1,10 +1,10 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.model.Multiplicity
-import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.language.IKeyed
-import io.lionweb.lioncore.java.model.Node
-import io.lionweb.lioncore.java.model.impl.DynamicNode
+import io.lionweb.language.Concept
+import io.lionweb.language.IKeyed
+import io.lionweb.model.Node
+import io.lionweb.model.impl.DynamicNode
 import kotlin.random.Random
 
 val Multiplicity.optional

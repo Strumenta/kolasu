@@ -5,18 +5,15 @@ import com.strumenta.kolasu.lionweb.LWNode
 import com.strumenta.kolasu.lionweb.LionWebModelConverter
 import com.strumenta.kolasu.lionweb.TokensList
 import com.strumenta.kolasu.model.Node
-import com.strumenta.starlasu.base.CodebaseAccessFlatBuffers
-import com.strumenta.starlasu.base.CodebaseAccessJSON
+import com.strumenta.starlasu.base.CodebaseAccess
 import com.strumenta.starlasu.base.CodebaseLanguage
-import io.lionweb.lioncore.java.model.ClassifierInstanceUtils
-import io.lionweb.lioncore.java.model.impl.DynamicNode
-import io.lionweb.lioncore.java.serialization.FlatBuffersSerialization
-import io.lionweb.lioncore.java.serialization.JsonSerialization
-import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
-import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
-import io.lionweb.lioncore.kotlin.getPropertyValueByName
-import io.lionweb.lioncore.kotlin.setPropertyValueByName
-import java.lang.IllegalStateException
+import io.lionweb.kotlin.getChildrenByContainmentName
+import io.lionweb.kotlin.getOnlyChildByContainmentName
+import io.lionweb.kotlin.getPropertyValueByName
+import io.lionweb.kotlin.setPropertyValueByName
+import io.lionweb.model.ClassifierInstanceUtils
+import io.lionweb.model.impl.DynamicNode
+import io.lionweb.serialization.JsonSerialization
 import java.util.stream.Collectors
 import kotlin.streams.asSequence
 
@@ -60,7 +57,7 @@ fun <R : Node> serialize(
 
 fun <R : Node> convertCodebaseJSON(
     modelConverter: LionWebModelConverter,
-    codebaseAccess: CodebaseAccessJSON,
+    codebaseAccess: CodebaseAccess,
     languagesWeConsider: Set<String>,
     jsonSerialization: JsonSerialization
 ): Codebase<R> {
@@ -90,33 +87,33 @@ fun <R : Node> convertCodebaseJSON(
     }
 }
 
-fun <R : Node> convertCodebaseFlatBuffers(
-    modelConverter: LionWebModelConverter,
-    codebaseAccess: CodebaseAccessFlatBuffers,
-    languagesWeConsider: Set<String>,
-    serialization: FlatBuffersSerialization
-): Codebase<R> {
-    return object : Codebase<R> {
-        override val name: String
-            get() = codebaseAccess.name
-
-        override fun files(): Sequence<CodebaseFile<R>> {
-            return codebaseAccess.files().map { fileIdentifier ->
-                val serializedFile = codebaseAccess.retrieve(fileIdentifier)
-                serialization.deserializeToNodes(serializedFile)[0]
-            }.filter { serializedCodebaseFile ->
-                val languageName = serializedCodebaseFile!!.getPropertyValueByName("language_name") as String
-                languagesWeConsider.contains(languageName)
-            }.map { serializedCodebaseFile ->
-                deserialize(modelConverter, this, serializedCodebaseFile!!)
-            }.asSequence()
-        }
-
-        override fun fileByRelativePath(relativePath: String): CodebaseFile<R>? {
-            val fileIdentifier = codebaseAccess.fileByRelativePath(relativePath) ?: return null
-            val serializedFile = codebaseAccess.retrieve(fileIdentifier) ?: throw IllegalStateException()
-            val serializedCodebaseFile = serialization.deserializeToNodes(serializedFile)[0]
-            return deserialize(modelConverter, this, serializedCodebaseFile)
-        }
-    }
-}
+// fun <R : Node> convertCodebaseFlatBuffers(
+//    modelConverter: LionWebModelConverter,
+//    codebaseAccess: CodebaseAccessFlatBuffers,
+//    languagesWeConsider: Set<String>,
+//    serialization: FlatBuffersSerialization
+// ): Codebase<R> {
+//    return object : Codebase<R> {
+//        override val name: String
+//            get() = codebaseAccess.name
+//
+//        override fun files(): Sequence<CodebaseFile<R>> {
+//            return codebaseAccess.files().map { fileIdentifier ->
+//                val serializedFile = codebaseAccess.retrieve(fileIdentifier)
+//                serialization.deserializeToNodes(serializedFile)[0]
+//            }.filter { serializedCodebaseFile ->
+//                val languageName = serializedCodebaseFile!!.getPropertyValueByName("language_name") as String
+//                languagesWeConsider.contains(languageName)
+//            }.map { serializedCodebaseFile ->
+//                deserialize(modelConverter, this, serializedCodebaseFile!!)
+//            }.asSequence()
+//        }
+//
+//        override fun fileByRelativePath(relativePath: String): CodebaseFile<R>? {
+//            val fileIdentifier = codebaseAccess.fileByRelativePath(relativePath) ?: return null
+//            val serializedFile = codebaseAccess.retrieve(fileIdentifier) ?: throw IllegalStateException()
+//            val serializedCodebaseFile = serialization.deserializeToNodes(serializedFile)[0]
+//            return deserialize(modelConverter, this, serializedCodebaseFile)
+//        }
+//    }
+// }

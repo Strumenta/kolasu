@@ -17,13 +17,13 @@ import com.strumenta.kolasu.model.ASTRoot
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.traversing.walkDescendants
-import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.model.HasSettableParent
-import io.lionweb.lioncore.java.model.impl.ProxyNode
-import io.lionweb.lioncore.java.serialization.JsonSerialization
-import io.lionweb.lioncore.kotlin.repoclient.ClassifierResult
-import io.lionweb.lioncore.kotlin.repoclient.LionWebClient
-import io.lionweb.lioncore.kotlin.repoclient.RetrievalMode
+import io.lionweb.language.Concept
+import io.lionweb.model.HasSettableParent
+import io.lionweb.model.impl.ProxyNode
+import io.lionweb.serialization.JsonSerialization
+import io.lionweb.client.kotlin.ClassifierResult
+import io.lionweb.client.kotlin.LionWebClient
+import io.lionweb.client.kotlin.RetrievalMode
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
@@ -83,7 +83,6 @@ class KolasuClient(
             port,
             repository = repository,
             debug = debug,
-            jsonSerializationProvider = { this.jsonSerialization },
             connectTimeOutInSeconds = connectTimeOutInSeconds,
             callTimeoutInSeconds = callTimeoutInSeconds,
             authorizationToken = authorizationToken,
