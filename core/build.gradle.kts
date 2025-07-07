@@ -96,12 +96,9 @@ publishing {
         }
     }
 
-    publications {
-        create<MavenPublication>("kolasu_core") {
-            from(components["java"])
+    publications.withType<MavenPublication>().configureEach {
+        if (name == "maven") {
             artifactId = "kolasu-${project.name}"
-            artifact(tasks.named("sourcesJar"))
-            artifact(tasks.named("javadocJar"))
             suppressPomMetadataWarningsFor("cliApiElements")
             suppressPomMetadataWarningsFor("cliRuntimeElements")
             pom {
@@ -133,11 +130,6 @@ publishing {
                         name.set("Alessio Stalla")
                         email.set("alessio.stalla@strumenta.com")
                     }
-                    developer {
-                        id.set("lorenzoaddazi")
-                        name.set("Lorenzo Addazi")
-                        email.set("lorenzo.addazi@strumenta.com")
-                    }
                 }
             }
         }
@@ -146,7 +138,7 @@ publishing {
 
 // Signing
 signing {
-    sign(publishing.publications["kolasu_core"])
+    sign(publishing.publications)
 }
 
 // Some tasks are created during the configuration, and therefore we need to set the dependencies involving
@@ -154,12 +146,6 @@ signing {
 project.afterEvaluate {
     tasks.named("dokkaJavadocJar") {
         dependsOn(tasks.named("dokkaJavadoc"))
-    }
-    tasks.named("publishKolasu_corePublicationToMavenRepository") {
-        dependsOn(tasks.named("dokkaJavadocJar"))
-        dependsOn(tasks.named("javaSourcesJar"))
-        dependsOn(tasks.named("javadocJar"))
-        dependsOn(tasks.named("sourcesJar"))
     }
     tasks.named("publishMavenPublicationToMavenRepository") {
         dependsOn(tasks.named("dokkaJavadocJar"))
@@ -171,4 +157,3 @@ project.afterEvaluate {
         dependsOn(tasks.named("generateGrammarSource"))
     }
 }
-
