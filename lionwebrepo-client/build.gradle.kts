@@ -66,7 +66,19 @@ dependencies {
 }
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.DEFAULT)
+    repositories {
+        maven {
+            val releaseRepo = uri("https://central.sonatype.com/publish/repositories/releases/")
+            val snapshotRepo = uri("https://central.sonatype.com/repository/maven-snapshots/")
+            url = if (!version.toString().endsWith("SNAPSHOT")) releaseRepo else snapshotRepo
+
+            credentials {
+                username = project.findProperty("mavenCentralUsername") as? String ?: "Unknown user"
+                password = project.findProperty("mavenCentralPassword") as? String ?: "Unknown password"
+            }
+        }
+    }
+
     signAllPublications()
 
     pom {
