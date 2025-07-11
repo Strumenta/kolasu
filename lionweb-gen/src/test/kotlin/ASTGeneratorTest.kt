@@ -1,7 +1,7 @@
 import com.strumenta.kolasu.lionweb.ASTGenerator
 import com.strumenta.kolasu.lionweb.LIONWEB_VERSION_USED_BY_KOLASU
 import com.strumenta.kolasu.lionweb.LWLanguage
-import com.strumenta.kolasu.lionweb.StarLasuLWLanguage
+import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.lioncore.java.language.Interface
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.language.LionCoreBuiltins
@@ -15,7 +15,7 @@ class ASTGeneratorTest {
     fun allASTClassesAreGeneratedAsExpected() {
         val inputStream = this.javaClass.getResourceAsStream("/properties-language.json")
         val jsonser = SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
-        jsonser.instanceResolver.addTree(StarLasuLWLanguage)
+        jsonser.instanceResolver.addTree(ASTLanguage.getLanguage())
         val propertiesLanguage = jsonser.deserializeToNodes(inputStream).first() as Language
         val generated = ASTGenerator("com.strumenta.properties", propertiesLanguage).generateClasses()
         assertEquals(1, generated.size)

@@ -28,6 +28,8 @@ lionwebjava = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-c
 lionwebjavaemf = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-emf", version.ref = "lwjava" }
 lionwebkotlinrepoclient = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-repo-client", version.ref = "lwkotlin" }
 lionwebjavarepoclienttesting = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-repo-client-testing", version.ref = "lwjava" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+
 lionwebkotlincore = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-core", version.ref = "lwkotlin" }
 kotesttestcontainers = { module = "io.kotest.extensions:kotest-extensions-testcontainers", version.ref = "kotestVersion" }
 antlr = { module = "org.antlr:antlr4", version.ref = "antlr" }

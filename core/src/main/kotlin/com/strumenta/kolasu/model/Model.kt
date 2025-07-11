@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.model
 
+import io.lionweb.lioncore.java.model.AnnotationInstance
 import java.io.Serializable
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
@@ -39,6 +41,114 @@ fun <N : BaseASTNode> N.withPosition(position: Position?): N {
     this.position = position
     return this
 }
+
+
+/**
+ * The Abstract Syntax Tree will be constituted by instances of Node.
+ *
+ * It implements Origin as it could be the source of a AST-to-AST transformation, so the node itself can be
+ * the Origin of another node.
+ */
+open class Node() : Origin, Destination, Serializable, HasID {
+
+    @Internal
+    override var id: String? = null
+
+    @Internal
+    val annotations: MutableList<AnnotationInstance> = CopyOnWriteArrayList()
+
+    @Internal
+    protected var positionOverride: Position? = null
+
+    constructor(position: Position?) : this() {
+        this.position = position
+    }
+
+    constructor(origin: Origin?) : this() {
+        if (origin != null) {
+            this.origin = origin
+        }
+    }
+
+    @Internal
+    open val nodeType: String
+        get() = this::class.qualifiedName!!
+
+    @Internal
+    open val simpleNodeType: String
+        get() = nodeType.split(".").last()
+
+    /**
+     * The properties of this AST nodes, including attributes, children, and references.
+     */
+    @property:Internal
+    open val properties: List<PropertyDescription>
+        get() = try {
+            nodeProperties.map { PropertyDescription.buildFor(it, this) }
+        } catch (e: Throwable) {
+            throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
+        }
+
+    /**
+     * The properties of this AST nodes, including attributes, children, and references, but excluding derived
+     * properties.
+     */
+    @property:Internal
+    open val originalProperties: List<PropertyDescription>
+        get() = try {
+            properties.filter { !it.derived }
+        } catch (e: Throwable) {
+            throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
+        }
+
+    /**
+     * The node from which this AST Node has been generated, if any.
+     */
+    @property:Internal
+    var origin: Origin? = null
+
+    /**
+     * The parent node, if any.
+     */
+    @property:Internal
+    var parent: Node? = null
+
+    /**
+     * The position of this node in the source text.
+     * If a position has been provided when creating this node, it is returned.
+     * Otherwise, the value of this property is the position of the origin, if any.
+     */
+    @property:Internal
+    override var position: Position?
+        get() = positionOverride ?: origin?.position
+        set(position) {
+            this.positionOverride = position
+        }
+
+    private var explicitlySetSource: Source? = null
+
+    @property:Internal
+    override var source: Source?
+        get() = explicitlySetSource ?: (position?.source ?: origin?.source)
+        set(value) {
+            explicitlySetSource = value
+            if (value == null) {
+                require(this.source == null)
+            } else {
+                require(this.source === value) {
+                    "The source has not been set correctly. It should be $value " +
+                        "while it is ${this.source}"
+                }
+            }
+        }
+
+    fun setSourceForTree(source: Source): Node {
+        this.source = source
+        this.walk().forEach {
+            it.source = source
+        }
+        return this
+    }
 
 fun <N : BaseASTNode> N.withOrigin(origin: Origin?): N {
     this.origin =

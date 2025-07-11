@@ -21,8 +21,6 @@ import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.model.HasSettableParent
 import io.lionweb.lioncore.java.model.impl.ProxyNode
 import io.lionweb.lioncore.java.serialization.JsonSerialization
-import io.lionweb.lioncore.java.serialization.SerializationProvider
-import io.lionweb.lioncore.java.serialization.UnavailableNodePolicy
 import io.lionweb.lioncore.kotlin.repoclient.ClassifierResult
 import io.lionweb.lioncore.kotlin.repoclient.LionWebClient
 import io.lionweb.lioncore.kotlin.repoclient.RetrievalMode
@@ -54,15 +52,24 @@ import kotlin.reflect.KProperty1
  * or (iii) implement IDLogic.
  */
 class KolasuClient(
-    val hostname: String = "localhost",
-    val port: Int = 3005,
-    val repository: String = "default",
+    hostname: String = "localhost",
+    port: Int = 3005,
+    repository: String = "default",
     val debug: Boolean = false,
-    val connectTimeOutInSeconds: Long = 60,
-    val callTimeoutInSeconds: Long = 60,
-    val authorizationToken: String? = null,
+    connectTimeOutInSeconds: Long = 60,
+    callTimeoutInSeconds: Long = 60,
+    authorizationToken: String? = null,
     val idProvider: NodeIdProvider = CommonNodeIdProvider().caching(),
 ) {
+    val hostname: String
+        get() = lionWebClient.hostname
+
+    val port: Int
+        get() = lionWebClient.port
+
+    val repository: String
+        get() = lionWebClient.repository
+
     /**
      * Exposed for testing purposes
      */
@@ -399,6 +406,10 @@ class KolasuClient(
     //
     // Other operations
     //
+
+    fun createRepository() {
+        lionWebClient.createRepository(lionWebClient.repository, lionWebClient.lionWebVersion)
+    }
 
     /**
      * Return the Node ID associated to the Node. If the Client has already "seen"

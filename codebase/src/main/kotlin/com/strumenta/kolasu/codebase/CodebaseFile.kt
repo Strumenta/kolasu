@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.codebase
 
+import com.strumenta.kolasu.lionweb.TokensList
 import com.strumenta.kolasu.model.CodeBaseSource
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.PropertyType
@@ -13,6 +14,7 @@ data class CodebaseFile<R : Node>(
     val relativePath: String,
     var code: String,
     var ast: R,
+    var tokens: TokensList?,
     val parsingIssues: List<Issue> = emptyList()
 ) {
 

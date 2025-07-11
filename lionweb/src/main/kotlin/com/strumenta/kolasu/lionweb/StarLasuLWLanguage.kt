@@ -1,10 +1,6 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.model.Node
-import com.strumenta.kolasu.model.Point
-import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.parsing.KolasuToken
-import com.strumenta.kolasu.parsing.TokenCategory
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.starlasu.base.ASTLanguage
@@ -19,8 +15,6 @@ import io.lionweb.lioncore.java.language.PrimitiveType
 import io.lionweb.lioncore.java.language.Property
 import io.lionweb.lioncore.java.language.Reference
 import io.lionweb.lioncore.java.self.LionCore
-import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
-import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 import io.lionweb.lioncore.kotlin.MetamodelRegistry
 import io.lionweb.lioncore.kotlin.Multiplicity
 import io.lionweb.lioncore.kotlin.addLiteral
@@ -98,7 +92,7 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
         createPrimitiveType(TokensList::class)
         ParsingResult =
             createConcept(KParsingResult::class.simpleName!!).apply {
-                createContainment(KParsingResult<*>::issues.name, ASTLanguage.getIssue(), Multiplicity.ZERO_TO_MANY)
+                createContainment(KParsingResult<*>::issues.name, Issue, Multiplicity.ZERO_TO_MANY)
                 createContainment(KParsingResult<*>::root.name, ASTNode, Multiplicity.OPTIONAL)
                 createProperty(
                     KParsingResult<*>::code.name,
@@ -111,7 +105,7 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
                     Multiplicity.OPTIONAL,
                 )
             }
-        MetamodelRegistry.registerMapping(IssueNode::class, ASTLanguage.getIssue())
+        MetamodelRegistry.registerMapping(IssueNode::class, Issue)
         MetamodelRegistry.registerMapping(ParsingResultNode::class, ParsingResult)
         registerSerializersAndDeserializersInMetamodelRegistry()
     }

@@ -39,6 +39,7 @@ class FileBasedCodebase<R : Node>(
                                             relativePath,
                                             child.readText(),
                                             root,
+                                            tokens = null,
                                             parsingResult.issues
                                         )
                                         yield(codebaseFile)

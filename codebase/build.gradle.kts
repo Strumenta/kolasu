@@ -10,7 +10,6 @@ plugins {
 
 val jvmVersion = project.property("jvm_version") as String
 val kotlinVersion = project.property("kotlin_version") as String
-val gsonVersion = project.property("gson_version") as String
 
 val isReleaseVersion = !(project.version as String).endsWith("-SNAPSHOT")
 
@@ -23,10 +22,12 @@ java {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":lionweb"))
+    implementation(libs.starlasu.specs)
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
-    implementation("com.google.code.gson:gson:$gsonVersion")
+    implementation(libs.gson)
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
 }
 
@@ -89,4 +90,5 @@ signing {
 
 tasks.named("dokkaJavadoc").configure {
     dependsOn(":core:compileKotlin")
+    dependsOn(":lionweb:jar")
 }

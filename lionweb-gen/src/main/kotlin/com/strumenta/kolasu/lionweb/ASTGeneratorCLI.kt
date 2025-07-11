@@ -5,6 +5,7 @@ package com.strumenta.kolasu.lionweb
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.types.file
+import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.lioncore.java.language.Language
 import io.lionweb.lioncore.java.serialization.SerializationProvider
 import java.io.File
@@ -20,7 +21,7 @@ class ASTGeneratorCommand : CliktCommand() {
         val existingKotlinClasses = KotlinCodeProcessor().classesDeclaredInDir(existingKotlinCode)
 
         val jsonser = SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
-        jsonser.instanceResolver.addTree(StarLasuLWLanguage)
+        jsonser.instanceResolver.addTree(ASTLanguage.getLanguage())
         val language = jsonser.deserializeToNodes(FileInputStream(languageFile)).first() as Language
         val ktFiles = ASTGenerator(packageName, language).generateClasses(existingKotlinClasses)
         ktFiles.forEach {

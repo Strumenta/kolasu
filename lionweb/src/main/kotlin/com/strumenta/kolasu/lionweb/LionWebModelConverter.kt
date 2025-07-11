@@ -26,6 +26,7 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.starlasu.base.ASTLanguage
+import io.lionweb.lioncore.java.language.Annotation
 import io.lionweb.lioncore.java.language.Classifier
 import io.lionweb.lioncore.java.language.Concept
 import io.lionweb.lioncore.java.language.Containment
@@ -78,6 +79,10 @@ class DummyNodeResolver : NodeResolver {
 private val ASTNodePosition = ASTLanguage.getASTNode().getPropertyByName("position")!!
 private val ASTNodeOriginalNode = ASTLanguage.getASTNode().getReferenceByName("originalNode")!!
 private val ASTNodeTranspiledNodes = ASTLanguage.getASTNode().getReferenceByName("transpiledNodes")!!
+private val PlaceholderNode = ASTLanguage.getLanguage().getElementByName("PlaceholderNode") as Annotation
+private val PlaceholderNodeMessageProperty = PlaceholderNode.getPropertyByName("message")!!
+private val PlaceholderNodeTypeProperty = PlaceholderNode.getPropertyByName("type")!!
+private val PlaceholderNodeType = ASTLanguage.getLanguage().getEnumerationByName("PlaceholderNodeType")!!
 
 /**
  * This class is able to convert between Kolasu and LionWeb models, tracking the mapping.
@@ -196,6 +201,9 @@ class LionWebModelConverter(
             }
             kolasuTree.walk().forEach { kNode ->
                 val lwNode = nodesMapping.byA(kNode)!!
+                kNode.annotations.forEach { annotationInstance ->
+                    lwNode.addAnnotation(annotationInstance)
+                }
                 if (!CommonChecks.isValidID(lwNode.id)) {
                     throw RuntimeException(
                         "Cannot export AST to LionWeb as we got an invalid Node ID: ${lwNode.id}. " +
@@ -262,7 +270,7 @@ class LionWebModelConverter(
                                         val instance =
                                             DynamicAnnotationInstance(
                                                 "${lwNode.id}_placeholder_annotation",
-                                                StarLasuLWLanguage.PlaceholderNode,
+                                                PlaceholderNode,
                                             )
                                         val effectiveOrigin = origin.origin
                                         if (effectiveOrigin is KNode) {
@@ -271,7 +279,7 @@ class LionWebModelConverter(
                                         }
                                         setPlaceholderNodeType(instance, origin.javaClass.kotlin)
                                         instance.setPropertyValue(
-                                            StarLasuLWLanguage.PlaceholderNodeMessageProperty,
+                                            PlaceholderNodeMessageProperty,
                                             origin.message,
                                         )
                                         lwNode.addAnnotation(instance)
@@ -306,7 +314,8 @@ class LionWebModelConverter(
                                         kFeatures[feature.name]
                                             ?: throw java.lang.IllegalStateException(
                                                 "Cannot find feature ${feature.name} " +
-                                                    "in Starlasu Node ${kNode.nodeType}",
+                                                    "in Starlasu Node ${kNode.nodeType}"
+                                        ,
                                             )
                                     )
                                         as com.strumenta.kolasu.language.Reference
@@ -412,18 +421,18 @@ class LionWebModelConverter(
         val enumerationLiteral: EnumerationLiteral =
             when (kClass) {
                 MissingASTTransformation::class ->
-                    StarLasuLWLanguage.PlaceholderNodeType.literals.find {
+                    PlaceholderNodeType.literals.find {
                         it.name == "MissingASTTransformation"
                     }!!
                 FailingASTTransformation::class ->
-                    StarLasuLWLanguage.PlaceholderNodeType.literals.find {
+                    PlaceholderNodeType.literals.find {
                         it.name == "FailingASTTransformation"
                     }!!
                 else -> TODO()
             }
 
         placeholderAnnotation.setPropertyValue(
-            StarLasuLWLanguage.PlaceholderNodeTypeProperty,
+            PlaceholderNodeTypeProperty,
             EnumerationValueImpl(enumerationLiteral),
         )
     }
@@ -447,6 +456,7 @@ class LionWebModelConverter(
                     // instantiated kNode
                     nodeIdProvider.registerMapping(instantiated, lwNode.id!!)
                     instantiated.id = lwNode.id
+                    instantiated.annotations.addAll(lwNode.annotations)
                 }
                 associateNodes(instantiated, lwNode)
             } catch (e: RuntimeException) {
@@ -471,18 +481,18 @@ class LionWebModelConverter(
                 }
                 val placeholderNodeAnnotation =
                     lwNode.annotations.find {
-                        it.classifier == StarLasuLWLanguage.PlaceholderNode
+                        it.classifier == PlaceholderNode
                     }
                 if (placeholderNodeAnnotation != null) {
                     val placeholderType =
                         (
                             placeholderNodeAnnotation.getPropertyValue(
-                                StarLasuLWLanguage.PlaceholderNodeTypeProperty,
+                                PlaceholderNodeTypeProperty,
                             ) as EnumerationValue
                         ).enumerationLiteral
                     val placeholderMessage =
                         placeholderNodeAnnotation.getPropertyValue(
-                            StarLasuLWLanguage.PlaceholderNodeMessageProperty,
+                            PlaceholderNodeMessageProperty,
                         ) as String
                     when (placeholderType.name) {
                         MissingASTTransformation::class.simpleName -> {
@@ -527,7 +537,7 @@ class LionWebModelConverter(
         serialization: AbstractSerialization =
             SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU),
     ): AbstractSerialization {
-        StarLasuLWLanguage
+        registerSerializersAndDeserializersInMetamodelRegistry()
         MetamodelRegistry.prepareJsonSerialization(serialization)
         synchronized(languageConverter) {
             languageConverter.knownLWLanguages().forEach {
@@ -818,7 +828,8 @@ class LionWebModelConverter(
                         val value = attributeValue(data, feature)
                         if (!param.type.isAssignableBy(value)) {
                             throw RuntimeException(
-                                "Cannot assign value $value to param ${param.name} of type ${param.type}",
+                                "Cannot assign value $value (${value?.javaClass?.canonicalName}) to param " +
+                                    "${param.name} of type ${param.type}",
                             )
                         }
                         params[param] = value
@@ -826,14 +837,18 @@ class LionWebModelConverter(
                     is Reference -> {
                         val value = referenceValue(data, feature, referencesPostponer)
                         if (!param.type.isAssignableBy(value)) {
-                            throw RuntimeException()
+                            throw RuntimeException(
+                                "Cannot assign value $value to param ${param.name} of type ${param.type}"
+                            )
                         }
                         params[param] = value
                     }
                     is Containment -> {
                         val value = containmentValue(data, feature)
                         if (!param.type.isAssignableBy(value)) {
-                            throw RuntimeException()
+                            throw RuntimeException(
+                                "Cannot assign value $value to param ${param.name} of type ${param.type}"
+                            )
                         }
                         params[param] = value
                     }
@@ -995,7 +1010,7 @@ class LionWebModelConverter(
         val position =
             issueNode.getPropertyValue(
                 ASTLanguage.getIssue().getPropertyByName(Issue::position.name)!!,
-            ) as Position
+            ) as? Position
         val issue = Issue(issueType, message, severity, position)
         return issueNode.id!! to issue
     }
