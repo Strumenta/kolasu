@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.lionweb
 
-import io.lionweb.lioncore.java.language.Language
-import io.lionweb.lioncore.java.model.Node
+import io.lionweb.language.Language
+import io.lionweb.model.Node
 import kotlin.reflect.KClass
 
 typealias LWLanguage = Language

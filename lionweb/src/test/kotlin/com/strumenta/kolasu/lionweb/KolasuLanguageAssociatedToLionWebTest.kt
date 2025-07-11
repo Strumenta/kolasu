@@ -4,9 +4,9 @@ import com.strumenta.kolasu.language.KolasuLanguage
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.ReferenceByName
-import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.language.Enumeration
-import io.lionweb.lioncore.java.language.Language
+import io.lionweb.language.Concept
+import io.lionweb.language.Enumeration
+import io.lionweb.language.Language
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

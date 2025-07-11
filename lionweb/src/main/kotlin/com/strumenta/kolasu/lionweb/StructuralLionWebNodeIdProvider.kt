@@ -5,7 +5,7 @@ import com.strumenta.kolasu.ids.SimpleSourceIdProvider
 import com.strumenta.kolasu.ids.SourceIdProvider
 import com.strumenta.kolasu.ids.StructuralNodeIdProvider
 import com.strumenta.kolasu.model.Node
-import io.lionweb.lioncore.java.utils.CommonChecks
+import io.lionweb.utils.CommonChecks
 
 class StructuralLionWebNodeIdProvider(sourceIdProvider: SourceIdProvider = SimpleSourceIdProvider()) :
     StructuralNodeIdProvider(sourceIdProvider) {

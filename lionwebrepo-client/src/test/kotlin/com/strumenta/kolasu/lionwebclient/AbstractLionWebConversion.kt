@@ -7,7 +7,7 @@ import com.strumenta.kolasu.traversing.children
 import com.strumenta.kolasu.traversing.walk
 import java.io.InputStream
 import com.strumenta.kolasu.model.Node as KNode
-import io.lionweb.lioncore.java.model.Node as LWNode
+import io.lionweb.model.Node as LWNode
 
 abstract class AbstractLionWebConversion<R : KNode>(val kolasuLanguage: KolasuLanguage) {
     protected abstract fun parse(inputStream: InputStream): ParsingResult<R>

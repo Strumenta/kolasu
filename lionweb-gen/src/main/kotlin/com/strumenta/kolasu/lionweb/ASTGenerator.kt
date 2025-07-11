@@ -16,16 +16,16 @@ import com.strumenta.kolasu.model.NodeType
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.starlasu.base.ASTLanguage
-import io.lionweb.lioncore.java.language.Classifier
-import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.language.Containment
-import io.lionweb.lioncore.java.language.DataType
-import io.lionweb.lioncore.java.language.Enumeration
-import io.lionweb.lioncore.java.language.Feature
-import io.lionweb.lioncore.java.language.Interface
-import io.lionweb.lioncore.java.language.LionCoreBuiltins
-import io.lionweb.lioncore.java.language.Property
-import io.lionweb.lioncore.java.language.Reference
+import io.lionweb.language.Classifier
+import io.lionweb.language.Concept
+import io.lionweb.language.Containment
+import io.lionweb.language.DataType
+import io.lionweb.language.Enumeration
+import io.lionweb.language.Feature
+import io.lionweb.language.Interface
+import io.lionweb.language.LionCoreBuiltins
+import io.lionweb.language.Property
+import io.lionweb.language.Reference
 import org.jetbrains.kotlin.konan.file.File
 
 data class KotlinFile(val path: String, val code: String)

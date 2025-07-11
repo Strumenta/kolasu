@@ -12,12 +12,12 @@ import com.strumenta.kolasu.semantics.scope.provider.declarative.scopeFor
 import com.strumenta.kolasu.semantics.symbol.provider.declarative.DeclarativeSymbolProvider
 import com.strumenta.kolasu.semantics.symbol.provider.declarative.symbolFor
 import com.strumenta.kolasu.semantics.symbol.repository.SymbolRepository
-import io.lionweb.lioncore.java.language.LionCoreBuiltins
-import io.lionweb.lioncore.java.model.impl.DynamicNode
-import io.lionweb.lioncore.kotlin.Multiplicity
-import io.lionweb.lioncore.kotlin.createConcept
-import io.lionweb.lioncore.kotlin.createContainment
-import io.lionweb.lioncore.kotlin.lwLanguage
+import io.lionweb.language.LionCoreBuiltins
+import io.lionweb.model.impl.DynamicNode
+import io.lionweb.kotlin.Multiplicity
+import io.lionweb.kotlin.createConcept
+import io.lionweb.kotlin.createContainment
+import io.lionweb.kotlin.lwLanguage
 
 val todoAccountLanguage =
     lwLanguage("todoAccountLanguage", lionWebVersion = LIONWEB_VERSION_USED_BY_KOLASU).apply {

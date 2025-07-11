@@ -8,8 +8,8 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeType
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.starlasu.base.ASTLanguage
-import io.lionweb.lioncore.java.language.LionCoreBuiltins
-import io.lionweb.lioncore.java.utils.LanguageValidator
+import io.lionweb.language.LionCoreBuiltins
+import io.lionweb.utils.LanguageValidator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

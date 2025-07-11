@@ -16,6 +16,9 @@ class FileBasedCodebase<R : Node>(
     }
 
     override fun files(): Sequence<CodebaseFile<R>> = cachedFiles.asSequence()
+    override fun fileByRelativePath(relativePath: String): CodebaseFile<R>? {
+        return cachedFiles.find { it.relativePath == relativePath }
+    }
 
     private fun parseFiles(): Sequence<CodebaseFile<R>> {
         return sequence {

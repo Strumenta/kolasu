@@ -27,15 +27,15 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.starlasu.base.ASTLanguage
-import io.lionweb.lioncore.java.language.Classifier
-import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.language.DataType
-import io.lionweb.lioncore.java.language.Enumeration
-import io.lionweb.lioncore.java.language.EnumerationLiteral
-import io.lionweb.lioncore.java.language.Interface
-import io.lionweb.lioncore.java.language.LionCoreBuiltins
-import io.lionweb.lioncore.java.language.PrimitiveType
-import io.lionweb.lioncore.java.language.Property
+import io.lionweb.language.Classifier
+import io.lionweb.language.Concept
+import io.lionweb.language.DataType
+import io.lionweb.language.Enumeration
+import io.lionweb.language.EnumerationLiteral
+import io.lionweb.language.Interface
+import io.lionweb.language.LionCoreBuiltins
+import io.lionweb.language.PrimitiveType
+import io.lionweb.language.Property
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
@@ -50,7 +50,7 @@ class LionWebLanguageConverter {
     private val languages = BiMap<KolasuLanguage, LWLanguage>()
 
     init {
-        val starLasuKLanguage = KolasuLanguage(ASTLanguage.getLanguage().name)
+        val starLasuKLanguage = KolasuLanguage(ASTLanguage.getLanguage().name!!)
         languages.associate(starLasuKLanguage, ASTLanguage.getLanguage())
         registerMapping(Node::class, ASTLanguage.getASTNode())
         registerMapping(Named::class, LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU))
@@ -83,7 +83,7 @@ class LionWebLanguageConverter {
         lionwebLanguage.version = "1"
         lionwebLanguage.name = kolasuLanguage.qualifiedName
         lionwebLanguage.key = kolasuLanguage.qualifiedName.replace('.', '-')
-        lionwebLanguage.id = "starlasu_language_${kolasuLanguage.qualifiedName.replace('.', '-')}"
+        lionwebLanguage.setID("starlasu_language_${kolasuLanguage.qualifiedName.replace('.', '-')}")
         lionwebLanguage.addDependency(ASTLanguage.getLanguage())
 
         kolasuLanguage.enumClasses.forEach { enumClass ->
@@ -100,13 +100,13 @@ class LionWebLanguageConverter {
                 val concept = Concept(lionwebLanguage, astClass.simpleName)
                 concept.isPartition = false
                 concept.key = lionwebLanguage.key + "_" + concept.name
-                concept.id = lionwebLanguage.id + "_" + concept.name
+                concept.setID(lionwebLanguage.id + "_" + concept.name)
                 concept.isAbstract = astClass.isAbstract || astClass.isSealed
                 registerMapping(astClass, concept)
             } else if (astClass.isConceptInterface) {
                 val conceptInterface = Interface(lionwebLanguage, astClass.simpleName)
                 conceptInterface.key = lionwebLanguage.key + "_" + conceptInterface.name
-                conceptInterface.id = lionwebLanguage.id + "_" + conceptInterface.name
+                conceptInterface.setID(lionwebLanguage.id + "_" + conceptInterface.name)
                 registerMapping(astClass, conceptInterface)
             }
         }
@@ -150,23 +150,23 @@ class LionWebLanguageConverter {
                     is Attribute -> {
                         val prop = Property(it.name, featuresContainer)
                         prop.key = featuresContainer.key + "_" + prop.name
-                        prop.id = featuresContainer.id + "_" + prop.name
+                        prop.setID(featuresContainer.id + "_" + prop.name)
                         prop.setOptional(it.optional)
                         prop.setType(toLWDataType(it.type, lionwebLanguage))
                         featuresContainer.addFeature(prop)
                     }
                     is Reference -> {
-                        val ref = io.lionweb.lioncore.java.language.Reference(it.name, featuresContainer)
+                        val ref = io.lionweb.language.Reference(it.name, featuresContainer)
                         ref.key = featuresContainer.key + "_" + ref.name
-                        ref.id = featuresContainer.id + "_" + ref.name
+                        ref.setID(featuresContainer.id + "_" + ref.name)
                         ref.setOptional(it.optional)
                         ref.setType(toLWClassifier(it.type))
                         featuresContainer.addFeature(ref)
                     }
                     is Containment -> {
-                        val cont = io.lionweb.lioncore.java.language.Containment(it.name, featuresContainer)
+                        val cont = io.lionweb.language.Containment(it.name, featuresContainer)
                         cont.key = featuresContainer.key + "_" + cont.name
-                        cont.id = featuresContainer.id + "_" + cont.name
+                        cont.setID(featuresContainer.id + "_" + cont.name)
                         cont.setOptional(true)
                         cont.setMultiple(it.multiplicity == Multiplicity.MANY)
                         cont.setType(toLWClassifier(it.type))
@@ -374,14 +374,14 @@ fun addEnumerationFromClass(
     kClass: EnumKClass,
 ): Enumeration {
     val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
-    newEnumeration.id = (lionwebLanguage.id ?: "unknown_language") + "_" + newEnumeration.name
+    newEnumeration.setID((lionwebLanguage.id ?: "unknown_language") + "_" + newEnumeration.name)
     newEnumeration.key = newEnumeration.name
 
     val entries = kClass.java.enumConstants
     entries.forEach { entry ->
         newEnumeration.addLiteral(
             EnumerationLiteral(newEnumeration, entry.name).apply {
-                id = newEnumeration.id + "-" + entry.name
+                setID(newEnumeration.id + "-" + entry.name)
                 key = newEnumeration.key + "-" + entry.name
             },
         )

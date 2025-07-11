@@ -27,6 +27,10 @@ dependencies {
     api(libs.clikt)
     testImplementation(kotlin("test-junit", libs.versions.kotlin.get()))
     api(libs.lionwebjava)
+
+    // To be removed in v1.7
+    implementation("org.redundent:kotlin-xml-builder:1.7.3")
+    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.2")
 }
 
 tasks.named<AntlrTask>("generateTestGrammarSource") {
@@ -52,6 +56,9 @@ tasks.named("runKtlintCheckOverTestSourceSet") {
 }
 tasks.named("runKtlintFormatOverTestSourceSet") {
     dependsOn("generateTestGrammarSource")
+}
+tasks.named("sourcesJar") {
+    dependsOn("generateGrammarSource")
 }
 tasks.named<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>("compileKotlin").configure {
     source(sourceSets["main"].allJava, sourceSets["main"].kotlin)

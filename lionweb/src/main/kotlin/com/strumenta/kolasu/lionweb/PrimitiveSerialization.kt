@@ -5,9 +5,9 @@ import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.parsing.KolasuToken
 import com.strumenta.kolasu.parsing.TokenCategory
 import com.strumenta.starlasu.base.ASTLanguage
-import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
-import io.lionweb.lioncore.java.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
-import io.lionweb.lioncore.kotlin.MetamodelRegistry
+import io.lionweb.kotlin.MetamodelRegistry
+import io.lionweb.serialization.PrimitiveValuesSerialization.PrimitiveDeserializer
+import io.lionweb.serialization.PrimitiveValuesSerialization.PrimitiveSerializer
 
 fun registerSerializersAndDeserializersInMetamodelRegistry() {
     MetamodelRegistry.addSerializerAndDeserializer(ASTLanguage.getChar(), charSerializer, charDeserializer)

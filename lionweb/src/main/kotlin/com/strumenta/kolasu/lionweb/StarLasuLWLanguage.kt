@@ -4,26 +4,26 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.starlasu.base.ASTLanguage
-import io.lionweb.lioncore.java.LionWebVersion
-import io.lionweb.lioncore.java.language.Annotation
-import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.language.Enumeration
-import io.lionweb.lioncore.java.language.Interface
-import io.lionweb.lioncore.java.language.Language
-import io.lionweb.lioncore.java.language.LionCoreBuiltins
-import io.lionweb.lioncore.java.language.PrimitiveType
-import io.lionweb.lioncore.java.language.Property
-import io.lionweb.lioncore.java.language.Reference
-import io.lionweb.lioncore.java.self.LionCore
-import io.lionweb.lioncore.kotlin.MetamodelRegistry
-import io.lionweb.lioncore.kotlin.Multiplicity
-import io.lionweb.lioncore.kotlin.addLiteral
-import io.lionweb.lioncore.kotlin.createConcept
-import io.lionweb.lioncore.kotlin.createContainment
-import io.lionweb.lioncore.kotlin.createInterface
-import io.lionweb.lioncore.kotlin.createPrimitiveType
-import io.lionweb.lioncore.kotlin.createProperty
-import io.lionweb.lioncore.kotlin.createReference
+import io.lionweb.LionWebVersion
+import io.lionweb.kotlin.MetamodelRegistry
+import io.lionweb.kotlin.Multiplicity
+import io.lionweb.kotlin.addLiteral
+import io.lionweb.kotlin.createConcept
+import io.lionweb.kotlin.createContainment
+import io.lionweb.kotlin.createInterface
+import io.lionweb.kotlin.createPrimitiveType
+import io.lionweb.kotlin.createProperty
+import io.lionweb.kotlin.createReference
+import io.lionweb.language.Annotation
+import io.lionweb.language.Concept
+import io.lionweb.language.Enumeration
+import io.lionweb.language.Interface
+import io.lionweb.language.Language
+import io.lionweb.language.LionCoreBuiltins
+import io.lionweb.language.PrimitiveType
+import io.lionweb.language.Property
+import io.lionweb.language.Reference
+import io.lionweb.lioncore.LionCore
 import com.strumenta.kolasu.model.BehaviorDeclaration as KBehaviorDeclaration
 import com.strumenta.kolasu.model.CommonElement as KCommonElement
 import com.strumenta.kolasu.model.Documentation as KDocumentation
@@ -52,7 +52,7 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
     val ParsingResult: Concept
 
     init {
-        id = "com-strumenta-StarLasu"
+        setID("com-strumenta-StarLasu")
         key = "com_strumenta_starlasu"
         version = "1"
         createPrimitiveType("Char")
@@ -125,7 +125,7 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
                 this,
                 "PlaceholderNodeType",
             ).apply {
-                this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
+                this.setID("${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id")
                 this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
                 addLiteral("MissingASTTransformation")
                 addLiteral("FailingASTTransformation")
@@ -135,7 +135,7 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
         val reference =
             Reference(lionWebVersion).apply {
                 this.name = "originalNode"
-                this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
+                this.setID("${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id")
                 this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
                 this.type = astNode
                 this.setOptional(true)
@@ -145,7 +145,7 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
         val type =
             Property(lionWebVersion).apply {
                 this.name = "type"
-                this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
+                this.setID("${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id")
                 this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
                 this.type = placeholderNodeAnnotationType
                 this.setOptional(false)
@@ -154,7 +154,7 @@ object StarLasuLWLanguage : Language(LIONWEB_VERSION_USED_BY_KOLASU, "com.strume
         val message =
             Property(lionWebVersion).apply {
                 this.name = "message"
-                this.id = "${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id"
+                this.setID("${placeholderNodeAnnotation.id!!.removeSuffix("-id")}-$name-id")
                 this.key = "${placeholderNodeAnnotation.key!!.removeSuffix("-key")}-$name-key"
                 this.type = LionCoreBuiltins.getString(LIONWEB_VERSION_USED_BY_KOLASU)
                 this.setOptional(false)

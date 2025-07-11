@@ -5,25 +5,25 @@ import com.strumenta.kolasu.lionweb.registerSerializersAndDeserializersInMetamod
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
-import io.lionweb.lioncore.kotlin.MetamodelRegistry
-import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
-import io.lionweb.repoclient.testing.AbstractRepoClientFunctionalTest
+import io.lionweb.kotlin.MetamodelRegistry
+import io.lionweb.kotlin.getChildrenByContainmentName
+import io.lionweb.client.testing.AbstractClientFunctionalTest
 import org.testcontainers.junit.jupiter.Testcontainers
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @Testcontainers
-class TodoFunctionalTest : AbstractRepoClientFunctionalTest(LIONWEB_VERSION_USED_BY_KOLASU, true) {
+class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_KOLASU, true) {
     @Test
     fun noPartitionsOnNewModelRepository() {
-        val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort, repository = "repo_noPartitionsOnNewModelRepository")
+        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, repository = "repo_noPartitionsOnNewModelRepository")
         kolasuClient.createRepository()
         assertEquals(emptyList(), kolasuClient.getPartitionIDs())
     }
 
     @Test
     fun storePartitionAndGetItBack() {
-        val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort, debug = true,
+        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, debug = true,
             repository = "repo_storePartitionAndGetItBack")
         kolasuClient.createRepository()
         kolasuClient.registerLanguage(todoLanguage)
@@ -89,7 +89,7 @@ class TodoFunctionalTest : AbstractRepoClientFunctionalTest(LIONWEB_VERSION_USED
     @Test
     fun checkNodeIDs() {
         val repoName = "checkNodeIDs"
-        val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort, debug = true, repositoryName = repoName)
+        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, debug = true, repositoryName = repoName)
         kolasuClient.lionWebClient.createRepository(repoName, LIONWEB_VERSION_USED_BY_KOLASU, history = false)
         kolasuClient.registerLanguage(todoLanguage)
         kolasuClient.registerLanguage(todoAccountLanguage)
@@ -126,7 +126,7 @@ class TodoFunctionalTest : AbstractRepoClientFunctionalTest(LIONWEB_VERSION_USED
     @Test
     fun sourceIsRetrievedCorrectly() {
         val repoName = "sourceIsRetrievedCorrectly"
-        val kolasuClient = KolasuClient(port = modelRepository!!.firstMappedPort, debug = true, repositoryName = repoName)
+        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, debug = true, repositoryName = repoName)
         kolasuClient.lionWebClient.createRepository(repoName, LIONWEB_VERSION_USED_BY_KOLASU, false)
         kolasuClient.registerLanguage(todoLanguage)
         kolasuClient.registerLanguage(todoAccountLanguage)

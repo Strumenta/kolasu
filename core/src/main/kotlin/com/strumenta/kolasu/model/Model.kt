@@ -1,6 +1,6 @@
 package com.strumenta.kolasu.model
 
-import io.lionweb.lioncore.java.model.AnnotationInstance
+import io.lionweb.model.AnnotationInstance
 import java.io.Serializable
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.reflect.KClass
