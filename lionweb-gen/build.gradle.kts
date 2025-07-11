@@ -35,7 +35,7 @@ dependencies {
     implementation(libs.clikt)
     implementation(libs.clikt)
 
-    implementation(libs.lionwebjava)
+    implementation(libs.lionweb.java)
     implementation(libs.starlasu.specs)
 
     api(project(":core"))

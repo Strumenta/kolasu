@@ -13,25 +13,28 @@ val <T : Any> Class<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
 val <T : Any> Class<T>.nodeDerivedProperties: Collection<KProperty1<T, *>>
     get() = this.kotlin.nodeDerivedProperties
 val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
-    get() = memberProperties.asSequence()
-        .filter { it.visibility == KVisibility.PUBLIC }
-        .filter { it.findAnnotation<Internal>() == null }
-        .filter { it.findAnnotation<Link>() == null }
-        .map {
-            require(it.name !in RESERVED_FEATURE_NAMES) {
-                "Property ${it.name} in ${this.qualifiedName} should be marked as internal"
+    get() =
+        memberProperties.asSequence()
+            .filter { it.visibility == KVisibility.PUBLIC }
+            .filter { it.findAnnotation<Internal>() == null }
+            .filter { it.findAnnotation<Link>() == null }
+            .map {
+                require(it.name !in RESERVED_FEATURE_NAMES) {
+                    "Property ${it.name} in ${this.qualifiedName} should be marked as internal"
+                }
+                it
             }
-            it
-        }
-        .toList()
+            .toList()
 
 val <T : Any> KClass<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
-    get() = nodeProperties
-        .filter { it.findAnnotation<Derived>() == null }
+    get() =
+        nodeProperties
+            .filter { it.findAnnotation<Derived>() == null }
 
 val <T : Any> KClass<T>.nodeDerivedProperties: Collection<KProperty1<T, *>>
-    get() = nodeProperties
-        .filter { it.findAnnotation<Derived>() != null }
+    get() =
+        nodeProperties
+            .filter { it.findAnnotation<Derived>() != null }
 
 /**
  * @return all properties of this node that are considered AST properties.

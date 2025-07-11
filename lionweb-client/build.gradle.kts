@@ -26,7 +26,7 @@ testing {
                 implementation(project(":core"))
                 implementation(project(":lionweb"))
                 implementation(project(":semantics"))
-                implementation(libs.lionwebkotlinrepoclient)
+                implementation(libs.lionweb.kotlin.client)
                 implementation(libs.kotlin.test.junit5)
                 implementation("io.kotest:kotest-runner-junit5-jvm:5.8.0")
                 implementation(libs.kotesttestcontainers)
@@ -35,7 +35,7 @@ testing {
                 implementation("org.testcontainers:testcontainers:1.19.5")
                 implementation("org.testcontainers:junit-jupiter:1.19.5")
                 implementation("org.testcontainers:postgresql:1.19.5")
-                implementation(libs.lionwebjavarepoclienttesting)
+                implementation(libs.lionweb.java.client.testing)
             }
 
             targets {
@@ -50,12 +50,12 @@ testing {
 }
 
 dependencies {
-    implementation(libs.lionwebjava)
+    implementation(libs.lionweb.java)
     implementation(project(":core"))
     implementation(project(":lionweb"))
     implementation(project(":semantics"))
-    implementation(libs.lionwebkotlincore)
-    implementation(libs.lionwebkotlinrepoclient)
+    implementation(libs.lionweb.kotlin.core)
+    implementation(libs.lionweb.kotlin.client)
     implementation(libs.starlasu.specs)
 
     testImplementation(kotlin("test-junit5"))

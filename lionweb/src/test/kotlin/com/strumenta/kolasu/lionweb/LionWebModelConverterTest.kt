@@ -1067,20 +1067,22 @@ class LionWebModelConverterTest {
     fun preserveLionWebAnnotationsWhenConvertingBackAndForthFromLionWeb() {
         var annotation1: Annotation
         var annotation1Value: Property
-        val language1 = Language().apply {
-            setID("lang1-id")
-            key = "lang1-key"
-            name = "Lang1"
-            annotation1 = createAnnotation("MyAnnotation").apply {
-                annotation1Value = createProperty("value", LionCoreBuiltins.getInteger())
+        val language1 =
+            Language().apply {
+                setID("lang1-id")
+                key = "lang1-key"
+                name = "Lang1"
+                annotation1 =
+                    createAnnotation("MyAnnotation").apply {
+                        annotation1Value = createProperty("value", LionCoreBuiltins.getInteger())
+                    }
             }
-        }
 
         val converter1 = LionWebModelConverter()
         converter1.exportLanguageToLionWeb(
             KolasuLanguage("myLanguage").apply {
                 addClass(NodeWithEnum::class)
-            }
+            },
         )
 
         val myKNode1 = NodeWithEnum("MyNode", AnEnum.ZUM)
@@ -1104,7 +1106,7 @@ class LionWebModelConverterTest {
         converter2.exportLanguageToLionWeb(
             KolasuLanguage("myLanguage").apply {
                 addClass(NodeWithEnum::class)
-            }
+            },
         )
 
         val myKNode3 = converter2.importModelFromLionWeb(lwNode1) as KNode
@@ -1114,7 +1116,7 @@ class LionWebModelConverterTest {
         converter3.exportLanguageToLionWeb(
             KolasuLanguage("myLanguage").apply {
                 addClass(NodeWithEnum::class)
-            }
+            },
         )
 
         val lwNode3 = converter3.exportModelToLionWeb(myKNode3)

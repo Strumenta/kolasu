@@ -202,7 +202,7 @@ class LionWebModelConverter(
             kolasuTree.walk().forEach { kNode ->
                 val lwNode = nodesMapping.byA(kNode)!!
                 kNode.annotations.forEach { annotationInstance ->
-                    lwNode.addAnnotation(annotationInstance)
+                    lwNode.addAnnotation(annotationInstance!!)
                 }
                 if (!CommonChecks.isValidID(lwNode.id)) {
                     throw RuntimeException(
@@ -314,8 +314,7 @@ class LionWebModelConverter(
                                         kFeatures[feature.name]
                                             ?: throw java.lang.IllegalStateException(
                                                 "Cannot find feature ${feature.name} " +
-                                                    "in Starlasu Node ${kNode.nodeType}"
-                                        ,
+                                                    "in Starlasu Node ${kNode.nodeType}",
                                             )
                                     )
                                         as com.strumenta.kolasu.language.Reference
@@ -456,7 +455,9 @@ class LionWebModelConverter(
                     // instantiated kNode
                     nodeIdProvider.registerMapping(instantiated, lwNode.id!!)
                     instantiated.id = lwNode.id
-                    instantiated.annotations.addAll(lwNode.annotations)
+                    lwNode.annotations.forEach {
+                        instantiated.addAnnotation(it)
+                    }
                 }
                 associateNodes(instantiated, lwNode)
             } catch (e: RuntimeException) {
@@ -838,7 +839,7 @@ class LionWebModelConverter(
                         val value = referenceValue(data, feature, referencesPostponer)
                         if (!param.type.isAssignableBy(value)) {
                             throw RuntimeException(
-                                "Cannot assign value $value to param ${param.name} of type ${param.type}"
+                                "Cannot assign value $value to param ${param.name} of type ${param.type}",
                             )
                         }
                         params[param] = value
@@ -847,7 +848,7 @@ class LionWebModelConverter(
                         val value = containmentValue(data, feature)
                         if (!param.type.isAssignableBy(value)) {
                             throw RuntimeException(
-                                "Cannot assign value $value to param ${param.name} of type ${param.type}"
+                                "Cannot assign value $value to param ${param.name} of type ${param.type}",
                             )
                         }
                         params[param] = value

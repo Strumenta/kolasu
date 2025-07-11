@@ -1,5 +1,3 @@
-import java.net.URI
-
 plugins {
     kotlin("jvm")
     alias(libs.plugins.superPublish)

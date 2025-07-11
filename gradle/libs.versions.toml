@@ -15,9 +15,6 @@ clikt = "3.5.0"
 specsVersion = "0.3.0-SNAPSHOT"
 kotlinpoet = "1.14.2"
 junit = "5.7.1"
-jvm = "1.8"
-antlr = "4.9.3"
-clikt = "3.5.0"
 
 [plugins]
 buildConfig = { id = "com.github.gmazzo.buildconfig", version = "5.6.5" }
@@ -28,17 +25,17 @@ release = { id ="net.researchgate.release", version = "3.1.0" }
 buildconfig = { id = "com.github.gmazzo.buildconfig", version = "3.1.0" }
 
 [libraries]
-lionwebjava = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-core", version.ref = "lwjava" }
-lionwebjavaemf = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-emf", version.ref = "lwjava" }
-lionwebkotlinrepoclient = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-repo-client", version.ref = "lwkotlin" }
-lionwebjavarepoclienttesting = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-client-testing", version.ref = "lwjava" }
-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+lionweb-java = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-core", version.ref = "lwjava" }
+lionweb-java-emf = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-emf", version.ref = "lwjava" }
+lionweb-java-client-testing = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-client-testing", version.ref = "lwjava" }
+lionweb-kotlin-core = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-core", version.ref = "lwkotlin" }
+lionweb-kotlin-client = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-client", version.ref = "lwkotlin" }
 
-lionwebkotlincore = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-core", version.ref = "lwkotlin" }
 kotesttestcontainers = { module = "io.kotest.extensions:kotest-extensions-testcontainers", version.ref = "kotestVersion" }
 antlr = { module = "org.antlr:antlr4", version.ref = "antlr" }
-antlrRuntime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+
+antlrRuntime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
 starlasu-specs = { module="com.strumenta.starlasu.specs:starlasuspecs-jvm", version.ref="specsVersion" }
 ksp-gradle-plugin = { module="com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
@@ -51,4 +48,3 @@ symbol-processing-api = { group = "com.google.devtools.ksp", name = "symbol-proc
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
 kotlinpoet = { group = "com.squareup", name = "kotlinpoet", version.ref = "kotlinpoet" }
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
-lionwebkotlinrepoclient = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-client", version.ref = "lwkotlin" }

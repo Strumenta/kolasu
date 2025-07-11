@@ -23,11 +23,6 @@ public class CompilationUnit extends BaseASTNode {
             return Arrays.asList(new PropertyDescription("bs", true, Multiplicity.MANY, getBs(), PropertyType.CONTAINMENT, false));
         }
 
-        @Override
-        @NotNull
-        public List<PropertyDescription> getDerivedProperties() {
-            return Collections.emptyList();
-        }
     }
 
     public static class B extends BaseASTNode {

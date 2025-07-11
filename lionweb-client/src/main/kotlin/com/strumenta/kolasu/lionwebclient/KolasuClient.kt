@@ -24,7 +24,7 @@ import io.lionweb.serialization.JsonSerialization
 import io.lionweb.client.kotlin.ClassifierResult
 import io.lionweb.client.kotlin.LionWebClient
 import io.lionweb.client.kotlin.RetrievalMode
-import io.lionweb.lioncore.kotlin.repoclient.SerializationDecorator
+import io.lionweb.serialization.UnavailableNodePolicy
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 

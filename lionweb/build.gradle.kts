@@ -23,9 +23,10 @@ dependencies {
     "cliImplementation"("com.github.ajalt.clikt:clikt:${libs.versions.clikt.get()}")
     testImplementation(kotlin("test-junit", libs.versions.kotlin.get()))
     testImplementation("com.google.code.gson:gson:${libs.versions.gson.get()}")
+    implementation(libs.starlasu.specs)
 
-    api(libs.lionwebjava)
-    api(libs.lionwebkotlincore) {
+    api(libs.lionweb.java)
+    api(libs.lionweb.kotlin.core) {
         exclude(group = "org.jetbrains.kotlin", module = "kotlin-test-junit5")
     }
 

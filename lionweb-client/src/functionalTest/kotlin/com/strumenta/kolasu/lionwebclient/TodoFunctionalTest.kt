@@ -89,7 +89,7 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
     @Test
     fun checkNodeIDs() {
         val repoName = "checkNodeIDs"
-        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, debug = true, repositoryName = repoName)
+        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, debug = true, repository = repoName)
         kolasuClient.lionWebClient.createRepository(repoName, LIONWEB_VERSION_USED_BY_KOLASU, history = false)
         kolasuClient.registerLanguage(todoLanguage)
         kolasuClient.registerLanguage(todoAccountLanguage)
@@ -126,7 +126,7 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
     @Test
     fun sourceIsRetrievedCorrectly() {
         val repoName = "sourceIsRetrievedCorrectly"
-        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, debug = true, repositoryName = repoName)
+        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, debug = true, repository = repoName)
         kolasuClient.lionWebClient.createRepository(repoName, LIONWEB_VERSION_USED_BY_KOLASU, false)
         kolasuClient.registerLanguage(todoLanguage)
         kolasuClient.registerLanguage(todoAccountLanguage)

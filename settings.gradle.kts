@@ -18,7 +18,7 @@ include("core")
 include("semantics")
 include("javalib")
 include("lionweb")
-include("lionwebrepo-client")
+include("lionweb-client")
 
 include("lionweb-ksp")
 include("lionweb-gen")

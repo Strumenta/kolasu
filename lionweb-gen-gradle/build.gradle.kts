@@ -7,16 +7,14 @@ plugins {
     `kotlin-dsl`
 }
 
-val kspVersion = extra["kspVersion"] as String
-val kotlin_version = extra["kotlin_version"] as String
 val lionwebGenGradlePluginID = extra["lionwebGenGradlePluginID"] as String
-val lionwebJavaVersion = libs.lionwebjava.get().version
+val lionwebJavaVersion = libs.versions.lwjava.get()
 
 dependencies {
     api(libs.kotlin.gradle.plugin)
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
-    implementation(libs.lionwebjava)
+    implementation(libs.lionweb.java)
 
     api(project(":lionweb-gen"))
     testImplementation(project(":lionweb-ksp"))

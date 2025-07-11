@@ -26,7 +26,7 @@ dependencies {
     implementation(libs.gson)
     api(libs.clikt)
     testImplementation(kotlin("test-junit", libs.versions.kotlin.get()))
-    api(libs.lionwebjava)
+    api(libs.lionweb.java)
 
     // To be removed in v1.7
     implementation("org.redundent:kotlin-xml-builder:1.7.3")

@@ -4,12 +4,12 @@ import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.traversing.walk
-import io.lionweb.lioncore.java.language.Annotation
-import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.language.Property
-import io.lionweb.lioncore.java.model.AnnotationInstance
-import io.lionweb.lioncore.java.model.Node
-import io.lionweb.lioncore.java.model.ReferenceValue
+import io.lionweb.language.Annotation
+import io.lionweb.language.Concept
+import io.lionweb.language.Property
+import io.lionweb.model.AnnotationInstance
+import io.lionweb.model.Node
+import io.lionweb.model.ReferenceValue
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
@@ -23,6 +23,8 @@ typealias Node = BaseASTNode
  * the Origin of another node.
  */
 open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
+    private val annotations = mutableListOf<AnnotationInstance>()
+
     @Internal
     override var id: String? = null
 
@@ -255,12 +257,12 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
         TODO("Not yet implemented")
     }
 
-    override fun getChildren(containment: io.lionweb.lioncore.java.language.Containment): List<Node?> {
+    override fun getChildren(containment: io.lionweb.language.Containment): List<Node?> {
         TODO("Not yet implemented")
     }
 
     override fun addChild(
-        containment: io.lionweb.lioncore.java.language.Containment,
+        containment: io.lionweb.language.Containment,
         child: Node,
     ) {
         TODO("Not yet implemented")
@@ -271,39 +273,39 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
     }
 
     override fun removeChild(
-        containment: io.lionweb.lioncore.java.language.Containment,
+        containment: io.lionweb.language.Containment,
         index: Int,
     ) {
         TODO("Not yet implemented")
     }
 
-    override fun getReferenceValues(reference: io.lionweb.lioncore.java.language.Reference): List<ReferenceValue?> {
+    override fun getReferenceValues(reference: io.lionweb.language.Reference): List<ReferenceValue?> {
         TODO("Not yet implemented")
     }
 
     override fun addReferenceValue(
-        reference: io.lionweb.lioncore.java.language.Reference,
+        reference: io.lionweb.language.Reference,
         referredNode: ReferenceValue?,
     ) {
         TODO("Not yet implemented")
     }
 
     override fun removeReferenceValue(
-        reference: io.lionweb.lioncore.java.language.Reference,
+        reference: io.lionweb.language.Reference,
         referenceValue: ReferenceValue?,
     ) {
         TODO("Not yet implemented")
     }
 
     override fun removeReferenceValue(
-        reference: io.lionweb.lioncore.java.language.Reference,
+        reference: io.lionweb.language.Reference,
         index: Int,
     ) {
         TODO("Not yet implemented")
     }
 
     override fun setReferenceValues(
-        reference: io.lionweb.lioncore.java.language.Reference,
+        reference: io.lionweb.language.Reference,
         values: List<ReferenceValue?>,
     ) {
         TODO("Not yet implemented")
@@ -321,12 +323,12 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
         TODO("Not yet implemented")
     }
 
-    override fun getContainmentFeature(): io.lionweb.lioncore.java.language.Containment? {
+    override fun getContainmentFeature(): io.lionweb.language.Containment? {
         TODO("Not yet implemented")
     }
 
-    override fun getAnnotations(): List<AnnotationInstance?> {
-        TODO("Not yet implemented")
+    override fun getAnnotations(): List<AnnotationInstance> {
+        return annotations
     }
 
     override fun getAnnotations(annotation: Annotation): List<AnnotationInstance?> {
@@ -334,7 +336,7 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
     }
 
     override fun addAnnotation(instance: AnnotationInstance) {
-        TODO("Not yet implemented")
+        this.annotations.add(instance)
     }
 
     override fun removeAnnotation(instance: AnnotationInstance) {
