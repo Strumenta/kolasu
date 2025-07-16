@@ -86,34 +86,3 @@ fun <R : Node> convertCodebaseJSON(
         }
     }
 }
-
-// fun <R : Node> convertCodebaseFlatBuffers(
-//    modelConverter: LionWebModelConverter,
-//    codebaseAccess: CodebaseAccessFlatBuffers,
-//    languagesWeConsider: Set<String>,
-//    serialization: FlatBuffersSerialization
-// ): Codebase<R> {
-//    return object : Codebase<R> {
-//        override val name: String
-//            get() = codebaseAccess.name
-//
-//        override fun files(): Sequence<CodebaseFile<R>> {
-//            return codebaseAccess.files().map { fileIdentifier ->
-//                val serializedFile = codebaseAccess.retrieve(fileIdentifier)
-//                serialization.deserializeToNodes(serializedFile)[0]
-//            }.filter { serializedCodebaseFile ->
-//                val languageName = serializedCodebaseFile!!.getPropertyValueByName("language_name") as String
-//                languagesWeConsider.contains(languageName)
-//            }.map { serializedCodebaseFile ->
-//                deserialize(modelConverter, this, serializedCodebaseFile!!)
-//            }.asSequence()
-//        }
-//
-//        override fun fileByRelativePath(relativePath: String): CodebaseFile<R>? {
-//            val fileIdentifier = codebaseAccess.fileByRelativePath(relativePath) ?: return null
-//            val serializedFile = codebaseAccess.retrieve(fileIdentifier) ?: throw IllegalStateException()
-//            val serializedCodebaseFile = serialization.deserializeToNodes(serializedFile)[0]
-//            return deserialize(modelConverter, this, serializedCodebaseFile)
-//        }
-//    }
-// }

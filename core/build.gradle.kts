@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm")
     alias(libs.plugins.ktlint)
-    alias(libs.plugins.superPublish)
+    alias(libs.plugins.vanniktech.publish)
     id("antlr")
     id("idea")
     id("signing")
@@ -19,14 +19,14 @@ java {
 
 dependencies {
     antlr(libs.antlr)
-    implementation(libs.antlrRuntime)
+    implementation(libs.antlr.runtime)
     implementation(kotlin("stdlib", libs.versions.kotlin.get()))
     implementation(kotlin("reflect", libs.versions.kotlin.get()))
     implementation(kotlin("test", libs.versions.kotlin.get()))
     implementation(libs.gson)
     api(libs.clikt)
     testImplementation(kotlin("test-junit", libs.versions.kotlin.get()))
-    api(libs.lionwebjava)
+    api(libs.lionweb.java)
 
     // To be removed in v1.7
     implementation("org.redundent:kotlin-xml-builder:1.7.3")
