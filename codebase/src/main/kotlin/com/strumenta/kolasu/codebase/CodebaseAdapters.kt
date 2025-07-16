@@ -15,7 +15,6 @@ import io.lionweb.model.ClassifierInstanceUtils
 import io.lionweb.model.impl.DynamicNode
 import io.lionweb.serialization.JsonSerialization
 import java.util.stream.Collectors
-import kotlin.streams.asSequence
 
 fun <R : Node> deserialize(
     modelConverter: LionWebModelConverter,
@@ -55,12 +54,12 @@ fun <R : Node> serialize(
     return lwCodebaseFile
 }
 
-fun <R : Node> convertCodebaseJSON(
+fun <R : Node> CodebaseAccess.convertToCodebase(
     modelConverter: LionWebModelConverter,
-    codebaseAccess: CodebaseAccess,
     languagesWeConsider: Set<String>,
     jsonSerialization: JsonSerialization
 ): Codebase<R> {
+    val codebaseAccess = this
     return object : Codebase<R> {
         override val name: String
             get() = codebaseAccess.name

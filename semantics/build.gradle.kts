@@ -1,5 +1,3 @@
-
-
 plugins {
     kotlin("jvm")
     `maven-publish`
@@ -11,7 +9,6 @@ plugins {
 
 val jvmVersion: String = properties["jvm_version"] as String
 val kotlinVersion: String = properties["kotlin_version"] as String
-val isReleaseVersion: Boolean = !(project.version as String).endsWith("SNAPSHOT")
 
 java {
     setSourceCompatibility(jvmVersion)
