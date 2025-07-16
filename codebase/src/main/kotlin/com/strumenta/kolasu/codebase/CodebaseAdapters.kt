@@ -81,7 +81,7 @@ fun <R : Node> CodebaseAccess.convertToCodebase(
         }
 
         override fun fileByRelativePath(relativePath: String): CodebaseFile<R>? {
-            TODO("Not yet implemented")
+            return files().find { it.relativePath == relativePath }
         }
     }
 }

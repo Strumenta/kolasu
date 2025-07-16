@@ -52,7 +52,8 @@ class LionWebGradlePlugin : Plugin<Project> {
                             val language = jsonser.deserializeToNodes(FileInputStream(languageFile)).first() as Language
                             val existingKotlinClasses = KotlinCodeProcessor().classesDeclaredInDir(project.file("src/main/kotlin"))
 
-                            val ktFiles = ASTGenerator(configuration.importPackageNames.get()[language.name] ?: language.name!!, language)
+                            val languageName = language.name ?: throw IllegalStateException("Language name not set")
+                            val ktFiles = ASTGenerator(configuration.importPackageNames.get()[languageName] ?: languageName, language)
                                 .generateClasses(existingKotlinClasses)
                             ktFiles.forEach { ktFile ->
                                 val file = File(configuration.outdir.get(), ktFile.path)
