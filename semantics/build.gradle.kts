@@ -8,7 +8,6 @@ plugins {
 }
 
 val jvmVersion: String = libs.versions.jvm.get()
-val isReleaseVersion: Boolean = !(project.version as String).endsWith("SNAPSHOT")
 
 java {
     setSourceCompatibility(jvmVersion)
@@ -24,55 +23,58 @@ dependencies {
     testImplementation(libs.kotlin.test)
 }
 
-publishing {
-    repositories {
-        maven {
-            val releaseRepo = uri("https://central.sonatype.com/publish/repositories/releases/")
-            val snapshotRepo = uri("https://central.sonatype.com/repository/maven-snapshots/")
-            url = if (!version.toString().endsWith("SNAPSHOT")) releaseRepo else snapshotRepo
+mavenPublishing {
+    coordinates(
+        groupId = project.group.toString(),
+        artifactId = "kolasu-" + project.name,
+        version = project.version as String,
+    )
 
-            credentials {
-                username = project.findProperty("mavenCentralUsername") as? String ?: "Unknown user"
-                password = project.findProperty("mavenCentralPassword") as? String ?: "Unknown password"
+    pom {
+        name.set("kolasu-" + project.name)
+        description.set("Framework to work with AST and building languages. Integrated with ANTLR.")
+        version = project.version as String
+        packaging = "jar"
+        url.set("https://github.com/strumenta/kolasu")
+
+        scm {
+            connection.set("scm:git:https://github.com/strumenta/kolasu.git")
+            developerConnection.set("scm:git:git@github.com:strumenta/kolasu.git")
+            url.set("https://github.com/strumentao/kolasu.git")
+        }
+
+        licenses {
+            license {
+                name.set("Apache Licenve V2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                distribution.set("repo")
+            }
+        }
+
+        // The developers entry is strictly required by Maven Central
+        developers {
+            developer {
+                id.set("ftomassetti")
+                name.set("Federico Tomassetti")
+                email.set("federico@strumenta.com")
+            }
+            developer {
+                id.set("alessiostalla")
+                name.set("Alessio Stalla")
+                email.set("alessio.stalla@strumenta.com")
             }
         }
     }
-    publications {
-        create<MavenPublication>("kolasu_semantics") {
-            artifactId = "kolasu-" + project.name
-            from(components["java"])
-            pom {
-                name = "kolasu-" + project.name
-                description = "Semantic enrichment facilities for Kolasu ASTs."
-                version = project.version as? String
-                packaging = "jar"
-                url = "https://github.com/Strumenta/kolasu"
-                scm {
-                    connection = "scm:git:https://github.com/Strumenta/kolasu.git"
-                    developerConnection = "scm:git:git@github.com:Strumenta/kolasu.git"
-                    url = "https://github.com/Strumenta/kolasu.git"
-                }
-                licenses {
-                    license {
-                        name = "Apache Licenve V2.0"
-                        url = "https://www.apache.org/licenses/LICENSE-2.0"
-                        distribution = "repo"
-                    }
-                }
-                developers {
-                    developer {
-                        id = "loradd"
-                        name = "Lorenzo Addazi"
-                        email = "lorenzo.addazi@strumenta.com"
-                    }
-                }
-            }
-        }
+    publishToMavenCentral(true)
+    signAllPublications()
+}
+
+project.afterEvaluate {
+    // Ensure Dokka runs after compilation
+    tasks.named("dokkaJavadoc") {
+        dependsOn("compileKotlin")
+    }
+    tasks.named("generateMetadataFileForMavenPublication") {
+        dependsOn("dokkaJavadocJar")
     }
 }
-
-signing {
-    sign(publishing.publications["kolasu_semantics"])
-}
-
-tasks.findByName("dokkaJavadoc")?.dependsOn(":core:compileKotlin")

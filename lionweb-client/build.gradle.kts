@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     java
     `jvm-test-suite`
@@ -57,61 +59,53 @@ dependencies {
     implementation(libs.starlasu.specs)
 
     testImplementation(kotlin("test-junit5"))
-    testImplementation("commons-io:commons-io:2.7")
+    testImplementation("commons-io:commons-io:2.14.0")
     testImplementation("org.slf4j:slf4j-simple:1.7.30")
 }
-
 mavenPublishing {
-    repositories {
-        maven {
-            val releaseRepo = uri("https://central.sonatype.com/publish/repositories/releases/")
-            val snapshotRepo = uri("https://central.sonatype.com/repository/maven-snapshots/")
-            url = if (!version.toString().endsWith("SNAPSHOT")) releaseRepo else snapshotRepo
-
-            credentials {
-                username = project.findProperty("mavenCentralUsername") as? String ?: "Unknown user"
-                password = project.findProperty("mavenCentralPassword") as? String ?: "Unknown password"
-            }
-        }
-    }
-
-    signAllPublications()
+    coordinates(
+        groupId = project.group.toString(),
+        artifactId = "kolasu-" + project.name,
+        version = project.version as String,
+    )
 
     pom {
-        name.set("kolasu-${project.name}")
-        description.set("The Kotlin client for working with StarLasu ASTSs and the lionweb-repository")
-        inceptionYear.set("2024")
-        url.set("https://github.com/Strumenta/kolasu")
+        name.set("kolasu-" + project.name)
+        description.set("Framework to work with AST and building languages. Integrated with ANTLR.")
+        version = project.version as String
+        packaging = "jar"
+        url.set("https://github.com/strumenta/kolasu")
+
+        scm {
+            connection.set("scm:git:https://github.com/strumenta/kolasu.git")
+            developerConnection.set("scm:git:git@github.com:strumenta/kolasu.git")
+            url.set("https://github.com/strumentao/kolasu.git")
+        }
+
         licenses {
             license {
-                name.set("The Apache License, Version 2.0")
-                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                name.set("Apache Licenve V2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                distribution.set("repo")
             }
         }
+
+        // The developers entry is strictly required by Maven Central
         developers {
             developer {
                 id.set("ftomassetti")
                 name.set("Federico Tomassetti")
-                url.set("https://github.com/ftomassetti/")
+                email.set("federico@strumenta.com")
             }
             developer {
                 id.set("alessiostalla")
                 name.set("Alessio Stalla")
                 email.set("alessio.stalla@strumenta.com")
             }
-            developer {
-                id.set("lorenzoaddazi")
-                name.set("Lorenzo Addazi")
-                email.set("lorenzo.addazi@strumenta.com")
-            }
-        }
-        scm {
-            url.set("https://github.com/Strumenta/kolasu/")
-            connection.set("scm:git:git://github.com/Strumenta/kolasu.git")
-            developerConnection.set("scm:git:ssh://git@github.com/Strumenta/kolasu.git")
         }
     }
+    publishToMavenCentral(true)
+    signAllPublications()
 }
 
 val jvmVersion = libs.versions.jvm.get()

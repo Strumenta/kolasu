@@ -1,3 +1,4 @@
+import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
@@ -31,77 +32,50 @@ dependencies {
     api(project(":core"))
     implementation(libs.starlasu.specs)
 }
+mavenPublishing {
+    coordinates(
+        groupId = project.group.toString(),
+        artifactId = "kolasu-" + project.name,
+        version = project.version as String,
+    )
 
-// Maven publishing
-publishing {
-    repositories {
-        maven {
-            val releaseRepo = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotRepo = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-            url = if (!project.version.toString().endsWith("SNAPSHOT")) releaseRepo else snapshotRepo
+    pom {
+        name.set("kolasu-" + project.name)
+        description.set("Framework to work with AST and building languages. Integrated with ANTLR.")
+        version = project.version as String
+        packaging = "jar"
+        url.set("https://github.com/strumenta/kolasu")
 
-            credentials {
-                username = project.findProperty("ossrhTokenUsername") as? String ?: "Unknown user"
-                password = project.findProperty("ossrhTokenPassword") as? String ?: "Unknown password"
+        scm {
+            connection.set("scm:git:https://github.com/strumenta/kolasu.git")
+            developerConnection.set("scm:git:git@github.com:strumenta/kolasu.git")
+            url.set("https://github.com/strumentao/kolasu.git")
+        }
+
+        licenses {
+            license {
+                name.set("Apache Licenve V2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                distribution.set("repo")
+            }
+        }
+
+        // The developers entry is strictly required by Maven Central
+        developers {
+            developer {
+                id.set("ftomassetti")
+                name.set("Federico Tomassetti")
+                email.set("federico@strumenta.com")
+            }
+            developer {
+                id.set("alessiostalla")
+                name.set("Alessio Stalla")
+                email.set("alessio.stalla@strumenta.com")
             }
         }
     }
-
-    publications {
-        create<MavenPublication>("kolasu_lionweb") {
-            from(components["java"])
-            artifactId = "kolasu-${project.name}"
-            artifact(tasks.named("sourcesJar"))
-            artifact(tasks.named("javadocJar"))
-            suppressPomMetadataWarningsFor("cliApiElements")
-            suppressPomMetadataWarningsFor("cliRuntimeElements")
-
-            pom {
-                name.set("kolasu-${project.name}")
-                description.set("Integration of Kolasu with LIonWeb")
-                version = project.version.toString()
-                packaging = "jar"
-                url.set("https://github.com/Strumenta/kolasu")
-
-                scm {
-                    connection.set("scm:git:https://github.com/Strumenta/kolasu.git")
-                    developerConnection.set("scm:git:git@github.com:Strumenta/kolasu.git")
-                    url.set("https://github.com/Strumenta/kolasu.git")
-                }
-
-                licenses {
-                    license {
-                        name.set("Apache License V2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
-                        distribution.set("repo")
-                    }
-                }
-
-                developers {
-                    developer {
-                        id.set("ftomassetti")
-                        name.set("Federico Tomassetti")
-                        email.set("federico@strumenta.com")
-                    }
-                    developer {
-                        id.set("alessiostalla")
-                        name.set("Alessio Stalla")
-                        email.set("alessio.stalla@strumenta.com")
-                    }
-                    developer {
-                        id.set("lorenzoaddazi")
-                        name.set("Lorenzo Addazi")
-                        email.set("lorenzo.addazi@strumenta.com")
-                    }
-                }
-            }
-        }
-    }
-}
-
-// Signing
-signing {
-    sign(publishing.publications["kolasu_lionweb"])
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, true)
+    signAllPublications()
 }
 
 // Ensure Dokka runs after compilation
