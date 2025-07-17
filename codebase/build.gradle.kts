@@ -1,9 +1,9 @@
 plugins {
     kotlin("jvm")
     alias(libs.plugins.ktlint)
-    id("maven-publish")
     id("signing")
     id("org.jetbrains.dokka")
+    alias(libs.plugins.vanniktech.publish)
 }
 
 val jvmVersion = project.property("jvm_version") as String
@@ -41,9 +41,8 @@ publishing {
             }
         }
     }
-    publications {
-        create<MavenPublication>("kolasu_codebase") {
-            from(components["java"])
+    publications.withType<MavenPublication>().configureEach {
+        if (name == "maven") {
             artifactId = "kolasu-${project.name}"
             suppressPomMetadataWarningsFor("cliApiElements")
             suppressPomMetadataWarningsFor("cliRuntimeElements")
