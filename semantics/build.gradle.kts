@@ -1,6 +1,6 @@
 plugins {
     kotlin("jvm")
-    alias(libs.plugins.superPublish)
+    alias(libs.plugins.vanniktech.publish)
     idea
     signing
     alias(libs.plugins.ktlint)

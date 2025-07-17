@@ -1,10 +1,10 @@
 package com.strumenta.kolasu.lionweb
 
 import com.strumenta.kolasu.model.Position
-import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.kotlin.BaseNode
 import io.lionweb.language.Concept
 import io.lionweb.model.impl.EnumerationValue
+import com.strumenta.starlasu.base.v2.ASTLanguageV2 as ASTLanguage
 
 class IssueNode : BaseNode(LIONWEB_VERSION_USED_BY_KOLASU) {
     var type: EnumerationValue? by property("type")

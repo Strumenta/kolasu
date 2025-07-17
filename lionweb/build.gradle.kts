@@ -3,7 +3,7 @@ import org.gradle.api.publish.maven.MavenPublication
 plugins {
     kotlin("jvm")
     id("org.jlleitschuh.gradle.ktlint")
-    alias(libs.plugins.superPublish)
+    alias(libs.plugins.vanniktech.publish)
     id("signing")
     id("org.jetbrains.dokka")
 }
@@ -26,9 +26,7 @@ dependencies {
     implementation(libs.starlasu.specs)
 
     api(libs.lionweb.java)
-    api(libs.lionweb.kotlin.core) {
-        exclude(group = "org.jetbrains.kotlin", module = "kotlin-test-junit5")
-    }
+    api(libs.lionweb.kotlin)
 
     api(project(":core"))
     implementation(libs.starlasu.specs)

@@ -24,7 +24,6 @@ import com.strumenta.kolasu.transformation.dummyInstance
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
-import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.kotlin.children
 import io.lionweb.kotlin.createAnnotation
 import io.lionweb.kotlin.createProperty
@@ -47,6 +46,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import com.strumenta.starlasu.base.v2.ASTLanguageV2 as ASTLanguage
 
 enum class AnEnum {
     FOO,
@@ -118,22 +118,6 @@ class LionWebModelConverterTest {
         }
       ],
       "references": [
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
-        }
       ],
       "annotations": [],
       "parent": null
@@ -164,14 +148,6 @@ class LionWebModelConverterTest {
         }
       ],
       "containments": [
-        {
-          "containment": {
-            "language": "com-strumenta-SimpleLang",
-            "version": "1",
-            "key": "com-strumenta-SimpleLang_SimpleNodeA_child"
-          },
-          "children": []
-        }
       ],
       "references": [
         {
@@ -186,22 +162,6 @@ class LionWebModelConverterTest {
               "reference": "synthetic_foo-bar-source_childrez"
             }
           ]
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
         }
       ],
       "annotations": [],
@@ -233,24 +193,7 @@ class LionWebModelConverterTest {
         }
       ],
       "containments": [],
-      "references": [
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
-        }
-      ],
+      "references": [],
       "annotations": [],
       "parent": "synthetic_foo-bar-source"
     },
@@ -304,22 +247,6 @@ class LionWebModelConverterTest {
               "reference": "synthetic_foo-bar-source_childrez"
             }
           ]
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
         }
       ],
       "annotations": [],
@@ -352,22 +279,6 @@ class LionWebModelConverterTest {
       ],
       "containments": [],
       "references": [
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
-        }
       ],
       "annotations": [],
       "parent": "synthetic_foo-bar-source_childrez_2"

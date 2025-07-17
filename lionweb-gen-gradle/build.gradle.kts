@@ -1,8 +1,8 @@
 plugins {
     id("java-gradle-plugin")
     id("org.jetbrains.kotlin.jvm")
-    alias(libs.plugins.buildconfig)
-    alias(libs.plugins.superPublish)
+    alias(libs.plugins.build.config)
+    alias(libs.plugins.vanniktech.publish)
     id("org.jetbrains.dokka")
     `kotlin-dsl`
 }
@@ -15,7 +15,6 @@ dependencies {
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
     implementation(libs.lionweb.java)
-
     api(project(":lionweb-gen"))
     testImplementation(project(":lionweb-ksp"))
 

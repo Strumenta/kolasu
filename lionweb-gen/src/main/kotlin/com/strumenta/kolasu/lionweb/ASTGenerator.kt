@@ -15,7 +15,6 @@ import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeType
 import com.strumenta.kolasu.model.Position
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.language.Classifier
 import io.lionweb.language.Concept
 import io.lionweb.language.Containment
@@ -27,6 +26,7 @@ import io.lionweb.language.LionCoreBuiltins
 import io.lionweb.language.Property
 import io.lionweb.language.Reference
 import org.jetbrains.kotlin.konan.file.File
+import com.strumenta.starlasu.base.v2.ASTLanguageV2 as ASTLanguage
 
 data class KotlinFile(val path: String, val code: String)
 

@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm")
     alias(libs.plugins.ksp)
-    alias(libs.plugins.superPublish)
+    alias(libs.plugins.vanniktech.publish)
     id("signing")
     id("org.jetbrains.dokka")
 }

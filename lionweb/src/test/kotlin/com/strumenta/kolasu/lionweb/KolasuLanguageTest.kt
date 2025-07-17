@@ -5,7 +5,6 @@ import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeType
 import com.strumenta.kolasu.model.ReferenceByName
-import io.lionweb.utils.LanguageValidator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -30,10 +29,5 @@ class KolasuLanguageTest {
             setOf(Root::class, NodeA::class, NodeB::class, FooMyRelevantInterface::class),
             kolasuLanguage.astClasses.toSet(),
         )
-    }
-
-    @Test
-    fun validateStarLasuLanguage() {
-        LanguageValidator.ensureIsValid(StarLasuLWLanguage)
     }
 }

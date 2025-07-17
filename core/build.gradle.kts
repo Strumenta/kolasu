@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm")
     alias(libs.plugins.ktlint)
-    alias(libs.plugins.superPublish)
+    alias(libs.plugins.vanniktech.publish)
     id("antlr")
     id("idea")
     id("signing")
@@ -19,7 +19,8 @@ java {
 
 dependencies {
     antlr(libs.antlr)
-    implementation(libs.antlrRuntime)
+    implementation(libs.antlr.runtime)
+    implementation(libs.starlasu.specs)
     implementation(kotlin("stdlib", libs.versions.kotlin.get()))
     implementation(kotlin("reflect", libs.versions.kotlin.get()))
     implementation(kotlin("test", libs.versions.kotlin.get()))
@@ -85,13 +86,13 @@ idea {
 publishing {
     repositories {
         maven {
-            val releaseRepo = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotRepo = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+            val releaseRepo = uri("https://central.sonatype.com/publish/repositories/releases/")
+            val snapshotRepo = uri("https://central.sonatype.com/repository/maven-snapshots/")
             url = if (!version.toString().endsWith("SNAPSHOT")) releaseRepo else snapshotRepo
 
             credentials {
-                username = project.findProperty("ossrhTokenUsername") as? String ?: "Unknown user"
-                password = project.findProperty("ossrhTokenPassword") as? String ?: "Unknown password"
+                username = project.findProperty("mavenCentralUsername") as? String ?: "Unknown user"
+                password = project.findProperty("mavenCentralPassword") as? String ?: "Unknown password"
             }
         }
     }
@@ -132,11 +133,6 @@ publishing {
                         id.set("alessiostalla")
                         name.set("Alessio Stalla")
                         email.set("alessio.stalla@strumenta.com")
-                    }
-                    developer {
-                        id.set("lorenzoaddazi")
-                        name.set("Lorenzo Addazi")
-                        email.set("lorenzo.addazi@strumenta.com")
                     }
                 }
             }

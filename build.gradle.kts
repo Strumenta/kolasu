@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version libs.versions.kotlin.get()
     alias(libs.plugins.ktlint)
-    alias(libs.plugins.superPublish)
+    alias(libs.plugins.vanniktech.publish)
     id("idea")
     id("signing")
     id("org.jetbrains.dokka") version libs.versions.dokka.get()
