@@ -19,7 +19,3 @@ include("semantics")
 include("javalib")
 include("lionweb")
 include("lionweb-client")
-
-include("lionweb-ksp")
-include("lionweb-gen")
-include("lionweb-gen-gradle")

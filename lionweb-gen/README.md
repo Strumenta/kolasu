@@ -1,1 +1,0 @@
-Logic to generate Kolasu AST classes from LionWeb languages.

@@ -60,7 +60,7 @@ class LionWebLanguageConverterTest {
         assertEquals("SimpleRoot", simpleRoot.name)
         assertSame(lwLanguage, simpleRoot.language)
         assertEquals(listOf(ASTLanguage.getASTNode()), simpleRoot.implemented)
-        assertEquals(emptyList(), simpleRoot.implemented)
+        assertEquals(null, simpleRoot.extendedConcept)
         assertEquals(false, simpleRoot.isAbstract)
         assertEquals(2, simpleRoot.features.size)
         assertEquals(5, simpleRoot.allFeatures().size)
@@ -78,14 +78,17 @@ class LionWebLanguageConverterTest {
 
         assertEquals("SimpleDecl", simpleDecl.name)
         assertSame(lwLanguage, simpleDecl.language)
-        assertEquals(listOf(ASTLanguage.getASTNode()), simpleDecl.implemented)
-        assertEquals(emptyList(), simpleRoot.implemented)
+        assertEquals(listOf(ASTLanguage.getASTNode(), ASTLanguage.getEntityDeclaration()), simpleDecl.implemented)
+        assertEquals(null, simpleRoot.extendedConcept)
         assertEquals(true, simpleDecl.isAbstract)
 
         assertEquals("SimpleNodeA", simpleNodeA.name)
         assertSame(lwLanguage, simpleNodeA.language)
         assertEquals(simpleDecl, simpleNodeA.extendedConcept)
-        assertEquals(listOf(ASTLanguage.getEntityDeclaration()), simpleNodeA.extendedConcept!!.implemented)
+        assertEquals(
+            listOf(ASTLanguage.getASTNode(), ASTLanguage.getEntityDeclaration()),
+            simpleNodeA.extendedConcept!!.implemented,
+        )
         assertEquals(
             listOf(LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU), myRelevantInterface),
             simpleNodeA.implemented,
@@ -152,7 +155,7 @@ class LionWebLanguageConverterTest {
         assertEquals(false, myNonPartition.isPartition)
         assertSame(lwLanguage, myNonPartition.language)
         assertEquals(listOf(ASTLanguage.getASTNode()), myNonPartition.implemented)
-        assertEquals(emptyList(), myNonPartition.implemented)
+        assertEquals(null, myNonPartition.extendedConcept)
         assertEquals(false, myNonPartition.isAbstract)
         assertEquals(1, myNonPartition.features.size)
         assertEquals(4, myNonPartition.allFeatures().size)
@@ -161,7 +164,7 @@ class LionWebLanguageConverterTest {
         assertEquals(false, simpleRoot.isPartition)
         assertSame(lwLanguage, simpleRoot.language)
         assertEquals(listOf(ASTLanguage.getASTNode()), simpleRoot.implemented)
-        assertEquals(emptyList(), simpleRoot.implemented)
+        assertEquals(null, simpleRoot.extendedConcept)
         assertEquals(false, simpleRoot.isAbstract)
         assertEquals(2, simpleRoot.features.size)
         assertEquals(5, simpleRoot.allFeatures().size)
@@ -180,9 +183,9 @@ class LionWebLanguageConverterTest {
         assertEquals("SimpleDecl", simpleDecl.name)
         assertEquals(false, simpleDecl.isPartition)
         assertSame(lwLanguage, simpleDecl.language)
-        assertEquals(listOf(ASTLanguage.getASTNode()), simpleDecl.implemented)
+        assertEquals(listOf(ASTLanguage.getASTNode(), ASTLanguage.getEntityDeclaration()), simpleDecl.implemented)
 
-        assertEquals(emptyList(), simpleRoot.implemented)
+        assertEquals(listOf(ASTLanguage.getASTNode()), simpleRoot.implemented)
         assertEquals(true, simpleDecl.isAbstract)
 
         assertEquals("SimpleNodeA", simpleNodeA.name)

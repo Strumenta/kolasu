@@ -129,7 +129,12 @@ class LionWebLanguageConverter {
                     astClass.supertypes.map { it.classifier as KClass<*> }
                         .filter { !it.java.isInterface }
                 if (superClasses.size == 1) {
-                    concept.extendedConcept = astClassesAndClassifiers.byA(superClasses.first()) as Concept
+                    val baseClass = astClassesAndClassifiers.byA(superClasses.first())
+                    if (baseClass is Concept) {
+                        concept.extendedConcept = baseClass
+                    } else {
+                        concept.addImplementedInterface(baseClass as Interface)
+                    }
                 } else {
                     throw IllegalStateException()
                 }

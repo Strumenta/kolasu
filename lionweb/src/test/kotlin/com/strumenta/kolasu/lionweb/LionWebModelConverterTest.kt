@@ -70,7 +70,7 @@ class LionWebModelConverterTest {
     },
     {
       "key": "com_strumenta_starlasu",
-      "version": "1"
+      "version": "2"
     },
     {
       "key": "LionCore-builtins",
@@ -97,7 +97,7 @@ class LionWebModelConverterTest {
         {
           "property": {
             "language": "com_strumenta_starlasu",
-            "version": "1",
+            "version": "2",
             "key": "com_strumenta_starlasu-ASTNode-position-key"
           },
           "value": null
@@ -141,7 +141,7 @@ class LionWebModelConverterTest {
         {
           "property": {
             "language": "com_strumenta_starlasu",
-            "version": "1",
+            "version": "2",
             "key": "com_strumenta_starlasu-ASTNode-position-key"
           },
           "value": null
@@ -186,7 +186,7 @@ class LionWebModelConverterTest {
         {
           "property": {
             "language": "com_strumenta_starlasu",
-            "version": "1",
+            "version": "2",
             "key": "com_strumenta_starlasu-ASTNode-position-key"
           },
           "value": null
@@ -216,7 +216,7 @@ class LionWebModelConverterTest {
         {
           "property": {
             "language": "com_strumenta_starlasu",
-            "version": "1",
+            "version": "2",
             "key": "com_strumenta_starlasu-ASTNode-position-key"
           },
           "value": null
@@ -271,7 +271,7 @@ class LionWebModelConverterTest {
         {
           "property": {
             "language": "com_strumenta_starlasu",
-            "version": "1",
+            "version": "2",
             "key": "com_strumenta_starlasu-ASTNode-position-key"
           },
           "value": null
