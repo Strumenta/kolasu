@@ -96,7 +96,6 @@ project.afterEvaluate {
     }
     tasks.named("generateMetadataFileForMavenPublication") {
         dependsOn(tasks.named("dokkaJavadocJar"))
-        dependsOn(tasks.named("javaSourcesJar"))
         dependsOn(tasks.named("javadocJar"))
         dependsOn(tasks.named("sourcesJar"))
     }

@@ -149,17 +149,12 @@ project.afterEvaluate {
     }
     tasks.named("publishMavenPublicationToMavenRepository") {
         dependsOn(tasks.named("dokkaJavadocJar"))
-        dependsOn(tasks.named("javaSourcesJar"))
         dependsOn(tasks.named("javadocJar"))
         dependsOn(tasks.named("sourcesJar"))
     }
     tasks.named("signMavenPublication") {
         dependsOn(tasks.named("dokkaJavadocJar"))
-        dependsOn(tasks.named("javaSourcesJar"))
         dependsOn(tasks.named("javadocJar"))
         dependsOn(tasks.named("sourcesJar"))
-    }
-    tasks.named("javaSourcesJar") {
-        dependsOn(tasks.named("generateGrammarSource"))
     }
 }
