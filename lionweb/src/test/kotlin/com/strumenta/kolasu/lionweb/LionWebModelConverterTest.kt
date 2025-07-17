@@ -118,22 +118,6 @@ class LionWebModelConverterTest {
         }
       ],
       "references": [
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
-        }
       ],
       "annotations": [],
       "parent": null
@@ -164,14 +148,6 @@ class LionWebModelConverterTest {
         }
       ],
       "containments": [
-        {
-          "containment": {
-            "language": "com-strumenta-SimpleLang",
-            "version": "1",
-            "key": "com-strumenta-SimpleLang_SimpleNodeA_child"
-          },
-          "children": []
-        }
       ],
       "references": [
         {
@@ -186,22 +162,6 @@ class LionWebModelConverterTest {
               "reference": "synthetic_foo-bar-source_childrez"
             }
           ]
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
         }
       ],
       "annotations": [],
@@ -233,24 +193,7 @@ class LionWebModelConverterTest {
         }
       ],
       "containments": [],
-      "references": [
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
-        }
-      ],
+      "references": [],
       "annotations": [],
       "parent": "synthetic_foo-bar-source"
     },
@@ -304,22 +247,6 @@ class LionWebModelConverterTest {
               "reference": "synthetic_foo-bar-source_childrez"
             }
           ]
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
         }
       ],
       "annotations": [],
@@ -352,22 +279,6 @@ class LionWebModelConverterTest {
       ],
       "containments": [],
       "references": [
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
-        }
       ],
       "annotations": [],
       "parent": "synthetic_foo-bar-source_childrez_2"
