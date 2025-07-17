@@ -14,8 +14,6 @@ val isReleaseVersion = !(project.version as String).endsWith("-SNAPSHOT")
 java {
     sourceCompatibility = JavaVersion.toVersion(jvmVersion)
     targetCompatibility = JavaVersion.toVersion(jvmVersion)
-    withSourcesJar()
-    withJavadocJar()
 }
 
 dependencies {
