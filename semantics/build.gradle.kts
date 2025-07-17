@@ -12,8 +12,6 @@ val jvmVersion: String = libs.versions.jvm.get()
 java {
     setSourceCompatibility(jvmVersion)
     setTargetCompatibility(jvmVersion)
-    withJavadocJar()
-    withSourcesJar()
 }
 
 dependencies {
