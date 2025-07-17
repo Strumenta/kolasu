@@ -89,3 +89,17 @@ tasks.named("dokkaJavadoc").configure {
     dependsOn(":core:compileKotlin")
     dependsOn(":lionweb:jar")
 }
+
+// Some tasks are created during the configuration, and therefore we need to set the dependencies involving
+// them after the configuration has been completed
+project.afterEvaluate {
+    tasks.named("dokkaJavadocJar") {
+        dependsOn(tasks.named("dokkaJavadoc"))
+    }
+    tasks.named("publishMavenPublicationToMavenRepository") {
+        dependsOn(tasks.named("dokkaJavadocJar"))
+        dependsOn(tasks.named("javaSourcesJar"))
+        dependsOn(tasks.named("javadocJar"))
+        dependsOn(tasks.named("sourcesJar"))
+    }
+}
