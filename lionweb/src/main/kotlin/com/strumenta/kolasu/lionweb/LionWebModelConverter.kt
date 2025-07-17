@@ -26,33 +26,33 @@ import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.starlasu.base.ASTLanguage
-import io.lionweb.lioncore.java.language.Annotation
-import io.lionweb.lioncore.java.language.Classifier
-import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.language.Containment
-import io.lionweb.lioncore.java.language.Enumeration
-import io.lionweb.lioncore.java.language.EnumerationLiteral
-import io.lionweb.lioncore.java.language.Language
-import io.lionweb.lioncore.java.language.LionCoreBuiltins
-import io.lionweb.lioncore.java.language.PrimitiveType
-import io.lionweb.lioncore.java.language.Property
-import io.lionweb.lioncore.java.language.Reference
-import io.lionweb.lioncore.java.model.AnnotationInstance
-import io.lionweb.lioncore.java.model.Node
-import io.lionweb.lioncore.java.model.ReferenceValue
-import io.lionweb.lioncore.java.model.impl.AbstractClassifierInstance
-import io.lionweb.lioncore.java.model.impl.DynamicAnnotationInstance
-import io.lionweb.lioncore.java.model.impl.DynamicNode
-import io.lionweb.lioncore.java.model.impl.EnumerationValue
-import io.lionweb.lioncore.java.model.impl.EnumerationValueImpl
-import io.lionweb.lioncore.java.model.impl.ProxyNode
-import io.lionweb.lioncore.java.serialization.AbstractSerialization
-import io.lionweb.lioncore.java.serialization.JsonSerialization
-import io.lionweb.lioncore.java.serialization.SerializationProvider
-import io.lionweb.lioncore.java.utils.CommonChecks
-import io.lionweb.lioncore.kotlin.MetamodelRegistry
-import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
-import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
+import io.lionweb.kotlin.MetamodelRegistry
+import io.lionweb.kotlin.getChildrenByContainmentName
+import io.lionweb.kotlin.getOnlyChildByContainmentName
+import io.lionweb.language.Annotation
+import io.lionweb.language.Classifier
+import io.lionweb.language.Concept
+import io.lionweb.language.Containment
+import io.lionweb.language.Enumeration
+import io.lionweb.language.EnumerationLiteral
+import io.lionweb.language.Language
+import io.lionweb.language.LionCoreBuiltins
+import io.lionweb.language.PrimitiveType
+import io.lionweb.language.Property
+import io.lionweb.language.Reference
+import io.lionweb.model.AnnotationInstance
+import io.lionweb.model.Node
+import io.lionweb.model.ReferenceValue
+import io.lionweb.model.impl.AbstractClassifierInstance
+import io.lionweb.model.impl.DynamicAnnotationInstance
+import io.lionweb.model.impl.DynamicNode
+import io.lionweb.model.impl.EnumerationValue
+import io.lionweb.model.impl.EnumerationValueImpl
+import io.lionweb.model.impl.ProxyNode
+import io.lionweb.serialization.AbstractSerialization
+import io.lionweb.serialization.JsonSerialization
+import io.lionweb.serialization.SerializationProvider
+import io.lionweb.utils.CommonChecks
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
@@ -60,7 +60,7 @@ import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.primaryConstructor
-import io.lionweb.lioncore.java.language.Feature as LWFeature
+import io.lionweb.language.Feature as LWFeature
 
 interface PrimitiveValueSerialization<E> {
     fun serialize(value: E): String
@@ -316,7 +316,7 @@ class LionWebModelConverter(
                                             // which we have therefore no LionWeb node. In that case, if we have the
                                             // identifier, we can produce a ProxyNode instead
                                             val lwReferred: Node = nodesMapping.byA(kReferred) ?: ProxyNode(
-                                                kValue.identifier
+                                                kValue.identifier ?: kReferred.id
                                                     ?: throw java.lang.IllegalStateException(
                                                         "Identifier of reference target " +
                                                             "value not set. Referred: $kReferred, " +
@@ -902,7 +902,7 @@ class LionWebModelConverter(
 
     fun exportIssueToLionweb(issue: Issue, id: String? = null): IssueNode {
         val issueNode = IssueNode()
-        id?.let { issueNode.id = it }
+        id?.let { issueNode.setID(it) }
         issueNode.setPropertyValue(ASTLanguage.getIssue().getPropertyByName(Issue::message.name)!!, issue.message)
         issueNode.setPropertyValue(ASTLanguage.getIssue().getPropertyByName(Issue::position.name)!!, issue.position)
         setEnumProperty(issueNode, ASTLanguage.getIssue().getPropertyByName(Issue::severity.name)!!, issue.severity)

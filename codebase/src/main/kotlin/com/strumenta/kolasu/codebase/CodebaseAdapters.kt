@@ -7,13 +7,13 @@ import com.strumenta.kolasu.lionweb.TokensList
 import com.strumenta.kolasu.model.Node
 import com.strumenta.starlasu.base.CodebaseAccess
 import com.strumenta.starlasu.base.CodebaseLanguage
-import io.lionweb.lioncore.java.model.ClassifierInstanceUtils
-import io.lionweb.lioncore.java.model.impl.DynamicNode
-import io.lionweb.lioncore.java.serialization.JsonSerialization
-import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
-import io.lionweb.lioncore.kotlin.getOnlyChildByContainmentName
-import io.lionweb.lioncore.kotlin.getPropertyValueByName
-import io.lionweb.lioncore.kotlin.setPropertyValueByName
+import io.lionweb.kotlin.getChildrenByContainmentName
+import io.lionweb.kotlin.getOnlyChildByContainmentName
+import io.lionweb.kotlin.getPropertyValueByName
+import io.lionweb.kotlin.setPropertyValueByName
+import io.lionweb.model.ClassifierInstanceUtils
+import io.lionweb.model.impl.DynamicNode
+import io.lionweb.serialization.JsonSerialization
 import java.util.stream.Collectors
 
 fun <R : Node> deserialize(
@@ -54,12 +54,12 @@ fun <R : Node> serialize(
     return lwCodebaseFile
 }
 
-fun <R : Node> convertCodebase(
+fun <R : Node> CodebaseAccess.convertToCodebase(
     modelConverter: LionWebModelConverter,
-    codebaseAccess: CodebaseAccess,
     languagesWeConsider: Set<String>,
     jsonSerialization: JsonSerialization
 ): Codebase<R> {
+    val codebaseAccess = this
     return object : Codebase<R> {
         override val name: String
             get() = codebaseAccess.name
@@ -78,6 +78,10 @@ fun <R : Node> convertCodebase(
 
         override fun files(): Sequence<CodebaseFile<R>> {
             return filesCache.asSequence()
+        }
+
+        override fun fileByRelativePath(relativePath: String): CodebaseFile<R>? {
+            return files().find { it.relativePath == relativePath }
         }
     }
 }

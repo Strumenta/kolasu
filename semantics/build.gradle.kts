@@ -1,5 +1,3 @@
-import java.net.URI
-
 plugins {
     kotlin("jvm")
     `maven-publish`
@@ -11,7 +9,6 @@ plugins {
 
 val jvmVersion: String = properties["jvm_version"] as String
 val kotlinVersion: String = properties["kotlin_version"] as String
-val isReleaseVersion: Boolean = !(project.version as String).endsWith("SNAPSHOT")
 
 java {
     setSourceCompatibility(jvmVersion)
@@ -30,12 +27,13 @@ dependencies {
 publishing {
     repositories {
         maven {
-            val releaseRepo = URI("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotRepo = URI("https://oss.sonatype.org/content/repositories/snapshots/")
-            url = releaseRepo.takeIf { isReleaseVersion } ?: snapshotRepo
+            val releaseRepo = uri("https://central.sonatype.com/publish/repositories/releases/")
+            val snapshotRepo = uri("https://central.sonatype.com/repository/maven-snapshots/")
+            url = if (!version.toString().endsWith("SNAPSHOT")) releaseRepo else snapshotRepo
+
             credentials {
-                username = project.findProperty("ossrhTokenUsername") as String? ?: "Unknown user"
-                password = project.findProperty("ossrhTokenPassword") as String? ?: "Unknown password"
+                username = project.findProperty("mavenCentralUsername") as? String ?: "Unknown user"
+                password = project.findProperty("mavenCentralPassword") as? String ?: "Unknown password"
             }
         }
     }

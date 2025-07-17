@@ -9,7 +9,7 @@ package com.strumenta.math
 import com.strumenta.kolasu.lionweb.LanguageGeneratorCommand
 import com.strumenta.kolasu.lionweb.KolasuLanguage
 import com.strumenta.kolasu.lionweb.LionWebLanguageExporter
-import io.lionweb.lioncore.java.language.Language
+import io.lionweb.language.Language
 
 val kLanguage = KolasuLanguage("com.strumenta.math").apply {
     addClass(Expression::class)

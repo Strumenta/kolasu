@@ -6,8 +6,8 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.types.file
 import com.strumenta.starlasu.base.ASTLanguage
-import io.lionweb.lioncore.java.language.Language
-import io.lionweb.lioncore.java.serialization.SerializationProvider
+import io.lionweb.language.Language
+import io.lionweb.serialization.SerializationProvider
 import java.io.File
 import java.io.FileInputStream
 

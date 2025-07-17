@@ -24,7 +24,7 @@ fun assertJSONsAreEqual(expected: JsonElement, actual: JsonElement, context: Str
         assertEquals(
             eja.size(),
             aja.size(),
-            message = "size of $context (expected: ${eja.size()}, actual: ${aja.size()}"
+            message = "size of $context (expected: ${eja.size()}, actual: ${aja.size()})"
         )
         (0 until eja.size()).forEach { i ->
             assertJSONsAreEqual(eja[i], aja[i], "$context[$i]")

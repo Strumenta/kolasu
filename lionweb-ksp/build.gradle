@@ -29,12 +29,12 @@ publishing {
 
     repositories {
         maven {
-            def releaseRepo = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotRepo = "https://oss.sonatype.org/content/repositories/snapshots/"
+            def releaseRepo = "https://central.sonatype.com/publish/repositories/releases/"
+            def snapshotRepo = "https://central.sonatype.com/repository/maven-snapshots/"
             url = isReleaseVersion ? releaseRepo : snapshotRepo
             credentials {
-                username = project.hasProperty('ossrhTokenUsername') ? ossrhTokenUsername : "Unknown user"
-                password = project.hasProperty('ossrhTokenPassword') ? ossrhTokenPassword : "Unknown password"
+                username = project.hasProperty('mavenCentralUsername') ? project.findProperty('mavenCentralUsername') : "Unknown user"
+                password = project.hasProperty('mavenCentralPassword') ? project.findProperty('mavenCentralPassword') : "Unknown password"
             }
         }
     }
