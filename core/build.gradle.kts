@@ -137,7 +137,6 @@ publishing {
     }
 }
 
-// Signing
 signing {
     sign(publishing.publications)
 }

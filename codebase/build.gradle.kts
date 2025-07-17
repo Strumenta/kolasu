@@ -82,7 +82,7 @@ publishing {
 }
 
 signing {
-    sign(publishing.publications["kolasu_codebase"])
+    sign(publishing.publications)
 }
 
 tasks.named("dokkaJavadoc").configure {
