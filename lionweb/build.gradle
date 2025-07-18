@@ -28,6 +28,8 @@ dependencies {
     implementation(libs.starlasu.specs)
 }
 
+def isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
+
 
 publishing {
 

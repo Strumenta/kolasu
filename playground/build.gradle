@@ -23,6 +23,8 @@ dependencies {
     testImplementation "junit:junit:$junit_version"
 }
 
+def isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
+
 publishing {
 
     repositories {

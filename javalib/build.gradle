@@ -23,6 +23,8 @@ compileKotlin.source sourceSets.main.java, sourceSets.main.kotlin
 compileTestKotlin.source sourceSets.test.kotlin
 
 
+def isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
+
 publishing {
 
     repositories {

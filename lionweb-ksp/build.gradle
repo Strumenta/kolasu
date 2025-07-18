@@ -19,6 +19,7 @@ java {
 
 
 def completeKspVersion = kspVersion.contains("-") ? kspVersion : "${kotlin_version}-${kspVersion}"
+def isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
 
 dependencies {
     implementation "com.google.devtools.ksp:symbol-processing-api:${completeKspVersion}"
