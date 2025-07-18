@@ -158,3 +158,48 @@ val triggerSonatypePublish by tasks.registering {
         }
     }
 }
+
+val dropClosedRepositories by tasks.registering {
+    group = "publishing"
+    description = "Drops all closed staging repos in new Sonatype Central"
+
+    val username = project.findProperty("mavenCentralUsername") as? String ?: error("Missing username")
+    val password = project.findProperty("mavenCentralPassword") as? String ?: error("Missing password")
+    val credentials = Base64.getEncoder().encodeToString("$username:$password".toByteArray())
+
+    doLast {
+        val namespace = "com.strumenta"
+        val client = HttpClient.newHttpClient()
+
+        val searchUrl = "https://ossrh-staging-api.central.sonatype.com/manual/search/repositories?ip=any&profile_id=$namespace"
+
+        val searchRequest = HttpRequest.newBuilder()
+            .uri(URI.create(searchUrl))
+            .header("Authorization", "Bearer $credentials")
+            .GET()
+            .build()
+
+        val searchResponse = client.send(searchRequest, HttpResponse.BodyHandlers.ofString())
+        val body = searchResponse.body()
+
+        val repoRegex = Regex("\"repositoryKey\"\\s*:\\s*\"(.*?)\"")
+        val closedRepos = repoRegex.findAll(body).map { it.groupValues[1] }.toList()
+
+        if (closedRepos.isEmpty()) {
+            println("✅ Nessun repo chiuso da droppare.")
+        } else {
+            closedRepos.forEach { repoKey ->
+                println("🧹 Dropping $repoKey")
+                val dropUrl = "https://ossrh-staging-api.central.sonatype.com/manual/drop/repository/$repoKey"
+                val dropRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(dropUrl))
+                    .header("Authorization", "Bearer $credentials")
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .build()
+
+                val dropResponse = client.send(dropRequest, HttpResponse.BodyHandlers.ofString())
+                println("🔻 Drop status: ${dropResponse.statusCode()} — ${dropResponse.body()}")
+            }
+        }
+    }
+}
