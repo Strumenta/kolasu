@@ -120,7 +120,7 @@ tasks.wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
-tasks.named("publish") {
+tasks.named(":publish") {
     finalizedBy(triggerSonatypePublish)
 }
 
