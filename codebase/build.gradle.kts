@@ -1,4 +1,8 @@
-
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
+import java.util.Base64
 
 plugins {
     kotlin("jvm")
@@ -34,13 +38,17 @@ dependencies {
 publishing {
     repositories {
         maven {
-            val releaseRepo = uri("https://central.sonatype.com/publish/repositories/releases/")
+            // Unused, for now, as not supported by the plugin
+            //val releaseRepo = uri("https://central.sonatype.com/publish/repositories/releases/")
+            val releaseRepo = uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/")
             val snapshotRepo = uri("https://central.sonatype.com/repository/maven-snapshots/")
-            url = if (!version.toString().endsWith("SNAPSHOT")) releaseRepo else snapshotRepo
+
             credentials {
                 username = project.findProperty("mavenCentralUsername") as? String ?: "Unknown user"
                 password = project.findProperty("mavenCentralPassword") as? String ?: "Unknown password"
             }
+
+            url = if (!version.toString().endsWith("SNAPSHOT")) releaseRepo else snapshotRepo
         }
     }
     publications {
@@ -91,4 +99,50 @@ signing {
 tasks.named("dokkaJavadoc").configure {
     dependsOn(":core:compileKotlin")
     dependsOn(":lionweb:jar")
+}
+
+val triggerSonatypePublish by tasks.registering {
+    group = "publishing"
+    description = "Triggers manual upload completion on central.sonatype.com"
+
+    val username = project.findProperty("mavenCentralUsername") as? String ?: "Unknown user"
+    val password = project.findProperty("mavenCentralPassword") as? String ?: "Unknown password"
+    val credentials = Base64.getEncoder().encodeToString("$username:$password".toByteArray())
+
+    val token = password
+    val namespace = "com.strumenta"
+
+    doLast {
+        println("Triggering Sonatype publish for namespace $namespace")
+
+        // https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/
+        //val url = "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/$namespace"
+        val url = "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/$namespace"
+        println("📡 Calling $url")
+
+        val client = HttpClient.newHttpClient()
+
+        val jsonBody = """{"namespace": "$namespace"}"""
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .header("Authorization", "Bearer $credentials")
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.noBody())
+            //.POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+
+            .build()
+
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+
+        println("📦 Status: ${response.statusCode()}")
+        println("🔸 Body: ${response.body()}")
+
+        if (response.statusCode() !in 200..299) {
+            throw GradleException("Failed to trigger Sonatype publish: HTTP ${response.statusCode()}")
+        }
+    }
+}
+
+tasks.named("publish") {
+    finalizedBy(triggerSonatypePublish)
 }
