@@ -161,5 +161,6 @@ project.afterEvaluate {
     }
     tasks.named("signMavenPublication") {
         dependsOn(tasks.named("javadocJar"))
+        dependsOn(tasks.named("sourcesJar"))
     }
 }
