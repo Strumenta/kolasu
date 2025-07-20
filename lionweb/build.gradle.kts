@@ -1,5 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     kotlin("jvm")
     id("org.jlleitschuh.gradle.ktlint")
@@ -9,9 +7,6 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
-    targetCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
-
     registerFeature("cli") {
         usingSourceSet(sourceSets["main"])
     }
@@ -73,11 +68,6 @@ mavenPublishing {
             }
         }
     }
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, true)
+    publishToMavenCentral(true)
     signAllPublications()
-}
-
-// Ensure Dokka runs after compilation
-tasks.named("dokkaJavadoc") {
-    dependsOn(":core:compileKotlin")
 }

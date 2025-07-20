@@ -108,11 +108,6 @@ mavenPublishing {
 
 val jvmVersion = libs.versions.jvm.get()
 
-java {
-    sourceCompatibility = JavaVersion.toVersion(jvmVersion)
-    targetCompatibility = JavaVersion.toVersion(jvmVersion)
-}
-
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
     kotlinOptions {
         jvmTarget = jvmVersion
@@ -122,14 +117,6 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
 kotlin {
     jvmToolchain {
         languageVersion.set(JavaLanguageVersion.of(jvmVersion.removePrefix("1.")))
-    }
-}
-
-afterEvaluate {
-    tasks {
-        named("generateMetadataFileForMavenPublication") {
-            dependsOn("kotlinSourcesJar")
-        }
     }
 }
 

@@ -7,13 +7,6 @@ plugins {
     id("org.jetbrains.dokka")
 }
 
-val jvmVersion: String = libs.versions.jvm.get()
-
-java {
-    setSourceCompatibility(jvmVersion)
-    setTargetCompatibility(jvmVersion)
-}
-
 dependencies {
     api(project(":core"))
     implementation(libs.kotlin.stdlib)
@@ -65,14 +58,4 @@ mavenPublishing {
     }
     publishToMavenCentral(true)
     signAllPublications()
-}
-
-project.afterEvaluate {
-    // Ensure Dokka runs after compilation
-    tasks.named("dokkaJavadoc") {
-        dependsOn("compileKotlin")
-    }
-    tasks.named("generateMetadataFileForMavenPublication") {
-        dependsOn("dokkaJavadocJar")
-    }
 }
