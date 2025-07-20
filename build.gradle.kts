@@ -38,17 +38,6 @@ subprojects {
         }
     }
 
-    tasks.register<Jar>("javadocJar") {
-        dependsOn(":${project.name}:dokkaJavadoc")
-        archiveClassifier.set("javadoc")
-        from(layout.buildDirectory.dir("dokka/javadoc"))
-    }
-
-    tasks.register<Jar>("sourcesJar") {
-        archiveClassifier.set("sources")
-        from(sourceSets["main"].allSource)
-    }
-
     tasks.withType<Test>().configureEach {
         testLogging {
             showStandardStreams = true
@@ -69,13 +58,36 @@ subprojects {
 
     plugins.withId("java") {
         the<JavaPluginExtension>().apply {
+            val jvmVersion = libs.versions.jvm.get()
+            require(!jvmVersion.startsWith("1."))
             toolchain {
-                val version = libs.versions.jvm.get()
-                val clean = if (version.startsWith("1.")) version.removePrefix("1.") else version
-                languageVersion.set(JavaLanguageVersion.of(clean))
+                languageVersion.set(JavaLanguageVersion.of(jvmVersion))
             }
-            sourceCompatibility = JavaVersion.toVersion(version)
-            targetCompatibility = JavaVersion.toVersion(version)
+            sourceCompatibility = JavaVersion.toVersion(jvmVersion)
+            targetCompatibility = JavaVersion.toVersion(jvmVersion)
+        }
+    }
+
+    // Some tasks are created during the configuration, and therefore we need to set the dependencies involving
+    // them after the configuration has been completed
+    project.afterEvaluate {
+        tasks.register<Jar>("javadocJar") {
+            dependsOn(":${project.name}:dokkaJavadoc")
+            archiveClassifier.set("javadoc")
+            from(layout.buildDirectory.dir("dokka/javadoc"))
+        }
+
+        tasks.register<Jar>("sourcesJar") {
+            archiveClassifier.set("sources")
+            from(sourceSets["main"].allSource)
+        }
+        tasks.findByName("dokkaJavadocJar")?.dependsOn(tasks.named("dokkaJavadoc"))
+        tasks.findByName("signMavenPublication")?.let { signMavenPublication ->
+            tasks.findByName("dokkaJavadocJar")?.let {
+                signMavenPublication.dependsOn(it)
+            }
+            signMavenPublication.dependsOn(tasks.named("javadocJar"))
+            signMavenPublication.dependsOn(tasks.named("sourcesJar"))
         }
     }
 }

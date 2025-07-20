@@ -1,5 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     kotlin("jvm")
     alias(libs.plugins.ktlint)
@@ -10,30 +8,18 @@ plugins {
     id("org.jetbrains.dokka")
 }
 
-java {
-    sourceCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
-    targetCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
-
-    registerFeature("cli") {
-        usingSourceSet(sourceSets["main"])
-    }
-}
-
 dependencies {
     antlr(libs.antlr)
     implementation(libs.antlr.runtime)
     implementation(libs.starlasu.specs)
     implementation(kotlin("stdlib", libs.versions.kotlin.get()))
     implementation(kotlin("reflect", libs.versions.kotlin.get()))
-    implementation(kotlin("test", libs.versions.kotlin.get()))
     implementation(libs.gson)
     api(libs.clikt)
-    testImplementation(kotlin("test-junit", libs.versions.kotlin.get()))
     api(libs.lionweb.java)
 
-    // To be removed in v1.7
-    implementation("org.redundent:kotlin-xml-builder:1.7.3")
-    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.2")
+    implementation(kotlin("test", libs.versions.kotlin.get()))
+    testImplementation(kotlin("test-junit", libs.versions.kotlin.get()))
 }
 
 tasks.named<AntlrTask>("generateTestGrammarSource") {
@@ -59,9 +45,6 @@ tasks.named("runKtlintCheckOverTestSourceSet") {
 }
 tasks.named("runKtlintFormatOverTestSourceSet") {
     dependsOn("generateTestGrammarSource")
-}
-tasks.named("sourcesJar") {
-    dependsOn("generateGrammarSource")
 }
 tasks.named<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>("compileKotlin").configure {
     source(sourceSets["main"].allJava, sourceSets["main"].kotlin)
@@ -126,7 +109,7 @@ mavenPublishing {
             }
         }
     }
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, true)
+    publishToMavenCentral(true)
     signAllPublications()
 }
 

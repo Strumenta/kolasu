@@ -1,4 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -9,11 +8,6 @@ plugins {
     id("idea")
     id("signing")
     id("org.jetbrains.dokka")
-}
-
-java {
-    sourceCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
-    targetCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
 }
 
 dependencies {
@@ -72,15 +66,12 @@ mavenPublishing {
             }
         }
     }
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, true)
+    publishToMavenCentral(true)
     signAllPublications()
 }
 // Task dependencies
 tasks.named("dokkaJavadoc") {
     dependsOn(":core:compileKotlin")
-}
-tasks.named("sourcesJar") {
-    dependsOn("generateGrammarSource")
 }
 tasks.named("runKtlintCheckOverMainSourceSet") {
     dependsOn("generateGrammarSource")
