@@ -96,4 +96,4 @@ New release can be made by running:
 ./gradlew release
 ```
 
-Releases must then be manually completed by visiting https://oss.sonatype.org/#stagingRepositories.
+Releases are performed automatically.
