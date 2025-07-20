@@ -99,8 +99,21 @@ subprojects {
 
 val isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
 
+tasks.register("publishAll") {
+    group = "publishing"
+    description = "Publishes all subprojects"
+
+    dependsOn(
+        subprojects.mapNotNull { it.tasks.findByName("publish") }
+    )
+}
+
+tasks.named("publishAll") {
+    finalizedBy(triggerSonatypePublish)
+}
+
 configure<net.researchgate.release.ReleaseExtension> {
-    buildTasks = listOf("publish", ":lionweb-gen-gradle:publishPlugins", "triggerSonatypePublish")
+    buildTasks = listOf("publishAll", ":lionweb-gen-gradle:publishPlugins")
     git.apply {
         requireBranch.set("")
         pushToRemote.set("origin")
@@ -120,9 +133,7 @@ tasks.wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
-//tasks.named("publish") {
-//    finalizedBy(triggerSonatypePublish)
-//}
+
 
 val isSnapshot = version.toString().endsWith("-SNAPSHOT")
 
