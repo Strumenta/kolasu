@@ -159,4 +159,7 @@ project.afterEvaluate {
     tasks.named("javaSourcesJar") {
         dependsOn(tasks.named("generateGrammarSource"))
     }
+    tasks.named("signMavenPublication") {
+        dependsOn(tasks.named("javadocJar"))
+    }
 }
