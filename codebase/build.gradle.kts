@@ -38,8 +38,6 @@ dependencies {
 publishing {
     repositories {
         maven {
-            // Unused, for now, as not supported by the plugin
-            //val releaseRepo = uri("https://central.sonatype.com/publish/repositories/releases/")
             val releaseRepo = uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/")
             val snapshotRepo = uri("https://central.sonatype.com/repository/maven-snapshots/")
 
