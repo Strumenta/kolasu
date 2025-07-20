@@ -5,6 +5,9 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.Base64
+import com.google.gson.Gson
+import com.google.gson.JsonParser
+
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -148,6 +151,8 @@ val triggerSonatypePublish by tasks.registering {
 
     onlyIf { !isSnapshot }
 
+    dependsOn("dropClosedRepositories")
+
     doLast {
         println("🚀 Triggering Sonatype publish for namespace $namespace")
 
@@ -193,23 +198,28 @@ val dropClosedRepositories by tasks.registering {
         val searchResponse = client.send(searchRequest, HttpResponse.BodyHandlers.ofString())
         val body = searchResponse.body()
 
-        val repoRegex = Regex("\"repositoryKey\"\\s*:\\s*\"(.*?)\"")
-        val closedRepos = repoRegex.findAll(body).map { it.groupValues[1] }.toList()
+        println("Status ${searchResponse.statusCode()}")
+        println("Body ${body}")
 
-        if (closedRepos.isEmpty()) {
+        val repositories = JsonParser.parseString(body).asJsonObject.get("repositories").asJsonArray
+        if (repositories.isEmpty) {
             println("✅ Nessun repo chiuso da droppare.")
         } else {
-            closedRepos.forEach { repoKey ->
-                println("🧹 Dropping $repoKey")
-                val dropUrl = "https://ossrh-staging-api.central.sonatype.com/manual/drop/repository/$repoKey"
-                val dropRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(dropUrl))
-                    .header("Authorization", "Bearer $credentials")
-                    .POST(HttpRequest.BodyPublishers.noBody())
-                    .build()
+            for (i in 0 until repositories.size()) {
+                val repo = repositories.get(i).asJsonObject
+                if (repo.get("state").asString == "closed") {
+                    val key = repo.get("key").asString
+                    println("🧹 Dropping $key")
+                    val dropUrl = "https://ossrh-staging-api.central.sonatype.com/manual/drop/repository/$key"
+                    val dropRequest = HttpRequest.newBuilder()
+                        .uri(URI.create(dropUrl))
+                        .header("Authorization", "Bearer $credentials")
+                        .DELETE()
+                        .build()
 
-                val dropResponse = client.send(dropRequest, HttpResponse.BodyHandlers.ofString())
-                println("🔻 Drop status: ${dropResponse.statusCode()} — ${dropResponse.body()}")
+                    val dropResponse = client.send(dropRequest, HttpResponse.BodyHandlers.ofString())
+                    println("🔻 Drop status: ${dropResponse.statusCode()} — ${dropResponse.body()}")
+                }
             }
         }
     }
