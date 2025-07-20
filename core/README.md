@@ -1,4 +1,4 @@
-# Module kolasu-core
+# Module core
 
 In this module we provide the main functionalities of Kolasu.
 
