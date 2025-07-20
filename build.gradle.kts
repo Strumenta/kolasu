@@ -1,12 +1,11 @@
-import org.jetbrains.dokka.gradle.DokkaTask
+import com.google.gson.JsonParser
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.jetbrains.dokka.gradle.DokkaTask
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.Base64
-import com.google.gson.Gson
-import com.google.gson.JsonParser
 
 
 plugins {
@@ -106,9 +105,13 @@ tasks.register("publishAll") {
     group = "publishing"
     description = "Publishes all subprojects"
 
-    dependsOn(
-        subprojects.mapNotNull { it.tasks.findByName("publish") }
-    )
+    doFirst {
+        subprojects.forEach { subproj ->
+            subproj.tasks.matching { it.name == "publish" }.configureEach {
+                this@register.dependsOn(this)
+            }
+        }
+    }
 }
 
 tasks.named("publishAll") {
@@ -123,20 +126,10 @@ configure<net.researchgate.release.ReleaseExtension> {
     }
 }
 
-//release {
-//    buildTasks = ['publish', ":lionweb-gen-gradle:publishPlugins"]
-//    git {
-//        requireBranch.set('')
-//        pushToRemote.set('origin')
-//    }
-//}
-
 tasks.wrapper {
     gradleVersion = "8.2.1"
     distributionType = Wrapper.DistributionType.ALL
 }
-
-
 
 val isSnapshot = version.toString().endsWith("-SNAPSHOT")
 
