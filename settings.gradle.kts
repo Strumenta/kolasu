@@ -15,6 +15,7 @@ plugins {
 rootProject.name = "starlasu-kotlin"
 
 include("core")
+include("codebase")
 include("semantics")
 include("javalib")
 include("lionweb")

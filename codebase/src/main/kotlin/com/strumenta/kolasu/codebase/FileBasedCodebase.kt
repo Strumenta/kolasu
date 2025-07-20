@@ -9,13 +9,14 @@ class FileBasedCodebase<R : Node>(
     val baseDir: File,
     val extensions: Set<String>,
     override val name: String = "UnnamedCodebase",
-    val parser: (String, File) -> ParsingResult<R>
+    val parser: (String, File) -> ParsingResult<R>,
 ) : Codebase<R> {
     private val cachedFiles: List<CodebaseFile<R>> by lazy {
         parseFiles().toList()
     }
 
     override fun files(): Sequence<CodebaseFile<R>> = cachedFiles.asSequence()
+
     override fun fileByRelativePath(relativePath: String): CodebaseFile<R>? {
         return cachedFiles.find { it.relativePath == relativePath }
     }
@@ -37,14 +38,15 @@ class FileBasedCodebase<R : Node>(
                                     val parsingResult = parser.invoke(relativePath, child)
                                     val root = parsingResult.root
                                     if (root != null) {
-                                        val codebaseFile = CodebaseFile(
-                                            this@FileBasedCodebase,
-                                            relativePath,
-                                            child.readText(),
-                                            root,
-                                            tokens = null,
-                                            parsingResult.issues
-                                        )
+                                        val codebaseFile =
+                                            CodebaseFile(
+                                                this@FileBasedCodebase,
+                                                relativePath,
+                                                child.readText(),
+                                                root,
+                                                tokens = null,
+                                                parsingResult.issues,
+                                            )
                                         yield(codebaseFile)
                                     }
                                 }

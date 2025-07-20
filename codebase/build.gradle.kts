@@ -6,25 +6,22 @@ plugins {
     alias(libs.plugins.vanniktech.publish)
 }
 
-val jvmVersion = project.property("jvm_version") as String
-val kotlinVersion = project.property("kotlin_version") as String
-
 val isReleaseVersion = !(project.version as String).endsWith("-SNAPSHOT")
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(jvmVersion)
-    targetCompatibility = JavaVersion.toVersion(jvmVersion)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
 }
 
 dependencies {
     implementation(project(":core"))
     implementation(project(":lionweb"))
     implementation(libs.starlasu.specs)
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+    implementation(kotlin("stdlib", libs.versions.kotlin.get()))
+    implementation(kotlin("reflect", libs.versions.kotlin.get()))
+    implementation(kotlin("test", libs.versions.kotlin.get()))
+    testImplementation(kotlin("test-junit", libs.versions.kotlin.get()))
     implementation(libs.gson)
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
 }
 
 publishing {
@@ -94,9 +91,8 @@ project.afterEvaluate {
     tasks.named("dokkaJavadocJar") {
         dependsOn(tasks.named("dokkaJavadoc"))
     }
-    tasks.named("generateMetadataFileForMavenPublication") {
+    tasks.named("signMavenPublication") {
         dependsOn(tasks.named("dokkaJavadocJar"))
-        dependsOn(tasks.named("javaSourcesJar"))
         dependsOn(tasks.named("javadocJar"))
         dependsOn(tasks.named("sourcesJar"))
     }

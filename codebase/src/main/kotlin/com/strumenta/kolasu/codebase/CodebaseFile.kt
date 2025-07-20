@@ -15,9 +15,8 @@ data class CodebaseFile<R : Node>(
     var code: String,
     var ast: R,
     var tokens: TokensList?,
-    val parsingIssues: List<Issue> = emptyList()
+    val parsingIssues: List<Issue> = emptyList(),
 ) {
-
     init {
         ast.source = this.asSource()
     }
@@ -62,10 +61,10 @@ fun <R : Node> Codebase<R>.filesWithExtension(vararg extensions: String): Sequen
         while (it.hasNext()) {
             val codebaseFile = it.next()
             if (extensions.any { extension ->
-                codebaseFile.relativePath.lowercase().endsWith(
-                        ".${extension.lowercase()}"
+                    codebaseFile.relativePath.lowercase().endsWith(
+                        ".${extension.lowercase()}",
                     )
-            }
+                }
             ) {
                 yield(codebaseFile)
             }

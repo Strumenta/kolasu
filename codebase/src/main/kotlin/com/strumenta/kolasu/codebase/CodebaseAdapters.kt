@@ -6,7 +6,6 @@ import com.strumenta.kolasu.lionweb.LionWebModelConverter
 import com.strumenta.kolasu.lionweb.TokensList
 import com.strumenta.kolasu.model.Node
 import com.strumenta.starlasu.base.CodebaseAccess
-import com.strumenta.starlasu.base.CodebaseLanguage
 import io.lionweb.kotlin.getChildrenByContainmentName
 import io.lionweb.kotlin.getOnlyChildByContainmentName
 import io.lionweb.kotlin.getPropertyValueByName
@@ -15,11 +14,12 @@ import io.lionweb.model.ClassifierInstanceUtils
 import io.lionweb.model.impl.DynamicNode
 import io.lionweb.serialization.JsonSerialization
 import java.util.stream.Collectors
+import com.strumenta.starlasu.base.v2.CodebaseLanguageV2 as CodebaseLanguage
 
 fun <R : Node> deserialize(
     modelConverter: LionWebModelConverter,
     codebase: Codebase<R>,
-    codebaseFile: LWNode
+    codebaseFile: LWNode,
 ): CodebaseFile<R> {
     val relativePath = codebaseFile.getPropertyValueByName("relative_path") as String
     val code = codebaseFile.getPropertyValueByName("code") as String
@@ -37,7 +37,7 @@ fun <R : Node> serialize(
     modelConverter: LionWebModelConverter,
     id: String,
     languageName: String,
-    codebaseFile: CodebaseFile<R>
+    codebaseFile: CodebaseFile<R>,
 ): LWNode {
     val lwCodebaseFile = DynamicNode(id, CodebaseLanguage.getCodebaseFile())
     lwCodebaseFile.setPropertyValueByName("language_name", languageName)
@@ -57,7 +57,7 @@ fun <R : Node> serialize(
 fun <R : Node> CodebaseAccess.convertToCodebase(
     modelConverter: LionWebModelConverter,
     languagesWeConsider: Set<String>,
-    jsonSerialization: JsonSerialization
+    jsonSerialization: JsonSerialization,
 ): Codebase<R> {
     val codebaseAccess = this
     return object : Codebase<R> {

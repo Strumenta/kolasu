@@ -130,7 +130,6 @@ mavenPublishing {
     signAllPublications()
 }
 
-
 // Some tasks are created during the configuration, and therefore we need to set the dependencies involving
 // them after the configuration has been completed
 project.afterEvaluate {
