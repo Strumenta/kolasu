@@ -35,7 +35,7 @@ publishing {
 
     repositories {
         maven {
-            def releaseRepo = "https://central.sonatype.com/publish/repositories/releases/"
+            def releaseRepo = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
             def snapshotRepo = "https://central.sonatype.com/repository/maven-snapshots/"
             url = isReleaseVersion ? releaseRepo : snapshotRepo
             credentials {
