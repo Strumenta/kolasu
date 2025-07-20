@@ -105,13 +105,9 @@ tasks.register("publishAll") {
     group = "publishing"
     description = "Publishes all subprojects"
 
-    doFirst {
-        subprojects.forEach { subproj ->
-            subproj.tasks.matching { it.name == "publish" }.configureEach {
-                this@register.dependsOn(this)
-            }
-        }
-    }
+    dependsOn(
+        subprojects.map { it.path + ":publish" }
+    )
 }
 
 tasks.named("publishAll") {
