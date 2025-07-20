@@ -1,9 +1,3 @@
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
-import java.util.Base64
-
 plugins {
     kotlin("jvm")
     alias(libs.plugins.ktlint)
@@ -14,8 +8,6 @@ plugins {
 
 val jvmVersion = project.property("jvm_version") as String
 val kotlinVersion = project.property("kotlin_version") as String
-
-val isReleaseVersion = !(project.version as String).endsWith("-SNAPSHOT")
 
 java {
     sourceCompatibility = JavaVersion.toVersion(jvmVersion)

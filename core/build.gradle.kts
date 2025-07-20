@@ -1,5 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     kotlin("jvm")
     alias(libs.plugins.ktlint)
@@ -84,7 +82,6 @@ idea {
     }
 }
 
-// Maven Publishing
 publishing {
     repositories {
         maven {
