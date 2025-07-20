@@ -99,7 +99,7 @@ subprojects {
     }
 }
 
-val isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
+val isSnapshot = version.toString().endsWith("-SNAPSHOT")
 
 tasks.register("publishAll") {
     group = "publishing"
@@ -127,8 +127,6 @@ tasks.wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
-val isSnapshot = version.toString().endsWith("-SNAPSHOT")
-
 val triggerSonatypePublish by tasks.registering {
     group = "publishing"
     description = "Triggers manual upload completion on central.sonatype.com"
@@ -143,7 +141,7 @@ val triggerSonatypePublish by tasks.registering {
     dependsOn("dropClosedRepositories")
 
     doLast {
-        println("🚀 Triggering Sonatype publish for namespace $namespace")
+        println("Triggering Sonatype publish for namespace $namespace")
 
         val url = "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/$namespace"
         val client = HttpClient.newHttpClient()
@@ -155,8 +153,8 @@ val triggerSonatypePublish by tasks.registering {
 
         val response = client.send(request, HttpResponse.BodyHandlers.ofString())
 
-        println("📦 Status: ${response.statusCode()}")
-        println("🔸 Body: ${response.body()}")
+        println(" Status: ${response.statusCode()}")
+        println(" Body: ${response.body()}")
 
         if (response.statusCode() !in 200..299) {
             throw GradleException("❌ Failed to trigger Sonatype publish: HTTP ${response.statusCode()}")
@@ -187,18 +185,18 @@ val dropClosedRepositories by tasks.registering {
         val searchResponse = client.send(searchRequest, HttpResponse.BodyHandlers.ofString())
         val body = searchResponse.body()
 
-        println("Status ${searchResponse.statusCode()}")
-        println("Body ${body}")
+        println(" Status ${searchResponse.statusCode()}")
+        println(" Body ${body}")
 
         val repositories = JsonParser.parseString(body).asJsonObject.get("repositories").asJsonArray
         if (repositories.isEmpty) {
-            println("✅ Nessun repo chiuso da droppare.")
+            println("No repo to drop.")
         } else {
             for (i in 0 until repositories.size()) {
                 val repo = repositories.get(i).asJsonObject
                 if (repo.get("state").asString == "closed") {
                     val key = repo.get("key").asString
-                    println("🧹 Dropping $key")
+                    println(" Dropping repo with key $key")
                     val dropUrl = "https://ossrh-staging-api.central.sonatype.com/manual/drop/repository/$key"
                     val dropRequest = HttpRequest.newBuilder()
                         .uri(URI.create(dropUrl))
@@ -207,7 +205,7 @@ val dropClosedRepositories by tasks.registering {
                         .build()
 
                     val dropResponse = client.send(dropRequest, HttpResponse.BodyHandlers.ofString())
-                    println("🔻 Drop status: ${dropResponse.statusCode()} — ${dropResponse.body()}")
+                    println(" Drop status: ${dropResponse.statusCode()} Body: ${dropResponse.body()}")
                 }
             }
         }
