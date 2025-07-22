@@ -4,7 +4,7 @@ import com.google.devtools.ksp.gradle.KspExtension
 import com.strumenta.kolasu.lionweb.ASTGenerator
 import com.strumenta.kolasu.lionweb.KotlinCodeProcessor
 import com.strumenta.kolasu.lionweb.LIONWEB_VERSION_USED_BY_KOLASU
-import com.strumenta.starlasu.base.ASTLanguage
+import com.strumenta.starlasu.base.v1.ASTLanguageV1 as ASTLanguage
 import io.lionweb.language.Language
 import io.lionweb.serialization.SerializationProvider
 import org.gradle.api.Plugin

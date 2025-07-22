@@ -1,7 +1,6 @@
 import com.strumenta.kolasu.lionweb.ASTGenerator
 import com.strumenta.kolasu.lionweb.LIONWEB_VERSION_USED_BY_KOLASU
 import com.strumenta.kolasu.lionweb.LWLanguage
-import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.language.Interface
 import io.lionweb.language.Language
 import io.lionweb.language.LionCoreBuiltins
@@ -9,6 +8,7 @@ import io.lionweb.language.Property
 import io.lionweb.serialization.SerializationProvider
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import com.strumenta.starlasu.base.v1.ASTLanguageV1 as ASTLanguage
 
 class ASTGeneratorTest {
 

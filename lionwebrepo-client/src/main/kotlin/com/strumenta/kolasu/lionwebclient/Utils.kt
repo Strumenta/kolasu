@@ -4,7 +4,7 @@ import com.strumenta.kolasu.lionweb.KNode
 import com.strumenta.kolasu.lionweb.LWNode
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Source
-import com.strumenta.starlasu.base.ASTLanguage
+import com.strumenta.starlasu.base.v1.ASTLanguageV1 as ASTLanguage
 import io.lionweb.language.Concept
 import io.lionweb.model.HasSettableParent
 import io.lionweb.model.impl.ProxyNode

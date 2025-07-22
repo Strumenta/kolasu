@@ -25,7 +25,6 @@ import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
-import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.kotlin.MetamodelRegistry
 import io.lionweb.kotlin.getChildrenByContainmentName
 import io.lionweb.kotlin.getOnlyChildByContainmentName
@@ -60,6 +59,7 @@ import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.primaryConstructor
+import com.strumenta.starlasu.base.v1.ASTLanguageV1 as ASTLanguage
 import io.lionweb.language.Feature as LWFeature
 
 interface PrimitiveValueSerialization<E> {

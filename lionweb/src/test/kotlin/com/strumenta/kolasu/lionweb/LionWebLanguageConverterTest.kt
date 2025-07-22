@@ -7,13 +7,13 @@ import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.NodeType
 import com.strumenta.kolasu.model.ReferenceByName
-import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.language.LionCoreBuiltins
 import io.lionweb.utils.LanguageValidator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
+import com.strumenta.starlasu.base.v1.ASTLanguageV1 as ASTLanguage
 
 @ASTRoot
 data class SimpleRoot(val _id: Int, val childrez: MutableList<SimpleDecl>) : Node()
