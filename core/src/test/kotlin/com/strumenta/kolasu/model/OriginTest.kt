@@ -11,7 +11,8 @@ import org.junit.Test as test
 
 class OriginTest {
 
-    @test fun parseTreeOriginPosition() {
+    @test
+    fun parseTreeOriginPosition() {
         val code = """set a = 1 + 2
             |input c is string
             |display 2 * 3
@@ -46,7 +47,8 @@ class OriginTest {
         assertEquals(pos(1, 2, 3, 4), node.position)
     }
 
-    @test fun parseTreeOriginsSourceText() {
+    @test
+    fun parseTreeOriginsSourceText() {
         val code = """set a = 1 + 2
             |input c is string
             |display 2 * 3

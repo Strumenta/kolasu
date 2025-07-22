@@ -1,6 +1,5 @@
 package com.strumenta.kolasu.model
 
-import java.lang.UnsupportedOperationException
 import java.util.LinkedList
 import kotlin.test.assertEquals
 import kotlin.test.assertSame

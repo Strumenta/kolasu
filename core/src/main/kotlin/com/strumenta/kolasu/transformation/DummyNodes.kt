@@ -34,6 +34,7 @@ fun <T : Node> KClass<T>.dummyInstance(levelOfDummyTree: Int = 0): T {
             mt is ParameterizedType && mt.rawType == List::class.java -> mutableListOf<Any>()
             (param.type.classifier as KClass<*>).isSubclassOf(Node::class) ->
                 (param.type.classifier as KClass<out Node>).dummyInstance(levelOfDummyTree + 1)
+
             param.type == String::class.createType() -> "DUMMY"
             param.type.classifier == ReferenceByName::class -> ReferenceByName<PossiblyNamed>("UNKNOWN")
             param.type == Int::class.createType() -> 0
@@ -43,6 +44,7 @@ fun <T : Node> KClass<T>.dummyInstance(levelOfDummyTree: Int = 0): T {
             param.type == Boolean::class.createType() -> false
             (param.type.classifier as KClass<*>).isSubclassOf(Enum::class)
             -> (param.type.classifier as KClass<*>).java.enumConstants[0]
+
             else -> TODO("Param type ${param.type}")
         }
         params[param] = value
@@ -77,12 +79,15 @@ private fun <T : Any> KClass<T>.toInstantiableType(levelOfDummyTree: Int = 0): K
                 subClassWithEmptyParam.toInstantiableType(levelOfDummyTree + 1)
             }
         }
+
         this.isAbstract -> {
             throw IllegalStateException("We cannot instantiate an abstract class (but we can handle sealed classes)")
         }
+
         this.java.isInterface -> {
             throw IllegalStateException("We cannot instantiate an interface")
         }
+
         else -> {
             this
         }

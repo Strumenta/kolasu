@@ -15,12 +15,12 @@ val IDENTTITY_TRANSFORMATION: (
     parent: Node?,
     expectedType: KClass<out Node>,
     astTransformer: ASTTransformer
-) -> List<Node> = {
-        source: Any?, parent: Node?, expectedType: KClass<out Node>, astTransformer: ASTTransformer ->
+) -> List<Node> = { source: Any?, parent: Node?, expectedType: KClass<out Node>, astTransformer: ASTTransformer ->
     when (source) {
         null -> {
             emptyList()
         }
+
         is Node -> {
             val kClass = source.javaClass.kotlin
             val primaryConstructor = kClass.primaryConstructor
@@ -42,10 +42,12 @@ val IDENTTITY_TRANSFORMATION: (
                     (parameter.type.classifier as KClass<*>).isSubclassOf(Node::class) -> {
                         params[parameter] = astTransformer.transform(originalValue)
                     }
+
                     mt is ParameterizedType && mt.rawType == List::class.java &&
                         (mt.actualTypeArguments.first() as? Class<*>)?.kotlin?.isSubclassOf(Node::class) == true -> {
                         params[parameter] = astTransformer.translateList<Node>(originalValue as List<Node>)
                     }
+
                     else -> params[parameter] = originalValue
                 }
             }
@@ -55,6 +57,7 @@ val IDENTTITY_TRANSFORMATION: (
             newInstance.origin = source
             listOf(newInstance)
         }
+
         else -> {
             throw IllegalArgumentException("An Identity Transformation expect to receive a Node")
         }

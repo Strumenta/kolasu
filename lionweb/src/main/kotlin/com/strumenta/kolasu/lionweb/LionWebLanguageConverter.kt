@@ -347,10 +347,7 @@ class LionWebLanguageConverter {
     }
 }
 
-fun addEnumerationFromClass(
-    lionwebLanguage: LWLanguage,
-    kClass: EnumKClass
-): Enumeration {
+fun addEnumerationFromClass(lionwebLanguage: LWLanguage, kClass: EnumKClass): Enumeration {
     val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
     newEnumeration.setID((lionwebLanguage.id ?: "unknown_language") + "_" + newEnumeration.name)
     newEnumeration.key = newEnumeration.name

@@ -125,7 +125,7 @@ class LionWebModelConverter(
         nodesMapping.clear()
     }
 
-    fun <E : Any>registerPrimitiveValueSerialization(
+    fun <E : Any> registerPrimitiveValueSerialization(
         kClass: KClass<E>,
         primitiveValueSerialization: PrimitiveValueSerialization<E>
     ) {
@@ -362,11 +362,7 @@ class LionWebModelConverter(
         return result
     }
 
-    private fun setEnumProperty(
-        lwNode: LWNode,
-        feature: Property,
-        kValue: Enum<*>
-    ) {
+    private fun setEnumProperty(lwNode: LWNode, feature: Property, kValue: Enum<*>) {
         val kClass: EnumKClass = kValue::class
         val enumeration = languageConverter.getKolasuClassesToEnumerationsMapping()[kClass]
             ?: throw IllegalStateException("No enumeration for enum class $kClass")
@@ -726,12 +722,7 @@ class LionWebModelConverter(
         }
     }
 
-    private fun <T : Any> instantiate(
-        kClass: KClass<T>,
-        data: Node,
-        referencesPostponer: ReferencesPostponer
-    ):
-        T {
+    private fun <T : Any> instantiate(kClass: KClass<T>, data: Node, referencesPostponer: ReferencesPostponer): T {
         val specialObject = maybeInstantiateSpecialObject(kClass, data)
         if (specialObject != null) {
             return specialObject as T

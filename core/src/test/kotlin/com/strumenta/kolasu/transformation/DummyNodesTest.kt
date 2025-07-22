@@ -20,6 +20,7 @@ data class MyNodeWithContainments(
     val c2: MyNodeWithProps?,
     val c3: MutableList<MyNodeWithProps>
 ) : Node()
+
 data class MyNodeWithRefs(val r1: ReferenceByName<PossiblyNamed>?, val r2: ReferenceByName<PossiblyNamed>) : Node()
 
 class DummyNodesTest {

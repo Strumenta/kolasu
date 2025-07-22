@@ -1,6 +1,10 @@
 package com.strumenta.kolasu.semantics
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.Expression
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.Statement
 
 internal data class CompilationUnit(
     var content: MutableList<TypeDecl> = mutableListOf()

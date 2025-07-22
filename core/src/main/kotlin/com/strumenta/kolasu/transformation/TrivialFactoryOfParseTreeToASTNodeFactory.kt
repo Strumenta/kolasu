@@ -25,12 +25,15 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
             ReferenceByName::class -> {
                 ReferenceByName<PossiblyNamed>(name = text)
             }
+
             String::class -> {
                 text
             }
+
             Int::class -> {
                 text.toInt()
             }
+
             else -> {
                 TODO()
             }
@@ -42,30 +45,38 @@ object TrivialFactoryOfParseTreeToASTNodeFactory {
             is Token -> {
                 return convertString(value.text, astTransformer, expectedType)
             }
+
             is List<*> -> {
                 return value.map { convert(it, astTransformer, expectedType.arguments[0].type!!) }
             }
+
             is ParserRuleContext -> {
                 return when (expectedType) {
                     String::class.createType(), String::class.createType(nullable = true) -> {
                         value.text
                     }
+
                     else -> {
                         astTransformer.transform(value)
                     }
                 }
             }
+
             null -> {
                 return null
             }
+
             is TerminalNode -> {
                 return convertString(value.text, astTransformer, expectedType)
             }
+
             else -> TODO("value $value (${value.javaClass})")
         }
     }
 
-    inline fun <S : RuleContext, reified T : Node> trivialFactory(vararg nameConversions: Pair<String, String>): (
+    inline fun <S : RuleContext, reified T : Node> trivialFactory(
+        vararg nameConversions: Pair<String, String>
+    ): (
         S,
         ASTTransformer
     ) -> T? {

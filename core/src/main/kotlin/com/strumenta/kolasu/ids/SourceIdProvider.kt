@@ -44,15 +44,19 @@ class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSo
                     throw SourceShouldBeSetException("Source should not be null")
                 }
             }
+
             is FileSource -> {
                 cleanId("file_${source.file.path}")
             }
+
             is SyntheticSource -> {
                 cleanId("synthetic_${source.description}")
             }
+
             is CodeBaseSource -> {
                 cleanId("codebase_${source.codebaseName}_relpath_${source.relativePath}")
             }
+
             is SourceWithID -> source.sourceID()
             else -> {
                 TODO("Unable to generate ID for Source $this (${source.javaClass.canonicalName})")
@@ -75,6 +79,7 @@ class RelativeSourceIdProvider(
                     throw IDGenerationException("Source should not be null")
                 }
             }
+
             is FileSource -> {
                 val thisAbsPath = source.file.absolutePath
                 val baseAbsPath = baseDir.absolutePath
@@ -84,6 +89,7 @@ class RelativeSourceIdProvider(
                 val id = if (rootName == null) relativePath else "${rootName}___$relativePath"
                 return cleanId(id)
             }
+
             else -> {
                 TODO("Unable to generate ID for Source $this (${this.javaClass.canonicalName})")
             }
@@ -96,10 +102,12 @@ class SourceShouldBeSetException(message: String, cause: Throwable? = null) : ID
     message,
     cause
 )
+
 class NodeShouldNotBeRootException(message: String, cause: Throwable? = null) : IDGenerationException(
     message,
     cause
 )
+
 class NodeShouldBeRootException(message: String, cause: Throwable? = null) : IDGenerationException(
     message,
     cause

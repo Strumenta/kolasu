@@ -159,7 +159,8 @@ class ModelTest {
         assertEquals(1, properties.size)
     }
 
-    @test fun nameIsProperty() {
+    @test
+    fun nameIsProperty() {
         assertTrue { MyNode("").properties.map { it.name }.contains("name") }
     }
 }

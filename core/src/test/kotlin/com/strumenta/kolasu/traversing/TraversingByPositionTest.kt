@@ -14,6 +14,7 @@ internal class TraversingByPositionTest {
         val contents: List<Node>,
         specifiedPosition: Position? = null
     ) : Node(specifiedPosition)
+
     class Item(val name: String, specifiedPosition: Position? = null) : Node(specifiedPosition)
 
     private fun printSequence(sequence: Sequence<Node>): String {

@@ -29,16 +29,19 @@ data class Issue(
             severity: IssueSeverity = IssueSeverity.ERROR,
             position: Position? = null
         ): Issue = Issue(IssueType.LEXICAL, message, severity, position)
+
         fun syntactic(
             message: String,
             severity: IssueSeverity = IssueSeverity.ERROR,
             position: Position? = null
         ): Issue = Issue(IssueType.SYNTACTIC, message, severity, position)
+
         fun semantic(
             message: String,
             severity: IssueSeverity = IssueSeverity.ERROR,
             position: Position? = null
         ): Issue = Issue(IssueType.SEMANTIC, message, severity, position)
+
         fun translation(
             message: String,
             severity: IssueSeverity = IssueSeverity.ERROR,

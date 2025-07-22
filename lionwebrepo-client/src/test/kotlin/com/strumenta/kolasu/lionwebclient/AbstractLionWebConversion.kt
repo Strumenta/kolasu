@@ -19,7 +19,7 @@ abstract class AbstractLionWebConversion<R : KNode>(val kolasuLanguage: KolasuLa
         inputStream: InputStream,
         astChecker: (ast: R) -> Unit = {},
         lwASTChecker: (lwAST: LWNode) -> Unit = {},
-        jsonChecker: (json: String) -> Unit = {},
+        jsonChecker: (json: String) -> Unit = {}
     ) {
         val result = parse(inputStream)
         val ast = result.root ?: throw IllegalStateException()

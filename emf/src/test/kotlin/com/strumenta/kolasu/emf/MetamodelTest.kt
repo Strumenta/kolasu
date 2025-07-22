@@ -1,6 +1,10 @@
 package com.strumenta.kolasu.emf
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.EntityDeclaration
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeType
+import com.strumenta.kolasu.model.ReferenceByName
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
@@ -18,8 +22,10 @@ sealed class Expression : Node(), com.strumenta.kolasu.model.Expression
 enum class Visibility {
     PUBLIC, PRIVATE
 }
+
 class VarDeclaration(var visibility: Visibility, var name: String, var initialValue: Expression) :
     Statement(), EntityDeclaration
+
 class StringLiteral(var value: String) : Expression()
 class LocalDateTimeLiteral(var value: LocalDateTime) : Expression()
 data class CompilationUnit(val statements: List<Statement>?) : Node()

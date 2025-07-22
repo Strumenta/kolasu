@@ -1,6 +1,11 @@
 package com.strumenta.kolasu.semantics
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.KReferenceByName
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.getReferredType
+import com.strumenta.kolasu.model.kReferenceByNameProperties
 import com.strumenta.kolasu.traversing.walkChildren
 import kotlin.reflect.KClass
 

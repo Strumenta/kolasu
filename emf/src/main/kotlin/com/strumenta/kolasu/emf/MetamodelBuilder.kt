@@ -153,6 +153,7 @@ class MetamodelBuilder(
                 (ktype.classifier as? KClass<*>)?.isSubclassOf(Enum::class) == true -> {
                     eDataType = createEEnum(ktype.classifier as KClass<out Enum<*>>)
                 }
+
                 else -> {
                     val handler = dataTypeHandlers.find { it.canHandle(ktype) }
                     if (handler == null) {
@@ -253,11 +254,7 @@ class MetamodelBuilder(
         return eClass
     }
 
-    private fun registerReference(
-        prop: PropertyTypeDescription,
-        valueType: KType,
-        eClass: EClass
-    ) {
+    private fun registerReference(prop: PropertyTypeDescription, valueType: KType, eClass: EClass) {
         if (valueType.classifier is KClass<*> && (valueType.classifier as KClass<*>).isSubclassOf(Collection::class)) {
             throw IllegalStateException("We do not support references to lists. EClass $eClass, property $prop")
         }
@@ -288,6 +285,7 @@ class MetamodelBuilder(
             KVariance.INVARIANT -> {
                 return provideType(valueType.type!!)
             }
+
             else -> TODO("Variance ${valueType.variance} not yet sypported")
         }
     }
@@ -311,11 +309,7 @@ class MetamodelBuilder(
         }
     }
 
-    private fun setType(
-        element: ETypedElement,
-        valueType: KType,
-        visibleTypeParameters: Map<String, ETypeParameter>
-    ) {
+    private fun setType(element: ETypedElement, valueType: KType, visibleTypeParameters: Map<String, ETypeParameter>) {
         when (val classifier = valueType.classifier) {
             is KClass<*> -> {
                 if (classifier.typeParameters.isEmpty()) {
@@ -332,12 +326,14 @@ class MetamodelBuilder(
                     }
                 }
             }
+
             is KTypeParameter -> {
                 element.eGenericType = EcoreFactory.eINSTANCE.createEGenericType().apply {
                     eTypeParameter = visibleTypeParameters[classifier.name]
                         ?: throw IllegalStateException("Type parameter not found")
                 }
             }
+
             else -> throw Error("Not a valid classifier: $classifier")
         }
     }

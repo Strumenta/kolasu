@@ -17,13 +17,13 @@ import com.strumenta.kolasu.model.ASTRoot
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.assignParents
 import com.strumenta.kolasu.traversing.walkDescendants
+import io.lionweb.client.kotlin.ClassifierResult
+import io.lionweb.client.kotlin.LionWebClient
+import io.lionweb.client.kotlin.RetrievalMode
 import io.lionweb.language.Concept
 import io.lionweb.model.HasSettableParent
 import io.lionweb.model.impl.ProxyNode
 import io.lionweb.serialization.JsonSerialization
-import io.lionweb.client.kotlin.ClassifierResult
-import io.lionweb.client.kotlin.LionWebClient
-import io.lionweb.client.kotlin.RetrievalMode
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
@@ -107,7 +107,7 @@ class KolasuClient(
 
     fun <E : Any> registerPrimitiveValueSerialization(
         kClass: KClass<E>,
-        primitiveValueSerialization: PrimitiveValueSerialization<E>,
+        primitiveValueSerialization: PrimitiveValueSerialization<E>
     ) {
         nodeConverter.registerPrimitiveValueSerialization(kClass, primitiveValueSerialization)
     }
@@ -149,7 +149,7 @@ class KolasuClient(
      */
     fun retrievePartition(
         nodeID: String,
-        retrievalMode: RetrievalMode = RetrievalMode.ENTIRE_SUBTREE,
+        retrievalMode: RetrievalMode = RetrievalMode.ENTIRE_SUBTREE
     ): LWNode {
         val lwNode = lionWebClient.retrieve(nodeID, retrievalMode = retrievalMode)
         return lwNode
@@ -182,7 +182,7 @@ class KolasuClient(
         kNode: Node,
         containerID: String,
         containmentName: String,
-        containmentIndex: Int,
+        containmentIndex: Int
     ): String {
         require(kNode::class.annotations.any { it is ASTRoot }) {
             "The class of root of the passed is not marked as ASTRoot (root: $kNode)"
@@ -199,7 +199,7 @@ class KolasuClient(
     fun attachAST(
         kNode: Node,
         containerID: String,
-        containmentName: String,
+        containmentName: String
     ): String {
         val containmentIndex = lionWebClient.childrenInContainment(containerID, containmentName).size
         considerLogging("got containment index")
@@ -215,7 +215,7 @@ class KolasuClient(
     fun attachAST(
         kNode: Node,
         container: LWNode,
-        containment: KProperty1<*, *>,
+        containment: KProperty1<*, *>
     ): String {
         return attachAST(kNode, container.id ?: throw java.lang.IllegalStateException(), containment.name)
     }
@@ -223,7 +223,7 @@ class KolasuClient(
     fun attachAST(
         kNode: Node,
         container: LWNode,
-        containmentName: String,
+        containmentName: String
     ): String {
         return attachAST(kNode, container.id ?: throw java.lang.IllegalStateException(), containmentName)
     }
@@ -231,7 +231,7 @@ class KolasuClient(
     fun attachAST(
         kNode: Node,
         containerID: String,
-        containment: KProperty1<*, *>,
+        containment: KProperty1<*, *>
     ): String {
         val containmentIndex = lionWebClient.childrenInContainment(containerID, containment.name).size
         return attachAST(kNode, containerID, containment.name, containmentIndex)
@@ -241,7 +241,7 @@ class KolasuClient(
         kNode: Node,
         containerID: String,
         containment: KProperty1<*, *>,
-        containmentIndex: Int,
+        containmentIndex: Int
     ): String {
         return attachAST(kNode, containerID, containment.name, containmentIndex)
     }
@@ -327,7 +327,7 @@ class KolasuClient(
     fun attachLionWebChild(
         child: LWNode,
         parentID: String,
-        property: KProperty1<*, *>,
+        property: KProperty1<*, *>
     ): String {
         return attachLionWebChild(child, parentID, property.name!!)
     }
@@ -335,12 +335,12 @@ class KolasuClient(
     fun attachLionWebChild(
         child: LWNode,
         parentID: String,
-        propertyName: String,
+        propertyName: String
     ): String {
         val updatedParent = lionWebClient.retrieve(
-                parentID,
-                retrievalMode = RetrievalMode.SINGLE_NODE,
-            )
+            parentID,
+            retrievalMode = RetrievalMode.SINGLE_NODE
+        )
         return attachLionWebChild(child, updatedParent, propertyName)
     }
 
@@ -355,7 +355,7 @@ class KolasuClient(
     fun attachLionWebChild(
         child: LWNode,
         parent: LWNode,
-        propertyName: String,
+        propertyName: String
     ): String {
         parent.addChild(parent.classifier.requireContainmentByName(propertyName), child)
         lionWebClient.storeTree(parent)
@@ -422,7 +422,9 @@ class KolasuClient(
                             kolasuClass to entry.value
                         }
                     } else {
-                        throw IllegalStateException("Classifier $lionWebClassifier is unexpected, as it is not a Concept")
+                        throw IllegalStateException(
+                            "Classifier $lionWebClassifier is unexpected, as it is not a Concept"
+                        )
                     }
                 }
             }.filterNotNull().toMap()
@@ -449,15 +451,14 @@ class KolasuClient(
         kNode: Node,
         containerID: String,
         containmentName: String,
-        containmentIndex: Int,
+        containmentIndex: Int
     ): LWNode {
         require(kNode.javaClass.annotations.any { it is ASTRoot })
         nodeConverter.clearNodesMapping()
         return nodeConverter.exportModelToLionWeb(
             kNode,
             idProvider,
-            considerParent = true,
+            considerParent = true
         )
     }
-
 }

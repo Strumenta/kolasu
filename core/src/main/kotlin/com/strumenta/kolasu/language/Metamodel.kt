@@ -35,6 +35,7 @@ sealed class Link : Feature() {
 data class Reference(override val name: String, val optional: Boolean, override val type: KClass<*>) : Link() {
     override val multiplicity: Multiplicity
         get() = if (optional) Multiplicity.OPTIONAL else Multiplicity.SINGULAR
+
     init {
         checkFeatureName(name)
     }

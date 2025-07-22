@@ -1,7 +1,11 @@
 package com.strumenta.kolasu.emf.rpgast
 
 import com.smeup.rpgparser.parsing.ast.Expression
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.Derived
+import com.strumenta.kolasu.model.Link
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Position
 import java.math.BigDecimal
 
 abstract class AbstractDataDefinition(
@@ -19,8 +23,7 @@ abstract class AbstractDataDefinition(
 
     override fun hashCode() = hashCode
 
-    override fun equals(other: Any?) =
-        if (other is AbstractDataDefinition) name == other.name else false
+    override fun equals(other: Any?) = if (other is AbstractDataDefinition) name == other.name else false
 }
 
 data class FileDefinition private constructor(override val name: String, val specifiedPosition: Position?) :

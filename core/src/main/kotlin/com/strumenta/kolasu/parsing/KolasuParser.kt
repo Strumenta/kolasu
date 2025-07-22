@@ -263,9 +263,11 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
     }
 
     @JvmOverloads
-    fun parseFirstStage(file: File, charset: Charset = Charsets.UTF_8, measureLexingTime: Boolean = false):
-        FirstStageParsingResult<C> =
-        parseFirstStage(FileInputStream(file), charset, measureLexingTime)
+    fun parseFirstStage(
+        file: File,
+        charset: Charset = Charsets.UTF_8,
+        measureLexingTime: Boolean = false
+    ): FirstStageParsingResult<C> = parseFirstStage(FileInputStream(file), charset, measureLexingTime)
 
     protected open fun postProcessAst(ast: R, issues: MutableList<Issue>): R {
         return ast
@@ -312,8 +314,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         charset: Charset,
         considerPosition: Boolean,
         measureLexingTime: Boolean
-    ): ParsingResult<R> =
-        parse(FileInputStream(file), charset, considerPosition, measureLexingTime, FileSource(file))
+    ): ParsingResult<R> = parse(FileInputStream(file), charset, considerPosition, measureLexingTime, FileSource(file))
 
     // For convenient use from Java
     fun walk(node: Node) = node.walk()

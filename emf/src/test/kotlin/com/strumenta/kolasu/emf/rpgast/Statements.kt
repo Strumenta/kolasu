@@ -1,7 +1,14 @@
 package com.smeup.rpgparser.parsing.ast
 
-import com.strumenta.kolasu.emf.rpgast.*
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.emf.rpgast.AbstractDataDefinition
+import com.strumenta.kolasu.emf.rpgast.ComparisonOperator
+import com.strumenta.kolasu.emf.rpgast.InStatementDataDefinition
+import com.strumenta.kolasu.emf.rpgast.KListType
+import com.strumenta.kolasu.emf.rpgast.startLine
+import com.strumenta.kolasu.model.Derived
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.traversing.findAncestorOfType
 
 class DBFile
@@ -18,7 +25,7 @@ enum class AssignmentOperator(val text: String) {
     MINUS_ASSIGNMENT("-="),
     MULT_ASSIGNMENT("*="),
     DIVIDE_ASSIGNMENT("/="),
-    EXP_ASSIGNMENT("**=");
+    EXP_ASSIGNMENT("**=")
 }
 
 abstract class Statement(specifiedPosition: Position? = null) : Node(specifiedPosition) {
@@ -284,7 +291,7 @@ data class CallStmt(
     val specifiedPosition: Position? = null
 ) : Statement(specifiedPosition), StatementThatCanDefineData {
     override fun dataDefinition(): List<InStatementDataDefinition> {
-        return params.mapNotNull() {
+        return params.mapNotNull {
             it.dataDefinition
         }
     }

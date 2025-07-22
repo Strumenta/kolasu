@@ -17,4 +17,4 @@ class MemoizeExtension1<in S, in T, out R>(val f: (S, T) -> R) : (S, T) -> R {
     }
 }
 
-fun <S, T, R>((S, T) -> R).memoize(): (S, T) -> R = MemoizeExtension1(this)
+fun <S, T, R> ((S, T) -> R).memoize(): (S, T) -> R = MemoizeExtension1(this)

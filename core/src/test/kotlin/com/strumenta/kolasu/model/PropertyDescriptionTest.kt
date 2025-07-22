@@ -1,7 +1,7 @@
 package com.strumenta.kolasu.model
 
 import org.junit.Test
-import java.util.*
+import java.util.LinkedList
 import kotlin.test.assertEquals
 
 data class Foo1(val name: String) : Node()

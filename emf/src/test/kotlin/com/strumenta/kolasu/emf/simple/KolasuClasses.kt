@@ -1,6 +1,10 @@
 package com.strumenta.kolasu.emf.simple
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.Derived
+import com.strumenta.kolasu.model.Link
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Position
 import java.math.BigDecimal
 
 abstract class Expression(specifiedPosition: Position? = null) : Node(specifiedPosition) {

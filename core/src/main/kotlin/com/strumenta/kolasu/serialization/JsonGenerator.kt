@@ -98,10 +98,7 @@ class JsonGenerator {
     /**
      * Converts "results" to JSON format.
      */
-    fun generateJSON(
-        result: Result<out Node>,
-        withIds: IdentityHashMap<Node, String>? = null
-    ): JsonElement {
+    fun generateJSON(result: Result<out Node>, withIds: IdentityHashMap<Node, String>? = null): JsonElement {
         return jsonObject(
             "issues" to result.issues.map { it.toJson() }.toJsonArray(),
             "root" to result.root?.let { nodeToJson(it, shortClassNames, withIds) }
@@ -111,10 +108,7 @@ class JsonGenerator {
     /**
      * Converts "results" to JSON format.
      */
-    fun generateJSON(
-        result: ParsingResult<out Node>,
-        withIds: IdentityHashMap<Node, String>? = null
-    ): JsonElement {
+    fun generateJSON(result: ParsingResult<out Node>, withIds: IdentityHashMap<Node, String>? = null): JsonElement {
         return jsonObject(
             "issues" to result.issues.map { it.toJson() }.toJsonArray(),
             "root" to result.root?.let { nodeToJson(it, shortClassNames, withIds) }
@@ -180,10 +174,7 @@ class JsonGenerator {
         File(file.toURI()).writeText(generateString(result, withIds))
     }
 
-    private fun valueToJson(
-        value: Any?,
-        withIds: IdentityHashMap<Node, String>? = null
-    ): JsonElement {
+    private fun valueToJson(value: Any?, withIds: IdentityHashMap<Node, String>? = null): JsonElement {
         try {
             return when (value) {
                 null -> JsonNull.INSTANCE
@@ -211,10 +202,9 @@ class JsonGenerator {
         }
     }
 
-    private fun computeIds(root: Node): IdentityHashMap<Node, String> =
-        IdentityHashMap<Node, String>().apply {
-            root.walk().forEach { this[it] = UUID.randomUUID().toString() }
-        }
+    private fun computeIds(root: Node): IdentityHashMap<Node, String> = IdentityHashMap<Node, String>().apply {
+        root.walk().forEach { this[it] = UUID.randomUUID().toString() }
+    }
 
     private fun computeIds(result: Result<out Node>): IdentityHashMap<Node, String> =
         if (result.root != null) computeIds(result.root) else IdentityHashMap()
@@ -228,8 +218,7 @@ class JsonGenerator {
         withIds: IdentityHashMap<Node, String>? = null,
         withOriginIds: IdentityHashMap<Node, String>? = null,
         withDestinationIds: IdentityHashMap<Node, String>? = null
-    ):
-        JsonElement {
+    ): JsonElement {
         val nodeType = node.nodeType
         val jsonObject = jsonObject(
             JSON_TYPE_KEY to if (shortClassNames) nodeType.substring(nodeType.lastIndexOf('.') + 1) else nodeType,
