@@ -1,6 +1,9 @@
 package com.strumenta.kolasu.traversing
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.model.pos
 import kotlin.system.measureTimeMillis
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -15,6 +18,7 @@ internal class TraversingStructurallyTest {
         val set: Set<Node> = setOf(),
         specifiedPosition: Position? = null
     ) : Node(specifiedPosition)
+
     class Item(val name: String, specifiedPosition: Position? = null) : Node(specifiedPosition)
 
     private fun printSequence(sequence: Sequence<Node>): String {
@@ -91,7 +95,8 @@ internal class TraversingStructurallyTest {
             .joinToString("")
     }
 
-    @Test @Ignore
+    @Test
+    @Ignore
     fun performanceTest() {
         val boxes = mutableListOf<Box>()
         val numberOfChildren = 10000

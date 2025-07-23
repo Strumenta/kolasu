@@ -15,19 +15,19 @@ enum class ComparisonOperator(val symbol: String) {
     GT(">"),
     GE(">="),
     LT("<"),
-    LE("<=");
+    LE("<=")
 }
 
 fun String.repeatWithMaxSize(l: Int): String {
     val repetitions = (l / this.length) + 1
     return this.repeat(repetitions).take(l)
 }
+
 fun String.asLong(): Long = this.trim().toLong()
 fun String.asInt(): Int = this.trim().toInt()
 fun String?.isEmptyTrim() = this == null || this.trim().isEmpty()
-fun String?.asIntOrNull(): Int? =
-    try {
-        this?.trim()?.toInt()
-    } catch (e: Exception) {
-        null
-    }
+fun String?.asIntOrNull(): Int? = try {
+    this?.trim()?.toInt()
+} catch (e: Exception) {
+    null
+}

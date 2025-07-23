@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.semantics
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.assignParents
+import com.strumenta.kolasu.model.processNodesOfType
 import com.strumenta.kolasu.testing.assertReferencesNotResolved
 import com.strumenta.kolasu.testing.assertReferencesResolved
 import com.strumenta.kolasu.traversing.findAncestorOfType
@@ -115,7 +117,9 @@ class SemanticsTest {
                     it.features.forEach(this::define)
                     parent = symbolResolver.scopeFrom(
                         it.superclass?.apply {
-                            if (!this.resolved) { symbolResolver.resolve(ClassDecl::superclass, it) }
+                            if (!this.resolved) {
+                                symbolResolver.resolve(ClassDecl::superclass, it)
+                            }
                         }?.referred
                     )
                 }
@@ -124,19 +128,27 @@ class SemanticsTest {
         typeComputer {
             // type computation rules
             typeFor(RefExpr::class) {
-                if (!it.symbol.resolved) { symbolResolver.resolve(RefExpr::symbol, it) }
+                if (!it.symbol.resolved) {
+                    symbolResolver.resolve(RefExpr::symbol, it)
+                }
                 typeComputer.typeFor(it.symbol.referred)
             }
             typeFor(CallExpr::class) {
-                if (!it.operation.resolved) { symbolResolver.resolve(CallExpr::operation, it) }
+                if (!it.operation.resolved) {
+                    symbolResolver.resolve(CallExpr::operation, it)
+                }
                 typeComputer.typeFor(it.operation.referred)
             }
             typeFor(Variable::class) {
-                if (!it.type.resolved) { symbolResolver.resolve(Variable::type, it) }
+                if (!it.type.resolved) {
+                    symbolResolver.resolve(Variable::type, it)
+                }
                 typeComputer.typeFor(it.type.referred)
             }
             typeFor(ParameterDecl::class) {
-                if (!it.type.resolved) { symbolResolver.resolve(ParameterDecl::type, it) }
+                if (!it.type.resolved) {
+                    symbolResolver.resolve(ParameterDecl::type, it)
+                }
                 typeComputer.typeFor(it.type.referred)
             }
             typeFor(OperationDecl::class) {
@@ -146,7 +158,9 @@ class SemanticsTest {
                 typeComputer.typeFor(it.returns?.referred)
             }
             typeFor(FeatureDecl::class) {
-                if (!it.type.resolved) { symbolResolver.resolve(FeatureDecl::type, it) }
+                if (!it.type.resolved) {
+                    symbolResolver.resolve(FeatureDecl::type, it)
+                }
                 typeComputer.typeFor(it.type.referred)
             }
         }

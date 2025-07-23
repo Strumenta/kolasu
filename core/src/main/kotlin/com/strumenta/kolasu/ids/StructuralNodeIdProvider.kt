@@ -49,6 +49,7 @@ open class StructuralNodeIdProvider(
                 }
                 "$sourceId"
             }
+
             is InternalCoordinates -> {
                 if (mustBeRoot) {
                     throw NodeShouldBeRootException("Node $kNode should be root")

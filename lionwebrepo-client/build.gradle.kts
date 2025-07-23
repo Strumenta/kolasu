@@ -156,3 +156,13 @@ buildConfig {
         useKotlinOutput()
     }
 }
+
+afterEvaluate {
+    tasks.named<org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask>("runKtlintCheckOverFunctionalTestSourceSet") {
+        setSource(
+            project.sourceSets["functionalTest"].allSource.filterNot { file ->
+                file.path.contains("/generated/")
+            }
+        )
+    }
+}

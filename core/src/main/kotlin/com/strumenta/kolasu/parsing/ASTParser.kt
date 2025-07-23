@@ -28,8 +28,7 @@ interface ASTParser<R : Node> {
         considerPosition: Boolean = true,
         measureLexingTime: Boolean = false,
         source: Source? = null
-    ): ParsingResult<R> =
-        parse(inputStreamToString(inputStream, charset), considerPosition, measureLexingTime, source)
+    ): ParsingResult<R> = parse(inputStreamToString(inputStream, charset), considerPosition, measureLexingTime, source)
 
     fun parse(
         code: String,

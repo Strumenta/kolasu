@@ -58,8 +58,10 @@ class KolasuLanguage(val qualifiedName: String) {
             return attempt.result
         } else {
             throw RuntimeException(
-                "Issues prevented from adding $kClass:\n${attempt.issues.map { it.message }
-                    .joinToString("\n")}"
+                "Issues prevented from adding $kClass:\n${
+                attempt.issues.map { it.message }
+                    .joinToString("\n")
+                }"
             )
         }
     }
@@ -107,8 +109,10 @@ class KolasuLanguage(val qualifiedName: String) {
             return attempt.result
         } else {
             throw RuntimeException(
-                "Issues prevented from adding $kClass:\n${attempt.issues.map { it.message }
-                    .joinToString("\n")}"
+                "Issues prevented from adding $kClass:\n${
+                attempt.issues.map { it.message }
+                    .joinToString("\n")
+                }"
             )
         }
     }

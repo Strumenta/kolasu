@@ -17,15 +17,13 @@ class ScopeProvider(
     private val scopeConstructionRules: MutableMap<KClass<out Node>, (Node) -> Scope> = mutableMapOf()
 ) {
     fun loadFrom(configuration: ScopeProviderConfiguration, semantics: Semantics) {
-        configuration.scopeResolutionRules.mapValuesTo(this.scopeResolutionRules) {
-                (_, classToScopeResolutionRules) ->
+        configuration.scopeResolutionRules.mapValuesTo(this.scopeResolutionRules) { (_, classToScopeResolutionRules) ->
             classToScopeResolutionRules
                 .mapValues { (_, scopeResolutionRule) ->
                     { node: Node -> semantics.scopeResolutionRule(node) }
                 }.toMutableMap()
         }
-        configuration.scopeConstructionRules.mapValuesTo(this.scopeConstructionRules) {
-                (_, scopeConstructionRule) ->
+        configuration.scopeConstructionRules.mapValuesTo(this.scopeConstructionRules) { (_, scopeConstructionRule) ->
             { node: Node -> semantics.scopeConstructionRule(node) }
         }
     }

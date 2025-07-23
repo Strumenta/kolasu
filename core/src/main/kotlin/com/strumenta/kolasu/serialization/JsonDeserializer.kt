@@ -50,14 +50,17 @@ class JsonDeserializer {
                         // So, when className is a simple name and we cannot resolve it directly,
                         // we need to get the package name of the rawClass and apply it to className.
                         Class.forName(
-                            "${rawClass.canonicalName.substring(
+                            "${
+                            rawClass.canonicalName.substring(
                                 0,
                                 rawClass.canonicalName.lastIndexOf('.') + 1
-                            )}$className"
+                            )
+                            }$className"
                         )
                     }
                     return deserialize(actualClass.asSubclass(Node::class.java), json.asJsonObject)
                 }
+
                 Collection::class.java.isAssignableFrom(rawClass) -> {
                     require(typeToDeserialize.arguments.size == 1)
                     val elementType = typeToDeserialize.arguments[0]
@@ -72,9 +75,11 @@ class JsonDeserializer {
                 rawClass == String::class.java -> {
                     return json.asString
                 }
+
                 rawClass == Int::class.java -> {
                     return json.asInt
                 }
+
                 else -> {
                     if (json.isJsonObject) {
                         if (json.asJsonObject.has(JSON_TYPE_KEY)) {
@@ -83,10 +88,12 @@ class JsonDeserializer {
                                 Class.forName(type)
                             } catch (ex: ClassNotFoundException) {
                                 Class.forName(
-                                    "${rawClass.canonicalName.substring(
+                                    "${
+                                    rawClass.canonicalName.substring(
                                         0,
                                         rawClass.canonicalName.lastIndexOf('.') + 1
-                                    )}$type"
+                                    )
+                                    }$type"
                                 )
                             }
                             if (clazz == null) {
@@ -102,6 +109,7 @@ class JsonDeserializer {
         }
         TODO()
     }
+
     fun <T : Node> deserialize(clazz: Class<T>, json: String): T {
         val jo = JsonParser().parse(json).asJsonObject
         return deserialize(clazz, jo)
@@ -127,9 +135,11 @@ class JsonDeserializer {
                 instance = primaryConstructor.callBy(args)
             } catch (e: InvocationTargetException) {
                 throw RuntimeException(
-                    "Issue instantiating ${clazz.canonicalName} with args ${args.map {
+                    "Issue instantiating ${clazz.canonicalName} with args ${
+                    args.map {
                         "${it.key.name}:${it.key.type} = ${it.value}"
-                    }.joinToString(", ")} by using constructor $primaryConstructor",
+                    }.joinToString(", ")
+                    } by using constructor $primaryConstructor",
                     e
                 )
             }

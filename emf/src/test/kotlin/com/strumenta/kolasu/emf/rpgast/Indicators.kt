@@ -35,6 +35,7 @@ enum class IndicatorType(val range: IntRange) {
     OC(102..102),
     OF(103..103),
     OV(104..104)
+
     ;
 
     companion object {
@@ -62,6 +63,7 @@ fun String.toIndicatorKey(): IndicatorKey {
             require(IndicatorType.Predefined.range.contains(it.toInt()))
             it.toInt()
         }
+
         else -> IndicatorType.valueOf(this).range.first
     }
 }

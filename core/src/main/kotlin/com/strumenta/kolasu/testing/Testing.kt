@@ -1,13 +1,21 @@
 package com.strumenta.kolasu.testing
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.KReferenceByName
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.PropertyType
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.kReferenceByNameProperties
 import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.parsing.toParseTreeModel
 import com.strumenta.kolasu.traversing.walkChildren
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Vocabulary
 import kotlin.reflect.KClass
-import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import kotlin.test.fail
 
 fun assertParseTreeStr(
     expectedMultiLineStr: String,
@@ -112,7 +120,7 @@ class IgnoreChildren<N : Node> : MutableList<N> {
     }
 
     // Sometimes the compiler complains about these methods not being overriden
-    fun <T : Any>toArray(base: Array<out T>): Array<out T> {
+    fun <T : Any> toArray(base: Array<out T>): Array<out T> {
         TODO()
     }
 }

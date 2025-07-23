@@ -7,4 +7,5 @@ interface Destination
 data class CompositeDestination(val elements: List<Destination>) : Destination, Serializable {
     constructor(vararg elements: Destination) : this(elements.toList())
 }
+
 data class TextFileDestination(val position: Position?) : Destination, Serializable

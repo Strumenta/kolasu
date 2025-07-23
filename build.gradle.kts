@@ -26,10 +26,9 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven(url="https://s01.oss.sonatype.org/content/repositories/snapshots/")
-        maven(url="https://central.sonatype.com/repository/maven-snapshots/")
+        maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
+        maven(url = "https://central.sonatype.com/repository/maven-snapshots/")
     }
-
 }
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -63,16 +62,6 @@ subprojects {
             showExceptions = true
             exceptionFormat = TestExceptionFormat.FULL
         }
-    }
-
-    configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-        version.set("0.48.1")
-        verbose.set(true)
-        outputToConsole.set(true)
-        enableExperimentalRules.set(true)
-        disabledRules.set(
-                listOf("no-wildcard-imports", "experimental:argument-list-wrapping")
-        )
     }
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
@@ -146,10 +135,10 @@ val triggerSonatypePublish by tasks.registering {
         val url = "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/$namespace"
         val client = HttpClient.newHttpClient()
         val request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Authorization", "Bearer $credentials")
-                .POST(HttpRequest.BodyPublishers.noBody())
-                .build()
+            .uri(URI.create(url))
+            .header("Authorization", "Bearer $credentials")
+            .POST(HttpRequest.BodyPublishers.noBody())
+            .build()
 
         val response = client.send(request, HttpResponse.BodyHandlers.ofString())
 
@@ -174,7 +163,8 @@ val dropClosedRepositories by tasks.registering {
         val namespace = "com.strumenta"
         val client = HttpClient.newHttpClient()
 
-        val searchUrl = "https://ossrh-staging-api.central.sonatype.com/manual/search/repositories?ip=any&profile_id=$namespace"
+        val searchUrl = "https://ossrh-staging-api.central.sonatype.com/manual/search/repositories?" +
+            "ip=any&profile_id=$namespace"
 
         val searchRequest = HttpRequest.newBuilder()
             .uri(URI.create(searchUrl))
@@ -186,7 +176,7 @@ val dropClosedRepositories by tasks.registering {
         val body = searchResponse.body()
 
         println(" Status ${searchResponse.statusCode()}")
-        println(" Body ${body}")
+        println(" Body $body")
 
         val repositories = JsonParser.parseString(body).asJsonObject.get("repositories").asJsonArray
         if (repositories.isEmpty) {

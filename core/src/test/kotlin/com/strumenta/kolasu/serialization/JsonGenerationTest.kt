@@ -1,7 +1,18 @@
 package com.strumenta.kolasu.serialization
 
 import com.google.gson.stream.JsonWriter
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.BaseNode
+import com.strumenta.kolasu.model.ExtNode
+import com.strumenta.kolasu.model.Multiplicity
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.NodeOverridingName
+import com.strumenta.kolasu.model.Point
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.PropertyDescription
+import com.strumenta.kolasu.model.PropertyType
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.pos
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType

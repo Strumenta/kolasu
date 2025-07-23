@@ -34,6 +34,7 @@ data class Point(val line: Int, val column: Int) : Comparable<Point>, Serializab
         fun checkLine(line: Int) {
             require(line >= START_LINE) { "Line should be equal or greater than 1, was $line" }
         }
+
         fun checkColumn(column: Int) {
             require(column >= START_COLUMN) { "Column should be equal or greater than 0, was $column" }
         }
@@ -256,10 +257,7 @@ val Node.endLine: Int?
  * If the text has leading whitespace, the start point will be advanced to skip such whitespace.
  * Similarly, if the text has trailing whitespace the end point will be receded to skip such whitespace.
  */
-fun strippedPosition(
-    text: String?,
-    start: Point
-): Position? {
+fun strippedPosition(text: String?, start: Point): Position? {
     return text?.let { text ->
         start.positionWithLength(text.length).stripPosition(text)
     }

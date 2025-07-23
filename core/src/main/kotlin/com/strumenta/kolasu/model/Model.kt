@@ -242,7 +242,11 @@ fun <N : Node> N.withPosition(position: Position?): N {
 }
 
 fun <N : Node> N.withOrigin(origin: Origin?): N {
-    this.origin = if (origin == this) { null } else { origin }
+    this.origin = if (origin == this) {
+        null
+    } else {
+        origin
+    }
     return this
 }
 

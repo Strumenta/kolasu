@@ -26,7 +26,6 @@ import com.strumenta.kolasu.parsing.ParsingResult
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
-import com.strumenta.starlasu.base.ASTLanguage
 import io.lionweb.language.Classifier
 import io.lionweb.language.Concept
 import io.lionweb.language.DataType
@@ -39,6 +38,7 @@ import io.lionweb.language.Property
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
+import com.strumenta.starlasu.base.v1.ASTLanguageV1 as ASTLanguage
 
 /**
  * This class is able to convert between Kolasu and LionWeb languages, tracking the mapping.
@@ -347,10 +347,7 @@ class LionWebLanguageConverter {
     }
 }
 
-fun addEnumerationFromClass(
-    lionwebLanguage: LWLanguage,
-    kClass: EnumKClass
-): Enumeration {
+fun addEnumerationFromClass(lionwebLanguage: LWLanguage, kClass: EnumKClass): Enumeration {
     val newEnumeration = Enumeration(lionwebLanguage, kClass.simpleName)
     newEnumeration.setID((lionwebLanguage.id ?: "unknown_language") + "_" + newEnumeration.name)
     newEnumeration.key = newEnumeration.name

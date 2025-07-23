@@ -216,6 +216,7 @@ data class ArrayAccessExpr(
     override fun render(): String {
         return "${this.array.render()}(${index.render()}))"
     }
+
     override fun size(): Int {
         TODO("size")
     }

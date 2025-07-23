@@ -7,9 +7,11 @@ data class PredefinedIndicatorExpr(val index: Int) : AssignableExpression() {
     constructor(index: Int, position: Position) : this(index) {
         this.position = position
     }
+
     init {
         require(index in 1..99) { "Indicator not in range 01 to 99 at $position" }
     }
+
     override fun size(): Int = 1
 }
 

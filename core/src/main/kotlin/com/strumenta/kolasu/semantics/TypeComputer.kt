@@ -12,8 +12,7 @@ class TypeComputer(
     private val typingRules: MutableMap<KClass<out Node>, (Node) -> Node?> = mutableMapOf()
 ) {
     fun loadFrom(configuration: TypeComputerConfiguration, semantics: Semantics) {
-        configuration.typingRules.mapValuesTo(this.typingRules) {
-                (_, typingRule) ->
+        configuration.typingRules.mapValuesTo(this.typingRules) { (_, typingRule) ->
             { node: Node -> semantics.typingRule(node) }
         }
     }

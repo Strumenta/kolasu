@@ -8,6 +8,7 @@ import kotlin.test.assertNotNull
 enum class E1 {
     A, B, C
 }
+
 sealed class C1 : Node()
 data class C2(val s: String) : C1()
 data class C3(val e: E1) : C1()

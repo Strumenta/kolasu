@@ -57,7 +57,7 @@ sourceSets {
 compileKotlin.source sourceSets.main.java, sourceSets.main.kotlin
 compileTestKotlin.source sourceSets.test.kotlin
 
-clean{
+clean {
     delete "generated-src"
     delete "generated-test-src"
 }
@@ -89,7 +89,7 @@ publishing {
     publications {
         kolasu_emf(MavenPublication) {
             from components.java
-            artifactId "kolasu-" +project.name
+            artifactId "kolasu-" + project.name
             artifact sourcesJar
             artifact javadocJar
             suppressPomMetadataWarningsFor('cliApiElements')

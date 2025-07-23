@@ -31,6 +31,7 @@ class SemanticsConfiguration(
     fun typeComputer(init: TypeComputerConfiguration.() -> Unit) {
         this.typeComputer = TypeComputerConfiguration().apply(init)
     }
+
     fun symbolResolver(init: SymbolResolverConfiguration.() -> Unit) {
         this.symbolResolver = SymbolResolverConfiguration().apply(init)
     }
@@ -38,7 +39,5 @@ class SemanticsConfiguration(
 
 // builder
 
-fun semantics(
-    issues: MutableList<Issue> = mutableListOf(),
-    init: SemanticsConfiguration.() -> Unit
-) = Semantics(issues, SemanticsConfiguration().apply(init))
+fun semantics(issues: MutableList<Issue> = mutableListOf(), init: SemanticsConfiguration.() -> Unit) =
+    Semantics(issues, SemanticsConfiguration().apply(init))

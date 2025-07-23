@@ -49,6 +49,7 @@ abstract class ASTProcessingCommand<R : Node, P : ASTParser<R>>(
 
     protected open fun initializeRun() {
     }
+
     protected open fun finalizeRun() {
     }
 

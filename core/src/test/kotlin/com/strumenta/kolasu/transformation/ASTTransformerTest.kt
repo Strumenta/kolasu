@@ -92,6 +92,7 @@ class ASTTransformerTest {
                         transform(source.left) as Expression,
                         transform(source.right) as Expression
                     )
+
                     Operator.PLUS -> Sum(
                         transform(source.left) as Expression,
                         transform(source.right) as Expression
@@ -538,6 +539,7 @@ class ASTTransformerTest {
         )
     }
 }
+
 data class BazRoot(var stmts: MutableList<BazStmt> = mutableListOf()) : Node()
 
 data class BazStmt(val desc: String? = null) : Node()

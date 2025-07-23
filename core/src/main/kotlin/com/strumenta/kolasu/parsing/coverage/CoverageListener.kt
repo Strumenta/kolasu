@@ -127,9 +127,11 @@ open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths
                         addUncoveredPath(PathElement(it.ruleIndex, true), it.target.stateNumber)
                     }
                 }
+
                 is AtomTransition -> {
                     addUncoveredPath(PathElement(it.label, false), it.target.stateNumber)
                 }
+
                 is SetTransition -> {
                     it.set.intervals.forEach { interval ->
                         for (i in interval.a..interval.b) {
@@ -137,6 +139,7 @@ open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths
                         }
                     }
                 }
+
                 else -> {
                     addUncoveredPaths(it.target.stateNumber)
                 }

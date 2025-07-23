@@ -3,7 +3,8 @@
 package com.strumenta.kolasu.traversing
 
 import com.strumenta.kolasu.model.Node
-import java.util.*
+import java.util.ArrayDeque
+import java.util.WeakHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
 
@@ -146,10 +147,8 @@ val Node.children: List<Node>
     }
 
 @JvmOverloads
-fun <T> Node.searchByType(
-    klass: Class<T>,
-    walker: KFunction1<Node, Sequence<Node>> = Node::walk
-) = walker.invoke(this).filterIsInstance(klass)
+fun <T> Node.searchByType(klass: Class<T>, walker: KFunction1<Node, Sequence<Node>> = Node::walk) =
+    walker.invoke(this).filterIsInstance(klass)
 
 /**
  * T is not forced to be a subtype of Node to support using interfaces.
