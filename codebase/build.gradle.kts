@@ -4,7 +4,6 @@ plugins {
     id("signing")
     id("org.jetbrains.dokka")
     alias(libs.plugins.vanniktech.publish)
-    id("com.strumenta.starlasu.build.plugin")
 }
 
 val isReleaseVersion = !(project.version as String).endsWith("-SNAPSHOT")

@@ -1,0 +1,3 @@
+disabled_rules:
+  - no-wildcard-imports
+  - argument-list-wrapping

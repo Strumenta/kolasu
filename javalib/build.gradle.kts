@@ -8,7 +8,6 @@ plugins {
     id("idea")
     id("signing")
     id("org.jetbrains.dokka")
-    id("com.strumenta.starlasu.build.plugin")
 }
 
 dependencies {

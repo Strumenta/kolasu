@@ -6,7 +6,6 @@ plugins {
     id("idea")
     id("signing")
     id("org.jetbrains.dokka")
-    id("com.strumenta.starlasu.build.plugin")
 }
 
 dependencies {
@@ -74,11 +73,6 @@ idea {
 project.afterEvaluate {
     tasks.named("dokkaJavadocJar") {
         dependsOn(tasks.named("dokkaJavadoc"))
-    }
-    tasks.named("signMavenPublication") {
-        dependsOn(tasks.named("dokkaJavadocJar"))
-        dependsOn(tasks.named("javadocJar"))
-        dependsOn(tasks.named("sourcesJar"))
     }
     tasks.named("sourcesJar") {
         dependsOn("generateGrammarSource")

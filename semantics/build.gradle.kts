@@ -5,7 +5,6 @@ plugins {
     signing
     alias(libs.plugins.ktlint)
     id("org.jetbrains.dokka")
-    id("com.strumenta.starlasu.build.plugin")
 }
 
 dependencies {

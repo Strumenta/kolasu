@@ -398,7 +398,7 @@ open class ASTTransformer(
         }
     }
 
-    public open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
+    open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
 
     protected open fun setChild(
         childNodeFactory: ChildNodeFactory<*, *, *>,

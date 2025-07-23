@@ -26,10 +26,10 @@ fun ParserRuleContext.processDescendantsAndErrors(
         operationOnParserRuleContext(this)
     }
     if (this.children != null) {
-        this.children.filterIsInstance(ParserRuleContext::class.java).forEach {
+        this.children.filterIsInstance<ParserRuleContext>().forEach {
             it.processDescendantsAndErrors(operationOnParserRuleContext, operationOnError, includingMe = true)
         }
-        this.children.filterIsInstance(ErrorNode::class.java).forEach {
+        this.children.filterIsInstance<ErrorNode>().forEach {
             operationOnError(it)
         }
     }

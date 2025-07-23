@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.vanniktech.publish)
     id("signing")
     id("org.jetbrains.dokka")
-    id("com.strumenta.starlasu.build.plugin")
 }
 
 java {

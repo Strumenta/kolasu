@@ -377,16 +377,24 @@ class ParseTreeToASTTransformerTest {
             when (pt.op.text) {
                 "/" -> {
                     TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
-                        AntlrScriptParser.Div_mult_expressionContext,
+                        AntlrScriptParser
+                            .Div_mult_expressionContext,
                         SDivision,
-                        >()(pt, t)
+                        >()(
+                        pt,
+                        t,
+                    )
                 }
 
                 "*" -> {
                     TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
-                        AntlrScriptParser.Div_mult_expressionContext,
+                        AntlrScriptParser
+                            .Div_mult_expressionContext,
                         SMultiplication,
-                        >()(pt, t)
+                        >()(
+                        pt,
+                        t,
+                    )
                 }
 
                 else -> TODO()
@@ -396,16 +404,24 @@ class ParseTreeToASTTransformerTest {
             when (pt.op.text) {
                 "+" -> {
                     TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
-                        AntlrScriptParser.Sum_sub_expressionContext,
+                        AntlrScriptParser
+                            .Sum_sub_expressionContext,
                         SSum,
-                        >()(pt, t)
+                        >()(
+                        pt,
+                        t,
+                    )
                 }
 
                 "-" -> {
                     TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
-                        AntlrScriptParser.Sum_sub_expressionContext,
+                        AntlrScriptParser
+                            .Sum_sub_expressionContext,
                         SSubtraction,
-                        >()(pt, t)
+                        >()(
+                        pt,
+                        t,
+                    )
                 }
 
                 else -> TODO()

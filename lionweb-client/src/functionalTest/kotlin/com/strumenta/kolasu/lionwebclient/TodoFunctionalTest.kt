@@ -5,9 +5,9 @@ import com.strumenta.kolasu.lionweb.registerSerializersAndDeserializersInMetamod
 import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
+import io.lionweb.client.testing.AbstractClientFunctionalTest
 import io.lionweb.kotlin.MetamodelRegistry
 import io.lionweb.kotlin.getChildrenByContainmentName
-import io.lionweb.client.testing.AbstractClientFunctionalTest
 import org.testcontainers.junit.jupiter.Testcontainers
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -16,15 +16,21 @@ import kotlin.test.assertEquals
 class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_KOLASU, true) {
     @Test
     fun noPartitionsOnNewModelRepository() {
-        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, repository = "repo_noPartitionsOnNewModelRepository")
+        val kolasuClient = KolasuClient(
+            port = server!!.firstMappedPort,
+            repository = "repo_noPartitionsOnNewModelRepository"
+        )
         kolasuClient.createRepository()
         assertEquals(emptyList(), kolasuClient.getPartitionIDs())
     }
 
     @Test
     fun storePartitionAndGetItBack() {
-        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, debug = true,
-            repository = "repo_storePartitionAndGetItBack")
+        val kolasuClient = KolasuClient(
+            port = server!!.firstMappedPort,
+            debug = true,
+            repository = "repo_storePartitionAndGetItBack"
+        )
         kolasuClient.createRepository()
         kolasuClient.registerLanguage(todoLanguage)
         kolasuClient.registerLanguage(todoAccountLanguage)
@@ -50,22 +56,28 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
                 mutableListOf(
                     Todo("Buy milk"),
                     Todo("Take the garbage out"),
-                    Todo("Go for a walk"),
-                ),
+                    Todo("Go for a walk")
+                )
             )
         // todoProject.assignParents()
 
         todoProject.source = SyntheticSource("TODO Project A")
-        val todoProjectID = kolasuClient.attachAST(todoProject, containerID = expectedPartitionId,
-            containmentName = "projects")
+        val todoProjectID = kolasuClient.attachAST(
+            todoProject,
+            containerID = expectedPartitionId,
+            containmentName = "projects"
+        )
 
         // I can retrieve the entire partition
         // todoAccount.projects.add(todoProject)
         // todoAccount.assignParents()
         val retrievedTodoAccount = kolasuClient.getLionWebNode(expectedPartitionId)
         assertEquals(1, retrievedTodoAccount.getChildrenByContainmentName("projects").size)
-        assertEquals(listOf(todoProjectID), retrievedTodoAccount.getChildrenByContainmentName("projects")
-            .map { it.id })
+        assertEquals(
+            listOf(todoProjectID),
+            retrievedTodoAccount.getChildrenByContainmentName("projects")
+                .map { it.id }
+        )
 
         // I can retrieve just a portion of that partition. In that case the parent of the root of the
         // subtree will appear null
@@ -78,10 +90,10 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
                 mutableListOf(
                     Todo("Buy milk"),
                     Todo("Take the garbage out"),
-                    Todo("Go for a walk"),
-                ),
+                    Todo("Go for a walk")
+                )
             ).apply { assignParents() },
-            retrievedTodoProject,
+            retrievedTodoProject
         )
         assertEquals(null, retrievedTodoProject.parent)
     }
@@ -89,7 +101,8 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
     @Test
     fun checkNodeIDs() {
         val repoName = "checkNodeIDs"
-        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, debug = true, repository = repoName)
+        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, debug = true, repository = repoName
+        )
         kolasuClient.lionWebClient.createRepository(repoName, LIONWEB_VERSION_USED_BY_KOLASU, history = false)
         kolasuClient.registerLanguage(todoLanguage)
         kolasuClient.registerLanguage(todoAccountLanguage)
@@ -109,8 +122,8 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
                 mutableListOf(
                     Todo("Buy milk"),
                     Todo("Take the garbage out"),
-                    Todo("Go for a walk"),
-                ),
+                    Todo("Go for a walk")
+                )
             )
         todoProject.assignParents()
         todoProject.source = SyntheticSource("MyProject")
@@ -126,7 +139,8 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
     @Test
     fun sourceIsRetrievedCorrectly() {
         val repoName = "sourceIsRetrievedCorrectly"
-        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, debug = true, repository = repoName)
+        val kolasuClient = KolasuClient(port = server!!.firstMappedPort, debug = true, repository = repoName
+        )
         kolasuClient.lionWebClient.createRepository(repoName, LIONWEB_VERSION_USED_BY_KOLASU, false)
         kolasuClient.registerLanguage(todoLanguage)
         kolasuClient.registerLanguage(todoAccountLanguage)
@@ -144,8 +158,8 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
                 mutableListOf(
                     Todo("Buy milk"),
                     Todo("garbage-out", "Take the garbage out"),
-                    Todo("Go for a walk"),
-                ),
+                    Todo("Go for a walk")
+                )
             )
         todoProject1.assignParents()
         todoProject1.source = SyntheticSource("Project1")
@@ -157,8 +171,8 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
                 mutableListOf(
                     Todo("BD", "Buy diary"),
                     Todo("WD", "Write in diary", ReferenceByName("BD")),
-                    Todo("garbage-in", "Produce more garbage", ReferenceByName("garbage-out")),
-                ),
+                    Todo("garbage-in", "Produce more garbage", ReferenceByName("garbage-out"))
+                )
             )
         todoProject2.assignParents()
         todoProject2.source = SyntheticSource("Project2")

@@ -27,7 +27,6 @@ allprojects {
         }
     }
 }
-
 subprojects {
 
     tasks.withType<DokkaTask>().configureEach {
