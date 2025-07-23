@@ -69,3 +69,15 @@ java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
+
+tasks {
+    runKtlintCheckOverMainSourceSet {
+        setSource(
+            project.sourceSets.main.map { sourceSet ->
+                sourceSet.allSource.filter { file ->
+                    !file.path.contains("/generated/")
+                }
+            }
+        )
+    }
+}
