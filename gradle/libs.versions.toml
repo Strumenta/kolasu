@@ -12,7 +12,7 @@ jvm = "11"
 antlr = "4.13.1"
 gson = "2.13.1"
 clikt = "3.5.0"
-specs = "0.4.1"
+specs = "0.4.2"
 kotlinpoet = "1.14.2"
 junit = "5.7.1"
 
