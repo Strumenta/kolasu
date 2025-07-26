@@ -16,7 +16,7 @@ plugins {
 }
 
 allprojects {
-    group = "com.strumenta.kolasu"
+    group = "com.strumenta.starlasu"
     version = rootProject.version
 
     repositories {
