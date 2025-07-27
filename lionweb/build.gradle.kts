@@ -26,3 +26,8 @@ dependencies {
     api(project(":core"))
     implementation(libs.starlasu.specs)
 }
+
+mavenPublishing {
+    coordinates(project.group.toString(), "starlasu-kotlin-${project.name}",
+        project.version.toString())
+}
