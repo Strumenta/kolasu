@@ -45,3 +45,8 @@ project.afterEvaluate {
         dependsOn("generateGrammarSource")
     }
 }
+
+mavenPublishing {
+    coordinates(project.group.toString(), "starlasu-kotlin-${project.name}",
+        project.version.toString())
+}
