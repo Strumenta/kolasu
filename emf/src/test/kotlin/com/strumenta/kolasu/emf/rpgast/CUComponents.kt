@@ -8,6 +8,7 @@ import com.strumenta.kolasu.model.Derived
 import com.strumenta.kolasu.model.Named
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Position
+
 // This file contains the AST nodes at the highest level:
 // from the CompilationUnit (which represents the whole file)
 // to its main components
@@ -59,8 +60,9 @@ data class CompilationUnit(
             return _allDataDefinitions
         }
 
-    private fun checkDuplicatedDataDefinition(dataDefinitions: List<AbstractDataDefinition>):
-        List<AbstractDataDefinition> {
+    private fun checkDuplicatedDataDefinition(
+        dataDefinitions: List<AbstractDataDefinition>
+    ): List<AbstractDataDefinition> {
         val dataDefinitionMap = mutableMapOf<String, AbstractDataDefinition>()
         return dataDefinitions.filter {
             val dataDefinition = dataDefinitionMap[it.name]
@@ -78,10 +80,10 @@ data class CompilationUnit(
 
     fun hasDataDefinition(name: String) = dataDefinitions.any { it.name.equals(name, ignoreCase = true) }
 
-    fun getDataDefinition(name: String) = dataDefinitions.firstOrNull() { it.name.equals(name, ignoreCase = true) }
+    fun getDataDefinition(name: String) = dataDefinitions.firstOrNull { it.name.equals(name, ignoreCase = true) }
         ?: throw IllegalArgumentException("Data definition $name was not found")
 
-    fun getDataOrFieldDefinition(name: String) = dataDefinitions.firstOrNull() {
+    fun getDataOrFieldDefinition(name: String) = dataDefinitions.firstOrNull {
         it.name.equals(name, ignoreCase = true)
     }
         ?: dataDefinitions.mapNotNull { it.fields.find { it.name.equals(name, ignoreCase = true) } }.firstOrNull()

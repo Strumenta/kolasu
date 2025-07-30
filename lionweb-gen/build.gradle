@@ -21,19 +21,18 @@ dependencies {
     cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    implementation(libs.lionwebjava)
-    implementation(libs.lionwebjavaemf)
+    implementation(libs.lionweb.java)
+    implementation(libs.lionweb.java.emf)
     implementation(libs.starlasu.specs)
     api(project(":core"))
     api(project(":emf"))
     api(project(":lionweb"))
 
-
     implementation("com.squareup:kotlinpoet:1.14.2")
     cliImplementation "com.github.ajalt.clikt:clikt:$clikt_version"
-    implementation("com.google.code.gson:gson:$gson_version") {
+    implementation(libs.gson) {
         version {
-            strictly gson_version
+            strictly(libs.versions.gson.get())
         }
     }
 
@@ -42,16 +41,18 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version")
 }
 
+def isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
+
 publishing {
 
     repositories {
         maven {
-            def releaseRepo = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotRepo = "https://oss.sonatype.org/content/repositories/snapshots/"
+            def releaseRepo = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
+            def snapshotRepo = "https://central.sonatype.com/repository/maven-snapshots/"
             url = isReleaseVersion ? releaseRepo : snapshotRepo
             credentials {
-                username = project.hasProperty('ossrhTokenUsername') ? ossrhTokenUsername : "Unknown user"
-                password = project.hasProperty('ossrhTokenPassword') ? ossrhTokenPassword : "Unknown password"
+                username = project.hasProperty('mavenCentralUsername') ? project.findProperty('mavenCentralUsername') : "Unknown user"
+                password = project.hasProperty('mavenCentralPassword') ? project.findProperty('mavenCentralPassword') : "Unknown password"
             }
         }
     }
@@ -119,7 +120,7 @@ test {
 configurations.all {
     resolutionStrategy.eachDependency { details ->
         if (details.requested.group == 'com.google.code.gson') {
-            details.useVersion gson_version
+            details.useVersion(libs.versions.gson.get())
         }
     }
 }

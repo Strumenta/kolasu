@@ -1,17 +1,39 @@
 package com.strumenta.kolasu.mapping
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.GenericErrorNode
+import com.strumenta.kolasu.model.Named
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.PossiblyNamed
+import com.strumenta.kolasu.model.ReferenceByName
+import com.strumenta.kolasu.model.children
+import com.strumenta.kolasu.model.hasValidParents
+import com.strumenta.kolasu.model.invalidPositions
 import com.strumenta.kolasu.parsing.withParseTreeNode
 import com.strumenta.kolasu.testing.assertASTsAreEqual
-import com.strumenta.kolasu.transformation.*
+import com.strumenta.kolasu.transformation.ASTTransformer
+import com.strumenta.kolasu.transformation.GenericNode
+import com.strumenta.kolasu.transformation.TrivialFactoryOfParseTreeToASTNodeFactory
+import com.strumenta.kolasu.transformation.registerTrivialPTtoASTConversion
+import com.strumenta.kolasu.transformation.unwrap
 import com.strumenta.kolasu.traversing.walk
 import com.strumenta.kolasu.validation.Issue
-import com.strumenta.simplelang.*
-import org.antlr.v4.runtime.*
+import com.strumenta.simplelang.AntlrEntityLexer
+import com.strumenta.simplelang.AntlrEntityParser
+import com.strumenta.simplelang.AntlrScriptLexer
+import com.strumenta.simplelang.AntlrScriptParser
+import com.strumenta.simplelang.SimpleLangLexer
+import com.strumenta.simplelang.SimpleLangParser
+import org.antlr.v4.runtime.ANTLRErrorListener
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.Parser
+import org.antlr.v4.runtime.RecognitionException
+import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
 import org.junit.Test
-import java.util.*
+import java.util.BitSet
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
@@ -37,6 +59,7 @@ sealed class SStatement : Node()
 data class SCreateStatement(val entity: ReferenceByName<EEntity>, val name: String? = null) : SStatement()
 data class SSetStatement(val feature: ReferenceByName<EFeature>, val instance: SExpression, val value: SExpression) :
     SStatement()
+
 data class SPrintStatement(val message: SExpression) : SStatement()
 
 sealed class SExpression : Node()
@@ -159,6 +182,7 @@ class ParseTreeToASTTransformerTest {
             SetStatement(variable = ctx.ID().text, value = ctx.expression().INT_LIT().text.toInt())
         }
     }
+
     class MyErrorListener : ANTLRErrorListener {
         override fun syntaxError(
             p0: Recognizer<*, *>?,
@@ -316,26 +340,42 @@ class ParseTreeToASTTransformerTest {
         transformer.registerNodeFactory(AntlrScriptParser.Div_mult_expressionContext::class) { pt, t ->
             when (pt.op.text) {
                 "/" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
-                        AntlrScriptParser.Div_mult_expressionContext, SDivision>()(pt, t)
+                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<AntlrScriptParser
+                        .Div_mult_expressionContext, SDivision>()(
+                        pt,
+                        t
+                    )
                 }
+
                 "*" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
-                        AntlrScriptParser.Div_mult_expressionContext, SMultiplication>()(pt, t)
+                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<AntlrScriptParser
+                        .Div_mult_expressionContext, SMultiplication>()(
+                        pt,
+                        t
+                    )
                 }
+
                 else -> TODO()
             }
         }
         transformer.registerNodeFactory(AntlrScriptParser.Sum_sub_expressionContext::class) { pt, t ->
             when (pt.op.text) {
                 "+" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
-                        AntlrScriptParser.Sum_sub_expressionContext, SSum>()(pt, t)
+                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<AntlrScriptParser
+                        .Sum_sub_expressionContext, SSum>()(
+                        pt,
+                        t
+                    )
                 }
+
                 "-" -> {
-                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<
-                        AntlrScriptParser.Sum_sub_expressionContext, SSubtraction>()(pt, t)
+                    TrivialFactoryOfParseTreeToASTNodeFactory.trivialFactory<AntlrScriptParser
+                        .Sum_sub_expressionContext, SSubtraction>()(
+                        pt,
+                        t
+                    )
                 }
+
                 else -> TODO()
             }
         }
@@ -344,10 +384,10 @@ class ParseTreeToASTTransformerTest {
         )
         transformer.registerTrivialPTtoASTConversion<AntlrScriptParser.Print_statementContext, SPrintStatement>()
         transformer.registerTrivialPTtoASTConversion<AntlrScriptParser.Concat_expressionContext, SConcat>()
-        transformer.registerTrivialPTtoASTConversion<
-            AntlrScriptParser.Feature_access_expressionContext, SFeatureAccess
-            >(
-            AntlrScriptParser.Feature_access_expressionContext::instance to SFeatureAccess::container
+        transformer.registerTrivialPTtoASTConversion<AntlrScriptParser.Feature_access_expressionContext,
+            SFeatureAccess>(
+            AntlrScriptParser.Feature_access_expressionContext::instance
+                to SFeatureAccess::container
         )
         val expectedAST = SScript(
             mutableListOf(

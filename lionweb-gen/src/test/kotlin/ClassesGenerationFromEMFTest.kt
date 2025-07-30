@@ -1,5 +1,5 @@
 import com.strumenta.kolasu.lionweb.ASTGenerator
-import io.lionweb.lioncore.java.emf.EMFMetamodelImporter
+import io.lionweb.emf.EMFMetamodelImporter
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcorePackage

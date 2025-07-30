@@ -77,7 +77,8 @@ class ResultTest {
         }
     }
 
-    @Test fun `serialization of issues`() {
+    @Test
+    fun `serialization of issues`() {
         val nsURI = "https://strumenta.com/simplemm"
         val metamodelBuilder = MetamodelBuilder(
             packageName(CompilationUnit::class),

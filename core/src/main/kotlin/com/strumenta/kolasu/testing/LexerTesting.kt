@@ -9,7 +9,7 @@ import java.io.InputStream
 import java.nio.charset.Charset
 import kotlin.test.assertEquals
 
-fun<T : KolasuToken> checkFileTokenization(
+fun <T : KolasuToken> checkFileTokenization(
     file: File,
     lexer: KolasuLexer<T>,
     charset: Charset = Charsets.UTF_8
@@ -21,7 +21,7 @@ fun<T : KolasuToken> checkFileTokenization(
     return checkTokenization(code, lexer)
 }
 
-fun<T : KolasuToken> checkTokenization(
+fun <T : KolasuToken> checkTokenization(
     inputStream: InputStream,
     lexer: KolasuLexer<T>,
     charset: Charset = Charsets.UTF_8
@@ -30,7 +30,7 @@ fun<T : KolasuToken> checkTokenization(
     return checkTokenization(code, lexer)
 }
 
-fun<T : KolasuToken> checkTokenization(code: String, lexer: KolasuLexer<T>): List<T> {
+fun <T : KolasuToken> checkTokenization(code: String, lexer: KolasuLexer<T>): List<T> {
     val lexingResult = lexer.lex(code, onlyFromDefaultChannel = false)
     require(lexingResult.issues.isEmpty()) {
         "Lexing issues occurred: ${lexingResult.issues}"
@@ -39,7 +39,7 @@ fun<T : KolasuToken> checkTokenization(code: String, lexer: KolasuLexer<T>): Lis
     return lexingResult.tokens
 }
 
-fun<T : KolasuToken> checkTokensAreCoveringText(code: String, tokens: List<T>) {
+fun <T : KolasuToken> checkTokensAreCoveringText(code: String, tokens: List<T>) {
     require(code.isEmpty() == tokens.isEmpty())
     if (code.isEmpty()) {
         return

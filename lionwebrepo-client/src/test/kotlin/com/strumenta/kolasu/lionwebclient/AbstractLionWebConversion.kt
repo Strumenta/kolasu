@@ -7,7 +7,7 @@ import com.strumenta.kolasu.traversing.children
 import com.strumenta.kolasu.traversing.walk
 import java.io.InputStream
 import com.strumenta.kolasu.model.Node as KNode
-import io.lionweb.lioncore.java.model.Node as LWNode
+import io.lionweb.model.Node as LWNode
 
 abstract class AbstractLionWebConversion<R : KNode>(val kolasuLanguage: KolasuLanguage) {
     protected abstract fun parse(inputStream: InputStream): ParsingResult<R>
@@ -19,7 +19,7 @@ abstract class AbstractLionWebConversion<R : KNode>(val kolasuLanguage: KolasuLa
         inputStream: InputStream,
         astChecker: (ast: R) -> Unit = {},
         lwASTChecker: (lwAST: LWNode) -> Unit = {},
-        jsonChecker: (json: String) -> Unit = {},
+        jsonChecker: (json: String) -> Unit = {}
     ) {
         val result = parse(inputStream)
         val ast = result.root ?: throw IllegalStateException()

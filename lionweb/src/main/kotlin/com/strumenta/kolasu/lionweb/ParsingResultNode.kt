@@ -3,9 +3,9 @@ package com.strumenta.kolasu.lionweb
 import com.strumenta.kolasu.ids.SimpleSourceIdProvider
 import com.strumenta.kolasu.ids.SourceShouldBeSetException
 import com.strumenta.kolasu.model.Source
-import com.strumenta.starlasu.base.ASTLanguage
-import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.kotlin.BaseNode
+import io.lionweb.kotlin.BaseNode
+import io.lionweb.language.Concept
+import com.strumenta.starlasu.base.v1.ASTLanguageV1 as ASTLanguage
 
 class ParsingResultNode(val source: Source?) : BaseNode(LIONWEB_VERSION_USED_BY_KOLASU) {
     override fun calculateID(): String? {

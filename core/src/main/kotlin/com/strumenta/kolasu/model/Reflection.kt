@@ -19,8 +19,7 @@ fun <T : Node> T.relevantMemberProperties(
     withPosition: Boolean = false,
     withNodeType: Boolean = false,
     includeDerived: Boolean = false
-):
-    List<KProperty1<T, *>> {
+): List<KProperty1<T, *>> {
     val list = if (includeDerived) {
         this::class.nodeProperties.map { it as KProperty1<T, *> }.toMutableList()
     } else {
@@ -266,6 +265,7 @@ fun <N : Any> KProperty1<N, *>.asContainment(): Containment {
             }
             Multiplicity.MANY
         }
+
         this.returnType.isMarkedNullable -> Multiplicity.OPTIONAL
         else -> Multiplicity.SINGULAR
     }
@@ -282,6 +282,7 @@ fun <N : Any> KProperty1<N, *>.asReference(): Reference {
         (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
             throw IllegalStateException()
         }
+
         this.returnType.isMarkedNullable -> true
         else -> false
     }
@@ -293,6 +294,7 @@ fun <N : Any> KProperty1<N, *>.asAttribute(): Attribute {
         (this.returnType.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true -> {
             throw IllegalStateException("Attributes with a Collection type are not allowed (property $this)")
         }
+
         this.returnType.isMarkedNullable -> true
         else -> false
     }

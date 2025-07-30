@@ -1,12 +1,10 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     java
     `jvm-test-suite`
     kotlin("jvm")
     id("java-library")
-    alias(libs.plugins.superPublish)
-    alias(libs.plugins.buildConfig)
+    alias(libs.plugins.vanniktech.publish)
+    alias(libs.plugins.build.config)
 }
 
 val kotlinVersion = extra["kotlin_version"]
@@ -28,16 +26,16 @@ testing {
                 implementation(project(":core"))
                 implementation(project(":lionweb"))
                 implementation(project(":semantics"))
-                implementation(libs.lionwebkotlinrepoclient)
+                implementation(libs.lionweb.kotlin.client)
                 implementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlinVersion")
                 implementation("io.kotest:kotest-runner-junit5-jvm:5.8.0")
-                implementation(libs.kotesttestcontainers)
+                implementation(libs.kotest.testcontainers)
                 implementation("io.kotest:kotest-assertions-core:5.8.0")
                 implementation("io.kotest:kotest-property:5.8.0")
                 implementation("org.testcontainers:testcontainers:1.19.5")
                 implementation("org.testcontainers:junit-jupiter:1.19.5")
                 implementation("org.testcontainers:postgresql:1.19.5")
-                implementation(libs.lionwebkotlinrepoclienttesting)
+                implementation(libs.lionweb.java.client.testing)
             }
 
             targets {
@@ -52,12 +50,12 @@ testing {
 }
 
 dependencies {
-    implementation(libs.lionwebjava)
+    implementation(libs.lionweb.java)
     implementation(project(":core"))
     implementation(project(":lionweb"))
     implementation(project(":semantics"))
-    implementation(libs.lionwebkotlincore)
-    implementation(libs.lionwebkotlinrepoclient)
+    implementation(libs.lionweb.kotlin)
+    implementation(libs.lionweb.kotlin.client)
     implementation(libs.starlasu.specs)
 
     testImplementation(kotlin("test-junit5"))
@@ -66,7 +64,19 @@ dependencies {
 }
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.DEFAULT)
+    repositories {
+        maven {
+            val releaseRepo = uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/")
+            val snapshotRepo = uri("https://central.sonatype.com/repository/maven-snapshots/")
+            url = if (!version.toString().endsWith("SNAPSHOT")) releaseRepo else snapshotRepo
+
+            credentials {
+                username = project.findProperty("mavenCentralUsername") as? String ?: "Unknown user"
+                password = project.findProperty("mavenCentralPassword") as? String ?: "Unknown password"
+            }
+        }
+    }
+
     signAllPublications()
 
     pom {
@@ -144,5 +154,15 @@ buildConfig {
         packageName("com.strumenta.kolasu.lionwebclient")
         buildConfigField("String", "LIONWEB_REPOSITORY_COMMIT_ID", "\"${lionwebRepositoryCommitID}\"")
         useKotlinOutput()
+    }
+}
+
+afterEvaluate {
+    tasks.named<org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask>("runKtlintCheckOverFunctionalTestSourceSet") {
+        setSource(
+            project.sourceSets["functionalTest"].allSource.filterNot { file ->
+                file.path.contains("/generated/")
+            }
+        )
     }
 }

@@ -16,23 +16,25 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: "$kotlin_version"
-    implementation "com.google.code.gson:gson:$gson_version"
+    implementation(libs.gson)
 
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testImplementation "junit:junit:$junit_version"
 }
 
+def isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
+
 publishing {
 
     repositories {
         maven {
-            def releaseRepo = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotRepo = "https://oss.sonatype.org/content/repositories/snapshots/"
+            def releaseRepo = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
+            def snapshotRepo = "https://central.sonatype.com/repository/maven-snapshots/"
             url = isReleaseVersion ? releaseRepo : snapshotRepo
             credentials {
-                username = project.hasProperty('ossrhTokenUsername') ? ossrhTokenUsername : "Unknown user"
-                password = project.hasProperty('ossrhTokenPassword') ? ossrhTokenPassword : "Unknown password"
+                username = project.hasProperty('mavenCentralUsername') ? project.findProperty('mavenCentralUsername') : "Unknown user"
+                password = project.hasProperty('mavenCentralPassword') ? project.findProperty('mavenCentralPassword') : "Unknown password"
             }
         }
     }

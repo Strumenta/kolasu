@@ -53,10 +53,7 @@ class DeclarativeNodeIdProviderRule<NodeTy : Node>(
     private val nodeType: KClass<NodeTy>,
     private val specification: SemanticNodeIDProvider.(NodeTy) -> String
 ) : Comparable<DeclarativeNodeIdProviderRule<*>>, (SemanticNodeIDProvider, Node) -> String {
-    override fun invoke(
-        nodeIdProvider: SemanticNodeIDProvider,
-        node: Node
-    ): String {
+    override fun invoke(nodeIdProvider: SemanticNodeIDProvider, node: Node): String {
         @Suppress("UNCHECKED_CAST")
         return nodeIdProvider.specification(node as NodeTy)
     }

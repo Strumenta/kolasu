@@ -4,7 +4,10 @@ import com.smeup.rpgparser.parsing.ast.CompilationUnit
 import java.math.BigDecimal
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.GregorianCalendar
+import java.util.LinkedList
 
 const val PAD_CHAR = ' '
 const val PAD_STRING = PAD_CHAR.toString()
@@ -20,11 +23,13 @@ interface Value : Comparable<Value> {
     fun asDecimal(): DecimalValue = throw UnsupportedOperationException(
         "${this.javaClass.simpleName} cannot be seen as an Decimal"
     )
+
     fun asString(): StringValue
     fun asBoolean(): BooleanValue = throw UnsupportedOperationException()
     fun asTimeStamp(): TimeStampValue = throw UnsupportedOperationException(
         "${this.javaClass.simpleName} cannot be seen as an TimeStamp - $this"
     )
+
     fun assignableTo(expectedType: Type): Boolean
     fun takeLast(n: Int): Value = TODO("takeLast not yet implemented for ${this.javaClass.simpleName}")
     fun takeFirst(n: Int): Value = TODO("takeFirst not yet implemented for ${this.javaClass.simpleName}")
@@ -40,6 +45,7 @@ interface Value : Comparable<Value> {
         }
         return ConcreteArrayValue(elements, elementType)
     }
+
     override operator fun compareTo(other: Value): Int = TODO("Cannot compare $this to $other")
 }
 
@@ -184,11 +190,10 @@ data class StringValue(var value: String, val varying: Boolean = false) : Value 
         return s1.compareTo(s2)
     }
 
-    override operator fun compareTo(other: Value): Int =
-        when (other) {
-            is StringValue -> compare(other, DEFAULT_CHARSET)
-            else -> super.compareTo(other)
-        }
+    override operator fun compareTo(other: Value): Int = when (other) {
+        is StringValue -> compare(other, DEFAULT_CHARSET)
+        else -> super.compareTo(other)
+    }
 }
 
 /**
@@ -204,6 +209,7 @@ fun sortA(value: Value, charset: Charset) {
             // TODO ascending/descending
             value.elements.sort()
         }
+
         is ProjectedArrayValue -> {
             require(value.field.type is ArrayType)
             val strings = value.field.type.element is StringType
@@ -250,6 +256,7 @@ data class IntValue(val value: Long) : NumberValue() {
             is ArrayType -> {
                 expectedType.element is NumberType
             }
+
             else -> false
         }
     }
@@ -283,10 +290,9 @@ data class IntValue(val value: Long) : NumberValue() {
         return localNr * java.lang.Long.signum(n)
     }
 
-    override fun take(from: Int, to: Int): Value =
-        firstDigits(value, to)
-            .let { lastDigits(it, (to - from) + 1) }
-            .let(::IntValue)
+    override fun take(from: Int, to: Int): Value = firstDigits(value, to)
+        .let { lastDigits(it, (to - from) + 1) }
+        .let(::IntValue)
 
     override fun concatenate(other: Value): Value {
         require(other is IntValue) {
@@ -375,12 +381,11 @@ data class DecimalValue(val value: BigDecimal) : NumberValue() {
 
     override fun copy(): DecimalValue = this
 
-    override operator fun compareTo(other: Value): Int =
-        when (other) {
-            is IntValue -> compareTo(other.asDecimal())
-            is DecimalValue -> this.value.compareTo(other.value)
-            else -> super.compareTo(other)
-        }
+    override operator fun compareTo(other: Value): Int = when (other) {
+        is IntValue -> compareTo(other.asDecimal())
+        is DecimalValue -> this.value.compareTo(other.value)
+        else -> super.compareTo(other)
+    }
 
     override fun asString(): StringValue {
         return StringValue(value.toPlainString())
@@ -401,16 +406,16 @@ data class BooleanValue private constructor(val value: Boolean) : Value {
         val TRUE = BooleanValue(true)
         operator fun invoke(value: Boolean) = if (value) TRUE else FALSE
     }
+
     override fun render(): String {
         return value.toString()
     }
 
     override fun copy(): BooleanValue = this
-    override operator fun compareTo(other: Value): Int =
-        when (other) {
-            is BooleanValue -> value.compareTo(other.value)
-            else -> super.compareTo(other)
-        }
+    override operator fun compareTo(other: Value): Int = when (other) {
+        is BooleanValue -> value.compareTo(other.value)
+        else -> super.compareTo(other)
+    }
 }
 
 data class CharacterValue(val value: Array<Char>) : Value {
@@ -491,9 +496,11 @@ abstract class ArrayValue : Value {
         }
         return false
     }
+
     override fun render(): String {
         return "Array(${elements().size})"
     }
+
     override fun asArray() = this
 
     fun areEquivalent(other: ArrayValue): Boolean {
@@ -621,8 +628,7 @@ object HiValValue : Value {
 
     override fun copy(): HiValValue = this
 
-    override operator fun compareTo(other: Value): Int =
-        if (other is HiValValue) 0 else 1
+    override operator fun compareTo(other: Value): Int = if (other is HiValValue) 0 else 1
 
     override fun asString(): StringValue {
         TODO("Not yet implemented")
@@ -643,8 +649,7 @@ object LowValValue : Value {
         return true
     }
 
-    override operator fun compareTo(other: Value): Int =
-        if (other is LowValValue) 0 else -1
+    override operator fun compareTo(other: Value): Int = if (other is LowValValue) 0 else -1
 
     override fun asString(): StringValue {
         TODO("Not yet implemented")
@@ -784,19 +789,20 @@ fun createBlankFor(dataDefinition: DataDefinition): Value {
     return ds
 }
 
-private fun NumberType.toRPGValue(iniz: Boolean): Value =
-    when (rpgType) {
-        RpgType.ZONED.rpgType, RpgType.PACKED.rpgType -> if (iniz) DecimalValue.ZERO else DecimalValue.ONE
-        RpgType.BINARY.rpgType, RpgType.INTEGER.rpgType, RpgType.UNSIGNED.rpgType ->
-            if (iniz) IntValue.ZERO else IntValue.ONE
-        else -> TODO("Please handle RpgType $rpgType")
-    }
+private fun NumberType.toRPGValue(iniz: Boolean): Value = when (rpgType) {
+    RpgType.ZONED.rpgType, RpgType.PACKED.rpgType -> if (iniz) DecimalValue.ZERO else DecimalValue.ONE
+    RpgType.BINARY.rpgType, RpgType.INTEGER.rpgType, RpgType.UNSIGNED.rpgType ->
+        if (iniz) IntValue.ZERO else IntValue.ONE
+
+    else -> TODO("Please handle RpgType $rpgType")
+}
 
 fun Type.blank(): Value {
     return when (this) {
         is ArrayType -> createArrayValue(this.element, this.nElements) {
             this.element.blank()
         }
+
         is DataStructureType -> DataStructValue.blank(this.size)
         is StringType -> StringValue.blank(this.size)
         is NumberType -> IntValue(0)
@@ -930,8 +936,11 @@ data class DataStructValue(var value: String, private val optionalExternalLen: I
          * @param dataStructName Name
          * @param values Initialization values
          * */
-        fun createInstance(compilationUnit: CompilationUnit, dataStructName: String, values: Map<String, Value>):
-            DataStructValue {
+        fun createInstance(
+            compilationUnit: CompilationUnit,
+            dataStructName: String,
+            values: Map<String, Value>
+        ): DataStructValue {
             val dataStructureDefinition = compilationUnit.getDataDefinition(dataStructName)
             val newInstance = blank(dataStructureDefinition.type.size)
             values.forEach {
@@ -1006,6 +1015,7 @@ fun areEquals(value1: Value, value2: Value): Boolean {
             val v2 = value2.value.trimEnd()
             v1 == v2
         }
+
         value1 is StringValue && value2 is DataStructValue -> {
             val v1 = value1.value.trimEnd()
             val v2 = value2.asStringValue().trimEnd()
@@ -1016,6 +1026,7 @@ fun areEquals(value1: Value, value2: Value): Boolean {
         value1 is ProjectedArrayValue && value2 is StringValue -> {
             value1.asArray().getElement(1) == value2
         }
+
         else -> value1 == value2
     }
 }

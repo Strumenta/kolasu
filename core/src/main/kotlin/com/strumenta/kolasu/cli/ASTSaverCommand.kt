@@ -79,6 +79,7 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
                     JsonGenerator().generateFile(result, targetFile!!)
                 }
             }
+
             "xml" -> {
                 if (print) {
                     if (verbose) {
@@ -95,6 +96,7 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
                     XMLGenerator().generateFile(result.toResult(), targetFile!!)
                 }
             }
+
             "debug-format" -> {
                 if (print) {
                     if (verbose) {
@@ -111,6 +113,7 @@ class ASTSaverCommand<R : Node, P : ASTParser<R>>(parserInstantiator: ParserInst
                     targetFile!!.writeText(result.debugPrint())
                 }
             }
+
             else -> throw UnsupportedOperationException()
         }
     }

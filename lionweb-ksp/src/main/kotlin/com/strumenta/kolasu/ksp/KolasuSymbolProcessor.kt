@@ -15,7 +15,7 @@ import java.lang.IllegalStateException
 
 class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : SymbolProcessor {
 
-    var generated : Boolean = false
+    var generated: Boolean = false
 
     class LanguageDef(val packageName: String) {
         val classes = mutableListOf<KSClassDeclaration>()
@@ -24,7 +24,7 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
             return "LanguageDef(packageName=$packageName,classes=$classes)"
         }
 
-        fun dependencies() : Dependencies {
+        fun dependencies(): Dependencies {
             val usedFiles = this.classes.mapNotNull { it.containingFile }.toSet().toTypedArray()
             val dependencies = Dependencies(true, *usedFiles)
             return dependencies
@@ -32,7 +32,8 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
 
         fun write(os: OutputStream) {
             val buf = PrintWriter(os)
-            buf.println("""
+            buf.println(
+                """
                     @file:JvmName("Language")
                     package $packageName
                     
@@ -40,7 +41,7 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
                     import com.strumenta.kolasu.language.KolasuLanguage
                     import com.strumenta.kolasu.lionweb.LionWebLanguageConverter
                     import com.strumenta.kolasu.lionweb.LionWebModelConverter
-                    import io.lionweb.lioncore.java.language.Language
+                    import io.lionweb.language.Language
 
                     private val kolasuLanguage = KolasuLanguage("$packageName").apply { 
                         ${classes.joinToString("\n        ") { "addClass(${it.simpleName.asString()}::class)" }}
@@ -58,7 +59,8 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
                     fun main(args: Array<String>) {
                         LionWebLanguageGeneratorCommand(lwLanguage).main(args)
                     }                    
-            """.trimIndent())
+                """.trimIndent()
+            )
             buf.flush()
         }
     }
@@ -82,7 +84,9 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
             val packageName = ksFile.packageName.asString()
             ksFile.declarations.forEach { ksDeclaration ->
                 if (ksDeclaration is KSClassDeclaration) {
-                    val isNodeDecl = ksDeclaration.getAllSuperTypes().any { it.declaration.qualifiedName?.asString() == Node::class.qualifiedName}
+                    val isNodeDecl = ksDeclaration.getAllSuperTypes().any {
+                        it.declaration.qualifiedName?.asString() == Node::class.qualifiedName
+                    }
                     if (isNodeDecl) {
                         languagesByPackage.computeIfAbsent(packageName) {
                             LanguageDef(packageName)
@@ -95,8 +99,14 @@ class KolasuSymbolProcessor(val environment: SymbolProcessorEnvironment) : Symbo
 
         if (!generated) {
             languagesByPackage.values.forEach { languageDef ->
-                languageDef.write(environment.codeGenerator.createNewFile(languageDef.dependencies(),
-                    languageDef.packageName, "Language", "kt"))
+                languageDef.write(
+                    environment.codeGenerator.createNewFile(
+                        languageDef.dependencies(),
+                        languageDef.packageName,
+                        "Language",
+                        "kt"
+                    )
+                )
             }
 
             generated = true

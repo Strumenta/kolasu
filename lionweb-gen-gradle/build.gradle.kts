@@ -10,21 +10,20 @@ plugins {
 
 val kspVersion = extra["kspVersion"] as String
 val kotlin_version = extra["kotlin_version"] as String
-val gson_version = extra["gson_version"] as String
 val lionwebGenGradlePluginID = extra["lionwebGenGradlePluginID"] as String
-val completeKspVersion = if (kspVersion.contains("-")) kspVersion else "${kotlin_version}-${kspVersion}"
-val lionwebJavaVersion = libs.lionwebjava.get().version
+val completeKspVersion = if (kspVersion.contains("-")) kspVersion else "$kotlin_version-$kspVersion"
+val lionwebJavaVersion = libs.versions.lwjava.get()
 
 dependencies {
     api("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
-    implementation(libs.lionwebjava)
+    implementation(libs.lionweb.java)
     api(project(":lionweb-gen"))
     testImplementation(project(":lionweb-ksp"))
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    implementation("com.google.code.gson:gson:$gson_version")
+    implementation(libs.gson)
     implementation(libs.starlasu.specs)
     implementation("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$completeKspVersion")
 }
@@ -69,4 +68,16 @@ tasks.findByName("dokkaJavadoc")!!.dependsOn(":lionweb-gen:jar")
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+tasks {
+    runKtlintCheckOverMainSourceSet {
+        setSource(
+            project.sourceSets.main.map { sourceSet ->
+                sourceSet.allSource.filter { file ->
+                    !file.path.contains("/generated/")
+                }
+            }
+        )
+    }
 }

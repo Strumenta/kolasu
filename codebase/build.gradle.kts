@@ -1,5 +1,3 @@
-
-
 plugins {
     kotlin("jvm")
     alias(libs.plugins.ktlint)
@@ -10,9 +8,6 @@ plugins {
 
 val jvmVersion = project.property("jvm_version") as String
 val kotlinVersion = project.property("kotlin_version") as String
-val gsonVersion = project.property("gson_version") as String
-
-val isReleaseVersion = !(project.version as String).endsWith("-SNAPSHOT")
 
 java {
     sourceCompatibility = JavaVersion.toVersion(jvmVersion)
@@ -28,20 +23,22 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
-    implementation("com.google.code.gson:gson:$gsonVersion")
+    implementation(libs.gson)
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
 }
 
 publishing {
     repositories {
         maven {
-            val releaseRepo = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotRepo = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-            url = if (isReleaseVersion) releaseRepo else snapshotRepo
+            val releaseRepo = uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/")
+            val snapshotRepo = uri("https://central.sonatype.com/repository/maven-snapshots/")
+
             credentials {
-                username = project.findProperty("ossrhTokenUsername") as String? ?: "Unknown user"
-                password = project.findProperty("ossrhTokenPassword") as String? ?: "Unknown password"
+                username = project.findProperty("mavenCentralUsername") as? String ?: "Unknown user"
+                password = project.findProperty("mavenCentralPassword") as? String ?: "Unknown password"
             }
+
+            url = if (!version.toString().endsWith("SNAPSHOT")) releaseRepo else snapshotRepo
         }
     }
     publications {

@@ -4,7 +4,7 @@ import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.traversing.walk
-import io.lionweb.lioncore.java.model.AnnotationInstance
+import io.lionweb.model.AnnotationInstance
 import java.io.Serializable
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.reflect.KClass
@@ -52,8 +52,12 @@ open class Node() : Origin, Destination, Serializable, HasID {
      */
     @property:Internal
     open val properties: List<PropertyDescription>
+        get() = originalProperties + derivedProperties
+
+    @property:Internal
+    open val derivedProperties: List<PropertyDescription>
         get() = try {
-            nodeProperties.map { PropertyDescription.buildFor(it, this) }
+            nodeDerivedProperties.map { PropertyDescription.buildFor(it, this) }
         } catch (e: Throwable) {
             throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
         }
@@ -65,7 +69,7 @@ open class Node() : Origin, Destination, Serializable, HasID {
     @property:Internal
     open val originalProperties: List<PropertyDescription>
         get() = try {
-            properties.filter { !it.derived }
+            nodeOriginalProperties.map { PropertyDescription.buildFor(it, this) }
         } catch (e: Throwable) {
             throw RuntimeException("Issue while getting properties of node ${this::class.qualifiedName}", e)
         }
@@ -238,7 +242,11 @@ fun <N : Node> N.withPosition(position: Position?): N {
 }
 
 fun <N : Node> N.withOrigin(origin: Origin?): N {
-    this.origin = if (origin == this) { null } else { origin }
+    this.origin = if (origin == this) {
+        null
+    } else {
+        origin
+    }
     return this
 }
 

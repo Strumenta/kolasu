@@ -3,7 +3,7 @@ package com.strumenta.kolasu.emf
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
-import java.util.*
+import java.util.LinkedList
 import kotlin.reflect.KClass
 
 /**

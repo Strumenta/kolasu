@@ -86,6 +86,7 @@ data class KLambda(
     val params: MutableList<KLambdaParamDecl> = mutableListOf(),
     val body: MutableList<KStatement> = mutableListOf()
 ) : KExpression()
+
 data class KLambdaParamDecl(override val name: String) : Node(), Named
 data class KParameterValue(val value: KExpression, val name: String? = null) : Node()
 
@@ -116,6 +117,7 @@ sealed class KName : Node() {
         }
     }
 }
+
 data class KSimpleName(val name: String) : KName()
 data class KQualifiedName(val container: KName, val name: String) : KName()
 

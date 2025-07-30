@@ -1,7 +1,11 @@
 package com.strumenta.kolasu.model
 
 import java.io.Serializable
-import kotlin.reflect.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
+import kotlin.reflect.KType
+import kotlin.reflect.KTypeProjection
+import kotlin.reflect.KVariance
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubtypeOf
 

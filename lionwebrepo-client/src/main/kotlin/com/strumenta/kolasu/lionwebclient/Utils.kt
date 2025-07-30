@@ -4,11 +4,11 @@ import com.strumenta.kolasu.lionweb.KNode
 import com.strumenta.kolasu.lionweb.LWNode
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Source
-import com.strumenta.starlasu.base.ASTLanguage
-import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.model.HasSettableParent
-import io.lionweb.lioncore.java.model.impl.ProxyNode
-import io.lionweb.lioncore.kotlin.children
+import io.lionweb.kotlin.children
+import io.lionweb.language.Concept
+import io.lionweb.model.HasSettableParent
+import io.lionweb.model.impl.ProxyNode
+import com.strumenta.starlasu.base.v1.ASTLanguageV1 as ASTLanguage
 
 fun Node.withSource(source: Source): Node {
     this.setSourceForTree(source)

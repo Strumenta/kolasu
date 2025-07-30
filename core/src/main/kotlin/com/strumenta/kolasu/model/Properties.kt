@@ -10,6 +10,8 @@ val <T : Any> Class<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() = this.kotlin.nodeProperties
 val <T : Any> Class<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
     get() = this.kotlin.nodeOriginalProperties
+val <T : Any> Class<T>.nodeDerivedProperties: Collection<KProperty1<T, *>>
+    get() = this.kotlin.nodeDerivedProperties
 val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() = memberProperties.asSequence()
         .filter { it.visibility == KVisibility.PUBLIC }
@@ -27,6 +29,10 @@ val <T : Any> KClass<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
     get() = nodeProperties
         .filter { it.findAnnotation<Derived>() == null }
 
+val <T : Any> KClass<T>.nodeDerivedProperties: Collection<KProperty1<T, *>>
+    get() = nodeProperties
+        .filter { it.findAnnotation<Derived>() != null }
+
 /**
  * @return all properties of this node that are considered AST properties.
  */
@@ -38,3 +44,9 @@ val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
  */
 val <T : Node> T.nodeOriginalProperties: Collection<KProperty1<T, *>>
     get() = this.javaClass.nodeOriginalProperties
+
+/**
+ * @return all derived properties of this node that are considered AST properties.
+ */
+val <T : Node> T.nodeDerivedProperties: Collection<KProperty1<T, *>>
+    get() = this.javaClass.nodeDerivedProperties

@@ -1,6 +1,10 @@
 package com.strumenta.kolasu.cli
 
-import com.github.ajalt.clikt.parameters.options.*
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.help
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.split
 import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.parsing.ASTParser

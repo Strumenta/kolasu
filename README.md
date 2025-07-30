@@ -96,4 +96,7 @@ New release can be made by running:
 ./gradlew release
 ```
 
-Releases must then be manually completed by visiting https://oss.sonatype.org/#stagingRepositories.
+Releases must then be manually completed by visiting https://central.sonatype.com/publishing.
+
+For details visit:
+https://central.sonatype.org/publish/publish-portal-ossrh-staging-api

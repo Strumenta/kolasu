@@ -24,7 +24,7 @@ dependencies {
     api group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore.xmi', version: '2.16.0'
     api group: 'org.eclipse.emfcloud', name: 'emfjson-jackson', version: '2.0.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
-    implementation "com.google.code.gson:gson:$gson_version"
+    implementation(libs.gson)
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: "$kotlin_version"
@@ -57,7 +57,7 @@ sourceSets {
 compileKotlin.source sourceSets.main.java, sourceSets.main.kotlin
 compileTestKotlin.source sourceSets.test.kotlin
 
-clean{
+clean {
     delete "generated-src"
     delete "generated-test-src"
 }
@@ -70,16 +70,18 @@ idea {
     }
 }
 
+def isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
+
 publishing {
 
     repositories {
         maven {
-            def releaseRepo = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotRepo = "https://oss.sonatype.org/content/repositories/snapshots/"
+            def releaseRepo = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
+            def snapshotRepo = "https://central.sonatype.com/repository/maven-snapshots/"
             url = isReleaseVersion ? releaseRepo : snapshotRepo
             credentials {
-                username = project.hasProperty('ossrhTokenUsername') ? ossrhTokenUsername : "Unknown user"
-                password = project.hasProperty('ossrhTokenPassword') ? ossrhTokenPassword : "Unknown password"
+                username = project.hasProperty('mavenCentralUsername') ? project.findProperty('mavenCentralUsername') : "Unknown user"
+                password = project.hasProperty('mavenCentralPassword') ? project.findProperty('mavenCentralPassword') : "Unknown password"
             }
         }
     }
@@ -87,7 +89,7 @@ publishing {
     publications {
         kolasu_emf(MavenPublication) {
             from components.java
-            artifactId "kolasu-" +project.name
+            artifactId "kolasu-" + project.name
             artifact sourcesJar
             artifact javadocJar
             suppressPomMetadataWarningsFor('cliApiElements')

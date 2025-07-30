@@ -1,9 +1,21 @@
 package com.strumenta.kolasu.emf.rpgast
 
-import com.smeup.rpgparser.parsing.ast.*
+import com.smeup.rpgparser.parsing.ast.ArrayAccessExpr
 import com.smeup.rpgparser.parsing.ast.DataRefExpr
 import com.smeup.rpgparser.parsing.ast.Expression
-import java.lang.IllegalStateException
+import com.smeup.rpgparser.parsing.ast.FigurativeConstantRef
+import com.smeup.rpgparser.parsing.ast.HiValExpr
+import com.smeup.rpgparser.parsing.ast.IntLiteral
+import com.smeup.rpgparser.parsing.ast.LowValExpr
+import com.smeup.rpgparser.parsing.ast.OffRefExpr
+import com.smeup.rpgparser.parsing.ast.OnRefExpr
+import com.smeup.rpgparser.parsing.ast.PlusExpr
+import com.smeup.rpgparser.parsing.ast.PredefinedGlobalIndicatorExpr
+import com.smeup.rpgparser.parsing.ast.PredefinedIndicatorExpr
+import com.smeup.rpgparser.parsing.ast.QualifiedAccessExpr
+import com.smeup.rpgparser.parsing.ast.RealLiteral
+import com.smeup.rpgparser.parsing.ast.StringLiteral
+import com.smeup.rpgparser.parsing.ast.SubstExpr
 import java.math.BigDecimal
 import kotlin.math.ceil
 import kotlin.math.max
@@ -23,6 +35,7 @@ sealed class Type {
     open fun numberOfElements(): Int {
         return 1
     }
+
     open fun elementSize(): Int {
         return size
     }
@@ -38,6 +51,7 @@ sealed class Type {
     open fun asArray(): ArrayType {
         throw IllegalStateException("Not an ArrayType")
     }
+
     open fun hasVariableSize() = false
 }
 
@@ -142,6 +156,7 @@ data class NumberType(val entireDigits: Int, val decimalDigits: Int, val rpgType
                         )
                     }
                 }
+
                 RpgType.BINARY.rpgType -> {
                     when (entireDigits) {
                         in 1..4 -> 2
@@ -149,6 +164,7 @@ data class NumberType(val entireDigits: Int, val decimalDigits: Int, val rpgType
                         else -> throw IllegalStateException("Only predefined length allowed binary ")
                     }
                 }
+
                 else -> numberOfDigits
             }
         }
@@ -197,41 +213,53 @@ fun Expression.type(): Type {
         is DataRefExpr -> {
             this.variable.referred!!.type
         }
+
         is StringLiteral -> {
             StringType(this.value.length, true) // TODO verify if varying has to be true or false here
         }
+
         is IntLiteral -> {
             NumberType(BigDecimal.valueOf(this.value).precision(), decimalDigits = 0)
         }
+
         is RealLiteral -> {
             NumberType(this.value.precision() - this.value.scale(), this.value.scale())
         }
+
         is ArrayAccessExpr -> {
             val type = this.array.type().asArray()
             return type.element
         }
+
         is PredefinedIndicatorExpr -> {
             return BooleanType
         }
+
         is PredefinedGlobalIndicatorExpr -> {
             return ArrayType(BooleanType, 99)
         }
+
         is HiValExpr -> {
             return HiValType
         }
+
         is LowValExpr -> {
             return LowValType
         }
+
         is SubstExpr -> {
             return this.string.type()
         }
+
         is QualifiedAccessExpr -> {
             return this.field.referred!!.type
         }
+
         is OnRefExpr, is OffRefExpr -> return BooleanType
         is FigurativeConstantRef -> {
             FigurativeType
         }
+
         is PlusExpr -> {
             val leftType = this.left.type()
             val rightType = this.right.type()
@@ -244,6 +272,7 @@ fun Expression.type(): Type {
                 TODO("We do not know the type of a sum of types $leftType and $rightType")
             }
         }
+
         else -> TODO("We do not know how to calculate the type of $this (${this.javaClass.canonicalName})")
     }
 }
@@ -302,9 +331,11 @@ fun Type.toDataStructureValue(value: Value): StringValue {
             }
             TODO("Not implemented $this")
         }
+
         is StringType -> {
             return StringValue(value.asString().value)
         }
+
         is ArrayType -> {
             val sb = StringBuilder()
             (value as ArrayValue).elements().forEach {
@@ -312,6 +343,7 @@ fun Type.toDataStructureValue(value: Value): StringValue {
             }
             return StringValue(sb.toString())
         }
+
         is CharacterType -> {
             val sb = StringBuilder()
             (value as StringValue).value.forEach {
@@ -319,9 +351,11 @@ fun Type.toDataStructureValue(value: Value): StringValue {
             }
             return StringValue(sb.toString())
         }
+
         is BooleanType -> {
             return StringValue(if ((value as BooleanValue).value) "1" else "0")
         }
+
         else -> TODO("Conversion to data struct value not implemented for $this")
     }
 }

@@ -1,6 +1,14 @@
 package com.strumenta.kolasu.transformation
 
-import com.strumenta.kolasu.model.*
+import com.strumenta.kolasu.model.GenericErrorNode
+import com.strumenta.kolasu.model.Node
+import com.strumenta.kolasu.model.Origin
+import com.strumenta.kolasu.model.Position
+import com.strumenta.kolasu.model.PropertyTypeDescription
+import com.strumenta.kolasu.model.asContainment
+import com.strumenta.kolasu.model.children
+import com.strumenta.kolasu.model.processProperties
+import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import org.antlr.v4.runtime.tree.ParseTree
@@ -8,7 +16,12 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.*
+import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.superclasses
 
 /**
  * Factory that, given a tree node, will instantiate the corresponding transformed node.
@@ -287,6 +300,7 @@ open class ASTTransformer(
                 require(node is Node)
                 node
             }
+
             else -> throw IllegalStateException(
                 "Cannot transform into a single Node as multiple nodes where produced"
             )
@@ -350,11 +364,7 @@ open class ASTTransformer(
         return nodes
     }
 
-    private fun setChildren(
-        factory: NodeFactory<Any, Node>,
-        source: Any,
-        node: Node
-    ) {
+    private fun setChildren(factory: NodeFactory<Any, Node>, source: Any, node: Node) {
         node::class.processProperties { pd ->
             val childNodeFactory = factory.getChildNodeFactory<Any, Node, Any>(node::class, pd.name)
             if (childNodeFactory != null) {
@@ -368,7 +378,7 @@ open class ASTTransformer(
         }
     }
 
-    public open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
+    open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
 
     protected open fun setChild(
         childNodeFactory: ChildNodeFactory<*, *, *>,
@@ -469,35 +479,34 @@ open class ASTTransformer(
     inline fun <S : Any, reified T : Node> registerNodeFactory(
         kclass: KClass<S>,
         crossinline factory: (S) -> T?
-    ): NodeFactory<S, T> =
-        registerNodeFactory(kclass) { input, _, _ ->
-            try {
-                factory(input)
-            } catch (t: NotImplementedError) {
-                if (faultTollerant) {
-                    val node = T::class.dummyInstance()
-                    node.origin = FailingASTTransformation(
-                        asOrigin(input),
-                        "Failed to transform $input into $kclass because the implementation is not complete " +
-                            "(${t.message}"
-                    )
-                    node
-                } else {
-                    throw RuntimeException("Failed to transform $input into $kclass", t)
-                }
-            } catch (e: Exception) {
-                if (faultTollerant) {
-                    val node = T::class.dummyInstance()
-                    node.origin = FailingASTTransformation(
-                        asOrigin(input),
-                        "Failed to transform $input into $kclass because of an error (${e.message})"
-                    )
-                    node
-                } else {
-                    throw RuntimeException("Failed to transform $input into $kclass", e)
-                }
+    ): NodeFactory<S, T> = registerNodeFactory(kclass) { input, _, _ ->
+        try {
+            factory(input)
+        } catch (t: NotImplementedError) {
+            if (faultTollerant) {
+                val node = T::class.dummyInstance()
+                node.origin = FailingASTTransformation(
+                    asOrigin(input),
+                    "Failed to transform $input into $kclass because the implementation is not complete " +
+                        "(${t.message}"
+                )
+                node
+            } else {
+                throw RuntimeException("Failed to transform $input into $kclass", t)
+            }
+        } catch (e: Exception) {
+            if (faultTollerant) {
+                val node = T::class.dummyInstance()
+                node.origin = FailingASTTransformation(
+                    asOrigin(input),
+                    "Failed to transform $input into $kclass because of an error (${e.message})"
+                )
+                node
+            } else {
+                throw RuntimeException("Failed to transform $input into $kclass", e)
             }
         }
+    }
 
     fun <S : Any, T : Node> registerMultipleNodeFactory(kclass: KClass<S>, factory: (S) -> List<T>): NodeFactory<S, T> =
         registerMultipleNodeFactory(kclass) { input, _, _ -> factory(input) }
@@ -594,8 +603,10 @@ open class ASTTransformer(
                     } catch (t: Throwable) {
                         throw RuntimeException(
                             "Invocation of constructor $constructor failed. " +
-                                "We passed: ${constructorParamValues.map { "${it.key.name}=${it.value}" }
-                                    .joinToString(", ")}",
+                                "We passed: ${
+                                constructorParamValues.map { "${it.key.name}=${it.value}" }
+                                    .joinToString(", ")
+                                }",
                             t
                         )
                     }

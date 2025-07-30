@@ -23,21 +23,20 @@ import com.strumenta.kolasu.transformation.dummyInstance
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
 import com.strumenta.kolasu.validation.IssueType
-import com.strumenta.starlasu.base.ASTLanguage
-import io.lionweb.lioncore.java.language.Annotation
-import io.lionweb.lioncore.java.language.Concept
-import io.lionweb.lioncore.java.language.Language
-import io.lionweb.lioncore.java.language.LionCoreBuiltins
-import io.lionweb.lioncore.java.language.Property
-import io.lionweb.lioncore.java.model.impl.DynamicAnnotationInstance
-import io.lionweb.lioncore.java.model.impl.EnumerationValue
-import io.lionweb.lioncore.java.serialization.SerializationProvider
-import io.lionweb.lioncore.kotlin.children
-import io.lionweb.lioncore.kotlin.createAnnotation
-import io.lionweb.lioncore.kotlin.createProperty
-import io.lionweb.lioncore.kotlin.getChildrenByContainmentName
-import io.lionweb.lioncore.kotlin.getPropertyValueByName
-import io.lionweb.lioncore.kotlin.getReferenceValueByName
+import io.lionweb.kotlin.children
+import io.lionweb.kotlin.createAnnotation
+import io.lionweb.kotlin.createProperty
+import io.lionweb.kotlin.getChildrenByContainmentName
+import io.lionweb.kotlin.getPropertyValueByName
+import io.lionweb.kotlin.getReferenceValueByName
+import io.lionweb.language.Annotation
+import io.lionweb.language.Concept
+import io.lionweb.language.Language
+import io.lionweb.language.LionCoreBuiltins
+import io.lionweb.language.Property
+import io.lionweb.model.impl.DynamicAnnotationInstance
+import io.lionweb.model.impl.EnumerationValue
+import io.lionweb.serialization.SerializationProvider
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -46,6 +45,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import com.strumenta.starlasu.base.v1.ASTLanguageV1 as ASTLanguage
 
 enum class AnEnum {
     FOO,
@@ -118,22 +118,6 @@ class LionWebModelConverterTest {
         }
       ],
       "references": [
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
-        }
       ],
       "annotations": [],
       "parent": null
@@ -164,14 +148,6 @@ class LionWebModelConverterTest {
         }
       ],
       "containments": [
-        {
-          "containment": {
-            "language": "com-strumenta-SimpleLang",
-            "version": "1",
-            "key": "com-strumenta-SimpleLang_SimpleNodeA_child"
-          },
-          "children": []
-        }
       ],
       "references": [
         {
@@ -186,22 +162,6 @@ class LionWebModelConverterTest {
               "reference": "synthetic_foo-bar-source_childrez"
             }
           ]
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
         }
       ],
       "annotations": [],
@@ -233,24 +193,7 @@ class LionWebModelConverterTest {
         }
       ],
       "containments": [],
-      "references": [
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
-        }
-      ],
+      "references": [],
       "annotations": [],
       "parent": "synthetic_foo-bar-source"
     },
@@ -304,22 +247,6 @@ class LionWebModelConverterTest {
               "reference": "synthetic_foo-bar-source_childrez"
             }
           ]
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
         }
       ],
       "annotations": [],
@@ -352,22 +279,6 @@ class LionWebModelConverterTest {
       ],
       "containments": [],
       "references": [
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-originalNode-key"
-          },
-          "targets": []
-        },
-        {
-          "reference": {
-            "language": "com_strumenta_starlasu",
-            "version": "1",
-            "key": "com_strumenta_starlasu-ASTNode-transpiledNodes-key"
-          },
-          "targets": []
-        }
       ],
       "annotations": [],
       "parent": "synthetic_foo-bar-source_childrez_2"
@@ -538,7 +449,7 @@ class LionWebModelConverterTest {
 
         exported = converter.exportModelToLionWeb(b2, considerParent = true)
         assertNotNull(exported.parent)
-        assertEquals(converter.nodeIdProvider.id(a1), exported.parent.id)
+        assertEquals(converter.nodeIdProvider.id(a1), exported.parent!!.id)
     }
 
     @Test
@@ -719,7 +630,7 @@ class LionWebModelConverterTest {
         val lwNode = mc.exportModelToLionWeb(n1)
         val jsonSerialization = SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
         mc.prepareSerialization(jsonSerialization)
-        val serializationBlock = jsonSerialization.serializeNodesToSerializationBlock(lwNode)
+        val serializationBlock = jsonSerialization.serializeNodesToSerializationChunk(lwNode)
         assertEquals(
             "L3:5-L27:200",
             serializationBlock.classifierInstancesByID["MySource"]!!
@@ -1035,7 +946,7 @@ class LionWebModelConverterTest {
         var annotation1: Annotation
         var annotation1Value: Property
         val language1 = Language().apply {
-            id = "lang1-id"
+            setID("lang1-id")
             key = "lang1-key"
             name = "Lang1"
             annotation1 = createAnnotation("MyAnnotation").apply {
