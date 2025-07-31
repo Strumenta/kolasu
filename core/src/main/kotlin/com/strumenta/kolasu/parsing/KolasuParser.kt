@@ -309,6 +309,12 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         )
     }
 
+    // Makes it more convenient to invoke from Java. We can't use @JvmOverloads because:
+    // - it has no effect on methods with no default values for arguments
+    // - an overriding method can't specify default values
+    // - @JvmOverloads can't be applied to interface methods
+    fun parse(file: File): ParsingResult<R> = parse(file, Charsets.UTF_8, true, false)
+
     override fun parse(
         file: File,
         charset: Charset,
