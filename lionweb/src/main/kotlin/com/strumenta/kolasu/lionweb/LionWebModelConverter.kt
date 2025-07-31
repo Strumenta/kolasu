@@ -95,7 +95,8 @@ private val PlaceholderNodeType = ASTLanguage.getLanguage().getEnumerationByName
  */
 class LionWebModelConverter(
     var nodeIdProvider: NodeIdProvider = StructuralLionWebNodeIdProvider(),
-    initialLanguageConverter: LionWebLanguageConverter = LionWebLanguageConverter()
+    initialLanguageConverter: LionWebLanguageConverter = LionWebLanguageConverter(),
+    val metamodelRegistry: MetamodelRegistry = DefaultMetamodelRegistry,
 ) {
     companion object {
         private val kFeaturesCache = mutableMapOf<Class<*>, Map<String, Feature>>()
@@ -494,7 +495,6 @@ class LionWebModelConverter(
     fun prepareSerialization(
         serialization: AbstractSerialization =
             SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU),
-        metamodelRegistry: MetamodelRegistry = DefaultMetamodelRegistry
     ): AbstractSerialization {
         registerSerializersAndDeserializersInMetamodelRegistry(metamodelRegistry)
         metamodelRegistry.prepareJsonSerialization(serialization)
