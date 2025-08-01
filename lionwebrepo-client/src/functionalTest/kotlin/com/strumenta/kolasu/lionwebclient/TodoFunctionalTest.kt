@@ -6,7 +6,7 @@ import com.strumenta.kolasu.model.ReferenceByName
 import com.strumenta.kolasu.model.SyntheticSource
 import com.strumenta.kolasu.model.assignParents
 import io.lionweb.client.testing.AbstractClientFunctionalTest
-import io.lionweb.kotlin.MetamodelRegistry
+import io.lionweb.kotlin.DefaultMetamodelRegistry
 import io.lionweb.kotlin.getChildrenByContainmentName
 import org.testcontainers.junit.jupiter.Testcontainers
 import kotlin.test.Test
@@ -35,7 +35,7 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
         kolasuClient.registerLanguage(todoLanguage)
         kolasuClient.registerLanguage(todoAccountLanguage)
         registerSerializersAndDeserializersInMetamodelRegistry()
-        MetamodelRegistry.prepareJsonSerialization(kolasuClient.jsonSerialization)
+        DefaultMetamodelRegistry.prepareJsonSerialization(kolasuClient.jsonSerialization)
 
         assertEquals(emptyList(), kolasuClient.getPartitionIDs())
 
@@ -59,7 +59,6 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
                     Todo("Go for a walk")
                 )
             )
-        // todoProject.assignParents()
 
         todoProject.source = SyntheticSource("TODO Project A")
         val todoProjectID = kolasuClient.attachAST(
@@ -69,8 +68,6 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
         )
 
         // I can retrieve the entire partition
-        // todoAccount.projects.add(todoProject)
-        // todoAccount.assignParents()
         val retrievedTodoAccount = kolasuClient.getLionWebNode(expectedPartitionId)
         assertEquals(1, retrievedTodoAccount.getChildrenByContainmentName("projects").size)
         assertEquals(
@@ -114,7 +111,6 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
         // We create an empty partition
         val todoAccount = TodoAccount("my-wonderful-partition")
         // By default the partition IDs are derived from the source
-        // todoAccount.source = SyntheticSource("my-wonderful-partition")
         kolasuClient.createPartition(todoAccount)
 
         // Now we want to attach a tree to the existing partition
@@ -149,11 +145,10 @@ class TodoFunctionalTest : AbstractClientFunctionalTest(LIONWEB_VERSION_USED_BY_
         kolasuClient.registerLanguage(todoLanguage)
         kolasuClient.registerLanguage(todoAccountLanguage)
         registerSerializersAndDeserializersInMetamodelRegistry()
-        MetamodelRegistry.prepareJsonSerialization(kolasuClient.jsonSerialization)
+        DefaultMetamodelRegistry.prepareJsonSerialization(kolasuClient.jsonSerialization)
 
         // We create an empty partition
         val todoAccount = TodoAccount("my-wonderful-partition")
-        // todoAccount.source = SyntheticSource("my-wonderful-partition")
         val todoAccountId = kolasuClient.createPartition(todoAccount)
 
         val todoProject1 =
