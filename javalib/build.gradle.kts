@@ -12,13 +12,11 @@ java {
     targetCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
 }
 
-
 dependencies {
     implementation(project(":core"))
 
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:${libs.versions.kotlin.get()}")
 }
-
 
 publishing {
     repositories {
@@ -72,7 +70,6 @@ publishing {
     }
 }
 
-// Signing
 signing {
     sign(publishing.publications)
 }
