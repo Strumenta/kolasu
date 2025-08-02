@@ -364,7 +364,7 @@ class ASTTransformerTest {
     fun testUnmappedNode() {
         val transformer1 = ASTTransformer(allowGenericNode = false)
         transformer1.registerNodeFactory(BarRoot::class, BazRoot::class)
-            .withChild(BazRoot::stmts, BarRoot::stmts)
+            .withChild(BazRoot::stmts) { -> stmts }
         val original =
             BarRoot(
                 stmts =

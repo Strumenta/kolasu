@@ -14,7 +14,7 @@ import io.lionweb.model.ClassifierInstanceUtils
 import io.lionweb.model.impl.DynamicNode
 import io.lionweb.serialization.JsonSerialization
 import java.util.stream.Collectors
-import com.strumenta.starlasu.base.v2.CodebaseLanguageV2 as CodebaseLanguage
+import com.strumenta.starlasu.base.v1.CodebaseLanguageV1 as CodebaseLanguage
 
 fun <R : Node> deserialize(
     modelConverter: LionWebModelConverter,

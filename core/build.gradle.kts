@@ -80,6 +80,9 @@ project.afterEvaluate {
 }
 
 mavenPublishing {
-    coordinates(project.group.toString(), "starlasu-kotlin-${project.name}",
-        project.version.toString())
+    coordinates(
+        project.group.toString(),
+        "starlasu-kotlin-${project.name}",
+        project.version.toString(),
+    )
 }
