@@ -6,8 +6,6 @@ plugins {
     alias(libs.plugins.vanniktech.publish)
 }
 
-val isReleaseVersion = !(project.version as String).endsWith("-SNAPSHOT")
-
 dependencies {
     implementation(project(":core"))
     implementation(project(":lionweb"))

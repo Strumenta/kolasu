@@ -58,8 +58,8 @@ dependencies {
     implementation(libs.starlasu.specs)
 
     testImplementation(kotlin("test-junit5"))
-    testImplementation("commons-io:commons-io:2.14.0")
-    testImplementation("org.slf4j:slf4j-simple:1.7.30")
+    testImplementation(libs.commons.io)
+    testImplementation(libs.slf4j)
 }
 
 val jvmVersion = libs.versions.jvm.get()
