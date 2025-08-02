@@ -20,14 +20,15 @@ class TypeComputer(
         }
     }
 
-    fun typeFor(node: Node? = null): Node? {
-        return node?.let {
+    fun typeFor(node: Node? = null): Node? =
+        node?.let {
             this.typingRules.keys
                 .filter { it.isSuperclassOf(node::class) }
                 .sortBySubclassesFirst()
-                .firstOrNull()?.let { this.typingRules[it] }?.invoke(node)
+                .firstOrNull()
+                ?.let { this.typingRules[it] }
+                ?.invoke(node)
         }
-    }
 }
 
 // configuration

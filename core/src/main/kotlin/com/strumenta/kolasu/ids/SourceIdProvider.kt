@@ -9,13 +9,14 @@ import java.io.File
 
 const val UNKNOWN_SOURCE_ID = "UNKNOWN_SOURCE"
 
-fun String.removeCharactersInvalidInLionWebIDs(): String {
-    return this.filter {
-        it in setOf('-', '_') || it in CharRange('0', '9') ||
-            it in CharRange('a', 'z') ||
-            it in CharRange('A', 'Z')
-    }.toString()
-}
+fun String.removeCharactersInvalidInLionWebIDs(): String =
+    this
+        .filter {
+            it in setOf('-', '_') ||
+                it in CharRange('0', '9') ||
+                it in CharRange('a', 'z') ||
+                it in CharRange('A', 'Z')
+        }.toString()
 
 /**
  * Given a Source (even null), it generates a corresponding identifier.
@@ -32,12 +33,15 @@ abstract class AbstractSourceIdProvider : SourceIdProvider {
             .replace('\\', '-')
             .replace('#', '-')
             .replace(' ', '_')
-            .replace("@", "_at_").removeCharactersInvalidInLionWebIDs()
+            .replace("@", "_at_")
+            .removeCharactersInvalidInLionWebIDs()
 }
 
-class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSourceIdProvider() {
-    override fun sourceId(source: Source?): String {
-        return when (source) {
+class SimpleSourceIdProvider(
+    var acceptNullSource: Boolean = false,
+) : AbstractSourceIdProvider() {
+    override fun sourceId(source: Source?): String =
+        when (source) {
             null -> {
                 if (acceptNullSource) {
                     UNKNOWN_SOURCE_ID
@@ -63,7 +67,6 @@ class SimpleSourceIdProvider(var acceptNullSource: Boolean = false) : AbstractSo
                 TODO("Unable to generate ID for Source $this (${source.javaClass.canonicalName})")
             }
         }
-    }
 }
 
 class RelativeSourceIdProvider(
@@ -98,19 +101,31 @@ class RelativeSourceIdProvider(
     }
 }
 
-open class IDGenerationException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+open class IDGenerationException(
+    message: String,
+    cause: Throwable? = null,
+) : RuntimeException(message, cause)
 
-class SourceShouldBeSetException(message: String, cause: Throwable? = null) : IDGenerationException(
-    message,
-    cause,
-)
+class SourceShouldBeSetException(
+    message: String,
+    cause: Throwable? = null,
+) : IDGenerationException(
+        message,
+        cause,
+    )
 
-class NodeShouldNotBeRootException(message: String, cause: Throwable? = null) : IDGenerationException(
-    message,
-    cause,
-)
+class NodeShouldNotBeRootException(
+    message: String,
+    cause: Throwable? = null,
+) : IDGenerationException(
+        message,
+        cause,
+    )
 
-class NodeShouldBeRootException(message: String, cause: Throwable? = null) : IDGenerationException(
-    message,
-    cause,
-)
+class NodeShouldBeRootException(
+    message: String,
+    cause: Throwable? = null,
+) : IDGenerationException(
+        message,
+        cause,
+    )

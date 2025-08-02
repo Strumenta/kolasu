@@ -10,10 +10,10 @@ fun interface IdProvider {
     fun getId(node: Node): String?
 }
 
-class SequentialIdProvider(private var counter: Int = 0) : IdProvider {
-    override fun getId(node: Node): String? {
-        return "${this.counter++}"
-    }
+class SequentialIdProvider(
+    private var counter: Int = 0,
+) : IdProvider {
+    override fun getId(node: Node): String? = "${this.counter++}"
 }
 
 class OnlyReferencedIdProvider(
@@ -21,16 +21,19 @@ class OnlyReferencedIdProvider(
     private var idProvider: IdProvider = SequentialIdProvider(),
 ) : IdProvider {
     private val referencedElements: Set<PossiblyNamed> by lazy {
-        this.root.walk().flatMap { node ->
-            node.properties.filter { property -> property.value is ReferenceByName<*> }
-                .mapNotNull { property -> (property.value as ReferenceByName<*>).referred }
-        }.toSet()
+        this.root
+            .walk()
+            .flatMap { node ->
+                node.properties
+                    .filter { property -> property.value is ReferenceByName<*> }
+                    .mapNotNull { property -> (property.value as ReferenceByName<*>).referred }
+            }.toSet()
     }
 
-    override fun getId(node: Node): String? {
-        return this.referencedElements.find { referencedElement -> referencedElement == node }
+    override fun getId(node: Node): String? =
+        this.referencedElements
+            .find { referencedElement -> referencedElement == node }
             ?.let { idProvider.getId(node) }
-    }
 }
 
 /**

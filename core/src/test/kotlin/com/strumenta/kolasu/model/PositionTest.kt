@@ -13,7 +13,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.junit.Test as test
 
-data class MySetStatement(val specifiedPosition: Position? = null) : Node(specifiedPosition)
+data class MySetStatement(
+    val specifiedPosition: Position? = null,
+) : Node(specifiedPosition)
 
 class PositionTest {
     @test

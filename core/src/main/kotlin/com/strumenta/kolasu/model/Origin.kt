@@ -12,10 +12,12 @@ interface Origin {
 class SimpleOrigin(
     override val position: Position?,
     override val sourceText: String? = null,
-) : Origin, Serializable
+) : Origin,
+    Serializable
 
 data class CompositeOrigin(
     val elements: List<Origin>,
     override val position: Position?,
     override val sourceText: String?,
-) : Origin, Serializable
+) : Origin,
+    Serializable

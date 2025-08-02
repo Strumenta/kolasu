@@ -14,19 +14,16 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-open class SimpleLangKolasuParser : KolasuParser<
-    Node,
-    SimpleLangParser,
-    SimpleLangParser.CompilationUnitContext,
-    KolasuANTLRToken,
+open class SimpleLangKolasuParser :
+    KolasuParser<
+        Node,
+        SimpleLangParser,
+        SimpleLangParser.CompilationUnitContext,
+        KolasuANTLRToken,
     >(ANTLRTokenFactory()) {
-    override fun createANTLRLexer(charStream: CharStream): Lexer {
-        return SimpleLangLexer(charStream)
-    }
+    override fun createANTLRLexer(charStream: CharStream): Lexer = SimpleLangLexer(charStream)
 
-    override fun createANTLRParser(tokenStream: TokenStream): SimpleLangParser {
-        return SimpleLangParser(tokenStream)
-    }
+    override fun createANTLRParser(tokenStream: TokenStream): SimpleLangParser = SimpleLangParser(tokenStream)
 
     override fun parseTreeToAst(
         parseTreeRoot: SimpleLangParser.CompilationUnitContext,

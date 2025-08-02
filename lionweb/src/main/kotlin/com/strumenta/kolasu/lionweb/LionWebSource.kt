@@ -4,7 +4,10 @@ import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.SourceWithID
 import io.lionweb.utils.CommonChecks
 
-data class LionWebSource(val sourceId: String) : Source(), SourceWithID {
+data class LionWebSource(
+    val sourceId: String,
+) : Source(),
+    SourceWithID {
     override fun sourceID(): String = sourceId
 
     init {

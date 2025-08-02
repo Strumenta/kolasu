@@ -99,9 +99,7 @@ class ScopeDescription(
     /**
      * Handle case sensitivity if enabled.
      **/
-    private fun String.asKey(): String {
-        return if (ignoreCase) this.lowercase() else this
-    }
+    private fun String.asKey(): String = if (ignoreCase) this.lowercase() else this
 }
 
 /**

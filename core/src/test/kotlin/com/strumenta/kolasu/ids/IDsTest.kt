@@ -8,7 +8,10 @@ import com.strumenta.starlasu.base.IDProvider
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-data class IdentifiableNode(var bar: String, val zum: MutableList<IdentifiableNode>) : Node()
+data class IdentifiableNode(
+    var bar: String,
+    val zum: MutableList<IdentifiableNode>,
+) : Node()
 
 class IDsTest {
     @Test

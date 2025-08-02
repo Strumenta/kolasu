@@ -16,7 +16,7 @@ import kotlin.reflect.full.isSuperclassOf
 inline fun <
     reified NodeTy : Node,
     PropertyTy : KProperty1<in NodeTy, ReferenceByName<out PossiblyNamed>?>,
-    > scopeFor(
+> scopeFor(
     property: PropertyTy,
     ignoreCase: Boolean = false,
     noinline specification: ScopeDescriptionApi.(DeclarativeScopeProviderRuleContext<NodeTy>) -> Unit,
@@ -58,13 +58,13 @@ open class DeclarativeScopeProvider(
     override fun <NodeType : Node> scopeFor(
         node: NodeType,
         reference: KProperty1<in NodeType, ReferenceByName<out PossiblyNamed>?>,
-    ): ScopeDescription {
-        return this.rules.firstOrNull { it.canBeInvokedWith(node::class, reference) }
+    ): ScopeDescription =
+        this.rules
+            .firstOrNull { it.canBeInvokedWith(node::class, reference) }
             ?.invoke(this, node)
             ?: throw RuntimeException(
                 "Cannot find scoping rule for reference ${node::class.qualifiedName}::${reference.name}",
             )
-    }
 }
 
 /**
@@ -75,36 +75,31 @@ class DeclarativeScopeProviderRule<NodeTy : Node>(
     private val propertyName: String,
     private val ignoreCase: Boolean,
     private val specification: ScopeDescription.(DeclarativeScopeProviderRuleContext<NodeTy>) -> Unit,
-) : (ScopeProvider, Node) -> ScopeDescription, Comparable<DeclarativeScopeProviderRule<out Node>> {
+) : (ScopeProvider, Node) -> ScopeDescription,
+    Comparable<DeclarativeScopeProviderRule<out Node>> {
     override fun invoke(
         scopeProvider: ScopeProvider,
         node: Node,
-    ): ScopeDescription {
-        return ScopeDescription(this.ignoreCase).apply {
+    ): ScopeDescription =
+        ScopeDescription(this.ignoreCase).apply {
             @Suppress("UNCHECKED_CAST")
             val context = DeclarativeScopeProviderRuleContext(node as NodeTy, scopeProvider)
             this.specification(context)
         }
-    }
 
     fun canBeInvokedWith(
         nodeType: KClass<*>,
         property: KProperty1<*, ReferenceByName<out PossiblyNamed>?>,
-    ): Boolean {
-        return this.nodeType.isSuperclassOf(nodeType) && this.propertyName == property.name
-    }
+    ): Boolean = this.nodeType.isSuperclassOf(nodeType) && this.propertyName == property.name
 
-    override fun compareTo(other: DeclarativeScopeProviderRule<out Node>): Int {
-        return when {
+    override fun compareTo(other: DeclarativeScopeProviderRule<out Node>): Int =
+        when {
             this.nodeType.isSuperclassOf(other.nodeType) -> 1
             other.nodeType.isSuperclassOf(this.nodeType) -> -1
             else -> this.describeForComparison() compareTo other.describeForComparison()
         }
-    }
 
-    private fun describeForComparison(): String {
-        return "${this.nodeType.qualifiedName ?: ""}::${this.propertyName}"
-    }
+    private fun describeForComparison(): String = "${this.nodeType.qualifiedName ?: ""}::${this.propertyName}"
 }
 
 /**

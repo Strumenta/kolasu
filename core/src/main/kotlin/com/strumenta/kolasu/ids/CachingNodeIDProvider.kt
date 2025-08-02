@@ -8,7 +8,9 @@ import java.util.IdentityHashMap
  * the parent,so that the Node IDs of all ancestors are calculated again and again.
  * By using a cache we can avoid that.
  */
-class CachingNodeIDProvider(val wrapped: NodeIdProvider) : BaseNodeIdProvider() {
+class CachingNodeIDProvider(
+    val wrapped: NodeIdProvider,
+) : BaseNodeIdProvider() {
     private val cache = IdentityHashMap<Node, String>()
 
     init {

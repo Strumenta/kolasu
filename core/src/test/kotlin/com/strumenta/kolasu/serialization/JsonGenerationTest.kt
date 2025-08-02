@@ -25,7 +25,8 @@ data class NodeWithReference(
     override val name: String? = null,
     val reference: ReferenceByName<NodeWithReference>? = null,
     val children: MutableList<Node> = mutableListOf(),
-) : Node(), PossiblyNamed
+) : Node(),
+    PossiblyNamed
 
 class JsonGenerationTest {
     @Test
@@ -285,7 +286,8 @@ class JsonGenerationTest {
         assertEquals(
             """{"issues":[{"type":"LEXICAL","message":"foo","severity":"ERROR","position":{"description":"Position(start=Line 1, Column 10,
                | end=Line 4, Column 540)","start":{"line":1,"column":10},"end":{"line":4,"column":540}}}]}
-            """.trimMargin().replace("\n", ""),
+            """.trimMargin()
+                .replace("\n", ""),
             json,
         )
     }
@@ -429,5 +431,7 @@ class JsonGenerationTest {
     }
 }
 
-data class DynamicNode(override val nodeType: String, override val originalProperties: List<PropertyDescription>) :
-    Node()
+data class DynamicNode(
+    override val nodeType: String,
+    override val originalProperties: List<PropertyDescription>,
+) : Node()

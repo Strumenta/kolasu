@@ -9,11 +9,17 @@ data class MyBigNode(
     override val name: String,
     val foo: MySmallNode? = null,
     val bars: List<MyOtherNode> = emptyList(),
-) : Node(), Named
+) : Node(),
+    Named
 
-data class MySmallNode(val value: Long) : Node()
+data class MySmallNode(
+    val value: Long,
+) : Node()
 
-data class MyOtherNode(val flag: Boolean, val s: String) : Node()
+data class MyOtherNode(
+    val flag: Boolean,
+    val s: String,
+) : Node()
 
 class AssertionsTest {
     @Test

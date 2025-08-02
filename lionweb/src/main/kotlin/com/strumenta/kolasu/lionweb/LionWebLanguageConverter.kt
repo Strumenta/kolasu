@@ -118,7 +118,8 @@ class LionWebLanguageConverter {
             if (astClass.java.isInterface) {
                 val conceptInterface = featuresContainer as Interface
                 val superInterfaces =
-                    astClass.supertypes.map { it.classifier as KClass<*> }
+                    astClass.supertypes
+                        .map { it.classifier as KClass<*> }
                         .filter { it.java.isInterface }
                 superInterfaces.filter { it.isMarkedAsNodeType() }.forEach {
                     conceptInterface.addExtendedInterface(correspondingInterface(it))
@@ -126,7 +127,8 @@ class LionWebLanguageConverter {
             } else {
                 val concept = featuresContainer as Concept
                 val superClasses =
-                    astClass.supertypes.map { it.classifier as KClass<*> }
+                    astClass.supertypes
+                        .map { it.classifier as KClass<*> }
                         .filter { !it.java.isInterface }
                 if (superClasses.size == 1) {
                     val baseClass = astClassesAndClassifiers.byA(superClasses.first())
@@ -236,67 +238,43 @@ class LionWebLanguageConverter {
         }
     }
 
-    fun knownLWLanguages(): Set<LWLanguage> {
-        return languages.bs
-    }
+    fun knownLWLanguages(): Set<LWLanguage> = languages.bs
 
-    fun knownKolasuLanguages(): Set<KolasuLanguage> {
-        return languages.`as`
-    }
+    fun knownKolasuLanguages(): Set<KolasuLanguage> = languages.`as`
 
-    fun correspondingLanguage(kolasuLanguage: KolasuLanguage): LWLanguage {
-        return languages.byA(kolasuLanguage)
+    fun correspondingLanguage(kolasuLanguage: KolasuLanguage): LWLanguage =
+        languages.byA(kolasuLanguage)
             ?: throw java.lang.IllegalArgumentException("Unknown Kolasu Language $kolasuLanguage")
-    }
 
-    fun correspondingLanguage(lwLanguage: LWLanguage): KolasuLanguage {
-        return languages.byB(lwLanguage)
+    fun correspondingLanguage(lwLanguage: LWLanguage): KolasuLanguage =
+        languages.byB(lwLanguage)
             ?: throw java.lang.IllegalArgumentException("Unknown LionWeb Language $lwLanguage")
-    }
 
-    fun getKolasuClassesToClassifiersMapping(): Map<KClass<*>, Classifier<*>> {
-        return astClassesAndClassifiers.asToBsMap
-    }
+    fun getKolasuClassesToClassifiersMapping(): Map<KClass<*>, Classifier<*>> = astClassesAndClassifiers.asToBsMap
 
-    fun getClassifiersToKolasuClassesMapping(): Map<Classifier<*>, KClass<*>> {
-        return astClassesAndClassifiers.bsToAsMap
-    }
+    fun getClassifiersToKolasuClassesMapping(): Map<Classifier<*>, KClass<*>> = astClassesAndClassifiers.bsToAsMap
 
-    fun getEnumerationsToKolasuClassesMapping(): Map<Enumeration, EnumKClass> {
-        return classesAndEnumerations.bsToAsMap
-    }
+    fun getEnumerationsToKolasuClassesMapping(): Map<Enumeration, EnumKClass> = classesAndEnumerations.bsToAsMap
 
-    fun getPrimitiveTypesToKolasuClassesMapping(): Map<PrimitiveType, KClass<*>> {
-        return classesAndPrimitiveTypes.bsToAsMap
-    }
+    fun getPrimitiveTypesToKolasuClassesMapping(): Map<PrimitiveType, KClass<*>> = classesAndPrimitiveTypes.bsToAsMap
 
-    fun getKolasuClassesToEnumerationsMapping(): Map<EnumKClass, Enumeration> {
-        return classesAndEnumerations.asToBsMap
-    }
+    fun getKolasuClassesToEnumerationsMapping(): Map<EnumKClass, Enumeration> = classesAndEnumerations.asToBsMap
 
-    fun getKolasuClassesToPrimitiveTypesMapping(): Map<KClass<*>, PrimitiveType> {
-        return classesAndPrimitiveTypes.asToBsMap
-    }
+    fun getKolasuClassesToPrimitiveTypesMapping(): Map<KClass<*>, PrimitiveType> = classesAndPrimitiveTypes.asToBsMap
 
-    fun correspondingInterface(kClass: KClass<*>): Interface {
-        return toLWClassifier(kClass) as Interface
-    }
+    fun correspondingInterface(kClass: KClass<*>): Interface = toLWClassifier(kClass) as Interface
 
-    fun correspondingConcept(kClass: KClass<*>): Concept {
-        return toLWClassifier(kClass) as Concept
-    }
+    fun correspondingConcept(kClass: KClass<*>): Concept = toLWClassifier(kClass) as Concept
 
-    fun correspondingConcept(nodeType: String): Concept {
-        return toLWClassifier(nodeType) as Concept
-    }
+    fun correspondingConcept(nodeType: String): Concept = toLWClassifier(nodeType) as Concept
 
-    fun correspondingKolasuClass(classifier: Classifier<*>): KClass<*>? {
-        return this.astClassesAndClassifiers.bsToAsMap.entries.find {
-            it.key.key == classifier.key &&
-                it.key.language!!.id == classifier.language!!.id &&
-                it.key.language!!.version == classifier.language!!.version
-        }?.value
-    }
+    fun correspondingKolasuClass(classifier: Classifier<*>): KClass<*>? =
+        this.astClassesAndClassifiers.bsToAsMap.entries
+            .find {
+                it.key.key == classifier.key &&
+                    it.key.language!!.id == classifier.language!!.id &&
+                    it.key.language!!.version == classifier.language!!.version
+            }?.value
 
     private fun registerMapping(
         kolasuClass: KClass<*>,
@@ -305,9 +283,8 @@ class LionWebLanguageConverter {
         astClassesAndClassifiers.associate(kolasuClass, featuresContainer)
     }
 
-    private fun toLWClassifier(kClass: KClass<*>): Classifier<*> {
-        return astClassesAndClassifiers.byA(kClass) ?: throw IllegalArgumentException("Unknown KClass $kClass")
-    }
+    private fun toLWClassifier(kClass: KClass<*>): Classifier<*> =
+        astClassesAndClassifiers.byA(kClass) ?: throw IllegalArgumentException("Unknown KClass $kClass")
 
     private fun toLWClassifier(nodeType: String): Classifier<*> {
         val kClass =

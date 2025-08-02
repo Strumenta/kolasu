@@ -58,9 +58,11 @@ fun Node.invalidPositions(): Sequence<Node> =
 
 fun Node.findInvalidPosition(): Node? = this.invalidPositions().firstOrNull()
 
-fun Node.hasValidParents(parent: Node? = this.parent): Boolean {
-    return this.parent == parent && this.children.all { it.hasValidParents(this) }
-}
+fun Node.hasValidParents(parent: Node? = this.parent): Boolean =
+    this.parent == parent &&
+        this.children.all {
+            it.hasValidParents(this)
+        }
 
 fun <T : Node> T.withParent(parent: Node?): T {
     this.parent = parent
@@ -122,9 +124,7 @@ fun <T : Any> Class<T>.processProperties(
 fun Node.find(
     predicate: (Node) -> Boolean,
     walker: KFunction1<Node, Sequence<Node>> = Node::walk,
-): Node? {
-    return walker.invoke(this).find(predicate)
-}
+): Node? = walker.invoke(this).find(predicate)
 
 /**
  * Recursively execute [operation] on this node, and all nodes below this node that extend [klass].
@@ -209,13 +209,15 @@ val Node.nextSamePropertySibling: Node?
     get() {
         if (this.parent != null) {
             val siblings =
-                this.parent!!.properties.find { p ->
-                    val v = p.value
-                    when (v) {
-                        is Collection<*> -> v.contains(this)
-                        else -> false
-                    }
-                }?.value as? Collection<*> ?: emptyList<Node>()
+                this.parent!!
+                    .properties
+                    .find { p ->
+                        val v = p.value
+                        when (v) {
+                            is Collection<*> -> v.contains(this)
+                            else -> false
+                        }
+                    }?.value as? Collection<*> ?: emptyList<Node>()
 
             val index = siblings.indexOf(this)
             return if (index == siblings.size - 1 || index == -1) null else siblings.elementAt(index + 1) as Node
@@ -230,13 +232,15 @@ val Node.previousSamePropertySibling: Node?
     get() {
         if (this.parent != null) {
             val siblings =
-                this.parent!!.properties.find { p ->
-                    val v = p.value
-                    when (v) {
-                        is Collection<*> -> v.contains(this)
-                        else -> false
-                    }
-                }?.value as? Collection<*> ?: emptyList<Node>()
+                this.parent!!
+                    .properties
+                    .find { p ->
+                        val v = p.value
+                        when (v) {
+                            is Collection<*> -> v.contains(this)
+                            else -> false
+                        }
+                    }?.value as? Collection<*> ?: emptyList<Node>()
 
             val index = siblings.indexOf(this)
             return if (index == 0 || index == -1) null else siblings.elementAt(index - 1) as Node
@@ -330,7 +334,10 @@ fun Node.transformTree(
             if (changes.containsKey(param.name)) {
                 params[param] = changes[param.name]
             } else {
-                params[param] = this.javaClass.kotlin.memberProperties.find { param.name == it.name }!!.get(this)
+                params[param] =
+                    this.javaClass.kotlin.memberProperties
+                        .find { param.name == it.name }!!
+                        .get(this)
             }
         }
         instanceToTransform = constructor.callBy(params)
@@ -338,8 +345,10 @@ fun Node.transformTree(
     return mutationsCache.computeIfAbsent(instanceToTransform) { operation(instanceToTransform) }
 }
 
-class ImmutablePropertyException(property: KProperty<*>, node: Node) :
-    RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
+class ImmutablePropertyException(
+    property: KProperty<*>,
+    node: Node,
+) : RuntimeException("Cannot mutate property '${property.name}' of node $node (class: ${node.javaClass.canonicalName})")
 
 // assumption: every MutableList in the AST contains Nodes.
 @Suppress("UNCHECKED_CAST")
@@ -411,7 +420,10 @@ fun Node.mapChildren(operation: (Node) -> Node): Node {
             if (changes.containsKey(param.name)) {
                 params[param] = changes[param.name]
             } else {
-                params[param] = this.javaClass.kotlin.memberProperties.find { param.name == it.name }!!.get(this)
+                params[param] =
+                    this.javaClass.kotlin.memberProperties
+                        .find { param.name == it.name }!!
+                        .get(this)
             }
         }
         instanceToTransform = constructor.callBy(params)

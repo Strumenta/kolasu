@@ -22,7 +22,9 @@ import kotlin.reflect.full.superclasses
  * We create this Class to represent that collection of AST classes.
  */
 @Deprecated("Use LionWeb's Language")
-class KolasuLanguage(val qualifiedName: String) {
+class KolasuLanguage(
+    val qualifiedName: String,
+) {
     val astClasses: List<KClass<*>>
         get() = _astClasses
     val enumClasses: List<KClass<out Enum<*>>>
@@ -125,7 +127,9 @@ class KolasuLanguage(val qualifiedName: String) {
         kClass: KClass<N>,
         exceptions: MutableList<Exception> = mutableListOf(),
     ): Attempt<Boolean, Exception> {
-        if (kClass == Node::class || kClass == Named::class || kClass == PossiblyNamed::class ||
+        if (kClass == Node::class ||
+            kClass == Named::class ||
+            kClass == PossiblyNamed::class ||
             kClass.superclasses.contains(
                 CommonElement::class,
             )
@@ -179,4 +183,7 @@ class KolasuLanguage(val qualifiedName: String) {
     fun findPrimitiveClass(name: String): KClass<*>? = primitiveClasses.find { it.simpleName == name }
 }
 
-data class Attempt<V, I>(val result: V, val issues: List<I>)
+data class Attempt<V, I>(
+    val result: V,
+    val issues: List<I>,
+)

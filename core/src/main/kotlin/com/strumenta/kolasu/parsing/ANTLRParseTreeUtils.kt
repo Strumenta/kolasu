@@ -44,7 +44,9 @@ fun ParserRuleContext.getOriginalText(): String {
     if (a > b) {
         throw IllegalStateException("Start index should be less than or equal to the stop index. Start: $a, Stop: $b")
     }
-    val interval = org.antlr.v4.runtime.misc.Interval(a, b)
+    val interval =
+        org.antlr.v4.runtime.misc
+            .Interval(a, b)
     return this.start.inputStream.getText(interval)
 }
 
@@ -62,7 +64,9 @@ fun Token.getOriginalText(): String {
     if (a > b) {
         throw IllegalStateException("Start index should be less than or equal to the stop index. Start: $a, Stop: $b")
     }
-    val interval = org.antlr.v4.runtime.misc.Interval(a, b)
+    val interval =
+        org.antlr.v4.runtime.misc
+            .Interval(a, b)
     return this.inputStream.getText(interval)
 }
 
@@ -77,7 +81,10 @@ fun Node.getText(code: String): String? = position?.text(code)
  *
  * Note that this is NOT serializable as ParseTree elements are not Serializable.
  */
-class ParseTreeOrigin(val parseTree: ParseTree, override var source: Source? = null) : Origin {
+class ParseTreeOrigin(
+    val parseTree: ParseTree,
+    override var source: Source? = null,
+) : Origin {
     override val position: Position?
         get() = parseTree.toPosition(source = source)
 
@@ -144,14 +151,13 @@ val ParserRuleContext.position: Position
 fun ParserRuleContext.toPosition(
     considerPosition: Boolean = true,
     source: Source? = null,
-): Position? {
-    return if (considerPosition && start != null && stop != null) {
+): Position? =
+    if (considerPosition && start != null && stop != null) {
         val position = position
         if (source == null) position else Position(position.start, position.end, source)
     } else {
         null
     }
-}
 
 fun TerminalNode.toPosition(
     considerPosition: Boolean = true,
@@ -166,30 +172,26 @@ fun Token.toPosition(
 fun ParseTree.toPosition(
     considerPosition: Boolean = true,
     source: Source? = null,
-): Position? {
-    return when (this) {
+): Position? =
+    when (this) {
         is TerminalNode -> this.toPosition(considerPosition, source)
         is ParserRuleContext -> this.toPosition(considerPosition, source)
         else -> null
     }
-}
 
 /**
  * Find the ancestor of the given element with the given class.
  */
-inline fun <reified T : RuleContext> RuleContext.ancestor(): T {
-    return this.ancestor(T::class)
-}
+inline fun <reified T : RuleContext> RuleContext.ancestor(): T = this.ancestor(T::class)
 
 /**
  * Find the ancestor of the given element with the given class.
  */
-fun <T : RuleContext> RuleContext.ancestor(kclass: KClass<T>): T {
-    return if (this.parent == null) {
+fun <T : RuleContext> RuleContext.ancestor(kclass: KClass<T>): T =
+    if (this.parent == null) {
         throw IllegalStateException("Cannot find ancestor of type $kclass")
     } else if (kclass.isInstance(this.parent)) {
         this.parent as T
     } else {
         this.parent.ancestor(kclass)
     }
-}

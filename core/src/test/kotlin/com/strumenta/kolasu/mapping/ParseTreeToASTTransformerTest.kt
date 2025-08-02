@@ -39,18 +39,39 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-data class CU(val specifiedPosition: Position? = null, var statements: List<Node> = listOf()) : Node(specifiedPosition)
+data class CU(
+    val specifiedPosition: Position? = null,
+    var statements: List<Node> = listOf(),
+) : Node(specifiedPosition)
 
-data class DisplayIntStatement(val specifiedPosition: Position? = null, val value: Int) : Node(specifiedPosition)
+data class DisplayIntStatement(
+    val specifiedPosition: Position? = null,
+    val value: Int,
+) : Node(specifiedPosition)
 
-data class SetStatement(val specifiedPosition: Position? = null, var variable: String = "", val value: Int = 0) :
-    Node(specifiedPosition)
+data class SetStatement(
+    val specifiedPosition: Position? = null,
+    var variable: String = "",
+    val value: Int = 0,
+) : Node(specifiedPosition)
 
-data class EModule(override val name: String, val entities: MutableList<EEntity>) : Node(), Named
+data class EModule(
+    override val name: String,
+    val entities: MutableList<EEntity>,
+) : Node(),
+    Named
 
-data class EEntity(override val name: String, val features: MutableList<EFeature>) : Node(), Named
+data class EEntity(
+    override val name: String,
+    val features: MutableList<EFeature>,
+) : Node(),
+    Named
 
-data class EFeature(override val name: String, val type: EType) : Node(), Named
+data class EFeature(
+    override val name: String,
+    val type: EType,
+) : Node(),
+    Named
 
 sealed class EType : Node()
 
@@ -58,38 +79,75 @@ class EStringType : EType()
 
 class EBooleanType : EType()
 
-data class EEntityRefType(val entity: ReferenceByName<EEntity>) : EType()
+data class EEntityRefType(
+    val entity: ReferenceByName<EEntity>,
+) : EType()
 
-data class SScript(val statements: MutableList<SStatement>) : Node()
+data class SScript(
+    val statements: MutableList<SStatement>,
+) : Node()
 
 sealed class SStatement : Node()
 
-data class SCreateStatement(val entity: ReferenceByName<EEntity>, val name: String? = null) : SStatement()
+data class SCreateStatement(
+    val entity: ReferenceByName<EEntity>,
+    val name: String? = null,
+) : SStatement()
 
-data class SSetStatement(val feature: ReferenceByName<EFeature>, val instance: SExpression, val value: SExpression) :
-    SStatement()
+data class SSetStatement(
+    val feature: ReferenceByName<EFeature>,
+    val instance: SExpression,
+    val value: SExpression,
+) : SStatement()
 
-data class SPrintStatement(val message: SExpression) : SStatement()
+data class SPrintStatement(
+    val message: SExpression,
+) : SStatement()
 
 sealed class SExpression : Node()
 
-data class SStringLiteral(val value: String) : SExpression()
+data class SStringLiteral(
+    val value: String,
+) : SExpression()
 
-data class SIntegerLiteral(val value: Int) : SExpression()
+data class SIntegerLiteral(
+    val value: Int,
+) : SExpression()
 
-data class SDivision(val left: SExpression, val right: SExpression) : SExpression()
+data class SDivision(
+    val left: SExpression,
+    val right: SExpression,
+) : SExpression()
 
-data class SSubtraction(val left: SExpression, val right: SExpression) : SExpression()
+data class SSubtraction(
+    val left: SExpression,
+    val right: SExpression,
+) : SExpression()
 
-data class SMultiplication(val left: SExpression, val right: SExpression) : SExpression()
+data class SMultiplication(
+    val left: SExpression,
+    val right: SExpression,
+) : SExpression()
 
-data class SSum(val left: SExpression, val right: SExpression) : SExpression()
+data class SSum(
+    val left: SExpression,
+    val right: SExpression,
+) : SExpression()
 
-data class SConcat(val left: SExpression, val right: SExpression) : SExpression()
+data class SConcat(
+    val left: SExpression,
+    val right: SExpression,
+) : SExpression()
 
-data class SFeatureAccess(val feature: ReferenceByName<EFeature>, val container: SExpression) : SExpression()
+data class SFeatureAccess(
+    val feature: ReferenceByName<EFeature>,
+    val container: SExpression,
+) : SExpression()
 
-data class SInstanceById(val entity: ReferenceByName<EEntity>, val index: SExpression) : SExpression()
+data class SInstanceById(
+    val entity: ReferenceByName<EEntity>,
+    val index: SExpression,
+) : SExpression()
 
 class ParseTreeToASTTransformerTest {
     @Test
@@ -136,15 +194,13 @@ class ParseTreeToASTTransformerTest {
                                 "RuntimeException: Failed to transform [8] into " +
                                     "class com.strumenta.simplelang.SimpleLangParser${'$'}SetStmtContext " +
                                     "-> IllegalStateException: Parse error",
-                        )
-                            .withParseTreeNode(pt.statement(0)),
+                        ).withParseTreeNode(pt.statement(0)),
                         GenericErrorNode(
                             message =
                                 "RuntimeException: Failed to transform [8] into " +
                                     "class com.strumenta.simplelang.SimpleLangParser${'$'}DisplayStmtContext " +
                                     "-> IllegalStateException: Parse error",
-                        )
-                            .withParseTreeNode(pt.statement(1)),
+                        ).withParseTreeNode(pt.statement(1)),
                     ),
             ).withParseTreeNode(pt)
         val transformedCU = transformer.transform(pt)!! as CU
@@ -190,21 +246,37 @@ class ParseTreeToASTTransformerTest {
     }
 
     private fun configure(transformer: ASTTransformer) {
-        transformer.registerNodeFactory(SimpleLangParser.CompilationUnitContext::class, CU::class)
+        transformer
+            .registerNodeFactory(SimpleLangParser.CompilationUnitContext::class, CU::class)
             .withChild(CU::statements, SimpleLangParser.CompilationUnitContext::statement)
         transformer.registerNodeFactory(SimpleLangParser.DisplayStmtContext::class) { ctx ->
             if (ctx.exception != null || ctx.expression().exception != null) {
                 // We throw a custom error so that we can check that it's recorded in the AST
                 throw IllegalStateException("Parse error")
             }
-            DisplayIntStatement(value = ctx.expression().INT_LIT().text.toInt())
+            DisplayIntStatement(
+                value =
+                    ctx
+                        .expression()
+                        .INT_LIT()
+                        .text
+                        .toInt(),
+            )
         }
         transformer.registerNodeFactory(SimpleLangParser.SetStmtContext::class) { ctx ->
             if (ctx.exception != null || ctx.expression().exception != null) {
                 // We throw a custom error so that we can check that it's recorded in the AST
                 throw IllegalStateException("Parse error")
             }
-            SetStatement(variable = ctx.ID().text, value = ctx.expression().INT_LIT().text.toInt())
+            SetStatement(
+                variable = ctx.ID().text,
+                value =
+                    ctx
+                        .expression()
+                        .INT_LIT()
+                        .text
+                        .toInt(),
+            )
         }
     }
 
@@ -216,9 +288,7 @@ class ParseTreeToASTTransformerTest {
             column: Int,
             message: String?,
             p5: RecognitionException?,
-        ) {
-            throw RuntimeException("L$line:$column: $message")
-        }
+        ): Unit = throw RuntimeException("L$line:$column: $message")
 
         override fun reportAmbiguity(
             p0: Parser?,
@@ -380,7 +450,7 @@ class ParseTreeToASTTransformerTest {
                         AntlrScriptParser
                             .Div_mult_expressionContext,
                         SDivision,
-                        >()(
+                    >()(
                         pt,
                         t,
                     )
@@ -391,7 +461,7 @@ class ParseTreeToASTTransformerTest {
                         AntlrScriptParser
                             .Div_mult_expressionContext,
                         SMultiplication,
-                        >()(
+                    >()(
                         pt,
                         t,
                     )
@@ -407,7 +477,7 @@ class ParseTreeToASTTransformerTest {
                         AntlrScriptParser
                             .Sum_sub_expressionContext,
                         SSum,
-                        >()(
+                    >()(
                         pt,
                         t,
                     )
@@ -418,7 +488,7 @@ class ParseTreeToASTTransformerTest {
                         AntlrScriptParser
                             .Sum_sub_expressionContext,
                         SSubtraction,
-                        >()(
+                    >()(
                         pt,
                         t,
                     )
@@ -435,7 +505,7 @@ class ParseTreeToASTTransformerTest {
         transformer.registerTrivialPTtoASTConversion<
             AntlrScriptParser.Feature_access_expressionContext,
             SFeatureAccess,
-            >(
+        >(
             AntlrScriptParser.Feature_access_expressionContext::instance to SFeatureAccess::container,
         )
         val expectedAST =
@@ -507,8 +577,9 @@ class ParseTreeToASTTransformerTest {
     }
 }
 
-class EntTransformer(issues: MutableList<Issue> = mutableListOf()) :
-    ParseTreeToASTTransformer(issues, allowGenericNode = false) {
+class EntTransformer(
+    issues: MutableList<Issue> = mutableListOf(),
+) : ParseTreeToASTTransformer(issues, allowGenericNode = false) {
     init {
         registerNodeFactory(EntCtx::class) { ctx -> Ent(ctx.name) }
             .withChild(Ent::features, EntCtx::features)
@@ -518,7 +589,10 @@ class EntTransformer(issues: MutableList<Issue> = mutableListOf()) :
     }
 }
 
-data class EntCtx(val name: String, val features: List<EntCtxFeature?>)
+data class EntCtx(
+    val name: String,
+    val features: List<EntCtxFeature?>,
+)
 
 data class EntCtxFeature(
     val name: String? = null,
@@ -531,12 +605,17 @@ open class EntCtxPrimitiveType : EntCtxType()
 
 class EntCtxStringType : EntCtxPrimitiveType()
 
-data class Ent(override val name: String, var features: List<EntFeature> = listOf()) : Node(), Named
+data class Ent(
+    override val name: String,
+    var features: List<EntFeature> = listOf(),
+) : Node(),
+    Named
 
 data class EntFeature(
     override val name: String? = null,
     var type: EntType? = null,
-) : Node(), PossiblyNamed
+) : Node(),
+    PossiblyNamed
 
 open class EntType : Node()
 

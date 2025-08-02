@@ -22,7 +22,12 @@ typealias Node = BaseASTNode
  * It implements Origin as it could be the source of a AST-to-AST transformation, so the node itself can be
  * the Origin of another node.
  */
-open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
+open class BaseASTNode() :
+    Origin,
+    Destination,
+    Serializable,
+    HasID,
+    ASTNode {
     private val annotations = mutableListOf<AnnotationInstance>()
 
     @Internal
@@ -148,17 +153,13 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
      * Tests whether the given position is contained in the interval represented by this object.
      * @param position the position
      */
-    fun contains(position: Position?): Boolean {
-        return this.position?.contains(position) ?: false
-    }
+    fun contains(position: Position?): Boolean = this.position?.contains(position) ?: false
 
     /**
      * Tests whether the given position overlaps the interval represented by this object.
      * @param position the position
      */
-    fun overlaps(position: Position?): Boolean {
-        return this.position?.overlaps(position) ?: false
-    }
+    fun overlaps(position: Position?): Boolean = this.position?.overlaps(position) ?: false
 
     /**
      * The source text for this node
@@ -175,16 +176,13 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
      * their own implementation. If Link properties are present it could lead to stack overflows in case
      * of circular graphs.
      */
-    final override fun toString(): String {
-        return "${this.nodeType}(${originalProperties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
-    }
+    final override fun toString(): String =
+        "${this.nodeType}(${originalProperties.joinToString(", ") { "${it.name}=${it.valueToString()}" }})"
 
     fun getChildren(
         containment: Containment,
         includeDerived: Boolean = false,
-    ): List<Node> {
-        return getChildren(containment.name, includeDerived)
-    }
+    ): List<Node> = getChildren(containment.name, includeDerived)
 
     fun getChildren(
         propertyName: String,
@@ -215,9 +213,7 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
         }
     }
 
-    fun getReference(reference: Reference): ReferenceByName<*>? {
-        return getReference(reference.name)
-    }
+    fun getReference(reference: Reference): ReferenceByName<*>? = getReference(reference.name)
 
     fun getReference(name: String): ReferenceByName<*>? {
         val rawValue = properties.find { it.name == name }!!.value
@@ -242,9 +238,7 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
         return value
     }
 
-    fun getAttributeValue(name: String): Any? {
-        return properties.find { it.name == name }!!.value
-    }
+    fun getAttributeValue(name: String): Any? = properties.find { it.name == name }!!.value
 
     override fun getPropertyValue(property: Property): Any? {
         TODO("Not yet implemented")
@@ -327,9 +321,7 @@ open class BaseASTNode() : Origin, Destination, Serializable, HasID, ASTNode {
         TODO("Not yet implemented")
     }
 
-    override fun getAnnotations(): List<AnnotationInstance> {
-        return annotations
-    }
+    override fun getAnnotations(): List<AnnotationInstance> = annotations
 
     override fun getAnnotations(annotation: Annotation): List<AnnotationInstance?> {
         TODO("Not yet implemented")

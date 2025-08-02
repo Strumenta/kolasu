@@ -5,13 +5,23 @@ import org.junit.Test as test
 
 abstract class Expr : Node()
 
-class Number(val value: Int) : Expr()
+class Number(
+    val value: Int,
+) : Expr()
 
-class Add(val left: Expr, val right: Expr) : Expr()
+class Add(
+    val left: Expr,
+    val right: Expr,
+) : Expr()
 
-class Sub(private val left: Expr, private val right: Expr) : Expr()
+class Sub(
+    private val left: Expr,
+    private val right: Expr,
+) : Expr()
 
-class Empty(val empty: List<Expr>? = emptyList()) : Expr()
+class Empty(
+    val empty: List<Expr>? = emptyList(),
+) : Expr()
 
 open class Expressions(
     val public: List<Expr> = emptyList(),

@@ -40,12 +40,11 @@ class NodeFactory<Source, Output : Node>(
             finalizer: (Output) -> Unit = {},
             skipChildren: Boolean = false,
             childrenSetAtConstruction: Boolean = false,
-        ): NodeFactory<Source, Output> {
-            return NodeFactory({ source, at, nf ->
+        ): NodeFactory<Source, Output> =
+            NodeFactory({ source, at, nf ->
                 val result = singleConstructor(source, at, nf)
                 if (result == null) emptyList() else listOf(result)
             }, children, finalizer, skipChildren, childrenSetAtConstruction)
-        }
     }
 
     /**
@@ -210,8 +209,8 @@ class NodeFactory<Source, Output : Node>(
     private fun getSubExpression(
         src: Any,
         elem: String,
-    ): Any? {
-        return if (src is Collection<*>) {
+    ): Any? =
+        if (src is Collection<*>) {
             src.map { getSubExpression(it!!, elem) }
         } else {
             val sourceProp = src::class.memberProperties.find { it.name == elem }
@@ -224,7 +223,6 @@ class NodeFactory<Source, Output : Node>(
                 (sourceProp as KProperty1<Any, Any>).get(src)
             }
         }
-    }
 }
 
 /**
@@ -410,9 +408,10 @@ open class ASTTransformer(
         val childrenSource = childFactory.get(getSource(node, source))
         val child: Any? =
             if (pd.multiple) {
-                (childrenSource as List<*>?)?.map {
-                    transformIntoNodes(it, node, childFactory.type)
-                }?.flatten() ?: listOf<Node>()
+                (childrenSource as List<*>?)
+                    ?.map {
+                        transformIntoNodes(it, node, childFactory.type)
+                    }?.flatten() ?: listOf<Node>()
             } else {
                 transform(childrenSource, node)
             }
@@ -426,9 +425,7 @@ open class ASTTransformer(
     protected open fun getSource(
         node: Node,
         source: Any,
-    ): Any {
-        return source
-    }
+    ): Any = source
 
     protected open fun <S : Any, T : Node> makeNodes(
         factory: NodeFactory<S, T>,
@@ -541,9 +538,8 @@ open class ASTTransformer(
         factory: (S) -> List<T>,
     ): NodeFactory<S, T> = registerMultipleNodeFactory(kclass) { input, _, _ -> factory(input) }
 
-    inline fun <reified S : Any, reified T : Node> registerNodeFactory(): NodeFactory<S, T> {
-        return registerNodeFactory(S::class, T::class)
-    }
+    inline fun <reified S : Any, reified T : Node> registerNodeFactory(): NodeFactory<S, T> =
+        registerNodeFactory(S::class, T::class)
 
     inline fun <reified S : Any> notTranslateDirectly(): NodeFactory<S, Node> =
         registerNodeFactory<S, Node> {
@@ -558,16 +554,18 @@ open class ASTTransformer(
         kParameter: KParameter,
         source: S,
         childNodeFactory: ChildNodeFactory<Any, T, Any>,
-    ): ParameterValue {
-        return when (val childSource = childNodeFactory.get.invoke(source)) {
+    ): ParameterValue =
+        when (val childSource = childNodeFactory.get.invoke(source)) {
             null -> {
                 AbsentParameterValue
             }
 
             is List<*> -> {
                 PresentParameterValue(
-                    childSource.map { transformIntoNodes(it) }
-                        .flatten().toMutableList(),
+                    childSource
+                        .map { transformIntoNodes(it) }
+                        .flatten()
+                        .toMutableList(),
                 )
             }
 
@@ -585,7 +583,6 @@ open class ASTTransformer(
                 }
             }
         }
-    }
 
     fun <S : Any, T : Node> registerNodeFactory(
         source: KClass<S>,
@@ -634,7 +631,8 @@ open class ASTTransformer(
                     if (thisFactory.childrenSetAtConstruction) {
                         val constructor = target.preferredConstructor()
                         val constructorParamValues =
-                            constructor.parameters.map { it to getConstructorParameterValue(it) }
+                            constructor.parameters
+                                .map { it to getConstructorParameterValue(it) }
                                 .filter { it.second is PresentParameterValue }
                                 .associate { it.first to (it.second as PresentParameterValue).value }
                         try {
@@ -719,6 +717,8 @@ private fun <Source : Any, Target : Any, Child : Any> NodeFactory<*, *>.getChild
 
 private sealed class ParameterValue
 
-private class PresentParameterValue(val value: Any?) : ParameterValue()
+private class PresentParameterValue(
+    val value: Any?,
+) : ParameterValue()
 
 private object AbsentParameterValue : ParameterValue()

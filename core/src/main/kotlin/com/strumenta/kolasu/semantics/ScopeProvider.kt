@@ -15,7 +15,7 @@ class ScopeProvider(
     private val scopeResolutionRules: MutableMap<
         String,
         MutableMap<KClass<out Node>, (Node) -> Scope>,
-        > = mutableMapOf(),
+    > = mutableMapOf(),
     private val scopeConstructionRules: MutableMap<KClass<out Node>, (Node) -> Scope> = mutableMapOf(),
 ) {
     fun loadFrom(
@@ -36,8 +36,8 @@ class ScopeProvider(
     fun scopeFor(
         referenceByName: KReferenceByName<out Node>,
         node: Node? = null,
-    ): Scope {
-        return node
+    ): Scope =
+        node
             ?.let { this.scopeResolutionRules.getOrDefault(referenceByName.name, null) }
             ?.let {
                 it.keys
@@ -48,16 +48,16 @@ class ScopeProvider(
                     ?.invoke(node)
             }
             ?: Scope()
-    }
 
-    fun scopeFrom(node: Node? = null): Scope {
-        return node?.let {
-            this.scopeConstructionRules.keys
-                .filter { it.isSuperclassOf(node::class) }
-                .sortBySubclassesFirst()
-                .firstOrNull()
-        }?.let { this.scopeConstructionRules[it] }?.invoke(node) ?: Scope()
-    }
+    fun scopeFrom(node: Node? = null): Scope =
+        node
+            ?.let {
+                this.scopeConstructionRules.keys
+                    .filter { it.isSuperclassOf(node::class) }
+                    .sortBySubclassesFirst()
+                    .firstOrNull()
+            }?.let { this.scopeConstructionRules[it] }
+            ?.invoke(node) ?: Scope()
 }
 
 // configuration
@@ -67,7 +67,7 @@ class ScopeProviderConfiguration(
     val scopeResolutionRules: MutableMap<
         String,
         MutableMap<KClass<out Node>, Semantics.(Node) -> Scope>,
-        > = mutableMapOf(),
+    > = mutableMapOf(),
     val scopeConstructionRules: MutableMap<KClass<out Node>, Semantics.(Node) -> Scope> = mutableMapOf(),
 ) {
     inline fun <reified N : Node> scopeFor(
@@ -135,6 +135,4 @@ data class Scope(
 fun scope(
     ignoreCase: Boolean = false,
     init: Scope.() -> Unit,
-): Scope {
-    return Scope(ignoreCase = ignoreCase).apply(init)
-}
+): Scope = Scope(ignoreCase = ignoreCase).apply(init)

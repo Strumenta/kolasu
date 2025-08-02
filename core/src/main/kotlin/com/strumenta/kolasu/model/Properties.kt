@@ -14,7 +14,8 @@ val <T : Any> Class<T>.nodeDerivedProperties: Collection<KProperty1<T, *>>
     get() = this.kotlin.nodeDerivedProperties
 val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
     get() =
-        memberProperties.asSequence()
+        memberProperties
+            .asSequence()
             .filter { it.visibility == KVisibility.PUBLIC }
             .filter { it.findAnnotation<Internal>() == null }
             .filter { it.findAnnotation<Link>() == null }
@@ -23,8 +24,7 @@ val <T : Any> KClass<T>.nodeProperties: Collection<KProperty1<T, *>>
                     "Property ${it.name} in ${this.qualifiedName} should be marked as internal"
                 }
                 it
-            }
-            .toList()
+            }.toList()
 
 val <T : Any> KClass<T>.nodeOriginalProperties: Collection<KProperty1<T, *>>
     get() =

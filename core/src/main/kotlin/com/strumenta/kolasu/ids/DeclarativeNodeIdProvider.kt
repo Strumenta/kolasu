@@ -24,18 +24,17 @@ open class DeclarativeNodeIdProvider(
 ) : SemanticNodeIDProvider {
     private val rules: List<DeclarativeNodeIdProviderRule<out Node>> = rules.sorted()
 
-    override fun hasSemanticIdentity(kNode: Node): Boolean {
-        return tryToGetSemanticID(kNode) != null
-    }
+    override fun hasSemanticIdentity(kNode: Node): Boolean = tryToGetSemanticID(kNode) != null
 
-    override fun semanticID(kNode: Node): String {
-        return tryToGetSemanticID(kNode)
+    override fun semanticID(kNode: Node): String =
+        tryToGetSemanticID(kNode)
             ?: throw RuntimeException("Cannot find rule for node type: ${kNode::class.qualifiedName}")
-    }
 
-    private fun tryToGetSemanticID(kNode: Node): String? {
-        return this.rules.firstOrNull { it.canBeInvokedWith(kNode::class) }?.invoke(this, kNode)
-    }
+    private fun tryToGetSemanticID(kNode: Node): String? =
+        this.rules
+            .firstOrNull {
+                it.canBeInvokedWith(kNode::class)
+            }?.invoke(this, kNode)
 }
 
 /**
@@ -52,7 +51,8 @@ inline fun <reified NodeTy : Node> idFor(
 class DeclarativeNodeIdProviderRule<NodeTy : Node>(
     private val nodeType: KClass<NodeTy>,
     private val specification: SemanticNodeIDProvider.(NodeTy) -> String,
-) : Comparable<DeclarativeNodeIdProviderRule<*>>, (SemanticNodeIDProvider, Node) -> String {
+) : Comparable<DeclarativeNodeIdProviderRule<*>>,
+    (SemanticNodeIDProvider, Node) -> String {
     override fun invoke(
         nodeIdProvider: SemanticNodeIDProvider,
         node: Node,
@@ -61,15 +61,12 @@ class DeclarativeNodeIdProviderRule<NodeTy : Node>(
         return nodeIdProvider.specification(node as NodeTy)
     }
 
-    fun canBeInvokedWith(type: KClass<*>): Boolean {
-        return this.nodeType.isSuperclassOf(type)
-    }
+    fun canBeInvokedWith(type: KClass<*>): Boolean = this.nodeType.isSuperclassOf(type)
 
-    override fun compareTo(other: DeclarativeNodeIdProviderRule<*>): Int {
-        return when {
+    override fun compareTo(other: DeclarativeNodeIdProviderRule<*>): Int =
+        when {
             this.nodeType.isSuperclassOf(other.nodeType) -> 1
             this.nodeType.isSubclassOf(other.nodeType) -> -1
             else -> (this.nodeType.qualifiedName ?: "") compareTo (other.nodeType.qualifiedName ?: "")
         }
-    }
 }

@@ -41,8 +41,7 @@ open class SymbolResolver(
             ?.let {
                 @Suppress("UNCHECKED_CAST")
                 it.value as ReferenceByName<PossiblyNamed>?
-            }
-            ?.let { this.scopeProvider.scopeFor(node, reference).resolve(it) }
+            }?.let { this.scopeProvider.scopeFor(node, reference).resolve(it) }
     }
 
     /**
@@ -67,12 +66,11 @@ open class SymbolResolver(
     /**
      * Retrieve all reference properties of a given node.
      **/
-    private fun Node.references(): List<KProperty1<Node, ReferenceByName<PossiblyNamed>?>> {
-        return this.nodeProperties
+    private fun Node.references(): List<KProperty1<Node, ReferenceByName<PossiblyNamed>?>> =
+        this.nodeProperties
             .filter { it.returnType.isSubtypeOf(kReferenceByNameType()) }
             .mapNotNull {
                 @Suppress("UNCHECKED_CAST")
                 it as? KProperty1<Node, ReferenceByName<PossiblyNamed>?>
             }
-    }
 }

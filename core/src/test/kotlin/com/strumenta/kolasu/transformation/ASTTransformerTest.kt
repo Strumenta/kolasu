@@ -15,13 +15,20 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-data class CU(var statements: List<Node> = listOf()) : Node()
+data class CU(
+    var statements: List<Node> = listOf(),
+) : Node()
 
 abstract class Statement : Node()
 
-data class DisplayIntStatement(val value: Int) : Statement()
+data class DisplayIntStatement(
+    val value: Int,
+) : Statement()
 
-data class SetStatement(var variable: String = "", val value: Int = 0) : Statement()
+data class SetStatement(
+    var variable: String = "",
+    val value: Int = 0,
+) : Statement()
 
 enum class Operator {
     PLUS,
@@ -30,38 +37,71 @@ enum class Operator {
 
 sealed class Expression : Node()
 
-data class IntLiteral(val value: Int) : Expression()
+data class IntLiteral(
+    val value: Int,
+) : Expression()
 
-data class GenericBinaryExpression(val operator: Operator, val left: Expression, val right: Expression) : Node()
+data class GenericBinaryExpression(
+    val operator: Operator,
+    val left: Expression,
+    val right: Expression,
+) : Node()
 
-data class Mult(val left: Expression, val right: Expression) : Node()
+data class Mult(
+    val left: Expression,
+    val right: Expression,
+) : Node()
 
-data class Sum(val left: Expression, val right: Expression) : Node()
+data class Sum(
+    val left: Expression,
+    val right: Expression,
+) : Node()
 
 sealed class ALangExpression : Node()
 
-data class ALangIntLiteral(val value: Int) : ALangExpression()
+data class ALangIntLiteral(
+    val value: Int,
+) : ALangExpression()
 
-data class ALangSum(val left: ALangExpression, val right: ALangExpression) : ALangExpression()
+data class ALangSum(
+    val left: ALangExpression,
+    val right: ALangExpression,
+) : ALangExpression()
 
-data class ALangMult(val left: ALangExpression, val right: ALangExpression) : ALangExpression()
+data class ALangMult(
+    val left: ALangExpression,
+    val right: ALangExpression,
+) : ALangExpression()
 
 sealed class BLangExpression : Node()
 
-data class BLangIntLiteral(val value: Int) : BLangExpression()
+data class BLangIntLiteral(
+    val value: Int,
+) : BLangExpression()
 
-data class BLangSum(val left: BLangExpression, val right: BLangExpression) : BLangExpression()
+data class BLangSum(
+    val left: BLangExpression,
+    val right: BLangExpression,
+) : BLangExpression()
 
-data class BLangMult(val left: BLangExpression, val right: BLangExpression) : BLangExpression()
+data class BLangMult(
+    val left: BLangExpression,
+    val right: BLangExpression,
+) : BLangExpression()
 
 enum class Type {
     INT,
     STR,
 }
 
-sealed class TypedExpression(open var type: Type? = null) : Node()
+sealed class TypedExpression(
+    open var type: Type? = null,
+) : Node()
 
-data class TypedLiteral(var value: String, override var type: Type?) : TypedExpression(type)
+data class TypedLiteral(
+    var value: String,
+    override var type: Type?,
+) : TypedExpression(type)
 
 data class TypedSum(
     var left: TypedExpression,
@@ -79,7 +119,8 @@ class ASTTransformerTest {
     @Test
     fun testIdentitiyTransformer() {
         val transformer = ASTTransformer()
-        transformer.registerNodeFactory(CU::class, CU::class)
+        transformer
+            .registerNodeFactory(CU::class, CU::class)
             .withChild(CU::statements, CU::statements)
         transformer.registerIdentityTransformation(DisplayIntStatement::class)
         transformer.registerIdentityTransformation(SetStatement::class)
@@ -285,7 +326,8 @@ class ASTTransformerTest {
     @Test
     fun testDroppingNodes() {
         val transformer = ASTTransformer()
-        transformer.registerNodeFactory(CU::class, CU::class)
+        transformer
+            .registerNodeFactory(CU::class, CU::class)
             .withChild(CU::statements, CU::statements)
         transformer.registerNodeFactory(DisplayIntStatement::class) { _ -> null }
         transformer.registerIdentityTransformation(SetStatement::class)
@@ -308,7 +350,8 @@ class ASTTransformerTest {
     @Test
     fun testNestedOrigin() {
         val transformer = ASTTransformer()
-        transformer.registerNodeFactory(CU::class, CU::class)
+        transformer
+            .registerNodeFactory(CU::class, CU::class)
             .withChild(CU::statements, CU::statements)
         transformer.registerNodeFactory(DisplayIntStatement::class) { s ->
             s.withOrigin(GenericNode())
@@ -330,7 +373,8 @@ class ASTTransformerTest {
     @Test
     fun testTransformingOneNodeToMany() {
         val transformer = ASTTransformer()
-        transformer.registerNodeFactory(BarRoot::class, BazRoot::class)
+        transformer
+            .registerNodeFactory(BarRoot::class, BazRoot::class)
             .withChild(BazRoot::stmts, BarRoot::stmts)
         transformer.registerMultipleNodeFactory(BarStmt::class) { s ->
             listOf(BazStmt("${s.desc}-1"), BazStmt("${s.desc}-2"))
@@ -363,8 +407,9 @@ class ASTTransformerTest {
     @Test
     fun testUnmappedNode() {
         val transformer1 = ASTTransformer(allowGenericNode = false)
-        transformer1.registerNodeFactory(BarRoot::class, BazRoot::class)
-            .withChild(BazRoot::stmts) { -> stmts }
+        transformer1
+            .registerNodeFactory(BarRoot::class, BazRoot::class)
+            .withChild(BazRoot::stmts) { stmts }
         val original =
             BarRoot(
                 stmts =
@@ -595,26 +640,56 @@ class ASTTransformerTest {
     }
 }
 
-data class BazRoot(var stmts: MutableList<BazStmt> = mutableListOf()) : Node()
+data class BazRoot(
+    var stmts: MutableList<BazStmt> = mutableListOf(),
+) : Node()
 
-data class BazStmt(val desc: String? = null) : Node()
+data class BazStmt(
+    val desc: String? = null,
+) : Node()
 
-data class BarRoot(var stmts: MutableList<BarStmt> = mutableListOf()) : Node()
+data class BarRoot(
+    var stmts: MutableList<BarStmt> = mutableListOf(),
+) : Node()
 
-data class BarStmt(val desc: String) : Node()
+data class BarStmt(
+    val desc: String,
+) : Node()
 
-data class FooRoot(var desc: String, var stmts: MutableList<BarStmt> = mutableListOf()) : Node()
+data class FooRoot(
+    var desc: String,
+    var stmts: MutableList<BarStmt> = mutableListOf(),
+) : Node()
 
-open class AA(var a: String, val child: AB) : Node()
+open class AA(
+    var a: String,
+    val child: AB,
+) : Node()
 
-open class AB(var b: String, val child: AC) : Node()
+open class AB(
+    var b: String,
+    val child: AC,
+) : Node()
 
-open class AC(var c: String, val children: MutableList<AD>) : Node()
+open class AC(
+    var c: String,
+    val children: MutableList<AD>,
+) : Node()
 
-open class AD(var d: String) : Node()
+open class AD(
+    var d: String,
+) : Node()
 
-class BA(a: String, child: AB) : AA(a, child)
+class BA(
+    a: String,
+    child: AB,
+) : AA(a, child)
 
-class BB(b: String, child: AC) : AB(b, child)
+class BB(
+    b: String,
+    child: AC,
+) : AB(b, child)
 
-class BD(d: String) : AD(d)
+class BD(
+    d: String,
+) : AD(d)

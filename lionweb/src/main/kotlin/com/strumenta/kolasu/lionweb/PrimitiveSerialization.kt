@@ -26,7 +26,9 @@ fun registerSerializersAndDeserializersInMetamodelRegistry(
     )
 }
 
-class TokensList(val tokens: List<KolasuToken>)
+class TokensList(
+    val tokens: List<KolasuToken>,
+)
 
 //
 // Char
@@ -110,13 +112,15 @@ val tokensListPrimitiveDeserializer =
             if (serialized.isEmpty()) {
                 mutableListOf()
             } else {
-                serialized.split(";").map {
-                    val parts = it.split("$")
-                    require(parts.size == 2)
-                    val category = parts[0]
-                    val position = positionDeserializer.deserialize(parts[1])
-                    KolasuToken(TokenCategory(category), position)
-                }.toMutableList()
+                serialized
+                    .split(";")
+                    .map {
+                        val parts = it.split("$")
+                        require(parts.size == 2)
+                        val category = parts[0]
+                        val position = positionDeserializer.deserialize(parts[1])
+                        KolasuToken(TokenCategory(category), position)
+                    }.toMutableList()
             }
         TokensList(tokens)
     }

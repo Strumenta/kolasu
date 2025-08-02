@@ -30,7 +30,10 @@ val Node.isDirectlyOrIndirectlyAPlaceholderASTTransformation: Boolean
 /**
  * This is used to indicate that a Node represents some form of placeholders to be used in transformation.
  */
-sealed class PlaceholderASTTransformation(val origin: Origin?, val message: String) : Origin {
+sealed class PlaceholderASTTransformation(
+    val origin: Origin?,
+    val message: String,
+) : Origin {
     override val position: Position?
         get() = origin?.position
     override val sourceText: String?
@@ -48,8 +51,7 @@ class MissingASTTransformation(
         "Translation of a node is not yet implemented: " +
             "${if (transformationSource is Node) transformationSource.simpleNodeType else transformationSource}" +
             if (expectedType != null) " into $expectedType" else "",
-) :
-    PlaceholderASTTransformation(origin, message) {
+) : PlaceholderASTTransformation(origin, message) {
     constructor(transformationSource: Node, expectedType: KClass<out Node>? = null) : this(
         transformationSource,
         transformationSource,
@@ -62,4 +64,7 @@ class MissingASTTransformation(
  * This is typically the case because the transformation covers only certain case and we encountered
  * one that was not covered.
  */
-class FailingASTTransformation(origin: Origin?, message: String) : PlaceholderASTTransformation(origin, message)
+class FailingASTTransformation(
+    origin: Origin?,
+    message: String,
+) : PlaceholderASTTransformation(origin, message)

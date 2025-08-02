@@ -23,11 +23,13 @@ class SemanticsTest {
     fun testTypeComputation() {
         val compilationUnit = getCompilationUnit()
         val featureDeclaration =
-            compilationUnit.walk()
+            compilationUnit
+                .walk()
                 .filterIsInstance<FeatureDecl>()
                 .find { featureDeclaration -> featureDeclaration.name == "feature_0" }!!
         assertEquals(
-            compilationUnit.walk()
+            compilationUnit
+                .walk()
                 .filterIsInstance<ClassDecl>()
                 .find { classDeclaration -> classDeclaration.name == "class_1" },
             getSemantics().typeComputer.typeFor(featureDeclaration),
@@ -86,7 +88,9 @@ class SemanticsTest {
                 // scope resolution rules
                 scopeFor(ClassDecl::superclass) {
                     scope {
-                        it.findAncestorOfType(CompilationUnit::class.java)?.content
+                        it
+                            .findAncestorOfType(CompilationUnit::class.java)
+                            ?.content
                             ?.filterIsInstance<ClassDecl>()
                             ?.filter { classDecl -> classDecl.name != it.name }
                             ?.forEach(this::define)
@@ -109,15 +113,18 @@ class SemanticsTest {
                         symbolResolver.scopeFrom(typeComputer.typeFor(it.context))
                     } else {
                         scope {
-                            it.findAncestorOfType(CompilationUnit::class.java)
+                            it
+                                .findAncestorOfType(CompilationUnit::class.java)
                                 ?.processNodesOfType(SymbolNode::class.java, this::define)
                         }
                     }
                 }
                 scopeFor(CallExpr::operation) {
                     scope {
-                        it.findAncestorOfType(ClassDecl::class.java)
-                            ?.operations?.forEach(this::define)
+                        it
+                            .findAncestorOfType(ClassDecl::class.java)
+                            ?.operations
+                            ?.forEach(this::define)
                     }
                 }
                 // scope construction rules
@@ -127,11 +134,12 @@ class SemanticsTest {
                         it.features.forEach(this::define)
                         parent =
                             symbolResolver.scopeFrom(
-                                it.superclass?.apply {
-                                    if (!this.resolved) {
-                                        symbolResolver.resolve(ClassDecl::superclass, it)
-                                    }
-                                }?.referred,
+                                it.superclass
+                                    ?.apply {
+                                        if (!this.resolved) {
+                                            symbolResolver.resolve(ClassDecl::superclass, it)
+                                        }
+                                    }?.referred,
                             )
                     }
                 }

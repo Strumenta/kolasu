@@ -13,7 +13,11 @@ interface ErrorNode {
 /**
  * Generic implementation of [ErrorNode].
  */
-class GenericErrorNode(error: Exception? = null, message: String? = null) : Node(), ErrorNode {
+class GenericErrorNode(
+    error: Exception? = null,
+    message: String? = null,
+) : Node(),
+    ErrorNode {
     override val message: String =
         message
             ?: error?.message() ?: "Unspecified error node"

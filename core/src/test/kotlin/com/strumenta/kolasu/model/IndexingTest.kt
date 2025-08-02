@@ -50,9 +50,7 @@ class IndexingTest {
                     object : IdProvider {
                         private var counter: Int = 0
 
-                        override fun getId(node: Node): String? {
-                            return "custom_${this.counter++}"
-                        }
+                        override fun getId(node: Node): String? = "custom_${this.counter++}"
                     },
             )
         assertEquals(4, ids.size)
@@ -75,9 +73,7 @@ class IndexingTest {
                     object : IdProvider {
                         private var counter: Int = 0
 
-                        override fun getId(node: Node): String? {
-                            return "custom_${this.counter++}"
-                        }
+                        override fun getId(node: Node): String? = "custom_${this.counter++}"
                     },
             )
         assertEquals(4, ids.size)

@@ -17,12 +17,13 @@ class FileBasedCodebase<R : Node>(
 
     override fun files(): Sequence<CodebaseFile<R>> = cachedFiles.asSequence()
 
-    override fun fileByRelativePath(relativePath: String): CodebaseFile<R>? {
-        return cachedFiles.find { it.relativePath == relativePath }
-    }
+    override fun fileByRelativePath(relativePath: String): CodebaseFile<R>? =
+        cachedFiles.find {
+            it.relativePath == relativePath
+        }
 
-    private fun parseFiles(): Sequence<CodebaseFile<R>> {
-        return sequence {
+    private fun parseFiles(): Sequence<CodebaseFile<R>> =
+        sequence {
             val stackOfDirs = Stack<File>()
             stackOfDirs.add(baseDir)
             while (stackOfDirs.isNotEmpty()) {
@@ -56,5 +57,4 @@ class FileBasedCodebase<R : Node>(
                 }
             }
         }
-    }
 }

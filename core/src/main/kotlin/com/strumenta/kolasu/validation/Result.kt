@@ -1,6 +1,9 @@
 package com.strumenta.kolasu.validation
 
-data class Result<C>(val issues: List<Issue>, val root: C?) {
+data class Result<C>(
+    val issues: List<Issue>,
+    val root: C?,
+) {
     val lexicalIssues
         get() = issues.filter { it.type == IssueType.LEXICAL }.toList()
     val syntacticIssues

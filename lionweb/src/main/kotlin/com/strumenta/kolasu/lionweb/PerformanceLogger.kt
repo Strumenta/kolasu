@@ -6,9 +6,7 @@ object PerformanceLogger {
     var file = File("performance-log.csv")
     val sumByStep = mutableMapOf<String, Long>()
 
-    fun sumByStep(description: String): Long {
-        return sumByStep.getOrDefault(description, 0)
-    }
+    fun sumByStep(description: String): Long = sumByStep.getOrDefault(description, 0)
 
     fun printAllSums() {
         println("== Performance logger sums ===")

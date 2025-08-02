@@ -14,9 +14,13 @@ data class KCompilationUnit(
     val elements: MutableList<KTopLevelDeclaration> = mutableListOf(),
 ) : Node()
 
-data class KImport(val imported: String) : Node()
+data class KImport(
+    val imported: String,
+) : Node()
 
-data class KPackageDecl(val name: String) : Node()
+data class KPackageDecl(
+    val name: String,
+) : Node()
 
 sealed class KTopLevelDeclaration : Node()
 
@@ -27,14 +31,16 @@ data class KClassDeclaration(
     var isAbstract: Boolean = false,
     var primaryConstructor: KPrimaryConstructor = KPrimaryConstructor(),
     val superTypes: MutableList<KSuperTypeInvocation> = mutableListOf(),
-) : KTopLevelDeclaration(), Named
+) : KTopLevelDeclaration(),
+    Named
 
 data class KTopLevelFunction(
     override val name: String,
     val params: MutableList<KParameterDeclaration> = mutableListOf<KParameterDeclaration>(),
     val returnType: KType? = null,
     val body: MutableList<KStatement> = mutableListOf(),
-) : KTopLevelDeclaration(), Named
+) : KTopLevelDeclaration(),
+    Named
 
 data class KExtensionMethod(
     var extendedClass: KName,
@@ -42,13 +48,18 @@ data class KExtensionMethod(
     val params: MutableList<KParameterDeclaration> = mutableListOf<KParameterDeclaration>(),
     var returnType: KType? = null,
     val body: MutableList<KStatement> = mutableListOf(),
-) : KTopLevelDeclaration(), Named
+) : KTopLevelDeclaration(),
+    Named
 
 sealed class KStatement : Node()
 
-data class KExpressionStatement(val expression: KExpression) : KStatement()
+data class KExpressionStatement(
+    val expression: KExpression,
+) : KStatement()
 
-data class KReturnStatement(val value: KExpression? = null) : KStatement()
+data class KReturnStatement(
+    val value: KExpression? = null,
+) : KStatement()
 
 data class KWhenStatement(
     var subject: KExpression? = null,
@@ -56,25 +67,42 @@ data class KWhenStatement(
     var elseClause: KElseClause? = null,
 ) : KExpression()
 
-data class KWhenClause(var condition: KExpression, var body: KStatement) : Node()
+data class KWhenClause(
+    var condition: KExpression,
+    var body: KStatement,
+) : Node()
 
-data class KElseClause(var body: KStatement) : Node()
+data class KElseClause(
+    var body: KStatement,
+) : Node()
 
-data class KThrowStatement(var exception: KExpression) : KStatement()
+data class KThrowStatement(
+    var exception: KExpression,
+) : KStatement()
 
 sealed class KExpression : Node()
 
 class KThisExpression : KExpression()
 
-data class KReferenceExpr(var symbol: String) : KExpression()
+data class KReferenceExpr(
+    var symbol: String,
+) : KExpression()
 
-data class KStringLiteral(var value: String) : KExpression()
+data class KStringLiteral(
+    var value: String,
+) : KExpression()
 
-data class KIntLiteral(var value: Int) : KExpression()
+data class KIntLiteral(
+    var value: Int,
+) : KExpression()
 
-data class KPlaceholderExpr(var name: String? = null) : KExpression()
+data class KPlaceholderExpr(
+    var name: String? = null,
+) : KExpression()
 
-data class KUniIsExpression(var ktype: KType) : KExpression()
+data class KUniIsExpression(
+    var ktype: KType,
+) : KExpression()
 
 data class KMethodCallExpression(
     var qualifier: KExpression,
@@ -83,16 +111,25 @@ data class KMethodCallExpression(
     val lambda: KLambda? = null,
 ) : KExpression()
 
-data class KFieldAccessExpr(var qualifier: KExpression, var field: String) : KExpression()
+data class KFieldAccessExpr(
+    var qualifier: KExpression,
+    var field: String,
+) : KExpression()
 
 data class KLambda(
     val params: MutableList<KLambdaParamDecl> = mutableListOf(),
     val body: MutableList<KStatement> = mutableListOf(),
 ) : KExpression()
 
-data class KLambdaParamDecl(override val name: String) : Node(), Named
+data class KLambdaParamDecl(
+    override val name: String,
+) : Node(),
+    Named
 
-data class KParameterValue(val value: KExpression, val name: String? = null) : Node()
+data class KParameterValue(
+    val value: KExpression,
+    val name: String? = null,
+) : Node()
 
 data class KInstantiationExpression(
     var type: KType,
@@ -127,9 +164,14 @@ sealed class KName : Node() {
     }
 }
 
-data class KSimpleName(val name: String) : KName()
+data class KSimpleName(
+    val name: String,
+) : KName()
 
-data class KQualifiedName(val container: KName, val name: String) : KName()
+data class KQualifiedName(
+    val container: KName,
+    val name: String,
+) : KName()
 
 data class KPrimaryConstructor(
     val params: MutableList<KParameterDeclaration> = mutableListOf(),
@@ -145,7 +187,9 @@ data class KParameterDeclaration(
     override val name: String,
     override val type: KType,
     val persistemce: KPersistence = KPersistence.NONE,
-) : Node(), Named, KTyped
+) : Node(),
+    Named,
+    KTyped
 
 interface KTyped {
     val type: KType
@@ -153,12 +197,25 @@ interface KTyped {
 
 sealed class KType : Node()
 
-data class KRefType(val name: String, val args: MutableList<KType> = mutableListOf<KType>()) : KType()
+data class KRefType(
+    val name: String,
+    val args: MutableList<KType> = mutableListOf<KType>(),
+) : KType()
 
-data class KOptionalType(val base: KType) : KType()
+data class KOptionalType(
+    val base: KType,
+) : KType()
 
-data class KSuperTypeInvocation(val name: String) : Node()
+data class KSuperTypeInvocation(
+    val name: String,
+) : Node()
 
-data class KObjectDeclaration(override val name: String) : KTopLevelDeclaration(), Named
+data class KObjectDeclaration(
+    override val name: String,
+) : KTopLevelDeclaration(),
+    Named
 
-data class KFunctionDeclaration(override val name: String) : KTopLevelDeclaration(), Named
+data class KFunctionDeclaration(
+    override val name: String,
+) : KTopLevelDeclaration(),
+    Named

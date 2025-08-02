@@ -9,9 +9,12 @@ data class SymbolDescription(
     val identifier: String,
     val types: List<String>,
     val fields: Map<String, ValueDescription>,
-) : Node(), Named
+) : Node(),
+    Named
 
-sealed class ValueDescription(open val value: Any? = null) : Node()
+sealed class ValueDescription(
+    open val value: Any? = null,
+) : Node()
 
 data class BooleanValueDescription(
     override val value: Boolean? = null,

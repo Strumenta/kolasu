@@ -24,13 +24,18 @@ import kotlin.test.assertEquals
 import com.strumenta.kolasu.semantics.symbol.resolver.SymbolResolver as SR
 
 @ASTRoot
-class TodoProject(override var name: String, val todos: MutableList<Todo>) : Node(), Named
+class TodoProject(
+    override var name: String,
+    val todos: MutableList<Todo>,
+) : Node(),
+    Named
 
 class Todo(
     override var name: String,
     var description: String,
     val prerequisite: ReferenceByName<Todo>? = null,
-) : Node(), Named
+) : Node(),
+    Named
 
 class SymbolResolutionWithSRITest {
     @Test
@@ -173,13 +178,12 @@ class ASTsSymbolRepository(
         TODO("Not yet implemented")
     }
 
-    override fun find(withType: KClass<out Node>): Sequence<SymbolDescription> {
-        return sequence {
+    override fun find(withType: KClass<out Node>): Sequence<SymbolDescription> =
+        sequence {
             roots.forEach { root ->
                 root.walkDescendants(withType).forEach { node ->
                     yield(symbolProvider.symbolFor(node)!!)
                 }
             }
         }
-    }
 }

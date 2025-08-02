@@ -10,7 +10,10 @@ internal data class CompilationUnit(
     var content: MutableList<TypeDecl> = mutableListOf(),
 ) : Node()
 
-internal sealed class SymbolNode(override val name: String) : Node(), Named
+internal sealed class SymbolNode(
+    override val name: String,
+) : Node(),
+    Named
 
 internal open class TypeDecl(
     override val name: String,
@@ -40,7 +43,9 @@ internal data class ParameterDecl(
     var type: ReferenceByName<TypeDecl>,
 ) : SymbolNode(name)
 
-internal sealed class StmtNode : Node(), Statement
+internal sealed class StmtNode :
+    Node(),
+    Statement
 
 internal data class DeclarationStmt(
     val variable: Variable,
@@ -57,7 +62,9 @@ internal data class AssignmentStmt(
     var rhs: ExprNode,
 ) : StmtNode()
 
-internal sealed class ExprNode : Node(), Expression
+internal sealed class ExprNode :
+    Node(),
+    Expression
 
 internal data class RefExpr(
     var context: ExprNode? = null,

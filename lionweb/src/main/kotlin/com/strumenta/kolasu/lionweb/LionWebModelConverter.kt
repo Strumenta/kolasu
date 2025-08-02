@@ -106,11 +106,10 @@ class LionWebModelConverter(
         fun lwFeatureByName(
             classifier: Classifier<*>,
             featureName: String,
-        ): LWFeature<*>? {
-            return lwFeaturesCache.getOrPut(classifier) {
+        ): LWFeature<*>? =
+            lwFeaturesCache.getOrPut(classifier) {
                 classifier.allFeatures().associateBy { it.name!! }
             }[featureName]
-        }
     }
 
     private val languageConverter = initialLanguageConverter
@@ -169,8 +168,8 @@ class LionWebModelConverter(
             object {
                 private val cache = IdentityHashMap<KNode, String>()
 
-                fun nodeId(kNode: KNode): String {
-                    return cache.getOrPut(kNode) {
+                fun nodeId(kNode: KNode): String =
+                    cache.getOrPut(kNode) {
                         // If a kNode has already an id, it should prevail and we should not attempt to generate
                         // an ID for it
                         require(kNode.id == null) {
@@ -183,7 +182,6 @@ class LionWebModelConverter(
                         }
                         id
                     }
-                }
 
                 override fun toString(): String = "Caching ID Manager in front of $nodeIdProvider"
             }
@@ -214,7 +212,9 @@ class LionWebModelConverter(
                 }
                 val kFeatures =
                     kFeaturesCache.getOrPut(kNode.javaClass) {
-                        kNode.javaClass.kotlin.allFeatures().associateBy { it.name }
+                        kNode.javaClass.kotlin
+                            .allFeatures()
+                            .associateBy { it.name }
                     }
                 val lwFeatures =
                     lwFeaturesCache.getOrPut(lwNode.classifier) {
@@ -299,7 +299,8 @@ class LionWebModelConverter(
                                         destinationNodes.add(kNode.destination as KNode)
                                     } else if (kNode.destination is CompositeDestination) {
                                         destinationNodes.addAll(
-                                            (kNode.destination as CompositeDestination).elements
+                                            (kNode.destination as CompositeDestination)
+                                                .elements
                                                 .filterIsInstance<KNode>(),
                                         )
                                     }
@@ -705,7 +706,9 @@ class LionWebModelConverter(
         val enumKClass =
             synchronized(languageConverter) {
                 languageConverter
-                    .getEnumerationsToKolasuClassesMapping().entries.find {
+                    .getEnumerationsToKolasuClassesMapping()
+                    .entries
+                    .find {
                         it.key.id == enumerationLiteral.enumeration?.id
                     }?.value
                     ?: throw java.lang.IllegalStateException(
@@ -935,8 +938,8 @@ class LionWebModelConverter(
     private fun maybeInstantiateSpecialObject(
         kClass: KClass<*>,
         data: Node,
-    ): Any? {
-        return when (kClass) {
+    ): Any? =
+        when (kClass) {
             Issue::class -> {
                 Issue(
                     attributeValue(data, data.classifier.getPropertyByName(Issue::type.name)!!) as IssueType,
@@ -963,11 +966,11 @@ class LionWebModelConverter(
                 null
             }
         }
-    }
 
-    private fun findConcept(kNode: com.strumenta.kolasu.model.Node): Concept {
-        return synchronized(languageConverter) { languageConverter.correspondingConcept(kNode.nodeType) }
-    }
+    private fun findConcept(kNode: com.strumenta.kolasu.model.Node): Concept =
+        synchronized(languageConverter) {
+            languageConverter.correspondingConcept(kNode.nodeType)
+        }
 
     private fun associateNodes(
         kNode: Any,

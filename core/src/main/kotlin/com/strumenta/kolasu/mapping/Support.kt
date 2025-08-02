@@ -30,10 +30,9 @@ inline fun <reified T : Node> ASTTransformer.translateCasted(original: Any): T {
  * JExtendsType(translateCasted(pt.typeType()), translateList(pt.annotation()))
  * ```
  */
-inline fun <reified T : Node> ASTTransformer.translateList(original: Collection<out Any>?): MutableList<T> {
-    return original?.map { transformIntoNodes(it, expectedType = T::class) as List<T> }?.flatten()?.toMutableList()
+inline fun <reified T : Node> ASTTransformer.translateList(original: Collection<out Any>?): MutableList<T> =
+    original?.map { transformIntoNodes(it, expectedType = T::class) as List<T> }?.flatten()?.toMutableList()
         ?: mutableListOf()
-}
 
 /**
  * Translate the given node and ensure a certain type will be obtained, if the value is not null.
@@ -70,9 +69,7 @@ inline fun <reified T : Node> ASTTransformer.translateOptional(original: Any?): 
  * }
  * ```
  */
-fun <T> ParseTreeToASTTransformer.translateOnlyChild(parent: ParserRuleContext): T {
-    return translateCasted(parent.onlyChild)
-}
+fun <T> ParseTreeToASTTransformer.translateOnlyChild(parent: ParserRuleContext): T = translateCasted(parent.onlyChild)
 
 /**
  * It returns the only child (of type ParseRuleContext). If there is no children or more than

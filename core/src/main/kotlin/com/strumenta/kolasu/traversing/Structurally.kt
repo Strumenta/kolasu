@@ -95,8 +95,8 @@ fun BaseASTNode.walkAncestors(): Sequence<BaseASTNode> {
 /**
  * @return all direct children of this node.
  */
-fun BaseASTNode.walkChildren(includeDerived: Boolean = false): Sequence<BaseASTNode> {
-    return sequence {
+fun BaseASTNode.walkChildren(includeDerived: Boolean = false): Sequence<BaseASTNode> =
+    sequence {
         (
             if (includeDerived) {
                 this@walkChildren.properties
@@ -110,7 +110,6 @@ fun BaseASTNode.walkChildren(includeDerived: Boolean = false): Sequence<BaseASTN
             }
         }
     }
-}
 
 /**
  * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method.
@@ -121,17 +120,13 @@ fun BaseASTNode.walkChildren(includeDerived: Boolean = false): Sequence<BaseASTN
 fun BaseASTNode.walkDescendants(
     walker: (BaseASTNode) ->
     Sequence<BaseASTNode> = BaseASTNode::walk,
-): Sequence<BaseASTNode> {
-    return walker.invoke(this).filter { node -> node != this }
-}
+): Sequence<BaseASTNode> = walker.invoke(this).filter { node -> node != this }
 
 @JvmOverloads
 fun <N : Any> BaseASTNode.walkDescendants(
     type: KClass<N>,
     walker: (BaseASTNode) -> Sequence<BaseASTNode> = BaseASTNode::walk,
-): Sequence<N> {
-    return walkDescendants(walker).filterIsInstance(type.java)
-}
+): Sequence<N> = walkDescendants(walker).filterIsInstance(type.java)
 
 /**
  * Note that type T is not strictly forced to be a Node. This is intended to support
@@ -140,9 +135,7 @@ fun <N : Any> BaseASTNode.walkDescendants(
  *
  * @return the nearest ancestor of this node that is an instance of klass.
  */
-fun <T> BaseASTNode.findAncestorOfType(klass: Class<T>): T? {
-    return walkAncestors().filterIsInstance(klass).firstOrNull()
-}
+fun <T> BaseASTNode.findAncestorOfType(klass: Class<T>): T? = walkAncestors().filterIsInstance(klass).firstOrNull()
 
 /**
  * @return all direct children of this node.
@@ -167,26 +160,25 @@ fun <T> BaseASTNode.searchByType(
 fun <T> BaseASTNode.collectByType(
     klass: Class<T>,
     walker: KFunction1<BaseASTNode, Sequence<BaseASTNode>> = BaseASTNode::walk,
-): List<T> {
-    return walker.invoke(this).filterIsInstance(klass).toList()
-}
+): List<T> = walker.invoke(this).filterIsInstance(klass).toList()
 
 /**
  * The FastWalker is a walker that implements a cache to speed up subsequent walks.
  * The first walk will take the same time of a normal walk.
  * This walker will ignore any change to the nodes.
  */
-class FastWalker(val node: BaseASTNode) {
+class FastWalker(
+    val node: BaseASTNode,
+) {
     private val childrenMap: WeakHashMap<BaseASTNode, List<BaseASTNode>> = WeakHashMap<BaseASTNode, List<BaseASTNode>>()
 
-    private fun getChildren(child: BaseASTNode): List<BaseASTNode> {
-        return if (childrenMap.containsKey(child)) {
+    private fun getChildren(child: BaseASTNode): List<BaseASTNode> =
+        if (childrenMap.containsKey(child)) {
             childrenMap[child]!!
         } else {
             childrenMap[child] = child.walkChildren().toList()
             childrenMap[child]!!
         }
-    }
 
     fun walk(root: BaseASTNode = node): Sequence<BaseASTNode> {
         val stack: Stack<BaseASTNode> = mutableStackOf(root)

@@ -17,7 +17,11 @@ val START_POINT = Point(START_LINE, START_COLUMN)
  * - the point before the first character will be Point(1, 0)
  * - the point at the end of the first line, after the letter "O" will be Point(1, 5)
  */
-data class Point(val line: Int, val column: Int) : Comparable<Point>, Serializable {
+data class Point(
+    val line: Int,
+    val column: Int,
+) : Comparable<Point>,
+    Serializable {
     override fun compareTo(other: Point): Int {
         if (line == other.line) {
             return this.column - other.column
@@ -81,9 +85,7 @@ data class Point(val line: Int, val column: Int) : Comparable<Point>, Serializab
      */
     fun isSameOrAfter(other: Point) = this >= other
 
-    operator fun plus(length: Int): Point {
-        return Point(this.line, this.column + length)
-    }
+    operator fun plus(length: Int): Point = Point(this.line, this.column + length)
 
     operator fun plus(text: String): Point {
         if (text.isEmpty()) {
@@ -126,17 +128,32 @@ interface SourceWithID {
     fun sourceID(): String
 }
 
-class SourceSet(val name: String, val root: Path)
+class SourceSet(
+    val name: String,
+    val root: Path,
+)
 
-class SourceSetElement(val sourceSet: SourceSet, val relativePath: Path) : Source()
+class SourceSetElement(
+    val sourceSet: SourceSet,
+    val relativePath: Path,
+) : Source()
 
-data class FileSource(val file: File) : Source()
+data class FileSource(
+    val file: File,
+) : Source()
 
-class StringSource(val code: String? = null) : Source()
+class StringSource(
+    val code: String? = null,
+) : Source()
 
-class URLSource(val url: URL) : Source()
+class URLSource(
+    val url: URL,
+) : Source()
 
-data class CodeBaseSource(val codebaseName: String, val relativePath: String) : Source()
+data class CodeBaseSource(
+    val codebaseName: String,
+    val relativePath: String,
+) : Source()
 
 /**
  * This source is intended to be used for nodes that are "calculated".
@@ -146,7 +163,9 @@ data class CodeBaseSource(val codebaseName: String, val relativePath: String) : 
  * @param description this is a description of the source. It is used to describe the process that calculated the node.
  *                    Examples of values could be "type inference".
  */
-data class SyntheticSource(val description: String) : Source()
+data class SyntheticSource(
+    val description: String,
+) : Source()
 
 /**
  * An area in a source file, from start to end.
@@ -157,13 +176,17 @@ data class SyntheticSource(val description: String) : Source()
  * Consider a file with one line, containing text "HELLO".
  * The Position of such text will be Position(Point(1, 0), Point(1, 5)).
  */
-data class Position(val start: Point, val end: Point, var source: Source? = null) : Comparable<Position>, Serializable {
+data class Position(
+    val start: Point,
+    val end: Point,
+    var source: Source? = null,
+) : Comparable<Position>,
+    Serializable {
     val isFlat: Boolean
         get() = start == end
 
-    override fun toString(): String {
-        return "Position(start=$start, end=$end${if (source == null) "" else ", source=$source"})"
-    }
+    override fun toString(): String =
+        "Position(start=$start, end=$end${if (source == null) "" else ", source=$source"})"
 
     override fun compareTo(other: Position): Int {
         val cmp = this.start.compareTo(other.start)
@@ -185,9 +208,7 @@ data class Position(val start: Point, val end: Point, var source: Source? = null
     /**
      * Given the whole code extract the portion of text corresponding to this position
      */
-    fun text(wholeText: String): String {
-        return wholeText.substring(start.offset(wholeText), end.offset(wholeText))
-    }
+    fun text(wholeText: String): String = wholeText.substring(start.offset(wholeText), end.offset(wholeText))
 
     /**
      * The length in characters of the text under this position in the provided source.
@@ -201,40 +222,36 @@ data class Position(val start: Point, val end: Point, var source: Source? = null
      * Tests whether the given point is contained in the interval represented by this object.
      * @param point the point.
      */
-    fun contains(point: Point): Boolean {
-        return ((point == start || start.isBefore(point)) && (point == end || point.isBefore(end)))
-    }
+    fun contains(point: Point): Boolean =
+        ((point == start || start.isBefore(point)) && (point == end || point.isBefore(end)))
 
     /**
      * Tests whether the given position is contained in the interval represented by this object.
      * @param position the position
      */
-    fun contains(position: Position?): Boolean {
-        return (position != null) &&
+    fun contains(position: Position?): Boolean =
+        (position != null) &&
             this.start.isSameOrBefore(position.start) &&
             this.end.isSameOrAfter(position.end)
-    }
 
     /**
      * Tests whether the given node is contained in the interval represented by this object.
      * @param node the node
      */
-    fun contains(node: BaseASTNode): Boolean {
-        return this.contains(node.position)
-    }
+    fun contains(node: BaseASTNode): Boolean = this.contains(node.position)
 
     /**
      * Tests whether the given position overlaps the interval represented by this object.
      * @param position the position
      */
-    fun overlaps(position: Position?): Boolean {
-        return (position != null) && (
-            (this.start.isSameOrAfter(position.start) && this.start.isSameOrBefore(position.end)) ||
-                (this.end.isSameOrAfter(position.start) && this.end.isSameOrBefore(position.end)) ||
-                (position.start.isSameOrAfter(this.start) && position.start.isSameOrBefore(this.end)) ||
-                (position.end.isSameOrAfter(this.start) && position.end.isSameOrBefore(this.end))
-        )
-    }
+    fun overlaps(position: Position?): Boolean =
+        (position != null) &&
+            (
+                (this.start.isSameOrAfter(position.start) && this.start.isSameOrBefore(position.end)) ||
+                    (this.end.isSameOrAfter(position.start) && this.end.isSameOrBefore(position.end)) ||
+                    (position.start.isSameOrAfter(this.start) && position.start.isSameOrBefore(this.end)) ||
+                    (position.end.isSameOrAfter(this.start) && position.end.isSameOrBefore(this.end))
+            )
 }
 
 /**
@@ -273,11 +290,10 @@ val BaseASTNode.endLine: Int?
 fun strippedPosition(
     text: String?,
     start: Point,
-): Position? {
-    return text?.let { text ->
+): Position? =
+    text?.let { text ->
         start.positionWithLength(text.length).stripPosition(text)
     }
-}
 
 /**
  * See strippedPosition.
@@ -300,30 +316,22 @@ fun Position.stripPosition(text: String): Position {
     return this
 }
 
-fun Position.advanceStart(): Position {
-    return Position(Point(start.line, start.column + 1), end)
-}
+fun Position.advanceStart(): Position = Position(Point(start.line, start.column + 1), end)
 
-fun Position.recedeEnd(): Position {
-    return Position(start, Point(end.line, end.column - 1))
-}
+fun Position.recedeEnd(): Position = Position(start, Point(end.line, end.column - 1))
 
-private fun <K, V> createLeastRecentlyUsedMap(maxEntries: Int = 100): Map<K, V> {
-    return object : LinkedHashMap<K, V>(maxEntries * 10 / 7, 0.7f, true) {
-        override fun removeEldestEntry(eldest: Map.Entry<K, V>): Boolean {
-            return size > maxEntries
-        }
+private fun <K, V> createLeastRecentlyUsedMap(maxEntries: Int = 100): Map<K, V> =
+    object : LinkedHashMap<K, V>(maxEntries * 10 / 7, 0.7f, true) {
+        override fun removeEldestEntry(eldest: Map.Entry<K, V>): Boolean = size > maxEntries
     }
-}
 
 private object LinesSplitter {
     val cache = createLeastRecentlyUsedMap<String, List<String>>() as MutableMap<String, List<String>>
 
-    fun getLines(code: String): List<String> {
-        return cache.getOrPut(code) {
+    fun getLines(code: String): List<String> =
+        cache.getOrPut(code) {
             code.split("(?<=\n)".toRegex())
         }
-    }
 }
 
 /**

@@ -55,15 +55,16 @@ class ASTCodeGeneratorTest {
         assertEquals("""this.myMethod("abc", 123, "qer")""", code)
 
         val codeWithNodePrinterOverrider =
-            KotlinPrinter().also {
-                it.nodePrinterOverrider = { n: Node ->
-                    when (n) {
-                        is KStringLiteral -> NodePrinter { output, ast -> output.print("YYY") }
-                        is KIntLiteral -> NodePrinter { output, ast -> output.print("XXX") }
-                        else -> null
+            KotlinPrinter()
+                .also {
+                    it.nodePrinterOverrider = { n: Node ->
+                        when (n) {
+                            is KStringLiteral -> NodePrinter { output, ast -> output.print("YYY") }
+                            is KIntLiteral -> NodePrinter { output, ast -> output.print("XXX") }
+                            else -> null
+                        }
                     }
-                }
-            }.printToString(ex)
+                }.printToString(ex)
         assertEquals("""this.myMethod(YYY, XXX, YYY)""", codeWithNodePrinterOverrider)
     }
 

@@ -23,9 +23,7 @@ inline fun <reified NodeTy : Node> symbolFor(
     noinline specification: DeclarativeSymbolProvideRuleApi<NodeTy>.(
         DeclarativeSymbolProviderRuleContext<NodeTy>,
     ) -> Unit,
-): DeclarativeSymbolProviderRule<NodeTy> {
-    return DeclarativeSymbolProviderRule(NodeTy::class, specification)
-}
+): DeclarativeSymbolProviderRule<NodeTy> = DeclarativeSymbolProviderRule(NodeTy::class, specification)
 
 open class DeclarativeSymbolProvider(
     private val nodeIdProvider: NodeIdProvider,
@@ -33,11 +31,10 @@ open class DeclarativeSymbolProvider(
 ) : SymbolProvider {
     private val rules: List<DeclarativeSymbolProviderRule<out Node>> = rules.sorted()
 
-    override fun symbolFor(node: Node): SymbolDescription? {
-        return this.rules
+    override fun symbolFor(node: Node): SymbolDescription? =
+        this.rules
             .firstOrNull { it.isCompatibleWith(node::class) }
             ?.invoke(nodeIdProvider, this, node)
-    }
 }
 
 class DeclarativeSymbolProviderRule<NodeTy : Node>(
@@ -85,43 +82,37 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
         }
     }
 
-    fun isCompatibleWith(nodeType: KClass<*>): Boolean {
-        return this.nodeType.isSuperclassOf(nodeType)
-    }
+    fun isCompatibleWith(nodeType: KClass<*>): Boolean = this.nodeType.isSuperclassOf(nodeType)
 
-    override fun compareTo(other: DeclarativeSymbolProviderRule<out Node>): Int {
-        return when {
+    override fun compareTo(other: DeclarativeSymbolProviderRule<out Node>): Int =
+        when {
             this.nodeType.isSuperclassOf(other.nodeType) -> 1
             other.nodeType.isSuperclassOf(this.nodeType) -> -1
             else -> (this.nodeType.qualifiedName ?: "") compareTo (other.nodeType.qualifiedName ?: "")
         }
-    }
 
-    private fun getName(node: NodeTy): String {
-        return this.name(node)
+    private fun getName(node: NodeTy): String =
+        this.name(node)
             ?: throw RuntimeException("Symbol description name property not set for node: ${node::class.qualifiedName}")
-    }
 
-    private fun getTypes(node: NodeTy): List<String> {
-        return listOfNotNull(
+    private fun getTypes(node: NodeTy): List<String> =
+        listOfNotNull(
             node::class.qualifiedName,
         ) + node::class.allSuperclasses.mapNotNull(KClass<*>::qualifiedName)
-    }
 
     private fun getProperties(
         nodeIdProvider: NodeIdProvider,
         node: NodeTy,
-    ): Map<String, ValueDescription> {
-        return this.properties.mapValues { (_, valueDescriptionProvider) ->
+    ): Map<String, ValueDescription> =
+        this.properties.mapValues { (_, valueDescriptionProvider) ->
             valueDescriptionProvider(nodeIdProvider, node)
         }
-    }
 
     private fun toValueDescription(
         nodeIdProvider: NodeIdProvider,
         source: Any?,
-    ): ValueDescription {
-        return when (source) {
+    ): ValueDescription =
+        when (source) {
             is Boolean -> BooleanValueDescription(source)
             is Int -> IntegerValueDescription(source)
             is String -> StringValueDescription(source)
@@ -131,30 +122,24 @@ class DeclarativeSymbolProviderRule<NodeTy : Node>(
             null -> NullValueDescription
             else -> throw RuntimeException("Unsupported value description for ${source::class.qualifiedName}")
         }
-    }
 
     private fun toReferenceValueDescription(
         nodeIdProvider: NodeIdProvider,
         source: ReferenceByName<*>,
-    ): ReferenceValueDescription {
-        return ReferenceValueDescription(
+    ): ReferenceValueDescription =
+        ReferenceValueDescription(
             source.referred?.let { it as? Node }?.let { nodeIdProvider.id(it) },
         )
-    }
 
     private fun toContainmentValueDescription(
         nodeIdProvider: NodeIdProvider,
         source: Node,
-    ): ContainmentValueDescription {
-        return ContainmentValueDescription(nodeIdProvider.id(source))
-    }
+    ): ContainmentValueDescription = ContainmentValueDescription(nodeIdProvider.id(source))
 
     private fun toListValueDescription(
         nodeIdProvider: NodeIdProvider,
         source: List<*>,
-    ): ListValueDescription {
-        return ListValueDescription(source.map { this.toValueDescription(nodeIdProvider, it) }.toList())
-    }
+    ): ListValueDescription = ListValueDescription(source.map { this.toValueDescription(nodeIdProvider, it) }.toList())
 }
 
 interface DeclarativeSymbolProvideRuleApi<NodeTy : Node> {
@@ -163,4 +148,7 @@ interface DeclarativeSymbolProvideRuleApi<NodeTy : Node> {
     fun include(property: KProperty1<in NodeTy, Any?>)
 }
 
-data class DeclarativeSymbolProviderRuleContext<NodeTy : Node>(val node: NodeTy, val symbolProvider: SymbolProvider)
+data class DeclarativeSymbolProviderRuleContext<NodeTy : Node>(
+    val node: NodeTy,
+    val symbolProvider: SymbolProvider,
+)

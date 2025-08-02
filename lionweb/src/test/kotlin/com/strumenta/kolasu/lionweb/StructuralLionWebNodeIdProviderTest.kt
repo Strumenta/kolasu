@@ -10,13 +10,20 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 @ASTRoot
-data class A(val bs: MutableList<B> = mutableListOf()) : Node()
+data class A(
+    val bs: MutableList<B> = mutableListOf(),
+) : Node()
 
 @ASTRoot(canBeNotRoot = true)
-data class B(var name: String, var cs: MutableList<C> = mutableListOf()) : Node()
+data class B(
+    var name: String,
+    var cs: MutableList<C> = mutableListOf(),
+) : Node()
 
 @ASTRoot(canBeNotRoot = true)
-data class C(var value: Int) : Node()
+data class C(
+    var value: Int,
+) : Node()
 
 class StructuralLionWebNodeIdProviderTest {
     @Test

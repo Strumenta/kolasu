@@ -16,27 +16,41 @@ import kotlin.test.assertSame
 import com.strumenta.starlasu.base.v2.ASTLanguageV2 as ASTLanguage
 
 @ASTRoot
-data class SimpleRoot(val _id: Int, val childrez: MutableList<SimpleDecl>) : Node()
+data class SimpleRoot(
+    val _id: Int,
+    val childrez: MutableList<SimpleDecl>,
+) : Node()
 
-sealed class SimpleDecl : Node(), EntityDeclaration
+sealed class SimpleDecl :
+    Node(),
+    EntityDeclaration
 
 @ASTRoot(canBeNotRoot = true)
 data class SimpleNodeA(
     override val name: String,
     val ref: ReferenceByName<SimpleNodeA>,
     val child: SimpleNodeB?,
-) : Named, SimpleDecl(), MyRelevantInterface, MyIrrelevantInterface
+) : SimpleDecl(),
+    Named,
+    MyRelevantInterface,
+    MyIrrelevantInterface
 
-data class MyNonPartition(val roots: MutableList<SimpleRoot>) : Node()
+data class MyNonPartition(
+    val roots: MutableList<SimpleRoot>,
+) : Node()
 
 interface MyIrrelevantInterface
 
 @NodeType
 interface MyRelevantInterface
 
-data class SimpleNodeB(val value: String) : SimpleDecl()
+data class SimpleNodeB(
+    val value: String,
+) : SimpleDecl()
 
-data class MyNodeWithNullableContainmentLists(val children: MutableList<MyNodeWithNullableContainmentLists>?) : Node()
+data class MyNodeWithNullableContainmentLists(
+    val children: MutableList<MyNodeWithNullableContainmentLists>?,
+) : Node()
 
 class LionWebLanguageConverterTest {
     @Test
@@ -99,7 +113,8 @@ class LionWebLanguageConverterTest {
 
         assertEquals(
             true,
-            LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU)
+            LionCoreBuiltins
+                .getINamed(LIONWEB_VERSION_USED_BY_KOLASU)
                 .getPropertyByName("name") in simpleNodeA.allFeatures(),
         )
 
@@ -202,7 +217,8 @@ class LionWebLanguageConverterTest {
 
         assertEquals(
             true,
-            LionCoreBuiltins.getINamed(LIONWEB_VERSION_USED_BY_KOLASU)
+            LionCoreBuiltins
+                .getINamed(LIONWEB_VERSION_USED_BY_KOLASU)
                 .getPropertyByName("name") in simpleNodeA.allFeatures(),
         )
 

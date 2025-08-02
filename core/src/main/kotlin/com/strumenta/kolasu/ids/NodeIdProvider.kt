@@ -44,19 +44,17 @@ abstract class BaseNodeIdProvider : NodeIdProvider {
  * The common approach for calculating Node IDs is to use Semantic Node IDs where present,
  * and Positional Node IDs in the other cases.
  */
-class CommonNodeIdProvider(val semanticIDProvider: SemanticNodeIDProvider = DeclarativeNodeIdProvider()) :
-    BaseNodeIdProvider() {
-    override fun id(kNode: Node): String {
-        return if (semanticIDProvider.hasSemanticIdentity(kNode)) {
+class CommonNodeIdProvider(
+    val semanticIDProvider: SemanticNodeIDProvider = DeclarativeNodeIdProvider(),
+) : BaseNodeIdProvider() {
+    override fun id(kNode: Node): String =
+        if (semanticIDProvider.hasSemanticIdentity(kNode)) {
             semanticIDProvider.semanticID(kNode)
         } else {
             positionalID(kNode)
         }
-    }
 
-    private fun positionalID(kNode: Node): String {
-        return StructuralNodeIdProvider().apply { parentProvider = this }.id(kNode)
-    }
+    private fun positionalID(kNode: Node): String = StructuralNodeIdProvider().apply { parentProvider = this }.id(kNode)
 }
 
 interface SemanticNodeIDProvider {

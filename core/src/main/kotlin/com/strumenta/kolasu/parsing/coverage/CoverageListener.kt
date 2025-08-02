@@ -10,32 +10,29 @@ import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.antlr.v4.runtime.tree.TerminalNode
 
-data class PathElement(val symbol: Int, val rule: Boolean) {
-    fun toString(parser: Parser): String {
-        return if (rule) {
+data class PathElement(
+    val symbol: Int,
+    val rule: Boolean,
+) {
+    fun toString(parser: Parser): String =
+        if (rule) {
             parser.ruleNames[symbol]
         } else {
             parser.vocabulary.getSymbolicName(symbol)
         }
-    }
 }
 
-data class Path(val elements: List<PathElement> = listOf(), val states: MutableSet<Int> = mutableSetOf()) {
-    fun followWith(el: PathElement): Path {
-        return Path(elements + el, states = this.states.toMutableSet())
-    }
+data class Path(
+    val elements: List<PathElement> = listOf(),
+    val states: MutableSet<Int> = mutableSetOf(),
+) {
+    fun followWith(el: PathElement): Path = Path(elements + el, states = this.states.toMutableSet())
 
-    fun toString(parser: Parser): String {
-        return elements.joinToString(" > ") { it.toString(parser) }
-    }
+    fun toString(parser: Parser): String = elements.joinToString(" > ") { it.toString(parser) }
 
-    override fun equals(other: Any?): Boolean {
-        return other is Path && elements == other.elements
-    }
+    override fun equals(other: Any?): Boolean = other is Path && elements == other.elements
 
-    override fun hashCode(): Int {
-        return elements.hashCode()
-    }
+    override fun hashCode(): Int = elements.hashCode()
 }
 
 /**
@@ -77,7 +74,10 @@ data class Path(val elements: List<PathElement> = listOf(), val states: MutableS
  * with the number of rules and alternatives, as parsing certain patterns requires more states than other patterns with
  * similar complexity, it would still be a better measure than what we have now.
  */
-open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths: Boolean = true) : ParseTreeListener {
+open class CoverageListener(
+    var parser: Parser? = null,
+    val expandUncoveredPaths: Boolean = true,
+) : ParseTreeListener {
     val paths = mutableMapOf<Path, Boolean>()
     val pathStack = mutableStackOf<Path>()
 
@@ -107,14 +107,13 @@ open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths
     private fun isLeftRecursive(
         path: Path,
         ruleIndex: Int,
-    ): Boolean {
-        return if (path.elements.isNotEmpty()) {
+    ): Boolean =
+        if (path.elements.isNotEmpty()) {
             val last = path.elements.last()
             last.rule && last.symbol == ruleIndex
         } else {
             false
         }
-    }
 
     private fun addUncoveredPaths(state: Int = parser!!.state) {
         val path = pathStack.peek()
@@ -177,22 +176,29 @@ open class CoverageListener(var parser: Parser? = null, val expandUncoveredPaths
     }
 
     override fun exitEveryRule(ctx: ParserRuleContext) {
-        if (pathStack.peek()?.elements?.last { it.rule }?.symbol == ctx.ruleIndex) {
+        if (pathStack
+                .peek()
+                ?.elements
+                ?.last { it.rule }
+                ?.symbol == ctx.ruleIndex
+        ) {
             pathStack.pop()
         }
     }
 
-    fun pathStrings(): List<String> {
-        return paths.keys.map { it.toString(parser!!) }
-    }
+    fun pathStrings(): List<String> = paths.keys.map { it.toString(parser!!) }
 
-    fun uncoveredPaths(maxLength: Int = Int.MAX_VALUE): Collection<Path> {
-        return paths.filterValues { !it }.keys.filter { it.elements.size <= maxLength }
-    }
+    fun uncoveredPaths(maxLength: Int = Int.MAX_VALUE): Collection<Path> =
+        paths
+            .filterValues {
+                !it
+            }.keys
+            .filter { it.elements.size <= maxLength }
 
-    fun uncoveredPathStrings(maxLength: Int = Int.MAX_VALUE): Collection<String> {
-        return uncoveredPaths(maxLength).map { it.toString(parser!!) }
-    }
+    fun uncoveredPathStrings(maxLength: Int = Int.MAX_VALUE): Collection<String> =
+        uncoveredPaths(maxLength).map {
+            it.toString(parser!!)
+        }
 
     fun listenTo(parser: Parser) {
         this.parser?.removeParseListener(this)

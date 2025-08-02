@@ -33,8 +33,9 @@ fun Iterable<*>.toJsonArray() = jsonArray(this.iterator())
 
 fun jsonArray(values: Iterator<Any?>): JsonArray {
     val array = JsonArray()
-    for (value in values)
+    for (value in values) {
         array.add(value.toJsonElement())
+    }
     return array
 }
 
@@ -88,15 +89,14 @@ class JsonGenerator {
         withOriginIds: IdentityHashMap<Node, String>? = null,
         withDestinationIds: IdentityHashMap<Node, String>? = null,
         shortClassNames: Boolean = false,
-    ): JsonElement {
-        return nodeToJson(
+    ): JsonElement =
+        nodeToJson(
             root,
             shortClassNames,
             withIds = withIds,
             withOriginIds = withOriginIds,
             withDestinationIds = withDestinationIds,
         )
-    }
 
     /**
      * Converts "results" to JSON format.
@@ -104,12 +104,11 @@ class JsonGenerator {
     fun generateJSON(
         result: Result<out Node>,
         withIds: IdentityHashMap<Node, String>? = null,
-    ): JsonElement {
-        return jsonObject(
+    ): JsonElement =
+        jsonObject(
             "issues" to result.issues.map { it.toJson() }.toJsonArray(),
             "root" to result.root?.let { nodeToJson(it, shortClassNames, withIds) },
         )
-    }
 
     /**
      * Converts "results" to JSON format.
@@ -117,12 +116,11 @@ class JsonGenerator {
     fun generateJSON(
         result: ParsingResult<out Node>,
         withIds: IdentityHashMap<Node, String>? = null,
-    ): JsonElement {
-        return jsonObject(
+    ): JsonElement =
+        jsonObject(
             "issues" to result.issues.map { it.toJson() }.toJsonArray(),
             "root" to result.root?.let { nodeToJson(it, shortClassNames, withIds) },
         )
-    }
 
     /**
      * Converts "results" to JSON format.
@@ -292,16 +290,16 @@ class JsonGenerator {
                     if (it.provideNodes) {
                         jsonObject.add(
                             it.name,
-                            (it.value as Collection<*>).map { el ->
-                                nodeToJson(
-                                    el as Node,
-                                    shortClassNames,
-                                    withIds = withIds,
-                                    withOriginIds = withOriginIds,
-                                    withDestinationIds = withDestinationIds,
-                                )
-                            }
-                                .toJsonArray(),
+                            (it.value as Collection<*>)
+                                .map { el ->
+                                    nodeToJson(
+                                        el as Node,
+                                        shortClassNames,
+                                        withIds = withIds,
+                                        withOriginIds = withOriginIds,
+                                        withDestinationIds = withDestinationIds,
+                                    )
+                                }.toJsonArray(),
                         )
                     } else {
                         jsonObject.add(it.name, valueToJson(it.value, withIds))
@@ -398,14 +396,13 @@ private fun Any?.toJsonStreaming(writer: JsonWriter) {
     }
 }
 
-fun Issue.toJson(): JsonElement {
-    return jsonObject(
+fun Issue.toJson(): JsonElement =
+    jsonObject(
         "type" to this.type.name,
         "message" to this.message,
         "severity" to this.severity.name,
         "position" to this.position?.toJson(),
     )
-}
 
 private fun Issue.toJsonStreaming(writer: JsonWriter) {
     writer.beginObject()
@@ -424,13 +421,12 @@ private fun Issue.toJsonStreaming(writer: JsonWriter) {
     writer.endObject()
 }
 
-fun Position.toJson(): JsonElement {
-    return jsonObject(
+fun Position.toJson(): JsonElement =
+    jsonObject(
         "description" to this.toString(),
         "start" to this.start.toJson(),
         "end" to this.end.toJson(),
     )
-}
 
 private fun Position.toJsonStreaming(writer: JsonWriter) {
     writer.beginObject()
@@ -443,12 +439,11 @@ private fun Position.toJsonStreaming(writer: JsonWriter) {
     writer.endObject()
 }
 
-private fun Point.toJson(): JsonElement {
-    return jsonObject(
+private fun Point.toJson(): JsonElement =
+    jsonObject(
         "line" to this.line,
         "column" to this.column,
     )
-}
 
 private fun Point.toJsonStreaming(writer: JsonWriter) {
     writer.beginObject()

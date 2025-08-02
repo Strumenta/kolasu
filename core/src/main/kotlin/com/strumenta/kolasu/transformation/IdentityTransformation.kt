@@ -45,7 +45,8 @@ val IDENTTITY_TRANSFORMATION: (
                         params[parameter] = astTransformer.transform(originalValue)
                     }
 
-                    mt is ParameterizedType && mt.rawType == List::class.java &&
+                    mt is ParameterizedType &&
+                        mt.rawType == List::class.java &&
                         (mt.actualTypeArguments.first() as? Class<*>)?.kotlin?.isSubclassOf(Node::class) == true -> {
                         params[parameter] = astTransformer.translateList<Node>(originalValue as List<Node>)
                     }

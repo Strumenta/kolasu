@@ -7,8 +7,9 @@ import com.strumenta.kolasu.ids.StructuralNodeIdProvider
 import com.strumenta.kolasu.model.Node
 import io.lionweb.utils.CommonChecks
 
-class StructuralLionWebNodeIdProvider(sourceIdProvider: SourceIdProvider = SimpleSourceIdProvider()) :
-    StructuralNodeIdProvider(sourceIdProvider) {
+class StructuralLionWebNodeIdProvider(
+    sourceIdProvider: SourceIdProvider = SimpleSourceIdProvider(),
+) : StructuralNodeIdProvider(sourceIdProvider) {
     constructor(customSourceId: String) : this(ConstantSourceIdProvider(customSourceId))
 
     override fun id(kNode: Node): String {

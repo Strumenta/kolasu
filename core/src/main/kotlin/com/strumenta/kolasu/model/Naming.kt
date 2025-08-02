@@ -68,17 +68,14 @@ class ReferenceByName<N : PossiblyNamed>(
     val retrieved: Boolean
         get() = referred != null
 
-    override fun toString(): String {
-        return if (resolved) {
+    override fun toString(): String =
+        if (resolved) {
             "Ref($name)[Solved]"
         } else {
             "Ref($name)[Unsolved]"
         }
-    }
 
-    override fun hashCode(): Int {
-        return name.hashCode() * (1 + identifier.hashCode()) * (7 + if (resolved) 2 else 1)
-    }
+    override fun hashCode(): Int = name.hashCode() * (1 + identifier.hashCode()) * (7 + if (resolved) 2 else 1)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -109,14 +106,13 @@ fun <N> ReferenceByName<N>.tryToResolve(
  *
  * @return true if the assignment has been performed
  */
-fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : PossiblyNamed {
-    return if (possibleValue == null) {
+fun <N> ReferenceByName<N>.tryToResolve(possibleValue: N?): Boolean where N : PossiblyNamed =
+    if (possibleValue == null) {
         false
     } else {
         this.referred = possibleValue
         true
     }
-}
 
 /**
  * Typealias representing reference properties.
@@ -126,20 +122,20 @@ typealias KReferenceByName<S> = KProperty1<S, ReferenceByName<out PossiblyNamed>
 /**
  * Builds a type representation for a reference
  **/
-fun kReferenceByNameType(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class): KType {
-    return ReferenceByName::class.createType(
+fun kReferenceByNameType(targetClass: KClass<out PossiblyNamed> = PossiblyNamed::class): KType =
+    ReferenceByName::class.createType(
         arguments = listOf(KTypeProjection(variance = KVariance.OUT, type = targetClass.createType())),
         nullable = true,
     )
-}
 
 /**
  * Retrieves the referred type for a given reference property.
  **/
 @Suppress("unchecked_cast")
-fun KReferenceByName<*>.getReferredType(): KClass<out PossiblyNamed> {
-    return this.returnType.arguments[0].type!!.classifier!! as KClass<out PossiblyNamed>
-}
+fun KReferenceByName<*>.getReferredType(): KClass<out PossiblyNamed> =
+    this.returnType.arguments[0]
+        .type!!
+        .classifier!! as KClass<out PossiblyNamed>
 
 /**
  * Retrieves all reference properties for a given node.

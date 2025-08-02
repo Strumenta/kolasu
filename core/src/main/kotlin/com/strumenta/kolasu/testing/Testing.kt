@@ -137,8 +137,11 @@ class IgnoreChildren<N : Node> : MutableList<N> {
     }
 }
 
-class ASTDifferenceException(val context: String, val expected: Any, val actual: Any) :
-    Exception("$context: expecting $expected, actual $actual")
+class ASTDifferenceException(
+    val context: String,
+    val expected: Any,
+    val actual: Any,
+) : Exception("$context: expecting $expected, actual $actual")
 
 fun <T : Node> assertParsingResultsAreEqual(
     expected: ParsingResult<T>,
@@ -285,7 +288,8 @@ fun assertASTsAreEqual(
 }
 
 fun Node.assertReferencesResolved(forProperty: KReferenceByName<out Node>) {
-    this.kReferenceByNameProperties()
+    this
+        .kReferenceByNameProperties()
         .filter { it == forProperty }
         .mapNotNull { it.get(this) }
         .forEach {
@@ -299,7 +303,8 @@ fun Node.assertReferencesResolved(forProperty: KReferenceByName<out Node>) {
 }
 
 fun Node.assertReferencesResolved(withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class) {
-    this.kReferenceByNameProperties(targetClass = withReturnType)
+    this
+        .kReferenceByNameProperties(targetClass = withReturnType)
         .mapNotNull { it.get(this) }
         .forEach {
             assertTrue("Reference $it in node $this at ${this.position} was expected to be solved") {
@@ -310,7 +315,8 @@ fun Node.assertReferencesResolved(withReturnType: KClass<out PossiblyNamed> = Po
 }
 
 fun Node.assertReferencesNotResolved(forProperty: KReferenceByName<out Node>) {
-    this.kReferenceByNameProperties()
+    this
+        .kReferenceByNameProperties()
         .filter { it == forProperty }
         .mapNotNull { it.get(this) }
         .forEach { assertFalse { (it as ReferenceByName<*>).resolved } }
@@ -318,7 +324,8 @@ fun Node.assertReferencesNotResolved(forProperty: KReferenceByName<out Node>) {
 }
 
 fun Node.assertReferencesNotResolved(withReturnType: KClass<out PossiblyNamed> = PossiblyNamed::class) {
-    this.kReferenceByNameProperties(targetClass = withReturnType)
+    this
+        .kReferenceByNameProperties(targetClass = withReturnType)
         .mapNotNull { it.get(this) }
         .forEach { assertFalse { (it as ReferenceByName<*>).resolved } }
     this.walkChildren().forEach { it.assertReferencesNotResolved(withReturnType = withReturnType) }

@@ -58,7 +58,8 @@ enum class AnEnum {
 data class NodeWithEnum(
     override val name: String,
     val e: AnEnum?,
-) : Named, BaseASTNode()
+) : BaseASTNode(),
+    Named
 
 class LionWebModelConverterTest {
     val serialized = """{
@@ -697,13 +698,12 @@ class LionWebModelConverterTest {
 
         mc.externalNodeResolver =
             object : NodeResolver {
-                override fun resolve(nodeID: String): KNode? {
-                    return if (nodeID == "MySource2") {
+                override fun resolve(nodeID: String): KNode? =
+                    if (nodeID == "MySource2") {
                         node2
                     } else {
                         null
                     }
-                }
             }
 
         node1.origin = node2
@@ -747,13 +747,12 @@ class LionWebModelConverterTest {
 
         mc.externalNodeResolver =
             object : NodeResolver {
-                override fun resolve(nodeID: String): KNode? {
-                    return if (nodeID == "MySource1") {
+                override fun resolve(nodeID: String): KNode? =
+                    if (nodeID == "MySource1") {
                         node1
                     } else {
                         null
                     }
-                }
             }
 
         val lwNode3 = mc.exportModelToLionWeb(node3)
@@ -784,8 +783,8 @@ class LionWebModelConverterTest {
 
         mc.externalNodeResolver =
             object : NodeResolver {
-                override fun resolve(nodeID: String): KNode? {
-                    return when (nodeID) {
+                override fun resolve(nodeID: String): KNode? =
+                    when (nodeID) {
                         "MySource1" -> {
                             node1
                         }
@@ -796,7 +795,6 @@ class LionWebModelConverterTest {
                             null
                         }
                     }
-                }
             }
 
         val lwNode3 = mc.exportModelToLionWeb(node3)
@@ -828,8 +826,8 @@ class LionWebModelConverterTest {
         // We verify the re-imported data is correct
         mc.externalNodeResolver =
             object : NodeResolver {
-                override fun resolve(nodeID: String): KNode? {
-                    return when (nodeID) {
+                override fun resolve(nodeID: String): KNode? =
+                    when (nodeID) {
                         "MySource1" -> {
                             node1
                         }
@@ -840,7 +838,6 @@ class LionWebModelConverterTest {
                             null
                         }
                     }
-                }
             }
         val deserializedNode1 = mc.importModelFromLionWeb(lwNode1) as SimpleRoot
         assertIs<MissingASTTransformation>(deserializedNode1.origin)
@@ -1037,14 +1034,22 @@ class LionWebModelConverterTest {
 }
 
 @ASTRoot(canBeNotRoot = true)
-data class NodeWithPropertiesNotInConstructor(override val name: String, var a: String) : Node(), Named {
+data class NodeWithPropertiesNotInConstructor(
+    override val name: String,
+    var a: String,
+) : Node(),
+    Named {
     var b: Int = 0
     val c = mutableListOf<NodeWithPropertiesNotInConstructor>()
     val r = ReferenceByName<NodeWithPropertiesNotInConstructor>("")
 }
 
 @ASTRoot(canBeNotRoot = true)
-data class NodeWithPropertiesNotInConstructorMutableProps(override val name: String, var a: String) : Node(), Named {
+data class NodeWithPropertiesNotInConstructorMutableProps(
+    override val name: String,
+    var a: String,
+) : Node(),
+    Named {
     var b: Int = 0
     var c = mutableListOf<NodeWithPropertiesNotInConstructorMutableProps>()
     var r = ReferenceByName<NodeWithPropertiesNotInConstructorMutableProps>("")

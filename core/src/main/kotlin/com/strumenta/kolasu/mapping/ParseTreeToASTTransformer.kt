@@ -33,16 +33,17 @@ open class ParseTreeToASTTransformer(
         expectedType: KClass<out Node>,
     ): List<Node> {
         val transformed = super.transformIntoNodes(source, parent, expectedType)
-        return transformed.map { node ->
-            if (source is ParserRuleContext) {
-                if (node.origin == null) {
-                    node.withParseTreeNode(source, this.source)
-                } else if (node.position != null && node.source == null) {
-                    node.position!!.source = this.source
+        return transformed
+            .map { node ->
+                if (source is ParserRuleContext) {
+                    if (node.origin == null) {
+                        node.withParseTreeNode(source, this.source)
+                    } else if (node.position != null && node.source == null) {
+                        node.position!!.source = this.source
+                    }
                 }
-            }
-            return listOf(node)
-        }.flatten()
+                return listOf(node)
+            }.flatten()
     }
 
     override fun getSource(
@@ -53,9 +54,7 @@ open class ParseTreeToASTTransformer(
         return if (origin is ParseTreeOrigin) origin.parseTree else source
     }
 
-    override fun asOrigin(source: Any): Origin? {
-        return if (source is ParseTree) ParseTreeOrigin(source) else null
-    }
+    override fun asOrigin(source: Any): Origin? = if (source is ParseTree) ParseTreeOrigin(source) else null
 
     /**
      * Often in ANTLR grammar we have rules which wraps other rules and act as

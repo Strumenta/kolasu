@@ -19,17 +19,20 @@ internal class TraversingStructurallyTest {
         specifiedPosition: Position? = null,
     ) : Node(specifiedPosition)
 
-    class Item(val name: String, specifiedPosition: Position? = null) : Node(specifiedPosition)
+    class Item(
+        val name: String,
+        specifiedPosition: Position? = null,
+    ) : Node(specifiedPosition)
 
-    private fun printSequence(sequence: Sequence<Node>): String {
-        return sequence.map {
-            when (it) {
-                is Box -> it.name
-                is Item -> it.name
-                else -> fail("")
-            }
-        }.joinToString()
-    }
+    private fun printSequence(sequence: Sequence<Node>): String =
+        sequence
+            .map {
+                when (it) {
+                    is Box -> it.name
+                    is Item -> it.name
+                    else -> fail("")
+                }
+            }.joinToString()
 
     private val testCase =
         Box(
@@ -201,15 +204,17 @@ internal class TraversingStructurallyTest {
                 specifiedPosition = pos(1, 1, 14, 1),
             )
         val set = mutableSetOf<String>()
-        testCase.walk().map {
-            when (it) {
-                is Box -> it.name
-                is Item -> it.name
-                else -> fail("")
+        testCase
+            .walk()
+            .map {
+                when (it) {
+                    is Box -> it.name
+                    is Item -> it.name
+                    else -> fail("")
+                }
+            }.forEach {
+                set.add(it)
             }
-        }.forEach {
-            set.add(it)
-        }
         assertEquals(setOf("root", "first", "1", "2", "big", "small", "3", "4", "5", "6"), set)
     }
 }

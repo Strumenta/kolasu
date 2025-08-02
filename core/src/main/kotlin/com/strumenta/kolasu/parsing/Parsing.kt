@@ -61,7 +61,9 @@ open class CodeProcessingResult<D>(
     }
 }
 
-data class TokenCategory(val type: String) {
+data class TokenCategory(
+    val type: String,
+) {
     companion object {
         val COMMENT = TokenCategory("Comment")
         val KEYWORD = TokenCategory("Keyword")
@@ -89,8 +91,10 @@ open class KolasuToken(
  * A [KolasuToken] generated from a [Token]. The [token] contains additional information that is specific to ANTLR,
  * such as type and channel.
  */
-data class KolasuANTLRToken(override val category: TokenCategory, val token: Token) :
-    KolasuToken(category, token.position, token.text)
+data class KolasuANTLRToken(
+    override val category: TokenCategory,
+    val token: Token,
+) : KolasuToken(category, token.position, token.text)
 
 /**
  * The result of lexing (tokenizing) a stream.

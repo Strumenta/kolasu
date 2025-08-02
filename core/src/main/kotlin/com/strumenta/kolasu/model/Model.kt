@@ -58,4 +58,6 @@ fun checkFeatureName(featureName: String) {
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class ASTRoot(val canBeNotRoot: Boolean = false)
+annotation class ASTRoot(
+    val canBeNotRoot: Boolean = false,
+)

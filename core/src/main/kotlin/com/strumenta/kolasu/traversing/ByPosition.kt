@@ -17,9 +17,7 @@ import com.strumenta.kolasu.model.Position
 fun Node.findByPosition(
     position: Position,
     selfContained: Boolean = false,
-): Node? {
-    return this.searchByPosition(position, selfContained).lastOrNull()
-}
+): Node? = this.searchByPosition(position, selfContained).lastOrNull()
 
 /**
  * @param position the position where to search for nodes
@@ -60,23 +58,21 @@ fun Node.searchByPosition(
  * @param position the position within which the walk should remain
  * @return walks the AST within the given [position] starting from this node, depth-first.
  */
-fun Node.walkWithin(position: Position): Sequence<Node> {
-    return if (position.contains(this)) {
+fun Node.walkWithin(position: Position): Sequence<Node> =
+    if (position.contains(this)) {
         sequenceOf(this) + this.children.walkWithin(position)
     } else if (this.overlaps(position)) {
         this.children.walkWithin(position)
     } else {
         emptySequence()
     }
-}
 
 /**
  * @param position the position within which the walk should remain
  * @return walks the AST within the given [position] starting from each node
  * and concatenates all results in a single sequence
  */
-fun List<Node>.walkWithin(position: Position): Sequence<Node> {
-    return this
+fun List<Node>.walkWithin(position: Position): Sequence<Node> =
+    this
         .map { it.walkWithin(position) }
         .reduceOrNull { previous, current -> previous + current } ?: emptySequence()
-}

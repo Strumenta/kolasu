@@ -16,28 +16,21 @@ val Multiplicity.multiple
 /**
  * Create a Dynamic Node with the given Concept and a random node ID.
  */
-fun Concept.dynamicNode(nodeId: String = "node-id-rand-${Random.nextInt()}"): DynamicNode {
-    return DynamicNode(nodeId, this)
-}
+fun Concept.dynamicNode(nodeId: String = "node-id-rand-${Random.nextInt()}"): DynamicNode = DynamicNode(nodeId, this)
 
-fun String.lwIDCleanedVersion(): String {
-    return this.replace(".", "_")
+fun String.lwIDCleanedVersion(): String =
+    this
+        .replace(".", "_")
         .replace(" ", "_")
         .replace("/", "_")
-}
 
-private fun Node.idPrefixForContainedElements(): String {
-    return this.id!!.removePrefix("language-").removeSuffix("-id")
-}
+private fun Node.idPrefixForContainedElements(): String = this.id!!.removePrefix("language-").removeSuffix("-id")
 
-private fun IKeyed<*>.keyPrefixForContainedElements(): String {
-    return this.key!!.removePrefix("language-").removeSuffix("-key")
-}
+private fun IKeyed<*>.keyPrefixForContainedElements(): String =
+    this.key!!.removePrefix("language-").removeSuffix("-key")
 
-fun Node.idForContainedElement(containedElementName: String): String {
-    return "${this.idPrefixForContainedElements()}-${containedElementName.lwIDCleanedVersion()}-id"
-}
+fun Node.idForContainedElement(containedElementName: String): String =
+    "${this.idPrefixForContainedElements()}-${containedElementName.lwIDCleanedVersion()}-id"
 
-fun IKeyed<*>.keyForContainedElement(containedElementName: String): String {
-    return "${this.keyPrefixForContainedElements()}-${containedElementName.lwIDCleanedVersion()}-key"
-}
+fun IKeyed<*>.keyForContainedElement(containedElementName: String): String =
+    "${this.keyPrefixForContainedElements()}-${containedElementName.lwIDCleanedVersion()}-key"

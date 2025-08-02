@@ -5,7 +5,9 @@ import java.util.IdentityHashMap
 /**
  * This class is thread-safe.
  */
-class BiMap<A, B>(val usingIdentity: Boolean = false) {
+class BiMap<A, B>(
+    val usingIdentity: Boolean = false,
+) {
     val `as`: Set<A>
         get() = synchronized(this) { internalAsToBs.keys }
     val bs: Set<B>

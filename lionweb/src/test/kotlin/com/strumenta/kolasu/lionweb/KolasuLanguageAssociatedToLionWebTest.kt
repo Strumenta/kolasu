@@ -12,10 +12,18 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @LionWebAssociation("key-123")
-data class LWRoot(val _id: Int, val childrez: MutableList<LWNodeA>) : Node()
+data class LWRoot(
+    val _id: Int,
+    val childrez: MutableList<LWNodeA>,
+) : Node()
 
 @LionWebAssociation("key-456")
-data class LWNodeA(override val name: String, val ref: ReferenceByName<LWNodeA>, val child: LWNodeB?) : Named, Node()
+data class LWNodeA(
+    override val name: String,
+    val ref: ReferenceByName<LWNodeA>,
+    val child: LWNodeB?,
+) : Node(),
+    Named
 
 @LionWebAssociation("key-000")
 enum class MyEnum {
@@ -25,7 +33,10 @@ enum class MyEnum {
 }
 
 @LionWebAssociation("key-789")
-data class LWNodeB(val value: String, val anotherValue: MyEnum) : Node()
+data class LWNodeB(
+    val value: String,
+    val anotherValue: MyEnum,
+) : Node()
 
 class KolasuLanguageAssociatedToLionWebTest {
     @Test

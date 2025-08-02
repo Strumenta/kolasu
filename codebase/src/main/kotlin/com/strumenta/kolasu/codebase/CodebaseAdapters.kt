@@ -65,23 +65,24 @@ fun <R : Node> CodebaseAccess.convertToCodebase(
             get() = codebaseAccess.name
 
         private val filesCache: List<CodebaseFile<R>> by lazy {
-            codebaseAccess.files().map { fileIdentifier ->
-                val serializedFile = codebaseAccess.retrieve(fileIdentifier)
-                jsonSerialization.deserializeToNodes(serializedFile)[0]
-            }.filter { serializedCodebaseFile ->
-                val languageName = serializedCodebaseFile!!.getPropertyValueByName("language_name") as String
-                languagesWeConsider.contains(languageName)
-            }.map { serializedCodebaseFile ->
-                deserialize(modelConverter, this, serializedCodebaseFile!!)
-            }.collect(Collectors.toList())
+            codebaseAccess
+                .files()
+                .map { fileIdentifier ->
+                    val serializedFile = codebaseAccess.retrieve(fileIdentifier)
+                    jsonSerialization.deserializeToNodes(serializedFile)[0]
+                }.filter { serializedCodebaseFile ->
+                    val languageName = serializedCodebaseFile!!.getPropertyValueByName("language_name") as String
+                    languagesWeConsider.contains(languageName)
+                }.map { serializedCodebaseFile ->
+                    deserialize(modelConverter, this, serializedCodebaseFile!!)
+                }.collect(Collectors.toList())
         }
 
-        override fun files(): Sequence<CodebaseFile<R>> {
-            return filesCache.asSequence()
-        }
+        override fun files(): Sequence<CodebaseFile<R>> = filesCache.asSequence()
 
-        override fun fileByRelativePath(relativePath: String): CodebaseFile<R>? {
-            return files().find { it.relativePath == relativePath }
-        }
+        override fun fileByRelativePath(relativePath: String): CodebaseFile<R>? =
+            files().find {
+                it.relativePath == relativePath
+            }
     }
 }

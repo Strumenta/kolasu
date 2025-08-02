@@ -8,11 +8,23 @@ import com.strumenta.kolasu.model.ReferenceByName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-data class Root(val _id: Int, val childrez: MutableList<NodeA>) : Node()
+data class Root(
+    val _id: Int,
+    val childrez: MutableList<NodeA>,
+) : Node()
 
-data class NodeA(override val name: String, val ref: ReferenceByName<NodeA>, val child: NodeB?) : Named, Node()
+data class NodeA(
+    override val name: String,
+    val ref: ReferenceByName<NodeA>,
+    val child: NodeB?,
+) : Node(),
+    Named
 
-data class NodeB(val value: String) : Node(), FooMyRelevantInterface, FooMyIrrelevantInterface
+data class NodeB(
+    val value: String,
+) : Node(),
+    FooMyRelevantInterface,
+    FooMyIrrelevantInterface
 
 interface FooMyIrrelevantInterface
 

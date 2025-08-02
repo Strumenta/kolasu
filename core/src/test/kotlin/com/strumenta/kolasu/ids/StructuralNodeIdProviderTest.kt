@@ -10,14 +10,24 @@ import kotlin.test.Test
 import kotlin.test.assertNotEquals
 
 @ASTRoot
-data class MyRoot(val foos: MutableList<MyNonRoot> = mutableListOf(), var other: MyOtherNode? = null) : Node()
+data class MyRoot(
+    val foos: MutableList<MyNonRoot> = mutableListOf(),
+    var other: MyOtherNode? = null,
+) : Node()
 
-data class MyNonRoot(val v: Int) : Node()
+data class MyNonRoot(
+    val v: Int,
+) : Node()
 
-data class MyOtherNode(override val name: String) : Node(), Named
+data class MyOtherNode(
+    override val name: String,
+) : Node(),
+    Named
 
 @ASTRoot
-data class MyOtherRoot(val s: String) : Node()
+data class MyOtherRoot(
+    val s: String,
+) : Node()
 
 class StructuralNodeIdProviderTest {
     @Test(expected = SourceShouldBeSetException::class)

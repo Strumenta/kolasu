@@ -6,14 +6,15 @@ import com.strumenta.kolasu.model.Source
 import com.strumenta.kolasu.model.containingProperty
 import com.strumenta.kolasu.model.indexInContainingProperty
 
-class ConstantSourceIdProvider(var value: String) : SourceIdProvider {
+class ConstantSourceIdProvider(
+    var value: String,
+) : SourceIdProvider {
     override fun sourceId(source: Source?) = value
 }
 
 open class StructuralNodeIdProvider(
     var sourceIdProvider: SourceIdProvider = SimpleSourceIdProvider(),
-) :
-    BaseNodeIdProvider() {
+) : BaseNodeIdProvider() {
     constructor(customSourceId: String) : this(
         ConstantSourceIdProvider(customSourceId),
     )

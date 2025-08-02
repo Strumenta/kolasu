@@ -40,13 +40,9 @@ class SymbolResolver(
     fun scopeFor(
         property: KReferenceByName<out Node>,
         node: Node? = null,
-    ): Scope {
-        return this.scopeProvider.scopeFor(property, node)
-    }
+    ): Scope = this.scopeProvider.scopeFor(property, node)
 
-    fun scopeFrom(node: Node? = null): Scope {
-        return this.scopeProvider.scopeFrom(node)
-    }
+    fun scopeFrom(node: Node? = null): Scope = this.scopeProvider.scopeFrom(node)
 }
 
 // configuration

@@ -53,8 +53,8 @@ fun <T : Node> KClass<T>.dummyInstance(levelOfDummyTree: Int = 0): T {
     return constructor.callBy(params)
 }
 
-private fun <T : Any> KClass<T>.toInstantiableType(levelOfDummyTree: Int = 0): KClass<out T> {
-    return when {
+private fun <T : Any> KClass<T>.toInstantiableType(levelOfDummyTree: Int = 0): KClass<out T> =
+    when {
         this.isSealed -> {
             val subclasses = this.sealedSubclasses.filter { it.isDirectlyOrIndirectlyInstantiable() }
             if (subclasses.isEmpty()) {
@@ -70,12 +70,15 @@ private fun <T : Any> KClass<T>.toInstantiableType(levelOfDummyTree: Int = 0): K
                     // infinite loop. Therefore we sort subclasses by the order of containments, preferring the ones
                     // with no or few containments and we take them consider the level of depth in the dummy tree
                     val subclassesByNumberOfContainments =
-                        subclasses.map {
-                            it to
-                                it.nodeProperties.count {
-                                    it.isContainment()
-                                }
-                        }.toList().sortedBy { it.second }.map { it.first }
+                        subclasses
+                            .map {
+                                it to
+                                    it.nodeProperties.count {
+                                        it.isContainment()
+                                    }
+                            }.toList()
+                            .sortedBy { it.second }
+                            .map { it.first }
                     subclasses[levelOfDummyTree].toInstantiableType(levelOfDummyTree + 1)
                 }
             } else {
@@ -95,16 +98,14 @@ private fun <T : Any> KClass<T>.toInstantiableType(levelOfDummyTree: Int = 0): K
             this
         }
     }
-}
 
 /**
  * We can only instantiate concrete classes or sealed classes, if one its subclasses is directly or
  * indirectly instantiable. For interfaces this return false.
  */
-fun <T : Any> KClass<T>.isDirectlyOrIndirectlyInstantiable(): Boolean {
-    return if (this.isSealed) {
+fun <T : Any> KClass<T>.isDirectlyOrIndirectlyInstantiable(): Boolean =
+    if (this.isSealed) {
         this.sealedSubclasses.any { it.isDirectlyOrIndirectlyInstantiable() }
     } else {
         !this.isAbstract && !this.java.isInterface
     }
-}

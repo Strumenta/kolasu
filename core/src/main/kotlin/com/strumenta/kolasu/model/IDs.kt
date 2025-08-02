@@ -3,7 +3,9 @@ package com.strumenta.kolasu.model
 import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.starlasu.base.IDProvider
 
-class NodeIdProviderAdapter(val idProvider: IDProvider) : NodeIdProvider {
+class NodeIdProviderAdapter(
+    val idProvider: IDProvider,
+) : NodeIdProvider {
     private var available: List<String>? = null
     private var index: Int = -1
 

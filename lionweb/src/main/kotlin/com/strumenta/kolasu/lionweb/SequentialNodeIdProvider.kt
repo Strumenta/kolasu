@@ -4,15 +4,16 @@ import com.strumenta.kolasu.ids.NodeIdProvider
 import com.strumenta.kolasu.model.Node
 import java.util.IdentityHashMap
 
-class SequentialNodeIdProvider(startId: Long = 1L) : NodeIdProvider {
+class SequentialNodeIdProvider(
+    startId: Long = 1L,
+) : NodeIdProvider {
     private val cache = IdentityHashMap<KNode, String>()
     private var next = startId
 
-    override fun id(kNode: Node): String {
-        return cache.getOrPut(kNode) {
+    override fun id(kNode: Node): String =
+        cache.getOrPut(kNode) {
             (next++).toString()
         }
-    }
 
     override var parentProvider: NodeIdProvider?
         get() = null

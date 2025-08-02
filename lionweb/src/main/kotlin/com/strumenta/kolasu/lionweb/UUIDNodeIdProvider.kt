@@ -8,11 +8,10 @@ import java.util.UUID
 class UUIDNodeIdProvider : NodeIdProvider {
     private val cache = IdentityHashMap<KNode, String>()
 
-    override fun id(kNode: Node): String {
-        return cache.getOrPut(kNode) {
+    override fun id(kNode: Node): String =
+        cache.getOrPut(kNode) {
             UUID.randomUUID().toString()
         }
-    }
 
     override var parentProvider: NodeIdProvider?
         get() = null

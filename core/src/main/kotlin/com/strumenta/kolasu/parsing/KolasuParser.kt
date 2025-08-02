@@ -71,7 +71,9 @@ open class ANTLRTokenFactory : TokenFactory<KolasuANTLRToken> {
     private fun convertToken(terminalNode: TerminalNode): KolasuANTLRToken = convertToken(terminalNode.symbol)
 }
 
-abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<T>) : KolasuLexer<T> {
+abstract class KolasuANTLRLexer<T : KolasuToken>(
+    val tokenFactory: TokenFactory<T>,
+) : KolasuLexer<T> {
     /**
      * Creates the lexer.
      */
@@ -79,9 +81,7 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<
     protected open fun createANTLRLexer(
         inputStream: InputStream,
         charset: Charset = Charsets.UTF_8,
-    ): Lexer {
-        return createANTLRLexer(CharStreams.fromStream(inputStream, charset))
-    }
+    ): Lexer = createANTLRLexer(CharStreams.fromStream(inputStream, charset))
 
     /**
      * Creates the lexer.
@@ -142,7 +142,8 @@ abstract class KolasuANTLRLexer<T : KolasuToken>(val tokenFactory: TokenFactory<
  */
 abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : KolasuToken>(
     tokenFactory: TokenFactory<T>,
-) : KolasuANTLRLexer<T>(tokenFactory), ASTParser<R> {
+) : KolasuANTLRLexer<T>(tokenFactory),
+    ASTParser<R> {
     protected var predictionContextCache = PredictionContextCache()
 
     /**
@@ -237,18 +238,14 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
     fun parseFirstStage(
         code: String,
         measureLexingTime: Boolean = false,
-    ): FirstStageParsingResult<C> {
-        return parseFirstStage(CharStreams.fromString(code), measureLexingTime)
-    }
+    ): FirstStageParsingResult<C> = parseFirstStage(CharStreams.fromString(code), measureLexingTime)
 
     @JvmOverloads
     fun parseFirstStage(
         inputStream: InputStream,
         charset: Charset = Charsets.UTF_8,
         measureLexingTime: Boolean = false,
-    ): FirstStageParsingResult<C> {
-        return parseFirstStage(CharStreams.fromStream(inputStream, charset), measureLexingTime)
-    }
+    ): FirstStageParsingResult<C> = parseFirstStage(CharStreams.fromStream(inputStream, charset), measureLexingTime)
 
     /**
      * Executes only the first stage of the parser, i.e., the production of a parse tree. Usually, you'll want to use
@@ -295,9 +292,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
     protected open fun postProcessAst(
         ast: R,
         issues: MutableList<Issue>,
-    ): R {
-        return ast
-    }
+    ): R = ast
 
     override fun parse(
         code: String,
@@ -362,9 +357,7 @@ abstract class KolasuParser<R : Node, P : Parser, C : ParserRuleContext, T : Kol
         ast?.assignParents()
     }
 
-    protected fun shouldWeClearCaches(): Boolean {
-        return executionsToNextCacheClean <= 0
-    }
+    protected fun shouldWeClearCaches(): Boolean = executionsToNextCacheClean <= 0
 
     protected var executionCounter = 0
     var cacheCycleSize = 500
