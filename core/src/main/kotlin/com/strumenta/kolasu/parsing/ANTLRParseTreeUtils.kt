@@ -1,3 +1,4 @@
+@file:JvmName("ANTLRParseTreeUtils")
 package com.strumenta.kolasu.parsing
 
 import com.strumenta.kolasu.model.Node

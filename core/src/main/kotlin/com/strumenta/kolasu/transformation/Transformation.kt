@@ -365,7 +365,7 @@ open class ASTTransformer(
         return nodes
     }
 
-    private fun setChildren(factory: NodeFactory<Any, Node>, source: Any, node: Node) {
+    protected open fun setChildren(factory: NodeFactory<Any, Node>, source: Any, node: Node) {
         node::class.processProperties { pd ->
             val childNodeFactory = factory.getChildNodeFactory<Any, Node, Any>(node::class, pd.name)
             if (childNodeFactory != null) {
