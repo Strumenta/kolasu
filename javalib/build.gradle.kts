@@ -2,7 +2,6 @@ plugins {
     kotlin("jvm")
     alias(libs.plugins.ktlint)
     alias(libs.plugins.vanniktech.publish)
-    id("antlr")
     id("idea")
     id("signing")
     id("org.jetbrains.dokka")
@@ -11,75 +10,12 @@ plugins {
 java {
     sourceCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
     targetCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
-
-    registerFeature("cli") {
-        usingSourceSet(sourceSets["main"])
-    }
 }
 
 dependencies {
-    antlr(libs.antlr)
-    api(libs.clikt)
-    api(libs.lionweb.java)
-    implementation(libs.antlr.runtime)
-    implementation(libs.starlasu.specs)
-    implementation(kotlin("stdlib", libs.versions.kotlin.get()))
-    implementation(kotlin("reflect", libs.versions.kotlin.get()))
-    implementation(kotlin("test-junit", libs.versions.kotlin.get()))
-    implementation(libs.gson)
+    implementation(project(":core"))
 
-    testImplementation(kotlin("test-junit", libs.versions.kotlin.get()))
-    // To be removed in v1.7
-    implementation("org.redundent:kotlin-xml-builder:1.7.3")
-    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.2")
-}
-
-tasks.named<AntlrTask>("generateTestGrammarSource") {
-    maxHeapSize = "64m"
-    arguments.addAll(listOf("-package", "com.strumenta.simplelang"))
-    outputDirectory = file("generated-test-src/antlr/main/com/strumenta/simplelang")
-}
-
-tasks.named("runKtlintCheckOverMainSourceSet") {
-    dependsOn("generateGrammarSource")
-}
-tasks.named("compileKotlin") {
-    dependsOn("generateGrammarSource")
-}
-tasks.named("compileJava") {
-    dependsOn("generateGrammarSource", "generateTestGrammarSource")
-}
-tasks.named("compileTestKotlin") {
-    dependsOn("generateTestGrammarSource")
-}
-tasks.named("runKtlintCheckOverTestSourceSet") {
-    dependsOn("generateTestGrammarSource")
-}
-tasks.named("runKtlintFormatOverTestSourceSet") {
-    dependsOn("generateTestGrammarSource")
-}
-tasks.named("sourcesJar") {
-    dependsOn("generateGrammarSource")
-}
-tasks.named<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>("compileKotlin").configure {
-    source(sourceSets["main"].allJava, sourceSets["main"].kotlin)
-}
-tasks.named<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>("compileTestKotlin").configure {
-    source(sourceSets["test"].kotlin)
-}
-
-sourceSets.named("test") {
-    java.srcDir("generated-test-src/antlr/main")
-}
-
-tasks.named<Delete>("clean") {
-    delete("generated-src", "generated-test-src")
-}
-
-idea {
-    module {
-        testSources.from(file("generated-test-src/antlr/main"))
-    }
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:${libs.versions.kotlin.get()}")
 }
 
 publishing {
@@ -99,8 +35,6 @@ publishing {
     publications.withType<MavenPublication>().configureEach {
         if (name == "maven") {
             artifactId = "kolasu-${project.name}"
-            suppressPomMetadataWarningsFor("cliApiElements")
-            suppressPomMetadataWarningsFor("cliRuntimeElements")
             pom {
                 name.set("kolasu-${project.name}")
                 description.set("Framework to work with AST and building languages. Integrated with ANTLR.")
@@ -151,9 +85,6 @@ project.afterEvaluate {
         dependsOn(tasks.named("javaSourcesJar"))
         dependsOn(tasks.named("javadocJar"))
         dependsOn(tasks.named("sourcesJar"))
-    }
-    tasks.named("javaSourcesJar") {
-        dependsOn(tasks.named("generateGrammarSource"))
     }
     tasks.named("signMavenPublication") {
         dependsOn(tasks.named("javadocJar"))
