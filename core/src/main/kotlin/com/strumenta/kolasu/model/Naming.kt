@@ -44,7 +44,7 @@ interface Named : PossiblyNamed {
  * the `referred` field is null and the `identifier` field is used instead. This, will be used to retrieve the
  * actual node at a later stage.
  */
-class ReferenceByName<N : PossiblyNamed>(
+class ReferenceByName<N : PossiblyNamed> @JvmOverloads constructor(
     var name: String,
     initialReferred: N? = null,
     var identifier: String? = null
