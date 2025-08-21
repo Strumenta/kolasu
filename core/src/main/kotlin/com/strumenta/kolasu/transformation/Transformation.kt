@@ -116,7 +116,7 @@ class NodeFactory<Source, Output : Node>(
     fun withChild(
         targetProperty: KProperty1<out Any, *>,
         sourceAccessor: Source.() -> Any?
-    ): NodeFactory<Source, Output> = withChild<Output, Node>(
+    ): NodeFactory<Source, Output> = withChild<Output, Any>(
         get = { source -> source.sourceAccessor() },
         null,
         targetProperty.name,
@@ -150,7 +150,7 @@ class NodeFactory<Source, Output : Node>(
      * the parent has been instantiated.
      */
     @JvmOverloads
-    fun <Target : Output, Child : Node> withChild(
+    fun <Target : Output, Child : Any> withChild(
         get: (Source) -> Any?,
         set: ((Target, Child?) -> Unit)?,
         name: String,

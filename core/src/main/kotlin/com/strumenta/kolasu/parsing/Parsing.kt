@@ -41,6 +41,7 @@ open class CodeProcessingResult<D>(
 ) : Serializable {
     val isCorrect: Boolean
         get() = issues.none { it.severity != IssueSeverity.INFO }
+
     @Deprecated(message = "Use isCorrect instead.", replaceWith = ReplaceWith("isCorrect"))
     val correct: Boolean = isCorrect
 

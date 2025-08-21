@@ -1,4 +1,4 @@
- @file:JvmName("Testing")
+@file:JvmName("Testing")
 
 package com.strumenta.kolasu.testing
 
@@ -137,7 +137,8 @@ fun <T : Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: 
         assertASTsAreEqual(expected.root, actual.root!!)
     }
 }
- @JvmOverloads
+
+@JvmOverloads
 fun <N : Node> assertASTsAreEqual(
     expected: Node,
     actual: ParsingResult<N>,
