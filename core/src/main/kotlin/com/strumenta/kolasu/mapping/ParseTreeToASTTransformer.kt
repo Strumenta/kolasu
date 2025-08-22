@@ -1,5 +1,6 @@
 package com.strumenta.kolasu.mapping
 
+import com.strumenta.kolasu.model.BaseASTNode
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.Source
@@ -29,9 +30,9 @@ open class ParseTreeToASTTransformer(
      */
     override fun transformIntoNodes(
         source: Any?,
-        parent: Node?,
-        expectedType: KClass<out Node>,
-    ): List<Node> {
+        parent: BaseASTNode?,
+        expectedType: KClass<out BaseASTNode>,
+    ): List<BaseASTNode> {
         val transformed = super.transformIntoNodes(source, parent, expectedType)
         return transformed
             .map { node ->

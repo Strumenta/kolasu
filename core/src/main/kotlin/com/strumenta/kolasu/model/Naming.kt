@@ -44,48 +44,50 @@ interface Named : PossiblyNamed {
  * the `referred` field is null and the `identifier` field is used instead. This, will be used to retrieve the
  * actual node at a later stage.
  */
-class ReferenceByName<N : PossiblyNamed>(
-    var name: String,
-    initialReferred: N? = null,
-    var identifier: String? = null,
-) : Serializable {
-    var referred: N? = null
-        set(value) {
-            require(value is Node || value == null) {
-                "We cannot enforce it statically but only Node should be referred to. Instead $value was assigned " +
-                    "(class: ${value?.javaClass})"
+class ReferenceByName<N : PossiblyNamed>
+    @JvmOverloads
+    constructor(
+        var name: String,
+        initialReferred: N? = null,
+        var identifier: String? = null,
+    ) : Serializable {
+        var referred: N? = null
+            set(value) {
+                require(value is Node || value == null) {
+                    "We cannot enforce it statically but only Node should be referred to. Instead $value was " +
+                        "assigned (class: ${value?.javaClass})"
+                }
+                field = value
             }
-            field = value
+
+        init {
+            this.referred = initialReferred
         }
 
-    init {
-        this.referred = initialReferred
-    }
+        val resolved: Boolean
+            get() = identifier != null || retrieved
 
-    val resolved: Boolean
-        get() = identifier != null || retrieved
+        val retrieved: Boolean
+            get() = referred != null
 
-    val retrieved: Boolean
-        get() = referred != null
+        override fun toString(): String =
+            if (resolved) {
+                "Ref($name)[Solved]"
+            } else {
+                "Ref($name)[Unsolved]"
+            }
 
-    override fun toString(): String =
-        if (resolved) {
-            "Ref($name)[Solved]"
-        } else {
-            "Ref($name)[Unsolved]"
+        override fun hashCode(): Int = name.hashCode() * (1 + identifier.hashCode()) * (7 + if (resolved) 2 else 1)
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is ReferenceByName<*>) return false
+            if (name != other.name) return false
+            if (identifier != other.identifier) return false
+            if (referred != other.referred) return false
+            return true
         }
-
-    override fun hashCode(): Int = name.hashCode() * (1 + identifier.hashCode()) * (7 + if (resolved) 2 else 1)
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is ReferenceByName<*>) return false
-        if (name != other.name) return false
-        if (identifier != other.identifier) return false
-        if (referred != other.referred) return false
-        return true
     }
-}
 
 /**
  * Try to resolve the reference by finding a named element with a matching name.

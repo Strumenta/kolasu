@@ -117,7 +117,7 @@ class NodeFactory<Source, Output : Node>(
         targetProperty: KProperty1<out Any, *>,
         sourceAccessor: Source.() -> Any?,
     ): NodeFactory<Source, Output> =
-        withChild<Any, Any>(
+        withChild<Output, Any>(
             get = { source -> source.sourceAccessor() },
             null,
             targetProperty.name,
@@ -138,7 +138,7 @@ class NodeFactory<Source, Output : Node>(
         sourceAccessor: Source.() -> Any?,
         scopedToType: KClass<*>,
     ): NodeFactory<Source, Output> =
-        withChild<Any, Any>(
+        withChild<Output, Node>(
             get = { source -> source.sourceAccessor() },
             null,
             targetProperty.name,
@@ -151,7 +151,8 @@ class NodeFactory<Source, Output : Node>(
      * as a constructor parameter when instantiating the parent, or be used to set the value after
      * the parent has been instantiated.
      */
-    fun <Target : Any, Child : Any> withChild(
+    @JvmOverloads
+    fun <Target : Output, Child : Any> withChild(
         get: (Source) -> Any?,
         set: ((Target, Child?) -> Unit)?,
         name: String,
@@ -378,7 +379,7 @@ open class ASTTransformer(
         return nodes
     }
 
-    private fun setChildren(
+    protected open fun setChildren(
         factory: NodeFactory<Any, Node>,
         source: Any,
         node: Node,
