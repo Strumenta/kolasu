@@ -1,3 +1,5 @@
+@file:JvmName("Testing")
+
 package com.strumenta.kolasu.testing
 
 import com.strumenta.kolasu.model.KReferenceByName
@@ -136,6 +138,7 @@ fun <T : Node> assertParsingResultsAreEqual(expected: ParsingResult<T>, actual: 
     }
 }
 
+@JvmOverloads
 fun <N : Node> assertASTsAreEqual(
     expected: Node,
     actual: ParsingResult<N>,
@@ -151,6 +154,7 @@ fun <N : Node> assertASTsAreEqual(
     )
 }
 
+@JvmOverloads
 fun assertASTsAreEqual(
     expected: Node,
     actual: Node,

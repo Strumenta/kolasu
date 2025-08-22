@@ -19,16 +19,16 @@ java {
 
 dependencies {
     antlr(libs.antlr)
+    api(libs.clikt)
+    api(libs.lionweb.java)
     implementation(libs.antlr.runtime)
     implementation(libs.starlasu.specs)
     implementation(kotlin("stdlib", libs.versions.kotlin.get()))
     implementation(kotlin("reflect", libs.versions.kotlin.get()))
     implementation(kotlin("test", libs.versions.kotlin.get()))
     implementation(libs.gson)
-    api(libs.clikt)
-    testImplementation(kotlin("test-junit", libs.versions.kotlin.get()))
-    api(libs.lionweb.java)
 
+    testImplementation(kotlin("test-junit", libs.versions.kotlin.get()))
     // To be removed in v1.7
     implementation("org.redundent:kotlin-xml-builder:1.7.3")
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.2")

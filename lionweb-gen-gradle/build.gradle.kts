@@ -42,7 +42,7 @@ gradlePlugin {
     vcsUrl.set("https://github.com/strumenta/kolasu.git")
     plugins {
         create("lionwebGenGradlePlugin") {
-            id = lionwebGenGradlePluginID as String
+            id = lionwebGenGradlePluginID
             displayName = "Kolasu LionWeb Gen"
             description = "Kolasu LionWeb Gen"
             tags.set(listOf("parsing", "ast", "starlasu", "lionweb"))
