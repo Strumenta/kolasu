@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
  * Implements a transformation from an ANTLR parse tree (the output of the parser) to an AST (a higher-level
  * representation of the source code).
  */
-open class ParseTreeToASTTransformer(
+open class ParseTreeToASTTransformer @JvmOverloads constructor(
     issues: MutableList<Issue> = mutableListOf(),
     allowGenericNode: Boolean = true,
     val source: Source? = null,
@@ -49,6 +49,14 @@ open class ParseTreeToASTTransformer(
 
     override fun asOrigin(source: Any): Origin? {
         return if (source is ParseTree) ParseTreeOrigin(source) else null
+    }
+
+    override fun asString(source: Any): String? {
+        return if (source is ParseTree) {
+            source.text
+        } else {
+            super.asString(source)
+        }
     }
 
     /**
