@@ -3,6 +3,7 @@ package com.strumenta.kolasu.javalib;
 import com.strumenta.kolasu.model.Node;
 import com.strumenta.kolasu.transformation.NodeFactory;
 import com.strumenta.kolasu.validation.Issue;
+import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import kotlin.jvm.functions.Function2;
 import kotlin.jvm.functions.Function4;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import static kotlin.jvm.JvmClassMappingKt.getKotlinClass;
 
@@ -51,6 +53,22 @@ public class ASTTransformer extends com.strumenta.kolasu.transformation.ASTTrans
 
     protected <S, T extends Node> NodeFactory<S, T> registerNodeFactory(Class<S> source, Function2<S, ? super com.strumenta.kolasu.transformation.ASTTransformer, T> function) {
         return registerNodeFactory(getKotlinClass(source), function);
+    }
+
+    /**
+     * Makes it less verbose to call withChild methods, allowing to use method references instead of closures.
+     * Example:
+     * <code>.withChild(Constant_bodyContext::base_type, setter(ModelSpecificConstant::setBaseDatatype), "base type");</code>
+     * @param consumer the wrapped consumer, typically a setter method reference
+     * @return the corresponding Kotlin function of two parameters and Unit return type
+     * @param <P> class of the parent
+     * @param <C> class of the child
+     */
+    public static @NotNull <P, C> Function2<P, C, Unit> setter(BiConsumer<P, C> consumer) {
+        return (parent, child) -> {
+            consumer.accept(parent, child);
+            return Unit.INSTANCE;
+        };
     }
 
 }
