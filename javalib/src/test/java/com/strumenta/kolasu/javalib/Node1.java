@@ -1,8 +1,6 @@
 package com.strumenta.kolasu.javalib;
 
-import com.strumenta.kolasu.model.Node;
-
-public class Node1 extends Node {
+public class Node1 extends JavaNode {
     private Node2 node2;
 
     public Node2 getNode2() {
