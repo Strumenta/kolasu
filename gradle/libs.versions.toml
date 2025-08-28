@@ -12,7 +12,7 @@ dokka="1.8.20"
 
 [plugins]
 build-config = { id = "com.github.gmazzo.buildconfig", version = "5.4.0" }
-# More recent versions og this plugin to do not work with JVM 8
+# More recent versions of this plugin do not work with JVM 8
 # We should configure JVM 11 for the build and JVM 8 only as a target
 vanniktech-publish = { id = "com.vanniktech.maven.publish", version = "0.22.0" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "11.5.1" }
@@ -20,13 +20,14 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 
 [libraries]
+guava = { group = "com.google.guava", name="guava", version="33.4.8-jre" } # Only used in tests
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+kotest-testcontainers = { module = "io.kotest.extensions:kotest-extensions-testcontainers", version.ref = "kotest" }
 lionweb-java = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-core", version.ref = "lwjava" }
 lionweb-java-emf = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-emf", version.ref = "lwjava" }
 lionweb-java-client-testing = { group = "io.lionweb.lionweb-java", name = "lionweb-java-2024.1-client-testing", version.ref = "lwjava" }
 lionweb-kotlin-client = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-client", version.ref = "lwkotlin" }
 lionweb-kotlin = { group = "io.lionweb.lionweb-kotlin", name = "lionweb-kotlin-2024.1-core", version.ref = "lwkotlin" }
-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
-kotest-testcontainers = { module = "io.kotest.extensions:kotest-extensions-testcontainers", version.ref = "kotest" }
 starlasu-specs = { module="com.strumenta.starlasu.specs:starlasuspecs-jvm", version.ref="specs" }
 antlr = { module = "org.antlr:antlr4", version.ref = "antlr" }
 antlr-runtime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr" }

@@ -118,6 +118,11 @@ data class PropertyDescription(
         fun <N : Node> buildFor(property: KProperty1<N, *>, node: Node): PropertyDescription {
             val multiplicity = multiplicity(property)
             val provideNodes = providesNodes(property)
+            val type = if (property.isReference()) {
+                property.returnType.arguments[0].type!!
+            } else {
+                property.returnType
+            }
             return PropertyDescription(
                 name = property.name,
                 provideNodes = provideNodes,
@@ -129,7 +134,7 @@ data class PropertyDescription(
                     else -> PropertyType.ATTRIBUTE
                 },
                 derived = property.findAnnotation<Derived>() != null,
-                type = property.returnType
+                type = type
             )
         }
     }

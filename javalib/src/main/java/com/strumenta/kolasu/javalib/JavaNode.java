@@ -12,6 +12,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -57,12 +58,14 @@ public class JavaNode extends Node {
         if (getRESERVED_FEATURE_NAMES().contains(p.getName())) {
             return false;
         }
+        Method getClassMethod;
         try {
-            if (p.getReadMethod() == null || p.getReadMethod().equals(Object.class.getDeclaredMethod("getClass"))) {
-                return false;
-            }
+             getClassMethod = Object.class.getDeclaredMethod("getClass");
         } catch (NoSuchMethodException e) {
-            // Can't happen
+            throw new RuntimeException("This is a bug", e);
+        }
+        if (p.getReadMethod() == null || p.getReadMethod().equals(getClassMethod)) {
+            return false;
         }
         return !hasAnnotation(p, Internal.class) && !hasAnnotation(p, Link.class);
     }
@@ -83,7 +86,7 @@ public class JavaNode extends Node {
         Multiplicity multiplicity = Multiplicity.OPTIONAL;
         if (Collection.class.isAssignableFrom(type)) {
             multiplicity = Multiplicity.MANY;
-        } else if (p.getReadMethod().isAnnotationPresent(NotNull.class) || p.getPropertyType().isPrimitive()) {
+        } else if (p.getReadMethod().isAnnotationPresent(Mandatory.class) || p.getPropertyType().isPrimitive()) {
             multiplicity = Multiplicity.SINGULAR;
         }
         Object value;
@@ -93,14 +96,26 @@ public class JavaNode extends Node {
             throw new RuntimeException(e);
         }
         PropertyType propertyType = provideNodes ? PropertyType.CONTAINMENT : PropertyType.ATTRIBUTE;
+        Class<?> actualType = type;
         if (ReferenceByName.class.isAssignableFrom(type)) {
             propertyType = PropertyType.REFERENCE;
+            Type returnType = p.getReadMethod().getGenericReturnType();
+            if (returnType instanceof ParameterizedType) {
+                Type[] typeArgs = ((ParameterizedType) returnType).getActualTypeArguments();
+                if (typeArgs.length == 1 && typeArgs[0] instanceof Class) {
+                    actualType = (Class<?>) typeArgs[0];
+                }
+            }
         }
         boolean derived = hasAnnotation(p, Derived.class);
-        // TODO type.getTypeParameters()
         boolean nullable = multiplicity == Multiplicity.OPTIONAL;
         return new PropertyDescription(
-                name, provideNodes, multiplicity, value, propertyType, derived, kotlinType(type, nullable));
+                name, provideNodes, multiplicity, value, propertyType, derived, kotlinType(actualType, nullable));
+    }
+
+    @NotNull
+    public static KType kotlinType(Class<?> type) {
+        return kotlinType(type, false);
     }
 
     @NotNull
@@ -118,6 +133,11 @@ public class JavaNode extends Node {
         return createType(
                 getKotlinClass(type), arguments,
                 nullable, Collections.emptyList());
+    }
+
+    @NotNull
+    public static KType kotlinType(ParameterizedType type) {
+        return kotlinType(type, false);
     }
 
     @NotNull

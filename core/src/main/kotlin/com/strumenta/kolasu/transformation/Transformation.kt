@@ -562,6 +562,14 @@ open class ASTTransformer @JvmOverloads constructor(
 
     protected open fun asString(source: Any): String? = null
 
+    /**
+     * Registers a factory that will be used to translate nodes of type S.
+     *
+     * @param source the class of the source node
+     * @param target the class of the target node
+     * @param nodeType the [Node.nodeType] of the target node. Normally, the node type is the same as the class name,
+     * however, [Node] subclasses may want to override it, and in that case, the parameter must be provided explicitly.
+     */
     fun <S : Any, T : Node> registerNodeFactory(
         source: KClass<S>,
         target: KClass<T>,
@@ -601,7 +609,7 @@ open class ASTTransformer @JvmOverloads constructor(
                 // initially based on `emptyLikeConstructor` being equal to null, this can be later changed in `withChild`,
                 // so we should really check the value that `childrenSetAtConstruction` time has when we actually invoke
                 // the factory.
-                if (thisFactory.childrenSetAtConstruction) {
+                val instance = if (thisFactory.childrenSetAtConstruction) {
                     val constructor = target.preferredConstructor()
                     val constructorParamValues = constructor.parameters.map { it to getConstructorParameterValue(it) }
                         .filter { it.second is PresentParameterValue }
@@ -629,6 +637,13 @@ open class ASTTransformer @JvmOverloads constructor(
                     }
                     target.createInstance()
                 }
+                if (instance.nodeType != nodeType) {
+                    throw RuntimeException(
+                        "Configuration exception: nodeType of instance of $target is " +
+                            "${instance.nodeType} instead of $nodeType"
+                    )
+                }
+                instance
             },
             // If I do not have an emptyLikeConstructor, then I am forced to invoke a constructor with parameters and
             // therefore setting the children at construction time.

@@ -115,13 +115,13 @@ fun Node.walkChildren(includeDerived: Boolean = false): Sequence<Node> {
 /**
  * @return all direct children of this node, together with the name of the containment of each child.
  */
-fun Node.walkNamedChildren(includeDerived: Boolean = false): Sequence<Pair<String, Node>> {
+fun Node.walkChildrenByContainment(includeDerived: Boolean = false): Sequence<Pair<String, Node>> {
     return sequence {
         (
             if (includeDerived) {
-                this@walkNamedChildren.properties
+                this@walkChildrenByContainment.properties
             } else {
-                this@walkNamedChildren.originalProperties
+                this@walkChildrenByContainment.originalProperties
             }
             ).forEach { property ->
             when (val value = property.value) {
@@ -169,9 +169,9 @@ val Node.children: List<Node>
 /**
  * @return all direct children of this node.
  */
-val Node.namedChildren: List<Pair<String, Node>>
+val Node.childrenByContainment: List<Pair<String, Node>>
     get() {
-        return walkNamedChildren().toList()
+        return walkChildrenByContainment().toList()
     }
 
 @JvmOverloads
