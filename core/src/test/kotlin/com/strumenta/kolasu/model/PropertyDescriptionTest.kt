@@ -2,12 +2,15 @@ package com.strumenta.kolasu.model
 
 import org.junit.Test
 import java.util.LinkedList
+import kotlin.reflect.KTypeProjection
+import kotlin.reflect.full.createType
 import kotlin.test.assertEquals
 
-data class Foo1(val name: String) : Node()
+data class Foo1(override val name: String) : Node(), Named
 data class Foo2(val names: List<String>) : Node()
 data class Foo3(val foo: Foo1) : Node()
 data class Foo4(val foos: List<Foo1>?) : Node()
+data class Foo5(val fooRef: ReferenceByName<Foo1>) : Node()
 
 class PropertyDescriptionTest {
 
@@ -26,7 +29,8 @@ class PropertyDescriptionTest {
                 Multiplicity.SINGULAR,
                 "gino",
                 PropertyType.ATTRIBUTE,
-                derived = false
+                derived = false,
+                type = String::class.createType()
             ),
             list[0]
         )
@@ -47,7 +51,10 @@ class PropertyDescriptionTest {
                 Multiplicity.MANY,
                 listOf("gino", "pino"),
                 PropertyType.ATTRIBUTE,
-                derived = false
+                derived = false,
+                type = List::class.createType(
+                    listOf(KTypeProjection.invariant(String()::class.createType()))
+                )
             ),
             list[0]
         )
@@ -68,7 +75,8 @@ class PropertyDescriptionTest {
                 Multiplicity.SINGULAR,
                 Foo1("gino"),
                 PropertyType.CONTAINMENT,
-                derived = false
+                derived = false,
+                type = Foo1::class.createType()
             ),
             list[0]
         )
@@ -89,7 +97,11 @@ class PropertyDescriptionTest {
                 Multiplicity.MANY,
                 listOf(Foo1("gino")),
                 PropertyType.CONTAINMENT,
-                derived = false
+                derived = false,
+                type = List::class.createType(
+                    listOf(KTypeProjection.invariant(Foo1::class.createType())),
+                    nullable = true
+                )
             ),
             list[0]
         )
@@ -110,7 +122,11 @@ class PropertyDescriptionTest {
                 Multiplicity.MANY,
                 emptyList<Foo1>(),
                 PropertyType.CONTAINMENT,
-                derived = false
+                derived = false,
+                type = List::class.createType(
+                    listOf(KTypeProjection.invariant(Foo1::class.createType())),
+                    nullable = true
+                )
             ),
             list[0]
         )
@@ -131,7 +147,30 @@ class PropertyDescriptionTest {
                 Multiplicity.MANY,
                 null,
                 PropertyType.CONTAINMENT,
-                derived = false
+                derived = false,
+                type = List::class.createType(
+                    listOf(KTypeProjection.invariant(Foo1::class.createType())),
+                    nullable = true
+                )
+            ),
+            list[0]
+        )
+    }
+
+    @Test
+    fun buildForNodeWithReference() {
+        val instance = Foo5(ReferenceByName(""))
+        val list = instance.properties
+        assertEquals(1, list.size)
+        assertEquals(
+            PropertyDescription(
+                "fooRef",
+                false,
+                Multiplicity.SINGULAR,
+                ReferenceByName<Foo1>(""),
+                PropertyType.REFERENCE,
+                derived = false,
+                type = Foo1::class.createType()
             ),
             list[0]
         )

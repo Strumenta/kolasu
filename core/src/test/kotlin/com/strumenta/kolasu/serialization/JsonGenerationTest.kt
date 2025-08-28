@@ -19,6 +19,7 @@ import com.strumenta.kolasu.validation.IssueType
 import com.strumenta.kolasu.validation.Result
 import org.junit.Test
 import java.io.StringWriter
+import kotlin.reflect.full.createType
 import kotlin.test.assertEquals
 
 data class NodeWithReference(
@@ -361,7 +362,8 @@ class JsonGenerationTest {
                     Multiplicity.SINGULAR,
                     123,
                     PropertyType.ATTRIBUTE,
-                    derived = false
+                    derived = false,
+                    type = String::class.createType()
                 ),
                 PropertyDescription(
                     "someListAttr",
@@ -369,7 +371,8 @@ class JsonGenerationTest {
                     Multiplicity.MANY,
                     listOf("a", "b"),
                     PropertyType.ATTRIBUTE,
-                    derived = false
+                    derived = false,
+                    type = String::class.createType()
                 ),
                 PropertyDescription(
                     "someChild",
@@ -377,7 +380,8 @@ class JsonGenerationTest {
                     Multiplicity.SINGULAR,
                     BaseNode(456),
                     PropertyType.CONTAINMENT,
-                    derived = false
+                    derived = false,
+                    type = String::class.createType()
                 ),
                 PropertyDescription(
                     "someChildren",
@@ -385,7 +389,8 @@ class JsonGenerationTest {
                     Multiplicity.MANY,
                     listOf(BaseNode(78), BaseNode(90)),
                     PropertyType.CONTAINMENT,
-                    derived = false
+                    derived = false,
+                    type = String::class.createType()
                 )
             )
         )

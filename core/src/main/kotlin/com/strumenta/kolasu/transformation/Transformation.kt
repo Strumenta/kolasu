@@ -4,14 +4,13 @@ import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.model.PropertyTypeDescription
+import com.strumenta.kolasu.model.PropertyDescription
 import com.strumenta.kolasu.model.asContainment
 import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
-import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
@@ -259,7 +258,7 @@ private val NO_CHILD_NODE = ChildNodeFactory<Any, Any, Any>("", { x -> x }, { _,
  * If no factory is provided for a source node type, a GenericNode is created, and the processing of the subtree stops
  * there.
  */
-open class ASTTransformer(
+open class ASTTransformer @JvmOverloads constructor(
     /**
      * Additional issues found during the transformation process.
      */
@@ -366,15 +365,14 @@ open class ASTTransformer(
     }
 
     protected open fun setChildren(factory: NodeFactory<Any, Node>, source: Any, node: Node) {
-        node::class.processProperties { pd ->
-            val childNodeFactory = factory.getChildNodeFactory<Any, Node, Any>(node::class, pd.name)
+        node.processProperties { pd ->
+            val childNodeFactory = factory.getChildNodeFactory<Any, Node, Any>(node, pd.name)
             if (childNodeFactory != null) {
                 if (childNodeFactory != NO_CHILD_NODE) {
                     setChild(childNodeFactory, source, node, pd)
                 }
             } else {
-                val childKey = node.nodeType + "#" + pd.name
-                factory.children[childKey] = NO_CHILD_NODE
+                factory.children[getChildKey(node.nodeType, pd.name)] = NO_CHILD_NODE
             }
         }
     }
@@ -385,7 +383,7 @@ open class ASTTransformer(
         childNodeFactory: ChildNodeFactory<*, *, *>,
         source: Any,
         node: Node,
-        pd: PropertyTypeDescription
+        pd: PropertyDescription
     ) {
         val childFactory = childNodeFactory as ChildNodeFactory<Any, Any, Any>
         val childrenSource = childFactory.get(getSource(node, source))
@@ -546,8 +544,13 @@ open class ASTTransformer(
             }
 
             else -> {
-                if (kParameter.type == String::class.createType() && childSource is ParseTree) {
-                    PresentParameterValue(childSource.text)
+                if (kParameter.type == String::class.createType()) {
+                    val string = asString(childSource)
+                    if (string != null) {
+                        PresentParameterValue(string)
+                    } else {
+                        AbsentParameterValue
+                    }
                 } else if ((kParameter.type.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
                     PresentParameterValue(transformIntoNodes(childSource))
                 } else {
@@ -557,7 +560,21 @@ open class ASTTransformer(
         }
     }
 
-    fun <S : Any, T : Node> registerNodeFactory(source: KClass<S>, target: KClass<T>): NodeFactory<S, T> {
+    protected open fun asString(source: Any): String? = null
+
+    /**
+     * Registers a factory that will be used to translate nodes of type S.
+     *
+     * @param source the class of the source node
+     * @param target the class of the target node
+     * @param nodeType the [Node.nodeType] of the target node. Normally, the node type is the same as the class name,
+     * however, [Node] subclasses may want to override it, and in that case, the parameter must be provided explicitly.
+     */
+    fun <S : Any, T : Node> registerNodeFactory(
+        source: KClass<S>,
+        target: KClass<T>,
+        nodeType: String = target.qualifiedName!!
+    ): NodeFactory<S, T> {
         registerKnownClass(target)
         // We are looking for any constructor with does not take parameters or have default
         // values for all its parameters
@@ -569,7 +586,7 @@ open class ASTTransformer(
                 }
                 fun getConstructorParameterValue(kParameter: KParameter): ParameterValue {
                     try {
-                        val childNodeFactory = thisFactory.getChildNodeFactory<Any, T, Any>(target, kParameter.name!!)
+                        val childNodeFactory = thisFactory.getChildNodeFactory<Any, T, Any>(nodeType, kParameter.name!!)
                         if (childNodeFactory == null) {
                             if (kParameter.isOptional) {
                                 return AbsentParameterValue
@@ -592,7 +609,7 @@ open class ASTTransformer(
                 // initially based on `emptyLikeConstructor` being equal to null, this can be later changed in `withChild`,
                 // so we should really check the value that `childrenSetAtConstruction` time has when we actually invoke
                 // the factory.
-                if (thisFactory.childrenSetAtConstruction) {
+                val instance = if (thisFactory.childrenSetAtConstruction) {
                     val constructor = target.preferredConstructor()
                     val constructorParamValues = constructor.parameters.map { it to getConstructorParameterValue(it) }
                         .filter { it.second is PresentParameterValue }
@@ -620,6 +637,13 @@ open class ASTTransformer(
                     }
                     target.createInstance()
                 }
+                if (instance.nodeType != nodeType) {
+                    throw RuntimeException(
+                        "Configuration exception: nodeType of instance of $target is " +
+                            "${instance.nodeType} instead of $nodeType"
+                    )
+                }
+                instance
             },
             // If I do not have an emptyLikeConstructor, then I am forced to invoke a constructor with parameters and
             // therefore setting the children at construction time.
@@ -660,17 +684,34 @@ open class ASTTransformer(
     }
 }
 
-private fun <Source : Any, Target : Any, Child : Any> NodeFactory<*, *>.getChildNodeFactory(
-    nodeClass: KClass<out Target>,
+private fun <Source : Any, Target : Node, Child : Any> NodeFactory<*, *>.getChildNodeFactory(
+    node: Target,
     parameterName: String
 ): ChildNodeFactory<Source, Target, Child>? {
-    val childKey = nodeClass.qualifiedName + "#" + parameterName
+    return getChildNodeFactory(node.nodeType, parameterName)
+}
+
+private fun <Source : Any, Target : Node, Child : Any> NodeFactory<*, *>.getChildNodeFactory(
+    nodeType: String,
+    parameterName: String
+): ChildNodeFactory<Source, Target, Child>? {
+    val childKey = getChildKey(nodeType, parameterName)
     var childNodeFactory = this.children[childKey]
     if (childNodeFactory == null) {
         childNodeFactory = this.children[parameterName]
     }
     return childNodeFactory as ChildNodeFactory<Source, Target, Child>?
 }
+
+private fun <Target : Any> getChildKey(
+    nodeClass: KClass<out Target>,
+    parameterName: String
+): String = getChildKey(nodeClass.qualifiedName!!, parameterName)
+
+private fun getChildKey(
+    nodeType: String,
+    parameterName: String
+): String = "$nodeType#$parameterName"
 
 private sealed class ParameterValue
 private class PresentParameterValue(val value: Any?) : ParameterValue()
