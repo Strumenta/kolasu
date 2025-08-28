@@ -1,3 +1,5 @@
+@file:JvmName("Reflection")
+
 package com.strumenta.kolasu.model
 
 import com.strumenta.kolasu.language.Attribute
@@ -58,18 +60,20 @@ enum class PropertyType {
 
 data class PropertyDescription(
     val name: String,
+    @Deprecated("Redundant", replaceWith = ReplaceWith("propertyType == PropertyType.CONTAINMENT"))
     val provideNodes: Boolean,
     val multiplicity: Multiplicity,
     val value: Any?,
     val propertyType: PropertyType,
-    val derived: Boolean
+    val derived: Boolean,
+    val type: KType
 ) {
 
     fun valueToString(): String {
         if (value == null) {
             return "null"
         }
-        return if (provideNodes) {
+        return if (propertyType == PropertyType.CONTAINMENT) {
             if (multiplicity == Multiplicity.MANY) {
                 when (value) {
                     is IgnoreChildren<*> -> "<Ignore Children Placeholder>"
@@ -111,16 +115,6 @@ data class PropertyDescription(
             }
         }
 
-        fun <N : Node> providesNodes(property: KProperty1<N, *>): Boolean {
-            val propertyType = property.returnType
-            val classifier = propertyType.classifier as? KClass<*>
-            return if (multiple(property)) {
-                providesNodes(propertyType.arguments[0])
-            } else {
-                providesNodes(classifier)
-            }
-        }
-
         fun <N : Node> buildFor(property: KProperty1<N, *>, node: Node): PropertyDescription {
             val multiplicity = multiplicity(property)
             val provideNodes = providesNodes(property)
@@ -134,13 +128,24 @@ data class PropertyDescription(
                     provideNodes -> PropertyType.CONTAINMENT
                     else -> PropertyType.ATTRIBUTE
                 },
-                derived = property.findAnnotation<Derived>() != null
+                derived = property.findAnnotation<Derived>() != null,
+                type = property.returnType
             )
         }
     }
 }
 
-private fun providesNodes(classifier: KClassifier?): Boolean {
+fun <N : Node> providesNodes(property: KProperty1<N, *>): Boolean {
+    val propertyType = property.returnType
+    val classifier = propertyType.classifier as? KClass<*>
+    return if (PropertyDescription.multiple(property)) {
+        providesNodes(propertyType.arguments[0])
+    } else {
+        providesNodes(classifier)
+    }
+}
+
+fun providesNodes(classifier: KClassifier?): Boolean {
     if (classifier == null) {
         return false
     }
@@ -153,7 +158,7 @@ private fun providesNodes(classifier: KClassifier?): Boolean {
     }
 }
 
-private fun providesNodes(kclass: KClass<*>?): Boolean {
+fun providesNodes(kclass: KClass<*>?): Boolean {
     return kclass?.isANode() ?: false
 }
 

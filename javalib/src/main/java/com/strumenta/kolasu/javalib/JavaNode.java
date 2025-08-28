@@ -2,6 +2,8 @@ package com.strumenta.kolasu.javalib;
 
 import com.strumenta.kolasu.model.*;
 import kotlin.reflect.KCallable;
+import kotlin.reflect.KType;
+import kotlin.reflect.KTypeProjection;
 import kotlin.reflect.full.KAnnotatedElements;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,13 +11,16 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.strumenta.kolasu.model.ModelKt.getRESERVED_FEATURE_NAMES;
 import static kotlin.jvm.JvmClassMappingKt.getKotlinClass;
+import static kotlin.reflect.full.KClassifiers.createType;
 
 /**
  * A subclass of {@link Node} that uses Java's reflection to compute its feature set.
@@ -40,7 +45,7 @@ public class JavaNode extends Node {
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(getClass());
             return Arrays.stream(beanInfo.getPropertyDescriptors())
-                    .filter(this::isPotentialFeature)
+                    .filter(this::isFeature)
                     .map(this::getPropertyDescription)
                     .collect(Collectors.toList());
         } catch (IntrospectionException e) {
@@ -48,7 +53,7 @@ public class JavaNode extends Node {
         }
     }
 
-    private boolean isPotentialFeature(PropertyDescriptor p) {
+    protected boolean isFeature(PropertyDescriptor p) {
         if (getRESERVED_FEATURE_NAMES().contains(p.getName())) {
             return false;
         }
@@ -59,21 +64,26 @@ public class JavaNode extends Node {
         } catch (NoSuchMethodException e) {
             // Can't happen
         }
+        return !hasAnnotation(p, Internal.class) && !hasAnnotation(p, Link.class);
+    }
+
+    public static boolean hasAnnotation(PropertyDescriptor p, Class<? extends Annotation> annotation) {
         KCallable<?> kCallable = getKotlinClass(Node.class).getMembers().stream()
                 .filter(m -> m.getName().equals(p.getName())).findFirst().orElse(null);
-        return kCallable == null || (
-                KAnnotatedElements.findAnnotations(kCallable, getKotlinClass(Internal.class)).isEmpty() &&
-                KAnnotatedElements.findAnnotations(kCallable, getKotlinClass(Link.class)).isEmpty());
+        return p.getReadMethod().isAnnotationPresent(annotation) ||
+                (p.getWriteMethod() != null && p.getWriteMethod().isAnnotationPresent(annotation)) ||
+                (kCallable != null && !KAnnotatedElements.findAnnotations(kCallable, getKotlinClass(annotation)).isEmpty());
     }
 
     @NotNull
     private PropertyDescription getPropertyDescription(PropertyDescriptor p) {
         String name = p.getName();
-        boolean provideNodes = Node.class.isAssignableFrom(p.getPropertyType());
+        Class<?> type = p.getPropertyType();
+        boolean provideNodes = isANode(type);
         Multiplicity multiplicity = Multiplicity.OPTIONAL;
-        if (Collection.class.isAssignableFrom(p.getPropertyType())) {
+        if (Collection.class.isAssignableFrom(type)) {
             multiplicity = Multiplicity.MANY;
-        } else if (p.getReadMethod().isAnnotationPresent(NotNull.class)) {
+        } else if (p.getReadMethod().isAnnotationPresent(NotNull.class) || p.getPropertyType().isPrimitive()) {
             multiplicity = Multiplicity.SINGULAR;
         }
         Object value;
@@ -83,12 +93,51 @@ public class JavaNode extends Node {
             throw new RuntimeException(e);
         }
         PropertyType propertyType = provideNodes ? PropertyType.CONTAINMENT : PropertyType.ATTRIBUTE;
-        if (ReferenceByName.class.isAssignableFrom(p.getPropertyType())) {
+        if (ReferenceByName.class.isAssignableFrom(type)) {
             propertyType = PropertyType.REFERENCE;
         }
-        boolean derived =
-                p.getReadMethod().isAnnotationPresent(Derived.class) ||
-                        (p.getWriteMethod() != null && p.getWriteMethod().isAnnotationPresent(Derived.class));
-        return new PropertyDescription(name, provideNodes, multiplicity, value, propertyType, derived);
+        boolean derived = hasAnnotation(p, Derived.class);
+        // TODO type.getTypeParameters()
+        boolean nullable = multiplicity == Multiplicity.OPTIONAL;
+        return new PropertyDescription(
+                name, provideNodes, multiplicity, value, propertyType, derived, kotlinType(type, nullable));
+    }
+
+    @NotNull
+    public static KType kotlinType(Class<?> type, boolean nullable) {
+        List<KTypeProjection> arguments = new LinkedList<>();
+        for (TypeVariable<? extends Class<?>> p : type.getTypeParameters()) {
+            if (p.getBounds().length == 1 && p.getBounds()[0] instanceof Class<?>) {
+                arguments.add(KTypeProjection.covariant(kotlinType((Class<?>) p.getBounds()[0], false)));
+            } else if (p.getBounds().length == 1 && p.getBounds()[0] instanceof ParameterizedType) {
+                arguments.add(KTypeProjection.covariant(kotlinType((ParameterizedType) p.getBounds()[0], false)));
+            } else {
+                arguments.add(KTypeProjection.star);
+            }
+        }
+        return createType(
+                getKotlinClass(type), arguments,
+                nullable, Collections.emptyList());
+    }
+
+    @NotNull
+    public static KType kotlinType(ParameterizedType type, boolean nullable) {
+        List<KTypeProjection> arguments = new LinkedList<>();
+        for (Type p : type.getActualTypeArguments()) {
+            if (p instanceof Class<?>) {
+                arguments.add(KTypeProjection.covariant(kotlinType((Class<?>) p, false)));
+            } else if (p instanceof ParameterizedType) {
+                arguments.add(KTypeProjection.covariant(kotlinType((ParameterizedType) p, false)));
+            } else {
+                arguments.add(KTypeProjection.star);
+            }
+        }
+        return createType(
+                getKotlinClass((Class<?>) type.getRawType()), arguments,
+                nullable, Collections.emptyList());
+    }
+
+    public static boolean isANode(Class<?> type) {
+        return Reflection.isANode(getKotlinClass(type));
     }
 }

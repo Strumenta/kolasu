@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":core"))
     implementation("org.jetbrains.kotlin:kotlin-reflect:${libs.versions.kotlin.get()}")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:${libs.versions.kotlin.get()}")
+    testImplementation("com.google.guava:guava:33.4.8-jre")
 }
 
 publishing {

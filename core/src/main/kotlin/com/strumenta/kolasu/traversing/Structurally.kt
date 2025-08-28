@@ -113,6 +113,26 @@ fun Node.walkChildren(includeDerived: Boolean = false): Sequence<Node> {
 }
 
 /**
+ * @return all direct children of this node, together with the name of the containment of each child.
+ */
+fun Node.walkNamedChildren(includeDerived: Boolean = false): Sequence<Pair<String, Node>> {
+    return sequence {
+        (
+            if (includeDerived) {
+                this@walkNamedChildren.properties
+            } else {
+                this@walkNamedChildren.originalProperties
+            }
+            ).forEach { property ->
+            when (val value = property.value) {
+                is Node -> yield(property.name to value)
+                is Collection<*> -> value.forEach { if (it is Node) yield(property.name to it) }
+            }
+        }
+    }
+}
+
+/**
  * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method.
  * For post-order traversal, take "walkLeavesFirst"
  * @return walks the whole AST starting from the childnodes of this node.
@@ -144,6 +164,14 @@ fun <T> Node.findAncestorOfType(klass: Class<T>): T? {
 val Node.children: List<Node>
     get() {
         return walkChildren().toList()
+    }
+
+/**
+ * @return all direct children of this node.
+ */
+val Node.namedChildren: List<Pair<String, Node>>
+    get() {
+        return walkNamedChildren().toList()
     }
 
 @JvmOverloads
