@@ -2,7 +2,9 @@
 
 package com.strumenta.kolasu.traversing
 
+import com.strumenta.kolasu.model.ASTNode
 import com.strumenta.kolasu.model.BaseASTNode
+import com.strumenta.kolasu.model.Node
 import java.util.ArrayDeque
 import java.util.WeakHashMap
 import kotlin.reflect.KClass
@@ -112,6 +114,25 @@ fun BaseASTNode.walkChildren(includeDerived: Boolean = false): Sequence<BaseASTN
     }
 
 /**
+ * @return all direct children of this node, together with the name of the containment of each child.
+ */
+fun ASTNode.walkChildrenByContainment(includeDerived: Boolean = false): Sequence<Pair<String, ASTNode>> =
+    sequence {
+        (
+            if (includeDerived) {
+                this@walkChildrenByContainment.properties
+            } else {
+                this@walkChildrenByContainment.originalProperties
+            }
+        ).forEach { property ->
+            when (val value = property.value) {
+                is Node -> yield(property.name to value)
+                is Collection<*> -> value.forEach { if (it is Node) yield(property.name to it) }
+            }
+        }
+    }
+
+/**
  * @param walker a function that generates a sequence of nodes. By default this is the depth-first "walk" method.
  * For post-order traversal, take "walkLeavesFirst"
  * @return walks the whole AST starting from the childnodes of this node.
@@ -143,6 +164,14 @@ fun <T> BaseASTNode.findAncestorOfType(klass: Class<T>): T? = walkAncestors().fi
 val BaseASTNode.children: List<BaseASTNode>
     get() {
         return walkChildren().toList()
+    }
+
+/**
+ * @return all direct children of this node.
+ */
+val Node.childrenByContainment: List<Pair<String, Node>>
+    get() {
+        return walkChildrenByContainment().toList()
     }
 
 @JvmOverloads

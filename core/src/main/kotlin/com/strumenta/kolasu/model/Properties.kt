@@ -40,16 +40,16 @@ val <T : Any> KClass<T>.nodeDerivedProperties: Collection<KProperty1<T, *>>
  * @return all properties of this node that are considered AST properties.
  */
 val <T : Node> T.nodeProperties: Collection<KProperty1<T, *>>
-    get() = this.javaClass.nodeProperties
+    get() = (this::class as KClass<T>).nodeProperties
 
 /**
  * @return all non-derived properties of this node that are considered AST properties.
  */
 val <T : Node> T.nodeOriginalProperties: Collection<KProperty1<T, *>>
-    get() = this.javaClass.nodeOriginalProperties
+    get() = (this::class as KClass<T>).nodeOriginalProperties
 
 /**
  * @return all derived properties of this node that are considered AST properties.
  */
 val <T : Node> T.nodeDerivedProperties: Collection<KProperty1<T, *>>
-    get() = this.javaClass.nodeDerivedProperties
+    get() = (this::class as KClass<T>).nodeDerivedProperties
