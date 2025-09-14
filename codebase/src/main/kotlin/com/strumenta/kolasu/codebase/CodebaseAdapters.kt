@@ -12,7 +12,7 @@ import io.lionweb.kotlin.getPropertyValueByName
 import io.lionweb.kotlin.setPropertyValueByName
 import io.lionweb.model.ClassifierInstanceUtils
 import io.lionweb.model.impl.DynamicNode
-import io.lionweb.serialization.JsonSerialization
+import io.lionweb.serialization.ProtoBufSerialization
 import java.util.stream.Collectors
 import com.strumenta.starlasu.base.v1.CodebaseLanguageV1 as CodebaseLanguage
 
@@ -57,7 +57,7 @@ fun <R : Node> serialize(
 fun <R : Node> CodebaseAccess.convertToCodebase(
     modelConverter: LionWebModelConverter,
     languagesWeConsider: Set<String>,
-    jsonSerialization: JsonSerialization
+    pbSerialization: ProtoBufSerialization
 ): Codebase<R> {
     val codebaseAccess = this
     return object : Codebase<R> {
@@ -67,7 +67,7 @@ fun <R : Node> CodebaseAccess.convertToCodebase(
         private val filesCache: List<CodebaseFile<R>> by lazy {
             codebaseAccess.files().map { fileIdentifier ->
                 val serializedFile = codebaseAccess.retrieve(fileIdentifier)
-                jsonSerialization.deserializeToNodes(serializedFile)[0]
+                pbSerialization.deserializeToNodes(serializedFile)[0]
             }.filter { serializedCodebaseFile ->
                 val languageName = serializedCodebaseFile!!.getPropertyValueByName("language_name") as String
                 languagesWeConsider.contains(languageName)

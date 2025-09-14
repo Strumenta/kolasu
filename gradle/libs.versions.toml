@@ -1,8 +1,8 @@
 [versions]
-lwjava = "1.0.6"
-lwkotlin = "0.5.6"
+lwjava = "1.1.0"
+lwkotlin = "0.6.0"
 kotest= "1.3.3"
-specs = "0.4.6"
+specs = "0.5.0"
 gson = "2.13.0"
 jvm = "1.8"
 antlr = "4.9.3"
