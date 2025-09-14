@@ -6,7 +6,7 @@ import com.strumenta.kolasu.traversing.children
 /**
  * A generic AST node. We use it to represent parts of a source tree that we don't know how to translate yet.
  */
-@Deprecated("To be removed in Kolasu 1.6")
+@Deprecated("To be removed in Kolasu 2.0")
 class GenericNode(
     parent: Node? = null,
 ) : Node() {
@@ -15,7 +15,7 @@ class GenericNode(
     }
 }
 
-@Deprecated("To be removed in Kolasu 1.6")
+@Deprecated("To be removed in Kolasu 2.0")
 fun Node.findGenericNode(): GenericNode? =
     if (this is GenericNode) {
         this

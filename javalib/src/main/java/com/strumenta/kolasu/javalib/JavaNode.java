@@ -1,6 +1,8 @@
 package com.strumenta.kolasu.javalib;
 
 import com.strumenta.kolasu.model.*;
+import io.lionweb.language.Concept;
+import io.lionweb.model.Node;
 import kotlin.reflect.KCallable;
 import kotlin.reflect.KType;
 import kotlin.reflect.KTypeProjection;
@@ -159,4 +161,6 @@ public class JavaNode extends BaseASTNode {
     public static boolean isANode(Class<?> type) {
         return Reflection.isANode(getKotlinClass(type));
     }
+
+
 }

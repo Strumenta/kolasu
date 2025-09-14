@@ -354,7 +354,12 @@ open class ASTTransformer
                     nodes = defaultTransformation.invoke(source, parent, expectedType, this)
                 } else if (allowGenericNode) {
                     val origin = asOrigin(source)
-                    nodes = listOf(GenericNode(parent).withOrigin(origin))
+                    nodes =
+                        listOf(
+                            GenericNode(
+                                parent,
+                            ).withOrigin(origin),
+                        )
                     issues.add(
                         Issue.semantic(
                             "Source node not mapped: ${source::class.qualifiedName}",
@@ -440,7 +445,11 @@ open class ASTTransformer
                     factory.constructor(source, this, factory)
                 } catch (e: Exception) {
                     if (allowGenericNode) {
-                        listOf(GenericErrorNode(e))
+                        listOf(
+                            GenericErrorNode(
+                                e,
+                            ),
+                        )
                     } else {
                         throw e
                     }

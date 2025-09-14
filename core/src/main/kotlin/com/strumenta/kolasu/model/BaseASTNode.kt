@@ -4,13 +4,7 @@ import com.strumenta.kolasu.language.Attribute
 import com.strumenta.kolasu.language.Containment
 import com.strumenta.kolasu.language.Reference
 import com.strumenta.kolasu.traversing.walk
-import io.lionweb.language.Annotation
-import io.lionweb.language.Concept
-import io.lionweb.language.Property
 import io.lionweb.model.AnnotationInstance
-import io.lionweb.model.Node
-import io.lionweb.model.PartitionObserver
-import io.lionweb.model.ReferenceValue
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
@@ -29,7 +23,8 @@ open class BaseASTNode() :
     Serializable,
     HasID,
     ASTNode {
-    private val annotations = mutableListOf<AnnotationInstance>()
+    @Internal
+    val annotations = mutableListOf<AnnotationInstance>()
 
     @Internal
     override var id: String? = null
@@ -241,134 +236,11 @@ open class BaseASTNode() :
 
     fun getAttributeValue(name: String): Any? = properties.find { it.name == name }!!.value
 
-    override fun getPropertyValue(property: Property): Any? {
-        TODO("Not yet implemented")
-    }
-
-    override fun setPropertyValue(
-        property: Property,
-        value: Any?,
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getChildren(containment: io.lionweb.language.Containment): List<Node?> {
-        TODO("Not yet implemented")
-    }
-
-    override fun addChild(
-        containment: io.lionweb.language.Containment,
-        child: Node,
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override fun removeChild(node: Node) {
-        TODO("Not yet implemented")
-    }
-
-    override fun removeChild(
-        containment: io.lionweb.language.Containment,
-        index: Int,
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getReferenceValues(reference: io.lionweb.language.Reference): List<ReferenceValue?> {
-        TODO("Not yet implemented")
-    }
-
-    override fun addReferenceValue(
-        reference: io.lionweb.language.Reference,
-        referredNode: ReferenceValue?,
-    ): Int {
-        TODO("Not yet implemented")
-    }
-
-    override fun removeReferenceValue(
-        reference: io.lionweb.language.Reference,
-        referenceValue: ReferenceValue?,
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override fun removeReferenceValue(
-        reference: io.lionweb.language.Reference,
-        index: Int,
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override fun setReferenceValues(
-        reference: io.lionweb.language.Reference,
-        values: List<ReferenceValue?>,
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override fun setReferred(
-        reference: io.lionweb.language.Reference,
-        index: Int,
-        referredNode: Node?,
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override fun setResolveInfo(
-        reference: io.lionweb.language.Reference,
-        index: Int,
-        resolveInfo: String?,
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getID(): String? {
-        TODO("Not yet implemented")
-    }
-
-    override fun getParent(): Node? {
-        TODO("Not yet implemented")
-    }
-
-    override fun getClassifier(): Concept? {
-        TODO("Not yet implemented")
-    }
-
-    override fun getContainmentFeature(): io.lionweb.language.Containment? {
-        TODO("Not yet implemented")
-    }
-
-    override fun registerPartitionObserver(observer: PartitionObserver): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun unregisterPartitionObserver(observer: PartitionObserver) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getAnnotations(): List<AnnotationInstance> = annotations
-
-    override fun getAnnotations(annotation: Annotation): List<AnnotationInstance?> {
-        TODO("Not yet implemented")
-    }
-
-    override fun addAnnotation(instance: AnnotationInstance): Boolean {
+    fun addAnnotation(instance: AnnotationInstance): Boolean {
         if (this.annotations.contains(instance)) {
             return false
         }
         this.annotations.add(instance)
         return true
-    }
-
-    override fun removeAnnotation(instance: AnnotationInstance): Int {
-        TODO("Not yet implemented")
-    }
-
-    override fun registeredPartitionObserver(): PartitionObserver? {
-        TODO("Not yet implemented")
-    }
-
-    override fun partitionObserverRegistered(observer: PartitionObserver?) {
-        TODO("Not yet implemented")
     }
 }
