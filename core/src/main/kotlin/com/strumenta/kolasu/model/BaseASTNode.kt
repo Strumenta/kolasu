@@ -9,6 +9,7 @@ import io.lionweb.language.Concept
 import io.lionweb.language.Property
 import io.lionweb.model.AnnotationInstance
 import io.lionweb.model.Node
+import io.lionweb.model.PartitionObserver
 import io.lionweb.model.ReferenceValue
 import java.io.Serializable
 import kotlin.reflect.KClass
@@ -280,7 +281,7 @@ open class BaseASTNode() :
     override fun addReferenceValue(
         reference: io.lionweb.language.Reference,
         referredNode: ReferenceValue?,
-    ) {
+    ): Int {
         TODO("Not yet implemented")
     }
 
@@ -305,6 +306,22 @@ open class BaseASTNode() :
         TODO("Not yet implemented")
     }
 
+    override fun setReferred(
+        reference: io.lionweb.language.Reference,
+        index: Int,
+        referredNode: Node?,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun setResolveInfo(
+        reference: io.lionweb.language.Reference,
+        index: Int,
+        resolveInfo: String?,
+    ) {
+        TODO("Not yet implemented")
+    }
+
     override fun getID(): String? {
         TODO("Not yet implemented")
     }
@@ -321,17 +338,37 @@ open class BaseASTNode() :
         TODO("Not yet implemented")
     }
 
+    override fun registerPartitionObserver(observer: PartitionObserver): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun unregisterPartitionObserver(observer: PartitionObserver) {
+        TODO("Not yet implemented")
+    }
+
     override fun getAnnotations(): List<AnnotationInstance> = annotations
 
     override fun getAnnotations(annotation: Annotation): List<AnnotationInstance?> {
         TODO("Not yet implemented")
     }
 
-    override fun addAnnotation(instance: AnnotationInstance) {
+    override fun addAnnotation(instance: AnnotationInstance): Boolean {
+        if (this.annotations.contains(instance)) {
+            return false
+        }
         this.annotations.add(instance)
+        return true
     }
 
-    override fun removeAnnotation(instance: AnnotationInstance) {
+    override fun removeAnnotation(instance: AnnotationInstance): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun registeredPartitionObserver(): PartitionObserver? {
+        TODO("Not yet implemented")
+    }
+
+    override fun partitionObserverRegistered(observer: PartitionObserver?) {
         TODO("Not yet implemented")
     }
 }

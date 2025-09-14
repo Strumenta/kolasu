@@ -12,7 +12,9 @@ plugins {
 
 dependencies {
     implementation(project(":core"))
+    implementation("org.jetbrains.kotlin:kotlin-reflect:${libs.versions.kotlin.get()}")
     testImplementation(kotlin("test-junit", libs.versions.kotlin.get()))
+    testImplementation(libs.guava)
 }
 
 // Configure Kotlin compilation source sets

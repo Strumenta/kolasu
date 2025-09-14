@@ -4,14 +4,13 @@ import com.strumenta.kolasu.model.GenericErrorNode
 import com.strumenta.kolasu.model.Node
 import com.strumenta.kolasu.model.Origin
 import com.strumenta.kolasu.model.Position
-import com.strumenta.kolasu.model.PropertyTypeDescription
+import com.strumenta.kolasu.model.PropertyDescription
 import com.strumenta.kolasu.model.asContainment
 import com.strumenta.kolasu.model.children
 import com.strumenta.kolasu.model.processProperties
 import com.strumenta.kolasu.model.withOrigin
 import com.strumenta.kolasu.validation.Issue
 import com.strumenta.kolasu.validation.IssueSeverity
-import org.antlr.v4.runtime.tree.ParseTree
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
@@ -267,454 +266,496 @@ private val NO_CHILD_NODE = ChildNodeFactory<Any, Any, Any>("", { x -> x }, { _,
  * If no factory is provided for a source node type, a GenericNode is created, and the processing of the subtree stops
  * there.
  */
-open class ASTTransformer(
-    /**
-     * Additional issues found during the transformation process.
-     */
-    val issues: MutableList<Issue> = mutableListOf(),
-    @Deprecated("To be removed in Kolasu 1.6")
-    val allowGenericNode: Boolean = true,
-    val throwOnUnmappedNode: Boolean = false,
-    /**
-     * When the fault tollerant flag is set, in case a transformation fails we will add a node
-     * with the origin FailingASTTransformation. If the flag is not set, then the transformation will just
-     * fail.
-     */
-    val faultTollerant: Boolean = !throwOnUnmappedNode,
-    val defaultTransformation: (
-        (
+open class ASTTransformer
+    @JvmOverloads
+    constructor(
+        /**
+         * Additional issues found during the transformation process.
+         */
+        val issues: MutableList<Issue> = mutableListOf(),
+        @Deprecated("To be removed in Kolasu 1.6")
+        val allowGenericNode: Boolean = true,
+        val throwOnUnmappedNode: Boolean = false,
+        /**
+         * When the fault tollerant flag is set, in case a transformation fails we will add a node
+         * with the origin FailingASTTransformation. If the flag is not set, then the transformation will just
+         * fail.
+         */
+        val faultTollerant: Boolean = !throwOnUnmappedNode,
+        val defaultTransformation: (
+            (
+                source: Any?,
+                parent: Node?,
+                expectedType: KClass<out Node>,
+                astTransformer: ASTTransformer,
+            ) -> List<Node>
+        )? = null,
+    ) {
+        /**
+         * Factories that map from source tree node to target tree node.
+         */
+        val factories = mutableMapOf<KClass<*>, NodeFactory<*, *>>()
+
+        private val _knownClasses = mutableMapOf<String, MutableSet<KClass<*>>>()
+        val knownClasses: Map<String, Set<KClass<*>>> = _knownClasses
+
+        /**
+         * This ensures that the generated value is a single Node or null.
+         */
+        @JvmOverloads
+        fun transform(
             source: Any?,
-            parent: Node?,
-            expectedType: KClass<out Node>,
-            astTransformer: ASTTransformer,
-        ) -> List<Node>
-    )? = null,
-) {
-    /**
-     * Factories that map from source tree node to target tree node.
-     */
-    val factories = mutableMapOf<KClass<*>, NodeFactory<*, *>>()
+            parent: Node? = null,
+            expectedType: KClass<out Node> = Node::class,
+        ): Node? {
+            val result = transformIntoNodes(source, parent, expectedType)
+            return when (result.size) {
+                0 -> null
+                1 -> {
+                    val node = result.first()
+                    require(node is Node)
+                    node
+                }
 
-    private val _knownClasses = mutableMapOf<String, MutableSet<KClass<*>>>()
-    val knownClasses: Map<String, Set<KClass<*>>> = _knownClasses
-
-    /**
-     * This ensures that the generated value is a single Node or null.
-     */
-    @JvmOverloads
-    fun transform(
-        source: Any?,
-        parent: Node? = null,
-        expectedType: KClass<out Node> = Node::class,
-    ): Node? {
-        val result = transformIntoNodes(source, parent, expectedType)
-        return when (result.size) {
-            0 -> null
-            1 -> {
-                val node = result.first()
-                require(node is Node)
-                node
-            }
-
-            else -> throw IllegalStateException(
-                "Cannot transform into a single Node as multiple nodes where produced",
-            )
-        }
-    }
-
-    /**
-     * Performs the transformation of a node and, recursively, its descendants.
-     */
-    @JvmOverloads
-    open fun transformIntoNodes(
-        source: Any?,
-        parent: Node? = null,
-        expectedType: KClass<out Node> = Node::class,
-    ): List<Node> {
-        if (source == null) {
-            return emptyList()
-        }
-        if (source is Collection<*>) {
-            throw Error("Mapping error: received collection when value was expected")
-        }
-        val factory = getNodeFactory<Any, Node>(source::class as KClass<Any>)
-        val nodes: List<Node>
-        if (factory != null) {
-            nodes = makeNodes(factory, source, allowGenericNode = allowGenericNode)
-            if (!factory.skipChildren && !factory.childrenSetAtConstruction) {
-                nodes.forEach { node -> setChildren(factory, source, node) }
-            }
-            nodes.forEach { node ->
-                factory.finalizer(node)
-                node.parent = parent
-            }
-        } else {
-            if (defaultTransformation != null) {
-                nodes = defaultTransformation.invoke(source, parent, expectedType, this)
-            } else if (allowGenericNode) {
-                val origin = asOrigin(source)
-                nodes = listOf(GenericNode(parent).withOrigin(origin))
-                issues.add(
-                    Issue.semantic(
-                        "Source node not mapped: ${source::class.qualifiedName}",
-                        IssueSeverity.WARNING,
-                        origin?.position,
-                    ),
+                else -> throw IllegalStateException(
+                    "Cannot transform into a single Node as multiple nodes where produced",
                 )
-            } else if (expectedType.isDirectlyOrIndirectlyInstantiable() && !throwOnUnmappedNode) {
-                try {
-                    val node = expectedType.dummyInstance()
-                    node.origin = MissingASTTransformation(asOrigin(source), source, expectedType)
-                    nodes = listOf(node)
-                } catch (e: Exception) {
+            }
+        }
+
+        /**
+         * Performs the transformation of a node and, recursively, its descendants.
+         */
+        @JvmOverloads
+        open fun transformIntoNodes(
+            source: Any?,
+            parent: Node? = null,
+            expectedType: KClass<out Node> = Node::class,
+        ): List<Node> {
+            if (source == null) {
+                return emptyList()
+            }
+            if (source is Collection<*>) {
+                throw Error("Mapping error: received collection when value was expected")
+            }
+            val factory = getNodeFactory<Any, Node>(source::class as KClass<Any>)
+            val nodes: List<Node>
+            if (factory != null) {
+                nodes = makeNodes(factory, source, allowGenericNode = allowGenericNode)
+                if (!factory.skipChildren && !factory.childrenSetAtConstruction) {
+                    nodes.forEach { node -> setChildren(factory, source, node) }
+                }
+                nodes.forEach { node ->
+                    factory.finalizer(node)
+                    node.parent = parent
+                }
+            } else {
+                if (defaultTransformation != null) {
+                    nodes = defaultTransformation.invoke(source, parent, expectedType, this)
+                } else if (allowGenericNode) {
+                    val origin = asOrigin(source)
+                    nodes = listOf(GenericNode(parent).withOrigin(origin))
+                    issues.add(
+                        Issue.semantic(
+                            "Source node not mapped: ${source::class.qualifiedName}",
+                            IssueSeverity.WARNING,
+                            origin?.position,
+                        ),
+                    )
+                } else if (expectedType.isDirectlyOrIndirectlyInstantiable() && !throwOnUnmappedNode) {
+                    try {
+                        val node = expectedType.dummyInstance()
+                        node.origin = MissingASTTransformation(asOrigin(source), source, expectedType)
+                        nodes = listOf(node)
+                    } catch (e: Exception) {
+                        throw IllegalStateException(
+                            "Unable to instantiate desired node type ${expectedType.qualifiedName}",
+                            e,
+                        )
+                    }
+                } else {
                     throw IllegalStateException(
-                        "Unable to instantiate desired node type ${expectedType.qualifiedName}",
-                        e,
+                        "Unable to translate node $source (class ${source::class.qualifiedName})",
                     )
                 }
-            } else {
-                throw IllegalStateException("Unable to translate node $source (class ${source::class.qualifiedName})")
             }
+            return nodes
         }
-        return nodes
-    }
 
-    protected open fun setChildren(
-        factory: NodeFactory<Any, Node>,
-        source: Any,
-        node: Node,
-    ) {
-        node::class.processProperties { pd ->
-            val childNodeFactory = factory.getChildNodeFactory<Any, Node, Any>(node::class, pd.name)
-            if (childNodeFactory != null) {
-                if (childNodeFactory != NO_CHILD_NODE) {
-                    setChild(childNodeFactory, source, node, pd)
+        protected open fun setChildren(
+            factory: NodeFactory<Any, Node>,
+            source: Any,
+            node: Node,
+        ) {
+            node.processProperties { pd ->
+                val childNodeFactory = factory.getChildNodeFactory<Any, Node, Any>(node, pd.name)
+                if (childNodeFactory != null) {
+                    if (childNodeFactory != NO_CHILD_NODE) {
+                        setChild(childNodeFactory, source, node, pd)
+                    }
+                } else {
+                    factory.children[getChildKey(node.nodeType, pd.name)] = NO_CHILD_NODE
                 }
-            } else {
-                val childKey = node.nodeType + "#" + pd.name
-                factory.children[childKey] = NO_CHILD_NODE
             }
         }
-    }
 
-    open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
+        open fun asOrigin(source: Any): Origin? = if (source is Origin) source else null
 
-    protected open fun setChild(
-        childNodeFactory: ChildNodeFactory<*, *, *>,
-        source: Any,
-        node: Node,
-        pd: PropertyTypeDescription,
-    ) {
-        val childFactory = childNodeFactory as ChildNodeFactory<Any, Any, Any>
-        val childrenSource = childFactory.get(getSource(node, source))
-        val child: Any? =
-            if (pd.multiple) {
-                (childrenSource as List<*>?)
-                    ?.map {
-                        transformIntoNodes(it, node, childFactory.type)
-                    }?.flatten() ?: listOf<Node>()
-            } else {
-                transform(childrenSource, node)
-            }
-        try {
-            childNodeFactory.set(node, child)
-        } catch (e: IllegalArgumentException) {
-            throw Error("Could not set child $childNodeFactory", e)
-        }
-    }
-
-    protected open fun getSource(
-        node: Node,
-        source: Any,
-    ): Any = source
-
-    protected open fun <S : Any, T : Node> makeNodes(
-        factory: NodeFactory<S, T>,
-        source: S,
-        allowGenericNode: Boolean = true,
-    ): List<Node> {
-        val nodes =
+        protected open fun setChild(
+            childNodeFactory: ChildNodeFactory<*, *, *>,
+            source: Any,
+            node: Node,
+            pd: PropertyDescription,
+        ) {
+            val childFactory = childNodeFactory as ChildNodeFactory<Any, Any, Any>
+            val childrenSource = childFactory.get(getSource(node, source))
+            val child: Any? =
+                if (pd.multiple) {
+                    (childrenSource as List<*>?)
+                        ?.map {
+                            transformIntoNodes(it, node, childFactory.type)
+                        }?.flatten() ?: listOf<Node>()
+                } else {
+                    transform(childrenSource, node)
+                }
             try {
-                factory.constructor(source, this, factory)
-            } catch (e: Exception) {
-                if (allowGenericNode) {
-                    listOf(GenericErrorNode(e))
-                } else {
-                    throw e
-                }
-            }
-        nodes.forEach { node ->
-            if (node.origin == null) {
-                node.withOrigin(asOrigin(source))
-            }
-        }
-        return nodes
-    }
-
-    protected open fun <S : Any, T : Node> getNodeFactory(kClass: KClass<S>): NodeFactory<S, T>? {
-        val factory = factories[kClass]
-        if (factory != null) {
-            return factory as NodeFactory<S, T>
-        } else {
-            if (kClass == Any::class) {
-                return null
-            }
-            for (superclass in kClass.superclasses) {
-                val nodeFactory = getNodeFactory<S, T>(superclass as KClass<S>)
-                if (nodeFactory != null) {
-                    return nodeFactory
-                }
-            }
-        }
-        return null
-    }
-
-    fun <S : Any, T : Node> registerNodeFactory(
-        kclass: KClass<S>,
-        factory: (S, ASTTransformer, NodeFactory<S, T>) -> T?,
-    ): NodeFactory<S, T> {
-        val nodeFactory = NodeFactory.single(factory)
-        factories[kclass] = nodeFactory
-        return nodeFactory
-    }
-
-    fun <S : Any, T : Node> registerMultipleNodeFactory(
-        kclass: KClass<S>,
-        factory: (S, ASTTransformer, NodeFactory<S, T>) -> List<T>,
-    ): NodeFactory<S, T> {
-        val nodeFactory = NodeFactory(factory)
-        factories[kclass] = nodeFactory
-        return nodeFactory
-    }
-
-    fun <S : Any, T : Node> registerNodeFactory(
-        kclass: KClass<S>,
-        factory: (S, ASTTransformer) -> T?,
-    ): NodeFactory<S, T> = registerNodeFactory(kclass) { source, transformer, _ -> factory(source, transformer) }
-
-    inline fun <reified S : Any, T : Node> registerNodeFactory(
-        crossinline factory: S.(ASTTransformer) -> T?,
-    ): NodeFactory<S, T> = registerNodeFactory(S::class) { source, transformer, _ -> source.factory(transformer) }
-
-    /**
-     * We need T to be reified because we may need to install dummy classes of T.
-     */
-    inline fun <S : Any, reified T : Node> registerNodeFactory(
-        kclass: KClass<S>,
-        crossinline factory: (S) -> T?,
-    ): NodeFactory<S, T> =
-        registerNodeFactory(kclass) { input, _, _ ->
-            try {
-                factory(input)
-            } catch (t: NotImplementedError) {
-                if (faultTollerant) {
-                    val node = T::class.dummyInstance()
-                    node.origin =
-                        FailingASTTransformation(
-                            asOrigin(input),
-                            "Failed to transform $input into $kclass because the implementation is not complete " +
-                                "(${t.message}",
-                        )
-                    node
-                } else {
-                    throw RuntimeException("Failed to transform $input into $kclass", t)
-                }
-            } catch (e: Exception) {
-                if (faultTollerant) {
-                    val node = T::class.dummyInstance()
-                    node.origin =
-                        FailingASTTransformation(
-                            asOrigin(input),
-                            "Failed to transform $input into $kclass because of an error (${e.message})",
-                        )
-                    node
-                } else {
-                    throw RuntimeException("Failed to transform $input into $kclass", e)
-                }
+                childNodeFactory.set(node, child)
+            } catch (e: IllegalArgumentException) {
+                throw Error("Could not set child $childNodeFactory", e)
             }
         }
 
-    fun <S : Any, T : Node> registerMultipleNodeFactory(
-        kclass: KClass<S>,
-        factory: (S) -> List<T>,
-    ): NodeFactory<S, T> = registerMultipleNodeFactory(kclass) { input, _, _ -> factory(input) }
+        protected open fun getSource(
+            node: Node,
+            source: Any,
+        ): Any = source
 
-    inline fun <reified S : Any, reified T : Node> registerNodeFactory(): NodeFactory<S, T> =
-        registerNodeFactory(S::class, T::class)
-
-    inline fun <reified S : Any> notTranslateDirectly(): NodeFactory<S, Node> =
-        registerNodeFactory<S, Node> {
-            throw java.lang.IllegalStateException(
-                "A Node of this type (${this.javaClass.canonicalName}) should never be translated directly. " +
-                    "It is expected that the container will not delegate the translation of this node but it will " +
-                    "handle it directly",
-            )
+        protected open fun <S : Any, T : Node> makeNodes(
+            factory: NodeFactory<S, T>,
+            source: S,
+            allowGenericNode: Boolean = true,
+        ): List<Node> {
+            val nodes =
+                try {
+                    factory.constructor(source, this, factory)
+                } catch (e: Exception) {
+                    if (allowGenericNode) {
+                        listOf(GenericErrorNode(e))
+                    } else {
+                        throw e
+                    }
+                }
+            nodes.forEach { node ->
+                if (node.origin == null) {
+                    node.withOrigin(asOrigin(source))
+                }
+            }
+            return nodes
         }
 
-    private fun <S : Any, T : Node> parameterValue(
-        kParameter: KParameter,
-        source: S,
-        childNodeFactory: ChildNodeFactory<Any, T, Any>,
-    ): ParameterValue =
-        when (val childSource = childNodeFactory.get.invoke(source)) {
-            null -> {
-                AbsentParameterValue
+        protected open fun <S : Any, T : Node> getNodeFactory(kClass: KClass<S>): NodeFactory<S, T>? {
+            val factory = factories[kClass]
+            if (factory != null) {
+                return factory as NodeFactory<S, T>
+            } else {
+                if (kClass == Any::class) {
+                    return null
+                }
+                for (superclass in kClass.superclasses) {
+                    val nodeFactory = getNodeFactory<S, T>(superclass as KClass<S>)
+                    if (nodeFactory != null) {
+                        return nodeFactory
+                    }
+                }
+            }
+            return null
+        }
+
+        fun <S : Any, T : Node> registerNodeFactory(
+            kclass: KClass<S>,
+            factory: (S, ASTTransformer, NodeFactory<S, T>) -> T?,
+        ): NodeFactory<S, T> {
+            val nodeFactory = NodeFactory.single(factory)
+            factories[kclass] = nodeFactory
+            return nodeFactory
+        }
+
+        fun <S : Any, T : Node> registerMultipleNodeFactory(
+            kclass: KClass<S>,
+            factory: (S, ASTTransformer, NodeFactory<S, T>) -> List<T>,
+        ): NodeFactory<S, T> {
+            val nodeFactory = NodeFactory(factory)
+            factories[kclass] = nodeFactory
+            return nodeFactory
+        }
+
+        fun <S : Any, T : Node> registerNodeFactory(
+            kclass: KClass<S>,
+            factory: (S, ASTTransformer) -> T?,
+        ): NodeFactory<S, T> = registerNodeFactory(kclass) { source, transformer, _ -> factory(source, transformer) }
+
+        inline fun <reified S : Any, T : Node> registerNodeFactory(
+            crossinline factory: S.(ASTTransformer) -> T?,
+        ): NodeFactory<S, T> = registerNodeFactory(S::class) { source, transformer, _ -> source.factory(transformer) }
+
+        /**
+         * We need T to be reified because we may need to install dummy classes of T.
+         */
+        inline fun <S : Any, reified T : Node> registerNodeFactory(
+            kclass: KClass<S>,
+            crossinline factory: (S) -> T?,
+        ): NodeFactory<S, T> =
+            registerNodeFactory(kclass) { input, _, _ ->
+                try {
+                    factory(input)
+                } catch (t: NotImplementedError) {
+                    if (faultTollerant) {
+                        val node = T::class.dummyInstance()
+                        node.origin =
+                            FailingASTTransformation(
+                                asOrigin(input),
+                                "Failed to transform $input into $kclass because the implementation is not complete " +
+                                    "(${t.message}",
+                            )
+                        node
+                    } else {
+                        throw RuntimeException("Failed to transform $input into $kclass", t)
+                    }
+                } catch (e: Exception) {
+                    if (faultTollerant) {
+                        val node = T::class.dummyInstance()
+                        node.origin =
+                            FailingASTTransformation(
+                                asOrigin(input),
+                                "Failed to transform $input into $kclass because of an error (${e.message})",
+                            )
+                        node
+                    } else {
+                        throw RuntimeException("Failed to transform $input into $kclass", e)
+                    }
+                }
             }
 
-            is List<*> -> {
-                PresentParameterValue(
-                    childSource
-                        .map { transformIntoNodes(it) }
-                        .flatten()
-                        .toMutableList(),
+        fun <S : Any, T : Node> registerMultipleNodeFactory(
+            kclass: KClass<S>,
+            factory: (S) -> List<T>,
+        ): NodeFactory<S, T> = registerMultipleNodeFactory(kclass) { input, _, _ -> factory(input) }
+
+        inline fun <reified S : Any, reified T : Node> registerNodeFactory(): NodeFactory<S, T> =
+            registerNodeFactory(S::class, T::class)
+
+        inline fun <reified S : Any> notTranslateDirectly(): NodeFactory<S, Node> =
+            registerNodeFactory<S, Node> {
+                throw java.lang.IllegalStateException(
+                    "A Node of this type (${this.javaClass.canonicalName}) should never be translated directly. " +
+                        "It is expected that the container will not delegate the translation of this node but it " +
+                        "will handle it directly",
                 )
             }
 
-            is String -> {
-                PresentParameterValue(childSource)
-            }
+        private fun <S : Any, T : Node> parameterValue(
+            kParameter: KParameter,
+            source: S,
+            childNodeFactory: ChildNodeFactory<Any, T, Any>,
+        ): ParameterValue =
+            when (val childSource = childNodeFactory.get.invoke(source)) {
+                null -> {
+                    AbsentParameterValue
+                }
 
-            else -> {
-                if (kParameter.type == String::class.createType() && childSource is ParseTree) {
-                    PresentParameterValue(childSource.text)
-                } else if ((kParameter.type.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
-                    PresentParameterValue(transformIntoNodes(childSource))
-                } else {
-                    PresentParameterValue(transform(childSource))
+                is List<*> -> {
+                    PresentParameterValue(
+                        childSource
+                            .map { transformIntoNodes(it) }
+                            .flatten()
+                            .toMutableList(),
+                    )
+                }
+
+                is String -> {
+                    PresentParameterValue(childSource)
+                }
+
+                else -> {
+                    if (kParameter.type == String::class.createType()) {
+                        val string = asString(childSource)
+                        if (string != null) {
+                            PresentParameterValue(string)
+                        } else {
+                            AbsentParameterValue
+                        }
+                    } else if ((kParameter.type.classifier as? KClass<*>)?.isSubclassOf(Collection::class) == true) {
+                        PresentParameterValue(transformIntoNodes(childSource))
+                    } else {
+                        PresentParameterValue(transform(childSource))
+                    }
                 }
             }
+
+        protected open fun asString(source: Any): String? = null
+
+        /**
+         * Registers a factory that will be used to translate nodes of type S.
+         *
+         * @param source the class of the source node
+         * @param target the class of the target node
+         * @param nodeType the [Node.nodeType] of the target node. Normally, the node type is the same as the class name,
+         * however, [Node] subclasses may want to override it, and in that case, the parameter must be provided explicitly.
+         */
+        fun <S : Any, T : Node> registerNodeFactory(
+            source: KClass<S>,
+            target: KClass<T>,
+            nodeType: String = target.qualifiedName!!,
+        ): NodeFactory<S, T> {
+            registerKnownClass(target)
+            // We are looking for any constructor with does not take parameters or have default
+            // values for all its parameters
+            val emptyLikeConstructor = target.constructors.find { it.parameters.all { param -> param.isOptional } }
+            val nodeFactory =
+                NodeFactory.single(
+                    { source: S, _, thisFactory ->
+                        if (target.isSealed) {
+                            throw IllegalStateException("Unable to instantiate sealed class $target")
+                        }
+
+                        fun getConstructorParameterValue(kParameter: KParameter): ParameterValue {
+                            try {
+                                val childNodeFactory =
+                                    thisFactory.getChildNodeFactory<Any, T, Any>(
+                                        nodeType,
+                                        kParameter.name!!,
+                                    )
+                                if (childNodeFactory == null) {
+                                    if (kParameter.isOptional) {
+                                        return AbsentParameterValue
+                                    }
+                                    throw java.lang.IllegalStateException(
+                                        "We do not know how to produce parameter ${kParameter.name!!} for $target",
+                                    )
+                                } else {
+                                    return parameterValue(kParameter, source, childNodeFactory)
+                                }
+                            } catch (t: Throwable) {
+                                throw RuntimeException(
+                                    "Issue while populating parameter ${kParameter.name} in " +
+                                        "constructor ${target.qualifiedName}.${target.preferredConstructor()}",
+                                    t,
+                                )
+                            }
+                        }
+                        // We check `childrenSetAtConstruction` and not `emptyLikeConstructor` because, while we set this value
+                        // initially based on `emptyLikeConstructor` being equal to null, this can be later changed in `withChild`,
+                        // so we should really check the value that `childrenSetAtConstruction` time has when we actually invoke
+                        // the factory.
+                        val instance =
+                            if (thisFactory.childrenSetAtConstruction) {
+                                val constructor = target.preferredConstructor()
+                                val constructorParamValues =
+                                    constructor.parameters
+                                        .map { it to getConstructorParameterValue(it) }
+                                        .filter { it.second is PresentParameterValue }
+                                        .associate { it.first to (it.second as PresentParameterValue).value }
+                                try {
+                                    val instance = constructor.callBy(constructorParamValues)
+                                    instance.children.forEach { child -> child.parent = instance }
+                                    instance
+                                } catch (t: Throwable) {
+                                    throw RuntimeException(
+                                        "Invocation of constructor $constructor failed. " +
+                                            "We passed: ${
+                                                constructorParamValues.map { "${it.key.name}=${it.value}" }
+                                                    .joinToString(", ")
+                                            }",
+                                        t,
+                                    )
+                                }
+                            } else {
+                                if (emptyLikeConstructor == null) {
+                                    throw RuntimeException(
+                                        "childrenSetAtConstruction is not set but there is no empty like " +
+                                            "constructor for $target",
+                                    )
+                                }
+                                target.createInstance()
+                            }
+                        if (instance.nodeType != nodeType) {
+                            throw RuntimeException(
+                                "Configuration exception: nodeType of instance of $target is " +
+                                    "${instance.nodeType} instead of $nodeType",
+                            )
+                        }
+                        instance
+                    },
+                    // If I do not have an emptyLikeConstructor, then I am forced to invoke a constructor with parameters and
+                    // therefore setting the children at construction time.
+                    // Note that we are assuming that either we set no children at construction time or we set all of them
+                    childrenSetAtConstruction = emptyLikeConstructor == null,
+                )
+            factories[source] = nodeFactory
+            return nodeFactory
         }
 
-    fun <S : Any, T : Node> registerNodeFactory(
-        source: KClass<S>,
-        target: KClass<T>,
-    ): NodeFactory<S, T> {
-        registerKnownClass(target)
-        // We are looking for any constructor with does not take parameters or have default
-        // values for all its parameters
-        val emptyLikeConstructor = target.constructors.find { it.parameters.all { param -> param.isOptional } }
-        val nodeFactory =
-            NodeFactory.single(
-                { source: S, _, thisFactory ->
-                    if (target.isSealed) {
-                        throw IllegalStateException("Unable to instantiate sealed class $target")
-                    }
+        /**
+         * Here the method needs to be inlined and the type parameter reified as in the invoked
+         * registerNodeFactory we need to access the nodeClass
+         */
+        inline fun <reified T : Node> registerIdentityTransformation(nodeClass: KClass<T>) =
+            registerNodeFactory(nodeClass) { node -> node }.skipChildren()
 
-                    fun getConstructorParameterValue(kParameter: KParameter): ParameterValue {
-                        try {
-                            val childNodeFactory =
-                                thisFactory.getChildNodeFactory<Any, T, Any>(
-                                    target,
-                                    kParameter.name!!,
-                                )
-                            if (childNodeFactory == null) {
-                                if (kParameter.isOptional) {
-                                    return AbsentParameterValue
-                                }
-                                throw java.lang.IllegalStateException(
-                                    "We do not know how to produce parameter ${kParameter.name!!} for $target",
-                                )
-                            } else {
-                                return parameterValue(kParameter, source, childNodeFactory)
-                            }
-                        } catch (t: Throwable) {
-                            throw RuntimeException(
-                                "Issue while populating parameter ${kParameter.name} in " +
-                                    "constructor ${target.qualifiedName}.${target.preferredConstructor()}",
-                                t,
-                            )
-                        }
-                    }
-                    // We check `childrenSetAtConstruction` and not `emptyLikeConstructor` because, while we set this value
-                    // initially based on `emptyLikeConstructor` being equal to null, this can be later changed in `withChild`,
-                    // so we should really check the value that `childrenSetAtConstruction` time has when we actually invoke
-                    // the factory.
-                    if (thisFactory.childrenSetAtConstruction) {
-                        val constructor = target.preferredConstructor()
-                        val constructorParamValues =
-                            constructor.parameters
-                                .map { it to getConstructorParameterValue(it) }
-                                .filter { it.second is PresentParameterValue }
-                                .associate { it.first to (it.second as PresentParameterValue).value }
-                        try {
-                            val instance = constructor.callBy(constructorParamValues)
-                            instance.children.forEach { child -> child.parent = instance }
-                            instance
-                        } catch (t: Throwable) {
-                            throw RuntimeException(
-                                "Invocation of constructor $constructor failed. " +
-                                    "We passed: ${
-                                        constructorParamValues.map { "${it.key.name}=${it.value}" }
-                                            .joinToString(", ")
-                                    }",
-                                t,
-                            )
-                        }
+        private fun registerKnownClass(target: KClass<*>) {
+            val qualifiedName = target.qualifiedName
+            val packageName =
+                if (qualifiedName != null) {
+                    val endIndex = qualifiedName.lastIndexOf('.')
+                    if (endIndex >= 0) {
+                        qualifiedName.substring(0, endIndex)
                     } else {
-                        if (emptyLikeConstructor == null) {
-                            throw RuntimeException(
-                                "childrenSetAtConstruction is not set but there is no empty like " +
-                                    "constructor for $target",
-                            )
-                        }
-                        target.createInstance()
+                        ""
                     }
-                },
-                // If I do not have an emptyLikeConstructor, then I am forced to invoke a constructor with parameters and
-                // therefore setting the children at construction time.
-                // Note that we are assuming that either we set no children at construction time or we set all of them
-                childrenSetAtConstruction = emptyLikeConstructor == null,
-            )
-        factories[source] = nodeFactory
-        return nodeFactory
-    }
-
-    /**
-     * Here the method needs to be inlined and the type parameter reified as in the invoked
-     * registerNodeFactory we need to access the nodeClass
-     */
-    inline fun <reified T : Node> registerIdentityTransformation(nodeClass: KClass<T>) =
-        registerNodeFactory(nodeClass) { node -> node }.skipChildren()
-
-    private fun registerKnownClass(target: KClass<*>) {
-        val qualifiedName = target.qualifiedName
-        val packageName =
-            if (qualifiedName != null) {
-                val endIndex = qualifiedName.lastIndexOf('.')
-                if (endIndex >= 0) {
-                    qualifiedName.substring(0, endIndex)
                 } else {
                     ""
                 }
-            } else {
-                ""
-            }
-        val set = _knownClasses.computeIfAbsent(packageName) { mutableSetOf() }
-        set.add(target)
+            val set = _knownClasses.computeIfAbsent(packageName) { mutableSetOf() }
+            set.add(target)
+        }
+
+        fun addIssue(
+            message: String,
+            severity: IssueSeverity = IssueSeverity.ERROR,
+            position: Position? = null,
+        ): Issue {
+            val issue = Issue.semantic(message, severity, position)
+            issues.add(issue)
+            return issue
+        }
     }
 
-    fun addIssue(
-        message: String,
-        severity: IssueSeverity = IssueSeverity.ERROR,
-        position: Position? = null,
-    ): Issue {
-        val issue = Issue.semantic(message, severity, position)
-        issues.add(issue)
-        return issue
-    }
-}
+private fun <Source : Any, Target : Node, Child : Any> NodeFactory<*, *>.getChildNodeFactory(
+    node: Target,
+    parameterName: String,
+): ChildNodeFactory<Source, Target, Child>? = getChildNodeFactory(node.nodeType, parameterName)
 
-private fun <Source : Any, Target : Any, Child : Any> NodeFactory<*, *>.getChildNodeFactory(
-    nodeClass: KClass<out Target>,
+private fun <Source : Any, Target : Node, Child : Any> NodeFactory<*, *>.getChildNodeFactory(
+    nodeType: String,
     parameterName: String,
 ): ChildNodeFactory<Source, Target, Child>? {
-    val childKey = nodeClass.qualifiedName + "#" + parameterName
+    val childKey = getChildKey(nodeType, parameterName)
     var childNodeFactory = this.children[childKey]
     if (childNodeFactory == null) {
         childNodeFactory = this.children[parameterName]
     }
     return childNodeFactory as ChildNodeFactory<Source, Target, Child>?
 }
+
+private fun <Target : Any> getChildKey(
+    nodeClass: KClass<out Target>,
+    parameterName: String,
+): String = getChildKey(nodeClass.qualifiedName!!, parameterName)
+
+private fun getChildKey(
+    nodeType: String,
+    parameterName: String,
+): String = "$nodeType#$parameterName"
 
 private sealed class ParameterValue
 

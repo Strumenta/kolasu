@@ -1,8 +1,11 @@
 package com.strumenta.kolasu.javalib;
 
+import com.google.common.reflect.TypeToken;
 import com.strumenta.kolasu.model.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -20,7 +23,10 @@ public class CompilationUnit extends BaseASTNode {
         @Override
         @NotNull
         public List<PropertyDescription> getOriginalProperties() {
-            return Arrays.asList(new PropertyDescription("bs", true, Multiplicity.MANY, getBs(), PropertyType.CONTAINMENT, false));
+            Type type = new TypeToken<List<B>>() {}.getType();
+            return Arrays.asList(new PropertyDescription(
+                    "bs", true, Multiplicity.MANY, getBs(), PropertyType.CONTAINMENT, false,
+                    JavaNode.kotlinType((ParameterizedType) type, false)));
         }
 
     }
@@ -39,7 +45,10 @@ public class CompilationUnit extends BaseASTNode {
     @Override
     @Internal
     public List<PropertyDescription> getProperties() {
-        return Arrays.asList(new PropertyDescription("as", true, Multiplicity.MANY, getAs(), PropertyType.CONTAINMENT, false));
+        Type type = new TypeToken<List<A>>() {}.getType();
+        return Arrays.asList(new PropertyDescription(
+                "as", true, Multiplicity.MANY, getAs(), PropertyType.CONTAINMENT, false,
+                JavaNode.kotlinType((ParameterizedType) type, false)));
     }
 
     @Override

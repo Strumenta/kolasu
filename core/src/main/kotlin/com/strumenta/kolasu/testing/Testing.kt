@@ -16,6 +16,7 @@ import org.antlr.v4.runtime.Vocabulary
 import kotlin.reflect.KClass
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
@@ -262,7 +263,23 @@ fun assertASTsAreEqual(
                             "$context, comparing reference pointer ${expectedProperty.name} of ${expected.nodeType}",
                         )
                     } else {
-                        TODO()
+                        if (expectedPropValue != null) {
+                            assertIs<ReferenceByName<*>>(
+                                expectedPropValue,
+                                "$context, checking reference ${expectedProperty.name} of ${expected.nodeType}",
+                            )
+                        }
+                        if (actualPropValue != null) {
+                            assertIs<ReferenceByName<*>>(
+                                actualPropValue,
+                                "$context, checking reference ${actualProperty.name} of ${actual.nodeType}",
+                            )
+                        }
+                        assertEquals(
+                            expectedPropValue,
+                            actualPropValue,
+                            "$context, comparing reference ${expectedProperty.name} of ${expected.nodeType}",
+                        )
                     }
                 } else {
                     if (useLightweightAttributeEquality) {
