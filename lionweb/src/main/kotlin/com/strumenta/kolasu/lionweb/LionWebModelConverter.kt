@@ -96,7 +96,8 @@ private val PlaceholderNodeType = ASTLanguage.getLanguage().getEnumerationByName
 class LionWebModelConverter(
     var nodeIdProvider: NodeIdProvider = StructuralLionWebNodeIdProvider(),
     initialLanguageConverter: LionWebLanguageConverter = LionWebLanguageConverter(),
-    val metamodelRegistry: MetamodelRegistry = DefaultMetamodelRegistry
+    val metamodelRegistry: MetamodelRegistry = DefaultMetamodelRegistry,
+    var ignoreMissingReferences: Boolean = false
 ) {
     companion object {
         private val kFeaturesCache = mutableMapOf<Class<*>, Map<String, Feature>>()
@@ -406,7 +407,7 @@ class LionWebModelConverter(
     }
 
     fun importModelFromLionWeb(lwTree: LWNode): Any {
-        val referencesPostponer = ReferencesPostponer()
+        val referencesPostponer = ReferencesPostponer(ignoreMissingReferences = this.ignoreMissingReferences)
         lwTree.thisAndAllDescendants().toList().myReversed().forEach { lwNode ->
             val kClass = synchronized(languageConverter) {
                 languageConverter.correspondingKolasuClass(lwNode.classifier)
@@ -497,7 +498,7 @@ class LionWebModelConverter(
             SerializationProvider.getStandardJsonSerialization(LIONWEB_VERSION_USED_BY_KOLASU)
     ): AbstractSerialization {
         registerSerializersAndDeserializersInMetamodelRegistry(metamodelRegistry)
-        metamodelRegistry.prepareJsonSerialization(serialization)
+        metamodelRegistry.prepareSerialization(serialization)
         synchronized(languageConverter) {
             languageConverter.knownLWLanguages().forEach {
                 serialization.primitiveValuesSerialization.registerLanguage(it)
@@ -566,7 +567,7 @@ class LionWebModelConverter(
     /**
      * Track reference values, so that we can populate them once the nodes are instantiated.
      */
-    private class ReferencesPostponer {
+    private class ReferencesPostponer(val ignoreMissingReferences: Boolean) {
         private val values = IdentityHashMap<ReferenceByName<PossiblyNamed>, LWNode?>()
         private val originValues = IdentityHashMap<KNode, String>()
         private val destinationValues = IdentityHashMap<KNode, List<String>>()
@@ -610,14 +611,19 @@ class LionWebModelConverter(
                 }
             }
             destinationValues.forEach { entry ->
-                val values = entry.value.map { targetID ->
+                val values = entry.value.mapNotNull { targetID ->
                     val lwNode = nodesMapping.bs.find { it.id == targetID }
                     if (lwNode != null) {
                         nodesMapping.byB(lwNode) as KNode
                     } else {
-                        externalNodeResolver.resolve(targetID) ?: throw IllegalStateException(
-                            "Unable to resolve node with ID $targetID"
-                        )
+                        val resolved = externalNodeResolver.resolve(targetID)
+                        when {
+                            resolved != null -> resolved
+                            ignoreMissingReferences -> null
+                            else -> throw IllegalStateException(
+                                "Unable to resolve node with ID $targetID"
+                            )
+                        }
                     }
                 }
                 if (values.size == 1) {
