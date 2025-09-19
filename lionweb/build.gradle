@@ -98,7 +98,16 @@ publishing {
 }
 
 signing {
-    sign publishing.publications.kolasu_lionweb
+    def key   = providers.gradleProperty('signingInMemoryKey').orNull
+    def keyId = providers.gradleProperty('signingInMemoryKeyId').orNull
+    def pass  = providers.gradleProperty('signingInMemoryKeyPassword').orNull
+
+    if (key) {
+        useInMemoryPgpKeys(keyId, key, pass)
+        sign publishing.publications
+    } else {
+        logger.lifecycle('No in-memory signing key configured; skipping signing.')
+    }
 }
 
 tasks.findByName("dokkaJavadoc").dependsOn(":core:compileKotlin")
