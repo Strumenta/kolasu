@@ -83,7 +83,13 @@ publishing {
 }
 
 signing {
-    sign(publishing.publications["kolasu_codebase"])
+    val key     = providers.gradleProperty("signingInMemoryKey").orNull
+    val keyId   = providers.gradleProperty("signingInMemoryKeyId").orNull
+    val pass    = providers.gradleProperty("signingInMemoryKeyPassword").orNull
+    if (!key.isNullOrBlank()) {
+        useInMemoryPgpKeys(keyId, key, pass)
+        sign(publishing.publications["kolasu_codebase"])
+    }
 }
 
 tasks.named("dokkaJavadoc").configure {
